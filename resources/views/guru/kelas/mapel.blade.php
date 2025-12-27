@@ -1,0 +1,104 @@
+@extends('layouts.sneat')
+
+@section('title', 'Pilih Mata Pelajaran')
+@section('page-title', 'Kelas ' . $kelas->nama_kelas)
+@section('page-subtitle', 'Pilih mata pelajaran untuk masuk LMS')
+
+@section('sidebar-menu')
+    @include('guru.partials.sneat-sidebar-menu')
+@endsection
+
+@section('styles')
+<style>
+    .mapel-card {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+    }
+    .mapel-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    }
+    .icon-circle {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+</style>
+@endsection
+
+@section('content')
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="container-fluid px-0">
+
+    <div class="mb-4">
+        <a href="{{ route('guru.kelas.index') }}" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Kelas
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1 fw-bold text-primary">
+                        <i class="fas fa-chalkboard me-2"></i>Kelas {{ $kelas->nama_kelas }}
+                    </h5>
+                    <p class="text-muted mb-0 small">
+                        <i class="fas fa-users me-1"></i>{{ $jumlahSiswa }} Siswa &bull;
+                        <i class="fas fa-book me-1"></i>{{ $mapelYangDiajar->count() }} Mata Pelajaran
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h6 class="mb-3 fw-bold text-gray-700">
+                <i class="fas fa-list me-2"></i>Pilih Mata Pelajaran:
+            </h6>
+
+            <div class="row g-3">
+                @foreach($mapelYangDiajar as $pengajaran)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-start border-warning border-4 mapel-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3 icon-circle">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div>
+                                    <h6 class="card-title fw-bold mb-1 text-gray-800">
+                                        {{ $pengajaran->mataPelajaran->nama_mapel }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        {{ $pengajaran->mataPelajaran->kode_mapel }}
+                                    </small>
+                                </div>
+                            </div>
+
+                            <a href="{{ route('guru.lms.dashboard', [$kelas->id, $pengajaran->mata_pelajaran_id]) }}"
+                               class="btn btn-primary w-100 shadow-sm fw-bold">
+                                <i class="fas fa-door-open me-1"></i>Masuk LMS
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- Information Card --}}
+    <div class="card shadow-sm border-start border-info border-4">
+        <div class="card-body">
+            <h6 class="fw-bold text-info mb-2">
+                <i class="fas fa-info-circle me-2"></i>Informasi
+            </h6>
+            <p class="text-muted small mb-0">
+                Klik tombol <strong>"Masuk LMS"</strong> untuk mengakses sistem pembelajaran untuk mata pelajaran yang Anda pilih.
+                Di dalam LMS, Anda dapat mengelola materi, tugas, ujian, dan forum diskusi.
+            </p>
+        </div>
+    </div>
+
+</div>
+</div>
+@endsection

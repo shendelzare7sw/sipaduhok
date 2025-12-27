@@ -1,0 +1,214 @@
+.btn-blue {
+    background-color: #2563eb;
+    color: white;
+    transition: 0.3s ease;
+}
+
+.btn-blue:hover {
+    background-color: #1d4ed8;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 220px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border-radius: 0.375rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    padding-top: 8px;
+    margin-top: -8px;
+    pointer-events: none;
+}
+
+/* State ketika dropdown aktif */
+.dropdown-content.show,
+.dropdown:hover .dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Untuk hover yang lebih smooth */
+.dropdown-content:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Menambahkan area "jembatan" invisible antara trigger dan dropdown */
+.dropdown::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 8px;
+    z-index: 999;
+}
+
+.dropdown-item {
+    color: #4B5563;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.dropdown-item:hover {
+    background-color: #EFF6FF;
+    color: #2563eb;
+}
+
+/* Regular nav items */
+.nav-item {
+    transition: color 0.3s, background-color 0.3s;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px; 
+}
+
+.nav-item:hover {
+    color: #2563eb;
+    background-color: white;
+}
+
+.dropdown > .nav-item:hover {
+    color: #2563eb;
+    background-color: white;
+}
+
+.active-nav-btn {
+    background-color: white;
+    color: #2563eb !important; 
+}
+
+#navbar.sticky-nav .active-nav-btn {
+    background-color: #2563eb; 
+    color: white !important;
+}
+
+.nav-btn {
+    transition: all 0.3s;
+}
+
+.nav-btn:hover {
+    background-color: white;
+    color: #2563eb !important; 
+}
+
+#navbar.sticky-nav .nav-btn {
+    color: #4B5563; 
+}
+
+#navbar.sticky-nav .nav-btn:hover {
+    color: #2563eb !important; 
+    background-color: #f3f4f6; 
+}
+
+.dropdown .dropdown-content {
+    top: 100%;
+    margin-top: 0.5rem;
+}
+
+#navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 50;
+    transition: all 0.3s ease;
+    background-color: transparent; 
+}
+
+#navbar.sticky-nav {
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#navbar.sticky-nav .nav-item, 
+#navbar.sticky-nav .dropdown .nav-item {
+    color: #4B5563;
+}
+
+#navbar.sticky-nav .nav-item:hover,
+#navbar.sticky-nav .dropdown .nav-item:hover {
+    background-color: #f3f4f6; 
+    color: #2563eb; 
+}
+
+#navbar .dropdown-content {
+    top: 100%;
+}
+
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 100;
+    overflow-y: auto;
+    padding: 2rem 1rem;
+}
+
+.mobile-menu.active {
+    display: block;
+}
+
+.mobile-dropdown-content {
+    display: none;
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.mobile-dropdown-content.show {
+    display: flex;
+    max-height: 500px;
+    transition: max-height 0.3s ease-in;
+}
+
+.mobile-menu-button svg {
+    stroke: white;
+    transition: stroke 0.3s ease;
+}
+
+#navbar.sticky-nav .mobile-menu-button svg {
+    stroke: #4B5563; 
+}
+
+.mobile-menu-button:hover svg {
+    stroke: #2563eb; 
+}
+
+@media (max-width: 768px) {
+    .hidden-mobile {
+        display: none;
+    }
+    
+    .block-mobile {
+        display: block;
+    }
+    
+    .mobile-menu-button {
+        display: block;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-menu-button {
+        display: none;
+    }
+}

@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Http\Controllers\Siswa;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Siswa;
+use App\Models\Rapor;
+use App\Models\Nilai;
+use Barryvdh\DomPDF\Facade\Pdf;
+
+class SiaRaporController extends Controller
+{
+    /**
+     * Halaman utama rapor
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->with('kelas.tahunAjaran')->first();
+
+        if (!$siswa) {
+            return redirect()->route('siswa.sia.dashboard')
+                ->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        // Ambil rapor yang sudah diterbitkan
+        $raporList = Rapor::where('siswa_id', $siswa->id)
+            ->where('status', 'diterbitkan')
+            ->with('tahunAjaran')
+            ->orderBy('tahun_ajaran_id', 'desc')
+            ->orderBy('semester', 'desc')
+            ->get();
+
+        // Cek validasi akses rapor
+        $aksesRapor = [
+            'bendahara' => $siswa->validasi_rapor_bendahara ?? false,
+            'wali' => $siswa->validasi_rapor_wali ?? false,
+        ];
+
+        $bolehLihat = $aksesRapor['bendahara'] && $aksesRapor['wali'];
+
+        return view('siswa.sia.rapor.index', compact('siswa', 'raporList', 'aksesRapor', 'bolehLihat'));
+    }
+
+    /**
+     * Rapor Tengah Semester
+     */
+    public function tengahSemester($raporId)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return redirect()->route('siswa.sia.dashboard')
+                ->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        // Cek validasi akses
+        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
+            return redirect()->route('siswa.sia.rapor.index')
+                ->with('error', 'Belum Memiliki Akses Rapor. Silakan Periksa Tagihan Anda.');
+        }
+
+        $rapor = Rapor::where('id', $raporId)
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'diterbitkan')
+            ->with(['raporNilai.mataPelajaran', 'kelas', 'tahunAjaran'])
+            ->firstOrFail();
+
+        // Hitung rata-rata
+        $rataRata = $rapor->raporNilai->avg('nilai_angka');
+
+        return view('siswa.sia.rapor.tengah-semester', compact('siswa', 'rapor', 'rataRata'));
+    }
+
+    /**
+     * Rapor Akhir Semester
+     */
+    public function akhirSemester($raporId)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return redirect()->route('siswa.sia.dashboard')
+                ->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        // Cek validasi akses
+        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
+            return redirect()->route('siswa.sia.rapor.index')
+                ->with('error', 'Belum Memiliki Akses Rapor. Silakan Periksa Tagihan Anda.');
+        }
+
+        $rapor = Rapor::where('id', $raporId)
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'diterbitkan')
+            ->with(['raporNilai.mataPelajaran', 'kelas', 'tahunAjaran'])
+            ->firstOrFail();
+
+        // Hitung rata-rata
+        $rataRata = $rapor->raporNilai->avg('nilai_angka');
+
+        return view('siswa.sia.rapor.akhir-semester', compact('siswa', 'rapor', 'rataRata'));
+    }
+
+    /**
+     * Download rapor PDF
+     */
+    public function download($raporId)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return redirect()->route('siswa.sia.dashboard')
+                ->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        // Cek validasi akses
+        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
+            return redirect()->route('siswa.sia.rapor.index')
+                ->with('error', 'Belum Memiliki Akses Rapor. Silakan Periksa Tagihan Anda.');
+        }
+
+        $rapor = Rapor::where('id', $raporId)
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'diterbitkan')
+            ->with(['raporNilai.mataPelajaran', 'kelas', 'tahunAjaran'])
+            ->firstOrFail();
+
+        $rataRata = $rapor->raporNilai->avg('nilai_angka');
+
+        $pdf = Pdf::loadView('siswa.sia.rapor.pdf-akhir', compact('siswa', 'rapor', 'rataRata'));
+        
+        $filename = 'Rapor_' . $siswa->nama_lengkap . '_' . $rapor->semester . '_' . $rapor->tahunAjaran->nama_tahun_ajaran . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+}
