@@ -28,16 +28,32 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        // Multi-role redirect based on user role
+        // Track login activity
         $user = Auth::user();
+        $user->last_login_at = now();
+        $user->last_login_ip = $request->ip();
+        $user->save();
 
-        return match($user->role) {
+        // Determine which role system to use
+        $roleName = null;
+
+        if ($user->role_id && $user->roleRelation) {
+            // New role system (from role_id relationship)
+            $roleName = $user->roleRelation->name;
+        } else {
+            // Old role enum system (get from attributes)
+            $roleName = $user->attributes['role'] ?? null;
+        }
+
+        // Redirect based on role
+        return match($roleName) {
             'admin' => redirect()->intended(route('admin.dashboard')),
             'ketua_pkbm' => redirect()->intended(route('ketua.dashboard')),
             'sekretaris' => redirect()->intended(route('sekretaris.dashboard')),
             'bendahara' => redirect()->intended(route('bendahara.dashboard')),
             'wali_kelas' => redirect()->intended(route('wali.dashboard')),
             'guru_pengajar' => redirect()->intended(route('guru.dashboard')),
+            'orang_tua' => redirect()->intended(route('orang-tua.dashboard')),
             'siswa' => redirect()->intended(route('siswa.dashboard')),
             default => redirect()->intended(route('dashboard')),
         };

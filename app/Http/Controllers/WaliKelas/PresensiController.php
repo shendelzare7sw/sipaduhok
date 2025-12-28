@@ -132,12 +132,24 @@ class PresensiController extends Controller
         }
 
         // Get pengajuan izin yang belum divalidasi
+        // Cek apakah diinput oleh orang tua (role orang_tua) dan belum divalidasi wali kelas
         $pengajuanIzin = Presensi::where('kelas_id', $kelas->id)
             ->whereIn('status', ['sakit', 'izin'])
-            ->whereNull('diinput_oleh') // Belum divalidasi wali kelas
-            ->with('siswa')
+            ->where(function($query) {
+                // Izin yang diajukan oleh orang tua (ada keterangan "Diajukan oleh orang tua")
+                // Dan BELUM divalidasi (tidak ada kata "Divalidasi" di keterangan)
+                $query->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
+                      ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
+                      ->whereNotNull('diinput_oleh');
+            })
+            ->with(['siswa', 'inputBy'])
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->get()
+            ->filter(function($presensi) {
+                // Filter: hanya tampilkan yang diinput oleh orang tua (role orang_tua)
+                return $presensi->inputBy && $presensi->inputBy->roleRelation &&
+                       $presensi->inputBy->roleRelation->name === 'orang_tua';
+            });
 
         return view('wali-kelas.presensi.validasi-izin', [
             'kelas' => $kelas,
@@ -158,19 +170,27 @@ class PresensiController extends Controller
         $presensi = Presensi::findOrFail($presensiId);
 
         if ($request->status == 'setuju') {
-            // Setujui izin
+            // Setujui izin - tambahkan keterangan validasi wali kelas
+            $keteranganBaru = $presensi->keterangan . ' - Divalidasi dan disetujui oleh wali kelas';
+            if ($request->keterangan) {
+                $keteranganBaru .= ' (Catatan: ' . $request->keterangan . ')';
+            }
+
             $presensi->update([
-                'diinput_oleh' => auth()->id(),
-                'keterangan' => $request->keterangan ?? $presensi->keterangan,
+                'keterangan' => $keteranganBaru,
             ]);
 
             return back()->with('success', 'Pengajuan izin disetujui!');
         } else {
             // Tolak izin -> ubah jadi Alpha
+            $keteranganBaru = 'Pengajuan izin ditolak oleh wali kelas';
+            if ($request->keterangan) {
+                $keteranganBaru .= '. Alasan: ' . $request->keterangan;
+            }
+
             $presensi->update([
                 'status' => 'alpha',
-                'diinput_oleh' => auth()->id(),
-                'keterangan' => $request->keterangan ?? 'Pengajuan izin ditolak',
+                'keterangan' => $keteranganBaru,
             ]);
 
             return back()->with('success', 'Pengajuan izin ditolak, status diubah menjadi Alpha.');

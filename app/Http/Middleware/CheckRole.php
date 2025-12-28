@@ -22,11 +22,31 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        $userRole = auth()->user()->role;
+        $user = auth()->user();
+
+        // IMPORTANT: Admin has access to ALL routes (level 1 = highest access)
+        if ($user->isAdmin()) {
+            return $next($request);
+        }
+
+        // For non-admin users, check if their role matches
+        $userRole = null;
+        if ($user->role_id && $user->roleRelation) {
+            $userRole = $user->roleRelation->name;
+        } else {
+            $userRole = $user->attributes['role'] ?? null;
+        }
 
         // Check if user role matches any of the allowed roles
         if (!in_array($userRole, $roles)) {
-            abort(403, 'Unauthorized action.');
+            // Auto-logout untuk kemudahan testing
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('error',
+                'Anda tidak memiliki akses ke halaman ini. Role Anda: ' . ($userRole ?? 'N/A') . '. Role yang dibutuhkan: ' . implode(', ', $roles)
+            );
         }
 
         return $next($request);

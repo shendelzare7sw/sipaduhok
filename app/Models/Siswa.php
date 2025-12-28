@@ -85,4 +85,30 @@ class Siswa extends Model
     {
         return $this->hasMany(Rapor::class);
     }
+
+    // New relationship for parents (many-to-many)
+    public function parents()
+    {
+        return $this->belongsToMany(User::class, 'student_parents', 'siswa_id', 'parent_id')
+                    ->withPivot('relationship', 'is_primary', 'is_financial_responsible', 'can_access_academic')
+                    ->withTimestamps();
+    }
+
+    // Alias untuk orang tua (sama dengan parents)
+    public function orangTua()
+    {
+        return $this->parents();
+    }
+
+    // Helper to get primary parent (penanggung jawab utama)
+    public function primaryParent()
+    {
+        return $this->parents()->wherePivot('is_primary', true)->first();
+    }
+
+    // Helper to get parents who can access financial
+    public function financialResponsibleParents()
+    {
+        return $this->parents()->wherePivot('is_financial_responsible', true)->get();
+    }
 }

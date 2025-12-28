@@ -458,6 +458,127 @@
                 </form>
             </div>
         </div>
+
+        {{-- Data Orang Tua / Wali --}}
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h5><i class="fas fa-users"></i> Data Orang Tua / Wali</h5>
+                <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('addParentForm').style.display = 'block';">
+                    <i class="fas fa-plus"></i> Tambah Orang Tua
+                </button>
+            </div>
+            <div class="card-body">
+                @if($siswa->orangTua && $siswa->orangTua->count() > 0)
+                    <div class="info-grid">
+                        @foreach($siswa->orangTua as $parent)
+                            <div class="info-item" style="grid-column: 1 / -1; padding: 16px; background: #f9fafb; border-radius: 8px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                            <div style="width: 40px; height: 40px; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                                {{ strtoupper(substr($parent->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; font-size: 16px;">{{ $parent->name }}</div>
+                                                <div style="font-size: 13px; color: #6b7280;">
+                                                    <i class="fas fa-envelope"></i> {{ $parent->email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 13px;">
+                                            <span>
+                                                <strong>Hubungan:</strong> {{ ucwords(str_replace('_', ' ', $parent->pivot->relationship)) }}
+                                            </span>
+                                            @if($parent->pivot->is_primary)
+                                                <span class="badge badge-success">
+                                                    <i class="fas fa-star"></i> Penanggung Jawab Utama
+                                                </span>
+                                            @endif
+                                            @if($parent->pivot->is_financial_responsible)
+                                                <span class="badge" style="background: #dcfce7; color: #166534;">
+                                                    <i class="fas fa-wallet"></i> Penanggung Jawab Keuangan
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <form action="{{ route('admin.manajemen-siswa.detach-parent', [$siswa, $parent]) }}" method="POST" onsubmit="return confirm('Hapus hubungan dengan orang tua ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #dc2626; border: none;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="alert alert-warning" style="margin: 0;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Belum ada data orang tua/wali yang terhubung dengan siswa ini.
+                    </div>
+                @endif
+
+                {{-- Form Tambah Orang Tua (Hidden by default) --}}
+                <div id="addParentForm" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <h6 style="margin-bottom: 16px;">Tambah Orang Tua / Wali</h6>
+                    <form action="{{ route('admin.manajemen-siswa.attach-parent', $siswa) }}" method="POST">
+                        @csrf
+                        <div class="form-group">
+                            <label for="parent_id">Pilih Orang Tua *</label>
+                            <select name="parent_id" id="parent_id" required>
+                                <option value="">-- Pilih Orang Tua --</option>
+                                @foreach($availableParents as $p)
+                                    <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->email }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="relationship">Hubungan *</label>
+                            <select name="relationship" id="relationship" required>
+                                <option value="">-- Pilih Hubungan --</option>
+                                <option value="ayah_kandung">Ayah Kandung</option>
+                                <option value="ibu_kandung">Ibu Kandung</option>
+                                <option value="ayah_tiri">Ayah Tiri</option>
+                                <option value="ibu_tiri">Ibu Tiri</option>
+                                <option value="kakek">Kakek</option>
+                                <option value="nenek">Nenek</option>
+                                <option value="paman">Paman</option>
+                                <option value="bibi">Bibi</option>
+                                <option value="wali">Wali</option>
+                                <option value="lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="is_primary" value="1">
+                                <span>Tandai sebagai Penanggung Jawab Utama</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="is_financial_responsible" value="1" checked>
+                                <span>Penanggung Jawab Keuangan</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="checkbox" name="can_access_academic" value="1" checked>
+                                <span>Dapat Mengakses Data Akademik</span>
+                            </label>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                <i class="fas fa-save"></i> Simpan
+                            </button>
+                            <button type="button" class="btn btn-white-outline" style="flex: 1;" onclick="document.getElementById('addParentForm').style.display = 'none';">
+                                <i class="fas fa-times"></i> Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

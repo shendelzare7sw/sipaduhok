@@ -20,6 +20,11 @@
 
     <!-- Icons (Font Awesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Icons (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Boxicons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
 
     <!-- Core CSS (Sneat Bootstrap 5) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -581,21 +586,35 @@
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <span class="avatar-initial rounded-circle bg-primary">A</span>
+                                        @if(auth()->user()->foto_profil)
+                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                        @else
+                                            <span class="avatar-initial rounded-circle bg-primary">
+                                                {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="{{ route('profile.index') }}">
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <span class="avatar-initial rounded-circle bg-primary">A</span>
+                                                        @if(auth()->user()->foto_profil)
+                                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        @else
+                                                            <span class="avatar-initial rounded-circle bg-primary">
+                                                                {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                                                            </span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
                                                     <h6 class="mb-0">{{ auth()->user()->name ?? 'Admin' }}</h6>
-                                                    <small class="text-muted">{{ ucfirst(auth()->user()->role ?? 'admin') }}</small>
+                                                    <small class="text-muted">
+                                                        {{ auth()->user()->roleRelation ? auth()->user()->roleRelation->display_name : ucwords(str_replace('_', ' ', auth()->user()->role ?? 'user')) }}
+                                                    </small>
                                                 </div>
                                             </div>
                                         </a>
@@ -604,13 +623,13 @@
                                         <div class="dropdown-divider my-1"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="{{ route('profile.index') }}">
                                             <i class="fas fa-user me-2"></i>
                                             <span class="align-middle">Profil Saya</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="{{ route('account.settings') }}">
                                             <i class="fas fa-cog me-2"></i>
                                             <span class="align-middle">Pengaturan</span>
                                         </a>

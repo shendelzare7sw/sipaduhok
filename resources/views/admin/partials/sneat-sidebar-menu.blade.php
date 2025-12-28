@@ -95,15 +95,127 @@
     </a>
 </li>
 
-<!-- Menu Header - Laporan -->
+<!-- Menu Header - Keuangan -->
 <li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Laporan</span>
+    <span class="menu-header-text">Keuangan</span>
 </li>
 
-<!-- Cetak Laporan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.cetak-laporan') ? 'active' : '' }}">
-    <a href="{{ route('admin.cetak-laporan.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-file-pdf"></i>
-        <div>Cetak Laporan</div>
+<!-- Tagihan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.tagihan') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.tagihan.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-file-invoice-dollar"></i>
+        <div>Tagihan</div>
+    </a>
+</li>
+
+<!-- Pembayaran -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.pembayaran') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.pembayaran.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-money-bill-wave"></i>
+        <div>Pembayaran</div>
+    </a>
+</li>
+
+<!-- Laporan Keuangan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.laporan.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-chart-line"></i>
+        <div>Laporan Keuangan</div>
+    </a>
+</li>
+
+<!-- Validasi Akses -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.validasi-akses') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.validasi-akses.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-check-circle"></i>
+        <div>Validasi Akses</div>
+    </a>
+</li>
+
+<!-- Menu Header - Akademik -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Manajemen Akademik</span>
+</li>
+
+<!-- Kalender Akademik -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.kalender') ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.kalender.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-calendar"></i>
+        <div>Kalender Akademik</div>
+    </a>
+</li>
+
+<!-- Pengumuman -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.pengumuman') ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.pengumuman.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-bullhorn"></i>
+        <div>Pengumuman</div>
+    </a>
+</li>
+
+<!-- Berita -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.berita') ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.berita.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-newspaper"></i>
+        <div>Berita</div>
+    </a>
+</li>
+
+<!-- Flyer -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.flyer') ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.flyer.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-images"></i>
+        <div>Flyer</div>
+    </a>
+</li>
+
+<!-- Menu Header - Monitoring -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Monitoring & Analitik</span>
+</li>
+
+<!-- Monitoring -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.monitoring') ? 'active open' : '' }}">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-chart-bar"></i>
+        <div>Monitoring</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ $currentRoute == 'admin.monitoring.pengguna' ? 'active' : '' }}">
+            <a href="{{ route('admin.monitoring.pengguna') }}" class="menu-link">
+                <div>Pengguna</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'admin.monitoring.wali-kelas' ? 'active' : '' }}">
+            <a href="{{ route('admin.monitoring.wali-kelas') }}" class="menu-link">
+                <div>Wali Kelas</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'admin.monitoring.guru-pengajar' ? 'active' : '' }}">
+            <a href="{{ route('admin.monitoring.guru-pengajar') }}" class="menu-link">
+                <div>Guru Pengajar</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'admin.monitoring.siswa' ? 'active' : '' }}">
+            <a href="{{ route('admin.monitoring.siswa') }}" class="menu-link">
+                <div>Siswa</div>
+            </a>
+        </li>
+    </ul>
+</li>
+
+<!-- Laporan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.laporan') && !Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
+    <a href="{{ route('admin.laporan.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-file-alt"></i>
+        <div>Laporan</div>
+    </a>
+</li>
+
+<!-- Catatan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.catatan') ? 'active' : '' }}">
+    <a href="{{ route('admin.catatan.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-sticky-note"></i>
+        <div>Catatan</div>
     </a>
 </li>

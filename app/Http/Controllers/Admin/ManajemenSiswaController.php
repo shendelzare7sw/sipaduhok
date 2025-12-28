@@ -90,7 +90,13 @@ class ManajemenSiswaController extends Controller
      */
     public function show(Siswa $siswa)
     {
-        $siswa->load(['user', 'cabang', 'kelas.tahunAjaran', 'kelas.waliKelas']);
+        $siswa->load([
+            'user',
+            'cabang',
+            'kelas.tahunAjaran',
+            'kelas.waliKelas',
+            'orangTua' // Load relasi orang tua
+        ]);
 
         // Get available kelas for reassignment
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
@@ -101,7 +107,14 @@ class ManajemenSiswaController extends Controller
             ->orderBy('nama_kelas')
             ->get();
 
-        return view('admin.manajemen-siswa.show', compact('siswa', 'kelasList', 'tahunAjaranAktif'));
+        // Get available parent users (role orang_tua)
+        $availableParents = \App\Models\User::whereHas('roleRelation', function($q) {
+            $q->where('name', 'orang_tua');
+        })->where('is_active', true)
+          ->orderBy('name')
+          ->get();
+
+        return view('admin.manajemen-siswa.show', compact('siswa', 'kelasList', 'tahunAjaranAktif', 'availableParents'));
     }
 
     /**
@@ -148,6 +161,44 @@ class ManajemenSiswaController extends Controller
         Siswa::whereIn('id', $validated['siswa_ids'])->update(['kelas_id' => $validated['kelas_id']]);
 
         return back()->with('success', "Berhasil memindahkan {$newCount} siswa ke kelas {$kelas->nama_kelas}!");
+    }
+
+    /**
+     * Attach parent (orang tua) to siswa.
+     */
+    public function attachParent(Request $request, Siswa $siswa)
+    {
+        $validated = $request->validate([
+            'parent_id' => 'required|exists:users,id',
+            'relationship' => 'required|in:ayah_kandung,ibu_kandung,ayah_tiri,ibu_tiri,kakek,nenek,paman,bibi,wali,lainnya',
+            'is_primary' => 'nullable|boolean',
+            'is_financial_responsible' => 'nullable|boolean',
+            'can_access_academic' => 'nullable|boolean',
+        ]);
+
+        // Check if already attached
+        if ($siswa->parents()->where('parent_id', $validated['parent_id'])->exists()) {
+            return back()->with('error', 'Orang tua ini sudah terhubung dengan siswa!');
+        }
+
+        $siswa->parents()->attach($validated['parent_id'], [
+            'relationship' => $validated['relationship'],
+            'is_primary' => $request->has('is_primary'),
+            'is_financial_responsible' => $request->has('is_financial_responsible'),
+            'can_access_academic' => $request->has('can_access_academic'),
+        ]);
+
+        $parent = \App\Models\User::find($validated['parent_id']);
+        return back()->with('success', "Berhasil menghubungkan {$parent->name} sebagai {$validated['relationship']}!");
+    }
+
+    /**
+     * Detach parent (orang tua) from siswa.
+     */
+    public function detachParent(Siswa $siswa, \App\Models\User $parent)
+    {
+        $siswa->parents()->detach($parent->id);
+        return back()->with('success', "Berhasil menghapus hubungan dengan {$parent->name}!");
     }
 
     /**

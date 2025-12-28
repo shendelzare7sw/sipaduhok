@@ -207,14 +207,9 @@
     {{-- ALERT SELAMAT DATANG --}}
     <div class="alert welcome-alert shadow-sm mb-4">
         <div class="row align-items-center">
-            <div class="col-md-8">
+            <div class="col-12">
                 <h5 class="fw-bold text-primary mb-1">Halo, {{ $siswa->nama_lengkap }}! 👋</h5>
                 <p class="mb-0 text-muted small">Selamat belajar! Jangan lupa pantau progres akademik Anda hari ini.</p>
-            </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <a href="{{ route('siswa.sia.pembayaran.index') }}" class="btn btn-outline-primary fw-bold btn-sm px-4 rounded-pill shadow-sm">
-                    <i class="fas fa-wallet me-2"></i> CEK PEMBAYARAN
-                </a>
             </div>
         </div>
     </div>
@@ -323,25 +318,19 @@
     {{-- 4. MENU CEPAT (DIPERBAIKI TATA LETAKNYA) --}}
     <h6 class="fw-bold text-muted mb-3 ms-1"><i class="fas fa-th me-2 text-warning"></i>Akses Layanan Cepat</h6>
     <div class="row mb-5">
-        <div class="col-6 col-lg-3 mb-3">
+        <div class="col-6 col-lg-4 mb-3">
             <a href="{{ route('siswa.sia.presensi.index') }}" class="menu-item-quick shadow-sm">
                 <i class="fas fa-user-check text-primary"></i>
                 <div class="menu-text">Presensi</div>
             </a>
         </div>
-        <div class="col-6 col-lg-3 mb-3">
+        <div class="col-6 col-lg-4 mb-3">
             <a href="{{ route('siswa.sia.penilaian') }}" class="menu-item-quick shadow-sm">
                 <i class="fas fa-chart-line text-success"></i>
                 <div class="menu-text">Nilai Tugas</div>
             </a>
         </div>
-        <div class="col-6 col-lg-3 mb-3">
-            <a href="{{ route('siswa.sia.pembayaran.index') }}" class="menu-item-quick shadow-sm">
-                <i class="fas fa-credit-card text-warning"></i>
-                <div class="menu-text">Pembayaran</div>
-            </a>
-        </div>
-        <div class="col-6 col-lg-3 mb-3">
+        <div class="col-6 col-lg-4 mb-3">
             <a href="{{ route('siswa.sia.rapor.index') }}" class="menu-item-quick shadow-sm">
                 <i class="fas fa-file-signature text-info"></i>
                 <div class="menu-text">E-Rapor</div>

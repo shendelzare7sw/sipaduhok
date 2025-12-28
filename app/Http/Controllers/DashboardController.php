@@ -15,7 +15,36 @@ use App\Models\JadwalPelajaran;
 
 class DashboardController extends Controller
 {
-    
+    /**
+     * Fallback dashboard - redirect based on role
+     */
+    public function index()
+    {
+        $user = auth()->user();
+
+        // Redirect to appropriate dashboard based on role
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        } elseif ($user->isKetuaPKBM()) {
+            return redirect()->route('ketua.dashboard');
+        } elseif ($user->isSekretaris()) {
+            return redirect()->route('sekretaris.dashboard');
+        } elseif ($user->isBendahara()) {
+            return redirect()->route('bendahara.dashboard');
+        } elseif ($user->isWaliKelas()) {
+            return redirect()->route('wali.dashboard');
+        } elseif ($user->isGuruPengajar()) {
+            return redirect()->route('guru.dashboard');
+        } elseif ($user->isSiswa()) {
+            return redirect()->route('siswa.dashboard');
+        } elseif ($user->isOrangTua()) {
+            return redirect()->route('parent.dashboard');
+        }
+
+        // Default fallback
+        abort(403, 'Role Anda tidak memiliki dashboard.');
+    }
+
     /**
      * Admin Dashboard
      */

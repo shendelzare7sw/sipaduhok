@@ -66,84 +66,10 @@ class SiaPresensiController extends Controller
     }
 
     /**
-     * Tampilkan form pengajuan izin
+     * Note: Method ajukanIzin(), createIzin(), dan storeIzin() telah dihapus.
+     * Fitur pengajuan izin dipindahkan ke OrangTuaController.
+     * Siswa fokus pada pembelajaran, pengajuan izin dilakukan oleh orang tua sebagai bentuk pendampingan.
      */
-    public function ajukanIzin()
-    {
-        return $this->createIzin();
-    }
-
-    /**
-     * Form pengajuan izin
-     */
-    public function createIzin()
-    {
-        $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->first();
-
-        if (!$siswa) {
-            return redirect()->route('siswa.sia.dashboard')
-                ->with('error', 'Data siswa tidak ditemukan');
-        }
-
-        return view('siswa.sia.presensi.ajukan-izin', compact('siswa'));
-    }
-
-    /**
-     * Proses pengajuan izin
-     */
-    public function storeIzin(Request $request)
-    {
-        $request->validate([
-            'tanggal' => 'required|date',
-            'jenis' => 'required|in:sakit,izin',
-            'keterangan' => 'required|string|max:500',
-            'bukti' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
-
-        $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->first();
-
-        if (!$siswa) {
-            return redirect()->route('siswa.sia.dashboard')
-                ->with('error', 'Data siswa tidak ditemukan');
-        }
-
-        // Cek apakah sudah ada presensi di tanggal tersebut
-        $existingPresensi = Presensi::where('siswa_id', $siswa->id)
-            ->whereDate('tanggal', $request->tanggal)
-            ->first();
-
-        if ($existingPresensi && $existingPresensi->status === 'hadir') {
-            return back()->with('error', 'Anda sudah hadir pada tanggal tersebut');
-        }
-
-        // Upload bukti jika ada
-        $buktiFoto = null;
-        if ($request->hasFile('bukti')) {
-            $buktiFoto = $request->file('bukti')->store('presensi/bukti', 'public');
-        }
-
-        // Simpan atau update presensi
-        if ($existingPresensi) {
-            $existingPresensi->update([
-                'status' => $request->jenis,
-                'keterangan' => $request->keterangan,
-            ]);
-        } else {
-            Presensi::create([
-                'siswa_id' => $siswa->id,
-                'kelas_id' => $siswa->kelas_id,
-                'tanggal' => $request->tanggal,
-                'status' => $request->jenis,
-                'keterangan' => $request->keterangan . ($buktiFoto ? " (Bukti: $buktiFoto)" : ""),
-                'diinput_oleh' => $user->id,
-            ]);
-        }
-
-        return redirect()->route('siswa.sia.presensi.index')
-            ->with('success', 'Pengajuan izin berhasil diajukan. Menunggu validasi wali kelas.');
-    }
 
     /**
      * Presensi otomatis (ketika siswa klik mata pelajaran di LMS)

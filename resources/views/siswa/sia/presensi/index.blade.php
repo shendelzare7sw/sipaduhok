@@ -2,7 +2,7 @@
 
 @section('title', 'Presensi')
 @section('page-title', 'Presensi Kehadiran')
-@section('page-subtitle', 'Lihat rekap presensi dan ajukan izin')
+@section('page-subtitle', 'Lihat rekap presensi kehadiran')
 
 @section('sidebar-menu')
     @include('siswa.partials.sneat-sidebar-sia')
@@ -108,7 +108,7 @@
 </div>
 
 <div class="card-custom mb-4">
-    <div class="p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="p-4">
         <div>
             <h5 class="fw-bold text-dark mb-1">
                 <i class="fas fa-calendar-check me-2 text-primary"></i>Riwayat Presensi Bulan Ini
@@ -117,10 +117,8 @@
                 Bulan {{ now()->translatedFormat('F Y') }}
             </small>
         </div>
-        <a href="{{ route('siswa.sia.presensi.ajukan-izin') }}"
-           class="btn btn-warning fw-bold px-4 py-2 rounded-pill shadow-sm text-white">
-            <i class="fas fa-file-medical me-2"></i>AJUKAN IZIN / SAKIT
-        </a>
+        {{-- Note: Fitur Ajukan Izin dipindahkan ke akses Orang Tua --}}
+        {{-- Siswa fokus pada pembelajaran, pengajuan izin dilakukan oleh orang tua sebagai bentuk pendampingan --}}
     </div>
 </div>
 

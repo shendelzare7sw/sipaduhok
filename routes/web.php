@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BeritaController;
 
 // Admin Controllers
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\CabangController;
@@ -54,6 +55,9 @@ use App\Http\Controllers\Siswa\SiaPresensiController;
 use App\Http\Controllers\Siswa\SiaPembayaranController;
 use App\Http\Controllers\Siswa\SiaRaporController;
 use App\Http\Controllers\Siswa\LmsDashboardController;
+
+// Orang Tua Controllers
+use App\Http\Controllers\OrangTua\OrangTuaController;
 use App\Http\Controllers\Siswa\LmsMateriController;
 use App\Http\Controllers\Siswa\LmsTugasController;
 use App\Http\Controllers\Siswa\LmsUjianController;
@@ -152,7 +156,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         
         // User Management
         Route::prefix('users')->name('users.')->group(function () {
@@ -220,7 +224,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('manajemen-siswa/{siswa}', [ManajemenSiswaController::class, 'show'])->name('manajemen-siswa.show');
         Route::get('manajemen-siswa/{siswa}/print-kartu', [ManajemenSiswaController::class, 'printKartu'])->name('manajemen-siswa.print-kartu');
         Route::post('manajemen-siswa/{siswa}/assign-kelas', [ManajemenSiswaController::class, 'assignKelas'])->name('manajemen-siswa.assign-kelas');
-        
+        Route::post('manajemen-siswa/{siswa}/attach-parent', [ManajemenSiswaController::class, 'attachParent'])->name('manajemen-siswa.attach-parent');
+        Route::delete('manajemen-siswa/{siswa}/detach-parent/{parent}', [ManajemenSiswaController::class, 'detachParent'])->name('manajemen-siswa.detach-parent');
+
         // Cetak Laporan
         Route::get('cetak-laporan', [CetakLaporanController::class, 'index'])->name('cetak-laporan.index');
         Route::get('cetak-laporan/siswa', [CetakLaporanController::class, 'siswa'])->name('cetak-laporan.siswa');
@@ -229,8 +235,151 @@ Route::middleware(['auth'])->group(function () {
         Route::get('cetak-laporan/wali-kelas', [CetakLaporanController::class, 'waliKelas'])->name('cetak-laporan.wali-kelas');
         Route::get('cetak-laporan/guru-pengajar', [CetakLaporanController::class, 'guruPengajar'])->name('cetak-laporan.guru-pengajar');
         Route::get('cetak-laporan/rekap', [CetakLaporanController::class, 'rekap'])->name('cetak-laporan.rekap');
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN KEUANGAN (Copy of Bendahara features for admin access)
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('keuangan')->name('keuangan.')->group(function () {
+            // Tagihan
+            Route::prefix('tagihan')->name('tagihan.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'index'])->name('index');
+                Route::get('/bulk-create', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'bulkCreate'])->name('bulk-create');
+                Route::post('/bulk-create', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'bulkCreate'])->name('bulk-create.store');
+                Route::get('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'show'])->name('show');
+                Route::get('/{siswa}/edit', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'edit'])->name('edit');
+                Route::put('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'update'])->name('update');
+            });
+
+            // Pembayaran
+            Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'index'])->name('index');
+                Route::get('/{pembayaran}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'show'])->name('show');
+                Route::post('/{pembayaran}/validasi', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'validasi'])->name('validasi');
+                Route::get('/siswa/{siswa}/create', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'create'])->name('create');
+                Route::post('/siswa/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'store'])->name('store');
+            });
+
+            // Laporan Keuangan
+            Route::prefix('laporan')->name('laporan.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Keuangan\LaporanPembayaranController::class, 'index'])->name('index');
+                Route::get('/cetak', [\App\Http\Controllers\Admin\Keuangan\LaporanPembayaranController::class, 'cetak'])->name('cetak');
+                Route::get('/rekap-tagihan', [\App\Http\Controllers\Admin\Keuangan\LaporanPembayaranController::class, 'rekapTagihan'])->name('rekap-tagihan');
+                Route::get('/cetak-rekap-tagihan', [\App\Http\Controllers\Admin\Keuangan\LaporanPembayaranController::class, 'cetakRekapTagihan'])->name('cetak-rekap-tagihan');
+                Route::get('/belum-lunas', [\App\Http\Controllers\Admin\Keuangan\LaporanPembayaranController::class, 'belumLunas'])->name('belum-lunas');
+                Route::get('/cetak-belum-lunas', [\App\Http\Controllers\Admin\Keuangan\LaporanPembayaranController::class, 'cetakBelumLunas'])->name('cetak-belum-lunas');
+            });
+
+            // Validasi Akses
+            Route::prefix('validasi-akses')->name('validasi-akses.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'index'])->name('index');
+
+                // Validasi individual
+                Route::post('/{siswa}/validasi-ujian', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'validasiUjian'])->name('validasi-ujian');
+                Route::post('/{siswa}/batalkan-ujian', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'batalkanUjian'])->name('batalkan-ujian');
+                Route::post('/{siswa}/validasi-rapor', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'validasiRapor'])->name('validasi-rapor');
+                Route::post('/{siswa}/batalkan-rapor', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'batalkanRapor'])->name('batalkan-rapor');
+
+                // Bulk validasi per kelas
+                Route::post('/kelas/{kelas}/bulk-validasi-ujian', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'bulkValidasiUjian'])->name('bulk-validasi-ujian');
+                Route::post('/kelas/{kelas}/bulk-validasi-rapor', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'bulkValidasiRapor'])->name('bulk-validasi-rapor');
+
+                // Bulk validasi siswa terpilih
+                Route::post('/bulk-validasi-selected', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'bulkValidasiSelected'])->name('bulk-validasi-selected');
+
+                // Reset validasi
+                Route::post('/reset', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'resetValidasi'])->name('reset');
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN AKADEMIK (Copy of Sekretaris features for admin access)
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('akademik')->name('akademik.')->group(function () {
+            $controller = \App\Http\Controllers\Admin\Akademik\AkademikController::class;
+
+            // Kalender Akademik
+            Route::prefix('kalender')->name('kalender.')->group(function () use ($controller) {
+                Route::get('/', [$controller, 'kalenderIndex'])->name('index');
+                Route::get('/bulanan', [$controller, 'kalenderBulanan'])->name('bulanan');
+                Route::get('/cetak', [$controller, 'kalenderCetak'])->name('cetak');
+                Route::get('/create', [$controller, 'kalenderCreate'])->name('create');
+                Route::post('/', [$controller, 'kalenderStore'])->name('store');
+                Route::get('/{id}/edit', [$controller, 'kalenderEdit'])->name('edit');
+                Route::put('/{id}', [$controller, 'kalenderUpdate'])->name('update');
+                Route::delete('/{id}', [$controller, 'kalenderDestroy'])->name('destroy');
+            });
+
+            // Pengumuman
+            Route::prefix('pengumuman')->name('pengumuman.')->group(function () use ($controller) {
+                Route::get('/', [$controller, 'pengumumanIndex'])->name('index');
+                Route::get('/create', [$controller, 'pengumumanCreate'])->name('create');
+                Route::post('/', [$controller, 'pengumumanStore'])->name('store');
+                Route::get('/{id}/edit', [$controller, 'pengumumanEdit'])->name('edit');
+                Route::put('/{id}', [$controller, 'pengumumanUpdate'])->name('update');
+                Route::delete('/{id}', [$controller, 'pengumumanDestroy'])->name('destroy');
+            });
+
+            // Berita
+            Route::prefix('berita')->name('berita.')->group(function () use ($controller) {
+                Route::get('/', [$controller, 'beritaIndex'])->name('index');
+                Route::get('/create', [$controller, 'beritaCreate'])->name('create');
+                Route::post('/', [$controller, 'beritaStore'])->name('store');
+                Route::get('/{id}/edit', [$controller, 'beritaEdit'])->name('edit');
+                Route::put('/{id}', [$controller, 'beritaUpdate'])->name('update');
+                Route::delete('/{id}', [$controller, 'beritaDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-featured', [$controller, 'beritaToggleFeatured'])->name('toggle-featured');
+            });
+
+            // Flyer
+            Route::prefix('flyer')->name('flyer.')->group(function () use ($controller) {
+                Route::get('/', [$controller, 'flyerIndex'])->name('index');
+                Route::get('/create', [$controller, 'flyerCreate'])->name('create');
+                Route::post('/', [$controller, 'flyerStore'])->name('store');
+                Route::get('/{id}/edit', [$controller, 'flyerEdit'])->name('edit');
+                Route::put('/{id}', [$controller, 'flyerUpdate'])->name('update');
+                Route::delete('/{id}', [$controller, 'flyerDestroy'])->name('destroy');
+            });
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN MONITORING & LAPORAN (Copy of Ketua features for admin access)
+        |--------------------------------------------------------------------------
+        */
+        $monitoringController = \App\Http\Controllers\Admin\MonitoringController::class;
+
+        // Monitoring
+        Route::prefix('monitoring')->name('monitoring.')->group(function () use ($monitoringController) {
+            Route::get('/pengguna', [$monitoringController, 'monitoringPengguna'])->name('pengguna');
+            Route::get('/wali-kelas', [$monitoringController, 'monitoringWaliKelas'])->name('wali-kelas');
+            Route::get('/guru-pengajar', [$monitoringController, 'monitoringGuruPengajar'])->name('guru-pengajar');
+            Route::get('/siswa', [$monitoringController, 'monitoringSiswa'])->name('siswa');
+        });
+
+        // Laporan
+        Route::prefix('laporan')->name('laporan.')->group(function () use ($monitoringController) {
+            Route::get('/', [$monitoringController, 'index'])->name('index');
+            Route::get('/cetak-siswa', [$monitoringController, 'siswa'])->name('siswa');
+            Route::get('/cetak-tenaga-pendidik', [$monitoringController, 'tenagaPendidik'])->name('tenaga-pendidik');
+            Route::get('/cetak-kelas', [$monitoringController, 'kelas'])->name('kelas');
+            Route::get('/cetak-wali-kelas', [$monitoringController, 'waliKelas'])->name('wali-kelas');
+            Route::get('/cetak-guru-pengajar', [$monitoringController, 'guruPengajar'])->name('guru-pengajar');
+            Route::get('/cetak-rekap', [$monitoringController, 'rekap'])->name('rekap');
+        });
+
+        // Catatan
+        Route::prefix('catatan')->name('catatan.')->group(function () use ($monitoringController) {
+            Route::get('/', [$monitoringController, 'catatanIndex'])->name('index');
+            Route::get('/create', [$monitoringController, 'catatanCreate'])->name('create');
+            Route::post('/', [$monitoringController, 'catatanStore'])->name('store');
+            Route::get('/{id}', [$monitoringController, 'catatanShow'])->name('show');
+        });
     });
-    
+
     /*
     |--------------------------------------------------------------------------
     | KETUA PKBM DASHBOARD
@@ -555,8 +704,11 @@ Route::middleware(['auth'])->group(function () {
             // Presensi
             Route::prefix('presensi')->name('presensi.')->group(function () {
                 Route::get('/', [SiaPresensiController::class, 'index'])->name('index');
-                Route::get('/ajukan-izin', [SiaPresensiController::class, 'ajukanIzin'])->name('ajukan-izin');
-                Route::post('/ajukan-izin', [SiaPresensiController::class, 'storeIzin'])->name('store-izin');
+
+                // Note: Routes ajukan izin di-disable - Fitur dipindahkan ke Orang Tua
+                // Siswa tidak bisa mengajukan izin sendiri, harus melalui orang tua sebagai bentuk pendampingan
+                // Route::get('/ajukan-izin', [SiaPresensiController::class, 'ajukanIzin'])->name('ajukan-izin');
+                // Route::post('/ajukan-izin', [SiaPresensiController::class, 'storeIzin'])->name('store-izin');
             });
             
             // Penilaian Harian
@@ -636,6 +788,56 @@ Route::middleware(['auth'])->group(function () {
             // Daftar Semua Tugas (Global)
             Route::get('/tugas', [LmsTugasController::class, 'indexAll'])->name('tugas.index');
         });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | ORANG TUA DASHBOARD & ROUTES
+    | Note: Orang tua yang bertanggung jawab untuk pembayaran & monitoring anak
+    | Siswa hanya fokus belajar, tidak ada akses pembayaran (mencegah penyembunyian info)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:orang_tua'])->prefix('orang-tua')->name('orang-tua.')->group(function () {
+
+        // Dashboard Orang Tua
+        Route::get('/dashboard', [OrangTuaController::class, 'dashboard'])->name('dashboard');
+
+        // Tagihan & Pembayaran Anak
+        Route::prefix('tagihan')->name('tagihan.')->group(function () {
+            Route::get('/anak/{siswa}', [OrangTuaController::class, 'tagihanAnak'])->name('anak');
+            Route::post('/anak/{siswa}/bayar', [OrangTuaController::class, 'prosesBayar'])->name('bayar');
+        });
+
+        // Monitoring Rapor Anak
+        Route::prefix('rapor')->name('rapor.')->group(function () {
+            Route::get('/anak/{siswa}', [OrangTuaController::class, 'raporAnak'])->name('anak');
+            Route::get('/detail/{rapor}', [OrangTuaController::class, 'detailRapor'])->name('detail');
+        });
+
+        // Monitoring Presensi & Pengajuan Izin Anak
+        Route::prefix('presensi')->name('presensi.')->group(function () {
+            Route::get('/anak/{siswa}', [OrangTuaController::class, 'presensiAnak'])->name('anak');
+            Route::get('/anak/{siswa}/ajukan-izin', [OrangTuaController::class, 'ajukanIzin'])->name('ajukan-izin');
+            Route::post('/anak/{siswa}/store-izin', [OrangTuaController::class, 'storeIzin'])->name('store-izin');
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PENGATURAN AKUN & PROFIL (Semua Role)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('account')->name('account.')->group(function () {
+        Route::get('/settings', [App\Http\Controllers\AccountController::class, 'settings'])->name('settings');
+        Route::put('/settings', [App\Http\Controllers\AccountController::class, 'updateSettings'])->name('update-settings');
+        Route::put('/change-password', [App\Http\Controllers\AccountController::class, 'changePassword'])->name('change-password');
+    });
+
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ProfileController::class, 'index'])->name('index');
+        Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
+        Route::post('/upload-foto', [App\Http\Controllers\ProfileController::class, 'uploadFoto'])->name('upload-foto');
+        Route::delete('/delete-foto', [App\Http\Controllers\ProfileController::class, 'deleteFoto'])->name('delete-foto');
     });
 
     /*

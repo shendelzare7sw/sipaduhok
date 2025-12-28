@@ -53,21 +53,5 @@
     </a>
 </li>
 
-<li class="menu-item {{ request()->routeIs('siswa.sia.rapor.*') ? 'active' : '' }}">
-    <a href="{{ route('siswa.sia.rapor.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-file-alt"></i>
-        <div>Rapor</div>
-    </a>
-</li>
-
-<!-- Keuangan Section -->
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Keuangan</span>
-</li>
-
-<li class="menu-item {{ request()->routeIs('siswa.sia.pembayaran.*') ? 'active' : '' }}">
-    <a href="{{ route('siswa.sia.pembayaran.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-credit-card"></i>
-        <div>Pembayaran</div>
-    </a>
-</li>
+<!-- Note: Menu Rapor & Pembayaran dipindahkan ke akses Orang Tua -->
+<!-- Siswa fokus pada pembelajaran, orang tua yang mengelola keuangan dan monitoring rapor -->

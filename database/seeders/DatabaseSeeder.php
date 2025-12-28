@@ -9,6 +9,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            // New role-based system seeders (run first)
+            RoleSeeder::class,
+            SuperAdminSeeder::class,
+
+            // Existing seeders
             CabangSeeder::class,
             TahunAjaranSeeder::class,
             UserSeeder::class,
@@ -16,6 +21,9 @@ class DatabaseSeeder extends Seeder
             MataPelajaranSeeder::class,
             KelasSeeder::class,
             SiswaSeeder::class,
+
+            // Orang tua seeder (run after SiswaSeeder)
+            OrangTuaSeeder::class,
         ]);
     }
 }

@@ -311,7 +311,7 @@
         <a href="{{ url('/kontak') }}" class="text-white px-4 py-2 text-lg font-medium rounded-full w-full text-center {{ request()->is('kontak') ? 'active-mobile' : '' }}">Kontak</a>       
         <!-- Login Button -->
         <div class="mt-6">
-            <a href="/login" class="btn-green font-medium py-2 px-6 rounded-full {{ request()->is('login') ? 'ring-2 ring-white' : '' }}">
+            <a href="{{ route('login') }}" class="btn-green font-medium py-2 px-6 rounded-full {{ request()->is('login') ? 'ring-2 ring-white' : '' }}">
                 Login
             </a>
         </div>
@@ -386,7 +386,7 @@
             </div>
             
             <div class="flex items-center">
-                <a href="/login" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-full transition duration-300 hidden md:inline-block {{ request()->is('login') ? 'ring-2 ring-white' : '' }}">
+                <a href="{{ route('login') }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-full transition duration-300 hidden md:inline-block {{ request()->is('login') ? 'ring-2 ring-white' : '' }}">
                     Login
                 </a>
                 <button id="mobileMenuButton" class="md:hidden text-white ml-4 mobile-menu-button">
