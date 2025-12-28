@@ -31,14 +31,18 @@ class CheckRole
 
         // For non-admin users, check if their role matches
         $userRole = null;
+
+        // Try new role system first (role_id relationship)
         if ($user->role_id && $user->roleRelation) {
             $userRole = $user->roleRelation->name;
-        } else {
-            $userRole = $user->attributes['role'] ?? null;
+        }
+        // Fallback to old role field
+        elseif ($user->role) {
+            $userRole = $user->role;
         }
 
         // Check if user role matches any of the allowed roles
-        if (!in_array($userRole, $roles)) {
+        if (!$userRole || !in_array($userRole, $roles)) {
             // Auto-logout untuk kemudahan testing
             auth()->logout();
             $request->session()->invalidate();

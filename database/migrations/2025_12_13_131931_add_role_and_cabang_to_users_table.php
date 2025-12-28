@@ -16,7 +16,8 @@ return new class extends Migration
                 'bendahara',
                 'wali_kelas',
                 'guru_pengajar',
-                'siswa'
+                'siswa',
+                'orang_tua'
             ])->after('email');
             $table->foreignId('cabang_id')->nullable()->constrained('cabang')->onDelete('set null');
             $table->string('username')->unique()->nullable()->after('name');

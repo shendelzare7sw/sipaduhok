@@ -41,6 +41,7 @@ class OrangTuaSeeder extends Seeder
                 'email' => 'agus.suryanto@parent.com',
                 'username' => 'agus_suryanto',
                 'password' => Hash::make('password'),
+                'role' => 'orang_tua',
                 'role_id' => $roleOrangTua->id,
                 'cabang_id' => 1,
                 'is_active' => true,
@@ -227,6 +228,14 @@ class OrangTuaSeeder extends Seeder
             $childrenIds = $parentData['children'];
             $relationships = $parentData['relationships'];
             unset($parentData['children'], $parentData['relationships']);
+
+            // Ensure role and role_id are set
+            if (!isset($parentData['role'])) {
+                $parentData['role'] = 'orang_tua';
+            }
+            if (!isset($parentData['role_id'])) {
+                $parentData['role_id'] = $roleOrangTua->id;
+            }
 
             // Create parent user
             $parent = User::create($parentData);

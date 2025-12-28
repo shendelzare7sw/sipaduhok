@@ -5,12 +5,16 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get role IDs
+        $roles = Role::pluck('id', 'name');
+
         // Admin
         User::create([
             'name' => 'Administrator',
@@ -18,6 +22,7 @@ class UserSeeder extends Seeder
             'username' => 'admin',
             'password' => Hash::make('password'),
             'role' => 'admin',
+            'role_id' => $roles['admin'],
             'cabang_id' => 1,
             'is_active' => true,
         ]);
@@ -29,6 +34,7 @@ class UserSeeder extends Seeder
             'username' => 'ketua_pkbm',
             'password' => Hash::make('password'),
             'role' => 'ketua_pkbm',
+            'role_id' => $roles['ketua_pkbm'],
             'cabang_id' => 1,
             'is_active' => true,
         ]);
@@ -40,6 +46,7 @@ class UserSeeder extends Seeder
             'username' => 'sekretaris',
             'password' => Hash::make('password'),
             'role' => 'sekretaris',
+            'role_id' => $roles['sekretaris'],
             'cabang_id' => 1,
             'is_active' => true,
         ]);
@@ -51,6 +58,7 @@ class UserSeeder extends Seeder
             'username' => 'bendahara',
             'password' => Hash::make('password'),
             'role' => 'bendahara',
+            'role_id' => $roles['bendahara'],
             'cabang_id' => 1,
             'is_active' => true,
         ]);
@@ -78,6 +86,7 @@ class UserSeeder extends Seeder
                 'username' => $wali['username'],
                 'password' => Hash::make('password'),
                 'role' => 'wali_kelas',
+                'role_id' => $roles['wali_kelas'],
                 'cabang_id' => $wali['cabang_id'],
                 'is_active' => true,
             ]);
@@ -106,6 +115,7 @@ class UserSeeder extends Seeder
                 'username' => $guru['username'],
                 'password' => Hash::make('password'),
                 'role' => 'guru_pengajar',
+                'role_id' => $roles['guru_pengajar'],
                 'cabang_id' => $guru['cabang_id'],
                 'is_active' => true,
             ]);
@@ -145,9 +155,12 @@ class UserSeeder extends Seeder
                 'username' => $siswa['username'],
                 'password' => Hash::make('password'),
                 'role' => 'siswa',
+                'role_id' => $roles['siswa'],
                 'cabang_id' => $siswa['cabang_id'],
                 'is_active' => true,
             ]);
         }
+
+        $this->command->info('Users seeded successfully with role_id!');
     }
 }

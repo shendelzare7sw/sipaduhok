@@ -34,15 +34,21 @@ class LoginController extends Controller
         $user->last_login_ip = $request->ip();
         $user->save();
 
-        // Determine which role system to use
+        // Determine role from either new role_id or old role field
         $roleName = null;
 
+        // Try new role system first (role_id relationship)
         if ($user->role_id && $user->roleRelation) {
-            // New role system (from role_id relationship)
             $roleName = $user->roleRelation->name;
-        } else {
-            // Old role enum system (get from attributes)
-            $roleName = $user->attributes['role'] ?? null;
+        }
+        // Fallback to old role field
+        elseif ($user->role) {
+            $roleName = $user->role;
+        }
+
+        // If still no role, redirect to default dashboard
+        if (!$roleName) {
+            return redirect()->intended(route('dashboard'));
         }
 
         // Redirect based on role
