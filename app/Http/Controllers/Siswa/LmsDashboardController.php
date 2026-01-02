@@ -14,6 +14,7 @@ use App\Models\Materi;
 use App\Models\Tugas;
 use App\Models\Ujian;
 use App\Models\Presensi;
+use App\Models\PengaturanIstirahat;
 use Carbon\Carbon;
 
 class LmsDashboardController extends Controller
@@ -183,6 +184,69 @@ class LmsDashboardController extends Controller
             ->groupBy('hari');
 
         return view('siswa.lms.jadwal', compact('siswa', 'jadwalMingguIni'));
+    }
+
+    /**
+     * Print Jadwal Pelajaran
+     */
+    public function printJadwal()
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->with(['kelas.tahunAjaran', 'kelas.waliKelas'])->first();
+
+        if (!$siswa) {
+            return redirect()->route('siswa.lms.dashboard');
+        }
+
+        $kelas = $siswa->kelas;
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        $jadwalPerHari = [];
+
+        foreach ($hariList as $hari) {
+            // Get jadwal pelajaran
+            $jadwalPelajaran = JadwalPelajaran::where('kelas_id', $kelas->id)
+                ->where('hari', $hari)
+                ->with(['mataPelajaran', 'guru'])
+                ->orderBy('jam_mulai')
+                ->get();
+
+            // Get waktu istirahat untuk jenjang dan hari ini
+            $istirahatList = PengaturanIstirahat::jenjang($kelas->jenjang)
+                ->aktif()
+                ->untukHari($hari)
+                ->orderBy('jam_mulai')
+                ->get();
+
+            // Merge jadwal dan istirahat, kemudian sort by jam_mulai
+            $merged = collect();
+
+            // Add jadwal pelajaran
+            foreach ($jadwalPelajaran as $jadwal) {
+                $merged->push([
+                    'type' => 'jadwal',
+                    'data' => $jadwal,
+                    'jam_mulai' => $jadwal->jam_mulai,
+                ]);
+            }
+
+            // Add istirahat
+            foreach ($istirahatList as $istirahat) {
+                $merged->push([
+                    'type' => 'istirahat',
+                    'data' => $istirahat,
+                    'jam_mulai' => $istirahat->jam_mulai,
+                ]);
+            }
+
+            // Sort by jam_mulai
+            $jadwalPerHari[$hari] = $merged->sortBy('jam_mulai')->values();
+        }
+
+        return view('siswa.lms.jadwal-print', [
+            'kelas' => $kelas,
+            'jadwalPerHari' => $jadwalPerHari,
+            'hariList' => $hariList,
+        ]);
     }
 
     /**

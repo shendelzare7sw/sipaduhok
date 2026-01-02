@@ -98,10 +98,84 @@
                                             <i class="fas fa-calendar me-1"></i>
                                             <strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                                         </div>
+                                        @php
+                                            // Extract bukti path from keterangan
+                                            $keterangan = $presensi->keterangan ?? '-';
+                                            $buktiPath = null;
+                                            $keteranganText = $keterangan;
+
+                                            if (preg_match('/\(Bukti: (.+?)\)/', $keterangan, $matches)) {
+                                                $buktiPath = $matches[1];
+                                                // Remove bukti info from display text
+                                                $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $keterangan);
+                                            }
+                                        @endphp
+
                                         <div class="text-muted small mb-3">
                                             <i class="fas fa-comment me-1"></i>
-                                            <strong>Keterangan:</strong> {{ $presensi->keterangan ?? '-' }}
+                                            <strong>Keterangan:</strong> {{ $keteranganText }}
                                         </div>
+
+                                        @if($buktiPath)
+                                            @php
+                                                $extension = pathinfo($buktiPath, PATHINFO_EXTENSION);
+                                                $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                                $isPdf = strtolower($extension) === 'pdf';
+                                            @endphp
+
+                                            <div class="mb-3">
+                                                <div class="card border-primary">
+                                                    <div class="card-header bg-light py-2">
+                                                        <small class="fw-bold text-primary">
+                                                            <i class="fas fa-paperclip me-1"></i>Bukti Lampiran
+                                                        </small>
+                                                    </div>
+                                                    <div class="card-body p-2">
+                                                        @if($isImage)
+                                                            <!-- Preview Gambar -->
+                                                            <div class="text-center mb-2">
+                                                                <img src="{{ asset('storage/' . $buktiPath) }}"
+                                                                     alt="Bukti"
+                                                                     class="img-fluid rounded"
+                                                                     style="max-height: 200px; cursor: pointer;"
+                                                                     data-bs-toggle="modal"
+                                                                     data-bs-target="#previewModal{{ $presensi->id }}">
+                                                            </div>
+                                                            <div class="d-grid">
+                                                                <a href="{{ asset('storage/' . $buktiPath) }}"
+                                                                   download
+                                                                   class="btn btn-sm btn-primary">
+                                                                    <i class="fas fa-download me-1"></i>Download Gambar
+                                                                </a>
+                                                            </div>
+                                                        @elseif($isPdf)
+                                                            <!-- Preview PDF -->
+                                                            <div class="d-grid gap-2">
+                                                                <a href="{{ asset('storage/' . $buktiPath) }}"
+                                                                   target="_blank"
+                                                                   class="btn btn-sm btn-danger">
+                                                                    <i class="fas fa-file-pdf me-1"></i>Buka PDF
+                                                                </a>
+                                                                <a href="{{ asset('storage/' . $buktiPath) }}"
+                                                                   download
+                                                                   class="btn btn-sm btn-primary">
+                                                                    <i class="fas fa-download me-1"></i>Download PDF
+                                                                </a>
+                                                            </div>
+                                                        @else
+                                                            <!-- File lainnya -->
+                                                            <div class="d-grid">
+                                                                <a href="{{ asset('storage/' . $buktiPath) }}"
+                                                                   download
+                                                                   class="btn btn-sm btn-primary">
+                                                                    <i class="fas fa-download me-1"></i>Download File ({{ strtoupper($extension) }})
+                                                                </a>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
 
                                         @if($presensi->inputBy)
                                             <div class="alert alert-info py-2 px-3 mb-0 small">
@@ -133,64 +207,108 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Modal Tolak -->
-                    <div class="modal fade" id="tolakModal{{ $presensi->id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <form action="{{ route('wali.presensi.proses-validasi-izin', $presensi->id) }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="status" value="tolak">
-
-                                    <div class="modal-header bg-danger">
-                                        <h5 class="modal-title text-white">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>Tolak Pengajuan Izin
-                                        </h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        <div class="alert alert-danger border-start border-danger border-4">
-                                            <div class="d-flex">
-                                                <i class="fas fa-exclamation-circle me-2 mt-1"></i>
-                                                <div>
-                                                    <strong>Peringatan!</strong><br>
-                                                    Status presensi akan otomatis berubah menjadi <strong>ALPHA</strong>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Siswa</label>
-                                            <input type="text" class="form-control" value="{{ $presensi->siswa->nama_lengkap }}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Tanggal</label>
-                                            <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}" readonly>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Alasan Penolakan (Opsional)</label>
-                                            <textarea name="keterangan" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                            <i class="fas fa-times me-1"></i>Batal
-                                        </button>
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fas fa-ban me-1"></i>Ya, Tolak Pengajuan
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 @endforeach
             </div>
         </div>
+
+        <!-- Modals - Outside the card -->
+        @foreach($pengajuanPending as $presensi)
+            @php
+                // Extract bukti for modal
+                $keterangan = $presensi->keterangan ?? '';
+                $buktiPath = null;
+                if (preg_match('/\(Bukti: (.+?)\)/', $keterangan, $matches)) {
+                    $buktiPath = $matches[1];
+                }
+                $extension = $buktiPath ? pathinfo($buktiPath, PATHINFO_EXTENSION) : '';
+                $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+            @endphp
+
+            <!-- Modal Preview Gambar -->
+            @if($buktiPath && $isImage)
+                <div class="modal fade" id="previewModal{{ $presensi->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-image me-2"></i>Preview Bukti - {{ $presensi->siswa->nama_lengkap }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center p-0">
+                                <img src="{{ asset('storage/' . $buktiPath) }}"
+                                     alt="Bukti"
+                                     class="img-fluid"
+                                     style="max-width: 100%; height: auto;">
+                            </div>
+                            <div class="modal-footer">
+                                <a href="{{ asset('storage/' . $buktiPath) }}"
+                                   download
+                                   class="btn btn-primary">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Modal Tolak -->
+            <div class="modal fade" id="tolakModal{{ $presensi->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form action="{{ route('wali.presensi.proses-validasi-izin', $presensi->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="status" value="tolak">
+
+                            <div class="modal-header bg-danger">
+                                <h5 class="modal-title text-white">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Tolak Pengajuan Izin
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="alert alert-danger border-start border-danger border-4">
+                                    <div class="d-flex">
+                                        <i class="fas fa-exclamation-circle me-2 mt-1"></i>
+                                        <div>
+                                            <strong>Peringatan!</strong><br>
+                                            Status presensi akan otomatis berubah menjadi <strong>ALPHA</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Siswa</label>
+                                    <input type="text" class="form-control" value="{{ $presensi->siswa->nama_lengkap }}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tanggal</label>
+                                    <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}" readonly>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Alasan Penolakan (Opsional)</label>
+                                    <textarea name="keterangan" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-1"></i>Batal
+                                </button>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-ban me-1"></i>Ya, Tolak Pengajuan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endforeach
     @else
         <!-- Empty State -->
         <div class="card border-0 shadow-sm">

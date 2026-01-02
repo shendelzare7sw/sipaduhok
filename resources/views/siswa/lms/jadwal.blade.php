@@ -14,6 +14,12 @@
 @endsection
 
 @section('content')
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ route('siswa.lms.jadwal.print') }}" target="_blank" class="btn btn-primary btn-sm">
+        <i class="fas fa-print me-1"></i> Cetak Jadwal
+    </a>
+</div>
+
 <style>
     /* Gunakan warna yang sudah ada di sistem, jangan buat variabel baru yang bentrok */
     .day-section-card {

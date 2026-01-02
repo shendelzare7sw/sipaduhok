@@ -61,6 +61,12 @@ class AccountController extends Controller
             'password' => Hash::make($validated['new_password']),
         ]);
 
-        return back()->with('success', 'Password berhasil diubah!');
+        // Logout user dan hapus semua sesi
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect ke login dengan pesan sukses
+        return redirect()->route('login')->with('success', 'Password berhasil diubah! Silakan login dengan password baru Anda.');
     }
 }

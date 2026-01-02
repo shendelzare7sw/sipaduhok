@@ -427,7 +427,7 @@
                             @endif
                         </div>
                     @else
-                        <h4>⚠️ Belum Ada Kelas</h4>
+                        <h4><i class="fas fa-exclamation-triangle"></i> Belum Ada Kelas</h4>
                         <div class="kelas-name">Siswa ini belum ditempatkan di kelas manapun</div>
                     @endif
                 </div>

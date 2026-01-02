@@ -281,14 +281,14 @@
             <div class="event-list-item">
                 <strong>{{ $event->nama_kegiatan }}</strong>
                 <div class="date">
-                    📅 {{ $event->tanggal_mulai->format('d F Y') }}
+                    <i class="fas fa-calendar"></i> {{ $event->tanggal_mulai->format('d F Y') }}
                     @if($event->tanggal_selesai)
                         - {{ $event->tanggal_selesai->format('d F Y') }}
                     @endif
                     @if($event->waktu_mulai)
-                        | ⏰ {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}
+                        | <i class="fas fa-clock"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}
                     @endif
-                    | 🏷️ {{ $event->jenis_label }}
+                    | <i class="fas fa-tag"></i> {{ $event->jenis_label }}
                 </div>
                 @if($event->keterangan)
                     <div class="desc">{{ $event->keterangan }}</div>

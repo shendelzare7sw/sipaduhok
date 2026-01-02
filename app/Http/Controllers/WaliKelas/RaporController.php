@@ -23,10 +23,27 @@ class RaporController extends Controller
     public function index(Request $request): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            return view('wali-kelas.rapor.index')->with([
+                'error' => 'Data tenaga pendidik tidak ditemukan.',
+                'kelas' => null,
+                'raporList' => collect(),
+                'semester' => 'ganjil',
+                'statusCount' => ['draft' => 0, 'diterbitkan' => 0],
+            ]);
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
 
         if (!$kelas) {
-            return view('wali-kelas.rapor.index')->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+            return view('wali-kelas.rapor.index')->with([
+                'error' => 'Anda belum ditugaskan sebagai wali kelas.',
+                'kelas' => null,
+                'raporList' => collect(),
+                'semester' => 'ganjil',
+                'statusCount' => ['draft' => 0, 'diterbitkan' => 0],
+            ]);
         }
 
         // Filter semester

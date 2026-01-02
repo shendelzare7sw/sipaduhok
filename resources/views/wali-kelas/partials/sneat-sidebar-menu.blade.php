@@ -25,7 +25,7 @@
 <!-- Jadwal Pelajaran -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.jadwal') ? 'active' : '' }}">
     <a href="{{ route('wali.jadwal.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-calendar-alt"></i>
+        <i class="menu-icon fas fa-calendar-week"></i>
         <div>Jadwal Pelajaran</div>
     </a>
 </li>

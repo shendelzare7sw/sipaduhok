@@ -22,8 +22,8 @@ class DatabaseSeeder extends Seeder
             KelasSeeder::class,
             SiswaSeeder::class,
 
-            // Orang tua seeder (run after SiswaSeeder)
-            OrangTuaSeeder::class,
+            // OrangTuaSeeder dibuat otomatis oleh SiswaSeeder
+            // OrangTuaSeeder::class, // DISABLED - konflik dengan SiswaSeeder
         ]);
     }
 }

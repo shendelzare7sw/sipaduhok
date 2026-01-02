@@ -217,8 +217,8 @@
                     <div class="detail-label">Prioritas</div>
                     <div class="detail-value">
                         <span class="badge badge-{{ $catatan->prioritas }}">
-                            @if($catatan->prioritas === 'biasa') 📝
-                            @elseif($catatan->prioritas === 'penting') ⚠️
+                            @if($catatan->prioritas === 'biasa') <i class="fas fa-file-alt"></i>
+                            @elseif($catatan->prioritas === 'penting') <i class="fas fa-exclamation-triangle"></i>
                             @else 🚨
                             @endif
                             {{ strtoupper($catatan->prioritas) }}
@@ -230,10 +230,10 @@
                     <div class="detail-label">Penerima</div>
                     <div class="detail-value">
                         @if($catatan->tipe_penerima === 'semua')
-                            <span class="badge badge-semua">📢 Semua Pengguna</span>
+                            <span class="badge badge-semua"><i class="fas fa-bullhorn"></i> Semua Pengguna</span>
                         @elseif($catatan->tipe_penerima === 'role')
                             <span class="badge badge-role">
-                                👥 {{ ucwords(str_replace('_', ' ', $catatan->role_penerima)) }}
+                                <i class="fas fa-users"></i> {{ ucwords(str_replace('_', ' ', $catatan->role_penerima)) }}
                             </span>
                         @else
                             <span class="badge badge-individu">

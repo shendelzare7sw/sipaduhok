@@ -3,8 +3,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="relative">
-                    <img src="/img/sma-main.jpg" 
-                    alt="SMA" 
+                    <img src="/img/sma-main.jpg"
+                    alt="SMA"
                     class="rounded-2xl shadow-xl w-full h-[400px] object-cover"
                     onerror="this.src='https://via.placeholder.com/800x400/d45930/ffffff?text=Paket+C+(SMA)'">
                     <div class="absolute -bottom-6 -right-6 bg-[#d45930] text-white p-6 rounded-2xl shadow-lg hidden md:block">
@@ -41,7 +41,7 @@
                 <!-- IPA -->
                 <div class="bg-gradient-to-br from-[#165fac] to-[#287f3b] rounded-2xl p-8 text-white">
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
-                        <span class="text-4xl">🔬</span>
+                        <span class="text-4xl"><i class="fas fa-microscope"></i></span>
                     </div>
                     <h3 class="text-2xl font-bold mb-4">Jurusan IPA</h3>
                     <p class="text-white/90 mb-6">Fokus pada mata pelajaran sains seperti Matematika, Fisika, Kimia, dan Biologi.</p>
@@ -75,7 +75,7 @@
                 <!-- IPS -->
                 <div class="bg-gradient-to-br from-[#d45930] to-[#fac030] rounded-2xl p-8 text-white">
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
-                        <span class="text-4xl">📊</span>
+                        <span class="text-4xl"><i class="fas fa-chart-bar"></i></span>
                     </div>
                     <h3 class="text-2xl font-bold mb-4">Jurusan IPS</h3>
                     <p class="text-white/90 mb-6">Fokus pada ilmu sosial seperti Ekonomi, Geografi, Sosiologi, dan Sejarah.</p>
@@ -118,22 +118,22 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <span class="text-4xl mb-4 block">🎓</span>
+                    <span class="text-4xl mb-4 block"><i class="fas fa-graduation-cap"></i></span>
                     <h3 class="font-bold text-gray-800">Kuliah</h3>
                     <p class="text-gray-600 text-sm mt-2">Lanjut ke Perguruan Tinggi Negeri/Swasta</p>
                 </div>
                 <div class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <span class="text-4xl mb-4 block">💼</span>
+                    <span class="text-4xl mb-4 block"><i class="fas fa-briefcase"></i></span>
                     <h3 class="font-bold text-gray-800">Kerja</h3>
                     <p class="text-gray-600 text-sm mt-2">Melamar pekerjaan dengan ijazah SMA</p>
                 </div>
                 <div class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <span class="text-4xl mb-4 block">🏢</span>
+                    <span class="text-4xl mb-4 block"><i class="fas fa-building"></i></span>
                     <h3 class="font-bold text-gray-800">Wirausaha</h3>
                     <p class="text-gray-600 text-sm mt-2">Memulai usaha sendiri</p>
                 </div>
                 <div class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg">
-                    <span class="text-4xl mb-4 block">📜</span>
+                    <span class="text-4xl mb-4 block"><i class="fas fa-scroll"></i></span>
                     <h3 class="font-bold text-gray-800">CPNS</h3>
                     <p class="text-gray-600 text-sm mt-2">Daftar seleksi CPNS</p>
                 </div>
@@ -146,7 +146,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Wujudkan Impian Anda</h2>
             <p class="text-white/90 mb-8">Dapatkan ijazah SMA dan buka pintu menuju masa depan yang lebih cerah.</p>
-            <a href="{{ url('/ppdb-formulir') }}" class="inline-flex items-center px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition">
+            <a href="/ppdb" class="inline-block px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition" style="cursor: pointer;">
                 Daftar Sekarang
             </a>
         </div>

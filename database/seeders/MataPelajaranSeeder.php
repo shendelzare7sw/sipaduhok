@@ -11,10 +11,20 @@ class MataPelajaranSeeder extends Seeder
     public function run(): void
     {
         $mataPelajaranData = [
-            // PAUD
-            ['kode_mapel' => 'PAUD-001', 'nama_mapel' => 'Bahasa Indonesia', 'jenjang' => 'PAUD', 'deskripsi' => 'Pengenalan bahasa dasar'],
-            ['kode_mapel' => 'PAUD-002', 'nama_mapel' => 'Matematika Dasar', 'jenjang' => 'PAUD', 'deskripsi' => 'Pengenalan angka dan berhitung'],
-            ['kode_mapel' => 'PAUD-003', 'nama_mapel' => 'Seni dan Kreativitas', 'jenjang' => 'PAUD', 'deskripsi' => 'Menggambar dan berkreasi'],
+            // KB (Kelompok Bermain)
+            ['kode_mapel' => 'KB-001', 'nama_mapel' => 'Bahasa Indonesia', 'jenjang' => 'KB', 'deskripsi' => 'Pengenalan bahasa dasar'],
+            ['kode_mapel' => 'KB-002', 'nama_mapel' => 'Matematika Dasar', 'jenjang' => 'KB', 'deskripsi' => 'Pengenalan angka dan berhitung'],
+            ['kode_mapel' => 'KB-003', 'nama_mapel' => 'Seni dan Kreativitas', 'jenjang' => 'KB', 'deskripsi' => 'Menggambar dan berkreasi'],
+
+            // TKA (Taman Kanak-kanak A)
+            ['kode_mapel' => 'TKA-001', 'nama_mapel' => 'Bahasa Indonesia', 'jenjang' => 'TKA', 'deskripsi' => 'Pengenalan bahasa dasar'],
+            ['kode_mapel' => 'TKA-002', 'nama_mapel' => 'Matematika Dasar', 'jenjang' => 'TKA', 'deskripsi' => 'Pengenalan angka dan berhitung'],
+            ['kode_mapel' => 'TKA-003', 'nama_mapel' => 'Seni dan Kreativitas', 'jenjang' => 'TKA', 'deskripsi' => 'Menggambar dan berkreasi'],
+
+            // TKB (Taman Kanak-kanak B)
+            ['kode_mapel' => 'TKB-001', 'nama_mapel' => 'Bahasa Indonesia', 'jenjang' => 'TKB', 'deskripsi' => 'Pengenalan bahasa dasar'],
+            ['kode_mapel' => 'TKB-002', 'nama_mapel' => 'Matematika Dasar', 'jenjang' => 'TKB', 'deskripsi' => 'Pengenalan angka dan berhitung'],
+            ['kode_mapel' => 'TKB-003', 'nama_mapel' => 'Seni dan Kreativitas', 'jenjang' => 'TKB', 'deskripsi' => 'Menggambar dan berkreasi'],
 
             // SD
             ['kode_mapel' => 'SD-001', 'nama_mapel' => 'Bahasa Indonesia', 'jenjang' => 'SD', 'deskripsi' => 'Mata pelajaran Bahasa Indonesia tingkat SD'],

@@ -180,13 +180,13 @@
                             </div>
                             <small style="color: #6b7280; margin-top: 4px; display: block;">
                                 @if($wali->progress_rapor == 100)
-                                    ✅ Semua rapor sudah selesai
+                                    <i class="fas fa-check-circle"></i> Semua rapor sudah selesai
                                 @elseif($wali->progress_rapor >= 75)
-                                    📝 Hampir selesai
+                                    <i class="fas fa-file-alt"></i> Hampir selesai
                                 @elseif($wali->progress_rapor >= 50)
                                     ⏳ Sedang proses
                                 @else
-                                    ⚠️ Perlu ditindaklanjuti
+                                    <i class="fas fa-exclamation-triangle"></i> Perlu ditindaklanjuti
                                 @endif
                             </small>
                         </td>

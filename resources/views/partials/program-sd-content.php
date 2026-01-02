@@ -4,11 +4,11 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div class="relative">
 
-                <img src="/img/sd-main.jpg" 
-                     alt="SD" 
+                <img src="/img/sd-main.jpg"
+                     alt="SD"
                      class="rounded-2xl shadow-xl w-full h-[400px] object-cover"
                      onerror="this.src='https://via.placeholder.com/800x400/165fac/ffffff?text=Paket+A+(SD)'">
-                
+
                 <div class="absolute -bottom-6 -right-6 bg-[#165fac] text-white p-6 rounded-2xl shadow-lg hidden md:block">
                     <p class="text-2xl font-bold">Paket A</p>
                     <p class="text-sm">Setara SD</p>
@@ -73,37 +73,37 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
                     <div class="w-14 h-14 bg-[#d45930]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">📚</span>
+                        <span class="text-2xl"><i class="fas fa-book"></i></span>
                     </div>
                     <h3 class="font-semibold text-gray-800">Bahasa Indonesia</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
                     <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">🔢</span>
+                        <span class="text-2xl"><i class="fas fa-calculator"></i></span>
                     </div>
                     <h3 class="font-semibold text-gray-800">Matematika</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
                     <div class="w-14 h-14 bg-[#287f3b]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">🔬</span>
+                        <span class="text-2xl"><i class="fas fa-microscope"></i></span>
                     </div>
                     <h3 class="font-semibold text-gray-800">IPA</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
                     <div class="w-14 h-14 bg-[#fac030]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">🌍</span>
+                        <span class="text-2xl"><i class="fas fa-globe"></i></span>
                     </div>
                     <h3 class="font-semibold text-gray-800">IPS</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
                     <div class="w-14 h-14 bg-[#d45930]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">🕌</span>
+                        <span class="text-2xl"><i class="fas fa-mosque"></i></span>
                     </div>
                     <h3 class="font-semibold text-gray-800">Agama</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
                     <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl">📚</span>
+                        <span class="text-2xl"><i class="fas fa-book"></i></span>
                     </div>
                     <h3 class="font-semibold text-gray-800">B. Inggris</h3>
                 </div>
@@ -157,7 +157,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Mulai Pendidikan Anda Sekarang</h2>
             <p class="text-white/90 mb-8">Dapatkan ijazah resmi setara SD dengan program Paket A kami.</p>
-            <a href="{{ url('/ppdb-formulir') }}" class="inline-flex items-center px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition">
+            <a href="/ppdb" class="inline-block px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition" style="cursor: pointer;">
                 Daftar Sekarang
             </a>
         </div>

@@ -355,12 +355,19 @@
         </div>
     @endif
 
-    {{-- Search Info --}}
-    @if(request('search'))
+    {{-- Search/Filter Info --}}
+    @if(request('search') || request('role'))
         <div class="search-info">
             <div>
-                <i class="fas fa-search"></i>
-                Menampilkan hasil pencarian untuk: <span class="search-term">"{{ request('search') }}"</span>
+                @if(request('search'))
+                    <i class="fas fa-search"></i>
+                    Menampilkan hasil pencarian untuk: <span class="search-term">"{{ request('search') }}"</span>
+                @endif
+                @if(request('role'))
+                    @if(request('search')) • @endif
+                    <i class="fas fa-filter"></i>
+                    Role: <span class="search-term">{{ $roles[request('role')] ?? request('role') }}</span>
+                @endif
                 <small style="color: #64748b; margin-left: 8px;">({{ $tenagaPendidik->total() }} data ditemukan)</small>
             </div>
             <a href="{{ route('admin.users.tenaga-pendidik') }}" class="btn-clear-all">
@@ -384,6 +391,20 @@
             </div>
             <div style="display: flex; gap: 10px;">
                 <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="search-form">
+                    <select
+                        name="role"
+                        id="roleFilter"
+                        class="search-input"
+                        style="width: 200px; padding-right: 12px;"
+                        onchange="this.form.submit()"
+                    >
+                        <option value="">Semua Role</option>
+                        @foreach($roles as $roleKey => $roleLabel)
+                            <option value="{{ $roleKey }}" {{ request('role') == $roleKey ? 'selected' : '' }}>
+                                {{ $roleLabel }}
+                            </option>
+                        @endforeach
+                    </select>
                     <div class="search-input-wrapper">
                         <i class="fas fa-search search-icon"></i>
                         <input
@@ -504,7 +525,7 @@
 
         @if($tenagaPendidik->hasPages())
         <div style="padding: 20px;">
-            {{ $tenagaPendidik->appends(['search' => request('search')])->links() }}
+            {{ $tenagaPendidik->appends(['search' => request('search'), 'role' => request('role')])->links() }}
         </div>
         @endif
     </div>

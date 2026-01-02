@@ -441,7 +441,7 @@
         <div class="header-content">
             <div class="header-top">
                 <div class="header-info">
-                    <div class="header-icon">📚</div>
+                    <div class="header-icon"><i class="fas fa-books"></i></div>
                     <div class="header-text">
                         <h1>Kelas {{ $kelas->nama_kelas }}</h1>
                         <div class="header-meta">

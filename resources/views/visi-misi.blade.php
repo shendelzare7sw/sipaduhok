@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visi & Misi - PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
@@ -108,19 +109,19 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3">🎯</div>
+                    <div class="text-4xl mb-3"><i class="fas fa-bullseye"></i></div>
                     <h3 class="text-white font-bold">Integritas</h3>
                 </div>
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3">💡</div>
+                    <div class="text-4xl mb-3"><i class="fas fa-lightbulb"></i></div>
                     <h3 class="text-white font-bold">Inovasi</h3>
                 </div>
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3">🤝</div>
+                    <div class="text-4xl mb-3"><i class="fas fa-handshake"></i></div>
                     <h3 class="text-white font-bold">Kolaborasi</h3>
                 </div>
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3">❤️</div>
+                    <div class="text-4xl mb-3"><i class="fas fa-heart"></i></div>
                     <h3 class="text-white font-bold">Pengembangan Bakat</h3>
                 </div>
             </div>

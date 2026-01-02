@@ -164,28 +164,28 @@
     {{-- Quick Stats --}}
     <div class="stats-row">
         <div class="stat-mini">
-            <div class="stat-mini-icon blue">👨‍🎓</div>
+            <div class="stat-mini-icon blue"><i class="fas fa-graduation-cap"></i></div>
             <div class="stat-mini-info">
                 <h4>{{ $stats['totalSiswa'] }}</h4>
                 <p>Siswa Aktif</p>
             </div>
         </div>
         <div class="stat-mini">
-            <div class="stat-mini-icon green">👨‍🏫</div>
+            <div class="stat-mini-icon green"><i class="fas fa-school"></i></div>
             <div class="stat-mini-info">
                 <h4>{{ $stats['totalGuru'] }}</h4>
                 <p>Tenaga Pendidik</p>
             </div>
         </div>
         <div class="stat-mini">
-            <div class="stat-mini-icon purple">📚</div>
+            <div class="stat-mini-icon purple"><i class="fas fa-books"></i></div>
             <div class="stat-mini-info">
                 <h4>{{ $stats['totalKelas'] }}</h4>
                 <p>Kelas Aktif</p>
             </div>
         </div>
         <div class="stat-mini">
-            <div class="stat-mini-icon orange">🏫</div>
+            <div class="stat-mini-icon orange"><i class="fas fa-school"></i></div>
             <div class="stat-mini-info">
                 <h4>{{ $stats['totalCabang'] }}</h4>
                 <p>Cabang</p>
@@ -199,7 +199,7 @@
         {{-- Laporan Siswa --}}
         <div class="report-card">
             <div class="report-card-header blue">
-                <div class="report-card-icon">👨‍🎓</div>
+                <div class="report-card-icon"><i class="fas fa-graduation-cap"></i></div>
                 <h4 class="report-card-title">Daftar Siswa</h4>
             </div>
             <div class="report-card-body">
@@ -245,7 +245,7 @@
         {{-- Laporan Tenaga Pendidik --}}
         <div class="report-card">
             <div class="report-card-header green">
-                <div class="report-card-icon">👨‍🏫</div>
+                <div class="report-card-icon"><i class="fas fa-school"></i></div>
                 <h4 class="report-card-title">Daftar Tenaga Pendidik</h4>
             </div>
             <div class="report-card-body">
@@ -285,7 +285,7 @@
         {{-- Laporan Kelas --}}
         <div class="report-card">
             <div class="report-card-header purple">
-                <div class="report-card-icon">📚</div>
+                <div class="report-card-icon"><i class="fas fa-books"></i></div>
                 <h4 class="report-card-title">Daftar Kelas</h4>
             </div>
             <div class="report-card-body">
@@ -366,7 +366,7 @@
         {{-- Laporan Guru Pengajar --}}
         <div class="report-card">
             <div class="report-card-header teal">
-                <div class="report-card-icon">👩‍🏫</div>
+                <div class="report-card-icon">👩‍<i class="fas fa-school"></i></div>
                 <h4 class="report-card-title">Daftar Guru Pengajar</h4>
             </div>
             <div class="report-card-body">
@@ -392,7 +392,7 @@
         {{-- Rekap Statistik --}}
         <div class="report-card">
             <div class="report-card-header pink">
-                <div class="report-card-icon">📊</div>
+                <div class="report-card-icon"><i class="fas fa-chart-bar"></i></div>
                 <h4 class="report-card-title">Rekap Statistik</h4>
             </div>
             <div class="report-card-body">

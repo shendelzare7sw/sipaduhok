@@ -226,7 +226,9 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
 .badge-teal { background: #ccfbf1; color: #0d9488; }
 
 /* Jenjang Badges */
-.badge-paud { background: #fef3c7; color: #92400e; }
+.badge-kb { background: #fef3c7; color: #92400e; }
+.badge-tka { background: #fed7aa; color: #9a3412; }
+.badge-tkb { background: #fecaca; color: #991b1b; }
 .badge-sd { background: #dcfce7; color: #166534; }
 .badge-smp { background: #e0f2fe; color: #075985; }
 .badge-sma { background: #f3e8ff; color: #7c3aed; }
@@ -655,7 +657,9 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                 <td>
                                     @php
                                         $jenjangClass = [
-                                            'PAUD' => 'badge-paud',
+                                            'KB' => 'badge-kb',
+                                            'TKA' => 'badge-tka',
+                                            'TKB' => 'badge-tkb',
                                             'SD' => 'badge-sd',
                                             'SMP' => 'badge-smp',
                                             'SMA' => 'badge-sma',

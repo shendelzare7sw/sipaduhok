@@ -51,7 +51,7 @@
                             <div class="h2 fw-bold mb-0 text-white">{{ $kelasYangDiajar->count() ?? 0 }}</div>
                             <div class="small text-white">Kelas aktif</div>
                         </div>
-                        <div style="font-size: 3rem; opacity: 0.2;">🏫</div>
+                        <div style="font-size: 3rem; opacity: 0.2;"><i class="fas fa-school"></i></div>
                     </div>
                 </div>
             </div>
@@ -66,7 +66,7 @@
                             <div class="h2 fw-bold mb-0 text-white">{{ $totalSiswa ?? 0 }}</div>
                             <div class="small text-white">Siswa diajar</div>
                         </div>
-                        <div style="font-size: 3rem; opacity: 0.2;">👨‍🎓</div>
+                        <div style="font-size: 3rem; opacity: 0.2;"><i class="fas fa-graduation-cap"></i></div>
                     </div>
                 </div>
             </div>
@@ -81,7 +81,7 @@
                             <div class="h2 fw-bold mb-0 text-white">{{ $jadwalHariIni->count() ?? 0 }}</div>
                             <div class="small text-white">Jam mengajar</div>
                         </div>
-                        <div style="font-size: 3rem; opacity: 0.2;">📅</div>
+                        <div style="font-size: 3rem; opacity: 0.2;"><i class="fas fa-calendar"></i></div>
                     </div>
                 </div>
             </div>

@@ -242,7 +242,7 @@ textarea.form-control {
                                 required
                                 onchange="togglePenerimaFields()"
                             >
-                            <span>📢 Semua Pengguna</span>
+                            <span><i class="fas fa-bullhorn"></i> Semua Pengguna</span>
                         </label>
                         <label class="radio-option">
                             <input 
@@ -252,7 +252,7 @@ textarea.form-control {
                                 {{ old('tipe_penerima') === 'role' ? 'checked' : '' }}
                                 onchange="togglePenerimaFields()"
                             >
-                            <span>👥 Per Role</span>
+                            <span><i class="fas fa-users"></i> Per Role</span>
                         </label>
                         <label class="radio-option">
                             <input 
@@ -320,10 +320,10 @@ textarea.form-control {
                         required
                     >
                         <option value="biasa" {{ old('prioritas') === 'biasa' ? 'selected' : '' }}>
-                            📝 Biasa
+                            <i class="fas fa-file-alt"></i> Biasa
                         </option>
                         <option value="penting" {{ old('prioritas') === 'penting' ? 'selected' : '' }}>
-                            ⚠️ Penting
+                            <i class="fas fa-exclamation-triangle"></i> Penting
                         </option>
                         <option value="mendesak" {{ old('prioritas') === 'mendesak' ? 'selected' : '' }}>
                             🚨 Mendesak

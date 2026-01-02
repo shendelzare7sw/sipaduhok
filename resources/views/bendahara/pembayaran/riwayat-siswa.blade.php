@@ -86,7 +86,7 @@
                 <h6>Total Terbayar</h6>
                 <div class="stat-value">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</div>
                 <div class="stat-label">Pembayaran disetujui</div>
-                <div class="stat-icon">✅</div>
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
@@ -102,7 +102,7 @@
                 <h6>Sisa Tagihan</h6>
                 <div class="stat-value">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</div>
                 <div class="stat-label">Belum dibayar</div>
-                <div class="stat-icon">💰</div>
+                <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
             </div>
         </div>
     </div>
@@ -156,9 +156,9 @@
                                     </td>
                                     <td class="align-middle text-center">
                                         @if($bayar->status_validasi === 'disetujui')
-                                            <span class="badge bg-success shadow-sm">✅ Disetujui</span>
+                                            <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle"></i> Disetujui</span>
                                         @elseif($bayar->status_validasi === 'ditolak')
-                                            <span class="badge bg-danger shadow-sm">❌ Ditolak</span>
+                                            <span class="badge bg-danger shadow-sm"><i class="fas fa-times-circle"></i> Ditolak</span>
                                         @else
                                             <span class="badge bg-warning shadow-sm">⏳ Pending</span>
                                         @endif

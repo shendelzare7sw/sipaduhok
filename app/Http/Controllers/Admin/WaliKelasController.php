@@ -70,13 +70,21 @@ class WaliKelasController extends Controller
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
-        $jenjangs = ['PAUD', 'SD', 'SMP', 'SMA'];
+        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
-        // Get tenaga pendidik yang bisa jadi wali kelas
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)
-              ->whereIn('role', ['wali_kelas', 'guru_pengajar', 'admin']);
-        })->orderBy('nama_lengkap')->get();
+        // Get tenaga pendidik yang bisa jadi wali kelas (hanya role wali_kelas)
+        // Load dengan informasi kelas yang sudah di-assign
+        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+            $q->where('name', 'wali_kelas');
+        })->whereHas('user', function($q) {
+            $q->where('is_active', true);
+        })->with(['kelasWali' => function($query) use ($tahunAjaranId) {
+            // Only load kelas for current tahun ajaran
+            if ($tahunAjaranId) {
+                $query->where('tahun_ajaran_id', $tahunAjaranId);
+            }
+            $query->with('cabang');
+        }])->orderBy('nama_lengkap')->get();
 
         // Statistics
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
@@ -85,8 +93,10 @@ class WaliKelasController extends Controller
         $kelasWithWali = Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
             ->whereNotNull('wali_kelas_id')->count();
         $kelasWithoutWali = $totalKelas - $kelasWithWali;
-        $totalWaliKelas = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->where('role', 'wali_kelas');
+        $totalWaliKelas = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+            $q->where('name', 'wali_kelas');
+        })->whereHas('user', function($q) {
+            $q->where('is_active', true);
         })->count();
 
         $stats = compact('totalKelas', 'kelasWithWali', 'kelasWithoutWali', 'totalWaliKelas');
@@ -99,6 +109,9 @@ class WaliKelasController extends Controller
 
     /**
      * Assign wali kelas to a class.
+     *
+     * IMPORTANT: Satu wali kelas hanya bisa mengajar SATU kelas.
+     * Jika wali kelas sudah assigned ke kelas lain, assignment lama akan dihapus otomatis.
      */
     public function assign(Request $request, Kelas $kelas)
     {
@@ -107,12 +120,25 @@ class WaliKelasController extends Controller
         ]);
 
         $oldWali = $kelas->waliKelas;
-        $kelas->update(['wali_kelas_id' => $validated['wali_kelas_id']]);
 
-        if ($validated['wali_kelas_id']) {
-            $newWali = TenagaPendidik::find($validated['wali_kelas_id']);
+        // Get wali_kelas_id from request, default to null if not present
+        $waliKelasId = $request->input('wali_kelas_id', null);
+
+        if ($waliKelasId) {
+            // CRITICAL: Hapus assignment lama dari wali kelas ini di kelas lain
+            // Satu wali kelas hanya boleh mengajar satu kelas
+            Kelas::where('wali_kelas_id', $waliKelasId)
+                ->where('id', '!=', $kelas->id)
+                ->update(['wali_kelas_id' => null]);
+
+            // Assign wali kelas ke kelas baru
+            $kelas->update(['wali_kelas_id' => $waliKelasId]);
+
+            $newWali = TenagaPendidik::find($waliKelasId);
             return back()->with('success', "Berhasil menunjuk {$newWali->nama_lengkap} sebagai Wali Kelas {$kelas->nama_kelas}!");
         } else {
+            // Hapus wali kelas
+            $kelas->update(['wali_kelas_id' => null]);
             return back()->with('success', "Wali Kelas {$kelas->nama_kelas} berhasil dihapus!");
         }
     }
@@ -154,10 +180,11 @@ class WaliKelasController extends Controller
             'siswaPerempuan' => $kelas->siswa->where('jenis_kelamin', 'P')->count(),
         ];
 
-        // Get other wali kelas options for reassignment
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)
-              ->whereIn('role', ['wali_kelas', 'guru_pengajar', 'admin']);
+        // Get other wali kelas options for reassignment (hanya role wali_kelas)
+        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+            $q->where('name', 'wali_kelas');
+        })->whereHas('user', function($q) {
+            $q->where('is_active', true);
         })->orderBy('nama_lengkap')->get();
 
         return view('admin.wali-kelas.show', compact('kelas', 'stats', 'waliKelasOptions'));

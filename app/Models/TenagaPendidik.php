@@ -45,6 +45,11 @@ class TenagaPendidik extends Model
         return $this->hasMany(JadwalPelajaran::class, 'guru_id');
     }
 
+    public function jadwalMengajar()
+    {
+        return $this->hasMany(JadwalPelajaran::class, 'guru_id');
+    }
+
     public function materi()
     {
         return $this->hasMany(Materi::class, 'guru_id');

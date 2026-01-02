@@ -22,8 +22,8 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <img src="/img/smp-main.jpg" 
-                        alt="SMP" 
+                    <img src="/img/smp-main.jpg"
+                        alt="SMP"
                         class="rounded-2xl shadow-xl w-full h-[400px] object-cover"
                         onerror="this.src='https://via.placeholder.com/800x400/287f3b/ffffff?text=Paket+B+(SMP)'">
                     <div class="absolute -bottom-6 -left-6 bg-[#287f3b] text-white p-6 rounded-2xl shadow-lg hidden md:block">
@@ -47,31 +47,31 @@
                     <h3 class="font-semibold text-gray-800">Bahasa Indonesia</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#287f3b]">
-                    <span class="text-3xl mb-4 block">➕</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-calculator"></i></span>
                     <h3 class="font-semibold text-gray-800">Matematika</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#d45930]">
-                    <span class="text-3xl mb-4 block">🧪</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-flask"></i></span>
                     <h3 class="font-semibold text-gray-800">IPA</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#fac030]">
-                    <span class="text-3xl mb-4 block">🏛️</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-landmark"></i></span>
                     <h3 class="font-semibold text-gray-800">IPS</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#287f3b]">
-                    <span class="text-3xl mb-4 block">📚</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-language"></i></span>
                     <h3 class="font-semibold text-gray-800">Bahasa Inggris</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#165fac]">
-                    <span class="text-3xl mb-4 block">🕋</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-mosque"></i></span>
                     <h3 class="font-semibold text-gray-800">Agama</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#d45930]">
-                    <span class="text-3xl mb-4 block">📗</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-book"></i></span>
                     <h3 class="font-semibold text-gray-800">PKn</h3>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#fac030]">
-                    <span class="text-3xl mb-4 block">🈯</span>
+                    <span class="text-3xl mb-4 block"><i class="fas fa-language"></i></span>
                     <h3 class="font-semibold text-gray-800">Bahasa Mandarin</h3>
                 </div>
             </div>
@@ -121,7 +121,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Raih Ijazah SMP Anda</h2>
             <p class="text-white/90 mb-8">Daftarkan diri Anda sekarang dan mulai perjalanan pendidikan baru.</p>
-            <a href="{{ url('/ppdb-formulir') }}" class="inline-flex items-center px-8 py-4 bg-white text-[#287f3b] font-semibold rounded-full hover:bg-gray-100 transition">
+            <a href="/ppdb" class="inline-block px-8 py-4 bg-white text-[#287f3b] font-semibold rounded-full hover:bg-gray-100 transition" style="cursor: pointer;">
                 Daftar Sekarang
             </a>
         </div>

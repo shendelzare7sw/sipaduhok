@@ -1,19 +1,23 @@
+{{-- resources/views/profile/index.blade.php --}}
+
 @extends('layouts.sneat')
 
 @section('title', 'Profil Saya')
 
 @section('sidebar-menu')
     @php
+        // Mapping sidebar berdasarkan role name
         $sidebarMap = [
             'admin' => 'admin.partials.sneat-sidebar-menu',
-            'ketua' => 'ketua.partials.sneat-sidebar-menu',
+            'ketua_pkbm' => 'ketua.partials.sneat-sidebar-menu',
             'sekretaris' => 'sekretaris.partials.sneat-sidebar-menu',
             'bendahara' => 'bendahara.partials.sneat-sidebar-menu',
-            'guru' => 'guru.partials.sneat-sidebar-menu',
+            'guru_pengajar' => 'guru.partials.sneat-sidebar-menu', // Perbaiki ini
             'wali_kelas' => 'wali-kelas.partials.sneat-sidebar-menu',
             'siswa' => 'siswa.partials.sneat-sidebar-sia',
             'orang_tua' => 'orang-tua.partials.sneat-sidebar-menu',
         ];
+
         $sidebarView = $sidebarMap[$roleName] ?? 'admin.partials.sneat-sidebar-menu';
     @endphp
     @include($sidebarView)
@@ -106,7 +110,7 @@
                         <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Status Akademik</h6>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tahun Ajaran</span>
-                            <span class="fw-bold">{{ $profileData->tahunAjaran->nama ?? '-' }}</span>
+                            <span class="fw-bold">{{ $profileData->kelas->tahunAjaran->nama ?? '-' }}</span>
                         </div>
                         <div class="d-flex justify-content-between">
                             <span>Status</span>

@@ -65,7 +65,7 @@
                                 <div class="text-white-50 small fw-bold text-uppercase">Total Siswa</div>
                                 <div class="h2 fw-bold mb-0 text-white">{{ $totalSiswa }}</div>
                             </div>
-                            <div class="icon-circle-lg">👨‍🎓</div>
+                            <div class="icon-circle-lg"><i class="fas fa-graduation-cap"></i></div>
                         </div>
                         <div class="mt-2 small text-white">Kelas {{ $kelas->nama_kelas }}</div>
                     </div>
@@ -80,7 +80,7 @@
                                 <div class="text-white-50 small fw-bold text-uppercase">Hadir Hari Ini</div>
                                 <div class="h2 fw-bold mb-0 text-white">{{ $presensiStats['hadir'] }}</div>
                             </div>
-                            <div class="icon-circle-lg">✅</div>
+                            <div class="icon-circle-lg"><i class="fas fa-check-circle"></i></div>
                         </div>
                         <div class="mt-2 small text-white">Siswa di sekolah</div>
                     </div>
@@ -95,7 +95,7 @@
                                 <div class="text-white-50 small fw-bold text-uppercase">Izin Pending</div>
                                 <div class="h2 fw-bold mb-0 text-white">{{ $izinMenungguValidasi }}</div>
                             </div>
-                            <div class="icon-circle-lg">📝</div>
+                            <div class="icon-circle-lg"><i class="fas fa-file-alt"></i></div>
                         </div>
                         <div class="mt-2 small text-white">Perlu validasi</div>
                     </div>
@@ -110,7 +110,7 @@
                                 <div class="text-white-50 small fw-bold text-uppercase">Rapor Draft</div>
                                 <div class="h2 fw-bold mb-0 text-white">{{ $raporBelumSelesai }}</div>
                             </div>
-                            <div class="icon-circle-lg">📄</div>
+                            <div class="icon-circle-lg"><i class="fas fa-file"></i></div>
                         </div>
                         <div class="mt-2 small text-white">Siswa belum beres</div>
                     </div>

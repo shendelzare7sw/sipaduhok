@@ -211,7 +211,7 @@
                         <td>
                             <div class="stat-mini-inline">
                                 <div class="stat-mini-row">
-                                    <span class="stat-label-small">✅ Sudah Dinilai</span>
+                                    <span class="stat-label-small"><i class="fas fa-check-circle"></i> Sudah Dinilai</span>
                                     <span class="stat-value-small" style="color: #10b981;">{{ $guru->nilai_sudah_diisi }}</span>
                                 </div>
                                 <div class="stat-mini-row">
@@ -252,7 +252,7 @@
     <div class="card" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
         <div class="card-body" style="padding: 20px;">
             <div style="display: flex; align-items: start; gap: 16px;">
-                <div style="font-size: 32px;">📊</div>
+                <div style="font-size: 32px;"><i class="fas fa-chart-bar"></i></div>
                 <div>
                     <strong style="color: #166534; display: block; margin-bottom: 8px;">Informasi Monitoring Guru</strong>
                     <ul style="color: #166534; margin: 0; padding-left: 20px; line-height: 1.8;">

@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PKBM House Of Knowledge - Galeri</title>
-    
+
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Custom Tailwind Config -->
     <script>
         tailwind.config = {
@@ -18,7 +18,7 @@
                 extend: {
                     colors: {
                         'primary': '#165fac',
-                        'secondary': '#287f3b', 
+                        'secondary': '#287f3b',
                         'accent-orange': '#d45930',
                         'accent-yellow': '#fac030',
                         'accent-bright': '#ffe400',
@@ -31,25 +31,25 @@
             }
         }
     </script>
-    
+
     <style>
         body { font-family: 'Poppins', sans-serif; }
-        
+
         /* Gallery Item Hover Effect */
         .gallery-item {
             position: relative;
             overflow: hidden;
             cursor: pointer;
         }
-        
+
         .gallery-item img {
             transition: transform 0.5s ease;
         }
-        
+
         .gallery-item:hover img {
             transform: scale(1.15);
         }
-        
+
         .gallery-overlay {
             position: absolute;
             inset: 0;
@@ -57,11 +57,11 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .gallery-item:hover .gallery-overlay {
             opacity: 1;
         }
-        
+
         .gallery-info {
             position: absolute;
             bottom: 0;
@@ -71,11 +71,11 @@
             transform: translateY(100%);
             transition: transform 0.3s ease;
         }
-        
+
         .gallery-item:hover .gallery-info {
             transform: translateY(0);
         }
-        
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -88,67 +88,67 @@
             background-color: rgba(0,0,0,0.95);
             animation: fadeIn 0.3s ease;
         }
-        
+
         .modal.active {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
         .modal-content {
             max-width: 90%;
             max-height: 90%;
             animation: zoomIn 0.3s ease;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
+
         @keyframes zoomIn {
             from { transform: scale(0.8); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
         }
-        
+
         /* Filter Button Active State */
         .filter-btn {
             transition: all 0.3s ease;
         }
-        
+
         .filter-btn.active {
             background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(22, 95, 172, 0.3);
         }
-        
+
         /* Masonry Grid */
         .masonry-grid {
             column-count: 1;
             column-gap: 1.5rem;
         }
-        
+
         @media (min-width: 640px) {
             .masonry-grid { column-count: 2; }
         }
-        
+
         @media (min-width: 1024px) {
             .masonry-grid { column-count: 3; }
         }
-        
+
         .masonry-item {
             break-inside: avoid;
             margin-bottom: 1.5rem;
         }
-        
+
         /* Scroll Animations */
         .scroll-reveal {
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s ease;
         }
-        
+
         .scroll-reveal.active {
             opacity: 1;
             transform: translateY(0);
@@ -169,7 +169,7 @@
             <div class="absolute bottom-20 right-20 w-20 h-20 bg-accent-yellow/20 rounded-full"></div>
             <div class="absolute top-40 right-40 w-24 h-24 border-4 border-white/10 rounded-lg rotate-45"></div>
         </div>
-        
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center">
                 <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-4">
@@ -215,7 +215,7 @@
     <section class="py-16 bg-cream">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="masonry-grid" id="galleryGrid">
-                
+
                 <!-- Gallery Item 1 -->
                 <div class="masonry-item scroll-reveal gallery-item rounded-2xl overflow-hidden shadow-lg bg-white" data-category="pembelajaran">
                     <img src="{{ asset('img/gallery-1.jpg') }}" alt="Kegiatan Pembelajaran" class="w-full h-auto object-cover">
@@ -350,7 +350,7 @@
 
             </div>
 
-            <!-- Load More Button -->
+            <!-- Load More Button
             <div class="text-center mt-12">
                 <button id="loadMoreBtn" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
                     Muat Lebih Banyak
@@ -358,7 +358,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
-            </div>
+            </div>-->
         </div>
     </section>
 
@@ -392,7 +392,7 @@
                 Jadilah bagian dari momen-momen berharga dan prestasi gemilang di PKBM House Of Knowledge
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ url('/ppdb-formulir') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
+                <a href="{{ url('/ppdb') }}" class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
                     Daftar Sekarang
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -409,19 +409,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            
+
             // Filter Functionality
             const filterBtns = document.querySelectorAll('.filter-btn');
             const galleryItems = document.querySelectorAll('.masonry-item');
-            
+
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const filter = this.getAttribute('data-filter');
-                    
+
                     // Update active state
                     filterBtns.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // Filter items
                     galleryItems.forEach(item => {
                         if (filter === 'all' || item.getAttribute('data-category') === filter) {
@@ -436,78 +436,78 @@
                     });
                 });
             });
-            
+
             // Scroll Reveal Animation
             const revealElements = document.querySelectorAll('.scroll-reveal');
-            
+
             const revealOnScroll = () => {
                 revealElements.forEach(el => {
                     const elementTop = el.getBoundingClientRect().top;
                     const windowHeight = window.innerHeight;
-                    
+
                     if (elementTop < windowHeight - 100) {
                         el.classList.add('active');
                     }
                 });
             };
-            
+
             window.addEventListener('scroll', revealOnScroll);
             revealOnScroll();
-            
+
             // Modal Functionality
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
             const modalTitle = document.getElementById('modalTitle');
             const modalDate = document.getElementById('modalDate');
             const closeModal = document.getElementById('closeModal');
-            
+
             let currentImageIndex = 0;
             const galleryItemsArray = Array.from(document.querySelectorAll('.gallery-item'));
-            
+
             galleryItems.forEach((item, index) => {
                 item.addEventListener('click', function() {
                     currentImageIndex = index;
                     openModal(this);
                 });
             });
-            
+
             function openModal(item) {
                 const img = item.querySelector('img');
                 const title = item.querySelector('h3').textContent;
                 const date = item.querySelector('.gallery-info p').textContent;
-                
+
                 modal.classList.add('active');
                 modalImg.src = img.src;
                 modalTitle.textContent = title;
                 modalDate.textContent = date;
                 document.body.style.overflow = 'hidden';
             }
-            
+
             closeModal.addEventListener('click', function() {
                 modal.classList.remove('active');
                 document.body.style.overflow = 'auto';
             });
-            
+
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     modal.classList.remove('active');
                     document.body.style.overflow = 'auto';
                 }
             });
-            
+
             // Modal Navigation
             document.getElementById('prevImage').addEventListener('click', function(e) {
                 e.stopPropagation();
                 currentImageIndex = (currentImageIndex - 1 + galleryItemsArray.length) % galleryItemsArray.length;
                 openModal(galleryItemsArray[currentImageIndex]);
             });
-            
+
             document.getElementById('nextImage').addEventListener('click', function(e) {
                 e.stopPropagation();
                 currentImageIndex = (currentImageIndex + 1) % galleryItemsArray.length;
                 openModal(galleryItemsArray[currentImageIndex]);
             });
-            
+
             // Keyboard Navigation
             document.addEventListener('keydown', function(e) {
                 if (modal.classList.contains('active')) {
@@ -520,12 +520,12 @@
                     }
                 }
             });
-            
+
             // Load More Button (Demo)
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            loadMoreBtn.addEventListener('click', function() {
-                alert('Fitur "Muat Lebih Banyak" akan menampilkan galeri tambahan dari database.');
-            });
+            //const loadMoreBtn = document.getElementById('loadMoreBtn');
+            //loadMoreBtn.addEventListener('click', function() {
+                //alert('Fitur "Muat Lebih Banyak" akan menampilkan galeri tambahan dari database.');
+            //});
         });
     </script>
 </body>

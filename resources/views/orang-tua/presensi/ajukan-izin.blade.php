@@ -105,7 +105,7 @@
                                     🏥 Sakit
                                 </option>
                                 <option value="izin" {{ old('jenis') === 'izin' ? 'selected' : '' }}>
-                                    📝 Izin
+                                    <i class="fas fa-file-alt"></i> Izin
                                 </option>
                             </select>
                             @error('jenis')

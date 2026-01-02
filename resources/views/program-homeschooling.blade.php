@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homeschooling - PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
@@ -83,7 +84,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center border-b-4 border-[#fac030]">
                     <div class="w-20 h-20 bg-[#fac030]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-4xl">📚</span>
+                        <span class="text-4xl"><i class="fas fa-books"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Paket A</h3>
                     <p class="text-gray-600 mb-4">Setara SD</p>
@@ -91,7 +92,7 @@
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center border-b-4 border-[#165fac]">
                     <div class="w-20 h-20 bg-[#165fac]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-4xl">📖</span>
+                        <span class="text-4xl"><i class="fas fa-book-open"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Paket B</h3>
                     <p class="text-gray-600 mb-4">Setara SMP</p>
@@ -99,7 +100,7 @@
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center border-b-4 border-[#287f3b]">
                     <div class="w-20 h-20 bg-[#287f3b]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-4xl">🎓</span>
+                        <span class="text-4xl"><i class="fas fa-graduation-cap"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2">Paket C</h3>
                     <p class="text-gray-600 mb-4">Setara SMA</p>

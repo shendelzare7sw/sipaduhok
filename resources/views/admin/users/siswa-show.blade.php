@@ -90,7 +90,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
 
                 {{-- Kolom Kanan --}}
                 <div>
-                    <h5 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #3b82f6; display: inline-block; padding-bottom: 5px;">Data Orang Tua</h5>
+                    <h5 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #3b82f6; display: inline-block; padding-bottom: 5px;">Data Orang Tua (Biodata)</h5>
                     <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
                         <tr>
                             <td style="padding: 10px 0; color: #64748b; width: 40%;">Nama Ayah</td>
@@ -106,8 +106,8 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                         </tr>
                     </table>
 
-                    <h5 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #3b82f6; display: inline-block; padding-bottom: 5px;">Informasi Akun</h5>
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <h5 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #3b82f6; display: inline-block; padding-bottom: 5px;">Informasi Akun Siswa</h5>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
                         <tr>
                             <td style="padding: 10px 0; color: #64748b; width: 40%;">Username</td>
                             <td style="padding: 10px 0; font-weight: 500;">{{ $siswa->user->username }}</td>
@@ -116,7 +116,72 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                             <td style="padding: 10px 0; color: #64748b;">Email</td>
                             <td style="padding: 10px 0; font-weight: 500;">{{ $siswa->user->email }}</td>
                         </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #64748b;">Status Akun</td>
+                            <td style="padding: 10px 0;">
+                                <span style="background: {{ $siswa->user->is_active ? '#dcfce7' : '#fee2e2' }}; color: {{ $siswa->user->is_active ? '#166534' : '#991b1b' }}; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                    {{ $siswa->user->is_active ? '✓ Aktif' : '✗ Non-Aktif' }}
+                                </span>
+                            </td>
+                        </tr>
                     </table>
+
+                    <h5 style="margin-bottom: 20px; color: #f59e0b; border-bottom: 2px solid #f59e0b; display: inline-block; padding-bottom: 5px;">Akun Orang Tua Terdaftar</h5>
+                    @if($siswa->studentParents && $siswa->studentParents->count() > 0)
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            @foreach($siswa->studentParents as $sp)
+                                <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 12px;">
+                                    <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 8px;">
+                                        <div style="flex: 1;">
+                                            <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">
+                                                <i class="fas fa-user" style="color: #f59e0b; margin-right: 6px;"></i>
+                                                {{ $sp->parent->name }}
+                                            </div>
+                                            <div style="font-size: 12px; color: #78350f; margin-bottom: 2px;">
+                                                <i class="fas fa-link" style="font-size: 10px; margin-right: 4px;"></i>
+                                                {{ ucwords(str_replace('_', ' ', $sp->relationship)) }}
+                                            </div>
+                                        </div>
+                                        @if($sp->is_primary)
+                                            <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;">
+                                                Kontak Utama
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div style="font-size: 12px; color: #78350f; display: flex; flex-direction: column; gap: 3px; padding-left: 22px;">
+                                        <div>
+                                            <i class="fas fa-at" style="width: 14px; font-size: 10px;"></i>
+                                            {{ $sp->parent->username }}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-envelope" style="width: 14px; font-size: 10px;"></i>
+                                            {{ $sp->parent->email }}
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-circle" style="width: 14px; font-size: 6px; color: {{ $sp->parent->is_active ? '#10b981' : '#ef4444' }};"></i>
+                                            {{ $sp->parent->is_active ? 'Akun Aktif' : 'Akun Non-Aktif' }}
+                                        </div>
+                                        @if($sp->can_access_academic)
+                                            <div style="color: #3b82f6;">
+                                                <i class="fas fa-check-circle" style="width: 14px; font-size: 10px;"></i>
+                                                Dapat Akses Akademik
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div style="background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 8px; padding: 16px; text-align: center;">
+                            <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 20px; margin-bottom: 8px;"></i>
+                            <div style="color: #92400e; font-size: 13px; font-weight: 500;">
+                                Belum ada akun orang tua terdaftar
+                            </div>
+                            <small style="color: #92400e; font-size: 11px;">
+                                Tambahkan melalui halaman edit siswa
+                            </small>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

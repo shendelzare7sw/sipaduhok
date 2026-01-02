@@ -10,139 +10,214 @@ class KelasSeeder extends Seeder
 {
     public function run(): void
     {
-        $kelasData = [
-            // Cabang Ruko (ID: 1) - 5 kelas
-            [
-                'cabang_id' => 1,
-                'tahun_ajaran_id' => 3, // 2025/2026
-                'wali_kelas_id' => 1, // Dewi Lestari
-                'nama_kelas' => 'SMP Paket A',
-                'jenjang' => 'SMP',
-                'kode_kelas' => 'RUKO-SMP-A-2025',
-                'kuota_siswa' => 30,
-            ],
-            [
-                'cabang_id' => 1,
-                'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 2, // Rina Wijaya
-                'nama_kelas' => 'SMA Paket A',
-                'jenjang' => 'SMA',
-                'kode_kelas' => 'RUKO-SMA-A-2025',
-                'kuota_siswa' => 30,
-            ],
-            [
-                'cabang_id' => 1,
-                'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 3, // Hendra Kusuma
-                'nama_kelas' => 'SD Paket A',
-                'jenjang' => 'SD',
-                'kode_kelas' => 'RUKO-SD-A-2025',
-                'kuota_siswa' => 25,
-            ],
-            [
-                'cabang_id' => 1,
-                'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 7, // Rudi Hartono
-                'nama_kelas' => 'SD Paket B',
-                'jenjang' => 'SD',
-                'kode_kelas' => 'RUKO-SD-B-2025',
-                'kuota_siswa' => 25,
-            ],
-            [
-                'cabang_id' => 1,
-                'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 9, // Faisal Rahman
-                'nama_kelas' => 'SMP Paket B',
-                'jenjang' => 'SMP',
-                'kode_kelas' => 'RUKO-SMP-B-2025',
-                'kuota_siswa' => 30,
-            ],
+        $kelasData = [];
 
-            // Cabang PAUD (ID: 2) - 4 kelas
-            [
-                'cabang_id' => 2,
+        // ========================================
+        // Gedung Utama PKBM House Of Knowledge (ID: 1)
+        // KB, TKA, TKB, SD (Paket A), SMP (Paket B), SMA (Paket C)
+        // ========================================
+
+        // KB: KB1, KB2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 1,
                 'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 4, // Nurul Hidayah
-                'nama_kelas' => 'Kelompok Bermain A',
-                'jenjang' => 'PAUD',
-                'kode_kelas' => 'PAUD-KB-A-2025',
+                'wali_kelas_id' => null,
+                'nama_kelas' => "KB{$i}",
+                'jenjang' => 'KB',
+                'kode_kelas' => "RUKO-KB{$i}-2025",
                 'kuota_siswa' => 20,
-            ],
-            [
-                'cabang_id' => 2,
+            ];
+        }
+
+        // TKA: TKA1, TKA2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 1,
                 'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 8, // Mega Puspita
-                'nama_kelas' => 'TK A',
-                'jenjang' => 'PAUD',
-                'kode_kelas' => 'PAUD-TKA-2025',
+                'wali_kelas_id' => null,
+                'nama_kelas' => "TKA{$i}",
+                'jenjang' => 'TKA',
+                'kode_kelas' => "RUKO-TKA{$i}-2025",
                 'kuota_siswa' => 20,
-            ],
-            [
-                'cabang_id' => 2,
+            ];
+        }
+
+        // TKB: TKB1, TKB2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 1,
                 'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 12, // Lilis Suryani
-                'nama_kelas' => 'TK B',
-                'jenjang' => 'PAUD',
-                'kode_kelas' => 'PAUD-TKB-2025',
+                'wali_kelas_id' => null,
+                'nama_kelas' => "TKB{$i}",
+                'jenjang' => 'TKB',
+                'kode_kelas' => "RUKO-TKB{$i}-2025",
                 'kuota_siswa' => 20,
-            ],
-            [
+            ];
+        }
+
+        // SD Paket A: 1A, 1B, 2A, 2B, ..., 6A, 6B
+        for ($tingkat = 1; $tingkat <= 6; $tingkat++) {
+            foreach (['A', 'B'] as $rombel) {
+                $kelasData[] = [
+                    'cabang_id' => 1,
+                    'tahun_ajaran_id' => 3,
+                    'wali_kelas_id' => null,
+                    'nama_kelas' => "{$tingkat}{$rombel}",
+                    'jenjang' => 'SD',
+                    'kode_kelas' => "RUKO-{$tingkat}{$rombel}-2025",
+                    'kuota_siswa' => 25,
+                ];
+            }
+        }
+
+        // SMP Paket B: 7A, 7B, 8A, 8B, 9A, 9B
+        for ($tingkat = 7; $tingkat <= 9; $tingkat++) {
+            foreach (['A', 'B'] as $rombel) {
+                $kelasData[] = [
+                    'cabang_id' => 1,
+                    'tahun_ajaran_id' => 3,
+                    'wali_kelas_id' => null,
+                    'nama_kelas' => "{$tingkat}{$rombel}",
+                    'jenjang' => 'SMP',
+                    'kode_kelas' => "RUKO-{$tingkat}{$rombel}-2025",
+                    'kuota_siswa' => 30,
+                ];
+            }
+        }
+
+        // SMA Paket C: 10A, 10B, 11A, 11B, 12A, 12B
+        for ($tingkat = 10; $tingkat <= 12; $tingkat++) {
+            foreach (['A', 'B'] as $rombel) {
+                $kelasData[] = [
+                    'cabang_id' => 1,
+                    'tahun_ajaran_id' => 3,
+                    'wali_kelas_id' => null,
+                    'nama_kelas' => "{$tingkat}{$rombel}",
+                    'jenjang' => 'SMA',
+                    'kode_kelas' => "RUKO-{$tingkat}{$rombel}-2025",
+                    'kuota_siswa' => 30,
+                ];
+            }
+        }
+
+        // ========================================
+        // PAUD House Of Knowledge (ID: 2)
+        // KB, TKA, TKB
+        // ========================================
+
+        // KB: KB1, KB2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
                 'cabang_id' => 2,
                 'tahun_ajaran_id' => 3,
                 'wali_kelas_id' => null,
-                'nama_kelas' => 'Kelompok Bermain B',
-                'jenjang' => 'PAUD',
-                'kode_kelas' => 'PAUD-KB-B-2025',
+                'nama_kelas' => "KB{$i}",
+                'jenjang' => 'KB',
+                'kode_kelas' => "PAUD-KB{$i}-2025",
                 'kuota_siswa' => 20,
-            ],
+            ];
+        }
 
-            // Cabang Cimanggis (ID: 3) - 5 kelas
-            [
-                'cabang_id' => 3,
+        // TKA: TKA1, TKA2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 2,
                 'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 5, // Arif Budiman
-                'nama_kelas' => 'SMP Paket A',
-                'jenjang' => 'SMP',
-                'kode_kelas' => 'CMNGS-SMP-A-2025',
-                'kuota_siswa' => 30,
-            ],
-            [
-                'cabang_id' => 3,
+                'wali_kelas_id' => null,
+                'nama_kelas' => "TKA{$i}",
+                'jenjang' => 'TKA',
+                'kode_kelas' => "PAUD-TKA{$i}-2025",
+                'kuota_siswa' => 20,
+            ];
+        }
+
+        // TKB: TKB1, TKB2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 2,
                 'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 6, // Linda Permata
-                'nama_kelas' => 'SMA Paket A',
-                'jenjang' => 'SMA',
-                'kode_kelas' => 'CMNGS-SMA-A-2025',
-                'kuota_siswa' => 30,
-            ],
-            [
-                'cabang_id' => 3,
-                'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 10, // Dian Anggraini
-                'nama_kelas' => 'SMA Paket B',
-                'jenjang' => 'SMA',
-                'kode_kelas' => 'CMNGS-SMA-B-2025',
-                'kuota_siswa' => 30,
-            ],
-            [
-                'cabang_id' => 3,
-                'tahun_ajaran_id' => 3,
-                'wali_kelas_id' => 11, // Yoga Pratama
-                'nama_kelas' => 'SD Paket A',
-                'jenjang' => 'SD',
-                'kode_kelas' => 'CMNGS-SD-A-2025',
-                'kuota_siswa' => 25,
-            ],
-            [
+                'wali_kelas_id' => null,
+                'nama_kelas' => "TKB{$i}",
+                'jenjang' => 'TKB',
+                'kode_kelas' => "PAUD-TKB{$i}-2025",
+                'kuota_siswa' => 20,
+            ];
+        }
+
+        // ========================================
+        // House Of Knowledge Cimanggis (ID: 3)
+        // SD (Paket A), KB, TKA, TKB, SMP (Paket B)
+        // ========================================
+
+        // SD Paket A: 1A, 1B, 2A, 2B, ..., 6A, 6B
+        for ($tingkat = 1; $tingkat <= 6; $tingkat++) {
+            foreach (['A', 'B'] as $rombel) {
+                $kelasData[] = [
+                    'cabang_id' => 3,
+                    'tahun_ajaran_id' => 3,
+                    'wali_kelas_id' => null,
+                    'nama_kelas' => "{$tingkat}{$rombel}",
+                    'jenjang' => 'SD',
+                    'kode_kelas' => "CMNGS-{$tingkat}{$rombel}-2025",
+                    'kuota_siswa' => 25,
+                ];
+            }
+        }
+
+        // KB: KB1, KB2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
                 'cabang_id' => 3,
                 'tahun_ajaran_id' => 3,
                 'wali_kelas_id' => null,
-                'nama_kelas' => 'SMP Paket B',
-                'jenjang' => 'SMP',
-                'kode_kelas' => 'CMNGS-SMP-B-2025',
-                'kuota_siswa' => 30,
-            ],
-        ];
+                'nama_kelas' => "KB{$i}",
+                'jenjang' => 'KB',
+                'kode_kelas' => "CMNGS-KB{$i}-2025",
+                'kuota_siswa' => 20,
+            ];
+        }
+
+        // TKA: TKA1, TKA2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 3,
+                'tahun_ajaran_id' => 3,
+                'wali_kelas_id' => null,
+                'nama_kelas' => "TKA{$i}",
+                'jenjang' => 'TKA',
+                'kode_kelas' => "CMNGS-TKA{$i}-2025",
+                'kuota_siswa' => 20,
+            ];
+        }
+
+        // TKB: TKB1, TKB2
+        for ($i = 1; $i <= 2; $i++) {
+            $kelasData[] = [
+                'cabang_id' => 3,
+                'tahun_ajaran_id' => 3,
+                'wali_kelas_id' => null,
+                'nama_kelas' => "TKB{$i}",
+                'jenjang' => 'TKB',
+                'kode_kelas' => "CMNGS-TKB{$i}-2025",
+                'kuota_siswa' => 20,
+            ];
+        }
+
+        // SMP Paket B: 7A, 7B, 8A, 8B, 9A, 9B
+        for ($tingkat = 7; $tingkat <= 9; $tingkat++) {
+            foreach (['A', 'B'] as $rombel) {
+                $kelasData[] = [
+                    'cabang_id' => 3,
+                    'tahun_ajaran_id' => 3,
+                    'wali_kelas_id' => null,
+                    'nama_kelas' => "{$tingkat}{$rombel}",
+                    'jenjang' => 'SMP',
+                    'kode_kelas' => "CMNGS-{$tingkat}{$rombel}-2025",
+                    'kuota_siswa' => 30,
+                ];
+            }
+        }
 
         foreach ($kelasData as $kelas) {
             Kelas::create($kelas);

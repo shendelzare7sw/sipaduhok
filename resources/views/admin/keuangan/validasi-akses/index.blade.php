@@ -181,7 +181,7 @@
                                     </td>
                                     <td class="text-center align-middle">
                                         @if($s->validasi_ujian_bendahara)
-                                            <span class="badge bg-success badge-status shadow-sm">✅ VALID</span>
+                                            <span class="badge bg-success badge-status shadow-sm"><i class="fas fa-check-circle"></i> VALID</span>
                                             <div class="text-xs text-muted mt-1">{{ \Carbon\Carbon::parse($s->tanggal_validasi_ujian_bendahara)->format('d/m/Y') }}</div>
                                         @else
                                             <span class="badge bg-warning badge-status text-white shadow-sm">⏳ BELUM</span>
@@ -189,7 +189,7 @@
                                     </td>
                                     <td class="text-center align-middle">
                                         @if($s->validasi_rapor_bendahara)
-                                            <span class="badge bg-success badge-status shadow-sm">✅ VALID</span>
+                                            <span class="badge bg-success badge-status shadow-sm"><i class="fas fa-check-circle"></i> VALID</span>
                                             <div class="text-xs text-muted mt-1">{{ \Carbon\Carbon::parse($s->tanggal_validasi_rapor_bendahara)->format('d/m/Y') }}</div>
                                         @else
                                             <span class="badge bg-warning badge-status text-white shadow-sm">⏳ BELUM</span>

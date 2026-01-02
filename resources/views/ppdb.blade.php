@@ -6,6 +6,7 @@
     <title>PPDB - PKBM House Of Knowledge</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
@@ -163,7 +164,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-20">
             <div class="text-center">
                 <span class="inline-block px-6 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6 animate-fade-up">
-                    📚 Tahun Ajaran 2025/2026
+                    <i class="fas fa-books"></i> Tahun Ajaran 2025/2026
                 </span>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 animate-fade-up" style="animation-delay: 0.1s;">
                     Penerimaan Peserta<br>
@@ -194,17 +195,17 @@
             <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl">
-                        <div class="text-3xl mb-2">📅</div>
+                        <div class="text-3xl mb-2"><i class="fas fa-calendar"></i></div>
                         <p class="text-sm text-gray-600 mb-1">Periode Pendaftaran</p>
                         <p class="text-lg font-bold text-gray-800">1 Jan - 31 Mei 2026</p>
                     </div>
                     <div class="text-center p-4 bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-2xl">
-                        <div class="text-3xl mb-2">💰</div>
+                        <div class="text-3xl mb-2"><i class="fas fa-money-bill-wave"></i></div>
                         <p class="text-sm text-gray-600 mb-1">Biaya Pendaftaran</p>
                         <p class="text-lg font-bold text-gray-800">200 Ribu</p>
                     </div>
                     <div class="text-center p-4 bg-gradient-to-br from-accent-orange/10 to-accent-orange/5 rounded-2xl">
-                        <div class="text-3xl mb-2">🎓</div>
+                        <div class="text-3xl mb-2"><i class="fas fa-graduation-cap"></i></div>
                         <p class="text-sm text-gray-600 mb-1">Kuota Tersedia</p>
                         <p class="text-lg font-bold text-gray-800">100 Siswa</p>
                     </div>
@@ -352,7 +353,7 @@
                 <div class="tab-content active" id="paud">
                     <div class="bg-gradient-to-br from-accent-yellow/10 to-accent-bright/10 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3">📚</span>
+                            <span class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-books"></i></span>
                             Syarat PAUD
                         </h3>
                         <div class="space-y-4">
@@ -404,7 +405,7 @@
                 <div class="tab-content" id="paket-a">
                     <div class="bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3">🎓</span>
+                            <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-graduation-cap"></i></span>
                             Syarat Paket A (Setara SD)
                         </h3>
                         <div class="space-y-4">
@@ -464,7 +465,7 @@
                 <div class="tab-content" id="paket-b">
                     <div class="bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3">📖</span>
+                            <span class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-book-open"></i></span>
                             Syarat Paket B (Setara SMP)
                         </h3>
                         <div class="space-y-4">
@@ -524,7 +525,7 @@
                 <div class="tab-content" id="paket-c">
                     <div class="bg-gradient-to-br from-accent-orange/10 to-accent-orange/5 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3">🎯</span>
+                            <span class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-bullseye"></i></span>
                             Syarat Paket C (Setara SMA)
                         </h3>
                         <div class="space-y-4">
@@ -652,7 +653,7 @@
                 <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 border-accent-yellow">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 mx-auto mb-4 bg-accent-yellow/10 rounded-full flex items-center justify-center">
-                            <span class="text-3xl">🎨</span>
+                            <span class="text-3xl"><i class="fas fa-palette"></i></span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">PAUD</h3>
                         <p class="text-sm text-gray-600">Pendidikan Anak Usia Dini</p>
@@ -680,7 +681,7 @@
                 <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 border-primary">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                            <span class="text-3xl">📚</span>
+                            <span class="text-3xl"><i class="fas fa-books"></i></span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">SD</h3>
                         <p class="text-sm text-gray-600">Sekolah Dasar</p>
@@ -708,7 +709,7 @@
                 <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 border-secondary">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-full flex items-center justify-center">
-                            <span class="text-3xl">📖</span>
+                            <span class="text-3xl"><i class="fas fa-book-open"></i></span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">SMP</h3>
                         <p class="text-sm text-gray-600">Sekolah Menengan Pertama</p>
@@ -736,7 +737,7 @@
                 <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 border-accent-orange">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 mx-auto mb-4 bg-accent-orange/10 rounded-full flex items-center justify-center">
-                            <span class="text-3xl">🎓</span>
+                            <span class="text-3xl"><i class="fas fa-graduation-cap"></i></span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">SMA</h3>
                         <p class="text-sm text-gray-600">Sekolah Menengah Atas</p>
@@ -762,10 +763,10 @@
             </div>
 
             <div class="mt-12 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-3xl p-8 text-center">
-                <h3 class="text-2xl font-bold text-gray-800 mb-4">💡 Informasi Penting</h3>
+                <h3 class="text-2xl font-bold text-gray-800 mb-4"><i class="fas fa-lightbulb"></i> Informasi Penting</h3>
                 <div class="grid md:grid-cols-3 gap-6 text-left">
                     <div class="bg-white rounded-xl p-6">
-                        <div class="text-2xl mb-2">✅</div>
+                        <div class="text-2xl mb-2"><i class="fas fa-check-circle"></i></div>
                         <h4 class="font-bold text-gray-800 mb-2">Pendaftaran 200rb </h4>
                         <p class="text-sm text-gray-600">Biaya Pendaftaran Mulai Dari 200 Ribu  Untuk Semua Jenjang Pendidikan</p>
                     </div>
@@ -970,7 +971,7 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3">💰</span>
+                    <span class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-money-bill-wave"></i></span>
                     Rincian Biaya PAUD
                 </h3>
                 <button onclick="closeCostModal()" class="text-gray-400 hover:text-gray-600">
@@ -984,7 +985,7 @@
                 <!-- Biaya Pokok -->
                 <div class="bg-gradient-to-r from-accent-yellow/10 to-accent-bright/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3 text-sm">📚</span>
+                        <span class="w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-books"></i></span>
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
@@ -1006,7 +1007,7 @@
                 <!-- Biaya Tambahan -->
                 <div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm">🎨</span>
+                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-palette"></i></span>
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
@@ -1061,7 +1062,7 @@
 
                 <!-- Informasi Tambahan -->
                 <div class="bg-gray-50 rounded-xl p-4">
-                    <h5 class="font-bold text-gray-800 mb-2">💡 Informasi Penting:</h5>
+                    <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
                         <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
                         <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
@@ -1084,7 +1085,7 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3">💰</span>
+                    <span class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-money-bill-wave"></i></span>
                     Rincian Biaya Sekolah Menengan Atas 
                 </h3>
                 <button onclick="closeCostModalPaketC()" class="text-gray-400 hover:text-gray-600">
@@ -1098,7 +1099,7 @@
                 <!-- Biaya Pokok -->
                 <div class="bg-gradient-to-r from-accent-orange/10 to-red-600/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 text-sm">📚</span>
+                        <span class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-books"></i></span>
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
@@ -1120,7 +1121,7 @@
                 <!-- Biaya Tambahan -->
                 <div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm">🎓</span>
+                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-graduation-cap"></i></span>
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
@@ -1179,7 +1180,7 @@
 
                 <!-- Informasi Tambahan -->
                 <div class="bg-gray-50 rounded-xl p-4">
-                    <h5 class="font-bold text-gray-800 mb-2">💡 Informasi Penting:</h5>
+                    <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
                         <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
                         <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
@@ -1202,7 +1203,7 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3">💰</span>
+                    <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-money-bill-wave"></i></span>
                     Rincian Biaya Sekolah Dasar
                 </h3>
                 <button onclick="closeCostModalPaketA()" class="text-gray-400 hover:text-gray-600">
@@ -1216,7 +1217,7 @@
                 <!-- Biaya Pokok -->
                 <div class="bg-gradient-to-r from-primary/10 to-blue-600/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm">📚</span>
+                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-books"></i></span>
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
@@ -1238,7 +1239,7 @@
                 <!-- Biaya Tambahan -->
                 <div class="bg-gradient-to-r from-secondary/10 to-green-600/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white mr-3 text-sm">🎓</span>
+                        <span class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-graduation-cap"></i></span>
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
@@ -1297,7 +1298,7 @@
 
                 <!-- Informasi Tambahan -->
                 <div class="bg-gray-50 rounded-xl p-4">
-                    <h5 class="font-bold text-gray-800 mb-2">💡 Informasi Penting:</h5>
+                    <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
                         <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
                         <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
@@ -1320,7 +1321,7 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3">💰</span>
+                    <span class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-money-bill-wave"></i></span>
                     Rincian Biaya Sekolam Menengah Pertama
                 </h3>
                 <button onclick="closeCostModalPaketB()" class="text-gray-400 hover:text-gray-600">
@@ -1334,7 +1335,7 @@
                 <!-- Biaya Pokok -->
                 <div class="bg-gradient-to-r from-secondary/10 to-green-600/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white mr-3 text-sm">📚</span>
+                        <span class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-books"></i></span>
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
@@ -1356,7 +1357,7 @@
                 <!-- Biaya Tambahan -->
                 <div class="bg-gradient-to-r from-primary/10 to-blue-600/10 rounded-2xl p-6">
                     <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm">📖</span>
+                        <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm"><i class="fas fa-book-open"></i></span>
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
@@ -1415,7 +1416,7 @@
 
                 <!-- Informasi Tambahan -->
                 <div class="bg-gray-50 rounded-xl p-4">
-                    <h5 class="font-bold text-gray-800 mb-2">💡 Informasi Penting:</h5>
+                    <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
                         <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
                         <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>

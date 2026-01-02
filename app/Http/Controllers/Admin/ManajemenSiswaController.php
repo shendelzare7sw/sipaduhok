@@ -71,6 +71,9 @@ class ManajemenSiswaController extends Controller
             ->when(!$request->tahun_ajaran_id && $tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
+        // Jenjang options
+        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
         // Statistics
         $stats = [
             'totalSiswa' => Siswa::where('status', 'aktif')->count(),
@@ -81,7 +84,7 @@ class ManajemenSiswaController extends Controller
         ];
 
         return view('admin.manajemen-siswa.index', compact(
-            'siswaList', 'tahunAjarans', 'tahunAjaranAktif', 'cabangs', 'kelasList', 'stats'
+            'siswaList', 'tahunAjarans', 'tahunAjaranAktif', 'cabangs', 'kelasList', 'jenjangs', 'stats'
         ));
     }
 

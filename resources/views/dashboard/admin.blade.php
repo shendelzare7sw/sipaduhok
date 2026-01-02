@@ -576,6 +576,14 @@
                         </span>
                         <i class="fas fa-chevron-right text-muted"></i>
                     </a>
+                    <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="quick-menu-item">
+                        <span>
+                            <i class="fas fa-calendar-week text-purple me-2"></i>
+                            <span class="d-none d-sm-inline">Jadwal Pelajaran</span>
+                            <span class="d-inline d-sm-none">Jadwal</span>
+                        </span>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </a>
                 </div>
             </div>
 

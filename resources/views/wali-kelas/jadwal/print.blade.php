@@ -10,32 +10,32 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
             background: white;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 30px;
             border-bottom: 3px solid #165fac;
             padding-bottom: 20px;
         }
-        
+
         .header h1 {
             color: #165fac;
             font-size: 24px;
             margin-bottom: 10px;
         }
-        
+
         .header h2 {
             color: #333;
             font-size: 18px;
             font-weight: normal;
         }
-        
+
         .info-box {
             display: flex;
             justify-content: space-between;
@@ -44,22 +44,22 @@
             background: #f8f9fa;
             border-radius: 8px;
         }
-        
+
         .info-box div {
             flex: 1;
         }
-        
+
         .info-box strong {
             display: block;
             color: #165fac;
             margin-bottom: 5px;
         }
-        
+
         .day-section {
             margin-bottom: 30px;
             page-break-inside: avoid;
         }
-        
+
         .day-header {
             background: #165fac;
             color: white;
@@ -68,18 +68,18 @@
             font-weight: bold;
             border-radius: 5px 5px 0 0;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         table thead {
             background: #e5e7eb;
         }
-        
+
         table th {
             padding: 12px;
             text-align: left;
@@ -87,17 +87,27 @@
             color: #374151;
             border: 1px solid #d1d5db;
         }
-        
+
         table td {
             padding: 12px;
             border: 1px solid #d1d5db;
             background: white;
         }
-        
+
         table tbody tr:nth-child(even) {
             background: #f9fafb;
         }
-        
+
+        /* Highlight untuk Istirahat */
+        table tbody tr.break-row {
+            background: #fff9c4 !important;
+        }
+
+        table tbody tr.break-row td {
+            font-weight: bold;
+            color: #f57f17;
+        }
+
         .no-schedule {
             text-align: center;
             padding: 30px;
@@ -106,35 +116,69 @@
             background: #f9fafb;
             border: 1px dashed #d1d5db;
         }
-        
+
         .footer {
             margin-top: 40px;
             text-align: right;
             padding-top: 20px;
             border-top: 2px solid #e5e7eb;
         }
-        
+
         .signature-box {
             display: inline-block;
             text-align: center;
             min-width: 200px;
         }
-        
+
         .signature-line {
             margin-top: 60px;
             border-top: 1px solid #333;
             padding-top: 5px;
         }
-        
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #165fac;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 9999;
+            transition: all 0.3s;
+        }
+
+        .print-button:hover {
+            background: #0f4a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
         @media print {
             body {
                 padding: 10px;
             }
-            
+
             .day-section {
                 page-break-inside: avoid;
             }
-            
+
+            /* Hide print button and any navigation elements */
+            .no-print, .print-button {
+                display: none !important;
+            }
+
+            /* Hide any layout elements */
+            nav, header, aside, .navbar, .sidebar, .topbar, .footer-app,
+            .app-menu, .layout-wrapper, .layout-container, .content-wrapper {
+                display: none !important;
+            }
+
             @page {
                 margin: 15mm;
             }
@@ -142,6 +186,11 @@
     </style>
 </head>
 <body>
+    <!-- Tombol Print Manual -->
+    <button class="print-button no-print" onclick="window.print()">
+        🖨️ Cetak / Simpan PDF
+    </button>
+
     <div class="header">
         <h1>JADWAL PELAJARAN</h1>
         <h2>PKBM House of Knowledge</h2>
@@ -169,7 +218,7 @@
     @foreach($hariList as $hari)
         <div class="day-section">
             <div class="day-header">{{ $hari }}</div>
-            
+
             @if($jadwalPerHari[$hari]->count() > 0)
                 <table>
                     <thead>
@@ -182,17 +231,40 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($jadwalPerHari[$hari] as $index => $jadwal)
-                            <tr>
-                                <td style="text-align: center;">{{ $index + 1 }}</td>
-                                <td>
-                                    {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - 
-                                    {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
-                                </td>
-                                <td><strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong></td>
-                                <td>{{ $jadwal->mataPelajaran->kode_mapel }}</td>
-                                <td>{{ $jadwal->guru->nama_lengkap }}</td>
-                            </tr>
+                        @foreach($jadwalPerHari[$hari] as $index => $item)
+                            @if($item['type'] === 'istirahat')
+                                @php
+                                    $istirahat = $item['data'];
+                                @endphp
+                                <tr class="break-row">
+                                    <td style="text-align: center;">{{ $index + 1 }}</td>
+                                    <td>
+                                        {{ substr($istirahat->jam_mulai, 0, 5) }} -
+                                        {{ substr($istirahat->jam_selesai, 0, 5) }}
+                                    </td>
+                                    <td>
+                                        <strong>{{ $istirahat->nama_istirahat }}</strong>
+                                    </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            @else
+                                @php
+                                    $jadwal = $item['data'];
+                                @endphp
+                                <tr>
+                                    <td style="text-align: center;">{{ $index + 1 }}</td>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
+                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                                    </td>
+                                    <td>
+                                        <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
+                                    </td>
+                                    <td>{{ $jadwal->mataPelajaran->kode_mapel }}</td>
+                                    <td>{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>
@@ -211,7 +283,11 @@
     </div>
 
     <script>
-        window.print();
+        // Auto print setelah halaman selesai dimuat (opsional)
+        // Dinonaktifkan agar user bisa melihat preview dulu
+        // window.onload = function() {
+        //     setTimeout(() => window.print(), 500);
+        // }
     </script>
 </body>
 </html>

@@ -111,4 +111,10 @@ class Siswa extends Model
     {
         return $this->parents()->wherePivot('is_financial_responsible', true)->get();
     }
+
+    // Direct relationship to student_parents pivot table
+    public function studentParents()
+    {
+        return $this->hasMany(StudentParent::class, 'siswa_id');
+    }
 }

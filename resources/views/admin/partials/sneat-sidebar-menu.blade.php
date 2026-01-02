@@ -39,6 +39,11 @@
                 <div>Siswa</div>
             </a>
         </li>
+        <li class="menu-item {{ $currentRoute == 'admin.users.orang-tua' ? 'active' : '' }}">
+            <a href="{{ route('admin.users.orang-tua') }}" class="menu-link">
+                <div>Orang Tua</div>
+            </a>
+        </li>
     </ul>
 </li>
 
@@ -84,6 +89,22 @@
     <a href="{{ route('admin.guru-pengajar.index') }}" class="menu-link">
         <i class="menu-icon fas fa-user-tie"></i>
         <div>Data Guru Pengajar</div>
+    </a>
+</li>
+
+<!-- Mata Pelajaran -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.mata-pelajaran') ? 'active' : '' }}">
+    <a href="{{ route('admin.mata-pelajaran.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-book"></i>
+        <div>Mata Pelajaran</div>
+    </a>
+</li>
+
+<!-- Jadwal Pelajaran -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.jadwal-pelajaran') || Str::startsWith($currentRoute, 'admin.pengaturan-istirahat') ? 'active' : '' }}">
+    <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-calendar-week"></i>
+        <div>Jadwal Pelajaran</div>
     </a>
 </li>
 

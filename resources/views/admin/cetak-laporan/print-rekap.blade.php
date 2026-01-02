@@ -109,7 +109,7 @@
         </table>
 
         {{-- Rekap Per Jenjang --}}
-        <div class="section-title">📚 Rekap Per Jenjang</div>
+        <div class="section-title"><i class="fas fa-books"></i> Rekap Per Jenjang</div>
         <table>
             <thead>
                 <tr>
@@ -150,7 +150,7 @@
         </table>
 
         {{-- Komposisi Gender --}}
-        <div class="section-title">👥 Komposisi Gender Siswa</div>
+        <div class="section-title"><i class="fas fa-users"></i> Komposisi Gender Siswa</div>
         <table>
             <thead>
                 <tr>

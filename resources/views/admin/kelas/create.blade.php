@@ -310,10 +310,12 @@
     <div class="info-box">
         <h6><i class="fas fa-lightbulb"></i> Panduan Penamaan Kelas</h6>
         <p>
-            <strong>PAUD:</strong> KB1, KB2, TKA1, TKA2, TKB1, TKB2<br>
+            <strong>KB:</strong> KB1, KB2, KB3 (Kelompok Bermain)<br>
+            <strong>TKA:</strong> TKA1, TKA2, TKA3 (Taman Kanak-Kanak A)<br>
+            <strong>TKB:</strong> TKB1, TKB2, TKB3 (Taman Kanak-Kanak B)<br>
             <strong>SD:</strong> 1A, 1B, 2A, 2B, ... 6A, 6B<br>
-            <strong>SMP:</strong> 7A, 7B, 8A, 8B, 9A, 9B atau SMP A, SMP B<br>
-            <strong>SMA:</strong> 10A, 10B, 11A, 11B, 12A, 12B atau SMA A, SMA B
+            <strong>SMP:</strong> 7A, 7B, 8A, 8B, 9A, 9B<br>
+            <strong>SMA:</strong> 10A, 10B, 11A, 11B, 12A, 12B
         </p>
     </div>
 
@@ -428,16 +430,16 @@
 
                         <div class="form-group">
                             <label for="wali_kelas_id">Wali Kelas</label>
-                            <select class="form-control @error('wali_kelas_id') is-invalid @enderror" 
+                            <select class="form-control @error('wali_kelas_id') is-invalid @enderror"
                                     id="wali_kelas_id" name="wali_kelas_id">
                                 <option value="">Belum ditentukan</option>
                                 @foreach($waliKelasOptions as $wk)
                                     <option value="{{ $wk->id }}" {{ old('wali_kelas_id') == $wk->id ? 'selected' : '' }}>
-                                        {{ $wk->nama_lengkap }} ({{ ucwords(str_replace('_', ' ', $wk->user->role ?? '')) }})
+                                        {{ $wk->nama_lengkap }}
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="form-hint">Dapat ditentukan nanti</div>
+                            <div class="form-hint">Pilih wali kelas untuk kelas ini</div>
                             @error('wali_kelas_id')
                                 <div class="invalid-feedback"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
                             @enderror
@@ -479,10 +481,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Suggestions based on jenjang
     const suggestions = {
-        'PAUD': ['KB1', 'KB2', 'KB3', 'TKA1', 'TKA2', 'TKA3', 'TKB1', 'TKB2', 'TKB3'],
+        'KB': ['KB1', 'KB2', 'KB3'],
+        'TKA': ['TKA1', 'TKA2', 'TKA3'],
+        'TKB': ['TKB1', 'TKB2', 'TKB3'],
         'SD': ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B', '6A', '6B'],
-        'SMP': ['7A', '7B', '8A', '8B', '9A', '9B', 'SMP A', 'SMP B'],
-        'SMA': ['10A', '10B', '11A', '11B', '12A', '12B', 'SMA A', 'SMA B']
+        'SMP': ['7A', '7B', '8A', '8B', '9A', '9B'],
+        'SMA': ['10A', '10B', '11A', '11B', '12A', '12B']
     };
 
     function updatePreview() {

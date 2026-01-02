@@ -99,6 +99,14 @@
     .badge-status.pindah { background: #fef3c7; color: #92400e; }
     .badge-status.keluar { background: #fee2e2; color: #991b1b; }
 
+    /* Jenjang Badges */
+    .badge-kb { background: #fef3c7; color: #92400e; }
+    .badge-tka { background: #fed7aa; color: #9a3412; }
+    .badge-tkb { background: #fecaca; color: #991b1b; }
+    .badge-sd { background: #dcfce7; color: #166534; }
+    .badge-smp { background: #e0f2fe; color: #075985; }
+    .badge-sma { background: #f3e8ff; color: #7c3aed; }
+
     /* Search Form */
     .search-form {
         display: flex;
@@ -440,35 +448,56 @@
         </div>
     @endif
 
-    {{-- Search Info --}}
-    @if(request('search'))
+    {{-- Search/Filter Info --}}
+    @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
         <div class="search-info">
             <div>
-                <i class="fas fa-search"></i>
-                Menampilkan hasil pencarian untuk: <span class="search-term">"{{ request('search') }}"</span>
+                <i class="fas fa-filter"></i>
+                Filter aktif:
+                @if(request('search'))
+                    <span class="search-term">Pencarian: "{{ request('search') }}"</span>
+                @endif
+                @if(request('jenjang'))
+                    <span class="search-term">Jenjang: {{ request('jenjang') }}</span>
+                @endif
+                @if(request('cabang_id'))
+                    <span class="search-term">Cabang: {{ $cabangList->find(request('cabang_id'))->nama_cabang ?? '-' }}</span>
+                @endif
+                @if(request('status'))
+                    <span class="search-term">Status: {{ ucfirst(request('status')) }}</span>
+                @endif
                 <small style="color: #64748b; margin-left: 8px;">({{ $siswa->total() }} data ditemukan)</small>
             </div>
             <a href="{{ route('admin.users.siswa') }}" class="btn-clear-all">
                 <i class="fas fa-times"></i>
-                Hapus Filter
+                Hapus Semua Filter
             </a>
         </div>
     @endif
 
     <div class="card">
-        <div class="card-header">
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <a href="{{ route('admin.users.index') }}" class="btn-secondary">
-                    <i class="fas fa-arrow-left"></i>
-                    Daftar Pengguna
-                </a>
-                <div>
-                    <h5 style="margin: 0; font-weight: 700; color: #111827;">Daftar Siswa</h5>
-                    <small style="color: #64748b;">Total: {{ $siswa->total() }} siswa</small>
+        <div class="card-header" style="flex-direction: column; align-items: stretch;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <a href="{{ route('admin.users.index') }}" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Daftar Pengguna
+                    </a>
+                    <div>
+                        <h5 style="margin: 0; font-weight: 700; color: #111827;">Daftar Siswa</h5>
+                        <small style="color: #64748b;">Total: {{ $siswa->total() }} siswa</small>
+                    </div>
                 </div>
+                <a href="{{ route('admin.users.create-siswa') }}" class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Tambah Siswa
+                </a>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <form action="{{ route('admin.users.siswa') }}" method="GET" class="search-form">
+
+            {{-- Filter Form --}}
+            <form action="{{ route('admin.users.siswa') }}" method="GET" id="filterForm">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    {{-- Search --}}
                     <div class="search-input-wrapper">
                         <i class="fas fa-search search-icon"></i>
                         <input
@@ -479,6 +508,7 @@
                             placeholder="Cari nama, NIS, atau NISN..."
                             value="{{ request('search') }}"
                             autocomplete="off"
+                            style="width: 250px;"
                         >
                         <button
                             type="button"
@@ -489,16 +519,40 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
+
+                    {{-- Filter Jenjang --}}
+                    <select name="jenjang" class="search-input" style="width: 150px;">
+                        <option value="">Semua Jenjang</option>
+                        @foreach($jenjangs as $j)
+                            <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                        @endforeach
+                    </select>
+
+                    {{-- Filter Cabang --}}
+                    <select name="cabang_id" class="search-input" style="width: 180px;">
+                        <option value="">Semua Cabang</option>
+                        @foreach($cabangList as $cabang)
+                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
+                                {{ $cabang->nama_cabang }}
+                            </option>
+                        @endforeach
+                    </select>
+
+                    {{-- Filter Status --}}
+                    <select name="status" class="search-input" style="width: 150px;">
+                        <option value="">Semua Status</option>
+                        <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus</option>
+                        <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah</option>
+                        <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
+                    </select>
+
                     <button type="submit" class="btn-search">
-                        <i class="fas fa-search"></i>
-                        Cari
+                        <i class="fas fa-filter"></i>
+                        Filter
                     </button>
-                </form>
-                <a href="{{ route('admin.users.create-siswa') }}" class="btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Tambah Siswa
-                </a>
-            </div>
+                </div>
+            </form>
         </div>
 
         <div style="overflow-x: auto;">
@@ -508,6 +562,7 @@
                         <th style="width: 60px;">No</th>
                         <th>Nama Siswa</th>
                         <th>NIS / NISN</th>
+                        <th style="width: 80px;">Jenjang</th>
                         <th>Kelas</th>
                         <th>Cabang</th>
                         <th style="width: 100px;">Status</th>
@@ -528,6 +583,25 @@
                         <td>
                             <div style="font-weight: 600; color: #111827; font-family: 'Courier New', monospace;">{{ $s->nis }}</div>
                             <small style="color: #64748b; font-family: 'Courier New', monospace;">{{ $s->nisn }}</small>
+                        </td>
+                        <td>
+                            @if($s->kelas)
+                                @php
+                                    $jenjangBadge = [
+                                        'KB' => 'badge-kb',
+                                        'TKA' => 'badge-tka',
+                                        'TKB' => 'badge-tkb',
+                                        'SD' => 'badge-sd',
+                                        'SMP' => 'badge-smp',
+                                        'SMA' => 'badge-sma',
+                                    ][$s->kelas->jenjang] ?? 'badge-class';
+                                @endphp
+                                <span class="badge {{ $jenjangBadge }}" style="padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">
+                                    {{ $s->kelas->jenjang }}
+                                </span>
+                            @else
+                                <span style="color: #94a3b8; font-size: 11px;">-</span>
+                            @endif
                         </td>
                         <td>
                             @if($s->kelas)
@@ -576,18 +650,18 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8;">
                             <i class="fas fa-user-graduate fa-3x" style="margin-bottom: 12px; opacity: 0.5;"></i>
                             <div style="font-size: 16px; font-weight: 500;">
-                                @if(request('search'))
-                                    Tidak ada data siswa yang sesuai dengan pencarian "{{ request('search') }}"
+                                @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
+                                    Tidak ada data siswa yang sesuai dengan filter yang dipilih
                                 @else
                                     Belum ada data siswa
                                 @endif
                             </div>
                             <small>
-                                @if(request('search'))
-                                    Coba kata kunci lain atau <a href="{{ route('admin.users.siswa') }}" style="color: #2563eb; text-decoration: underline;">hapus filter</a>
+                                @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
+                                    Coba filter lain atau <a href="{{ route('admin.users.siswa') }}" style="color: #2563eb; text-decoration: underline;">hapus semua filter</a>
                                 @else
                                     Silakan tambah data siswa baru
                                 @endif
@@ -601,7 +675,7 @@
 
         @if($siswa->hasPages())
         <div style="padding: 20px;">
-            {{ $siswa->appends(['search' => request('search')])->links() }}
+            {{ $siswa->appends(request()->except('page'))->links() }}
         </div>
         @endif
     </div>

@@ -173,7 +173,7 @@
 
                         {{-- Summary --}}
                         <div class="bg-primary bg-opacity-10 p-3 rounded border border-primary border-2 mb-3">
-                            <h6 class="small fw-bold text-primary mb-3">📊 Ringkasan Pembayaran</h6>
+                            <h6 class="small fw-bold text-primary mb-3"><i class="fas fa-chart-bar"></i> Ringkasan Pembayaran</h6>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Tagihan dipilih:</span>
                                 <span id="count-selected" class="fw-bold text-primary">0 item</span>

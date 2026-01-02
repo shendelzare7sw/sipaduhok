@@ -301,7 +301,7 @@ class OrangTuaController extends Controller
         if ($buktiFoto) {
             $keterangan .= " (Bukti: $buktiFoto)";
         }
-        $keterangan .= " - Diajukan oleh orang tua: {$user->name}";
+        $keterangan .= " - Diajukan oleh orang tua ({$user->name})";
 
         // Simpan atau update presensi
         if ($existingPresensi) {
@@ -322,5 +322,130 @@ class OrangTuaController extends Controller
 
         return redirect()->route('orang-tua.dashboard')
             ->with('success', "Pengajuan izin untuk {$siswa->nama_lengkap} berhasil diajukan. Menunggu validasi wali kelas.");
+    }
+
+    /**
+     * Lihat riwayat pengajuan izin untuk anak
+     */
+    public function riwayatIzin($siswaId)
+    {
+        $user = Auth::user();
+
+        // Pastikan siswa ini adalah anak dari orang tua yang login
+        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+
+        if (!$siswa) {
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
+        }
+
+        // Ambil pengajuan izin yang diajukan oleh orang tua ini
+        $pengajuanIzin = Presensi::where('siswa_id', $siswa->id)
+            ->whereIn('status', ['sakit', 'izin', 'alpha'])
+            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
+            ->where('diinput_oleh', $user->id)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return view('orang-tua.presensi.riwayat-izin', compact('siswa', 'pengajuanIzin'));
+    }
+
+    /**
+     * Form edit pengajuan izin
+     */
+    public function editIzin($presensiId)
+    {
+        $user = Auth::user();
+
+        $presensi = Presensi::with('siswa.kelas')->findOrFail($presensiId);
+
+        // Pastikan siswa adalah anak dari orang tua yang login
+        $isMyChild = $user->children()->where('siswa.id', $presensi->siswa_id)->exists();
+
+        if (!$isMyChild) {
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke data ini.');
+        }
+
+        // Cek apakah sudah divalidasi
+        if (str_contains($presensi->keterangan, 'Divalidasi')) {
+            return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+                ->with('error', 'Pengajuan yang sudah divalidasi tidak dapat diedit.');
+        }
+
+        return view('orang-tua.presensi.edit-izin', compact('presensi'));
+    }
+
+    /**
+     * Update pengajuan izin
+     */
+    public function updateIzin(Request $request, $presensiId)
+    {
+        $user = Auth::user();
+
+        $presensi = Presensi::with('siswa')->findOrFail($presensiId);
+
+        // Pastikan siswa adalah anak dari orang tua yang login
+        $isMyChild = $user->children()->where('siswa.id', $presensi->siswa_id)->exists();
+
+        if (!$isMyChild) {
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke data ini.');
+        }
+
+        // Cek apakah sudah divalidasi
+        if (str_contains($presensi->keterangan, 'Divalidasi')) {
+            return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+                ->with('error', 'Pengajuan yang sudah divalidasi tidak dapat diedit.');
+        }
+
+        $validated = $request->validate([
+            'jenis' => 'required|in:sakit,izin',
+            'keterangan' => 'required|string|max:500',
+            'bukti' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'hapus_bukti' => 'nullable|boolean',
+        ]);
+
+        // Extract old bukti path
+        $oldBuktiPath = null;
+        if (preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan, $matches)) {
+            $oldBuktiPath = $matches[1];
+        }
+
+        // Handle bukti
+        $buktiFoto = $oldBuktiPath; // Keep old bukti by default
+
+        // Hapus bukti lama jika diminta
+        if ($request->hapus_bukti) {
+            if ($oldBuktiPath && \Storage::disk('public')->exists($oldBuktiPath)) {
+                \Storage::disk('public')->delete($oldBuktiPath);
+            }
+            $buktiFoto = null;
+        }
+
+        // Upload bukti baru jika ada
+        if ($request->hasFile('bukti')) {
+            // Hapus file lama jika ada
+            if ($oldBuktiPath && \Storage::disk('public')->exists($oldBuktiPath)) {
+                \Storage::disk('public')->delete($oldBuktiPath);
+            }
+            $buktiFoto = $request->file('bukti')->store('presensi/bukti', 'public');
+        }
+
+        // Build keterangan
+        $keterangan = $validated['keterangan'];
+        if ($buktiFoto) {
+            $keterangan .= " (Bukti: $buktiFoto)";
+        }
+        $keterangan .= " - Diajukan oleh orang tua ({$user->name})";
+
+        // Update presensi
+        $presensi->update([
+            'status' => $validated['jenis'],
+            'keterangan' => $keterangan,
+        ]);
+
+        return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+            ->with('success', 'Pengajuan izin berhasil diperbarui.');
     }
 }

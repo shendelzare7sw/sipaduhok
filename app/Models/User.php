@@ -184,4 +184,12 @@ class User extends Authenticatable
                     ->withPivot('relationship', 'is_primary', 'is_financial_responsible', 'can_access_academic')
                     ->withTimestamps();
     }
+
+    /**
+     * Relasi ke tabel student_parents (untuk query detail parent-student relationship)
+     */
+    public function studentParents()
+    {
+        return $this->hasMany(StudentParent::class, 'parent_id');
+    }
 }

@@ -26,17 +26,17 @@ class ProfileController extends Controller
         switch ($roleName) {
             case 'siswa':
                 $profileData = Siswa::where('user_id', $user->id)
-                    ->with(['kelas', 'cabang', 'tahunAjaran'])
+                    ->with(['kelas.tahunAjaran', 'cabang'])
                     ->first();
                 break;
 
-            case 'guru':
+            case 'guru_pengajar':
             case 'wali_kelas':
-            case 'ketua':
+            case 'ketua_pkbm':
             case 'sekretaris':
             case 'bendahara':
                 $profileData = TenagaPendidik::where('user_id', $user->id)
-                    ->with('cabang')
+                    ->with('user.cabang')
                     ->first();
                 break;
 
@@ -79,9 +79,9 @@ class ProfileController extends Controller
                 }
                 break;
 
-            case 'guru':
+            case 'guru_pengajar':
             case 'wali_kelas':
-            case 'ketua':
+            case 'ketua_pkbm':
             case 'sekretaris':
             case 'bendahara':
                 $tenagaPendidik = TenagaPendidik::where('user_id', $user->id)->first();

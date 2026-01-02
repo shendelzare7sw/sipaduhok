@@ -8,21 +8,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
 
-        body { 
-            font-family: 'Poppins', sans-serif; 
+        body {
+            font-family: 'Poppins', sans-serif;
             background-color: #f9fafb;
         }
 
-        .hero-overlay { 
-            background: linear-gradient(135deg, rgba(22, 95, 172, 0.88) 0%, rgba(40, 127, 59, 0.85) 100%); 
+        .hero-overlay {
+            background: linear-gradient(135deg, rgba(22, 95, 172, 0.88) 0%, rgba(40, 127, 59, 0.85) 100%);
         }
 
-        .card-hover { 
-            transition: all 0.3s ease; 
+        .card-hover {
+            transition: all 0.3s ease;
         }
-        .card-hover:hover { 
-            transform: translateY(-6px); 
-            box-shadow: 0 24px 48px rgba(0,0,0,0.12); 
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 48px rgba(0,0,0,0.12);
         }
 
         :root {
@@ -55,14 +55,14 @@
 
 </head>
 <body class="bg-gray-50">
-    
+
     <!-- Navbar -->
     <x-navbar />
 
     <!-- Hero Section -->
     <section class="relative h-[400px] flex items-center justify-center bg-cover bg-center"
         style="background-image: url('{{ asset('img/hero-bg.jpg') }}');">
-        
+
         <div class="hero-overlay absolute inset-0"></div>
 
         <div class="relative z-10 text-center text-white px-4">
@@ -90,17 +90,17 @@
                 <div class="relative w-full h-[420px] md:h-[460px]">
                     <!-- Gambar utama -->
                     <img src="{{ asset('img/tk-main.jpg') }}"
-                        class="absolute top-0 left-0 w-2/3 h-[280px] md:h-[300px] object-cover rounded-2xl shadow-xl 
+                        class="absolute top-0 left-0 w-2/3 h-[280px] md:h-[300px] object-cover rounded-2xl shadow-xl
                         transform rotate-[-4deg] hover:rotate-0 transition duration-700 ease-out z-[30]">
 
                     <!-- Gambar kedua -->
                     <img src="{{ asset('img/tk-aktif.jpg') }}"
-                        class="absolute bottom-4 left-6 w-1/2 h-[220px] md:h-[240px] object-cover rounded-2xl shadow-lg 
+                        class="absolute bottom-4 left-6 w-1/2 h-[220px] md:h-[240px] object-cover rounded-2xl shadow-lg
                         transform rotate-[3deg] hover:rotate-0 transition duration-700 ease-out z-[20]">
 
                     <!-- Gambar ketiga -->
                     <img src="{{ asset('img/tk-belajar.jpg') }}"
-                        class="absolute top-10 right-0 w-1/2 h-[240px] md:h-[260px] object-cover rounded-2xl shadow-lg 
+                        class="absolute top-10 right-0 w-1/2 h-[240px] md:h-[260px] object-cover rounded-2xl shadow-lg
                         transform rotate-[6deg] hover:rotate-0 transition duration-700 ease-out z-[10]">
 
                     <!-- Kotak teks -->
@@ -450,7 +450,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Daftarkan Anak Anda Sekarang</h2>
             <p class="text-white/90 mb-8">Berikan pendidikan terbaik untuk tumbuh kembang anak Anda sejak usia dini hingga siap memasuki SD.</p>
-            <a href="/ppdb-formulir" class="inline-flex items-center px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition">
+            <a href="/ppdb" class="inline-flex items-center px-8 py-4 bg-white text-[#d45930] font-semibold rounded-full hover:bg-gray-100 transition">
                 Daftar Sekarang
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

@@ -226,10 +226,10 @@
                         </td>
                         <td style="text-align: center;">
                             @if($s->status_bayar === 'lunas')
-                                <span class="status-box status-lunas">✅ Lunas</span>
+                                <span class="status-box status-lunas"><i class="fas fa-check-circle"></i> Lunas</span>
                             @else
                                 <span class="status-box status-belum-lunas">
-                                    ⚠️ Sisa: Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}
+                                    <i class="fas fa-exclamation-triangle"></i> Sisa: Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}
                                 </span>
                             @endif
                         </td>
@@ -250,7 +250,7 @@
     {{-- Summary Card --}}
     <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
         <div class="card-body" style="padding: 24px;">
-            <h5 style="margin: 0 0 20px 0; font-size: 18px;">📊 Ringkasan Monitoring</h5>
+            <h5 style="margin: 0 0 20px 0; font-size: 18px;"><i class="fas fa-chart-bar"></i> Ringkasan Monitoring</h5>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                 <div>
                     <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">Total Siswa</div>

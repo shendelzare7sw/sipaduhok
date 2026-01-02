@@ -58,7 +58,7 @@ class KelasController extends Controller
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
-        $jenjangs = ['PAUD', 'SD', 'SMP', 'SMA'];
+        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
         
         // Get current tahun ajaran untuk display
         $currentTahunAjaran = null;
@@ -91,14 +91,15 @@ class KelasController extends Controller
     {
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
-        $jenjangs = ['PAUD', 'SD', 'SMP', 'SMA'];
-        
-        // Get tenaga pendidik yang bisa jadi wali kelas
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)
-              ->whereIn('role', ['wali_kelas', 'guru_pengajar']);
-        })->get();
-        
+        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
+        // Get tenaga pendidik yang bisa jadi wali kelas (hanya role wali_kelas)
+        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+            $q->where('name', 'wali_kelas');
+        })->whereHas('user', function($q) {
+            $q->where('is_active', true);
+        })->orderBy('nama_lengkap')->get();
+
         return view('admin.kelas.create', compact('tahunAjarans', 'cabangs', 'jenjangs', 'waliKelasOptions'));
     }
 
@@ -112,7 +113,7 @@ class KelasController extends Controller
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
             'nama_kelas' => 'required|string|max:50',
-            'jenjang' => 'required|in:PAUD,SD,SMP,SMA',
+            'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kuota_siswa' => 'required|integer|min:1|max:100',
         ], [
             'cabang_id.required' => 'Cabang harus dipilih',
@@ -176,14 +177,15 @@ class KelasController extends Controller
         $kelas = $kela;
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
-        $jenjangs = ['PAUD', 'SD', 'SMP', 'SMA'];
-        
-        // Get tenaga pendidik yang bisa jadi wali kelas
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)
-              ->whereIn('role', ['wali_kelas', 'guru_pengajar']);
-        })->get();
-        
+        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
+        // Get tenaga pendidik yang bisa jadi wali kelas (hanya role wali_kelas)
+        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+            $q->where('name', 'wali_kelas');
+        })->whereHas('user', function($q) {
+            $q->where('is_active', true);
+        })->orderBy('nama_lengkap')->get();
+
         return view('admin.kelas.edit', compact('kelas', 'tahunAjarans', 'cabangs', 'jenjangs', 'waliKelasOptions'));
     }
 
@@ -199,7 +201,7 @@ class KelasController extends Controller
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
             'nama_kelas' => 'required|string|max:50',
-            'jenjang' => 'required|in:PAUD,SD,SMP,SMA',
+            'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kuota_siswa' => 'required|integer|min:1|max:100',
         ], [
             'cabang_id.required' => 'Cabang harus dipilih',

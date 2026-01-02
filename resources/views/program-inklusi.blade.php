@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Program Inklusi - PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
@@ -134,42 +135,42 @@
                 <!-- Made cards clickable to open modal -->
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#165fac]" onclick="openModal('autism')">
                     <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl">🧩</span>
+                        <span class="text-2xl"><i class="fas fa-puzzle-piece"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Autisme (ASD)</h3>
                     <p class="text-gray-600">Program khusus untuk anak dengan gangguan spektrum autisme dengan pendekatan terstruktur.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#287f3b]" onclick="openModal('adhd')">
                     <div class="w-14 h-14 bg-[#287f3b]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl">🎯</span>
+                        <span class="text-2xl"><i class="fas fa-bullseye"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">ADHD</h3>
                     <p class="text-gray-600">Pendekatan pembelajaran khusus untuk anak dengan gangguan pemusatan perhatian dan hiperaktivitas.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#d45930]" onclick="openModal('disleksia')">
                     <div class="w-14 h-14 bg-[#d45930]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl">📚</span>
+                        <span class="text-2xl"><i class="fas fa-books"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Disleksia</h3>
                     <p class="text-gray-600">Metode pembelajaran multisensori untuk anak dengan kesulitan membaca dan menulis.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#fac030]" onclick="openModal('down')">
                     <div class="w-14 h-14 bg-[#fac030]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl">🧠</span>
+                        <span class="text-2xl"><i class="fas fa-brain"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Down Syndrome</h3>
                     <p class="text-gray-600">Program stimulasi dan pembelajaran yang disesuaikan untuk anak down syndrome.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#165fac]" onclick="openModal('speech')">
                     <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl">💬</span>
+                        <span class="text-2xl"><i class="fas fa-comments"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Speech Delay</h3>
                     <p class="text-gray-600">Terapi wicara dan program stimulasi bahasa untuk anak dengan keterlambatan bicara.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#287f3b]" onclick="openModal('slow')">
                     <div class="w-14 h-14 bg-[#287f3b]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl">🌟</span>
+                        <span class="text-2xl"><i class="fas fa-star"></i></span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Slow Learner</h3>
                     <p class="text-gray-600">Pendekatan pembelajaran bertahap untuk anak dengan kecepatan belajar yang berbeda.</p>

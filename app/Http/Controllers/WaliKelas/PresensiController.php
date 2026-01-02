@@ -20,10 +20,33 @@ class PresensiController extends Controller
     public function index(Request $request): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            return view('wali-kelas.presensi.index')->with([
+                'error' => 'Data tenaga pendidik tidak ditemukan.',
+                'kelas' => null,
+                'siswaList' => collect(),
+                'presensiData' => [],
+                'rekapBulan' => [],
+                'tanggal' => now()->toDateString(),
+                'bulan' => now()->month,
+                'tahun' => now()->year,
+            ]);
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
 
         if (!$kelas) {
-            return view('wali-kelas.presensi.index')->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+            return view('wali-kelas.presensi.index')->with([
+                'error' => 'Anda belum ditugaskan sebagai wali kelas.',
+                'kelas' => null,
+                'siswaList' => collect(),
+                'presensiData' => [],
+                'rekapBulan' => [],
+                'tanggal' => now()->toDateString(),
+                'bulan' => now()->month,
+                'tahun' => now()->year,
+            ]);
         }
 
         // Filter tanggal
@@ -135,21 +158,18 @@ class PresensiController extends Controller
         // Cek apakah diinput oleh orang tua (role orang_tua) dan belum divalidasi wali kelas
         $pengajuanIzin = Presensi::where('kelas_id', $kelas->id)
             ->whereIn('status', ['sakit', 'izin'])
-            ->where(function($query) {
-                // Izin yang diajukan oleh orang tua (ada keterangan "Diajukan oleh orang tua")
-                // Dan BELUM divalidasi (tidak ada kata "Divalidasi" di keterangan)
-                $query->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
-                      ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
-                      ->whereNotNull('diinput_oleh');
+            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
+            ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
+            ->whereNotNull('diinput_oleh')
+            ->whereHas('inputBy', function($query) {
+                // Filter: hanya yang diinput oleh user dengan role orang_tua
+                $query->whereHas('roleRelation', function($q) {
+                    $q->where('name', 'orang_tua');
+                });
             })
-            ->with(['siswa', 'inputBy'])
+            ->with(['siswa', 'inputBy.roleRelation'])
             ->orderBy('tanggal', 'desc')
-            ->get()
-            ->filter(function($presensi) {
-                // Filter: hanya tampilkan yang diinput oleh orang tua (role orang_tua)
-                return $presensi->inputBy && $presensi->inputBy->roleRelation &&
-                       $presensi->inputBy->roleRelation->name === 'orang_tua';
-            });
+            ->get();
 
         return view('wali-kelas.presensi.validasi-izin', [
             'kelas' => $kelas,

@@ -2,7 +2,7 @@
 
 @section('title', 'Validasi Akses Siswa')
 @section('page-title', 'Validasi Akses')
-@section('page-subtitle', 'Validasi akses ujian dan rapor siswa kelas ' . $kelas->nama_kelas)
+@section('page-subtitle', isset($kelas) && $kelas ? 'Validasi akses ujian dan rapor siswa kelas ' . $kelas->nama_kelas : 'Validasi akses siswa')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')

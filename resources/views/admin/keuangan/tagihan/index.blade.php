@@ -149,11 +149,11 @@
                                     </td>
                                     <td class="text-center align-middle">
                                         @if($siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0)
-                                            <span class="badge bg-success badge-status shadow-sm">✅ LUNAS</span>
+                                            <span class="badge bg-success badge-status shadow-sm"><i class="fas fa-check-circle"></i> LUNAS</span>
                                         @elseif($siswa->total_tagihan == 0)
                                             <span class="badge bg-light border badge-status text-muted">KOSONG</span>
                                         @else
-                                            <span class="badge bg-danger badge-status shadow-sm">❌ BELUM LUNAS</span>
+                                            <span class="badge bg-danger badge-status shadow-sm"><i class="fas fa-times-circle"></i> BELUM LUNAS</span>
                                         @endif
                                     </td>
                                     <td class="text-center align-middle">

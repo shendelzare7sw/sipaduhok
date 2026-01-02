@@ -20,11 +20,11 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    
+
     <x-navbar></x-navbar>
 
     <!-- Hero Section -->
-    <section class="relative h-[400px] flex items-center justify-center" 
+    <section class="relative h-[400px] flex items-center justify-center"
              style="background-image: url('{{ asset('img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
         <div class="hero-overlay absolute inset-0"></div>
         <div class="relative z-10 text-center text-white px-4">
@@ -43,10 +43,10 @@
     <section class="py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                
+
                 <!-- Image -->
                 <div class="relative">
-                    <img src="{{ asset('img/about-school.jpg') }}" alt="Tentang Sekolah" 
+                    <img src="{{ asset('img/about-school.jpg') }}" alt="Tentang Sekolah"
                          class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                     <div class="absolute -bottom-6 -right-6 bg-[#165fac] text-white p-6 rounded-2xl shadow-lg hidden md:block">
                         <p class="text-4xl font-bold">14+</p>
@@ -137,7 +137,7 @@
         <div class="max-w-6xl mx-auto px-4 relative">
 
             <div class="timeline-line hidden md:block"></div>
-            
+
             <div class="space-y-12">
 
                 <!-- 2014 -->
@@ -267,7 +267,7 @@
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
                     <div class="w-16 h-16 bg-[#287f3b]/10 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg class="w-8 h-8 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" 
+                            <path fill-rule="evenodd"
                                   d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
                                   clip-rule="evenodd"/>
                         </svg>
@@ -285,7 +285,7 @@
         <div class="max-w-4xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-white mb-4">Tertarik Bergabung?</h2>
             <p class="text-white/90 mb-8">Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa depan yang cerah</p>
-            <a href="{{ url('/ppdb-formulir') }}" 
+            <a href="{{ url('/ppdb') }}"
                class="inline-flex items-center px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition">
                 Daftar Sekarang
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

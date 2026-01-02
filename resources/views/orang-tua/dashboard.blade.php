@@ -142,6 +142,18 @@
                                         <span class="d-none d-sm-inline">Rapor</span>
                                     </a>
                                 </div>
+                                <div class="col-6">
+                                    <a href="{{ route('orang-tua.presensi.ajukan-izin', $child->id) }}" class="btn btn-warning btn-sm w-100">
+                                        <i class="fas fa-notes-medical me-1"></i>
+                                        <span class="d-none d-sm-inline">Ajukan Izin</span>
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="{{ route('orang-tua.presensi.riwayat-izin', $child->id) }}" class="btn btn-outline-info btn-sm w-100">
+                                        <i class="fas fa-history me-1"></i>
+                                        <span class="d-none d-sm-inline">Riwayat Izin</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

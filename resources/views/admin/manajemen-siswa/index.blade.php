@@ -342,7 +342,7 @@
                     <div class="stat-number">{{ $stats['totalSiswa'] }}</div>
                     <div class="stat-desc">Siswa aktif</div>
                 </div>
-                <div class="stat-icon-bg">👨‍🎓</div>
+                <div class="stat-icon-bg"><i class="fas fa-graduation-cap"></i></div>
             </div>
         </div>
         
@@ -353,7 +353,7 @@
                     <div class="stat-number">{{ $stats['siswaWithKelas'] }}</div>
                     <div class="stat-desc">Terdaftar di kelas</div>
                 </div>
-                <div class="stat-icon-bg">✅</div>
+                <div class="stat-icon-bg"><i class="fas fa-check-circle"></i></div>
             </div>
         </div>
         
@@ -420,7 +420,14 @@
                             <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama_cabang }}</option>
                         @endforeach
                     </select>
-                    
+
+                    <select name="jenjang" class="filter-select" onchange="this.form.submit()">
+                        <option value="">Semua Jenjang</option>
+                        @foreach($jenjangs as $j)
+                            <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                        @endforeach
+                    </select>
+
                     <select name="kelas_id" class="filter-select" onchange="this.form.submit()">
                         <option value="">Semua Kelas</option>
                         @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
@@ -450,7 +457,7 @@
                         <i class="fas fa-filter"></i> Filter
                     </button>
                     
-                    @if(request()->hasAny(['search', 'cabang_id', 'kelas_id', 'no_kelas']) || request('status') != 'aktif')
+                    @if(request()->hasAny(['search', 'cabang_id', 'jenjang', 'kelas_id', 'no_kelas']) || request('status') != 'aktif')
                         <a href="{{ route('admin.manajemen-siswa.index') }}" class="btn btn-outline">
                             <i class="fas fa-times"></i> Reset
                         </a>

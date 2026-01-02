@@ -221,7 +221,7 @@
                                                                     <option value="">Pilih Metode</option>
                                                                     <option value="tunai">💵 Tunai</option>
                                                                     <option value="transfer">🏦 Transfer Bank</option>
-                                                                    <option value="ewallet">📱 E-Wallet</option>
+                                                                    <option value="ewallet"><i class="fas fa-mobile-alt"></i> E-Wallet</option>
                                                                 </select>
                                                                 @error('metode_pembayaran')
                                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -308,7 +308,7 @@
                                         @elseif($bayar->metode_pembayaran == 'transfer')
                                             <span class="badge bg-label-info">🏦 Transfer</span>
                                         @else
-                                            <span class="badge bg-label-primary">📱 E-Wallet</span>
+                                            <span class="badge bg-label-primary"><i class="fas fa-mobile-alt"></i> E-Wallet</span>
                                         @endif
                                     </td>
                                     <td class="text-center">

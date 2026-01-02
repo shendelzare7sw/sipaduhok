@@ -16,7 +16,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    
+
     <x-navbar></x-navbar>
 
     <!-- Hero Section -->
@@ -94,7 +94,7 @@
                             <p class="text-gray-500 text-xs">Bidang Kesetaraan</p>
                         </div>
                         <div class="org-card bg-gray-50 rounded-xl p-4 text-center shadow hover:bg-white">
-                            <img src="{{ asset('img/koordinator-2.png') }}" alt="Koordinator" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover">
+                            <img src="{{ asset('img/koordinator-2.jpg') }}" alt="Koordinator" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover">
                             <h4 class="font-semibold text-gray-800 text-sm">Robert Yinaidi Lay</h4>
                             <p class="text-gray-500 text-xs">Bidang Sarpas</p>
                         </div>

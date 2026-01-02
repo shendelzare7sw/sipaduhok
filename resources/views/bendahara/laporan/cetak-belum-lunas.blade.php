@@ -151,7 +151,7 @@
     </div>
 
     <div class="warning-box">
-        <strong>⚠️ Perhatian:</strong> Laporan ini berisi daftar siswa yang masih memiliki sisa tagihan yang belum dibayar.
+        <strong><i class="fas fa-exclamation-triangle"></i> Perhatian:</strong> Laporan ini berisi daftar siswa yang masih memiliki sisa tagihan yang belum dibayar.
     </div>
 
     <div class="info">

@@ -656,6 +656,95 @@
                 </div>
             </div>
         </div>
+
+        {{-- 3. Orang Tua Table --}}
+        <div class="col-12 mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h5><i class="fas fa-user-friends" style="color: #f59e0b; margin-right: 8px;"></i> Orang Tua Terbaru</h5>
+                        <small>5 data orang tua yang baru ditambahkan</small>
+                    </div>
+                    <div>
+                        @if($orangTua->count() > 0)
+                            <a href="{{ route('admin.users.orang-tua') }}" class="btn btn-outline">
+                                Lihat Semua <i class="fas fa-arrow-right" style="margin-left: 6px;"></i>
+                            </a>
+                        @else
+                            <a href="{{ route('admin.users.orang-tua') }}" class="btn btn-primary">
+                                <i class="fas fa-arrow-right" style="margin-right: 6px;"></i> Kelola Orang Tua
+                            </a>
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if($orangTua->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Lengkap</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Anak (Siswa)</th>
+                                        <th>Status</th>
+                                        <th style="width: 100px; text-align: center;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($orangTua as $ortu)
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: 600; font-size: 15px;">{{ $ortu->name }}</div>
+                                            <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $ortu->created_at->diffForHumans() }}</small>
+                                        </td>
+                                        <td style="font-family: 'Courier New', monospace; font-size: 14px;">{{ $ortu->username }}</td>
+                                        <td style="font-size: 14px;">{{ $ortu->email }}</td>
+                                        <td>
+                                            @if($ortu->studentParents && $ortu->studentParents->count() > 0)
+                                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                                    @foreach($ortu->studentParents->take(2) as $sp)
+                                                        <span style="font-size: 13px; color: #475569;">
+                                                            <i class="fas fa-user-graduate" style="color: #3b82f6; font-size: 11px;"></i>
+                                                            {{ $sp->siswa->nama_lengkap }}
+                                                        </span>
+                                                    @endforeach
+                                                    @if($ortu->studentParents->count() > 2)
+                                                        <small style="color: #64748b;">+{{ $ortu->studentParents->count() - 2 }} lainnya</small>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span style="color: #ef4444; font-size: 12px;">
+                                                    <i class="fas fa-exclamation-circle"></i> Belum ada
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($ortu->is_active)
+                                                <span class="badge badge-success">Aktif</span>
+                                            @else
+                                                <span class="badge badge-warning">Non-Aktif</span>
+                                            @endif
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <a href="{{ route('admin.users.orang-tua') }}" class="btn btn-icon btn-light-primary" title="Kelola">
+                                                <i class="fas fa-cog"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="empty-state">
+                            <i class="fas fa-user-friends"></i>
+                            <p>Belum ada data Orang Tua.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

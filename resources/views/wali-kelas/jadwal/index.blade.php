@@ -2,7 +2,7 @@
 
 @section('title', 'Jadwal Pelajaran')
 @section('page-title', 'Jadwal Pelajaran')
-@section('page-subtitle', 'Kelola jadwal pelajaran kelas ' . $kelas->nama_kelas)
+@section('page-subtitle', isset($kelas) ? 'Lihat jadwal pelajaran kelas ' . $kelas->nama_kelas : 'Kelola jadwal pelajaran')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
@@ -56,14 +56,14 @@
                     <h4 class="m-0 fw-bold text-primary">
                         <i class="fas fa-calendar-alt me-2"></i>Jadwal Kelas {{ $kelas->nama_kelas }}
                     </h4>
-                    <p class="text-muted small mb-0 mt-1">Gunakan tombol di sebelah kanan untuk memodifikasi atau mencetak jadwal.</p>
+                    <p class="text-muted small mb-0 mt-1">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Jadwal pelajaran dikelola oleh Admin. Anda dapat melihat dan mencetak jadwal.
+                    </p>
                 </div>
                 <div class="col-auto">
-                    <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#tambahJadwalModal">
-                        <i class="fas fa-plus-circle me-1"></i> Tambah Jadwal
-                    </button>
-                    <a href="{{ route('wali.jadwal.print') }}" target="_blank" class="btn btn-outline-secondary shadow-sm ms-2">
-                        <i class="fas fa-print me-1"></i> Cetak
+                    <a href="{{ route('wali.jadwal.print') }}" target="_blank" class="btn btn-primary shadow-sm">
+                        <i class="fas fa-print me-1"></i> Cetak Jadwal
                     </a>
                 </div>
             </div>
@@ -92,7 +92,6 @@
                                     <th class="ps-4">Jam</th>
                                     <th>Mata Pelajaran</th>
                                     <th>Pengajar</th>
-                                    <th class="text-center pe-4">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -109,18 +108,6 @@
                                     </td>
                                     <td class="align-middle small fw-bold text-gray-600">
                                         {{ $jadwal->guru->nama_lengkap }}
-                                    </td>
-                                    <td class="text-center pe-4 align-middle">
-                                        <div class="btn-group">
-                                            <button onclick="editJadwal({{ $jadwal->id }}, '{{ $jadwal->mata_pelajaran_id }}', '{{ $jadwal->guru_id }}', '{{ $jadwal->hari }}', '{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}', '{{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}')"
-                                                    class="btn btn-sm btn-warning mx-1 rounded-circle" style="width: 32px; height: 32px;" title="Edit">
-                                                <i class="fas fa-edit fa-sm"></i>
-                                            </button>
-                                            <button onclick="hapusJadwal({{ $jadwal->id }}, '{{ $jadwal->mataPelajaran->nama_mapel }}', '{{ $hari }}')"
-                                                    class="btn btn-sm btn-danger mx-1 rounded-circle" style="width: 32px; height: 32px;" title="Hapus">
-                                                <i class="fas fa-trash fa-sm"></i>
-                                            </button>
-                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -141,80 +128,4 @@
 </div>
 </div>
 
-{{-- MODAL TAMBAH (CONTOH) --}}
-<div class="modal fade" id="tambahJadwalModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog shadow-lg">
-        <div class="modal-content border-0">
-            <form action="{{ route('wali.jadwal.store') }}" method="POST">
-                @csrf
-                <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold text-white"><i class="fas fa-plus-circle me-2"></i>Tambah Jadwal Baru</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-uppercase">Hari</label>
-                        <select name="hari" class="form-select" required>
-                            @foreach($hariList as $hari)
-                                <option value="{{ $hari }}">{{ $hari }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-uppercase">Mata Pelajaran</label>
-                        <select name="mata_pelajaran_id" class="form-select" required>
-                            @foreach($mataPelajaranList as $mapel)
-                                <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-uppercase">Guru Pengajar</label>
-                        <select name="guru_id" class="form-select" required>
-                            @foreach($guruList as $guru)
-                                <option value="{{ $guru->id }}">{{ $guru->nama_lengkap }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold small text-uppercase">Jam Mulai</label>
-                            <input type="time" name="jam_mulai" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold small text-uppercase">Jam Selesai</label>
-                            <input type="time" name="jam_selesai" class="form-control" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light">
-                    <button class="btn btn-secondary btn-sm" type="button" data-bs-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary btn-sm px-4 shadow" type="submit">Simpan Jadwal</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- MODAL EDIT & HAPUS DISESUAIKAN SEPERTI TAMBAH DI ATAS --}}
-@endsection
-
-@section('scripts')
-<script>
-    function editJadwal(id, mapelId, guruId, hari, jamMulai, jamSelesai) {
-        // Implementasi logika pengisian form edit seperti kode Anda sebelumnya
-        // Sesuaikan target selector ID jika menggunakan modal edit baru
-        const editModal = new bootstrap.Modal(document.getElementById('editJadwalModal'));
-        editModal.show();
-    }
-
-    function hapusJadwal(id, namaMapel, hari) {
-        document.getElementById('hapus_nama_mapel').textContent = namaMapel;
-        document.getElementById('hapus_hari').textContent = hari;
-        document.getElementById('hapusJadwalForm').action = '/wali/jadwal/' + id;
-        const hapusModal = new bootstrap.Modal(document.getElementById('hapusJadwalModal'));
-        hapusModal.show();
-    }
-</script>
 @endsection

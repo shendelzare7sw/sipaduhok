@@ -2,7 +2,7 @@
 
 @section('title', 'Presensi Siswa')
 @section('page-title', 'Presensi Siswa')
-@section('page-subtitle', 'Kelola presensi siswa kelas ' . $kelas->nama_kelas)
+@section('page-subtitle', isset($kelas) && $kelas ? 'Kelola presensi siswa kelas ' . $kelas->nama_kelas : 'Kelola presensi siswa')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')

@@ -430,16 +430,16 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
 
                         <div class="form-group">
                             <label for="wali_kelas_id">Wali Kelas</label>
-                            <select class="form-control @error('wali_kelas_id') is-invalid @enderror" 
+                            <select class="form-control @error('wali_kelas_id') is-invalid @enderror"
                                     id="wali_kelas_id" name="wali_kelas_id">
                                 <option value="">Belum ditentukan</option>
                                 @foreach($waliKelasOptions as $wk)
                                     <option value="{{ $wk->id }}" {{ old('wali_kelas_id', $kelas->wali_kelas_id) == $wk->id ? 'selected' : '' }}>
-                                        {{ $wk->nama_lengkap }} ({{ ucwords(str_replace('_', ' ', $wk->user->role ?? '')) }})
+                                        {{ $wk->nama_lengkap }}
                                     </option>
                                 @endforeach
                             </select>
-                            <div class="form-hint">Pilih guru sebagai wali kelas</div>
+                            <div class="form-hint">Pilih wali kelas untuk kelas ini</div>
                             @error('wali_kelas_id')
                                 <div class="invalid-feedback"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
                             @enderror

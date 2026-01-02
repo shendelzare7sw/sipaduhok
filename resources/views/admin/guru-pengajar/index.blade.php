@@ -212,7 +212,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 <div class="stat-number">{{ $stats['totalGuru'] }}</div>
                 <div class="stat-desc">Guru aktif</div>
             </div>
-            <div class="stat-icon-bg">👩‍🏫</div>
+            <div class="stat-icon-bg"><i class="fas fa-school"></i></div>
         </div>
     </div>
 
@@ -223,7 +223,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 <div class="stat-number">{{ $stats['guruWithAssignment'] }}</div>
                 <div class="stat-desc">Guru dengan penugasan</div>
             </div>
-            <div class="stat-icon-bg">✅</div>
+            <div class="stat-icon-bg"><i class="fas fa-check-circle"></i></div>
         </div>
     </div>
 
@@ -234,7 +234,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 <div class="stat-number">{{ $stats['totalPenugasan'] }}</div>
                 <div class="stat-desc">Guru-Kelas-Mapel</div>
             </div>
-            <div class="stat-icon-bg">📝</div>
+            <div class="stat-icon-bg"><i class="fas fa-file-alt"></i></div>
         </div>
     </div>
 
@@ -245,7 +245,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 <div class="stat-number">{{ $stats['totalMataPelajaran'] }}</div>
                 <div class="stat-desc">Mapel aktif</div>
             </div>
-            <div class="stat-icon-bg">📖</div>
+            <div class="stat-icon-bg"><i class="fas fa-book-open"></i></div>
         </div>
     </div>
 </div>
