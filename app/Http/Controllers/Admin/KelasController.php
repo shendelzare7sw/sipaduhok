@@ -140,6 +140,13 @@ class KelasController extends Controller
         
         $validated['kode_kelas'] = $kodeKelas;
 
+        // PENTING: Hapus assignment lama jika wali kelas dipilih sudah mengajar di kelas lain
+        if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
+            // Hapus wali kelas dari kelas lain (set jadi NULL)
+            Kelas::where('wali_kelas_id', $validated['wali_kelas_id'])
+                ->update(['wali_kelas_id' => null]);
+        }
+
         Kelas::create($validated);
 
         return redirect()->route('admin.kelas.index')
@@ -211,14 +218,22 @@ class KelasController extends Controller
             'kuota_siswa.required' => 'Kuota siswa harus diisi',
         ]);
 
+        // PENTING: Hapus assignment lama jika wali kelas dipilih sudah mengajar di kelas lain
+        if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
+            // Hapus wali kelas dari kelas lain (set jadi NULL)
+            Kelas::where('wali_kelas_id', $validated['wali_kelas_id'])
+                ->where('id', '!=', $kelas->id)
+                ->update(['wali_kelas_id' => null]);
+        }
+
         // Regenerate kode_kelas jika ada perubahan
         $cabang = Cabang::find($validated['cabang_id']);
         $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
         $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
-        
-        $newKodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' . 
+
+        $newKodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
                         strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
-        
+
         // Check if new kode_kelas already exists (excluding current)
         if ($newKodeKelas !== $kelas->kode_kelas) {
             $existingKelas = Kelas::where('kode_kelas', $newKodeKelas)->first();

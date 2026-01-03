@@ -26,9 +26,9 @@ class GuruPengajarController extends Controller
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
 
-        // Get guru pengajar (tenaga pendidik dengan role guru_pengajar)
+        // Get guru pengajar (tenaga pendidik dengan role guru_pengajar SAJA, tidak termasuk wali_kelas)
         $query = TenagaPendidik::whereHas('user', function($q) {
-            $q->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('role', 'guru_pengajar');
         })->with(['user', 'guruKelas' => function($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
                 $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
@@ -65,11 +65,11 @@ class GuruPengajarController extends Controller
 
         // Statistics
         $totalGuru = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->count();
 
         $guruWithAssignment = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->whereHas('guruKelas', function($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
                 $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
@@ -194,9 +194,9 @@ class GuruPengajarController extends Controller
     {
         $kelas->load(['cabang', 'tahunAjaran', 'guruPengajar.tenagaPendidik', 'guruPengajar.mataPelajaran']);
 
-        // Get available guru
+        // Get available guru (hanya guru_pengajar, tidak termasuk wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
         // Get mata pelajaran sesuai jenjang kelas
@@ -272,7 +272,7 @@ class GuruPengajarController extends Controller
         }
 
         $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->with(['user', 'guruKelas' => function($q) use ($tahunAjaranId) {
             if ($tahunAjaranId) {
                 $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));

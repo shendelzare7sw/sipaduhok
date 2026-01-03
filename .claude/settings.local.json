@@ -20,7 +20,8 @@
       "Bash(php replace_all_emojis.php:*)",
       "Bash(php check_emojis.php:*)",
       "Bash(php verify_fontawesome.php:*)",
-      "Bash(php artisan migrate:status:*)"
+      "Bash(php artisan migrate:status:*)",
+      "Bash(cat:*)"
     ]
   }
 }

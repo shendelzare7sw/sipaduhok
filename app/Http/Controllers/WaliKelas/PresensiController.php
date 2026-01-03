@@ -148,10 +148,23 @@ class PresensiController extends Controller
     public function validasiIzin(): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            return view('wali-kelas.presensi.validasi-izin')->with([
+                'error' => 'Data tenaga pendidik tidak ditemukan.',
+                'kelas' => null,
+                'pengajuanPending' => collect(),
+            ]);
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
 
         if (!$kelas) {
-            return view('wali-kelas.presensi.validasi-izin')->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+            return view('wali-kelas.presensi.validasi-izin')->with([
+                'error' => 'Anda belum ditugaskan sebagai wali kelas.',
+                'kelas' => null,
+                'pengajuanPending' => collect(),
+            ]);
         }
 
         // Get pengajuan izin yang belum divalidasi
@@ -254,7 +267,16 @@ class PresensiController extends Controller
     public function printRekap(Request $request)
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            abort(403, 'Data tenaga pendidik tidak ditemukan.');
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+
+        if (!$kelas) {
+            abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+        }
 
         $bulan = (int) $request->get('bulan', now()->month);
         $tahun = (int) $request->get('tahun', now()->year);

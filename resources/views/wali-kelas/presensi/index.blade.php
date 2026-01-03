@@ -36,6 +36,7 @@
     @endif
 
     {{-- HEADER ACTIONS --}}
+    @if($kelas)
     <div class="card shadow mb-4 text-center text-sm-start">
         <div class="card-body py-3">
             <div class="row align-items-center">
@@ -53,7 +54,9 @@
             </div>
         </div>
     </div>
+    @endif
 
+    @if($kelas)
     {{-- FILTER TANGGAL --}}
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-white">
@@ -209,6 +212,7 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 </div>
 

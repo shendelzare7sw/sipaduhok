@@ -66,7 +66,16 @@ class JadwalPelajaranController extends Controller
     public function print()
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            abort(403, 'Data tenaga pendidik tidak ditemukan.');
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+
+        if (!$kelas) {
+            abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+        }
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
         $jadwalPerHari = [];

@@ -83,8 +83,9 @@ class JadwalPelajaranController extends Controller
             ->orderBy('nama_kelas')
             ->get();
 
+        // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
         // Statistics
@@ -135,8 +136,9 @@ class JadwalPelajaranController extends Controller
 
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
+        // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -247,8 +249,9 @@ class JadwalPelajaranController extends Controller
 
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
+        // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->whereIn('role', ['guru_pengajar', 'wali_kelas']);
+            $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];

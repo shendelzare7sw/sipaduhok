@@ -63,20 +63,20 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Wali Kelas (12 orang)
+        // Wali Kelas (12 orang) - Format: wali.namaguru@sipaduhok.com (TIDAK TERIKAT JENJANG)
         $waliKelasData = [
-            ['name' => 'Dewi Lestari', 'email' => 'wali.smp.a@sipaduhok.com', 'username' => 'wali_smp_a', 'cabang_id' => 1],
-            ['name' => 'Rina Wijaya', 'email' => 'wali.sma.a@sipaduhok.com', 'username' => 'wali_sma_a', 'cabang_id' => 1],
-            ['name' => 'Hendra Kusuma', 'email' => 'wali.sd.a@sipaduhok.com', 'username' => 'wali_sd_a', 'cabang_id' => 1],
-            ['name' => 'Nurul Hidayah', 'email' => 'wali.paud.a@sipaduhok.com', 'username' => 'wali_paud_a', 'cabang_id' => 2],
-            ['name' => 'Arif Budiman', 'email' => 'wali.smp.b@sipaduhok.com', 'username' => 'wali_smp_b', 'cabang_id' => 3],
-            ['name' => 'Linda Permata', 'email' => 'wali.sma.b@sipaduhok.com', 'username' => 'wali_sma_b', 'cabang_id' => 3],
-            ['name' => 'Rudi Hartono', 'email' => 'wali.sd.b@sipaduhok.com', 'username' => 'wali_sd_b', 'cabang_id' => 1],
-            ['name' => 'Mega Puspita', 'email' => 'wali.paud.b@sipaduhok.com', 'username' => 'wali_paud_b', 'cabang_id' => 2],
-            ['name' => 'Faisal Rahman', 'email' => 'wali.smp.c@sipaduhok.com', 'username' => 'wali_smp_c', 'cabang_id' => 1],
-            ['name' => 'Dian Anggraini', 'email' => 'wali.sma.c@sipaduhok.com', 'username' => 'wali_sma_c', 'cabang_id' => 3],
-            ['name' => 'Yoga Pratama', 'email' => 'wali.sd.c@sipaduhok.com', 'username' => 'wali_sd_c', 'cabang_id' => 1],
-            ['name' => 'Lilis Suryani', 'email' => 'wali.paud.c@sipaduhok.com', 'username' => 'wali_paud_c', 'cabang_id' => 2],
+            ['name' => 'Hendra Kusuma, S.Pd', 'email' => 'wali.hendrakusuma@sipaduhok.com', 'username' => 'wali_hendrakusuma', 'cabang_id' => 1],
+            ['name' => 'Nurul Hidayah, S.Paud', 'email' => 'wali.nurulhidayah@sipaduhok.com', 'username' => 'wali_nurulhidayah', 'cabang_id' => 2],
+            ['name' => 'Arif Budiman, S.Pd', 'email' => 'wali.arifbudiman@sipaduhok.com', 'username' => 'wali_arifbudiman', 'cabang_id' => 3],
+            ['name' => 'Linda Permata, S.Pd', 'email' => 'wali.lindapermata@sipaduhok.com', 'username' => 'wali_lindapermata', 'cabang_id' => 3],
+            ['name' => 'Rudi Hartono, S.Pd', 'email' => 'wali.rudihartono@sipaduhok.com', 'username' => 'wali_rudihartono', 'cabang_id' => 1],
+            ['name' => 'Mega Puspita, S.Paud', 'email' => 'wali.megapuspita@sipaduhok.com', 'username' => 'wali_megapuspita', 'cabang_id' => 2],
+            ['name' => 'Faisal Rahman, S.Pd', 'email' => 'wali.faisalrahman@sipaduhok.com', 'username' => 'wali_faisalrahman', 'cabang_id' => 1],
+            ['name' => 'Dian Anggraini, S.Pd', 'email' => 'wali.diananggraini@sipaduhok.com', 'username' => 'wali_diananggraini', 'cabang_id' => 3],
+            ['name' => 'Dewi Lestari, S.Pd', 'email' => 'wali.dewilestari@sipaduhok.com', 'username' => 'wali_dewilestari', 'cabang_id' => 1],
+            ['name' => 'Lilis Suryani, S.Paud', 'email' => 'wali.lilissuryani@sipaduhok.com', 'username' => 'wali_lilissuryani', 'cabang_id' => 2],
+            ['name' => 'Yoga Pratama, S.Pd', 'email' => 'wali.yogapratama@sipaduhok.com', 'username' => 'wali_yogapratama', 'cabang_id' => 1],
+            ['name' => 'Sri Mulyani, S.Pd', 'email' => 'wali.srimulyani@sipaduhok.com', 'username' => 'wali_srimulyani', 'cabang_id' => 1],
         ];
 
         foreach ($waliKelasData as $wali) {
@@ -92,20 +92,18 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Guru Pengajar (12 orang)
+        // Guru Pengajar (10 orang) - Format: guru.namaguru@sipaduhok.com
         $guruData = [
-            ['name' => 'Prof. Andi Prasetyo', 'email' => 'guru.matematika@sipaduhok.com', 'username' => 'guru_matematika', 'cabang_id' => 1],
-            ['name' => 'Sri Mulyani', 'email' => 'guru.bahasa@sipaduhok.com', 'username' => 'guru_bahasa', 'cabang_id' => 1],
-            ['name' => 'Bambang Sutrisno', 'email' => 'guru.ipa@sipaduhok.com', 'username' => 'guru_ipa', 'cabang_id' => 2],
-            ['name' => 'Ratna Sari', 'email' => 'guru.ips@sipaduhok.com', 'username' => 'guru_ips', 'cabang_id' => 3],
-            ['name' => 'Agus Setiawan', 'email' => 'guru.fisika@sipaduhok.com', 'username' => 'guru_fisika', 'cabang_id' => 1],
-            ['name' => 'Wulan Dari', 'email' => 'guru.kimia@sipaduhok.com', 'username' => 'guru_kimia', 'cabang_id' => 1],
-            ['name' => 'Hendro Wijaya', 'email' => 'guru.biologi@sipaduhok.com', 'username' => 'guru_biologi', 'cabang_id' => 3],
-            ['name' => 'Sinta Dewi', 'email' => 'guru.inggris@sipaduhok.com', 'username' => 'guru_inggris', 'cabang_id' => 1],
-            ['name' => 'Yudi Santoso', 'email' => 'guru.sejarah@sipaduhok.com', 'username' => 'guru_sejarah', 'cabang_id' => 3],
-            ['name' => 'Ani Susanti', 'email' => 'guru.geografi@sipaduhok.com', 'username' => 'guru_geografi', 'cabang_id' => 1],
-            ['name' => 'Budi Prasetyo', 'email' => 'guru.ekonomi@sipaduhok.com', 'username' => 'guru_ekonomi', 'cabang_id' => 3],
-            ['name' => 'Maya Kartika', 'email' => 'guru.pkn@sipaduhok.com', 'username' => 'guru_pkn', 'cabang_id' => 1],
+            ['name' => 'Bambang Sutrisno, S.Si', 'email' => 'guru.bambangsutrisno@sipaduhok.com', 'username' => 'guru_bambangsutrisno', 'cabang_id' => 2],
+            ['name' => 'Ratna Sari, S.Pd', 'email' => 'guru.ratnasari@sipaduhok.com', 'username' => 'guru_ratnasari', 'cabang_id' => 3],
+            ['name' => 'Agus Setiawan, M.Si', 'email' => 'guru.agussetiawan@sipaduhok.com', 'username' => 'guru_agussetiawan', 'cabang_id' => 1],
+            ['name' => 'Wulan Dari, S.Pd', 'email' => 'guru.wulandari@sipaduhok.com', 'username' => 'guru_wulandari', 'cabang_id' => 1],
+            ['name' => 'Hendro Wijaya, S.Si', 'email' => 'guru.hendrowijaya@sipaduhok.com', 'username' => 'guru_hendrowijaya', 'cabang_id' => 3],
+            ['name' => 'Sinta Dewi, S.Pd', 'email' => 'guru.sintadewi@sipaduhok.com', 'username' => 'guru_sintadewi', 'cabang_id' => 1],
+            ['name' => 'Yudi Santoso, M.Pd', 'email' => 'guru.yudisantoso@sipaduhok.com', 'username' => 'guru_yudisantoso', 'cabang_id' => 3],
+            ['name' => 'Ani Susanti, S.Pd', 'email' => 'guru.anisusanti@sipaduhok.com', 'username' => 'guru_anisusanti', 'cabang_id' => 1],
+            ['name' => 'Budi Prasetyo, S.E', 'email' => 'guru.budiprasetyo@sipaduhok.com', 'username' => 'guru_budiprasetyo', 'cabang_id' => 3],
+            ['name' => 'Maya Kartika, S.Pd', 'email' => 'guru.mayakartika@sipaduhok.com', 'username' => 'guru_mayakartika', 'cabang_id' => 1],
         ];
 
         foreach ($guruData as $guru) {

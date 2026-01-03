@@ -81,7 +81,16 @@ class RaporController extends Controller
         ]);
 
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+
+        if (!$kelas) {
+            return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
 
         // Get semua siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelas->id)

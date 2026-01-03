@@ -49,6 +49,7 @@
     @endif
 
     {{-- HEADER ACTIONS --}}
+    @if($kelas)
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="row align-items-center">
@@ -69,8 +70,10 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- JADWAL PER HARI --}}
+    @if($kelas)
     <div class="row">
         @foreach($hariList as $hari)
         <div class="col-lg-6 mb-4">
@@ -125,6 +128,7 @@
         </div>
         @endforeach
     </div>
+    @endif
 </div>
 </div>
 

@@ -18,10 +18,37 @@ class ValidasiAksesController extends Controller
     public function index(Request $request): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+
+        if (!$tenagaPendidik) {
+            return view('wali-kelas.validasi-akses.index')->with([
+                'error' => 'Data tenaga pendidik tidak ditemukan.',
+                'kelas' => null,
+                'siswaList' => collect(),
+                'stats' => [
+                    'ujian_pending' => 0,
+                    'ujian_selesai' => 0,
+                    'rapor_pending' => 0,
+                    'rapor_selesai' => 0,
+                ],
+                'filterStatus' => null,
+            ]);
+        }
+
         $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
 
         if (!$kelas) {
-            return view('wali-kelas.validasi-akses.index')->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+            return view('wali-kelas.validasi-akses.index')->with([
+                'error' => 'Anda belum ditugaskan sebagai wali kelas.',
+                'kelas' => null,
+                'siswaList' => collect(),
+                'stats' => [
+                    'ujian_pending' => 0,
+                    'ujian_selesai' => 0,
+                    'rapor_pending' => 0,
+                    'rapor_selesai' => 0,
+                ],
+                'filterStatus' => null,
+            ]);
         }
 
         // Get siswa di kelas
