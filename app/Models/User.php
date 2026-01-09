@@ -104,6 +104,14 @@ class User extends Authenticatable
         return $this->attributes['role'] === 'ketua_pkbm';
     }
 
+    public function isWakilKepalaSekolah()
+    {
+        if ($this->role_id && $this->roleRelation) {
+            return $this->roleRelation->name === 'wakil_kepala_sekolah';
+        }
+        return $this->attributes['role'] === 'wakil_kepala_sekolah';
+    }
+
     public function isSekretaris()
     {
         if ($this->role_id && $this->roleRelation) {

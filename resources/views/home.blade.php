@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PKBM House Of Knowledge - Beranda</title>
-    
+
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Custom Tailwind Config -->
     <script>
         tailwind.config = {
@@ -18,7 +18,7 @@
                 extend: {
                     colors: {
                         'primary': '#165fac',
-                        'secondary': '#287f3b', 
+                        'secondary': '#287f3b',
                         'accent-orange': '#d45930',
                         'accent-yellow': '#fac030',
                         'accent-bright': '#ffe400',
@@ -31,15 +31,15 @@
             }
         }
     </script>
-    
+
     <style>
     body { font-family: 'Poppins', sans-serif; }
-    
+
     /* Hero Section */
     .hero-overlay {
         background: linear-gradient(135deg, rgba(22, 95, 172, 0.9) 0%, rgba(40, 127, 59, 0.85) 100%);
     }
-    
+
     /* Decorative Frame Tilt Style */
 .decorative-frame-tilt {
     position: relative;
@@ -82,22 +82,22 @@
 .decorative-frame-tilt:hover::after {
     transform: rotate(-3deg);
 }
-    
+
     /* Animations */
     @keyframes float {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-20px); }
     }
-    
+
     @keyframes bounce {
         0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
         40% { transform: translateY(-10px); }
         60% { transform: translateY(-5px); }
     }
-    
+
     .float-animation { animation: float 6s ease-in-out infinite; }
     .bounce-animation { animation: bounce 2s infinite; }
-    
+
     /* Card Hover */
     .card-hover {
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -106,13 +106,13 @@
         transform: translateY(-12px);
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
     }
-    
+
     /* 3D Carousel */
     .carousel-3d {
         perspective: 1000px;
         height: 450px;
     }
-    
+
     .carousel-item {
         position: absolute;
         width: 280px;
@@ -122,53 +122,53 @@
         overflow: hidden;
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
     }
-    
+
     .carousel-item.center {
         transform: translateX(-50%) scale(1.1);
         left: 50%;
         z-index: 5;
         opacity: 1;
     }
-    
+
     .carousel-item.left-1 {
         transform: translateX(-50%) scale(0.9) rotateY(15deg);
         left: 25%;
         z-index: 4;
         opacity: 0.9;
     }
-    
+
     .carousel-item.left-2 {
         transform: translateX(-50%) scale(0.75) rotateY(25deg);
         left: 5%;
         z-index: 3;
         opacity: 0.6;
     }
-    
+
     .carousel-item.right-1 {
         transform: translateX(-50%) scale(0.9) rotateY(-15deg);
         left: 75%;
         z-index: 4;
         opacity: 0.9;
     }
-    
+
     .carousel-item.right-2 {
         transform: translateX(-50%) scale(0.75) rotateY(-25deg);
         left: 95%;
         z-index: 3;
         opacity: 0.6;
     }
-    
+
     .carousel-item.hidden-item {
         opacity: 0;
         pointer-events: none;
     }
-    
+
     @media (max-width: 768px) {
         .carousel-3d { height: 350px; }
         .carousel-item { width: 200px; height: 280px; }
         .carousel-item.left-2, .carousel-item.right-2 { opacity: 0.4; }
     }
-    
+
     /* Gallery Hover */
     .gallery-item {
         overflow: hidden;
@@ -179,7 +179,7 @@
     .gallery-item:hover img {
         transform: scale(1.1);
     }
-    
+
     /* Contact Card Hover */
     .contact-hover:hover {
         transform: translateX(10px);
@@ -193,11 +193,11 @@
 }
 
 @keyframes float-gentle {
-    0%, 100% { 
-        transform: translate(-50%, 0); 
+    0%, 100% {
+        transform: translate(-50%, 0);
     }
-    50% { 
-        transform: translate(-50%, 10px); 
+    50% {
+        transform: translate(-50%, 10px);
     }
 }
 
@@ -245,15 +245,15 @@ section {
     <!-- ==================== HERO SECTION ==================== -->
     <section class="relative min-h-screen flex items-center" style="background-image: url('{{ asset('img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
         <div class="hero-overlay absolute inset-0"></div>
-        
+
         <!-- Decorative Elements -->
         <div class="absolute top-20 left-10 w-20 h-20 border-4 border-white/20 rounded-full float-animation hidden lg:block"></div>
         <div class="absolute bottom-40 left-20 w-10 h-10 bg-accent-yellow/30 rounded-full float-animation hidden lg:block" style="animation-delay: 1s;"></div>
         <div class="absolute top-40 right-40 w-16 h-16 border-4 border-secondary/30 rounded-lg rotate-45 float-animation hidden lg:block" style="animation-delay: 2s;"></div>
-        
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-20">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                
+
                 <!-- Left Content -->
                 <div class="text-center lg:text-left">
                     <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6">
@@ -281,12 +281,12 @@ section {
                         </a> -->
                     </div>
                 </div>
-                
+
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
                     <div class="decorative-frame-tilt relative">
                         <img src="{{ asset('img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
-                        
+
                         <!-- Floating Badge 1 -->
                         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
                             <div class="flex items-center gap-3">
@@ -301,7 +301,7 @@ section {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Floating Badge 2 -->
                         <div class="absolute -top-4 -right-4 bg-primary rounded-2xl p-4 shadow-xl transform rotate-6 hover:rotate-0 transition-transform duration-300">
                             <div class="text-center text-white">
@@ -313,7 +313,7 @@ section {
                 </div>
             </div>
         </div>
-        
+
         <!-- Scroll Indicator -->
         <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
             <a href="#stats" class="scroll-indicator flex flex-col items-center text-white/80 hover:text-white transition-all duration-300 group">
@@ -387,7 +387,7 @@ section {
                     Alasan kenapa harus memilih untuk bergabung dengan PKBM House Of Knowledge?
                 </p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Card 1 - Pendidikan Inklusi -->
                 <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-accent-orange group">
@@ -399,11 +399,11 @@ section {
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Inklusi</h3>
                     <p class="text-gray-600 text-sm mb-4">Program pendidikan untuk anak berkebutuhan khusus dengan pendekatan individual</p>
                     <a href="{{ url('/program-inklusi') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya 
+                        Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
-                
+
                 <!-- Card 2 - Pendidikan Kesetaraan -->
                 <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-primary group">
                     <div class="w-20 h-20 mx-auto mb-6 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
@@ -413,12 +413,12 @@ section {
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Kesetaraan</h3>
                     <p class="text-gray-600 text-sm mb-4">Program Paket A, B, dan C untuk kesetaraan pendidikan SD, SMP, dan SMA</p>
-                    <a href="{{ url('/program-sd') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya 
+                    <a href="{{ url('/program-sd-sma') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
+                        Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
-                
+
                 <!-- Card 3 - Konseling ABK -->
                 <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-secondary group">
                     <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-secondary transition-colors duration-300">
@@ -429,11 +429,11 @@ section {
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Konseling Anak Berkebutuhan Khusus</h3>
                     <p class="text-gray-600 text-sm mb-4">Layanan konseling profesional untuk mendukung tumbuh kembang anak</p>
                     <a href="{{ url('/program-terapi') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya 
+                        Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
-                
+
                 <!-- Card 4 - PAUD -->
                 <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-accent-yellow group">
                     <div class="w-20 h-20 mx-auto mb-6 bg-yellow-50 rounded-2xl flex items-center justify-center group-hover:bg-accent-yellow transition-colors duration-300">
@@ -443,8 +443,8 @@ section {
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Anak Usia Dini</h3>
                     <p class="text-gray-600 text-sm mb-4">Program PAUD dengan metode bermain sambil belajar yang menyenangkan</p>
-                    <a href="{{ url('/program-paud') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya 
+                    <a href="{{ url('/program-paud-tk') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
+                        Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
@@ -459,16 +459,16 @@ section {
                 <!-- Left - Image -->
                 <div class="relative">
                     <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                        <img src="{{ asset('img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">                     
+                        <img src="{{ asset('img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">
                     </div>
-                    
+
                     <!-- Experience Badge -->
                     <div class="absolute -bottom-6 -right-6 bg-primary text-white p-6 rounded-2xl shadow-xl hidden md:block">
                         <p class="text-4xl font-bold">14+</p>
                         <p class="text-sm">Tahun<br>Pengalaman</p>
                     </div>
                 </div>
-                
+
                 <!-- Right - Content -->
                 <div>
                     <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
@@ -483,7 +483,7 @@ section {
                     <p class="text-gray-600 mb-8 leading-relaxed">
                         Dengan pengalaman lebih dari 14 tahun, kami telah membantu ribuan siswa mencapai potensi terbaik mereka melalui pendekatan pembelajaran yang inovatif dan personal.
                     </p>
-                    
+
                     <!-- Features -->
                     <div class="space-y-4 mb-8">
                         <div class="flex items-center gap-3">
@@ -511,7 +511,7 @@ section {
                             <span class="text-gray-700">Fasilitas lengkap dan ramah anak</span>
                         </div>
                     </div>
-                    
+
                     <a href="{{ url('/tentang-sekolah') }}" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
                         Selengkapnya
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -535,7 +535,7 @@ section {
                     Ikuti perkembangan terbaru dari kegiatan dan prestasi PKBM House Of Knowledge
                 </p>
             </div>
-            
+
             <!-- 3D Carousel -->
             <div class="carousel-3d relative flex items-center justify-center overflow-hidden">
                 <!-- Navigation Left -->
@@ -544,7 +544,7 @@ section {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-                
+
                 <!-- Carousel Items -->
                 <div id="carouselTrack" class="relative w-full h-full">
                     <!-- Item 1 -->
@@ -555,7 +555,7 @@ section {
                             <h3 class="text-white font-bold">Kegiatan Pembelajaran Aktif</h3>
                         </div>
                     </div>
-                    
+
                     <!-- Item 2 -->
                     <div class="carousel-item" data-index="1">
                         <img src="{{ asset('img/news-2.jpg') }}" alt="Prestasi Siswa" class="w-full h-full object-cover">
@@ -564,7 +564,7 @@ section {
                             <h3 class="text-white font-bold">Prestasi Siswa Berprestasi</h3>
                         </div>
                     </div>
-                    
+
                     <!-- Item 3 -->
                     <div class="carousel-item" data-index="2">
                         <img src="{{ asset('img/news-3.jpg') }}" alt="Program Terapi" class="w-full h-full object-cover">
@@ -573,7 +573,7 @@ section {
                             <h3 class="text-white font-bold">Program Terapi Anak</h3>
                         </div>
                     </div>
-                    
+
                     <!-- Item 4 -->
                     <div class="carousel-item" data-index="3">
                         <img src="{{ asset('img/news-4.jpg') }}" alt="Ekstrakurikuler" class="w-full h-full object-cover">
@@ -582,7 +582,7 @@ section {
                             <h3 class="text-white font-bold">Kegiatan Ekstrakurikuler</h3>
                         </div>
                     </div>
-                    
+
                     <!-- Item 5 -->
                     <div class="carousel-item" data-index="4">
                         <img src="{{ asset('img/news-5.jpg') }}" alt="Workshop Guru" class="w-full h-full object-cover">
@@ -592,7 +592,7 @@ section {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Navigation Right -->
                 <button id="carouselNext" class="absolute right-4 md:right-8 z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -600,13 +600,13 @@ section {
                     </svg>
                 </button>
             </div>
-            
+
             <!-- Info Display -->
             <div id="newsInfo" class="text-center mt-8">
                 <h3 class="text-xl md:text-2xl font-bold text-white mb-2" id="newsTitle">Kegiatan Pembelajaran Aktif</h3>
                 <p class="text-white/80" id="newsCategory">Kegiatan</p>
             </div>
-            
+
             <!-- View All Button -->
             <div class="text-center mt-8">
                 <a href="{{ url('/berita') }}" class="inline-flex items-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
@@ -629,7 +629,7 @@ section {
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Galeri</h2>
                 <p class="text-gray-600">Berisi Kegiatan Siswa Dan Siswi</p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="gallery-item rounded-2xl shadow-lg">
                     <img src="{{ asset('img/gallery-1.jpg') }}" alt="Gallery 1" class="w-full h-64 object-cover rounded-2xl">
@@ -650,7 +650,7 @@ section {
                     <img src="{{ asset('img/gallery-6.jpg') }}" alt="Gallery 6" class="w-full h-64 object-cover rounded-2xl">
                 </div>
             </div>
-            
+
             <div class="text-center mt-12">
                 <a href="{{ url('/galeri') }}" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
                     Lihat Semua Galeri
@@ -681,22 +681,22 @@ section {
                     PKBM House Of Knowledge hadir di 3 lokasi strategis untuk memudahkan akses pendidikan bagi putra-putri Anda.
                 </p>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
+
                 <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 border-accent-orange group relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                    
+
                     <div class="relative z-10">
                         <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-6 text-accent-orange group-hover:bg-accent-orange group-hover:text-white transition-all duration-300">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </div>
-                        
+
                         <h3 class="text-xl font-bold text-gray-800 mb-1">Gedung Utama PKBM House Of Knowledge </h3>
                         <p class="text-sm text-accent-orange font-medium uppercase tracking-wider mb-4">Pamulang Barat</p>
-                        
+
                         <p class="text-gray-600 text-sm leading-relaxed mb-4">
                             Jl. Ruko Reni Jaya Blok AF No. 22-23<br>
                             Pamulang Barat, Tangerang Selatan<br>
@@ -707,17 +707,17 @@ section {
 
                 <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 border-primary group relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                    
+
                     <div class="relative z-10">
                         <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
                             </svg>
                         </div>
-                        
+
                         <h3 class="text-xl font-bold text-gray-800 mb-1">PAUD House Of Knowledge</h3>
                         <p class="text-sm text-primary font-medium uppercase tracking-wider mb-4">Pamulang</p>
-                        
+
                         <p class="text-gray-600 text-sm leading-relaxed mb-4">
                             Jl. Bratasena I, Pondok Benda<br>
                             Pamulang, Tangerang Selatan<br>
@@ -728,17 +728,17 @@ section {
 
                 <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 border-secondary group relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                    
+
                     <div class="relative z-10">
                         <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6 text-secondary group-hover:bg-secondary group-hover:text-white transition-all duration-300">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                             </svg>
                         </div>
-                        
+
                         <h3 class="text-xl font-bold text-gray-800 mb-1">House Of Knowledge Cimanggis</h3>
                         <p class="text-sm text-secondary font-medium uppercase tracking-wider mb-4">Ciputat</p>
-                        
+
                         <p class="text-gray-600 text-sm leading-relaxed mb-4">
                             Jl. Otista Raya Blok A25<br>
                             Ruko Prima Ciputat, Tangerang Selatan<br>
@@ -748,7 +748,7 @@ section {
                 </div>
 
             </div>
-            
+
             <div class="text-center mt-12">
                 <a href="{{ url('/kontak') }}" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg group">
                     <span>Lihat Peta & Kontak Lengkap</span>
@@ -763,19 +763,19 @@ section {
     </section>
 
     <x-cta></x-cta>
-    
+
     <x-footer></x-footer>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        
+
         // ========== 3D Carousel Script ==========
         const items = document.querySelectorAll('.carousel-item');
         const prevBtn = document.getElementById('carouselPrev');
         const nextBtn = document.getElementById('carouselNext');
         const newsTitle = document.getElementById('newsTitle');
         const newsCategory = document.getElementById('newsCategory');
-        
+
         const newsData = [
             { title: 'Kegiatan Pembelajaran Aktif', category: 'Kegiatan' },
             { title: 'Prestasi Siswa Berprestasi', category: 'Prestasi' },
@@ -783,16 +783,16 @@ section {
             { title: 'Kegiatan Ekstrakurikuler', category: 'Ekskul' },
             { title: 'Workshop Guru', category: 'Workshop' }
         ];
-        
+
         let currentIndex = 0;
         const totalItems = items.length;
-        
+
         function updateCarousel() {
             items.forEach((item, index) => {
                 item.classList.remove('center', 'left-1', 'left-2', 'right-1', 'right-2', 'hidden-item');
-                
+
                 const diff = (index - currentIndex + totalItems) % totalItems;
-                
+
                 if (diff === 0) {
                     item.classList.add('center');
                 } else if (diff === 1) {
@@ -807,53 +807,53 @@ section {
                     item.classList.add('hidden-item');
                 }
             });
-            
+
             // Update info
             newsTitle.textContent = newsData[currentIndex].title;
             newsCategory.textContent = newsData[currentIndex].category;
         }
-        
+
         function nextSlide() {
             currentIndex = (currentIndex + 1) % totalItems;
             updateCarousel();
         }
-        
+
         function prevSlide() {
             currentIndex = (currentIndex - 1 + totalItems) % totalItems;
             updateCarousel();
         }
-        
+
         prevBtn.addEventListener('click', prevSlide);
         nextBtn.addEventListener('click', nextSlide);
-        
+
         // Keyboard navigation
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowLeft') prevSlide();
             if (e.key === 'ArrowRight') nextSlide();
         });
-        
+
         // Auto rotate
         let autoRotate = setInterval(nextSlide, 5000);
-        
+
         const carouselSection = document.querySelector('.carousel-3d');
         carouselSection.addEventListener('mouseenter', () => clearInterval(autoRotate));
         carouselSection.addEventListener('mouseleave', () => {
             autoRotate = setInterval(nextSlide, 5000);
         });
-        
+
         // Initialize carousel
         updateCarousel();
-        
+
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const targetId = this.getAttribute('href');
-                
+
                 if (targetId === '#') return;
-                
+
                 const target = document.querySelector(targetId);
                 if (target) {
-                    const offset = 100; 
+                    const offset = 100;
                     const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
 
                     window.scrollTo({
@@ -864,7 +864,7 @@ section {
             });
         });
         const scrollIndicator = document.querySelector('.scroll-indicator');
-        
+
         if (scrollIndicator) {
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 300) {

@@ -381,44 +381,66 @@ Perbarui data {{ $orangTua->name ?? 'N/A' }}
         </div>
     </div>
 
-    {{-- Section 2: Children Information (Read-only) --}}
+    {{-- Section 2: Children Information with Editable Relationship --}}
     @if($orangTua->studentParents && $orangTua->studentParents->count() > 0)
     <div class="card">
         <h5 class="form-title">
             <i class="fas fa-users" style="color: #10b981;"></i>
-            Data Anak Terdaftar
+            Data Anak Terdaftar & Hubungan Keluarga
         </h5>
         <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">
             <i class="fas fa-info-circle"></i>
-            Daftar siswa yang terhubung dengan akun orang tua ini. Untuk mengubah hubungan orang tua-siswa, gunakan halaman edit siswa.
+            Anda dapat mengubah hubungan keluarga untuk setiap siswa di bawah ini.
         </p>
 
-        <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
             @foreach($orangTua->studentParents as $sp)
-                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">
-                                <i class="fas fa-user-graduate" style="color: #3b82f6;"></i>
-                                {{ $sp->siswa->nama_lengkap }}
-                            </div>
-                            <small style="color: #64748b;">
-                                {{ ucwords(str_replace('_', ' ', $sp->relationship)) }} •
-                                NIS: {{ $sp->siswa->nis }} •
-                                Kelas: {{ $sp->siswa->kelas->nama_kelas ?? '-' }}
-                            </small>
+                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px;">
+                    <div style="margin-bottom: 10px;">
+                        <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">
+                            <i class="fas fa-user-graduate" style="color: #3b82f6;"></i>
+                            {{ $sp->siswa->nama_lengkap }}
                         </div>
-                        <div style="display: flex; gap: 6px; font-size: 11px;">
-                            @if($sp->is_primary)
-                                <span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
-                                    Kontak Utama
-                                </span>
-                            @endif
-                            @if($sp->can_access_academic)
-                                <span style="background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
-                                    Akses Akademik
-                                </span>
-                            @endif
+                        <small style="color: #64748b;">
+                            NIS: {{ $sp->siswa->nis }} • NISN: {{ $sp->siswa->nisn }} •
+                            Kelas: {{ $sp->siswa->kelas->nama_kelas ?? '-' }}
+                        </small>
+                    </div>
+
+                    <div class="row" style="align-items: end;">
+                        <div class="col">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Hubungan Keluarga</label>
+                                <select name="relationships[{{ $sp->id }}]" class="form-control" id="hubungan_keluarga_{{ $sp->id }}" onchange="toggleOtherRelationshipEdit({{ $sp->id }})">
+                                    <option value="ayah_kandung" {{ $sp->relationship == 'ayah_kandung' ? 'selected' : '' }}>Ayah Kandung</option>
+                                    <option value="ibu_kandung" {{ $sp->relationship == 'ibu_kandung' ? 'selected' : '' }}>Ibu Kandung</option>
+                                    <option value="wali" {{ $sp->relationship == 'wali' ? 'selected' : '' }}>Wali</option>
+                                    <option value="ayah_tiri" {{ $sp->relationship == 'ayah_tiri' ? 'selected' : '' }}>Ayah Tiri</option>
+                                    <option value="ibu_tiri" {{ $sp->relationship == 'ibu_tiri' ? 'selected' : '' }}>Ibu Tiri</option>
+                                    <option value="lainnya" {{ $sp->relationship == 'lainnya' || (!in_array($sp->relationship, ['ayah_kandung', 'ibu_kandung', 'wali', 'ayah_tiri', 'ibu_tiri'])) ? 'selected' : '' }}>Lainnya</option>
+                                </select>
+                            </div>
+
+                            <div id="otherRelationshipEditField_{{ $sp->id }}" style="display: {{ $sp->relationship == 'lainnya' || (!in_array($sp->relationship, ['ayah_kandung', 'ibu_kandung', 'wali', 'ayah_tiri', 'ibu_tiri'])) ? 'block' : 'none' }}; margin-top: 12px;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label">Sebutkan Hubungan Keluarga Lainnya</label>
+                                    <input type="text" class="form-control" name="relationships_lainnya[{{ $sp->id }}]" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll" value="{{ (!in_array($sp->relationship, ['ayah_kandung', 'ibu_kandung', 'wali', 'ayah_tiri', 'ibu_tiri'])) ? $sp->relationship : '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col" style="max-width: 200px;">
+                            <div style="display: flex; gap: 6px; font-size: 11px; flex-wrap: wrap;">
+                                @if($sp->is_primary)
+                                    <span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                        <i class="fas fa-star" style="font-size: 9px;"></i> Kontak Utama
+                                    </span>
+                                @endif
+                                @if($sp->can_access_academic)
+                                    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 600;">
+                                        <i class="fas fa-check-circle" style="font-size: 9px;"></i> Akses Akademik
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -439,4 +461,17 @@ Perbarui data {{ $orangTua->name ?? 'N/A' }}
         </button>
     </div>
 </form>
+
+<script>
+function toggleOtherRelationshipEdit(studentParentId) {
+    const selectValue = document.getElementById('hubungan_keluarga_' + studentParentId).value;
+    const otherField = document.getElementById('otherRelationshipEditField_' + studentParentId);
+
+    if (selectValue === 'lainnya') {
+        otherField.style.display = 'block';
+    } else {
+        otherField.style.display = 'none';
+    }
+}
+</script>
 @endsection

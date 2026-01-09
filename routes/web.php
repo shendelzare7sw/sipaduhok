@@ -19,6 +19,16 @@ use App\Http\Controllers\Admin\CetakLaporanController;
 // Ketua PKBM Controllers
 use App\Http\Controllers\Ketua\KetuaController;
 
+// Wakil Kepala Sekolah Controllers
+use App\Http\Controllers\WakilKepalaSekolah\WakilKepalaSekolahController;
+use App\Http\Controllers\WakilKepalaSekolah\TahunAjaranController as WakaTahunAjaranController;
+use App\Http\Controllers\WakilKepalaSekolah\MataPelajaranController as WakaMataPelajaranController;
+use App\Http\Controllers\WakilKepalaSekolah\KelasController as WakaKelasController;
+use App\Http\Controllers\WakilKepalaSekolah\ManajemenSiswaController as WakaManajemenSiswaController;
+use App\Http\Controllers\WakilKepalaSekolah\WaliKelasController as WakaWaliKelasController;
+use App\Http\Controllers\WakilKepalaSekolah\JadwalPelajaranController as WakaJadwalPelajaranController;
+use App\Http\Controllers\WakilKepalaSekolah\PengaturanIstirahatController as WakaPengaturanIstirahatController;
+
 // Sekretaris Controllers
 use App\Http\Controllers\Sekretaris\SekretarisController;
 
@@ -182,6 +192,8 @@ Route::middleware(['auth'])->group(function () {
 
             // Orang Tua
             Route::get('/orang-tua', [UserController::class, 'orangTua'])->name('orang-tua');
+            Route::get('/orang-tua/create', [UserController::class, 'createOrangTua'])->name('orang-tua.create');
+            Route::post('/orang-tua', [UserController::class, 'storeOrangTua'])->name('orang-tua.store');
             Route::get('/orang-tua/{id}', [UserController::class, 'showOrangTua'])->name('show-orang-tua');
             Route::get('/orang-tua/{id}/edit', [UserController::class, 'editOrangTua'])->name('edit-orang-tua');
             Route::put('/orang-tua/{id}', [UserController::class, 'updateOrangTua'])->name('update-orang-tua');
@@ -294,6 +306,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'show'])->name('show');
                 Route::get('/{siswa}/edit', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'edit'])->name('edit');
                 Route::put('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'update'])->name('update');
+                Route::get('/{siswa}/cetak', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'cetak'])->name('cetak');
             });
 
             // Pembayaran
@@ -457,6 +470,94 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', [KetuaController::class, 'catatanCreate'])->name('create');
             Route::post('/', [KetuaController::class, 'catatanStore'])->name('store');
             Route::get('/{id}', [KetuaController::class, 'catatanShow'])->name('show');
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | WAKIL KEPALA SEKOLAH DASHBOARD
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:wakil_kepala_sekolah'])->prefix('waka')->name('waka.')->group(function () {
+        Route::get('/dashboard', [WakilKepalaSekolahController::class, 'dashboard'])->name('dashboard');
+
+        // Tahun Ajaran
+        Route::prefix('tahun-ajaran')->name('tahun-ajaran.')->group(function () {
+            Route::get('/', [WakaTahunAjaranController::class, 'index'])->name('index');
+            Route::get('/create', [WakaTahunAjaranController::class, 'create'])->name('create');
+            Route::post('/', [WakaTahunAjaranController::class, 'store'])->name('store');
+            Route::get('/{tahunAjaran}', [WakaTahunAjaranController::class, 'show'])->name('show');
+            Route::get('/{tahunAjaran}/edit', [WakaTahunAjaranController::class, 'edit'])->name('edit');
+            Route::put('/{tahunAjaran}', [WakaTahunAjaranController::class, 'update'])->name('update');
+            Route::delete('/{tahunAjaran}', [WakaTahunAjaranController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/toggle-active', [WakaTahunAjaranController::class, 'toggleActive'])->name('toggle-active');
+        });
+
+        // Mata Pelajaran
+        Route::resource('mata-pelajaran', WakaMataPelajaranController::class);
+
+        // Kelas
+        Route::get('/kelas/print', [WakaKelasController::class, 'print'])->name('kelas.print');
+        Route::get('/kelas/{kelas}/manage-siswa', [WakaKelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
+        Route::post('/kelas/{kelas}/add-siswa', [WakaKelasController::class, 'addSiswa'])->name('kelas.add-siswa');
+        Route::post('/kelas/{kelas}/remove-siswa', [WakaKelasController::class, 'removeSiswa'])->name('kelas.remove-siswa');
+        Route::resource('kelas', WakaKelasController::class)->parameters(['kelas' => 'kelas']);
+
+        // Manajemen Siswa
+        Route::prefix('manajemen-siswa')->name('manajemen-siswa.')->group(function () {
+            Route::get('/', [WakaManajemenSiswaController::class, 'index'])->name('index');
+            Route::get('/print', [WakaManajemenSiswaController::class, 'print'])->name('print');
+            Route::get('/kelas/{kelas}', [WakaManajemenSiswaController::class, 'perKelas'])->name('per-kelas');
+            Route::post('/kelas/{kelas}/add-siswa', [WakaManajemenSiswaController::class, 'addToKelas'])->name('add-to-kelas');
+            Route::post('/kelas/{kelas}/remove-siswa', [WakaManajemenSiswaController::class, 'removeFromKelas'])->name('remove-from-kelas');
+            Route::post('/{siswa}/assign-kelas', [WakaManajemenSiswaController::class, 'assignKelas'])->name('assign-kelas');
+            Route::post('/{siswa}/attach-parent', [WakaManajemenSiswaController::class, 'attachParent'])->name('attach-parent');
+            Route::delete('/{siswa}/detach-parent/{parent}', [WakaManajemenSiswaController::class, 'detachParent'])->name('detach-parent');
+            Route::get('/{siswa}', [WakaManajemenSiswaController::class, 'show'])->name('show');
+            Route::get('/{siswa}/print-kartu', [WakaManajemenSiswaController::class, 'printKartu'])->name('print-kartu');
+        });
+
+        // Wali Kelas
+        Route::prefix('wali-kelas')->name('wali-kelas.')->group(function () {
+            Route::get('/', [WakaWaliKelasController::class, 'index'])->name('index');
+            Route::get('/print', [WakaWaliKelasController::class, 'print'])->name('print');
+            Route::post('/{kelasId}/assign', [WakaWaliKelasController::class, 'assign'])->name('assign');
+            Route::get('/{kelas}', [WakaWaliKelasController::class, 'show'])->name('show');
+        });
+
+        // Jadwal Pelajaran
+        Route::resource('jadwal-pelajaran', WakaJadwalPelajaranController::class);
+        Route::get('/jadwal-pelajaran/print', [WakaJadwalPelajaranController::class, 'print'])->name('jadwal-pelajaran.print');
+        Route::get('/jadwal-pelajaran/export-pdf', [WakaJadwalPelajaranController::class, 'exportPdf'])->name('jadwal-pelajaran.export-pdf');
+        Route::get('/jadwal-pelajaran/export-excel', [WakaJadwalPelajaranController::class, 'exportExcel'])->name('jadwal-pelajaran.export-excel');
+        Route::post('/jadwal-pelajaran/bulk-replace-guru', [WakaJadwalPelajaranController::class, 'bulkReplaceGuru'])->name('jadwal-pelajaran.bulk-replace-guru');
+        Route::post('/jadwal-pelajaran/duplicate', [WakaJadwalPelajaranController::class, 'duplicate'])->name('jadwal-pelajaran.duplicate');
+        Route::delete('/jadwal-pelajaran/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('jadwal-pelajaran.bulk-delete');
+
+        // Monitoring
+        Route::prefix('monitoring')->name('monitoring.')->group(function () {
+            Route::get('/wali-kelas', [WakilKepalaSekolahController::class, 'monitoringWaliKelas'])->name('wali-kelas');
+            Route::get('/guru-pengajar', [WakilKepalaSekolahController::class, 'monitoringGuruPengajar'])->name('guru-pengajar');
+            Route::get('/siswa', [WakilKepalaSekolahController::class, 'monitoringSiswa'])->name('siswa');
+        });
+
+        // Catatan / Teguran
+        Route::prefix('catatan')->name('catatan.')->group(function () {
+            Route::get('/', [WakilKepalaSekolahController::class, 'catatanIndex'])->name('index');
+            Route::get('/create', [WakilKepalaSekolahController::class, 'catatanCreate'])->name('create');
+            Route::post('/', [WakilKepalaSekolahController::class, 'catatanStore'])->name('store');
+            Route::get('/{id}', [WakilKepalaSekolahController::class, 'catatanShow'])->name('show');
+        });
+
+        // Pengaturan Istirahat
+        Route::prefix('pengaturan-istirahat')->name('pengaturan-istirahat.')->group(function () {
+            Route::get('/', [WakaPengaturanIstirahatController::class, 'index'])->name('index');
+            Route::get('/create', [WakaPengaturanIstirahatController::class, 'create'])->name('create');
+            Route::post('/', [WakaPengaturanIstirahatController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [WakaPengaturanIstirahatController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [WakaPengaturanIstirahatController::class, 'update'])->name('update');
+            Route::delete('/{id}', [WakaPengaturanIstirahatController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [WakaPengaturanIstirahatController::class, 'toggleStatus'])->name('toggle-status');
         });
     });
 

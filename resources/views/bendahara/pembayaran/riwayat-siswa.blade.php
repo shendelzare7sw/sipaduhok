@@ -78,7 +78,7 @@
                 <h6>Total Tagihan</h6>
                 <div class="stat-value">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
                 <div class="stat-label">Seluruh tagihan</div>
-                <div class="stat-icon">📋</div>
+                <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
@@ -147,11 +147,11 @@
                                     <td class="align-middle text-end fw-bold">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
                                     <td class="align-middle text-center">
                                         @if($bayar->metode_pembayaran === 'tunai')
-                                            <span class="badge bg-info">💵 Tunai</span>
+                                            <span class="badge bg-info"><i class="fas fa-money-bill"></i> Tunai</span>
                                         @elseif($bayar->metode_pembayaran === 'transfer')
-                                            <span class="badge bg-warning">🏦 Transfer</span>
+                                            <span class="badge bg-warning"><i class="fas fa-university"></i> Transfer</span>
                                         @else
-                                            <span class="badge bg-success">💳 Midtrans</span>
+                                            <span class="badge bg-success"><i class="fas fa-credit-card"></i> Midtrans</span>
                                         @endif
                                     </td>
                                     <td class="align-middle text-center">

@@ -34,7 +34,7 @@
 </head>
 <body>
     <a href="{{ route('admin.manajemen-siswa.index') }}" class="back-button no-print">← Kembali</a>
-    <button onclick="window.print()" class="print-button no-print">🖨️ Cetak</button>
+    <button onclick="window.print()" class="print-button no-print"><i class="fas fa-print"></i> Cetak</button>
 
     <div class="container">
         <div class="header">

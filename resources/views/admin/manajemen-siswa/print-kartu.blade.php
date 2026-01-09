@@ -83,7 +83,7 @@
 </head>
 <body>
     <a href="{{ route('admin.manajemen-siswa.show', $siswa) }}" class="back-button no-print">← Kembali</a>
-    <button onclick="window.print()" class="print-button no-print">🖨️ Cetak Kartu</button>
+    <button onclick="window.print()" class="print-button no-print"><i class="fas fa-print"></i> Cetak Kartu</button>
 
     <div class="card-container">
         {{-- Front Card --}}

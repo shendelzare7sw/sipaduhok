@@ -29,7 +29,7 @@
 
     <div class="info-box">
         <div><strong>Kelas:</strong> {{ $kelas->nama_kelas }}</div>
-        <div><strong>Periode:</strong> {{ \Carbon\Carbon::create()->month($bulan)->locale('id')->isoFormat('MMMM') }} {{ $tahun }}</div>
+        <div><strong>Periode:</strong> {{ \Carbon\Carbon::create($tahun, $bulan, 1)->locale('id')->isoFormat('MMMM YYYY') }}</div>
         <div><strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap }}</div>
         <div><strong>Dicetak:</strong> {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY HH:mm') }}</div>
     </div>

@@ -351,7 +351,12 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
         
         <div class="form-group">
             <label class="form-label">Password <small class="text-muted">(Kosongkan jika tidak ingin diubah)</small></label>
-            <input type="password" name="password" class="form-control" placeholder="Masukkan password baru (opsional)">
+            <div style="position: relative;">
+                <input type="password" id="passwordField" name="password" class="form-control" placeholder="Masukkan password baru (opsional)" style="padding-right: 45px;">
+                <button type="button" onclick="togglePassword('passwordField', 'togglePasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 5px;">
+                    <i id="togglePasswordIcon" class="fas fa-eye"></i>
+                </button>
+            </div>
         </div>
 
         <div class="form-group">
@@ -531,29 +536,95 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
 
         {{-- Add Existing Parent Form --}}
         <div id="addExistingParentForm" style="display: none; margin-top: 12px;">
-            <div class="form-group">
-                <label class="form-label">Pilih Orang Tua</label>
-                <select name="add_existing_parent_id" class="form-control">
-                    <option value="">-- Pilih Orang Tua --</option>
-                    @foreach($orangTuaList as $ortu)
-                        <option value="{{ $ortu->id }}">
-                            {{ $ortu->name }} ({{ $ortu->username }})
-                            @if($ortu->studentParents->count() > 0)
-                                - Anak: {{ $ortu->studentParents->pluck('siswa.nama_lengkap')->join(', ') }}
-                            @endif
-                        </option>
-                    @endforeach
-                </select>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-search" style="color: #9ca3af; margin-right: 6px;"></i>
+                            Cari Orang Tua
+                        </label>
+                        <input type="text" id="searchParent" class="form-control" placeholder="Ketik nama atau username orang tua...">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-filter" style="color: #9ca3af; margin-right: 6px;"></i>
+                            Filter Status
+                        </label>
+                        <select id="filterParentStatus" class="form-control">
+                            <option value="">Semua Orang Tua</option>
+                            <option value="available">Belum Terhubung (Baru)</option>
+                            <option value="has_children">Sudah Punya Anak Terdaftar</option>
+                        </select>
+                    </div>
+                </div>
             </div>
+
+            <div class="form-group" style="margin-top: 12px;">
+                <label class="form-label">
+                    Pilih Orang Tua
+                    <small class="text-muted" style="font-weight: normal; margin-left: 8px;">
+                        (<span id="parentCount">{{ $orangTuaList->count() }}</span> tersedia)
+                    </small>
+                </label>
+                <div id="parentListContainer" style="max-height: 300px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px;">
+                    @foreach($orangTuaList as $ortu)
+                        @php
+                            $hasChildren = $ortu->studentParents->count() > 0;
+                            $isAlreadyLinked = $ortu->studentParents->where('siswa_id', $siswa->id)->count() > 0;
+                        @endphp
+                        <label class="parent-option"
+                               data-name="{{ strtolower($ortu->name) }}"
+                               data-username="{{ strtolower($ortu->username) }}"
+                               data-status="{{ $hasChildren ? 'has_children' : 'available' }}"
+                               data-already-linked="{{ $isAlreadyLinked ? 'true' : 'false' }}"
+                               style="display: {{ $isAlreadyLinked ? 'none' : 'flex' }}; align-items: center; padding: 12px; margin-bottom: 8px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                            <input type="radio" name="add_existing_parent_id" value="{{ $ortu->id }}" style="margin-right: 12px;" {{ $isAlreadyLinked ? 'disabled' : '' }}>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #111827; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-user" style="color: #f59e0b;"></i>
+                                    {{ $ortu->name }}
+                                    @if(!$hasChildren)
+                                        <span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">BARU</span>
+                                    @endif
+                                </div>
+                                <small style="color: #64748b;">
+                                    Username: {{ $ortu->username }}
+                                    @if($hasChildren)
+                                        • <strong>Anak:</strong> {{ $ortu->studentParents->pluck('siswa.nama_lengkap')->join(', ') }}
+                                    @else
+                                        • <em>Belum memiliki anak terdaftar</em>
+                                    @endif
+                                </small>
+                            </div>
+                        </label>
+                    @endforeach
+                    <div id="noParentFound" style="display: none; text-align: center; padding: 20px; color: #64748b;">
+                        <i class="fas fa-search" style="font-size: 24px; margin-bottom: 8px;"></i>
+                        <p style="margin: 0; font-weight: 600;">Tidak ada orang tua yang ditemukan</p>
+                        <small>Coba ubah kata kunci atau filter pencarian</small>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Hubungan</label>
-                <select name="add_existing_relationship" class="form-control">
+                <select name="add_existing_relationship" class="form-control" id="add_existing_relationship" onchange="toggleAddExistingRelationship()">
                     <option value="ayah_kandung">Ayah Kandung</option>
                     <option value="ibu_kandung">Ibu Kandung</option>
                     <option value="wali">Wali</option>
                     <option value="ayah_tiri">Ayah Tiri</option>
                     <option value="ibu_tiri">Ibu Tiri</option>
+                    <option value="lainnya">Lainnya</option>
                 </select>
+            </div>
+
+            <div id="addExistingRelationshipOtherField" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Sebutkan Hubungan Keluarga Lainnya</label>
+                    <input type="text" class="form-control" name="add_existing_relationship_lainnya" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
+                </div>
             </div>
         </div>
 
@@ -583,7 +654,12 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input type="password" name="add_new_parent_password" class="form-control" placeholder="Minimal 8 karakter">
+                        <div style="position: relative;">
+                            <input type="password" id="newParentPasswordField" name="add_new_parent_password" class="form-control" placeholder="Minimal 8 karakter" style="padding-right: 45px;">
+                            <button type="button" onclick="togglePassword('newParentPasswordField', 'toggleNewParentPasswordIcon')" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 5px;">
+                                <i id="toggleNewParentPasswordIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -600,13 +676,21 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Hubungan dengan Siswa</label>
-                        <select name="add_new_relationship" class="form-control">
+                        <select name="add_new_relationship" class="form-control" id="add_new_relationship" onchange="toggleAddNewRelationship()">
                             <option value="ayah_kandung">Ayah Kandung</option>
                             <option value="ibu_kandung">Ibu Kandung</option>
                             <option value="wali">Wali</option>
                             <option value="ayah_tiri">Ayah Tiri</option>
                             <option value="ibu_tiri">Ibu Tiri</option>
+                            <option value="lainnya">Lainnya</option>
                         </select>
+                    </div>
+
+                    <div id="addNewRelationshipOtherField" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Sebutkan Hubungan Keluarga Lainnya</label>
+                            <input type="text" class="form-control" name="add_new_relationship_lainnya" placeholder="Contoh: Kakek, Nenek, Paman, Bibi, dll">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -614,6 +698,22 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
     </div>
 
     <script>
+    // Toggle password visibility
+    function togglePassword(fieldId, iconId) {
+        const field = document.getElementById(fieldId);
+        const icon = document.getElementById(iconId);
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
     function toggleAddParentForm() {
         const option = document.getElementById('addParentOption').value;
         const existingForm = document.getElementById('addExistingParentForm');
@@ -624,6 +724,9 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
 
         if (option === 'existing') {
             existingForm.style.display = 'block';
+            // Reset search when opening
+            document.getElementById('searchParent').value = '';
+            filterParentList();
         } else if (option === 'new') {
             newForm.style.display = 'block';
         }
@@ -635,6 +738,90 @@ Perbarui data {{ $siswa->nama_lengkap ?? 'N/A' }}
             // Hide the parent card visually
             event.target.closest('div[style*="flex"]').style.opacity = '0.5';
             event.target.closest('div[style*="flex"]').style.pointerEvents = 'none';
+        }
+    }
+
+    // Search functionality for parent list
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchParent');
+        const filterStatus = document.getElementById('filterParentStatus');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', filterParentList);
+        }
+        if (filterStatus) {
+            filterStatus.addEventListener('change', filterParentList);
+        }
+    });
+
+    function filterParentList() {
+        const searchTerm = document.getElementById('searchParent').value.toLowerCase();
+        const statusFilter = document.getElementById('filterParentStatus').value;
+        const parentOptions = document.querySelectorAll('.parent-option');
+        const noParentFound = document.getElementById('noParentFound');
+        const parentCount = document.getElementById('parentCount');
+        let visibleCount = 0;
+
+        parentOptions.forEach(option => {
+            const name = option.getAttribute('data-name');
+            const username = option.getAttribute('data-username');
+            const status = option.getAttribute('data-status');
+            const alreadyLinked = option.getAttribute('data-already-linked');
+
+            // Skip already linked parents
+            if (alreadyLinked === 'true') {
+                option.style.display = 'none';
+                return;
+            }
+
+            // Search match
+            const matchSearch = searchTerm === '' || name.includes(searchTerm) || username.includes(searchTerm);
+
+            // Status filter match
+            const matchStatus = statusFilter === '' || status === statusFilter;
+
+            if (matchSearch && matchStatus) {
+                option.style.display = 'flex';
+                visibleCount++;
+            } else {
+                option.style.display = 'none';
+            }
+        });
+
+        // Update count
+        if (parentCount) {
+            parentCount.textContent = visibleCount;
+        }
+
+        // Show/hide no results message
+        if (visibleCount === 0) {
+            noParentFound.style.display = 'block';
+        } else {
+            noParentFound.style.display = 'none';
+        }
+    }
+
+    // Toggle for adding existing parent relationship
+    function toggleAddExistingRelationship() {
+        const selectValue = document.getElementById('add_existing_relationship').value;
+        const otherField = document.getElementById('addExistingRelationshipOtherField');
+
+        if (selectValue === 'lainnya') {
+            otherField.style.display = 'block';
+        } else {
+            otherField.style.display = 'none';
+        }
+    }
+
+    // Toggle for adding new parent relationship
+    function toggleAddNewRelationship() {
+        const selectValue = document.getElementById('add_new_relationship').value;
+        const otherField = document.getElementById('addNewRelationshipOtherField');
+
+        if (selectValue === 'lainnya') {
+            otherField.style.display = 'block';
+        } else {
+            otherField.style.display = 'none';
         }
     }
     </script>

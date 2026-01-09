@@ -116,8 +116,8 @@
                             <label class="form-label fw-bold">Metode Pembayaran <span class="text-danger">*</span></label>
                             <select name="metode_pembayaran" class="form-select shadow-sm" required>
                                 <option value="">-- Pilih Metode --</option>
-                                <option value="tunai" {{ old('metode_pembayaran') == 'tunai' ? 'selected' : '' }}>💵 Tunai / Loket (Cash)</option>
-                                <option value="transfer" {{ old('metode_pembayaran') == 'transfer' ? 'selected' : '' }}>🏦 Transfer Bank Manual</option>
+                                <option value="tunai" {{ old('metode_pembayaran') == 'tunai' ? 'selected' : '' }}>💰 Tunai / Loket (Cash)</option>
+                                <option value="transfer" {{ old('metode_pembayaran') == 'transfer' ? 'selected' : '' }}>🏛️ Transfer Bank Manual</option>
                             </select>
                             <small class="text-muted fst-italic">
                                 <i class="fas fa-info-circle"></i> Pembayaran via Midtrans online otomatis tercatat dari sistem

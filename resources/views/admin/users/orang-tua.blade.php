@@ -150,6 +150,10 @@
                         <small style="color: #64748b;">Total: {{ $orangTua->total() }} akun orang tua</small>
                     </div>
                 </div>
+                <a href="{{ route('admin.users.orang-tua.create') }}" class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Tambah Orang Tua
+                </a>
             </div>
 
             {{-- Filter Form --}}

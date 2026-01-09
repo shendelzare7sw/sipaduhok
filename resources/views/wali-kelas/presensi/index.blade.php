@@ -74,7 +74,7 @@
                         <select name="bulan" class="form-select" onchange="this.form.submit()">
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
-                                    {{ \Carbon\Carbon::create()->month($m)->locale('id')->isoFormat('MMMM') }}
+                                    {{ \Carbon\Carbon::create(now()->year, $m, 1)->locale('id')->isoFormat('MMMM') }}
                                 </option>
                             @endfor
                         </select>
@@ -171,7 +171,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-white border-bottom-0">
             <h6 class="m-0 fw-bold text-gray-800">
-                <i class="fas fa-book-open me-2 text-info"></i>Rekapitulasi: {{ \Carbon\Carbon::create()->month($bulan)->locale('id')->isoFormat('MMMM YYYY') }}
+                <i class="fas fa-book-open me-2 text-info"></i>Rekapitulasi: {{ \Carbon\Carbon::create($tahun, $bulan, 1)->locale('id')->isoFormat('MMMM YYYY') }}
             </h6>
         </div>
         <div class="card-body p-0 text-center">

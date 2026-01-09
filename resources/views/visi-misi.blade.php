@@ -13,7 +13,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    
+
     <x-navbar></x-navbar>
 
     <!-- Hero Section -->
@@ -109,19 +109,19 @@
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3"><i class="fas fa-bullseye"></i></div>
+                    <div class="text-4xl mb-3"><i class="fas fa-bullseye text-orange-400"></i></div>
                     <h3 class="text-white font-bold">Integritas</h3>
                 </div>
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3"><i class="fas fa-lightbulb"></i></div>
+                    <div class="text-4xl mb-3"><i class="fas fa-lightbulb text-yellow-300"></i></div>
                     <h3 class="text-white font-bold">Inovasi</h3>
                 </div>
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3"><i class="fas fa-handshake"></i></div>
+                    <div class="text-4xl mb-3"><i class="fas fa-handshake text-green-500"></i></div>
                     <h3 class="text-white font-bold">Kolaborasi</h3>
                 </div>
                 <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                    <div class="text-4xl mb-3"><i class="fas fa-heart"></i></div>
+                    <div class="text-4xl mb-3"><i class="fas fa-heart text-red-500"></i></div>
                     <h3 class="text-white font-bold">Pengembangan Bakat</h3>
                 </div>
             </div>

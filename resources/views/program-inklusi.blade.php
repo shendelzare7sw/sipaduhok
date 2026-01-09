@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Program Inklusi - PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Poppins', sans-serif; }
@@ -74,7 +73,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    
+
     <x-navbar></x-navbar>
 
     <!-- Hero Section -->
@@ -135,42 +134,54 @@
                 <!-- Made cards clickable to open modal -->
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#165fac]" onclick="openModal('autism')">
                     <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl"><i class="fas fa-puzzle-piece"></i></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#165fac]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+                        </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Autisme (ASD)</h3>
                     <p class="text-gray-600">Program khusus untuk anak dengan gangguan spektrum autisme dengan pendekatan terstruktur.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#287f3b]" onclick="openModal('adhd')">
                     <div class="w-14 h-14 bg-[#287f3b]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl"><i class="fas fa-bullseye"></i></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#287f3b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">ADHD</h3>
                     <p class="text-gray-600">Pendekatan pembelajaran khusus untuk anak dengan gangguan pemusatan perhatian dan hiperaktivitas.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#d45930]" onclick="openModal('disleksia')">
                     <div class="w-14 h-14 bg-[#d45930]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl"><i class="fas fa-books"></i></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#d45930]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Disleksia</h3>
                     <p class="text-gray-600">Metode pembelajaran multisensori untuk anak dengan kesulitan membaca dan menulis.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#fac030]" onclick="openModal('down')">
                     <div class="w-14 h-14 bg-[#fac030]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl"><i class="fas fa-brain"></i></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#fac030]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Down Syndrome</h3>
                     <p class="text-gray-600">Program stimulasi dan pembelajaran yang disesuaikan untuk anak down syndrome.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#165fac]" onclick="openModal('speech')">
                     <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl"><i class="fas fa-comments"></i></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#165fac]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Speech Delay</h3>
                     <p class="text-gray-600">Terapi wicara dan program stimulasi bahasa untuk anak dengan keterlambatan bicara.</p>
                 </div>
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4 border-[#287f3b]" onclick="openModal('slow')">
                     <div class="w-14 h-14 bg-[#287f3b]/10 rounded-xl flex items-center justify-center mb-4">
-                        <span class="text-2xl"><i class="fas fa-star"></i></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-[#287f3b]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                        </svg>
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Slow Learner</h3>
                     <p class="text-gray-600">Pendekatan pembelajaran bertahap untuk anak dengan kecepatan belajar yang berbeda.</p>

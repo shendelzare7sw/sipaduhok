@@ -283,12 +283,14 @@ class UserController extends Controller
             'parent_option' => 'nullable|in:existing,new,none',
             'parent_id' => 'required_if:parent_option,existing|exists:users,id',
             'existing_relationship' => 'required_if:parent_option,existing|string',
+            'existing_relationship_lainnya' => 'nullable|string|max:100',
             'parent_name' => 'required_if:parent_option,new|string|max:255',
             'parent_username' => 'required_if:parent_option,new|string|unique:users,username|max:50',
             'parent_email' => 'required_if:parent_option,new|email|unique:users,email',
             'parent_password' => 'required_if:parent_option,new|string|min:8',
             'parent_phone' => 'nullable|string|max:20',
             'new_relationship' => 'required_if:parent_option,new|string',
+            'new_relationship_lainnya' => 'nullable|string|max:100',
             'is_primary' => 'nullable|boolean',
             'can_access_academic' => 'nullable|boolean',
         ]);
@@ -323,16 +325,28 @@ class UserController extends Controller
 
         // Handle parent assignment
         if ($request->parent_option === 'existing' && $request->parent_id) {
+            // Determine the actual relationship value
+            $existingRelationship = $request->existing_relationship;
+            if ($existingRelationship === 'lainnya' && !empty($request->existing_relationship_lainnya)) {
+                $existingRelationship = $request->existing_relationship_lainnya;
+            }
+
             // Link to existing parent
             StudentParent::create([
                 'siswa_id' => $siswa->id,
                 'parent_id' => $request->parent_id,
-                'relationship' => $request->existing_relationship,
+                'relationship' => $existingRelationship,
                 'is_primary' => true,
                 'is_financial_responsible' => true,
                 'can_access_academic' => true,
             ]);
         } elseif ($request->parent_option === 'new') {
+            // Determine the actual relationship value
+            $newRelationship = $request->new_relationship;
+            if ($newRelationship === 'lainnya' && !empty($request->new_relationship_lainnya)) {
+                $newRelationship = $request->new_relationship_lainnya;
+            }
+
             // Create new parent account
             $parentUser = User::create([
                 'name' => $request->parent_name,
@@ -348,7 +362,7 @@ class UserController extends Controller
             StudentParent::create([
                 'siswa_id' => $siswa->id,
                 'parent_id' => $parentUser->id,
-                'relationship' => $request->new_relationship,
+                'relationship' => $newRelationship,
                 'is_primary' => $request->has('is_primary'),
                 'is_financial_responsible' => true,
                 'can_access_academic' => $request->has('can_access_academic'),
@@ -398,11 +412,13 @@ class UserController extends Controller
             'add_parent_option' => 'nullable|in:existing,new',
             'add_existing_parent_id' => 'nullable|exists:users,id',
             'add_existing_relationship' => 'nullable|string',
+            'add_existing_relationship_lainnya' => 'nullable|string|max:100',
             'add_new_parent_name' => 'nullable|string|max:255',
             'add_new_parent_username' => 'nullable|string|unique:users,username|max:50',
             'add_new_parent_email' => 'nullable|email|unique:users,email',
             'add_new_parent_password' => 'nullable|string|min:8',
             'add_new_relationship' => 'nullable|string',
+            'add_new_relationship_lainnya' => 'nullable|string|max:100',
         ]);
 
         $userData = [
@@ -452,10 +468,16 @@ class UserController extends Controller
                 ->exists();
 
             if (!$exists) {
+                // Determine the actual relationship value
+                $addExistingRelationship = $request->add_existing_relationship;
+                if ($addExistingRelationship === 'lainnya' && !empty($request->add_existing_relationship_lainnya)) {
+                    $addExistingRelationship = $request->add_existing_relationship_lainnya;
+                }
+
                 StudentParent::create([
                     'siswa_id' => $siswa->id,
                     'parent_id' => $request->add_existing_parent_id,
-                    'relationship' => $request->add_existing_relationship,
+                    'relationship' => $addExistingRelationship,
                     'is_primary' => false,
                     'is_financial_responsible' => true,
                     'can_access_academic' => true,
@@ -465,6 +487,12 @@ class UserController extends Controller
 
         // Handle adding new parent
         if ($request->add_parent_option === 'new' && $request->add_new_parent_name) {
+            // Determine the actual relationship value
+            $addNewRelationship = $request->add_new_relationship;
+            if ($addNewRelationship === 'lainnya' && !empty($request->add_new_relationship_lainnya)) {
+                $addNewRelationship = $request->add_new_relationship_lainnya;
+            }
+
             $parentUser = User::create([
                 'name' => $request->add_new_parent_name,
                 'email' => $request->add_new_parent_email,
@@ -478,7 +506,7 @@ class UserController extends Controller
             StudentParent::create([
                 'siswa_id' => $siswa->id,
                 'parent_id' => $parentUser->id,
-                'relationship' => $request->add_new_relationship,
+                'relationship' => $addNewRelationship,
                 'is_primary' => false,
                 'is_financial_responsible' => true,
                 'can_access_academic' => true,
@@ -554,6 +582,80 @@ class UserController extends Controller
         return view('admin.users.orang-tua', compact('orangTua', 'cabangList', 'jenjangs'));
     }
 
+    public function createOrangTua()
+    {
+        // Get all active siswa for optional linking
+        $siswaList = Siswa::with(['kelas', 'cabang', 'user'])
+            ->whereHas('user', function($q) {
+                $q->where('is_active', true);
+            })
+            ->get()
+            ->sortBy(function($siswa) {
+                return $siswa->user->name ?? $siswa->nama_lengkap;
+            });
+
+        // Get unique cabang list from siswa
+        $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get();
+
+        // Get unique kelas list from siswa
+        $kelasList = \App\Models\Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
+
+        // Jenjang list
+        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
+        return view('admin.users.orang-tua-create', compact('siswaList', 'cabangList', 'kelasList', 'jenjangs'));
+    }
+
+    public function storeOrangTua(Request $request)
+    {
+        $validated = $request->validate([
+            'username' => 'required|string|max:50|unique:users,username',
+            'password' => 'required|string|min:6|confirmed',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'siswa_ids' => 'nullable|array',
+            'siswa_ids.*' => 'exists:siswa,id',
+            'hubungan_keluarga' => 'required_with:siswa_ids|nullable|string|max:50',
+            'hubungan_keluarga_lainnya' => 'nullable|string|max:100',
+        ]);
+
+        // Create parent user account
+        $orangTua = User::create([
+            'username' => $validated['username'],
+            'password' => Hash::make($validated['password']),
+            'name' => $validated['name'],
+            'email' => $validated['email'] ?? null,
+            'phone' => $validated['phone'] ?? null,
+            'role' => 'orang_tua',
+            'is_active' => true,
+        ]);
+
+        // Link to students if selected
+        if (!empty($validated['siswa_ids']) && !empty($validated['hubungan_keluarga'])) {
+            // Determine the actual relationship value
+            $relationship = $validated['hubungan_keluarga'];
+            if ($relationship === 'lainnya' && !empty($validated['hubungan_keluarga_lainnya'])) {
+                $relationship = $validated['hubungan_keluarga_lainnya'];
+            }
+
+            foreach ($validated['siswa_ids'] as $siswaId) {
+                StudentParent::create([
+                    'siswa_id' => $siswaId,
+                    'parent_id' => $orangTua->id,
+                    'relationship' => $relationship,
+                    'is_primary' => false,
+                    'is_financial_responsible' => true,
+                    'can_access_academic' => true,
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.users.orang-tua')
+            ->with('success', 'Akun orang tua berhasil dibuat!');
+    }
+
     public function toggleOrangTuaStatus($id)
     {
         $user = User::where('role', 'orang_tua')->findOrFail($id);
@@ -602,6 +704,10 @@ class UserController extends Controller
             'phone' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:8',
             'is_active' => 'required|boolean',
+            'relationships' => 'nullable|array',
+            'relationships.*' => 'nullable|string|max:100',
+            'relationships_lainnya' => 'nullable|array',
+            'relationships_lainnya.*' => 'nullable|string|max:100',
         ]);
 
         // Update user data
@@ -617,6 +723,23 @@ class UserController extends Controller
         }
 
         $orangTua->save();
+
+        // Update relationships if provided
+        if ($request->has('relationships')) {
+            foreach ($request->relationships as $studentParentId => $relationship) {
+                if (!empty($relationship)) {
+                    // Determine the actual relationship value
+                    $actualRelationship = $relationship;
+                    if ($relationship === 'lainnya' && isset($request->relationships_lainnya[$studentParentId])) {
+                        $actualRelationship = $request->relationships_lainnya[$studentParentId];
+                    }
+
+                    StudentParent::where('id', $studentParentId)
+                        ->where('parent_id', $orangTua->id)
+                        ->update(['relationship' => $actualRelationship]);
+                }
+            }
+        }
 
         return redirect()->route('admin.users.show-orang-tua', $orangTua->id)
             ->with('success', 'Data orang tua berhasil diperbarui!');

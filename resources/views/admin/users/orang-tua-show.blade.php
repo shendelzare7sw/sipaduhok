@@ -25,7 +25,7 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
             </div>
             <h3 style="margin: 0; color: #92400e; font-size: 24px;">{{ $orangTua->name }}</h3>
             <div style="margin-top: 5px; font-weight: 500; color: #b45309;">
-                @{{ $orangTua->username }}
+                {{ $orangTua->username }}
             </div>
             <div style="margin-top: 10px;">
                 <span style="background: white; border: 1px solid #f59e0b; color: #f59e0b; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;">

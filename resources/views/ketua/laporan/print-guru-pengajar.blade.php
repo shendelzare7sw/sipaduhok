@@ -36,7 +36,7 @@
 <body>
     <div class="btn-actions no-print">
         <a href="{{ route('ketua.laporan.index') }}" class="btn btn-back">← Kembali</a>
-        <button onclick="window.print()" class="btn btn-print">🖨️ Cetak</button>
+        <button onclick="window.print()" class="btn btn-print"><i class="fas fa-print"></i> Cetak</button>
     </div>
 
     <div class="container">

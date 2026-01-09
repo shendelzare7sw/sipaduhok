@@ -18,6 +18,14 @@
                 <div>
                     <span class="inline-block bg-[#165fac]/20 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Pendidikan Kesetaraan</span>
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Paket A (Setara SD)</h2>
+                    <script src="https://cdn.tailwindcss.com"></script>
+
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+                        body { font-family: 'Inter', sans-serif; }
+                    </style>
                     <p class="text-gray-600 mb-6 leading-relaxed">
                         Program Paket A adalah program pendidikan kesetaraan yang setara dengan Sekolah Dasar (SD). Program ini diperuntukkan bagi anak-anak yang tidak dapat mengikuti pendidikan formal karena berbagai alasan.
                     </p>
@@ -70,44 +78,51 @@
                 <span class="inline-block bg-[#165fac]/10 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Kurikulum</span>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Mata Pelajaran</h2>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
-                    <div class="w-14 h-14 bg-[#d45930]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl"><i class="fas fa-book"></i></span>
-                    </div>
-                    <h3 class="font-semibold text-gray-800">Bahasa Indonesia</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
-                    <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl"><i class="fas fa-calculator"></i></span>
-                    </div>
-                    <h3 class="font-semibold text-gray-800">Matematika</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
-                    <div class="w-14 h-14 bg-[#287f3b]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl"><i class="fas fa-microscope"></i></span>
-                    </div>
-                    <h3 class="font-semibold text-gray-800">IPA</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
-                    <div class="w-14 h-14 bg-[#fac030]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl"><i class="fas fa-globe"></i></span>
-                    </div>
-                    <h3 class="font-semibold text-gray-800">IPS</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
-                    <div class="w-14 h-14 bg-[#d45930]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl"><i class="fas fa-mosque"></i></span>
-                    </div>
-                    <h3 class="font-semibold text-gray-800">Agama</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center">
-                    <div class="w-14 h-14 bg-[#165fac]/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <span class="text-2xl"><i class="fas fa-book"></i></span>
-                    </div>
-                    <h3 class="font-semibold text-gray-800">B. Inggris</h3>
-                </div>
-            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 p-4">
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+        <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-4 text-orange-600 text-2xl">
+            <i class="fas fa-book"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-center">Bahasa Indonesia</h3>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+        <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-4 text-blue-600 text-2xl">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-center">Matematika</h3>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+        <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mb-4 text-emerald-600 text-2xl">
+            <i class="fas fa-microscope"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-center">IPA</h3>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+        <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mb-4 text-amber-600 text-2xl">
+            <i class="fas fa-globe-asia"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-center">IPS</h3>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+        <div class="w-16 h-16 bg-rose-100 rounded-2xl flex items-center justify-center mb-4 text-rose-600 text-2xl">
+            <i class="fas fa-mosque"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-center">Agama</h3>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+        <div class="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center mb-4 text-sky-600 text-2xl">
+            <i class="fas fa-language"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-center">B. Inggris</h3>
+    </div>
+
+</div>
         </div>
     </section>
 

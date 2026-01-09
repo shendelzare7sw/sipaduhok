@@ -221,7 +221,7 @@
         ← Kembali
     </a>
     <button onclick="window.print()" class="print-button no-print">
-        🖨️ Cetak
+        <i class="fas fa-print"></i> Cetak
     </button>
 
     <div class="container">

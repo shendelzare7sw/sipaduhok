@@ -375,10 +375,10 @@
                     <div class="stat-number">{{ $stats['siswaLaki'] }}</div>
                     <div class="stat-desc">Siswa</div>
                 </div>
-                <div class="stat-icon-bg">👦</div>
+                <div class="stat-icon-bg"><i class="fas fa-male"></i></div>
             </div>
         </div>
-        
+
         <div class="col-md-2-4">
             <div class="stat-card bg-gradient-pink">
                 <div class="stat-content">
@@ -386,7 +386,7 @@
                     <div class="stat-number">{{ $stats['siswaPerempuan'] }}</div>
                     <div class="stat-desc">Siswi</div>
                 </div>
-                <div class="stat-icon-bg">👧</div>
+                <div class="stat-icon-bg"><i class="fas fa-female"></i></div>
             </div>
         </div>
     </div>

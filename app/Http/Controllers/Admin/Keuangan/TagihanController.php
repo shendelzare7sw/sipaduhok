@@ -64,4 +64,13 @@ class TagihanController extends BendaharaTagihanController
 
         return $response;
     }
+
+    /**
+     * Override cetak method to use admin/bendahara view (same view for both)
+     */
+    public function cetak($siswa)
+    {
+        // Use parent method which already returns the correct view
+        return parent::cetak($siswa);
+    }
 }

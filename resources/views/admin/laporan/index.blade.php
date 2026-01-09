@@ -97,7 +97,7 @@
 .report-card-header.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
 
 .report-card-icon { font-size: 32px; margin-bottom: 12px; position: relative; z-index: 1; }
-.report-card-title { font-size: 18px; font-weight: 600; margin: 0; position: relative; z-index: 1; }
+.report-card-title { font-size: 18px; font-weight: 600; margin: 0; position: relative; z-index: 1; color: white; }
 
 .report-card-body { padding: 24px; }
 .report-card-desc { font-size: 14px; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
@@ -180,7 +180,7 @@
             </div>
         </div>
         <div class="stat-mini">
-            <div class="stat-mini-icon purple"><i class="fas fa-books"></i></div>
+            <div class="stat-mini-icon purple"><i class="fas fa-door-open"></i></div>
             <div class="stat-mini-info">
                 <h4>{{ $stats['totalKelas'] }}</h4>
                 <p>Kelas Aktif</p>
@@ -287,7 +287,7 @@
         {{-- Laporan Kelas --}}
         <div class="report-card">
             <div class="report-card-header purple">
-                <div class="report-card-icon"><i class="fas fa-books"></i></div>
+                <div class="report-card-icon"><i class="fas fa-door-open"></i></div>
                 <h4 class="report-card-title">Daftar Kelas</h4>
             </div>
             <div class="report-card-body">
@@ -332,7 +332,7 @@
         {{-- Laporan Wali Kelas --}}
         <div class="report-card">
             <div class="report-card-header orange">
-                <div class="report-card-icon">👔</div>
+                <div class="report-card-icon"><i class="fas fa-user-tie"></i></div>
                 <h4 class="report-card-title">Daftar Wali Kelas</h4>
             </div>
             <div class="report-card-body">
@@ -368,7 +368,7 @@
         {{-- Laporan Guru Pengajar --}}
         <div class="report-card">
             <div class="report-card-header teal">
-                <div class="report-card-icon">👩‍<i class="fas fa-school"></i></div>
+                <div class="report-card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
                 <h4 class="report-card-title">Daftar Guru Pengajar</h4>
             </div>
             <div class="report-card-body">

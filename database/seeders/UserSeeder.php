@@ -39,6 +39,18 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        // Wakil Kepala Sekolah
+        User::create([
+            'name' => 'Drs. Harianto Wijaya, M.Pd',
+            'email' => 'waka@sipaduhok.com',
+            'username' => 'wakil_kepala',
+            'password' => Hash::make('password'),
+            'role' => 'wakil_kepala_sekolah',
+            'role_id' => $roles['wakil_kepala_sekolah'],
+            'cabang_id' => 1,
+            'is_active' => true,
+        ]);
+
         // Sekretaris
         User::create([
             'name' => 'Siti Nurhaliza',

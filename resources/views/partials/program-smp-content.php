@@ -6,6 +6,14 @@
                 <div>
                     <span class="inline-block bg-[#287f3b]/20 text-[#287f3b] px-4 py-2 rounded-full text-sm font-semibold mb-4">Pendidikan Kesetaraan</span>
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Paket B (Setara SMP)</h2>
+                    <script src="https://cdn.tailwindcss.com"></script>
+
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+                        body { font-family: 'Inter', sans-serif; }
+                    </style>
                     <p class="text-gray-600 mb-6 leading-relaxed">
                         Program Paket B adalah program pendidikan kesetaraan yang setara dengan Sekolah Menengah Pertama (SMP). Program ini memberikan kesempatan bagi mereka yang ingin melanjutkan pendidikan ke jenjang yang lebih tinggi.
                     </p>
@@ -37,46 +45,88 @@
 
     <!-- Mata Pelajaran -->
     <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Mata Pelajaran</h2>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#165fac]">
-                    <span class="text-3xl mb-4 block">📖</span>
-                    <h3 class="font-semibold text-gray-800">Bahasa Indonesia</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#287f3b]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-calculator"></i></span>
-                    <h3 class="font-semibold text-gray-800">Matematika</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#d45930]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-flask"></i></span>
-                    <h3 class="font-semibold text-gray-800">IPA</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#fac030]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-landmark"></i></span>
-                    <h3 class="font-semibold text-gray-800">IPS</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#287f3b]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-language"></i></span>
-                    <h3 class="font-semibold text-gray-800">Bahasa Inggris</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#165fac]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-mosque"></i></span>
-                    <h3 class="font-semibold text-gray-800">Agama</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#d45930]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-book"></i></span>
-                    <h3 class="font-semibold text-gray-800">PKn</h3>
-                </div>
-                <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#fac030]">
-                    <span class="text-3xl mb-4 block"><i class="fas fa-language"></i></span>
-                    <h3 class="font-semibold text-gray-800">Bahasa Mandarin</h3>
-                </div>
-            </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Mata Pelajaran</h2>
         </div>
-    </section>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#165fac]">
+                <div class="mb-4 flex justify-center text-[#165fac]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">Bahasa Indonesia</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#287f3b]">
+                <div class="mb-4 flex justify-center text-[#287f3b]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">Matematika</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#d45930]">
+                <div class="mb-4 flex justify-center text-[#d45930]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">IPA</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#fac030]">
+                <div class="mb-4 flex justify-center text-[#fac030]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">IPS</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#287f3b]">
+                <div class="mb-4 flex justify-center text-[#287f3b]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">Bahasa Inggris</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#165fac]">
+                <div class="mb-4 flex justify-center text-[#165fac]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 9h20L12 2z"/>
+                        <path d="M4 10v9a2 2 0 002 2h12a2 2 0 002-2v-9H4zm8 7a2 2 0 110-4 2 2 0 010 4z"/>
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">Agama</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#d45930]">
+                <div class="mb-4 flex justify-center text-[#d45930]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">PKn</h3>
+            </div>
+
+            <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4 border-[#fac030]">
+                <div class="mb-4 flex justify-center text-[#fac030]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <h3 class="font-semibold text-gray-800">Bahasa Mandarin</h3>
+            </div>
+
+        </div>
+    </div>
+</section>
 
     <!-- Keunggulan -->
     <section class="py-20">

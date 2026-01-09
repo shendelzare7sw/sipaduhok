@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PPDB - PKBM House Of Knowledge</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         'primary': '#165fac',
-                        'secondary': '#287f3b', 
+                        'secondary': '#287f3b',
                         'accent-orange': '#d45930',
                         'accent-yellow': '#fac030',
                         'accent-bright': '#ffe400',
@@ -28,39 +28,39 @@
             }
         }
     </script>
-    
+
     <style>
         body { font-family: 'Poppins', sans-serif; }
-        
+
         .hero-overlay {
             background: linear-gradient(135deg, rgba(22, 95, 172, 0.95) 0%, rgba(40, 127, 59, 0.9) 100%);
         }
-        
+
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-20px); }
         }
-        
+
         @keyframes slideInLeft {
             from { opacity: 0; transform: translateX(-50px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        
+
         @keyframes slideInRight {
             from { opacity: 0; transform: translateX(50px); }
             to { opacity: 1; transform: translateX(0); }
         }
-        
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .float-animation { animation: float 6s ease-in-out infinite; }
         .animate-slide-left { animation: slideInLeft 0.8s ease-out; }
         .animate-slide-right { animation: slideInRight 0.8s ease-out; }
         .animate-fade-up { animation: fadeInUp 0.8s ease-out; }
-        
+
         .card-hover {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -68,11 +68,11 @@
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
-        
+
         .step-connector {
             position: relative;
         }
-        
+
         .step-connector::after {
             content: '';
             position: absolute;
@@ -84,47 +84,47 @@
             transform: translateY(-50%);
             z-index: -1;
         }
-        
+
         @media (max-width: 768px) {
             .step-connector::after {
                 display: none;
             }
         }
-        
+
         .requirement-check {
             transition: all 0.3s ease;
         }
-        
+
         .requirement-check:hover {
             transform: translateX(5px);
         }
-        
+
         html { scroll-behavior: smooth; }
         section { scroll-margin-top: 100px; }
-        
+
         .tab-button {
             transition: all 0.3s ease;
         }
-        
+
         .tab-button.active {
             background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);
             color: white;
         }
-        
+
         .tab-content {
             display: none;
             animation: fadeInUp 0.5s ease-out;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         .price-badge {
             position: relative;
             overflow: hidden;
         }
-        
+
         .price-badge::before {
             content: '';
             position: absolute;
@@ -135,15 +135,15 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s ease;
         }
-        
+
         .price-badge:hover::before {
             left: 100%;
         }
-        
+
         .form-input {
             transition: all 0.3s ease;
         }
-        
+
         .form-input:focus {
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(22, 95, 172, 0.15);
@@ -155,7 +155,7 @@
 
         <section class="relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat"
         style="background-image: linear-gradient(135deg, rgba(22,95,172,0.75) 45%, rgba(40,127,59,0.75) 20%), url('img/bg-ppdb.jpg');">
-        
+
         <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M30 0l30 30-30 30L0 30z" fill="white"/></svg>'); background-size: 60px 60px;"></div>
 
         <div class="absolute top-20 left-10 w-20 h-20 border-4 border-white/20 rounded-full float-animation hidden lg:block"></div>
@@ -353,7 +353,7 @@
                 <div class="tab-content active" id="paud">
                     <div class="bg-gradient-to-br from-accent-yellow/10 to-accent-bright/10 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-books"></i></span>
+                            <span class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-book"></i></span>
                             Syarat PAUD
                         </h3>
                         <div class="space-y-4">
@@ -681,7 +681,7 @@
                 <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 border-primary">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-                            <span class="text-3xl"><i class="fas fa-books"></i></span>
+                            <span class="text-3xl"><i class="fas fa-book"></i></span>
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-2">SD</h3>
                         <p class="text-sm text-gray-600">Sekolah Dasar</p>
@@ -771,12 +771,12 @@
                         <p class="text-sm text-gray-600">Biaya Pendaftaran Mulai Dari 200 Ribu  Untuk Semua Jenjang Pendidikan</p>
                     </div>
                     <div class="bg-white rounded-xl p-6">
-                        <div class="text-2xl mb-2">💳</div>
+                        <div class="text-2xl mb-2"><i class="fas fa-credit-card"></i></div>
                         <h4 class="font-bold text-gray-800 mb-2">Cicilan Tersedia</h4>
                         <p class="text-sm text-gray-600">Pembayaran dapat dicicil setiap bulan untuk memudahkan orang tua</p>
                     </div>
                     <div class="bg-white rounded-xl p-6">
-                        <div class="text-2xl mb-2">🎁</div>
+                        <div class="text-2xl mb-2"><i class="fas fa-gift"></i></div>
                         <h4 class="font-bold text-gray-800 mb-2">Beasiswa</h4>
                         <p class="text-sm text-gray-600">Tersedia program beasiswa untuk siswa berprestasi dan kurang mampu</p>
                     </div>
@@ -785,7 +785,7 @@
         </div>
     </section>
 
-    <!-- Formulir Section -->
+    <!-- Formulir Section
     <section id="formulir" class="py-20 bg-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
@@ -800,8 +800,8 @@
                 </p>
             </div>
 
-            <form id="registrationForm" class="bg-gradient-to-br from-cream/50 to-white rounded-3xl shadow-2xl p-8 md:p-12">
-                <!-- Data Peserta Didik -->
+            <form id="registrationForm" class="bg-gradient-to-br from-cream/50 to-white rounded-3xl shadow-2xl p-8 md:p-12"> -->
+                <!-- Data Peserta Didik
                 <div class="mb-10">
                     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                         <span class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white mr-3 text-sm">1</span>
@@ -841,9 +841,9 @@
                             <input type="email" class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="email@contoh.com">
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <!-- Pilihan Program -->
+                <!-- Pilihan Program
                 <div class="mb-10">
                     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                         <span class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-white mr-3 text-sm">2</span>
@@ -870,9 +870,9 @@
                             </select>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <!-- Data Orang Tua -->
+                <!-- Data Orang Tua
                 <div class="mb-10">
                     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                         <span class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 text-sm">3</span>
@@ -910,9 +910,9 @@
                             </select>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <!-- Informasi Tambahan -->
+                <!-- Informasi Tambahan
                 <div class="mb-10">
                     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                         <span class="w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3 text-sm">4</span>
@@ -934,9 +934,9 @@
                             </label>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <!-- Submit Button -->
+                <!-- Submit Button
                 <div class="text-center">
                     <button type="submit" class="inline-flex items-center justify-center px-10 py-4 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -948,9 +948,9 @@
                 </div>
             </form>
         </div>
-    </section>
+    </section> -->
 
-    <!-- Success Modal -->
+    <!-- Success Modal
     <div id="successModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 text-center animate-fade-up">
             <div class="w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -964,7 +964,7 @@
                 Tutup
             </button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Cost Detail Modal PAUD-->
     <div id="costModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
@@ -1086,7 +1086,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3"><i class="fas fa-money-bill-wave"></i></span>
-                    Rincian Biaya Sekolah Menengan Atas 
+                    Rincian Biaya Sekolah Menengan Atas
                 </h3>
                 <button onclick="closeCostModalPaketC()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1440,15 +1440,15 @@
         // Tab functionality
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
-        
+
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const tabId = button.getAttribute('data-tab');
-                
+
                 // Remove active class from all buttons and contents
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabContents.forEach(content => content.classList.remove('active'));
-                
+
                 // Add active class to clicked button and corresponding content
                 button.classList.add('active');
                 document.getElementById(tabId).classList.add('active');
@@ -1458,7 +1458,7 @@
         // Show/hide jurusan field based on jenjang selection
         const jenjangSelect = document.getElementById('jenjangSelect');
         const jurusanField = document.getElementById('jurusanField');
-        
+
         jenjangSelect.addEventListener('change', function() {
             if (this.value === 'paket-c') {
                 jurusanField.classList.remove('hidden');
@@ -1470,22 +1470,22 @@
         // Form submission
         const form = document.getElementById('registrationForm');
         const modal = document.getElementById('successModal');
-        
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             // Show success modal
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            
+
             // Reset form
             form.reset();
             jurusanField.classList.add('hidden');
-            
+
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-        
+
         function closeModal() {
             modal.classList.add('hidden');
             modal.classList.remove('flex');

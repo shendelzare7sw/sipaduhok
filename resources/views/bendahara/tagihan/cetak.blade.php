@@ -123,10 +123,10 @@
 <body>
     <div class="no-print" style="margin-bottom: 20px; text-align: center;">
         <button onclick="window.print()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
-            🖨️ Cetak
+            <i class="fas fa-print"></i> Cetak
         </button>
         <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;">
-            ✕ Tutup
+            <i class="fas fa-times"></i> Tutup
         </button>
     </div>
 

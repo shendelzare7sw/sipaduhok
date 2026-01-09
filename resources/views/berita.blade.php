@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Berita - PKBM House Of Knowledge</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         'primary': '#165fac',
-                        'secondary': '#287f3b', 
+                        'secondary': '#287f3b',
                         'accent-orange': '#d45930',
                         'accent-yellow': '#fac030',
                         'accent-bright': '#ffe400',
@@ -28,7 +28,7 @@
             }
         }
     </script>
-    
+
     <style>
         body { font-family: 'Poppins', sans-serif; }
         .hero-overlay { background: linear-gradient(135deg, rgba(22, 95, 172, 0.9) 0%, rgba(40, 127, 59, 0.8) 100%); }
@@ -91,9 +91,9 @@
     <x-navbar></x-navbar>
 
     <!-- PAGE HEADER -->
-    <section class="relative py-24" 
-        style="background-image: url('{{ asset('img/bg-berita.jpg') }}'); 
-               background-size: cover; 
+    <section class="relative py-24"
+        style="background-image: url('{{ asset('img/bg-berita.jpg') }}');
+               background-size: cover;
                background-position: center;">
 
         <div class="hero-overlay absolute inset-0"></div>
@@ -109,7 +109,7 @@
                             <div class="flex items-center">
                                 <svg class="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
-                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" 
+                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                                         clip-rule="evenodd" />
                                 </svg>
                                 <span class="text-white font-medium">Berita</span>
@@ -132,15 +132,15 @@
     <section class="py-12 bg-cream">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <form method="GET" action="{{ url('/berita') }}" class="flex flex-col md:flex-row gap-6 items-center justify-between">
-                
+
                 <!-- Search Box -->
                 <div class="w-full md:w-96">
                     <div class="search-box relative">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             name="search"
                             value="{{ request('search') }}"
-                            placeholder="Cari berita..." 
+                            placeholder="Cari berita..."
                             class="w-full px-6 py-4 pr-12 rounded-full border-2 border-gray-200 focus:border-primary focus:outline-none transition"
                         >
                         <button type="submit" class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition">
@@ -150,30 +150,30 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Filter Buttons -->
                 <div class="flex flex-wrap gap-3 justify-center">
-                    <button type="submit" name="kategori" value="all" 
+                    <button type="submit" name="kategori" value="all"
                             class="filter-btn {{ $kategori === 'all' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
                         Semua
                     </button>
-                    <button type="submit" name="kategori" value="kegiatan" 
+                    <button type="submit" name="kategori" value="kegiatan"
                             class="filter-btn {{ $kategori === 'kegiatan' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
                         Kegiatan
                     </button>
-                    <button type="submit" name="kategori" value="prestasi" 
+                    <button type="submit" name="kategori" value="prestasi"
                             class="filter-btn {{ $kategori === 'prestasi' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
                         Prestasi
                     </button>
-                    <button type="submit" name="kategori" value="pengumuman" 
+                    <button type="submit" name="kategori" value="pengumuman"
                             class="filter-btn {{ $kategori === 'pengumuman' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
                         Pengumuman
                     </button>
-                    <button type="submit" name="kategori" value="artikel" 
+                    <button type="submit" name="kategori" value="artikel"
                             class="filter-btn {{ $kategori === 'artikel' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
                         Artikel
                     </button>
-                    <button type="submit" name="kategori" value="ujian" 
+                    <button type="submit" name="kategori" value="ujian"
                             class="filter-btn {{ $kategori === 'ujian' ? 'active' : '' }} px-6 py-3 bg-white rounded-full font-medium shadow-md hover:shadow-lg">
                         Ujian
                     </button>
@@ -185,7 +185,7 @@
     <!-- NEWS GRID SECTION -->
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
             @if($beritaUtama)
             <!-- Featured News -->
             <div class="mb-16">
@@ -193,7 +193,7 @@
                     <span class="w-1 h-8 bg-primary mr-3"></span>
                     Berita Utama
                 </h2>
-                
+
                 <div class="news-card bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2 gap-0">
                     <div class="news-image-wrapper h-80 md:h-auto">
                         <img src="{{ $beritaUtama->gambar_url }}" alt="{{ $beritaUtama->judul }}" class="w-full h-full object-cover">
@@ -212,7 +212,7 @@
                             {{ $beritaUtama->deskripsi_singkat }}
                         </p>
                         <a href="{{ $beritaUtama->url_berita }}" target="_blank" rel="noopener" class="inline-flex items-center text-primary font-semibold hover:text-secondary transition group">
-                            Baca Selengkapnya 
+                            Baca Selengkapnya
                             <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
@@ -228,7 +228,7 @@
                     <span class="w-1 h-8 bg-primary mr-3"></span>
                     Berita Terbaru
                 </h2>
-                
+
                 @if($beritaList->count() > 0)
                     <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         @foreach($beritaList as $index => $item)
@@ -250,7 +250,7 @@
                                         {{ $item->deskripsi_singkat }}
                                     </p>
                                     <a href="{{ $item->url_berita }}" target="_blank" rel="noopener" class="inline-flex items-center text-primary font-semibold hover:text-secondary transition text-sm group">
-                                        Selengkapnya 
+                                        Selengkapnya
                                         <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                         </svg>
@@ -296,13 +296,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
-                <a href="{{ url('/ppdb-formulir') }}" class="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary font-semibold rounded-full transition-all duration-300">
+                <a href="{{ url('/ppdb') }}" class="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary font-semibold rounded-full transition-all duration-300">
                     Daftar Sekarang
                 </a>
             </div>
         </div>
     </section>
-    
+
     <x-footer></x-footer>
 
 </body>

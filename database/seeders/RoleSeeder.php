@@ -28,6 +28,13 @@ class RoleSeeder extends Seeder
                 'permissions' => ['view_all_reports', 'view_dashboard', 'view_analytics'],
             ],
             [
+                'name' => 'wakil_kepala_sekolah',
+                'display_name' => 'Wakil Kepala Sekolah',
+                'level' => 2,
+                'description' => 'Deputy head of school with academic management access',
+                'permissions' => ['manage_academic_year', 'manage_classes', 'manage_students', 'assign_wali_kelas', 'manage_schedules', 'manage_subjects', 'monitor_teachers', 'monitor_students', 'send_warnings'],
+            ],
+            [
                 'name' => 'sekretaris',
                 'display_name' => 'Sekretaris',
                 'level' => 3,

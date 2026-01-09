@@ -41,7 +41,7 @@
         </li>
         <li class="menu-item {{ $currentRoute == 'admin.users.orang-tua' ? 'active' : '' }}">
             <a href="{{ route('admin.users.orang-tua') }}" class="menu-link">
-                <div>Orang Tua</div>
+                <div>Wali Murid</div>
             </a>
         </li>
     </ul>

@@ -28,7 +28,7 @@
 </head>
 <body>
     <button class="btn-print" onclick="window.print()">
-        🖨️ Cetak Rapor
+        <i class="fas fa-print"></i> Cetak Rapor
     </button>
 
     <div class="rapor-container">

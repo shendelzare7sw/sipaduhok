@@ -20,11 +20,40 @@
     .btn-primary { background: #2563eb; color: white; padding: 10px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;}
     .btn-secondary { background: white; border: 1px solid #cbd5e1; color: #475569; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block;}
     .text-danger { color: #ef4444; font-size: 12px; margin-top: 4px; }
+
+    /* Password Field Styles */
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .password-wrapper input {
+        padding-right: 45px;
+    }
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s ease;
+    }
+    .toggle-password:hover {
+        color: #3b82f6;
+    }
+    .toggle-password i {
+        font-size: 16px;
+    }
 </style>
 
 <form action="{{ route('admin.users.store-tenaga-pendidik') }}" method="POST">
     @csrf
-    
+
     {{-- CARD 1: INFORMASI AKUN --}}
     <div class="card">
         <h5 class="form-title">1. Informasi Akun (Login)</h5>
@@ -48,7 +77,12 @@
             <div class="col">
                 <div class="form-group">
                     <label class="form-label">Password <span style="color:red">*</span></label>
-                    <input type="password" name="password" class="form-control" required>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="password" class="form-control" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                            <i class="fas fa-eye" id="password-icon"></i>
+                        </button>
+                    </div>
                     @error('password') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -145,4 +179,21 @@
         <button type="submit" class="btn-primary">Simpan Data</button>
     </div>
 </form>
+
+<script>
+function togglePassword(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    const icon = document.getElementById(inputId + '-icon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
 @endsection

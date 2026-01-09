@@ -188,7 +188,7 @@
 <body>
     <!-- Tombol Print Manual -->
     <button class="print-button no-print" onclick="window.print()">
-        🖨️ Cetak / Simpan PDF
+        <i class="fas fa-print"></i> Cetak / Simpan PDF
     </button>
 
     <div class="header">

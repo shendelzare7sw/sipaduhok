@@ -27,6 +27,8 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         } elseif ($user->isKetuaPKBM()) {
             return redirect()->route('ketua.dashboard');
+        } elseif ($user->isWakilKepalaSekolah()) {
+            return redirect()->route('waka.dashboard');
         } elseif ($user->isSekretaris()) {
             return redirect()->route('sekretaris.dashboard');
         } elseif ($user->isBendahara()) {

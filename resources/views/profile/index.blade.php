@@ -10,9 +10,10 @@
         $sidebarMap = [
             'admin' => 'admin.partials.sneat-sidebar-menu',
             'ketua_pkbm' => 'ketua.partials.sneat-sidebar-menu',
+            'wakil_kepala_sekolah' => 'waka.partials.sneat-sidebar-menu',
             'sekretaris' => 'sekretaris.partials.sneat-sidebar-menu',
             'bendahara' => 'bendahara.partials.sneat-sidebar-menu',
-            'guru_pengajar' => 'guru.partials.sneat-sidebar-menu', // Perbaiki ini
+            'guru_pengajar' => 'guru.partials.sneat-sidebar-menu',
             'wali_kelas' => 'wali-kelas.partials.sneat-sidebar-menu',
             'siswa' => 'siswa.partials.sneat-sidebar-sia',
             'orang_tua' => 'orang-tua.partials.sneat-sidebar-menu',

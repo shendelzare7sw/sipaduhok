@@ -15,14 +15,14 @@ class TahunAjaranController extends Controller
     public function index(Request $request)
     {
         $query = TahunAjaran::query();
-        
-        // Filter by status (is_active) only
-        if ($request->has('status') && $request->status !== '') {
+
+        // Filter by status (is_active) only if filled
+        if ($request->filled('status')) {
             $query->where('is_active', $request->status);
         }
-        
+
         $tahunAjarans = $query->orderBy('tanggal_mulai', 'desc')->paginate(10);
-        
+
         return view('admin.tahun-ajaran.index', compact('tahunAjarans'));
     }
 

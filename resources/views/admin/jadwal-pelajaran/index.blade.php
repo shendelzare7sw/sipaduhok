@@ -270,7 +270,7 @@ Susun jadwal mengajar untuk {{ $currentTahunAjaran ? $currentTahunAjaran->nama_t
                 <div class="stat-number">{{ $stats['totalGuru'] }}</div>
                 <div class="stat-desc">Guru aktif</div>
             </div>
-            <div class="stat-icon-bg">👩‍<i class="fas fa-school"></i></div>
+            <div class="stat-icon-bg"><i class="fas fa-chalkboard-teacher"></i></div>
         </div>
     </div>
 

@@ -35,6 +35,7 @@ class ProfileController extends Controller
             case 'ketua_pkbm':
             case 'sekretaris':
             case 'bendahara':
+            case 'wakil_kepala_sekolah':
                 $profileData = TenagaPendidik::where('user_id', $user->id)
                     ->with('user.cabang')
                     ->first();
@@ -84,6 +85,7 @@ class ProfileController extends Controller
             case 'ketua_pkbm':
             case 'sekretaris':
             case 'bendahara':
+            case 'wakil_kepala_sekolah':
                 $tenagaPendidik = TenagaPendidik::where('user_id', $user->id)->first();
                 if ($tenagaPendidik) {
                     $tenagaPendidik->update([
