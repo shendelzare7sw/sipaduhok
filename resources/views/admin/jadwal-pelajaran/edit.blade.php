@@ -33,6 +33,17 @@
     border-radius: 6px;
     margin-bottom: 20px;
 }
+
+/* Chevron animation */
+.fa-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+/* Istirahat collapse button hover effect */
+[data-bs-toggle="collapse"]:hover {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border-color: #3b82f6 !important;
+}
 </style>
 @endsection
 
@@ -155,7 +166,7 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Hari <span class="text-danger">*</span></label>
-                        <select name="hari" class="form-select" required>
+                        <select name="hari" id="hariSelect" class="form-select" required>
                             @foreach($hariList as $hari)
                                 <option value="{{ $hari }}"
                                         {{ old('hari', $jadwalPelajaran->hari) == $hari ? 'selected' : '' }}>
@@ -177,6 +188,77 @@
                                value="{{ old('jam_selesai', \Carbon\Carbon::parse($jadwalPelajaran->jam_selesai)->format('H:i')) }}" required>
                     </div>
                 </div>
+
+                {{-- Info Waktu Istirahat (Expandable) --}}
+                @if($pengaturanIstirahat->count() > 0)
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-between"
+                            data-bs-toggle="collapse" data-bs-target="#istirahatCollapse" aria-expanded="false">
+                        <span>
+                            <i class="fas fa-coffee me-2"></i>
+                            <strong>Lihat Waktu Istirahat</strong>
+                            <small class="text-muted ms-2" id="istirahatSummary">({{ $pengaturanIstirahat->sum(fn($items) => $items->count()) }} jadwal istirahat)</small>
+                        </span>
+                        <i class="fas fa-chevron-down transition-transform"></i>
+                    </button>
+
+                    <div class="collapse mt-2" id="istirahatCollapse">
+                        <div class="card border-info">
+                            <div class="card-body bg-light">
+                                <div class="d-flex align-items-start gap-2 mb-3">
+                                    <i class="fas fa-info-circle mt-1 text-info"></i>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-2 fw-bold text-info">
+                                            <i class="fas fa-coffee me-1"></i>Informasi Waktu Istirahat
+                                        </h6>
+                                        <p class="mb-2 small text-muted" id="istirahatDesc">
+                                            Berikut adalah waktu istirahat yang telah dikonfigurasi. Pilih kelas dan hari untuk melihat istirahat yang relevan.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div id="istirahatList">
+                                    {{-- Show all istirahat by default --}}
+                                    @foreach($pengaturanIstirahat as $jenjang => $istirahatItems)
+                                        <div class="mb-3 jenjang-group" data-jenjang="{{ $jenjang }}">
+                                            <div class="badge bg-primary mb-2">{{ $jenjang }}</div>
+                                            <div class="row g-2">
+                                                @foreach($istirahatItems as $item)
+                                                    <div class="col-md-6">
+                                                        <div class="p-2 bg-white rounded border border-info">
+                                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                                <span class="badge {{ $item->urutan == 1 ? 'bg-warning' : 'bg-info' }} text-dark">
+                                                                    Istirahat {{ $item->urutan }}
+                                                                </span>
+                                                                <strong class="text-dark">{{ substr($item->jam_mulai, 0, 5) }} - {{ substr($item->jam_selesai, 0, 5) }}</strong>
+                                                            </div>
+                                                            <small class="text-muted d-block">{{ $item->nama_istirahat }}</small>
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-calendar-day me-1"></i>
+                                                                {{ is_array($item->hari_aktif) ? implode(', ', $item->hari_aktif) : $item->hari_aktif }}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="alert alert-warning border-0 shadow-sm">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div>
+                            <strong>Belum ada pengaturan waktu istirahat</strong>
+                            <p class="mb-0 small">Silakan konfigurasi waktu istirahat terlebih dahulu di menu <a href="{{ route('admin.pengaturan-istirahat.index') }}" class="alert-link">Pengaturan Istirahat</a></p>
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <div class="mb-3">
                     <label class="form-label">Keterangan <small class="text-muted">(Opsional)</small></label>
@@ -242,6 +324,23 @@
 document.addEventListener('DOMContentLoaded', function() {
     const kelasSelect = document.getElementById('kelasSelect');
     const mapelSelect = document.getElementById('mapelSelect');
+    const hariSelect = document.getElementById('hariSelect');
+    const istirahatDesc = document.getElementById('istirahatDesc');
+    const istirahatCollapse = document.getElementById('istirahatCollapse');
+
+    // Animate chevron when collapse is toggled
+    if (istirahatCollapse) {
+        const collapseBtn = document.querySelector('[data-bs-target="#istirahatCollapse"]');
+        const chevronIcon = collapseBtn ? collapseBtn.querySelector('.fa-chevron-down') : null;
+
+        istirahatCollapse.addEventListener('show.bs.collapse', function() {
+            if (chevronIcon) chevronIcon.style.transform = 'rotate(180deg)';
+        });
+
+        istirahatCollapse.addEventListener('hide.bs.collapse', function() {
+            if (chevronIcon) chevronIcon.style.transform = 'rotate(0deg)';
+        });
+    }
 
     // Filter mata pelajaran berdasarkan jenjang kelas
     kelasSelect.addEventListener('change', function() {
@@ -262,11 +361,116 @@ document.addEventListener('DOMContentLoaded', function() {
                 option.style.display = 'block';
             }
         });
+
+        // Update istirahat info
+        filterIstirahatDisplay();
+    });
+
+    // Update istirahat info when hari changes
+    hariSelect.addEventListener('change', function() {
+        filterIstirahatDisplay();
     });
 
     // Trigger filter on page load
     kelasSelect.dispatchEvent(new Event('change'));
 });
+
+// Function to filter istirahat display based on jenjang and hari
+function filterIstirahatDisplay() {
+    const kelasSelect = document.getElementById('kelasSelect');
+    const hariSelect = document.getElementById('hariSelect');
+    const istirahatDesc = document.getElementById('istirahatDesc');
+    const istirahatSummary = document.getElementById('istirahatSummary');
+    const jenjangGroups = document.querySelectorAll('.jenjang-group');
+
+    const selectedKelasOption = kelasSelect.options[kelasSelect.selectedIndex];
+    const selectedJenjang = selectedKelasOption ? selectedKelasOption.getAttribute('data-jenjang') : null;
+    const selectedHari = hariSelect.value;
+
+    let visibleTotalCount = 0;
+
+    // If both selected, show only relevant istirahat
+    if (selectedJenjang && selectedHari) {
+        istirahatDesc.textContent = `Waktu istirahat untuk ${selectedJenjang} pada hari ${selectedHari}:`;
+
+        jenjangGroups.forEach(group => {
+            const groupJenjang = group.getAttribute('data-jenjang');
+
+            if (groupJenjang === selectedJenjang) {
+                // Show this jenjang group, but filter by hari
+                const items = group.querySelectorAll('.col-md-6');
+                let visibleCount = 0;
+
+                items.forEach(item => {
+                    const hariText = item.querySelector('small.text-muted:last-child').textContent;
+                    if (hariText.includes(selectedHari)) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                        visibleTotalCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                // Show group only if has visible items
+                group.style.display = visibleCount > 0 ? 'block' : 'none';
+            } else {
+                group.style.display = 'none';
+            }
+        });
+
+        // Update summary
+        if (istirahatSummary) {
+            if (visibleTotalCount > 0) {
+                istirahatSummary.textContent = `(${visibleTotalCount} istirahat pada ${selectedHari})`;
+            } else {
+                istirahatSummary.textContent = `(Tidak ada istirahat pada ${selectedHari})`;
+            }
+        }
+    }
+    // If only jenjang selected
+    else if (selectedJenjang) {
+        istirahatDesc.textContent = `Waktu istirahat untuk ${selectedJenjang}. Pilih hari untuk melihat istirahat yang lebih spesifik.`;
+
+        jenjangGroups.forEach(group => {
+            const groupJenjang = group.getAttribute('data-jenjang');
+            if (groupJenjang === selectedJenjang) {
+                group.style.display = 'block';
+                // Show all items in this jenjang
+                const items = group.querySelectorAll('.col-md-6');
+                items.forEach(item => {
+                    item.style.display = 'block';
+                    visibleTotalCount++;
+                });
+            } else {
+                group.style.display = 'none';
+            }
+        });
+
+        // Update summary
+        if (istirahatSummary) {
+            istirahatSummary.textContent = `(${visibleTotalCount} istirahat untuk ${selectedJenjang})`;
+        }
+    }
+    // Show all if nothing selected
+    else {
+        istirahatDesc.textContent = 'Berikut adalah waktu istirahat yang telah dikonfigurasi. Pilih kelas dan hari untuk melihat istirahat yang relevan.';
+
+        jenjangGroups.forEach(group => {
+            group.style.display = 'block';
+            const items = group.querySelectorAll('.col-md-6');
+            items.forEach(item => {
+                item.style.display = 'block';
+                visibleTotalCount++;
+            });
+        });
+
+        // Update summary
+        if (istirahatSummary) {
+            istirahatSummary.textContent = `(${visibleTotalCount} jadwal istirahat)`;
+        }
+    }
+}
 
 // Guru Modal Functions
 let selectedGuruId = null;

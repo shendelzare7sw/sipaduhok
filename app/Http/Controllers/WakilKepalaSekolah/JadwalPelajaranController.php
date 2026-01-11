@@ -4,11 +4,14 @@ namespace App\Http\Controllers\WakilKepalaSekolah;
 
 use App\Http\Controllers\Controller;
 use App\Models\JadwalPelajaran;
+use App\Models\JadwalPelajaranHistory;
 use App\Models\Kelas;
 use App\Models\TenagaPendidik;
 use App\Models\MataPelajaran;
 use App\Models\TahunAjaran;
+use App\Models\PengaturanIstirahat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class JadwalPelajaranController extends Controller
 {
@@ -117,13 +120,21 @@ class JadwalPelajaranController extends Controller
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+        // Ambil semua pengaturan istirahat yang aktif, dikelompokkan per jenjang
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('urutan')
+            ->get()
+            ->groupBy('jenjang');
+
         return view('waka.jadwal-pelajaran.create', compact(
             'tahunAjarans',
             'currentTahunAjaran',
             'kelasList',
             'mataPelajaranList',
             'guruList',
-            'hariList'
+            'hariList',
+            'pengaturanIstirahat'
         ));
     }
 
@@ -140,6 +151,24 @@ class JadwalPelajaranController extends Controller
         ], [
             'guru_id.exists' => 'Tenaga Pendidik belum ditugaskan atau tidak valid',
         ]);
+
+        // Check conflicts (waktu istirahat, kelas, guru)
+        $kelas = Kelas::find($validated['kelas_id']);
+        $conflictCheck = $this->checkConflicts(
+            $kelas->tahun_ajaran_id,
+            $validated['kelas_id'],
+            $validated['guru_id'] ?? null,
+            $validated['hari'],
+            $validated['jam_mulai'] . ':00',
+            $validated['jam_selesai'] . ':00'
+        );
+
+        if ($conflictCheck['hasConflict']) {
+            return back()->withInput()->withErrors(['conflict' => $conflictCheck['message']]);
+        }
+
+        $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
+        $validated['updated_by'] = Auth::id();
 
         JadwalPelajaran::create($validated);
 
@@ -201,13 +230,21 @@ class JadwalPelajaranController extends Controller
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+        // Ambil semua pengaturan istirahat yang aktif, dikelompokkan per jenjang
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('urutan')
+            ->get()
+            ->groupBy('jenjang');
+
         return view('waka.jadwal-pelajaran.edit', compact(
             'jadwalPelajaran',
             'tahunAjarans',
             'kelasList',
             'mataPelajaranList',
             'guruList',
-            'hariList'
+            'hariList',
+            'pengaturanIstirahat'
         ));
     }
 
@@ -224,6 +261,28 @@ class JadwalPelajaranController extends Controller
         ], [
             'guru_id.exists' => 'Tenaga Pendidik belum ditugaskan atau tidak valid',
         ]);
+
+        // Check conflicts (waktu istirahat, kelas, guru) - exclude current jadwal
+        $kelas = Kelas::find($validated['kelas_id']);
+        $conflictCheck = $this->checkConflicts(
+            $kelas->tahun_ajaran_id,
+            $validated['kelas_id'],
+            $validated['guru_id'] ?? null,
+            $validated['hari'],
+            $validated['jam_mulai'] . ':00',
+            $validated['jam_selesai'] . ':00',
+            $jadwalPelajaran->id
+        );
+
+        if ($conflictCheck['hasConflict']) {
+            return back()->withInput()->withErrors(['conflict' => $conflictCheck['message']]);
+        }
+
+        // Track changes untuk history
+        $this->trackChanges($jadwalPelajaran, $validated);
+
+        $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
+        $validated['updated_by'] = Auth::id();
 
         $jadwalPelajaran->update($validated);
 
@@ -551,6 +610,191 @@ class JadwalPelajaranController extends Controller
         } catch (\Exception $e) {
             \DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Check for scheduling conflicts (waktu istirahat, kelas, guru)
+     */
+    private function checkConflicts($tahunAjaranId, $kelasId, $guruId, $hari, $jamMulai, $jamSelesai, $excludeId = null)
+    {
+        $result = ['hasConflict' => false, 'message' => ''];
+
+        // Check bentrok dengan waktu istirahat
+        $kelas = Kelas::find($kelasId);
+        if ($kelas) {
+            $istirahatConflict = PengaturanIstirahat::jenjang($kelas->jenjang)
+                ->aktif()
+                ->untukHari($hari)
+                ->get()
+                ->first(function($istirahat) use ($jamMulai, $jamSelesai) {
+                    // Check if time overlaps
+                    // Menggunakan <= dan >= agar jadwal yang berakhir/mulai TEPAT pada boundary
+                    // istirahat TIDAK dianggap bentrok
+                    // Contoh: Jadwal 07:00-08:30 dengan Istirahat 08:30-09:00 = TIDAK bentrok ✅
+                    return !($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
+                });
+
+            if ($istirahatConflict) {
+                $result['hasConflict'] = true;
+                $result['message'] = "Bentrok dengan waktu istirahat '{$istirahatConflict->nama_istirahat}' pada {$hari} jam " . substr($istirahatConflict->jam_mulai, 0, 5) . " - " . substr($istirahatConflict->jam_selesai, 0, 5);
+                return $result;
+            }
+        }
+
+        // Check bentrok kelas
+        $kelasConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
+            ->byKelas($kelasId)
+            ->byHari($hari)
+            ->where(function($q) use ($jamMulai, $jamSelesai) {
+                $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
+                  ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                  ->orWhere(function($q2) use ($jamMulai, $jamSelesai) {
+                      $q2->where('jam_mulai', '<=', $jamMulai)
+                         ->where('jam_selesai', '>=', $jamSelesai);
+                  });
+            })
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+            ->first();
+
+        if ($kelasConflict) {
+            $result['hasConflict'] = true;
+            $result['message'] = "Kelas sudah memiliki jadwal lain pada {$hari} jam " . substr($kelasConflict->jam_mulai, 0, 5) . " - " . substr($kelasConflict->jam_selesai, 0, 5) . " ({$kelasConflict->mataPelajaran->nama_mapel})";
+            return $result;
+        }
+
+        // Check bentrok guru (jika ada)
+        if ($guruId) {
+            $guruConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
+                ->byGuru($guruId)
+                ->byHari($hari)
+                ->where(function($q) use ($jamMulai, $jamSelesai) {
+                    $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
+                      ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                      ->orWhere(function($q2) use ($jamMulai, $jamSelesai) {
+                          $q2->where('jam_mulai', '<=', $jamMulai)
+                             ->where('jam_selesai', '>=', $jamSelesai);
+                      });
+                })
+                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
+                ->first();
+
+            if ($guruConflict) {
+                $result['hasConflict'] = true;
+                $result['message'] = "Guru sudah mengajar di kelas lain pada {$hari} jam " . substr($guruConflict->jam_mulai, 0, 5) . " - " . substr($guruConflict->jam_selesai, 0, 5) . " ({$guruConflict->kelas->nama_kelas} - {$guruConflict->mataPelajaran->nama_mapel})";
+                return $result;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Ganti guru pada jadwal pelajaran
+     */
+    public function gantiGuru(Request $request, JadwalPelajaran $jadwalPelajaran)
+    {
+        $validated = $request->validate([
+            'guru_id_baru' => 'nullable|exists:tenaga_pendidik,id',
+            'alasan' => 'nullable|string',
+        ]);
+
+        $guruLama = $jadwalPelajaran->guru;
+        $guruBaru = $validated['guru_id_baru'] ? TenagaPendidik::find($validated['guru_id_baru']) : null;
+
+        // Check conflict untuk guru baru
+        if ($guruBaru) {
+            $conflicts = $this->checkConflicts(
+                $jadwalPelajaran->tahun_ajaran_id,
+                $jadwalPelajaran->kelas_id,
+                $validated['guru_id_baru'],
+                $jadwalPelajaran->hari,
+                $jadwalPelajaran->jam_mulai,
+                $jadwalPelajaran->jam_selesai,
+                $jadwalPelajaran->id
+            );
+
+            if ($conflicts['hasConflict']) {
+                return back()->with('error', $conflicts['message']);
+            }
+        }
+
+        // Catat ke history
+        JadwalPelajaranHistory::create([
+            'jadwal_pelajaran_id' => $jadwalPelajaran->id,
+            'field_changed' => 'guru_id',
+            'old_value' => $guruLama ? $guruLama->nama_lengkap : 'Kosong',
+            'new_value' => $guruBaru ? $guruBaru->nama_lengkap : 'Kosong',
+            'keterangan' => $validated['alasan'] ?? 'Penggantian guru',
+            'changed_by' => Auth::id(),
+            'changed_at' => now(),
+        ]);
+
+        $jadwalPelajaran->update([
+            'guru_id' => $validated['guru_id_baru'],
+            'status' => $validated['guru_id_baru'] ? 'aktif' : 'kosong',
+            'keterangan' => $validated['alasan'],
+            'updated_by' => Auth::id(),
+        ]);
+
+        $message = $guruBaru
+            ? "Guru berhasil diganti dari {$guruLama->nama_lengkap} ke {$guruBaru->nama_lengkap}"
+            : "Jadwal diset menjadi kosong (menunggu guru pengganti)";
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Track changes untuk history audit trail
+     */
+    private function trackChanges(JadwalPelajaran $jadwal, array $newData)
+    {
+        $fieldsToTrack = [
+            'guru_id' => 'Guru',
+            'kelas_id' => 'Kelas',
+            'mata_pelajaran_id' => 'Mata Pelajaran',
+            'hari' => 'Hari',
+            'jam_mulai' => 'Jam Mulai',
+            'jam_selesai' => 'Jam Selesai',
+        ];
+
+        foreach ($fieldsToTrack as $field => $label) {
+            if (isset($newData[$field]) && $jadwal->$field != $newData[$field]) {
+                $oldValue = $this->getReadableValue($field, $jadwal->$field);
+                $newValue = $this->getReadableValue($field, $newData[$field]);
+
+                JadwalPelajaranHistory::create([
+                    'jadwal_pelajaran_id' => $jadwal->id,
+                    'field_changed' => $field,
+                    'old_value' => $oldValue,
+                    'new_value' => $newValue,
+                    'keterangan' => "Perubahan {$label}",
+                    'changed_by' => Auth::id(),
+                    'changed_at' => now(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Get readable value untuk history
+     */
+    private function getReadableValue($field, $value)
+    {
+        if (is_null($value)) return 'Kosong';
+
+        switch ($field) {
+            case 'guru_id':
+                $guru = TenagaPendidik::find($value);
+                return $guru ? $guru->nama_lengkap : 'Kosong';
+            case 'kelas_id':
+                $kelas = Kelas::find($value);
+                return $kelas ? $kelas->nama_kelas : '-';
+            case 'mata_pelajaran_id':
+                $mapel = MataPelajaran::find($value);
+                return $mapel ? $mapel->nama_mapel : '-';
+            default:
+                return $value;
         }
     }
 }

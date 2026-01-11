@@ -301,7 +301,164 @@
         </div>
     </div>
 
-    {{-- 3. REKAP ABSENSI (BAGIAN KETIGA) --}}
+    {{-- 3. TUGAS & DEADLINE + NILAI TERBARU --}}
+    @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
+    <div class="row mb-4">
+        {{-- TUGAS & DEADLINE --}}
+        <div class="col-lg-6 mb-4">
+            <div class="card-custom shadow-sm">
+                <div class="card-header-custom">
+                    <span><i class="fas fa-tasks me-2"></i>Tugas & Deadline</span>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    @if($tugasList->count() > 0)
+                        @foreach($tugasList as $tugas)
+                            @php
+                                $deadline = \Carbon\Carbon::parse($tugas->tanggal_deadline);
+                                $diffDays = now()->diffInDays($deadline, false);
+                                $isUrgent = $diffDays <= 1;
+                                $isWarning = $diffDays > 1 && $diffDays <= 3;
+                            @endphp
+
+                            @if($isUrgent)
+                            <div class="alert alert-danger d-flex align-items-start mb-3">
+                                <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ $tugas->mataPelajaran->nama_mapel }} - {{ $tugas->judul_tugas }}</h6>
+                                    <p class="mb-1 small">Deadline: <strong>{{ $deadline->locale('id')->isoFormat('dddd, D MMM Y - HH:mm') }}</strong></p>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-danger">Urgent</span>
+                                        <a href="{{ route('siswa.lms.mapel.show', $tugas->mata_pelajaran_id) }}" class="badge bg-white text-danger text-decoration-none">Kerjakan Sekarang</a>
+                                    </div>
+                                </div>
+                            </div>
+                            @elseif($isWarning)
+                            <div class="alert alert-warning d-flex align-items-start mb-3">
+                                <i class="fas fa-clock me-2 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ $tugas->mataPelajaran->nama_mapel }} - {{ $tugas->judul_tugas }}</h6>
+                                    <p class="mb-1 small">Deadline: <strong>{{ $deadline->locale('id')->isoFormat('dddd, D MMM Y - HH:mm') }}</strong></p>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-warning text-dark">{{ $diffDays }} Hari Lagi</span>
+                                        <a href="{{ route('siswa.lms.mapel.show', $tugas->mata_pelajaran_id) }}" class="badge bg-white text-warning text-decoration-none">Lihat Tugas</a>
+                                    </div>
+                                </div>
+                            </div>
+                            @else
+                            <div class="card bg-light mb-2">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ $tugas->mataPelajaran->nama_mapel }} - {{ $tugas->judul_tugas }}</h6>
+                                            <small class="text-muted">Deadline: {{ $deadline->locale('id')->isoFormat('D MMM Y') }}</small>
+                                        </div>
+                                        <a href="{{ route('siswa.lms.mapel.show', $tugas->mata_pelajaran_id) }}" class="btn btn-sm btn-primary">Lihat</a>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        @endforeach
+                    @else
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3 opacity-25"></i>
+                            <p class="text-muted mb-0">Tidak ada tugas yang harus dikerjakan</p>
+                            <small class="text-muted">Semua tugas sudah selesai!</small>
+                        </div>
+                    @endif
+                </div>
+                @if($tugasList->count() > 0)
+                <div class="card-footer bg-white">
+                    <a href="{{ route('siswa.lms.dashboard') }}" class="btn btn-sm btn-outline-primary w-100">Lihat Semua Tugas di LMS</a>
+                </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- NILAI TERBARU --}}
+        <div class="col-lg-6 mb-4">
+            <div class="card-custom shadow-sm">
+                <div class="card-header-custom">
+                    <span><i class="fas fa-trophy me-2"></i>Nilai Terbaru</span>
+                    <a href="{{ route('siswa.sia.penilaian') }}" class="btn btn-sm btn-link text-primary fw-bold">Lihat Semua</a>
+                </div>
+                <div class="card-body">
+                    @if($nilaiTerbaru->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small fw-bold">
+                                <tr>
+                                    <th>Mata Pelajaran</th>
+                                    <th>Jenis</th>
+                                    <th class="text-center">Nilai</th>
+                                    <th class="text-center">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                @foreach($nilaiTerbaru as $nilai)
+                                <tr>
+                                    <td><strong>{{ $nilai->mataPelajaran->nama_mapel }}</strong></td>
+                                    <td>
+                                        @if($nilai->jenis_penilaian == 'tugas')
+                                            <span class="badge bg-info">Tugas</span>
+                                        @elseif($nilai->jenis_penilaian == 'uts')
+                                            <span class="badge bg-warning text-dark">UTS</span>
+                                        @elseif($nilai->jenis_penilaian == 'uas')
+                                            <span class="badge bg-danger">UAS</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ ucfirst($nilai->jenis_penilaian) }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center"><strong>{{ $nilai->nilai ?? '-' }}</strong></td>
+                                    <td class="text-center">
+                                        @php
+                                            $nilaiAngka = $nilai->nilai ?? 0;
+                                            if ($nilaiAngka >= 90) {
+                                                $grade = 'A';
+                                                $badgeClass = 'bg-success';
+                                            } elseif ($nilaiAngka >= 85) {
+                                                $grade = 'A-';
+                                                $badgeClass = 'bg-success';
+                                            } elseif ($nilaiAngka >= 80) {
+                                                $grade = 'B+';
+                                                $badgeClass = 'bg-primary';
+                                            } elseif ($nilaiAngka >= 75) {
+                                                $grade = 'B';
+                                                $badgeClass = 'bg-primary';
+                                            } elseif ($nilaiAngka >= 70) {
+                                                $grade = 'B-';
+                                                $badgeClass = 'bg-info';
+                                            } elseif ($nilaiAngka >= 65) {
+                                                $grade = 'C+';
+                                                $badgeClass = 'bg-warning text-dark';
+                                            } elseif ($nilaiAngka >= 60) {
+                                                $grade = 'C';
+                                                $badgeClass = 'bg-warning text-dark';
+                                            } else {
+                                                $grade = 'D';
+                                                $badgeClass = 'bg-danger';
+                                            }
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }}">{{ $grade }}</span>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3 opacity-25"></i>
+                        <p class="text-muted mb-0">Belum ada nilai yang tercatat</p>
+                        <small class="text-muted">Nilai akan muncul setelah guru menilai tugas Anda</small>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- 4. REKAP ABSENSI (BAGIAN KEEMPAT) --}}
     <h6 class="fw-bold text-muted mb-3 ms-1"><i class="fas fa-calendar-check me-2 text-primary"></i>Statistik Kehadiran Bulan Ini</h6>
     <div class="row mb-4">
         <div class="col-6 col-md-3 mb-3">
@@ -330,7 +487,7 @@
         </div>
     </div>
 
-    {{-- 4. MENU CEPAT (DIPERBAIKI TATA LETAKNYA) --}}
+    {{-- 5. MENU CEPAT (DIPERBAIKI TATA LETAKNYA) --}}
     <h6 class="fw-bold text-muted mb-3 ms-1"><i class="fas fa-th me-2 text-warning"></i>Akses Layanan Cepat</h6>
     <div class="row mb-5">
         <div class="col-6 col-lg-4 mb-3">
@@ -342,15 +499,17 @@
         <div class="col-6 col-lg-4 mb-3">
             <a href="{{ route('siswa.sia.penilaian') }}" class="menu-item-quick shadow-sm">
                 <i class="fas fa-chart-line text-success"></i>
-                <div class="menu-text">Nilai Tugas</div>
+                <div class="menu-text">Nilai Saya</div>
             </a>
         </div>
+        @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
         <div class="col-6 col-lg-4 mb-3">
-            <a href="{{ route('siswa.sia.rapor.index') }}" class="menu-item-quick shadow-sm">
-                <i class="fas fa-file-signature text-info"></i>
-                <div class="menu-text">E-Rapor</div>
+            <a href="{{ route('siswa.lms.dashboard') }}" class="menu-item-quick shadow-sm">
+                <i class="fas fa-graduation-cap text-info"></i>
+                <div class="menu-text">LMS</div>
             </a>
         </div>
+        @endif
     </div>
 
     {{-- LMS BANNER --}}

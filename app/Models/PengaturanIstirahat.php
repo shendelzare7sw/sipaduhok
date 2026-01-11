@@ -52,6 +52,21 @@ class PengaturanIstirahat extends Model
 
     /**
      * Check apakah waktu bentrok dengan istirahat ini
+     *
+     * Logika: Dua interval waktu TIDAK bentrok jika:
+     * - Interval 1 selesai SEBELUM ATAU TEPAT saat interval 2 mulai (jamSelesai <= jam_mulai), ATAU
+     * - Interval 1 mulai SETELAH ATAU TEPAT saat interval 2 selesai (jamMulai >= jam_selesai)
+     *
+     * Dengan menggunakan <= dan >=, jadwal yang berakhir/mulai TEPAT pada boundary
+     * istirahat TIDAK dianggap bentrok (no overlap).
+     *
+     * Contoh TIDAK bentrok:
+     * - Jadwal 07:00-08:30, Istirahat 08:30-09:00 ✅ (jadwal selesai tepat saat istirahat mulai)
+     * - Jadwal 09:00-11:00, Istirahat 08:30-09:00 ✅ (jadwal mulai tepat saat istirahat selesai)
+     *
+     * Contoh BENTROK:
+     * - Jadwal 08:00-08:45, Istirahat 08:30-09:00 ❌ (overlap 15 menit)
+     * - Jadwal 08:45-09:15, Istirahat 08:30-09:00 ❌ (overlap 15 menit)
      */
     public function isBentrok($jamMulai, $jamSelesai)
     {

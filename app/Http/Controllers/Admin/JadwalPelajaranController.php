@@ -143,13 +143,21 @@ class JadwalPelajaranController extends Controller
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+        // Ambil semua pengaturan istirahat yang aktif, dikelompokkan per jenjang
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('urutan')
+            ->get()
+            ->groupBy('jenjang');
+
         return view('admin.jadwal-pelajaran.create', compact(
             'tahunAjarans',
             'currentTahunAjaran',
             'kelasList',
             'mataPelajaranList',
             'guruList',
-            'hariList'
+            'hariList',
+            'pengaturanIstirahat'
         ));
     }
 
@@ -256,13 +264,21 @@ class JadwalPelajaranController extends Controller
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+        // Ambil semua pengaturan istirahat yang aktif, dikelompokkan per jenjang
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('urutan')
+            ->get()
+            ->groupBy('jenjang');
+
         return view('admin.jadwal-pelajaran.edit', compact(
             'jadwalPelajaran',
             'tahunAjarans',
             'kelasList',
             'mataPelajaranList',
             'guruList',
-            'hariList'
+            'hariList',
+            'pengaturanIstirahat'
         ));
     }
 
@@ -503,6 +519,9 @@ class JadwalPelajaranController extends Controller
                 ->get()
                 ->first(function($istirahat) use ($jamMulai, $jamSelesai) {
                     // Check if time overlaps
+                    // Menggunakan <= dan >= agar jadwal yang berakhir/mulai TEPAT pada boundary
+                    // istirahat TIDAK dianggap bentrok
+                    // Contoh: Jadwal 07:00-08:30 dengan Istirahat 08:30-09:00 = TIDAK bentrok ✅
                     return !($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
                 });
 

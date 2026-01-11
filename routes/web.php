@@ -540,6 +540,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{jadwalPelajaran}/edit', [WakaJadwalPelajaranController::class, 'edit'])->name('edit');
             Route::put('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'update'])->name('update');
             Route::delete('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'destroy'])->name('destroy');
+            Route::post('/{jadwalPelajaran}/ganti-guru', [WakaJadwalPelajaranController::class, 'gantiGuru'])->name('ganti-guru');
         });
 
         // Monitoring

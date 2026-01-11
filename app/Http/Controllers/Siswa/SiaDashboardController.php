@@ -60,6 +60,25 @@ class SiaDashboardController extends Controller
             ->orderBy('jam_mulai')
             ->get();
 
+        // Tugas & Deadline (untuk LMS - SMP & SMA)
+        $tugasList = collect();
+        if ($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA'])) {
+            $tugasList = Tugas::where('kelas_id', $siswa->kelas_id)
+                ->where('tanggal_deadline', '>=', now())
+                ->with(['mataPelajaran', 'guru'])
+                ->orderBy('tanggal_deadline', 'asc')
+                ->limit(5)
+                ->get();
+        }
+
+        // Nilai Terbaru
+        $nilaiTerbaru = Nilai::where('siswa_id', $siswa->id)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->with(['mataPelajaran', 'guru'])
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->get();
+
         // Show LMS Button
         $showLmsButton = true;
 
@@ -70,6 +89,8 @@ class SiaDashboardController extends Controller
             'performaData',
             'rekapAbsen',
             'jadwalHariIni',
+            'tugasList',
+            'nilaiTerbaru',
             'showLmsButton'
         ));
     }
