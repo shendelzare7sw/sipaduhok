@@ -200,13 +200,9 @@ class ValidasiAksesController extends Controller
     /**
      * Bulk validasi akses ujian (per kelas)
      */
-    public function bulkValidasiUjian(Request $request)
+    public function bulkValidasiUjian(Request $request, Kelas $kelas)
     {
-        $request->validate([
-            'kelas_id' => 'required|exists:kelas,id',
-        ]);
-
-        $siswaList = Siswa::where('kelas_id', $request->kelas_id)
+        $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
             ->where('validasi_ujian_bendahara', false)
             ->get();
@@ -236,13 +232,9 @@ class ValidasiAksesController extends Controller
     /**
      * Bulk validasi akses rapor (per kelas)
      */
-    public function bulkValidasiRapor(Request $request)
+    public function bulkValidasiRapor(Request $request, Kelas $kelas)
     {
-        $request->validate([
-            'kelas_id' => 'required|exists:kelas,id',
-        ]);
-
-        $siswaList = Siswa::where('kelas_id', $request->kelas_id)
+        $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
             ->where('validasi_rapor_bendahara', false)
             ->get();

@@ -156,9 +156,9 @@ class KelasController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Kelas $kela)
+    public function show(Kelas $kelas)
     {
-        $kelas = $kela->load(['cabang', 'tahunAjaran', 'waliKelas']);
+        $kelas->load(['cabang', 'tahunAjaran', 'waliKelas']);
         
         // Get siswa in this kelas
         $siswa = Siswa::where('kelas_id', $kelas->id)
@@ -179,9 +179,8 @@ class KelasController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Kelas $kela)
+    public function edit(Kelas $kelas)
     {
-        $kelas = $kela;
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
@@ -199,10 +198,8 @@ class KelasController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Kelas $kela)
+    public function update(Request $request, Kelas $kelas)
     {
-        $kelas = $kela;
-        
         $validated = $request->validate([
             'cabang_id' => 'required|exists:cabang,id',
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
@@ -252,10 +249,8 @@ class KelasController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Kelas $kela)
+    public function destroy(Kelas $kelas)
     {
-        $kelas = $kela;
-        
         // Check if kelas has siswa
         $siswaCount = Siswa::where('kelas_id', $kelas->id)->count();
         if ($siswaCount > 0) {
@@ -272,9 +267,9 @@ class KelasController extends Controller
     /**
      * Manage siswa in kelas (add/remove)
      */
-    public function manageSiswa(Kelas $kela)
+    public function manageSiswa(Kelas $kelas)
     {
-        $kelas = $kela->load(['cabang', 'tahunAjaran', 'waliKelas']);
+        $kelas->load(['cabang', 'tahunAjaran', 'waliKelas']);
         
         // Siswa yang sudah ada di kelas ini
         $siswaInKelas = Siswa::where('kelas_id', $kelas->id)
@@ -299,10 +294,8 @@ class KelasController extends Controller
     /**
      * Add siswa to kelas
      */
-    public function addSiswa(Request $request, Kelas $kela)
+    public function addSiswa(Request $request, Kelas $kelas)
     {
-        $kelas = $kela;
-        
         $validated = $request->validate([
             'siswa_ids' => 'required|array',
             'siswa_ids.*' => 'exists:siswa,id',
@@ -326,10 +319,8 @@ class KelasController extends Controller
     /**
      * Remove siswa from kelas
      */
-    public function removeSiswa(Request $request, Kelas $kela)
+    public function removeSiswa(Request $request, Kelas $kelas)
     {
-        $kelas = $kela;
-        
         $validated = $request->validate([
             'siswa_id' => 'required|exists:siswa,id',
         ]);
@@ -343,10 +334,8 @@ class KelasController extends Controller
     /**
      * Assign wali kelas
      */
-    public function assignWaliKelas(Request $request, Kelas $kela)
+    public function assignWaliKelas(Request $request, Kelas $kelas)
     {
-        $kelas = $kela;
-        
         $validated = $request->validate([
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
         ]);

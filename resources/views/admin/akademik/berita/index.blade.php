@@ -342,7 +342,7 @@
 // Delete Confirmation Function (Bootstrap 5)
 function confirmDelete(id, name) {
     document.getElementById('deleteBeritaName').textContent = name;
-    document.getElementById('deleteForm').action = '/sekretaris/berita/' + id;
+    document.getElementById('deleteForm').action = '/admin/akademik/berita/' + id;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
     deleteModal.show();
 }
@@ -363,7 +363,7 @@ async function confirmFeatured(beritaId) {
     }
 
     try {
-        const response = await fetch(`/sekretaris/berita/${beritaId}/toggle-featured`, {
+        const response = await fetch(`/admin/akademik/berita/${beritaId}/toggle-featured`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -269,7 +269,7 @@
 <script>
 function confirmDelete(id, name) {
     document.getElementById('deletePengumumanName').textContent = name;
-    document.getElementById('deleteForm').action = '/sekretaris/pengumuman/' + id;
+    document.getElementById('deleteForm').action = '/admin/akademik/pengumuman/' + id;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
     deleteModal.show();
 }

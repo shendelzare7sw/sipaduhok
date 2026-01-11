@@ -211,11 +211,11 @@ Route::middleware(['auth'])->group(function () {
         
         // Kelas
         Route::get('kelas/print', [KelasController::class, 'printDaftarKelas'])->name('kelas.print');
-        Route::get('kelas/{kela}/manage-siswa', [KelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
-        Route::post('kelas/{kela}/add-siswa', [KelasController::class, 'addSiswa'])->name('kelas.add-siswa');
-        Route::post('kelas/{kela}/remove-siswa', [KelasController::class, 'removeSiswa'])->name('kelas.remove-siswa');
-        Route::post('kelas/{kela}/assign-wali', [KelasController::class, 'assignWaliKelas'])->name('kelas.assign-wali');
-        Route::resource('kelas', KelasController::class);
+        Route::get('kelas/{kelas}/manage-siswa', [KelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
+        Route::post('kelas/{kelas}/add-siswa', [KelasController::class, 'addSiswa'])->name('kelas.add-siswa');
+        Route::post('kelas/{kelas}/remove-siswa', [KelasController::class, 'removeSiswa'])->name('kelas.remove-siswa');
+        Route::post('kelas/{kelas}/assign-wali', [KelasController::class, 'assignWaliKelas'])->name('kelas.assign-wali');
+        Route::resource('kelas', KelasController::class)->parameters(['kelas' => 'kelas']);
 
         // Wali Kelas
         Route::get('wali-kelas', [AdminWaliKelasController::class, 'index'])->name('wali-kelas.index');
@@ -526,13 +526,21 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Jadwal Pelajaran
-        Route::resource('jadwal-pelajaran', WakaJadwalPelajaranController::class);
-        Route::get('/jadwal-pelajaran/print', [WakaJadwalPelajaranController::class, 'print'])->name('jadwal-pelajaran.print');
-        Route::get('/jadwal-pelajaran/export-pdf', [WakaJadwalPelajaranController::class, 'exportPdf'])->name('jadwal-pelajaran.export-pdf');
-        Route::get('/jadwal-pelajaran/export-excel', [WakaJadwalPelajaranController::class, 'exportExcel'])->name('jadwal-pelajaran.export-excel');
-        Route::post('/jadwal-pelajaran/bulk-replace-guru', [WakaJadwalPelajaranController::class, 'bulkReplaceGuru'])->name('jadwal-pelajaran.bulk-replace-guru');
-        Route::post('/jadwal-pelajaran/duplicate', [WakaJadwalPelajaranController::class, 'duplicate'])->name('jadwal-pelajaran.duplicate');
-        Route::delete('/jadwal-pelajaran/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('jadwal-pelajaran.bulk-delete');
+        Route::prefix('jadwal-pelajaran')->name('jadwal-pelajaran.')->group(function () {
+            Route::get('/', [WakaJadwalPelajaranController::class, 'index'])->name('index');
+            Route::get('/create', [WakaJadwalPelajaranController::class, 'create'])->name('create');
+            Route::post('/', [WakaJadwalPelajaranController::class, 'store'])->name('store');
+            Route::get('/print', [WakaJadwalPelajaranController::class, 'print'])->name('print');
+            Route::get('/export-pdf', [WakaJadwalPelajaranController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/export-excel', [WakaJadwalPelajaranController::class, 'exportExcel'])->name('export-excel');
+            Route::post('/duplicate', [WakaJadwalPelajaranController::class, 'duplicate'])->name('duplicate');
+            Route::post('/bulk-replace-guru', [WakaJadwalPelajaranController::class, 'bulkReplaceGuru'])->name('bulk-replace-guru');
+            Route::delete('/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::get('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'show'])->name('show');
+            Route::get('/{jadwalPelajaran}/edit', [WakaJadwalPelajaranController::class, 'edit'])->name('edit');
+            Route::put('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'update'])->name('update');
+            Route::delete('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'destroy'])->name('destroy');
+        });
 
         // Monitoring
         Route::prefix('monitoring')->name('monitoring.')->group(function () {

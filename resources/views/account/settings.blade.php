@@ -169,6 +169,17 @@
         line-height: 1;
     }
 
+    /* Prevent duplicate icons from browser extensions or other scripts */
+    .toggle-password i:not(:first-child) {
+        display: none !important;
+    }
+
+    /* Ensure only one icon is visible */
+    .toggle-password::before,
+    .toggle-password::after {
+        display: none !important;
+    }
+
     .input-group .form-control.is-invalid {
         z-index: 2;
         border-right: 1px solid #dc3545;
@@ -181,6 +192,21 @@
     .input-group .form-control:focus {
         border-color: #86b7fe;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Hide browser default password reveal button */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+        display: none;
+    }
+
+    input[type="password"]::-webkit-credentials-auto-fill-button,
+    input[type="password"]::-webkit-contacts-auto-fill-button {
+        display: none !important;
+        visibility: hidden;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
     }
 </style>
 @endsection

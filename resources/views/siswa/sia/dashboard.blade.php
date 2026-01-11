@@ -258,30 +258,45 @@
         <div class="col-lg-7 mb-4">
             <div class="card-custom shadow-sm">
                 <div class="card-header-custom">
-                    <span><i class="fas fa-clock me-2"></i>Jadwal Hari Ini</span>
-                    <a href="#" class="btn btn-sm btn-link text-primary fw-bold">Lihat Semua</a>
+                    <span><i class="fas fa-clock me-2"></i>Jadwal Hari Ini ({{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM Y') }})</span>
+                    @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
+                    <a href="{{ route('siswa.lms.jadwal') }}" class="btn btn-sm btn-link text-primary fw-bold">Lihat Semua</a>
+                    @endif
                 </div>
+                @if(isset($jadwalHariIni) && $jadwalHariIni->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light small fw-bold">
-                            <tr><th class="ps-4">JAM</th><th>MATA PELAJARAN</th><th>RUANG</th><th class="text-center">AKSI</th></tr>
+                            <tr><th class="ps-4">JAM</th><th>MATA PELAJARAN</th><th>GURU PENGAJAR</th><th class="text-center">AKSI</th></tr>
                         </thead>
                         <tbody class="small">
+                            @foreach($jadwalHariIni as $jadwal)
                             <tr>
-                                <td class="ps-4 fw-bold text-primary">08:00</td>
-                                <td><span class="d-block fw-bold text-dark">Matematika Wajib</span><span class="text-muted">Bpk. Budi Raharjo</span></td>
-                                <td>R. 201</td>
-                                <td class="text-center"><button class="btn btn-sm btn-primary rounded-pill px-3">Masuk</button></td>
+                                <td class="ps-4 fw-bold text-primary">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}</td>
+                                <td>
+                                    <span class="d-block fw-bold text-dark">{{ $jadwal->mataPelajaran->nama_mapel }}</span>
+                                    <span class="text-muted small">{{ $jadwal->mataPelajaran->kode_mapel }}</span>
+                                </td>
+                                <td>{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
+                                <td class="text-center">
+                                    @if($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']))
+                                    <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="btn btn-sm btn-primary rounded-pill px-3">Masuk</a>
+                                    @else
+                                    <span class="badge bg-secondary">-</span>
+                                    @endif
+                                </td>
                             </tr>
-                            <tr>
-                                <td class="ps-4 fw-bold text-primary">10:30</td>
-                                <td><span class="d-block fw-bold text-dark">Bahasa Inggris</span><span class="text-muted">Ibu Siti Aminah</span></td>
-                                <td>Lab Bahasa</td>
-                                <td class="text-center"><button class="btn btn-sm btn-primary rounded-pill px-3">Masuk</button></td>
-                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
+                @else
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3 opacity-25"></i>
+                    <p class="text-muted mb-0">Tidak ada jadwal pelajaran hari ini</p>
+                    <small class="text-muted">Silakan hubungi wali kelas atau admin</small>
+                </div>
+                @endif
             </div>
         </div>
     </div>

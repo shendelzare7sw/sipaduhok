@@ -160,11 +160,40 @@
         .password-toggle {
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
         }
-        
+
         .password-toggle:hover {
             color: #165fac;
             transform: scale(1.1);
+        }
+
+        /* Prevent duplicate icons from browser extensions or other scripts */
+        .password-toggle svg:not(:first-child):not(#eyeClosed) {
+            display: none !important;
+        }
+
+        /* Ensure only one visible icon at a time */
+        .password-toggle::before,
+        .password-toggle::after {
+            display: none !important;
+        }
+
+        /* Hide browser default password reveal button */
+        input[type="password"]::-ms-reveal,
+        input[type="password"]::-ms-clear {
+            display: none;
+        }
+
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-contacts-auto-fill-button,
+        input[type="text"]::-webkit-credentials-auto-fill-button,
+        input[type="text"]::-webkit-contacts-auto-fill-button {
+            display: none !important;
+            visibility: hidden;
+            pointer-events: none;
+            position: absolute;
+            right: 0;
         }
         
         /* Error Message */

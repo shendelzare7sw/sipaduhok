@@ -304,7 +304,7 @@
     // 2. LOGIC MODAL HAPUS - EXACT COPY DARI PENGUMUMAN YANG BERHASIL
     function confirmDelete(id, name) {
         document.getElementById('deleteKalenderName').textContent = name;
-        document.getElementById('deleteForm').action = '/sekretaris/kalender/' + id;
+        document.getElementById('deleteForm').action = '/admin/akademik/kalender/' + id;
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
         deleteModal.show();
     }

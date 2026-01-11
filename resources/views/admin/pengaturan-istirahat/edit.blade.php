@@ -193,12 +193,15 @@
         {{-- Info Card --}}
         <div class="card mt-4">
             <div class="card-body">
-                <h6 class="mb-3"><i class="fas fa-info-circle text-info me-2"></i>Informasi</h6>
+                <h6 class="mb-3"><i class="fas fa-info-circle text-info me-2"></i>Informasi & Aturan</h6>
                 <ul class="mb-0">
                     <li>Field yang bertanda <span class="text-danger">*</span> wajib diisi</li>
-                    <li>Maksimal 2 waktu istirahat per jenjang</li>
+                    <li><strong>Urutan istirahat:</strong> Maksimal 2 urutan (Istirahat 1 dan Istirahat 2) per jenjang</li>
+                    <li><strong>Hari yang berbeda:</strong> Anda bisa membuat istirahat dengan urutan yang sama tapi untuk hari yang berbeda
+                        <br><small class="text-muted">Contoh: Istirahat 1 untuk Senin-Kamis (09:00-09:15), dan Istirahat 1 untuk Jumat (10:00-10:15)</small>
+                    </li>
                     <li>Jam selesai harus lebih besar dari jam mulai</li>
-                    <li>Sistem akan otomatis mengecek bentrok waktu dengan istirahat lain di jenjang yang sama</li>
+                    <li>Sistem akan mengecek bentrok waktu dan duplikasi urutan untuk hari yang sama</li>
                     <li>Nonaktifkan status jika ingin menonaktifkan sementara tanpa menghapus</li>
                 </ul>
             </div>

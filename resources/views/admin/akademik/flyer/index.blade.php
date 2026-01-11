@@ -244,7 +244,7 @@
 <script>
 function confirmDelete(id, name) {
     document.getElementById('deleteFlyerName').textContent = name;
-    document.getElementById('deleteForm').action = '/sekretaris/flyer/' + id;
+    document.getElementById('deleteForm').action = '/admin/akademik/flyer/' + id;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
     deleteModal.show();
 }

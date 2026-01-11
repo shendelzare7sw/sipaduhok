@@ -43,24 +43,35 @@ class PengaturanIstirahatController extends Controller
             'nama_istirahat' => 'required|string|max:255',
         ]);
 
-        // Cek apakah sudah ada 2 istirahat untuk jenjang ini
-        $jumlahIstirahat = PengaturanIstirahat::where('jenjang', $validated['jenjang'])->count();
-        if ($jumlahIstirahat >= 2) {
-            return back()->with('error', 'Maksimal 2 waktu istirahat per jenjang');
+        // Cek apakah urutan ini sudah ada untuk hari yang sama
+        $existingIstirahat = PengaturanIstirahat::where('jenjang', $validated['jenjang'])
+            ->where('urutan', $validated['urutan'])
+            ->get();
+
+        // Cek apakah ada bentrok hari aktif dengan istirahat yang sama urutan
+        foreach ($existingIstirahat as $istirahat) {
+            $hariSama = array_intersect($validated['hari_aktif'], $istirahat->hari_aktif ?? []);
+            if (!empty($hariSama)) {
+                $hariList = implode(', ', $hariSama);
+                return back()->with('error', "Istirahat urutan {$validated['urutan']} sudah ada untuk hari: {$hariList}. Gunakan urutan yang berbeda atau edit yang sudah ada.")->withInput();
+            }
         }
 
-        // Cek bentrok waktu untuk jenjang yang sama
-        $bentrok = PengaturanIstirahat::where('jenjang', $validated['jenjang'])
-            ->where(function($query) use ($validated) {
-                $query->where(function($q) use ($validated) {
-                    $q->where('jam_mulai', '<', $validated['jam_selesai'])
-                      ->where('jam_selesai', '>', $validated['jam_mulai']);
-                });
-            })
-            ->exists();
+        // Cek bentrok waktu untuk jenjang yang sama (hanya untuk hari yang sama)
+        $allIstirahat = PengaturanIstirahat::where('jenjang', $validated['jenjang'])->get();
 
-        if ($bentrok) {
-            return back()->with('error', 'Waktu istirahat bentrok dengan pengaturan yang sudah ada')->withInput();
+        foreach ($allIstirahat as $istirahat) {
+            // Cek apakah ada hari yang sama
+            $hariSama = array_intersect($validated['hari_aktif'], $istirahat->hari_aktif ?? []);
+
+            if (!empty($hariSama)) {
+                // Cek apakah waktu bentrok
+                if ($istirahat->jam_mulai < $validated['jam_selesai'] &&
+                    $istirahat->jam_selesai > $validated['jam_mulai']) {
+                    $hariList = implode(', ', $hariSama);
+                    return back()->with('error', "Waktu istirahat bentrok dengan '{$istirahat->nama_istirahat}' pada hari: {$hariList}")->withInput();
+                }
+            }
         }
 
         PengaturanIstirahat::create($validated);
@@ -93,19 +104,38 @@ class PengaturanIstirahatController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        // Cek bentrok waktu (exclude current record)
-        $bentrok = PengaturanIstirahat::where('jenjang', $validated['jenjang'])
+        // Cek apakah urutan ini sudah ada untuk hari yang sama (exclude current record)
+        $existingIstirahat = PengaturanIstirahat::where('jenjang', $validated['jenjang'])
+            ->where('urutan', $validated['urutan'])
             ->where('id', '!=', $id)
-            ->where(function($query) use ($validated) {
-                $query->where(function($q) use ($validated) {
-                    $q->where('jam_mulai', '<', $validated['jam_selesai'])
-                      ->where('jam_selesai', '>', $validated['jam_mulai']);
-                });
-            })
-            ->exists();
+            ->get();
 
-        if ($bentrok) {
-            return back()->with('error', 'Waktu istirahat bentrok dengan pengaturan yang sudah ada')->withInput();
+        // Cek apakah ada bentrok hari aktif dengan istirahat yang sama urutan
+        foreach ($existingIstirahat as $istirahat) {
+            $hariSama = array_intersect($validated['hari_aktif'], $istirahat->hari_aktif ?? []);
+            if (!empty($hariSama)) {
+                $hariList = implode(', ', $hariSama);
+                return back()->with('error', "Istirahat urutan {$validated['urutan']} sudah ada untuk hari: {$hariList}. Gunakan urutan yang berbeda atau edit yang sudah ada.")->withInput();
+            }
+        }
+
+        // Cek bentrok waktu untuk jenjang yang sama (exclude current record, hanya untuk hari yang sama)
+        $allIstirahat = PengaturanIstirahat::where('jenjang', $validated['jenjang'])
+            ->where('id', '!=', $id)
+            ->get();
+
+        foreach ($allIstirahat as $istirahat) {
+            // Cek apakah ada hari yang sama
+            $hariSama = array_intersect($validated['hari_aktif'], $istirahat->hari_aktif ?? []);
+
+            if (!empty($hariSama)) {
+                // Cek apakah waktu bentrok
+                if ($istirahat->jam_mulai < $validated['jam_selesai'] &&
+                    $istirahat->jam_selesai > $validated['jam_mulai']) {
+                    $hariList = implode(', ', $hariSama);
+                    return back()->with('error', "Waktu istirahat bentrok dengan '{$istirahat->nama_istirahat}' pada hari: {$hariList}")->withInput();
+                }
+            }
         }
 
         $pengaturan->update($validated);

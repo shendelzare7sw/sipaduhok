@@ -14,7 +14,7 @@ class JadwalPelajaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = JadwalPelajaran::with(['kelas.tahunAjaran', 'tenagaPendidik', 'mataPelajaran']);
+        $query = JadwalPelajaran::with(['kelas.tahunAjaran', 'guru', 'mataPelajaran']);
 
         // Filter by tahun ajaran
         if ($request->filled('tahun_ajaran_id')) {
@@ -38,7 +38,7 @@ class JadwalPelajaranController extends Controller
 
         // Filter by guru
         if ($request->filled('guru_id')) {
-            $query->where('tenaga_pendidik_id', $request->guru_id);
+            $query->where('guru_id', $request->guru_id);
         }
 
         $jadwalList = $query->orderBy('hari')
@@ -59,7 +59,7 @@ class JadwalPelajaranController extends Controller
             ->orderBy('nama_kelas')
             ->get();
 
-        $guruList = TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['guru_pengajar', 'wali_kelas'])->where('is_active', true))
+        $guruList = TenagaPendidik::whereHas('user', fn($q) => $q->where('role', 'guru_pengajar')->where('is_active', true))
             ->orderBy('nama_lengkap')
             ->get();
 
@@ -76,7 +76,7 @@ class JadwalPelajaranController extends Controller
         $stats = [
             'totalJadwal' => JadwalPelajaran::when($currentTahunAjaran, fn($q) => $q->whereHas('kelas', fn($kq) => $kq->where('tahun_ajaran_id', $currentTahunAjaran->id)))->count(),
             'jadwalKosong' => $totalKelas - $kelasWithJadwal,
-            'totalGuru' => TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['guru_pengajar', 'wali_kelas']))->count(),
+            'totalGuru' => TenagaPendidik::whereHas('user', fn($q) => $q->where('role', 'guru_pengajar'))->count(),
             'totalKelas' => $totalKelas,
         ];
 
@@ -111,7 +111,7 @@ class JadwalPelajaranController extends Controller
 
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
-        $guruList = TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['guru_pengajar', 'wali_kelas'])->where('is_active', true))
+        $guruList = TenagaPendidik::whereHas('user', fn($q) => $q->where('role', 'guru_pengajar')->where('is_active', true))
             ->orderBy('nama_lengkap')
             ->get();
 
@@ -131,11 +131,14 @@ class JadwalPelajaranController extends Controller
     {
         $validated = $request->validate([
             'kelas_id' => 'required|exists:kelas,id',
-            'tenaga_pendidik_id' => 'required|exists:tenaga_pendidik,id',
+            'guru_id' => 'nullable|exists:tenaga_pendidik,id',
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
             'hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+            'keterangan' => 'nullable|string',
+        ], [
+            'guru_id.exists' => 'Tenaga Pendidik belum ditugaskan atau tidak valid',
         ]);
 
         JadwalPelajaran::create($validated);
@@ -155,7 +158,7 @@ class JadwalPelajaranController extends Controller
 
         $kelas = Kelas::with('cabang', 'tahunAjaran', 'waliKelas')->findOrFail($kelasId);
 
-        $jadwalList = JadwalPelajaran::with(['mataPelajaran', 'tenagaPendidik'])
+        $jadwalList = JadwalPelajaran::with(['mataPelajaran', 'guru'])
             ->whereHas('kelas', fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
             ->where('kelas_id', $kelasId)
             ->get();
@@ -181,7 +184,7 @@ class JadwalPelajaranController extends Controller
 
     public function edit(JadwalPelajaran $jadwalPelajaran)
     {
-        $jadwalPelajaran->load(['kelas.tahunAjaran', 'mataPelajaran', 'tenagaPendidik']);
+        $jadwalPelajaran->load(['kelas.tahunAjaran', 'mataPelajaran', 'guru']);
 
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
@@ -192,7 +195,7 @@ class JadwalPelajaranController extends Controller
 
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
-        $guruList = TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['guru_pengajar', 'wali_kelas'])->where('is_active', true))
+        $guruList = TenagaPendidik::whereHas('user', fn($q) => $q->where('role', 'guru_pengajar')->where('is_active', true))
             ->orderBy('nama_lengkap')
             ->get();
 
@@ -212,11 +215,14 @@ class JadwalPelajaranController extends Controller
     {
         $validated = $request->validate([
             'kelas_id' => 'required|exists:kelas,id',
-            'tenaga_pendidik_id' => 'required|exists:tenaga_pendidik,id',
+            'guru_id' => 'nullable|exists:tenaga_pendidik,id',
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
             'hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+            'keterangan' => 'nullable|string',
+        ], [
+            'guru_id.exists' => 'Tenaga Pendidik belum ditugaskan atau tidak valid',
         ]);
 
         $jadwalPelajaran->update($validated);
@@ -238,7 +244,7 @@ class JadwalPelajaranController extends Controller
 
     public function print(Request $request)
     {
-        $query = JadwalPelajaran::with(['kelas.tahunAjaran', 'tenagaPendidik', 'mataPelajaran']);
+        $query = JadwalPelajaran::with(['kelas.tahunAjaran', 'guru', 'mataPelajaran']);
 
         // Apply same filters
         if ($request->filled('tahun_ajaran_id')) {
@@ -259,7 +265,7 @@ class JadwalPelajaranController extends Controller
         }
 
         if ($request->filled('guru_id')) {
-            $query->where('tenaga_pendidik_id', $request->guru_id);
+            $query->where('guru_id', $request->guru_id);
         }
 
         $jadwalList = $query->orderBy('hari')->orderBy('jam_mulai')->get();
@@ -288,7 +294,7 @@ class JadwalPelajaranController extends Controller
             'kelas.cabang',
             'kelas.waliKelas',
             'mataPelajaran',
-            'tenagaPendidik',
+            'guru',
             'kelas.tahunAjaran'
         ]);
 
@@ -314,7 +320,7 @@ class JadwalPelajaranController extends Controller
         }
 
         if ($guruId) {
-            $query->where('tenaga_pendidik_id', $guruId);
+            $query->where('guru_id', $guruId);
         }
 
         $jadwalList = $query->get()->sortBy(function($jadwal) {
@@ -351,7 +357,7 @@ class JadwalPelajaranController extends Controller
         $query = JadwalPelajaran::with([
             'kelas.cabang',
             'mataPelajaran',
-            'tenagaPendidik',
+            'guru',
             'kelas.tahunAjaran'
         ]);
 
@@ -377,7 +383,7 @@ class JadwalPelajaranController extends Controller
         }
 
         if ($guruId) {
-            $query->where('tenaga_pendidik_id', $guruId);
+            $query->where('guru_id', $guruId);
         }
 
         $jadwalList = $query->get()->sortBy(function($jadwal) {
@@ -422,7 +428,7 @@ class JadwalPelajaranController extends Controller
         $guruBaru = $validated['guru_id_baru'] ? TenagaPendidik::find($validated['guru_id_baru']) : null;
 
         $jadwalList = JadwalPelajaran::whereHas('kelas', fn($q) => $q->where('tahun_ajaran_id', $validated['tahun_ajaran_id']))
-            ->where('tenaga_pendidik_id', $validated['guru_id_lama'])
+            ->where('guru_id', $validated['guru_id_lama'])
             ->get();
 
         if ($jadwalList->isEmpty()) {
@@ -433,7 +439,7 @@ class JadwalPelajaranController extends Controller
         try {
             foreach ($jadwalList as $jadwal) {
                 $jadwal->update([
-                    'tenaga_pendidik_id' => $validated['guru_id_baru'],
+                    'guru_id' => $validated['guru_id_baru'],
                 ]);
             }
 
@@ -499,7 +505,7 @@ class JadwalPelajaranController extends Controller
                 JadwalPelajaran::create([
                     'kelas_id' => $kelasBaru->id,
                     'mata_pelajaran_id' => $jadwal->mata_pelajaran_id,
-                    'tenaga_pendidik_id' => $jadwal->tenaga_pendidik_id,
+                    'guru_id' => $jadwal->guru_id,
                     'hari' => $jadwal->hari,
                     'jam_mulai' => $jadwal->jam_mulai,
                     'jam_selesai' => $jadwal->jam_selesai,

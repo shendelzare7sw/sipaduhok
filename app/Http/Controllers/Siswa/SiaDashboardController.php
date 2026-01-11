@@ -13,6 +13,7 @@ use App\Models\Tugas;
 use App\Models\Ujian;
 use App\Models\Materi;
 use App\Models\Nilai;
+use App\Models\JadwalPelajaran;
 use Carbon\Carbon;
 
 class SiaDashboardController extends Controller
@@ -49,6 +50,16 @@ class SiaDashboardController extends Controller
         // Rekap Absensi Bulan Ini
         $rekapAbsen = $this->getRekapAbsensi($siswa->id);
 
+        // Jadwal Hari Ini (Real Data)
+        $hariIni = Carbon::now()->locale('id')->dayName;
+        $hariIni = ucfirst($hariIni); // Senin, Selasa, etc.
+
+        $jadwalHariIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+            ->where('hari', $hariIni)
+            ->with(['mataPelajaran', 'guru'])
+            ->orderBy('jam_mulai')
+            ->get();
+
         // Show LMS Button
         $showLmsButton = true;
 
@@ -58,6 +69,7 @@ class SiaDashboardController extends Controller
             'flyerList',
             'performaData',
             'rekapAbsen',
+            'jadwalHariIni',
             'showLmsButton'
         ));
     }
