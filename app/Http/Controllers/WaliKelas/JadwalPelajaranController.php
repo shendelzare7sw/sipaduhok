@@ -104,6 +104,7 @@ class JadwalPelajaranController extends Controller
                     'type' => 'jadwal',
                     'data' => $jadwal,
                     'jam_mulai' => $jadwal->jam_mulai,
+                    'sort_time' => $jadwal->jam_mulai ? $jadwal->jam_mulai->format('H:i') : '00:00',
                 ]);
             }
 
@@ -113,11 +114,12 @@ class JadwalPelajaranController extends Controller
                     'type' => 'istirahat',
                     'data' => $istirahat,
                     'jam_mulai' => $istirahat->jam_mulai,
+                    'sort_time' => substr($istirahat->jam_mulai, 0, 5),
                 ]);
             }
 
-            // Sort by jam_mulai
-            $jadwalPerHari[$hari] = $merged->sortBy('jam_mulai')->values();
+            // Sort by sort_time
+            $jadwalPerHari[$hari] = $merged->sortBy('sort_time')->values();
         }
 
         return view('wali-kelas.jadwal.print', [

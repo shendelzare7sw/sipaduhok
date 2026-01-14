@@ -141,9 +141,21 @@
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .card:hover {
+        /* Disable card hover when modal is open to prevent flickering */
+        body:not(.modal-open) .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Prevent parent elements from receiving pointer events when modal is open */
+        body.modal-open > *:not(.modal):not(.modal-backdrop) {
+            pointer-events: none;
+        }
+
+        /* Re-enable pointer events for modal */
+        body.modal-open .modal,
+        body.modal-open .modal-backdrop {
+            pointer-events: auto;
         }
 
         /* Alert Animation */

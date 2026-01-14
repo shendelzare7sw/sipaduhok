@@ -10,6 +10,7 @@ use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Rapor;
 use App\Models\Presensi;
+use App\Services\MidtransService;
 
 class OrangTuaController extends Controller
 {
@@ -116,23 +117,102 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        $validated = $request->validate([
+        // Validation rules dengan conditional untuk bukti_bayar
+        $rules = [
             'tagihan_id' => 'required|exists:tagihan,id',
             'jumlah_bayar' => 'required|numeric|min:1000',
-            'metode_pembayaran' => 'required|in:tunai,transfer,ewallet',
-            'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'metode_pembayaran' => 'required|in:tunai,transfer,midtrans',
             'catatan' => 'nullable|string',
-        ]);
+        ];
 
+        // Bukti bayar WAJIB untuk tunai & transfer manual, OPSIONAL untuk midtrans
+        if (in_array($request->metode_pembayaran, ['tunai', 'transfer'])) {
+            $rules['bukti_bayar'] = 'required|image|mimes:jpeg,png,jpg|max:2048';
+        } else {
+            $rules['bukti_bayar'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Generate kode pembayaran unik
+        $validated['kode_pembayaran'] = $this->generateKodePembayaran();
         $validated['siswa_id'] = $siswa->id;
         $validated['tanggal_bayar'] = now();
         $validated['status_validasi'] = 'pending';
 
+        // Upload bukti pembayaran jika ada
         if ($request->hasFile('bukti_bayar')) {
-            $validated['bukti_bayar'] = $request->file('bukti_bayar')
+            $validated['bukti_pembayaran'] = $request->file('bukti_bayar')
                 ->store('pembayaran/bukti', 'public');
         }
 
+        // Untuk metode midtrans, redirect ke payment gateway
+        if ($validated['metode_pembayaran'] === 'midtrans') {
+            try {
+                $midtransService = new MidtransService();
+
+                // Check if Midtrans is configured
+                if (!$midtransService->isConfigured()) {
+                    return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+                        ->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan gunakan metode pembayaran lainnya.');
+                }
+
+                // Get tagihan detail
+                $tagihan = Tagihan::findOrFail($validated['tagihan_id']);
+
+                // Create order_id (same as kode_pembayaran for tracking)
+                $orderId = $validated['kode_pembayaran'];
+
+                // Build customer details
+                $customerDetails = [
+                    'first_name' => $siswa->nama_lengkap,
+                    'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
+                    'phone' => $user->no_hp ?? '08123456789',
+                ];
+
+                // Build item details
+                $itemDetails = [
+                    [
+                        'id' => 'TAGIHAN-' . $tagihan->id,
+                        'price' => (int) $validated['jumlah_bayar'],
+                        'quantity' => 1,
+                        'name' => $tagihan->jenis_tagihan . ' - ' . $tagihan->nama_tagihan,
+                    ]
+                ];
+
+                // Build transaction params
+                $transactionParams = $midtransService->buildTransactionParams(
+                    $orderId,
+                    $validated['jumlah_bayar'],
+                    $customerDetails,
+                    $itemDetails
+                );
+
+                // Get Snap token
+                $snapToken = $midtransService->createSnapToken($transactionParams);
+
+                // Save pembayaran with pending status and additional fields
+                $validated['payment_gateway'] = 'midtrans';
+                $validated['order_id'] = $orderId;
+                $validated['paid_by_parent_id'] = $user->id;
+
+                $pembayaran = Pembayaran::create($validated);
+
+                // Redirect to Snap payment page with token as query parameter (encrypted)
+                return redirect()->route('orang-tua.pembayaran.snap', [
+                    'pembayaran' => $pembayaran->id,
+                    'token' => encrypt($snapToken)
+                ]);
+
+            } catch (\Exception $e) {
+                \Log::error('Midtrans Payment Error: ' . $e->getMessage());
+
+                return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+                    ->with('error', 'Gagal memproses pembayaran digital: ' . $e->getMessage());
+            }
+        }
+
+        // Untuk metode manual (tunai & transfer)
         Pembayaran::create($validated);
 
         return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
@@ -447,5 +527,202 @@ class OrangTuaController extends Controller
 
         return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
             ->with('success', 'Pengajuan izin berhasil diperbarui.');
+    }
+
+    /**
+     * Show Midtrans Snap Payment Page
+     */
+    public function snapPayment(Request $request, $pembayaranId)
+    {
+        $user = Auth::user();
+
+        // Get pembayaran with relationships
+        $pembayaran = Pembayaran::with(['siswa', 'tagihan'])
+            ->findOrFail($pembayaranId);
+
+        // Check if user is the parent of the student
+        $isMyChild = $user->children()->where('siswa.id', $pembayaran->siswa_id)->exists();
+
+        if (!$isMyChild) {
+            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
+        // Check if payment is already rejected/expired or approved
+        if ($pembayaran->status_validasi === 'ditolak') {
+            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                ->with('error', 'Sesi pembayaran telah kadaluarsa. Silakan ajukan pembayaran baru.');
+        }
+
+        if ($pembayaran->status_validasi === 'disetujui') {
+            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                ->with('success', 'Pembayaran ini sudah berhasil diproses.');
+        }
+
+        // Get snap token from query parameter or regenerate
+        $snapToken = null;
+
+        if ($request->has('token')) {
+            try {
+                $snapToken = decrypt($request->query('token'));
+            } catch (\Exception $e) {
+                \Log::error('Failed to decrypt snap token', ['error' => $e->getMessage()]);
+            }
+        }
+
+        // If no token or decryption failed, regenerate token
+        if (!$snapToken) {
+            try {
+                $midtransService = new MidtransService();
+
+                // Build transaction params again
+                $customerDetails = [
+                    'first_name' => $pembayaran->siswa->nama_lengkap,
+                    'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
+                    'phone' => $user->no_hp ?? '08123456789',
+                ];
+
+                $itemDetails = [
+                    [
+                        'id' => 'TAGIHAN-' . $pembayaran->tagihan_id,
+                        'price' => (int) $pembayaran->jumlah_bayar,
+                        'quantity' => 1,
+                        'name' => $pembayaran->tagihan->jenis_tagihan . ' - ' . $pembayaran->tagihan->nama_tagihan,
+                    ]
+                ];
+
+                $transactionParams = $midtransService->buildTransactionParams(
+                    $pembayaran->order_id,
+                    $pembayaran->jumlah_bayar,
+                    $customerDetails,
+                    $itemDetails
+                );
+
+                $snapToken = $midtransService->createSnapToken($transactionParams);
+            } catch (\Exception $e) {
+                \Log::error('Failed to regenerate snap token', [
+                    'error' => $e->getMessage(),
+                    'order_id' => $pembayaran->order_id,
+                    'pembayaran_id' => $pembayaran->id,
+                ]);
+
+                // If token generation fails (possibly due to expiration), redirect with clear message
+                return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                    ->with('error', 'Sesi pembayaran telah kadaluarsa atau tidak valid. Silakan ajukan pembayaran baru.');
+            }
+        }
+
+        $midtransService = new MidtransService();
+        $clientKey = $midtransService->isConfigured()
+            ? \App\Models\InfoPembayaran::getInstance()->midtrans_client_key
+            : null;
+
+        return view('orang-tua.pembayaran.snap', compact('pembayaran', 'snapToken', 'clientKey'));
+    }
+
+    /**
+     * Handle Midtrans Finish/Success Redirect
+     */
+    public function snapFinish(Request $request)
+    {
+        $orderId = $request->query('order_id');
+        $statusCode = $request->query('status_code');
+        $transactionStatus = $request->query('transaction_status');
+
+        \Log::info('Midtrans Snap Finish Redirect', [
+            'order_id' => $orderId,
+            'status_code' => $statusCode,
+            'transaction_status' => $transactionStatus,
+        ]);
+
+        // Find pembayaran by order_id
+        $pembayaran = Pembayaran::where('order_id', $orderId)->first();
+
+        if (!$pembayaran) {
+            \Log::error('Pembayaran not found in snapFinish', ['order_id' => $orderId]);
+
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Data pembayaran tidak ditemukan. Order ID: ' . $orderId);
+        }
+
+        // Update status if webhook hasn't been called yet (fallback)
+        $midtransService = new MidtransService();
+        $newStatus = $midtransService->mapTransactionStatus($transactionStatus);
+        $oldStatus = $pembayaran->status_validasi;
+
+        // Only update if webhook hasn't updated it yet
+        if ($oldStatus === 'pending' && $newStatus !== 'pending') {
+            $pembayaran->update([
+                'status_validasi' => $newStatus,
+                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
+            ]);
+
+            // Create audit log for bendahara tracking
+            \App\Models\FinancialAuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'update_status',
+                'model_type' => 'Pembayaran',
+                'model_id' => $pembayaran->id,
+                'old_values' => json_encode(['status_validasi' => $oldStatus]),
+                'new_values' => json_encode(['status_validasi' => $newStatus]),
+                'description' => "Pembayaran digital {$orderId} status updated from redirect (fallback): {$transactionStatus} → {$newStatus}",
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            // Auto-update status tagihan if payment approved
+            if ($newStatus === 'disetujui') {
+                $pembayaran->tagihan->updateStatusBayar();
+
+                \Log::info('Tagihan status auto-updated from snapFinish', [
+                    'tagihan_id' => $pembayaran->tagihan_id,
+                    'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
+                ]);
+            }
+
+            \Log::info('Pembayaran status updated from snapFinish', [
+                'pembayaran_id' => $pembayaran->id,
+                'order_id' => $orderId,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+            ]);
+        }
+
+        // Redirect to tagihan page with appropriate message
+        if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
+            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                ->with('success', 'Pembayaran berhasil! Transaksi telah dikonfirmasi.');
+        } elseif ($transactionStatus === 'pending') {
+            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                ->with('info', 'Pembayaran Anda sedang diproses. Mohon tunggu konfirmasi dari bank.');
+        } else {
+            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                ->with('warning', 'Pembayaran dibatalkan atau gagal. Status: ' . $transactionStatus);
+        }
+    }
+
+    /**
+     * Generate kode pembayaran unik
+     * Format: PAY-YYYYMMDD-XXXXX
+     */
+    private function generateKodePembayaran()
+    {
+        $prefix = 'PAY';
+        $date = now()->format('Ymd');
+
+        // Get last payment code for today
+        $lastPayment = \App\Models\Pembayaran::whereDate('created_at', now())
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($lastPayment && preg_match('/PAY-\d{8}-(\d{5})/', $lastPayment->kode_pembayaran, $matches)) {
+            $lastNumber = intval($matches[1]);
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        $sequence = str_pad($newNumber, 5, '0', STR_PAD_LEFT);
+
+        return "{$prefix}-{$date}-{$sequence}";
     }
 }

@@ -62,7 +62,7 @@ class JadwalPelajaranController extends Controller
 
         // Order by hari and jam
         $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalList = $query->get()->sortBy(function($jadwal) use ($hariOrder) {
+        $jadwalList = $query->get()->sortBy(function ($jadwal) use ($hariOrder) {
             return [
                 array_search($jadwal->hari, $hariOrder),
                 $jadwal->jam_mulai
@@ -84,7 +84,7 @@ class JadwalPelajaranController extends Controller
             ->get();
 
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
-        $guruList = TenagaPendidik::whereHas('user', function($q) {
+        $guruList = TenagaPendidik::whereHas('user', function ($q) {
             $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
@@ -137,7 +137,7 @@ class JadwalPelajaranController extends Controller
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
-        $guruList = TenagaPendidik::whereHas('user', function($q) {
+        $guruList = TenagaPendidik::whereHas('user', function ($q) {
             $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
@@ -222,7 +222,7 @@ class JadwalPelajaranController extends Controller
 
         // Group by hari
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function($hari) use ($jadwalList) {
+        $jadwalByHari = collect($hariList)->mapWithKeys(function ($hari) use ($jadwalList) {
             return [
                 $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
             ];
@@ -258,7 +258,7 @@ class JadwalPelajaranController extends Controller
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
-        $guruList = TenagaPendidik::whereHas('user', function($q) {
+        $guruList = TenagaPendidik::whereHas('user', function ($q) {
             $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
@@ -517,7 +517,7 @@ class JadwalPelajaranController extends Controller
                 ->aktif()
                 ->untukHari($hari)
                 ->get()
-                ->first(function($istirahat) use ($jamMulai, $jamSelesai) {
+                ->first(function ($istirahat) use ($jamMulai, $jamSelesai) {
                     // Check if time overlaps
                     // Menggunakan <= dan >= agar jadwal yang berakhir/mulai TEPAT pada boundary
                     // istirahat TIDAK dianggap bentrok
@@ -536,13 +536,13 @@ class JadwalPelajaranController extends Controller
         $kelasConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
             ->byKelas($kelasId)
             ->byHari($hari)
-            ->where(function($q) use ($jamMulai, $jamSelesai) {
+            ->where(function ($q) use ($jamMulai, $jamSelesai) {
                 $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                  ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                  ->orWhere(function($q2) use ($jamMulai, $jamSelesai) {
-                      $q2->where('jam_mulai', '<=', $jamMulai)
-                         ->where('jam_selesai', '>=', $jamSelesai);
-                  });
+                    ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                    ->orWhere(function ($q2) use ($jamMulai, $jamSelesai) {
+                        $q2->where('jam_mulai', '<=', $jamMulai)
+                            ->where('jam_selesai', '>=', $jamSelesai);
+                    });
             })
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->first();
@@ -558,13 +558,13 @@ class JadwalPelajaranController extends Controller
             $guruConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
                 ->byGuru($guruId)
                 ->byHari($hari)
-                ->where(function($q) use ($jamMulai, $jamSelesai) {
+                ->where(function ($q) use ($jamMulai, $jamSelesai) {
                     $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                      ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                      ->orWhere(function($q2) use ($jamMulai, $jamSelesai) {
-                          $q2->where('jam_mulai', '<=', $jamMulai)
-                             ->where('jam_selesai', '>=', $jamSelesai);
-                      });
+                        ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                        ->orWhere(function ($q2) use ($jamMulai, $jamSelesai) {
+                            $q2->where('jam_mulai', '<=', $jamMulai)
+                                ->where('jam_selesai', '>=', $jamSelesai);
+                        });
                 })
                 ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
                 ->with('kelas')
@@ -617,7 +617,8 @@ class JadwalPelajaranController extends Controller
      */
     private function getReadableValue($field, $value)
     {
-        if (is_null($value)) return 'Kosong';
+        if (is_null($value))
+            return 'Kosong';
 
         switch ($field) {
             case 'guru_id':
@@ -655,7 +656,7 @@ class JadwalPelajaranController extends Controller
 
         // Group by hari
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function($hari) use ($jadwalList) {
+        $jadwalByHari = collect($hariList)->mapWithKeys(function ($hari) use ($jadwalList) {
             return [
                 $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
             ];
@@ -692,7 +693,7 @@ class JadwalPelajaranController extends Controller
 
         // Group by hari
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function($hari) use ($jadwalList) {
+        $jadwalByHari = collect($hariList)->mapWithKeys(function ($hari) use ($jadwalList) {
             return [
                 $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
             ];
@@ -748,7 +749,7 @@ class JadwalPelajaranController extends Controller
             $query->byGuru($guruId);
         }
 
-        $jadwalList = $query->get()->sortBy(function($jadwal) {
+        $jadwalList = $query->get()->sortBy(function ($jadwal) {
             $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             return [
                 array_search($jadwal->hari, $hariOrder),
@@ -766,11 +767,17 @@ class JadwalPelajaranController extends Controller
             'guru' => $guruId ? TenagaPendidik::find($guruId)->nama_lengkap : null,
         ];
 
-        // Generate filename
+        // Get pengaturan istirahat aktif
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Generate filename with .xls extension (HTML-based Excel works better with xls)
         $filename = 'Jadwal_Pelajaran_' . ($tahunAjaran ? str_replace(' ', '_', $tahunAjaran->nama_tahun_ajaran) : 'Export') . '.xls';
 
-        // Set proper headers for Excel download
-        return response()->view('admin.jadwal-pelajaran.export-excel', compact('jadwalList', 'tahunAjaran', 'filterInfo'))
+        // Set proper headers for Excel download (.xls format for HTML-based export)
+        return response()->view('admin.jadwal-pelajaran.export-excel', compact('jadwalList', 'tahunAjaran', 'filterInfo', 'pengaturanIstirahat'))
             ->header('Content-Type', 'application/vnd.ms-excel')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->header('Pragma', 'no-cache')
@@ -818,7 +825,7 @@ class JadwalPelajaranController extends Controller
             $query->byGuru($guruId);
         }
 
-        $jadwalList = $query->get()->sortBy(function($jadwal) {
+        $jadwalList = $query->get()->sortBy(function ($jadwal) {
             $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             return [
                 array_search($jadwal->hari, $hariOrder),
@@ -836,7 +843,13 @@ class JadwalPelajaranController extends Controller
             'guru' => $guruId ? TenagaPendidik::find($guruId)->nama_lengkap : null,
         ];
 
-        return view('admin.jadwal-pelajaran.export-pdf', compact('jadwalList', 'tahunAjaran', 'filterInfo'));
+        // Get pengaturan istirahat aktif
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('jam_mulai')
+            ->get();
+
+        return view('admin.jadwal-pelajaran.export-pdf', compact('jadwalList', 'tahunAjaran', 'filterInfo', 'pengaturanIstirahat'));
     }
 
     /**
@@ -974,10 +987,10 @@ class JadwalPelajaranController extends Controller
             // Update status
             $updated = JadwalPelajaran::whereIn('id', $jadwalIds)
                 ->update([
-                    'status' => $request->status,
-                    'updated_at' => now(),
-                    'updated_by' => Auth::id(),
-                ]);
+                        'status' => $request->status,
+                        'updated_at' => now(),
+                        'updated_by' => Auth::id(),
+                    ]);
 
             DB::commit();
 
@@ -988,4 +1001,75 @@ class JadwalPelajaranController extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Show import form.
+     */
+    public function importForm()
+    {
+        return view('admin.jadwal-pelajaran.import');
+    }
+
+    /**
+     * Process import from Excel.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+        ]);
+
+        try {
+            $import = new \App\Imports\JadwalPelajaranImport($request->tahun_ajaran_id);
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+            $missingKelas = $import->getMissingKelas();
+            $missingMapel = $import->getMissingMapel();
+            $missingGuru = $import->getMissingGuru();
+            $warnings = $import->getWarnings();
+
+            $message = "Berhasil mengimport {$imported} jadwal pelajaran.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati.";
+            }
+
+            // Build warning message for missing entities
+            $warningMessage = '';
+            if (!empty($missingKelas)) {
+                $warningMessage .= "Kelas tidak ditemukan: " . implode(', ', $missingKelas) . ". ";
+            }
+            if (!empty($missingMapel)) {
+                $warningMessage .= "Mata Pelajaran tidak ditemukan: " . implode(', ', $missingMapel) . ". ";
+            }
+            if (!empty($missingGuru)) {
+                $warningMessage .= "Guru tidak ditemukan (jadwal dibuat dengan status kosong): " . implode(', ', $missingGuru) . ". ";
+            }
+
+            if (!empty($warningMessage)) {
+                return redirect()->route('admin.jadwal-pelajaran.index', ['tahun_ajaran_id' => $request->tahun_ajaran_id])
+                    ->with('success', $message)
+                    ->with('warning', $warningMessage);
+            }
+
+            return redirect()->route('admin.jadwal-pelajaran.index', ['tahun_ajaran_id' => $request->tahun_ajaran_id])
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download import template.
+     */
+    public function downloadTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\Templates\JadwalPelajaranTemplate(),
+            'template_jadwal_pelajaran.xlsx'
+        );
+    }
 }
+

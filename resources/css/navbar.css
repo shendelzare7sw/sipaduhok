@@ -125,8 +125,9 @@
     top: 0;
     width: 100%;
     z-index: 50;
-    transition: all 0.3s ease;
-    background-color: transparent; 
+    /* Only transition specific properties to avoid reflow issues with modals */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: transparent;
 }
 
 #navbar.sticky-nav {

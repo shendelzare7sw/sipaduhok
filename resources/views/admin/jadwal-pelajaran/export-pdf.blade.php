@@ -149,6 +149,26 @@
         .badge-kamis { background: #fff3e0; color: #e65100; }
         .badge-jumat { background: #fce4ec; color: #c2185b; }
         .badge-sabtu { background: #f1f8e9; color: #558b2f; }
+
+        .istirahat-row {
+            background-color: #fff9c4 !important;
+        }
+
+        .istirahat-row td {
+            font-style: italic;
+            color: #795548;
+        }
+
+        .hari-header {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+        }
+
+        .hari-header td {
+            font-weight: bold;
+            color: #1565c0;
+            padding: 10px 6px;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +199,29 @@
         <p>Dicetak pada: {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y HH:mm') }} WIB</p>
     </div>
 
+    @php
+        // Prepare combined data - merge jadwal with istirahat, sorted by hari then jam_mulai
+        $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        // Group jadwal by hari
+        $jadwalByHari = $jadwalList->groupBy('hari');
+
+        // Get unique jenjang from filtered jadwal
+        $jenjangs = $jadwalList->pluck('kelas.jenjang')->unique()->values()->toArray();
+
+        // Filter istirahat by relevant jenjang
+        $relevanIstirahat = isset($pengaturanIstirahat) ? $pengaturanIstirahat->filter(function($ist) use ($jenjangs, $filterInfo) {
+            // If jenjang filter is applied, only show istirahat for that jenjang
+            if ($filterInfo['jenjang']) {
+                return $ist->jenjang === $filterInfo['jenjang'];
+            }
+            // Otherwise show istirahat for all jenjang in the data
+            return empty($jenjangs) || in_array($ist->jenjang, $jenjangs);
+        }) : collect();
+
+        $rowNumber = 1;
+    @endphp
+
     @if($jadwalList->isEmpty())
         <div style="text-align: center; padding: 40px; color: #999;">
             <p style="font-size: 14px;">Tidak ada data jadwal pelajaran</p>
@@ -198,29 +241,92 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($jadwalList as $index => $jadwal)
-                <tr>
-                    <td class="text-center">{{ $index + 1 }}</td>
-                    <td><strong>{{ $jadwal->kelas->nama_kelas }}</strong></td>
-                    <td style="font-size: 9px;">{{ $jadwal->kelas->cabang->nama_cabang }}</td>
-                    <td>
-                        @php
-                            $hariClass = [
-                                'Senin' => 'badge-senin',
-                                'Selasa' => 'badge-selasa',
-                                'Rabu' => 'badge-rabu',
-                                'Kamis' => 'badge-kamis',
-                                'Jumat' => 'badge-jumat',
-                                'Sabtu' => 'badge-sabtu',
-                            ][$jadwal->hari] ?? '';
-                        @endphp
-                        <span class="badge {{ $hariClass }}">{{ $jadwal->hari }}</span>
-                    </td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</td>
-                    <td><strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong></td>
-                    <td>{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
-                </tr>
+                @foreach($hariOrder as $hari)
+                    @php
+                        // Get all jadwal for this day
+                        $jadwalHari = isset($jadwalByHari[$hari]) ? $jadwalByHari[$hari] : collect();
+
+                        // Get istirahat for this day
+                        $istirahatHari = $relevanIstirahat->filter(function($ist) use ($hari) {
+                            $hariAktif = is_array($ist->hari_aktif) ? $ist->hari_aktif : json_decode($ist->hari_aktif, true);
+                            return in_array($hari, $hariAktif ?? []);
+                        });
+
+                        // Create combined items array
+                        $combinedItems = collect();
+
+                        // Add jadwal items
+                        foreach ($jadwalHari as $jadwal) {
+                            $combinedItems->push([
+                                'type' => 'jadwal',
+                                'jam_mulai' => $jadwal->jam_mulai,
+                                'jam_selesai' => $jadwal->jam_selesai,
+                                'sort_time' => $jadwal->jam_mulai ? $jadwal->jam_mulai->format('H:i') : '00:00',
+                                'data' => $jadwal,
+                            ]);
+                        }
+
+                        // Add istirahat items
+                        foreach ($istirahatHari as $ist) {
+                            $combinedItems->push([
+                                'type' => 'istirahat',
+                                'jam_mulai' => $ist->jam_mulai,
+                                'jam_selesai' => $ist->jam_selesai,
+                                'sort_time' => substr($ist->jam_mulai, 0, 5),
+                                'data' => $ist,
+                            ]);
+                        }
+
+                        // Sort by sort_time
+                        $combinedItems = $combinedItems->sortBy('sort_time')->values();
+                    @endphp
+
+                    @if($combinedItems->count() > 0)
+                        {{-- Day header --}}
+                        <tr class="hari-header">
+                            <td colspan="8">
+                                @php
+                                    $hariClass = [
+                                        'Senin' => 'badge-senin',
+                                        'Selasa' => 'badge-selasa',
+                                        'Rabu' => 'badge-rabu',
+                                        'Kamis' => 'badge-kamis',
+                                        'Jumat' => 'badge-jumat',
+                                        'Sabtu' => 'badge-sabtu',
+                                    ][$hari] ?? '';
+                                @endphp
+                                <span class="badge {{ $hariClass }}" style="font-size: 11px; padding: 4px 10px;">{{ $hari }}</span>
+                            </td>
+                        </tr>
+
+                        @foreach($combinedItems as $item)
+                            @if($item['type'] === 'jadwal')
+                                @php $jadwal = $item['data']; @endphp
+                                <tr>
+                                    <td class="text-center">{{ $rowNumber++ }}</td>
+                                    <td><strong>{{ $jadwal->kelas->nama_kelas }}</strong></td>
+                                    <td style="font-size: 9px;">{{ $jadwal->kelas->cabang->nama_cabang }}</td>
+                                    <td>
+                                        <span class="badge {{ $hariClass }}">{{ $jadwal->hari }}</span>
+                                    </td>
+                                    <td class="text-center">{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }}</td>
+                                    <td class="text-center">{{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</td>
+                                    <td><strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong></td>
+                                    <td>{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
+                                </tr>
+                            @else
+                                @php $ist = $item['data']; @endphp
+                                <tr class="istirahat-row">
+                                    <td class="text-center">-</td>
+                                    <td colspan="2"><strong>☕ ISTIRAHAT</strong></td>
+                                    <td>{{ $hari }}</td>
+                                    <td class="text-center">{{ substr($ist->jam_mulai, 0, 5) }}</td>
+                                    <td class="text-center">{{ substr($ist->jam_selesai, 0, 5) }}</td>
+                                    <td colspan="2">{{ $ist->nama_istirahat }} ({{ $ist->jenjang }})</td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    @endif
                 @endforeach
             </tbody>
         </table>

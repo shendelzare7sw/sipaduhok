@@ -193,7 +193,7 @@ class JadwalPelajaranController extends Controller
             ->get();
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function($hari) use ($jadwalList) {
+        $jadwalByHari = collect($hariList)->mapWithKeys(function ($hari) use ($jadwalList) {
             return [
                 $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
             ];
@@ -382,7 +382,7 @@ class JadwalPelajaranController extends Controller
             $query->where('guru_id', $guruId);
         }
 
-        $jadwalList = $query->get()->sortBy(function($jadwal) {
+        $jadwalList = $query->get()->sortBy(function ($jadwal) {
             $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             return [
                 array_search($jadwal->hari, $hariOrder),
@@ -400,7 +400,13 @@ class JadwalPelajaranController extends Controller
             'guru' => $guruId ? TenagaPendidik::find($guruId)->nama_lengkap : null,
         ];
 
-        return view('waka.jadwal-pelajaran.export-pdf', compact('jadwalList', 'tahunAjaran', 'filterInfo'));
+        // Get pengaturan istirahat aktif
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('jam_mulai')
+            ->get();
+
+        return view('waka.jadwal-pelajaran.export-pdf', compact('jadwalList', 'tahunAjaran', 'filterInfo', 'pengaturanIstirahat'));
     }
 
     public function exportExcel(Request $request)
@@ -445,7 +451,7 @@ class JadwalPelajaranController extends Controller
             $query->where('guru_id', $guruId);
         }
 
-        $jadwalList = $query->get()->sortBy(function($jadwal) {
+        $jadwalList = $query->get()->sortBy(function ($jadwal) {
             $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             return [
                 array_search($jadwal->hari, $hariOrder),
@@ -463,11 +469,17 @@ class JadwalPelajaranController extends Controller
             'guru' => $guruId ? TenagaPendidik::find($guruId)->nama_lengkap : null,
         ];
 
+        // Get pengaturan istirahat aktif
+        $pengaturanIstirahat = PengaturanIstirahat::where('is_active', true)
+            ->orderBy('jenjang')
+            ->orderBy('jam_mulai')
+            ->get();
+
         // Generate filename
         $filename = 'Jadwal_Pelajaran_' . ($tahunAjaran ? str_replace(' ', '_', $tahunAjaran->nama_tahun_ajaran) : 'Export') . '.xls';
 
         // Set proper headers for Excel download
-        return response()->view('waka.jadwal-pelajaran.export-excel', compact('jadwalList', 'tahunAjaran', 'filterInfo'))
+        return response()->view('waka.jadwal-pelajaran.export-excel', compact('jadwalList', 'tahunAjaran', 'filterInfo', 'pengaturanIstirahat'))
             ->header('Content-Type', 'application/vnd.ms-excel')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->header('Pragma', 'no-cache')
@@ -627,7 +639,7 @@ class JadwalPelajaranController extends Controller
                 ->aktif()
                 ->untukHari($hari)
                 ->get()
-                ->first(function($istirahat) use ($jamMulai, $jamSelesai) {
+                ->first(function ($istirahat) use ($jamMulai, $jamSelesai) {
                     // Check if time overlaps
                     // Menggunakan <= dan >= agar jadwal yang berakhir/mulai TEPAT pada boundary
                     // istirahat TIDAK dianggap bentrok
@@ -646,13 +658,13 @@ class JadwalPelajaranController extends Controller
         $kelasConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
             ->byKelas($kelasId)
             ->byHari($hari)
-            ->where(function($q) use ($jamMulai, $jamSelesai) {
+            ->where(function ($q) use ($jamMulai, $jamSelesai) {
                 $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                  ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                  ->orWhere(function($q2) use ($jamMulai, $jamSelesai) {
-                      $q2->where('jam_mulai', '<=', $jamMulai)
-                         ->where('jam_selesai', '>=', $jamSelesai);
-                  });
+                    ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                    ->orWhere(function ($q2) use ($jamMulai, $jamSelesai) {
+                        $q2->where('jam_mulai', '<=', $jamMulai)
+                            ->where('jam_selesai', '>=', $jamSelesai);
+                    });
             })
             ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
             ->first();
@@ -668,13 +680,13 @@ class JadwalPelajaranController extends Controller
             $guruConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
                 ->byGuru($guruId)
                 ->byHari($hari)
-                ->where(function($q) use ($jamMulai, $jamSelesai) {
+                ->where(function ($q) use ($jamMulai, $jamSelesai) {
                     $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                      ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                      ->orWhere(function($q2) use ($jamMulai, $jamSelesai) {
-                          $q2->where('jam_mulai', '<=', $jamMulai)
-                             ->where('jam_selesai', '>=', $jamSelesai);
-                      });
+                        ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
+                        ->orWhere(function ($q2) use ($jamMulai, $jamSelesai) {
+                            $q2->where('jam_mulai', '<=', $jamMulai)
+                                ->where('jam_selesai', '>=', $jamSelesai);
+                        });
                 })
                 ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
                 ->first();
@@ -781,7 +793,8 @@ class JadwalPelajaranController extends Controller
      */
     private function getReadableValue($field, $value)
     {
-        if (is_null($value)) return 'Kosong';
+        if (is_null($value))
+            return 'Kosong';
 
         switch ($field) {
             case 'guru_id':

@@ -170,7 +170,7 @@
                                         <div class="modal fade" id="modalBayar{{ $item->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-                                                    <form action="{{ route('orang-tua.tagihan.bayar', $siswa->id) }}" method="POST" enctype="multipart/form-data">
+                                                    <form id="formBayar{{ $item->id }}" action="{{ route('orang-tua.tagihan.bayar', $siswa->id) }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         <input type="hidden" name="tagihan_id" value="{{ $item->id }}">
 
@@ -197,18 +197,23 @@
                                                                 <label class="form-label fw-bold">
                                                                     Jumlah Bayar <span class="text-danger">*</span>
                                                                 </label>
-                                                                <input type="number"
-                                                                       name="jumlah_bayar"
-                                                                       class="form-control @error('jumlah_bayar') is-invalid @enderror"
-                                                                       value="{{ old('jumlah_bayar', $item->jumlah) }}"
-                                                                       min="1000"
-                                                                       max="{{ $item->jumlah }}"
-                                                                       placeholder="Masukkan jumlah"
+                                                                <input type="text"
+                                                                       name="jumlah_bayar_display"
+                                                                       id="jumlahBayarDisplay{{ $item->id }}"
+                                                                       class="form-control @if($errors->any() && old('tagihan_id') == $item->id) @error('jumlah_bayar') is-invalid @enderror @endif"
+                                                                       value="Rp {{ old('tagihan_id') == $item->id ? number_format(old('jumlah_bayar', $item->jumlah), 0, ',', '.') : number_format($item->jumlah, 0, ',', '.') }}"
+                                                                       placeholder="Rp 0"
                                                                        required>
-                                                                @error('jumlah_bayar')
-                                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                                @enderror
-                                                                <small class="text-muted">Minimal Rp 1.000</small>
+                                                                <input type="hidden"
+                                                                       name="jumlah_bayar"
+                                                                       id="jumlahBayarActual{{ $item->id }}"
+                                                                       value="{{ old('tagihan_id') == $item->id ? old('jumlah_bayar', $item->jumlah) : $item->jumlah }}">
+                                                                @if($errors->any() && old('tagihan_id') == $item->id)
+                                                                    @error('jumlah_bayar')
+                                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                                    @enderror
+                                                                @endif
+                                                                <small class="text-muted">Minimal Rp 1.000 | Maksimal Rp {{ number_format($item->jumlah, 0, ',', '.') }}</small>
                                                             </div>
 
                                                             <div class="mb-3">
@@ -216,28 +221,47 @@
                                                                     Metode Pembayaran <span class="text-danger">*</span>
                                                                 </label>
                                                                 <select name="metode_pembayaran"
-                                                                        class="form-select @error('metode_pembayaran') is-invalid @enderror"
+                                                                        id="metodePembayaran{{ $item->id }}"
+                                                                        class="form-select @if($errors->any() && old('tagihan_id') == $item->id) @error('metode_pembayaran') is-invalid @enderror @endif"
                                                                         required>
-                                                                    <option value="">Pilih Metode</option>
-                                                                    <option value="tunai">💵 Tunai</option>
-                                                                    <option value="transfer">🏦 Transfer Bank</option>
-                                                                    <option value="ewallet"><i class="fas fa-mobile-alt"></i> E-Wallet</option>
+                                                                    <option value="">-- Pilih Metode Pembayaran --</option>
+                                                                    <option value="midtrans" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'midtrans' ? 'selected' : '' }}>
+                                                                        💳 Pembayaran Digital (Otomatis)
+                                                                    </option>
+                                                                    <option value="transfer" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'transfer' ? 'selected' : '' }}>
+                                                                        🏦 Transfer ke Rekening Sekolah
+                                                                    </option>
+                                                                    <option value="tunai" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'tunai' ? 'selected' : '' }}>
+                                                                        💵 Tunai di Sekolah
+                                                                    </option>
                                                                 </select>
-                                                                @error('metode_pembayaran')
-                                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                                @enderror
+                                                                @if($errors->any() && old('tagihan_id') == $item->id)
+                                                                    @error('metode_pembayaran')
+                                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                                    @enderror
+                                                                @endif
+                                                                <small class="text-muted d-block mt-2">
+                                                                    <i class="fas fa-info-circle text-info"></i>
+                                                                    <strong>Pembayaran Digital:</strong> VA Bank, E-Wallet, QRIS, Kartu Kredit (tidak perlu upload bukti)<br>
+                                                                    <strong>Transfer/Tunai:</strong> Wajib upload bukti pembayaran
+                                                                </small>
                                                             </div>
 
-                                                            <div class="mb-3">
-                                                                <label class="form-label fw-bold">Bukti Pembayaran</label>
+                                                            <div class="mb-3" id="buktiBayarSection{{ $item->id }}">
+                                                                <label class="form-label fw-bold">
+                                                                    Bukti Pembayaran <span class="text-danger bukti-required-{{ $item->id }}">*</span>
+                                                                </label>
                                                                 <input type="file"
                                                                        name="bukti_bayar"
-                                                                       class="form-control @error('bukti_bayar') is-invalid @enderror"
+                                                                       id="buktiBayar{{ $item->id }}"
+                                                                       class="form-control @if($errors->any() && old('tagihan_id') == $item->id) @error('bukti_bayar') is-invalid @enderror @endif"
                                                                        accept="image/*">
-                                                                @error('bukti_bayar')
-                                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                                @enderror
-                                                                <small class="text-muted">Upload foto bukti transfer/struk (JPG, PNG, max 2MB)</small>
+                                                                @if($errors->any() && old('tagihan_id') == $item->id)
+                                                                    @error('bukti_bayar')
+                                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                                    @enderror
+                                                                @endif
+                                                                <small class="text-muted bukti-help-{{ $item->id }}">Upload foto bukti transfer/struk (JPG, PNG, max 2MB)</small>
                                                             </div>
 
                                                             <div class="mb-3">
@@ -245,7 +269,7 @@
                                                                 <textarea name="catatan"
                                                                           class="form-control"
                                                                           rows="3"
-                                                                          placeholder="Catatan tambahan (opsional)"></textarea>
+                                                                          placeholder="Catatan tambahan (opsional)">{{ old('tagihan_id') == $item->id ? old('catatan') : '' }}</textarea>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -336,4 +360,225 @@
     </div>
 
 </div>
+@endsection
+
+@section('styles')
+<style>
+/* Prevent modal flickering on hover and interaction */
+.modal {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth modal fade transition */
+.modal.fade {
+    transition: opacity 0.15s linear;
+}
+
+.modal.fade:not(.show) {
+    opacity: 0;
+}
+
+/* Smooth modal dialog transition */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.fade:not(.show) .modal-dialog {
+    transform: translate(0, -20px);
+}
+
+.modal.show .modal-dialog {
+    transform: none;
+}
+
+/* Stabilize modal content rendering */
+.modal-content {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Remove flickering on form elements */
+.modal input,
+.modal select,
+.modal textarea,
+.modal button {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Smooth backdrop */
+.modal-backdrop {
+    transition: opacity 0.15s linear;
+}
+</style>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Prevent modal flickering by ensuring only one instance exists
+    const modalInstances = new Map();
+
+    // Initialize all modals properly
+    document.querySelectorAll('.modal').forEach(modalEl => {
+        // Prevent duplicate initialization
+        if (!modalInstances.has(modalEl.id)) {
+            const modalInstance = new bootstrap.Modal(modalEl, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            modalInstances.set(modalEl.id, modalInstance);
+        }
+
+        // Clean up on hide
+        modalEl.addEventListener('hidden.bs.modal', function() {
+            // Remove any leftover backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            if (backdrops.length > 0) {
+                backdrops.forEach(backdrop => {
+                    if (!document.querySelector('.modal.show')) {
+                        backdrop.remove();
+                    }
+                });
+            }
+
+            // Reset modal position
+            this.style.display = '';
+        });
+
+        // Prevent body scroll issues
+        modalEl.addEventListener('show.bs.modal', function() {
+            // Ensure no other modals are showing
+            document.querySelectorAll('.modal.show').forEach(otherModal => {
+                if (otherModal !== modalEl) {
+                    const instance = bootstrap.Modal.getInstance(otherModal);
+                    if (instance) {
+                        instance.hide();
+                    }
+                }
+            });
+        });
+    });
+
+    // Format Rupiah Input Handler
+    document.querySelectorAll('[name="jumlah_bayar_display"]').forEach(displayInput => {
+        const tagihanId = displayInput.id.replace('jumlahBayarDisplay', '');
+        const actualInput = document.getElementById('jumlahBayarActual' + tagihanId);
+
+        // Format on input
+        displayInput.addEventListener('input', function(e) {
+            let value = e.target.value;
+
+            // Remove all non-digit characters
+            value = value.replace(/[^\d]/g, '');
+
+            // Update hidden input with raw number
+            if (actualInput) {
+                actualInput.value = value;
+            }
+
+            // Format display with Rp and thousand separators
+            if (value) {
+                const formatted = parseInt(value).toLocaleString('id-ID');
+                e.target.value = 'Rp ' + formatted;
+            } else {
+                e.target.value = 'Rp ';
+            }
+        });
+
+        // Handle focus - select all for easy editing
+        displayInput.addEventListener('focus', function(e) {
+            setTimeout(() => {
+                e.target.select();
+            }, 50);
+        });
+
+        // Prevent non-numeric input
+        displayInput.addEventListener('keypress', function(e) {
+            const char = String.fromCharCode(e.which);
+            if (!/[\d]/.test(char)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Handle metode pembayaran change - toggle bukti bayar required
+    document.querySelectorAll('[id^="metodePembayaran"]').forEach(selectEl => {
+        const tagihanId = selectEl.id.replace('metodePembayaran', '');
+        const buktiBayarInput = document.getElementById('buktiBayar' + tagihanId);
+        const buktiBayarSection = document.getElementById('buktiBayarSection' + tagihanId);
+        const requiredStar = document.querySelector('.bukti-required-' + tagihanId);
+        const helpText = document.querySelector('.bukti-help-' + tagihanId);
+
+        // Handle change event
+        selectEl.addEventListener('change', function() {
+            const selectedMethod = this.value;
+
+            if (selectedMethod === 'midtrans') {
+                // Pembayaran Digital - Bukti OPSIONAL
+                if (buktiBayarInput) buktiBayarInput.removeAttribute('required');
+                if (requiredStar) requiredStar.style.display = 'none';
+                if (helpText) helpText.innerHTML = '<span class="text-info"><i class="fas fa-check-circle"></i> Bukti pembayaran tidak diperlukan (validasi otomatis)</span>';
+                if (buktiBayarSection) buktiBayarSection.style.opacity = '0.6';
+            } else {
+                // Transfer Manual / Tunai - Bukti WAJIB
+                if (buktiBayarInput) buktiBayarInput.setAttribute('required', 'required');
+                if (requiredStar) requiredStar.style.display = 'inline';
+                if (helpText) helpText.innerHTML = 'Upload foto bukti transfer/struk (JPG, PNG, max 2MB)';
+                if (buktiBayarSection) buktiBayarSection.style.opacity = '1';
+            }
+        });
+
+        // Trigger on page load if method already selected
+        if (selectEl.value) {
+            selectEl.dispatchEvent(new Event('change'));
+        }
+    });
+
+    // Handle form submission - validate based on payment method
+    document.querySelectorAll('[id^="formBayar"]').forEach(formEl => {
+        formEl.addEventListener('submit', function(e) {
+            const tagihanId = this.id.replace('formBayar', '');
+            const metodePembayaran = document.getElementById('metodePembayaran' + tagihanId);
+            const buktiBayar = document.getElementById('buktiBayar' + tagihanId);
+
+            // Jika metode adalah transfer atau tunai, validasi bukti bayar
+            if (metodePembayaran && buktiBayar) {
+                const selectedMethod = metodePembayaran.value;
+
+                if ((selectedMethod === 'transfer' || selectedMethod === 'tunai') && !buktiBayar.files.length) {
+                    e.preventDefault();
+                    alert('Bukti pembayaran wajib diupload untuk metode ' + (selectedMethod === 'transfer' ? 'Transfer ke Rekening Sekolah' : 'Tunai di Sekolah'));
+                    buktiBayar.focus();
+                    return false;
+                }
+            }
+
+            // Form valid, allow submission
+            return true;
+        });
+    });
+
+    // Check if there are validation errors and show the correct modal
+    @if($errors->any() && old('tagihan_id'))
+        // Use requestAnimationFrame for smooth modal opening
+        requestAnimationFrame(function() {
+            const tagihanId = {{ old('tagihan_id') }};
+            const modalElement = document.getElementById('modalBayar' + tagihanId);
+
+            if (modalElement) {
+                const modalInstance = modalInstances.get(modalElement.id) ||
+                                     bootstrap.Modal.getOrCreateInstance(modalElement);
+
+                // Small delay to ensure DOM is stable
+                setTimeout(function() {
+                    modalInstance.show();
+                }, 50);
+            }
+        });
+    @endif
+});
+</script>
 @endsection

@@ -95,10 +95,10 @@
         <a href="{{ route('admin.keuangan.tagihan.edit', $siswa->id) }}" class="btn btn-warning shadow-sm">
             <i class="fas fa-edit me-1"></i> Edit Tagihan
         </a>
-        <a href="{{ route('bendahara.pembayaran.create', $siswa->id) }}" class="btn btn-success shadow-sm">
+        <a href="{{ route('admin.keuangan.pembayaran.create', $siswa->id) }}" class="btn btn-success shadow-sm">
             <i class="fas fa-plus me-1"></i> Input Pembayaran
         </a>
-        <a href="{{ route('bendahara.pembayaran.riwayat-siswa', $siswa->id) }}" class="btn btn-info shadow-sm">
+        <a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id) }}" class="btn btn-info shadow-sm">
             <i class="fas fa-history me-1"></i> Riwayat Pembayaran
         </a>
         <a href="{{ route('admin.keuangan.tagihan.cetak', $siswa->id) }}" class="btn btn-secondary shadow-sm" target="_blank">

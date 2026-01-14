@@ -23,6 +23,13 @@ class Pembayaran extends Model
         'divalidasi_oleh',
         'tanggal_validasi',
         'catatan',
+        // Midtrans fields
+        'payment_gateway',
+        'order_id',
+        'transaction_id',
+        'payment_type',
+        'gateway_response',
+        'paid_by_parent_id',
     ];
 
     protected $casts = [

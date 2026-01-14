@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BeritaController;
+use App\Http\Controllers\MidtransWebhookController;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -77,6 +78,9 @@ use App\Http\Controllers\Siswa\LmsUjianController;
 | PUBLIC ROUTES - Accessible to everyone
 |--------------------------------------------------------------------------
 */
+
+// Midtrans Webhook (must be outside auth middleware)
+Route::post('/midtrans/notification', [MidtransWebhookController::class, 'notification'])->name('midtrans.notification');
 
 // Homepage
 Route::get('/', function () {
@@ -159,7 +163,7 @@ Route::middleware('auth')->group(function () {
 */
 
 Route::middleware(['auth'])->group(function () {
-    
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN DASHBOARD
@@ -167,21 +171,27 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        
+
         // User Management
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
-            
+
             // Tenaga Pendidik
+            Route::get('/tenaga-pendidik/import', [UserController::class, 'importTenagaPendidikForm'])->name('import-tenaga-pendidik');
+            Route::post('/tenaga-pendidik/import', [UserController::class, 'importTenagaPendidik'])->name('import-tenaga-pendidik.store');
+            Route::get('/tenaga-pendidik/template', [UserController::class, 'downloadTenagaPendidikTemplate'])->name('tenaga-pendidik-template');
             Route::get('/tenaga-pendidik', [UserController::class, 'tenagaPendidik'])->name('tenaga-pendidik');
-            Route::get('/tenaga-pendidik/create', [UserController::class, 'createTenagaPendidik'])->name('create-tenaga-pendidik'); 
+            Route::get('/tenaga-pendidik/create', [UserController::class, 'createTenagaPendidik'])->name('create-tenaga-pendidik');
             Route::post('/tenaga-pendidik', [UserController::class, 'storeTenagaPendidik'])->name('store-tenaga-pendidik');
             Route::get('/tenaga-pendidik/{id}/edit', [UserController::class, 'editTenagaPendidik'])->name('edit-tenaga-pendidik');
             Route::put('/tenaga-pendidik/{id}', [UserController::class, 'updateTenagaPendidik'])->name('update-tenaga-pendidik');
             Route::delete('/tenaga-pendidik/{id}', [UserController::class, 'deleteTenagaPendidik'])->name('delete-tenaga-pendidik');
-            Route::get('/tenaga-pendidik/{id}', [UserController::class, 'showTenagaPendidik'])->name('show-tenaga-pendidik'); 
-            
+            Route::get('/tenaga-pendidik/{id}', [UserController::class, 'showTenagaPendidik'])->name('show-tenaga-pendidik');
+
             // Siswa
+            Route::get('/siswa/import', [UserController::class, 'importSiswaForm'])->name('import-siswa');
+            Route::post('/siswa/import', [UserController::class, 'importSiswa'])->name('import-siswa.store');
+            Route::get('/siswa/template', [UserController::class, 'downloadSiswaTemplate'])->name('siswa-template');
             Route::get('/siswa', [UserController::class, 'siswa'])->name('siswa');
             Route::get('/siswa/create', [UserController::class, 'createSiswa'])->name('create-siswa');
             Route::post('/siswa', [UserController::class, 'storeSiswa'])->name('store-siswa');
@@ -191,6 +201,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/siswa/{id}', [UserController::class, 'showSiswa'])->name('show-siswa');
 
             // Orang Tua
+            Route::get('/orang-tua/import', [UserController::class, 'importOrangTuaForm'])->name('import-orang-tua');
+            Route::post('/orang-tua/import', [UserController::class, 'importOrangTua'])->name('import-orang-tua.store');
+            Route::get('/orang-tua/template', [UserController::class, 'downloadOrangTuaTemplate'])->name('orang-tua-template');
             Route::get('/orang-tua', [UserController::class, 'orangTua'])->name('orang-tua');
             Route::get('/orang-tua/create', [UserController::class, 'createOrangTua'])->name('orang-tua.create');
             Route::post('/orang-tua', [UserController::class, 'storeOrangTua'])->name('orang-tua.store');
@@ -200,7 +213,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/orang-tua/{id}/toggle-status', [UserController::class, 'toggleOrangTuaStatus'])->name('toggle-orang-tua-status');
             Route::delete('/orang-tua/{id}', [UserController::class, 'deleteOrangTua'])->name('delete-orang-tua');
         });
-        
+
         // Tahun Ajaran
         Route::resource('tahun-ajaran', TahunAjaranController::class);
         Route::post('tahun-ajaran/{tahunAjaran}/activate', [TahunAjaranController::class, 'activate'])->name('tahun-ajaran.activate');
@@ -208,8 +221,11 @@ Route::middleware(['auth'])->group(function () {
         // Cabang
         Route::resource('cabang', CabangController::class);
         Route::post('cabang/{cabang}/toggle-status', [CabangController::class, 'toggleStatus'])->name('cabang.toggle-status');
-        
+
         // Kelas
+        Route::get('kelas/import', [KelasController::class, 'importForm'])->name('kelas.import');
+        Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import.store');
+        Route::get('kelas/template', [KelasController::class, 'downloadTemplate'])->name('kelas.template');
         Route::get('kelas/print', [KelasController::class, 'printDaftarKelas'])->name('kelas.print');
         Route::get('kelas/{kelas}/manage-siswa', [KelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
         Route::post('kelas/{kelas}/add-siswa', [KelasController::class, 'addSiswa'])->name('kelas.add-siswa');
@@ -223,7 +239,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('wali-kelas/{kelas}', [AdminWaliKelasController::class, 'show'])->name('wali-kelas.show');
         Route::post('wali-kelas/{kelas}/assign', [AdminWaliKelasController::class, 'assign'])->name('wali-kelas.assign');
         Route::post('wali-kelas/bulk-assign', [AdminWaliKelasController::class, 'bulkAssign'])->name('wali-kelas.bulk-assign');
-        
+
         // Guru Pengajar
         Route::get('guru-pengajar', [GuruPengajarController::class, 'index'])->name('guru-pengajar.index');
         Route::get('guru-pengajar/print', [GuruPengajarController::class, 'print'])->name('guru-pengajar.print');
@@ -235,6 +251,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('guru-pengajar/{guruPengajar}/remove-assignment', [GuruPengajarController::class, 'removeAssignment'])->name('guru-pengajar.remove-assignment');
 
         // Mata Pelajaran
+        Route::get('mata-pelajaran/import', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'importForm'])->name('mata-pelajaran.import');
+        Route::post('mata-pelajaran/import', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'import'])->name('mata-pelajaran.import.store');
+        Route::get('mata-pelajaran/template', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
         Route::resource('mata-pelajaran', \App\Http\Controllers\Admin\MataPelajaranController::class);
 
         // Pengaturan Istirahat
@@ -250,6 +269,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Jadwal Pelajaran
         Route::prefix('jadwal-pelajaran')->name('jadwal-pelajaran.')->group(function () {
+            Route::get('/import', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'importForm'])->name('import');
+            Route::post('/import', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'import'])->name('import.store');
+            Route::get('/template', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'downloadTemplate'])->name('template');
             Route::get('/', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'index'])->name('index');
             Route::get('/create', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'store'])->name('store');
@@ -300,6 +322,9 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('keuangan')->name('keuangan.')->group(function () {
             // Tagihan
             Route::prefix('tagihan')->name('tagihan.')->group(function () {
+                Route::get('/import', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'importForm'])->name('import');
+                Route::post('/import', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'import'])->name('import.store');
+                Route::get('/template', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'downloadTemplate'])->name('template');
                 Route::get('/', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'index'])->name('index');
                 Route::get('/bulk-create', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'bulkCreate'])->name('bulk-create');
                 Route::post('/bulk-create', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'bulkCreate'])->name('bulk-create.store');
@@ -312,10 +337,12 @@ Route::middleware(['auth'])->group(function () {
             // Pembayaran
             Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'index'])->name('index');
-                Route::get('/{pembayaran}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'show'])->name('show');
+                Route::get('/{pembayaran}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'show'])->name('show')->where('pembayaran', '[0-9]+');
                 Route::post('/{pembayaran}/validasi', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'validasi'])->name('validasi');
                 Route::get('/siswa/{siswa}/create', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'create'])->name('create');
                 Route::post('/siswa/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'store'])->name('store');
+                Route::post('/siswa/{siswa}/validasi-langsung', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'validasiLangsung'])->name('validasi-langsung');
+                Route::get('/riwayat/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'riwayatSiswa'])->name('riwayat-siswa');
             });
 
             // Laporan Keuangan
@@ -347,6 +374,12 @@ Route::middleware(['auth'])->group(function () {
 
                 // Reset validasi
                 Route::post('/reset', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'resetValidasi'])->name('reset');
+            });
+
+            // Info Pembayaran (API Midtrans & Rekening Bank)
+            Route::prefix('info-pembayaran')->name('info-pembayaran.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'index'])->name('index');
+                Route::post('/update', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'update'])->name('update');
             });
         });
 
@@ -444,7 +477,7 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::middleware(['role:ketua_pkbm'])->prefix('ketua')->name('ketua.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'ketua'])->name('dashboard');
-        
+
         // Monitoring
         Route::prefix('monitoring')->name('monitoring.')->group(function () {
             Route::get('/pengguna', [KetuaController::class, 'monitoringPengguna'])->name('pengguna');
@@ -452,9 +485,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/guru-pengajar', [KetuaController::class, 'monitoringGuruPengajar'])->name('guru-pengajar');
             Route::get('/siswa', [KetuaController::class, 'monitoringSiswa'])->name('siswa');
         });
-        
+
         // Laporan
-        Route::prefix('laporan')->name('laporan.')->group(function() {
+        Route::prefix('laporan')->name('laporan.')->group(function () {
             Route::get('/', [KetuaController::class, 'index'])->name('index');
             Route::get('/cetak-siswa', [KetuaController::class, 'siswa'])->name('siswa');
             Route::get('/cetak-tenaga-pendidik', [KetuaController::class, 'tenagaPendidik'])->name('tenaga-pendidik');
@@ -463,7 +496,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/cetak-guru-pengajar', [KetuaController::class, 'guruPengajar'])->name('guru-pengajar');
             Route::get('/cetak-rekap', [KetuaController::class, 'rekap'])->name('rekap');
         });
-        
+
         // Catatan
         Route::prefix('catatan')->name('catatan.')->group(function () {
             Route::get('/', [KetuaController::class, 'catatanIndex'])->name('index');
@@ -628,10 +661,10 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:bendahara'])->prefix('bendahara')->name('bendahara.')->group(function () {
-        
+
         // Dashboard
         Route::get('/dashboard', [BendaharaController::class, 'dashboard'])->name('dashboard');
-        
+
         // Tagihan
         Route::prefix('tagihan')->name('tagihan.')->group(function () {
             Route::get('/', [TagihanController::class, 'index'])->name('index');
@@ -642,49 +675,49 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{siswa}', [TagihanController::class, 'update'])->name('update');
             Route::get('/{siswa}/cetak', [TagihanController::class, 'cetak'])->name('cetak');
         });
-        
+
         // Pembayaran
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
             Route::get('/', [PembayaranController::class, 'index'])->name('index');
             Route::get('/{pembayaran}', [PembayaranController::class, 'show'])->name('show');
             Route::post('/{pembayaran}/validasi', [PembayaranController::class, 'validasi'])->name('validasi');
-            
+
             // Input pembayaran manual
             Route::get('/siswa/{siswa}/create', [PembayaranController::class, 'create'])->name('create');
             Route::post('/siswa/{siswa}', [PembayaranController::class, 'store'])->name('store');
             Route::post('/siswa/{siswa}/validasi-langsung', [PembayaranController::class, 'validasiLangsung'])->name('validasi-langsung');
-            
+
             // Riwayat per siswa
             Route::get('/riwayat/{siswa}', [PembayaranController::class, 'riwayatSiswa'])->name('riwayat-siswa');
         });
-        
+
         // Info Pembayaran
         Route::prefix('info-pembayaran')->name('info-pembayaran.')->group(function () {
             Route::get('/', [InfoPembayaranController::class, 'index'])->name('index');
             Route::post('/update', [InfoPembayaranController::class, 'update'])->name('update');
         });
-        
+
         // Validasi Akses
         Route::prefix('validasi-akses')->name('validasi-akses.')->group(function () {
             Route::get('/', [BendaharaValidasiAksesController::class, 'index'])->name('index');
-            
+
             // Validasi individual
             Route::post('/{siswa}/validasi-ujian', [BendaharaValidasiAksesController::class, 'validasiUjian'])->name('validasi-ujian');
             Route::post('/{siswa}/batalkan-ujian', [BendaharaValidasiAksesController::class, 'batalkanUjian'])->name('batalkan-ujian');
             Route::post('/{siswa}/validasi-rapor', [BendaharaValidasiAksesController::class, 'validasiRapor'])->name('validasi-rapor');
             Route::post('/{siswa}/batalkan-rapor', [BendaharaValidasiAksesController::class, 'batalkanRapor'])->name('batalkan-rapor');
-            
+
             // Bulk validasi per kelas
             Route::post('/kelas/{kelas}/bulk-validasi-ujian', [BendaharaValidasiAksesController::class, 'bulkValidasiUjian'])->name('bulk-validasi-ujian');
             Route::post('/kelas/{kelas}/bulk-validasi-rapor', [BendaharaValidasiAksesController::class, 'bulkValidasiRapor'])->name('bulk-validasi-rapor');
-            
+
             // Bulk validasi siswa terpilih
             Route::post('/bulk-validasi-selected', [BendaharaValidasiAksesController::class, 'bulkValidasiSelected'])->name('bulk-validasi-selected');
-            
+
             // Reset validasi
             Route::post('/reset', [BendaharaValidasiAksesController::class, 'resetValidasi'])->name('reset');
         });
-        
+
         // Laporan Pembayaran
         Route::prefix('laporan')->name('laporan.')->group(function () {
             Route::get('/', [LaporanPembayaranController::class, 'index'])->name('index');
@@ -702,7 +735,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:wali_kelas'])->prefix('wali')->name('wali.')->group(function () {
-        
+
         // Dashboard
         Route::get('/dashboard', [WaliKelasController::class, 'dashboard'])->name('dashboard');
 
@@ -724,7 +757,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/validasi-izin/{id}', [PresensiController::class, 'prosesValidasiIzin'])->name('proses-validasi-izin');
             Route::get('/print-rekap', [PresensiController::class, 'printRekap'])->name('print-rekap');
         });
-        
+
         // Nilai Siswa
         Route::prefix('nilai')->name('nilai.')->group(function () {
             Route::get('/', [WaliKelasNilaiController::class, 'index'])->name('index');
@@ -733,7 +766,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{siswa}/edit', [WaliKelasNilaiController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [WaliKelasNilaiController::class, 'update'])->name('update');
         });
-        
+
         // Rapor
         Route::prefix('rapor')->name('rapor.')->group(function () {
             Route::get('/', [RaporController::class, 'index'])->name('index');
@@ -744,17 +777,17 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{rapor}/preview', [RaporController::class, 'preview'])->name('preview');
             Route::get('/{rapor}/print', [RaporController::class, 'print'])->name('print');
         });
-        
+
         // Validasi Akses
         Route::prefix('validasi-akses')->name('validasi-akses.')->group(function () {
             Route::get('/', [WaliKelasValidasiAksesController::class, 'index'])->name('index');
-            
+
             // Validasi Ujian
             Route::post('/{siswa}/validasi-ujian', [WaliKelasValidasiAksesController::class, 'validasiUjian'])->name('validasi-ujian');
             Route::post('/{siswa}/batalkan-ujian', [WaliKelasValidasiAksesController::class, 'batalkanUjian'])->name('batalkan-ujian');
             Route::post('/bulk-validasi-ujian', [WaliKelasValidasiAksesController::class, 'bulkValidasiUjian'])->name('bulk-validasi-ujian');
             Route::post('/validasi-semua-ujian', [WaliKelasValidasiAksesController::class, 'validasiSemuaUjian'])->name('validasi-semua-ujian');
-            
+
             // Validasi Rapor
             Route::post('/{siswa}/validasi-rapor', [WaliKelasValidasiAksesController::class, 'validasiRapor'])->name('validasi-rapor');
             Route::post('/{siswa}/batalkan-rapor', [WaliKelasValidasiAksesController::class, 'batalkanRapor'])->name('batalkan-rapor');
@@ -769,24 +802,24 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:guru_pengajar'])->prefix('guru')->name('guru.')->group(function () {
-        
+
         // Dashboard Overview
         Route::get('/dashboard', [DashboardController::class, 'guru'])->name('dashboard');
-        
+
         // Daftar Kelas & Mata Pelajaran yang Diajar
         Route::get('/kelas', [GuruKelasController::class, 'index'])->name('kelas.index');
         Route::get('/kelas/{kelas}/mapel', [GuruKelasController::class, 'showMapel'])->name('kelas.mapel');
-        
+
         /*
         |--------------------------------------------------------------------------
         | LMS GURU - Per Kelas & Mata Pelajaran
         |--------------------------------------------------------------------------
         */
         Route::prefix('lms/{kelas}/{mapel}')->name('lms.')->group(function () {
-            
+
             // Dashboard LMS (Beranda)
             Route::get('/dashboard', [GuruLmsController::class, 'dashboard'])->name('dashboard');
-            
+
             // Materi
             Route::prefix('materi')->name('materi.')->group(function () {
                 Route::get('/', [GuruMateriController::class, 'index'])->name('index');
@@ -796,7 +829,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{materi}', [GuruMateriController::class, 'update'])->name('update');
                 Route::delete('/{materi}', [GuruMateriController::class, 'destroy'])->name('destroy');
             });
-            
+
             // Tugas & Latihan
             Route::prefix('tugas')->name('tugas.')->group(function () {
                 Route::get('/', [GuruTugasController::class, 'index'])->name('index');
@@ -805,13 +838,13 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{tugas}/edit', [GuruTugasController::class, 'edit'])->name('edit');
                 Route::put('/{tugas}', [GuruTugasController::class, 'update'])->name('update');
                 Route::delete('/{tugas}', [GuruTugasController::class, 'destroy'])->name('destroy');
-                
+
                 // Koreksi Tugas
                 Route::get('/{tugas}/koreksi', [GuruKoreksiController::class, 'index'])->name('koreksi');
                 Route::get('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'show'])->name('koreksi.show');
                 Route::post('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'store'])->name('koreksi.store');
             });
-            
+
             // Ujian
             Route::prefix('ujian')->name('ujian.')->group(function () {
                 Route::get('/', [GuruUjianController::class, 'index'])->name('index');
@@ -820,16 +853,16 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/edit', [GuruUjianController::class, 'edit'])->name('edit');
                 Route::put('/{ujian}', [GuruUjianController::class, 'update'])->name('update');
                 Route::delete('/{ujian}', [GuruUjianController::class, 'destroy'])->name('destroy');
-                
+
                 // Hasil & Koreksi Ujian
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
                 Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksi'])->name('koreksi');
             });
-            
+
             // Nilai Siswa
             Route::get('/nilai', [GuruNilaiController::class, 'index'])->name('nilai.index');
             Route::post('/nilai/update', [GuruNilaiController::class, 'update'])->name('nilai.update');
-            
+
             // Forum Diskusi (Fase 2 - placeholder)
             Route::get('/forum', [GuruForumController::class, 'index'])->name('forum.index');
         });
@@ -841,20 +874,20 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
-        
+
         // Main Dashboard Router
         Route::get('/dashboard', [SiswaDashboardController::class, 'index'])->name('dashboard');
-        
+
         /*
         |--------------------------------------------------------------------------
         | SIA (Sistem Informasi Akademik) Routes
         |--------------------------------------------------------------------------
         */
         Route::prefix('sia')->name('sia.')->group(function () {
-            
+
             // Dashboard SIA
             Route::get('/dashboard', [SiaDashboardController::class, 'index'])->name('dashboard');
-            
+
             // Presensi
             Route::prefix('presensi')->name('presensi.')->group(function () {
                 Route::get('/', [SiaPresensiController::class, 'index'])->name('index');
@@ -864,22 +897,22 @@ Route::middleware(['auth'])->group(function () {
                 // Route::get('/ajukan-izin', [SiaPresensiController::class, 'ajukanIzin'])->name('ajukan-izin');
                 // Route::post('/ajukan-izin', [SiaPresensiController::class, 'storeIzin'])->name('store-izin');
             });
-            
+
             // Penilaian Harian
             Route::get('/penilaian', [SiaDashboardController::class, 'penilaian'])->name('penilaian');
-            
+
             // Pembayaran
             Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
                 Route::get('/', [SiaPembayaranController::class, 'index'])->name('index');
                 Route::post('/bayar', [SiaPembayaranController::class, 'bayar'])->name('bayar');
                 Route::get('/riwayat', [SiaPembayaranController::class, 'riwayat'])->name('riwayat');
                 Route::get('/cetak/{pembayaran}', [SiaPembayaranController::class, 'cetak'])->name('cetak');
-                
+
                 // Midtrans callbacks
                 Route::post('/midtrans/notification', [SiaPembayaranController::class, 'midtransNotification'])->name('midtrans-notification');
                 Route::get('/midtrans/finish', [SiaPembayaranController::class, 'midtransFinish'])->name('midtrans-finish');
             });
-            
+
             // Rapor
             Route::prefix('rapor')->name('rapor.')->group(function () {
                 Route::get('/', [SiaRaporController::class, 'index'])->name('index');
@@ -888,58 +921,58 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/download/{rapor}', [SiaRaporController::class, 'download'])->name('download');
             });
         });
-        
+
         /*
         |--------------------------------------------------------------------------
         | LMS (Learning Management System) Routes
         |--------------------------------------------------------------------------
         */
         Route::prefix('lms')->name('lms.')->group(function () {
-            
+
             // Dashboard LMS
             Route::get('/dashboard', [LmsDashboardController::class, 'index'])->name('dashboard');
-            
+
             // Kalender Akademik
             Route::get('/kalender', [SiswaDashboardController::class, 'kalenderTahunan'])->name('kalender');
             Route::get('/kalender/{tanggal}', [SiswaDashboardController::class, 'kalenderDetail'])->name('kalender.detail');
-            
+
             // Jadwal Pelajaran
             Route::get('/jadwal', [LmsDashboardController::class, 'jadwal'])->name('jadwal');
             Route::get('/jadwal/print', [LmsDashboardController::class, 'printJadwal'])->name('jadwal.print');
 
             // Daftar Guru
             Route::get('/guru', [LmsDashboardController::class, 'guru'])->name('guru');
-            
+
             // Mata Pelajaran
             Route::prefix('mata-pelajaran')->name('mapel.')->group(function () {
-                
+
                 // Detail Mata Pelajaran
                 Route::get('/{mapelId}', [LmsMateriController::class, 'show'])->name('show');
-                
+
                 // Materi
                 Route::get('/{mapelId}/materi/{materiId}', [LmsMateriController::class, 'lihatMateri'])->name('materi');
-                
+
                 // Tugas
                 Route::prefix('{mapelId}/tugas')->name('tugas.')->group(function () {
                     Route::get('/', [LmsTugasController::class, 'index'])->name('index');
                     Route::get('/{tugasId}', [LmsTugasController::class, 'show'])->name('show');
                     Route::post('/{tugasId}/submit', [LmsTugasController::class, 'submit'])->name('submit');
                 });
-                
+
                 // Ujian
                 Route::prefix('{mapelId}/ujian')->name('ujian.')->group(function () {
                     Route::get('/{ujianId}', [LmsUjianController::class, 'show'])->name('show');
                     Route::post('/{ujianId}/mulai', [LmsUjianController::class, 'mulai'])->name('mulai');
                     Route::post('/{ujianId}/submit', [LmsUjianController::class, 'submit'])->name('submit');
                 });
-                
+
                 // Forum Diskusi
                 Route::prefix('{mapelId}/forum')->name('forum.')->group(function () {
                     Route::get('/', [LmsMateriController::class, 'forum'])->name('index');
                     Route::post('/', [LmsMateriController::class, 'postForum'])->name('post');
                 });
             });
-            
+
             // Daftar Semua Tugas (Global)
             Route::get('/tugas', [LmsTugasController::class, 'indexAll'])->name('tugas.index');
         });
@@ -961,6 +994,12 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('tagihan')->name('tagihan.')->group(function () {
             Route::get('/anak/{siswa}', [OrangTuaController::class, 'tagihanAnak'])->name('anak');
             Route::post('/anak/{siswa}/bayar', [OrangTuaController::class, 'prosesBayar'])->name('bayar');
+        });
+
+        // Pembayaran Digital (Midtrans)
+        Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+            Route::get('/snap-finish', [OrangTuaController::class, 'snapFinish'])->name('snap.finish');
+            Route::get('/snap/{pembayaran}', [OrangTuaController::class, 'snapPayment'])->name('snap');
         });
 
         // Monitoring Rapor Anak

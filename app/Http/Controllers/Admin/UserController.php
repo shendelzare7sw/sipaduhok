@@ -44,16 +44,16 @@ class UserController extends Controller
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('nip', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         // Handle role filter
         if ($request->has('role') && $request->role != '') {
-            $query->whereHas('user', function($q) use ($request) {
+            $query->whereHas('user', function ($q) use ($request) {
                 $q->where('role', $request->role);
             });
         }
@@ -137,7 +137,7 @@ class UserController extends Controller
     public function updateTenagaPendidik(Request $request, $id)
     {
         $tenagaPendidik = TenagaPendidik::findOrFail($id);
-        
+
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($tenagaPendidik->user_id)],
@@ -189,9 +189,9 @@ class UserController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::with(['user.cabang'])->where('user_id', $id)->first();
         if (!$tenagaPendidik) {
-             $tenagaPendidik = TenagaPendidik::with(['user.cabang'])->find($id);
+            $tenagaPendidik = TenagaPendidik::with(['user.cabang'])->find($id);
         }
-        
+
         if (!$tenagaPendidik) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
@@ -218,16 +218,16 @@ class UserController extends Controller
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
             });
         }
 
         // Handle other filters
         if ($request->has('jenjang') && $request->jenjang != '') {
-            $query->whereHas('kelas', function($q) use ($request) {
+            $query->whereHas('kelas', function ($q) use ($request) {
                 $q->where('jenjang', $request->jenjang);
             });
         }
@@ -474,6 +474,18 @@ class UserController extends Controller
                     $addExistingRelationship = $request->add_existing_relationship_lainnya;
                 }
 
+                // Check for duplicate ayah_kandung or ibu_kandung
+                if (in_array($addExistingRelationship, ['ayah_kandung', 'ibu_kandung'])) {
+                    $duplicateRelation = StudentParent::where('siswa_id', $siswa->id)
+                        ->where('relationship', $addExistingRelationship)
+                        ->exists();
+
+                    if ($duplicateRelation) {
+                        $relationLabel = $addExistingRelationship === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+                        return back()->with('error', "Siswa sudah memiliki {$relationLabel}! Satu siswa hanya boleh memiliki 1 Ayah Kandung dan 1 Ibu Kandung.");
+                    }
+                }
+
                 StudentParent::create([
                     'siswa_id' => $siswa->id,
                     'parent_id' => $request->add_existing_parent_id,
@@ -491,6 +503,18 @@ class UserController extends Controller
             $addNewRelationship = $request->add_new_relationship;
             if ($addNewRelationship === 'lainnya' && !empty($request->add_new_relationship_lainnya)) {
                 $addNewRelationship = $request->add_new_relationship_lainnya;
+            }
+
+            // Check for duplicate ayah_kandung or ibu_kandung
+            if (in_array($addNewRelationship, ['ayah_kandung', 'ibu_kandung'])) {
+                $duplicateRelation = StudentParent::where('siswa_id', $siswa->id)
+                    ->where('relationship', $addNewRelationship)
+                    ->exists();
+
+                if ($duplicateRelation) {
+                    $relationLabel = $addNewRelationship === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+                    return back()->with('error', "Siswa sudah memiliki {$relationLabel}! Satu siswa hanya boleh memiliki 1 Ayah Kandung dan 1 Ibu Kandung.");
+                }
             }
 
             $parentUser = User::create([
@@ -550,22 +574,22 @@ class UserController extends Controller
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         // Handle filters
         if ($request->has('jenjang') && $request->jenjang != '') {
-            $query->whereHas('studentParents.siswa.kelas', function($q) use ($request) {
+            $query->whereHas('studentParents.siswa.kelas', function ($q) use ($request) {
                 $q->where('jenjang', $request->jenjang);
             });
         }
 
         if ($request->has('cabang_id') && $request->cabang_id != '') {
-            $query->whereHas('studentParents.siswa', function($q) use ($request) {
+            $query->whereHas('studentParents.siswa', function ($q) use ($request) {
                 $q->where('cabang_id', $request->cabang_id);
             });
         }
@@ -586,11 +610,11 @@ class UserController extends Controller
     {
         // Get all active siswa for optional linking
         $siswaList = Siswa::with(['kelas', 'cabang', 'user'])
-            ->whereHas('user', function($q) {
+            ->whereHas('user', function ($q) {
                 $q->where('is_active', true);
             })
             ->get()
-            ->sortBy(function($siswa) {
+            ->sortBy(function ($siswa) {
                 return $siswa->user->name ?? $siswa->nama_lengkap;
             });
 
@@ -751,5 +775,113 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('admin.users.orang-tua')->with('success', 'Akun orang tua berhasil dihapus!');
+    }
+
+    // --- IMPORT SISWA ---
+
+    public function importSiswaForm()
+    {
+        return view('admin.users.siswa-import');
+    }
+
+    public function importSiswa(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        try {
+            $import = new \App\Imports\SiswaImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+
+            $message = "Berhasil mengimport {$imported} siswa.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati (sudah ada).";
+            }
+
+            return redirect()->route('admin.users.siswa')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadSiswaTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\SiswaTemplate(), 'template_siswa.xlsx');
+    }
+
+    // --- IMPORT TENAGA PENDIDIK ---
+
+    public function importTenagaPendidikForm()
+    {
+        return view('admin.users.tenaga-pendidik-import');
+    }
+
+    public function importTenagaPendidik(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        try {
+            $import = new \App\Imports\TenagaPendidikImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+
+            $message = "Berhasil mengimport {$imported} tenaga pendidik.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati (sudah ada).";
+            }
+
+            return redirect()->route('admin.users.tenaga-pendidik')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTenagaPendidikTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\TenagaPendidikTemplate(), 'template_tenaga_pendidik.xlsx');
+    }
+
+    // --- IMPORT ORANG TUA ---
+
+    public function importOrangTuaForm()
+    {
+        return view('admin.users.orang-tua-import');
+    }
+
+    public function importOrangTua(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        try {
+            $import = new \App\Imports\OrangTuaImport();
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+
+            $message = "Berhasil mengimport {$imported} orang tua.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati (sudah ada).";
+            }
+
+            return redirect()->route('admin.users.orang-tua')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadOrangTuaTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\OrangTuaTemplate(), 'template_orang_tua.xlsx');
     }
 }

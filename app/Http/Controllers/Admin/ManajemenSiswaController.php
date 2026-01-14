@@ -53,10 +53,10 @@ class ManajemenSiswaController extends Controller
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%");
+                    ->orWhere('nisn', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%");
             });
         }
 
@@ -84,7 +84,13 @@ class ManajemenSiswaController extends Controller
         ];
 
         return view('admin.manajemen-siswa.index', compact(
-            'siswaList', 'tahunAjarans', 'tahunAjaranAktif', 'cabangs', 'kelasList', 'jenjangs', 'stats'
+            'siswaList',
+            'tahunAjarans',
+            'tahunAjaranAktif',
+            'cabangs',
+            'kelasList',
+            'jenjangs',
+            'stats'
         ));
     }
 
@@ -111,11 +117,11 @@ class ManajemenSiswaController extends Controller
             ->get();
 
         // Get available parent users (role orang_tua)
-        $availableParents = \App\Models\User::whereHas('roleRelation', function($q) {
+        $availableParents = \App\Models\User::whereHas('roleRelation', function ($q) {
             $q->where('name', 'orang_tua');
         })->where('is_active', true)
-          ->orderBy('name')
-          ->get();
+            ->orderBy('name')
+            ->get();
 
         return view('admin.manajemen-siswa.show', compact('siswa', 'kelasList', 'tahunAjaranAktif', 'availableParents'));
     }
@@ -152,11 +158,11 @@ class ManajemenSiswaController extends Controller
         ]);
 
         $kelas = Kelas::find($validated['kelas_id']);
-        
+
         // Check kuota
         $currentCount = Siswa::where('kelas_id', $kelas->id)->count();
         $newCount = count($validated['siswa_ids']);
-        
+
         if (($currentCount + $newCount) > $kelas->kuota_siswa) {
             return back()->with('error', "Kuota kelas {$kelas->nama_kelas} tidak mencukupi! (Sisa: " . ($kelas->kuota_siswa - $currentCount) . " siswa)");
         }
@@ -182,6 +188,18 @@ class ManajemenSiswaController extends Controller
         // Check if already attached
         if ($siswa->parents()->where('parent_id', $validated['parent_id'])->exists()) {
             return back()->with('error', 'Orang tua ini sudah terhubung dengan siswa!');
+        }
+
+        // Check for duplicate ayah_kandung or ibu_kandung
+        if (in_array($validated['relationship'], ['ayah_kandung', 'ibu_kandung'])) {
+            $duplicateRelation = $siswa->parents()
+                ->wherePivot('relationship', $validated['relationship'])
+                ->exists();
+
+            if ($duplicateRelation) {
+                $relationLabel = $validated['relationship'] === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+                return back()->with('error', "Siswa sudah memiliki {$relationLabel}! Satu siswa hanya boleh memiliki 1 Ayah Kandung dan 1 Ibu Kandung.");
+            }
         }
 
         $siswa->parents()->attach($validated['parent_id'], [
@@ -235,10 +253,10 @@ class ManajemenSiswaController extends Controller
         switch ($sortBy) {
             case 'kelas':
                 $query->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
-                      ->orderBy('kelas.jenjang')
-                      ->orderBy('kelas.nama_kelas')
-                      ->orderBy('siswa.nama_lengkap')
-                      ->select('siswa.*');
+                    ->orderBy('kelas.jenjang')
+                    ->orderBy('kelas.nama_kelas')
+                    ->orderBy('siswa.nama_lengkap')
+                    ->select('siswa.*');
                 break;
             case 'cabang':
                 $query->orderBy('cabang_id')->orderBy('nama_lengkap');
@@ -271,7 +289,7 @@ class ManajemenSiswaController extends Controller
     public function perKelas(Request $request, Kelas $kelas)
     {
         $kelas->load(['cabang', 'tahunAjaran', 'waliKelas']);
-        
+
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap')
@@ -325,7 +343,7 @@ class ManajemenSiswaController extends Controller
         ]);
 
         $siswa = Siswa::find($validated['siswa_id']);
-        
+
         if ($siswa->kelas_id == $kelas->id) {
             $siswa->update(['kelas_id' => null]);
             return back()->with('success', "Siswa {$siswa->nama_lengkap} berhasil dikeluarkan dari kelas!");

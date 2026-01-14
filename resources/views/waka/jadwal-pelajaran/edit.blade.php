@@ -482,33 +482,6 @@ function openGuruModal() {
     modal.show();
 }
 
-// Search functionality
-document.getElementById('searchGuru').addEventListener('input', function() {
-    const searchTerm = this.value.toLowerCase();
-    const guruOptions = document.querySelectorAll('.guru-option-item');
-
-    guruOptions.forEach(option => {
-        const name = option.getAttribute('data-name');
-        if (name.includes(searchTerm)) {
-            option.style.display = 'flex';
-        } else {
-            option.style.display = 'none';
-        }
-    });
-});
-
-// Hover effect
-document.querySelectorAll('.guru-option-item').forEach(option => {
-    option.addEventListener('mouseenter', function() {
-        this.style.background = '#f9fafb';
-        this.style.borderColor = '#d1d5db';
-    });
-    option.addEventListener('mouseleave', function() {
-        this.style.background = 'transparent';
-        this.style.borderColor = 'transparent';
-    });
-});
-
 function selectGuru(id, name, cabang) {
     setGuru(id, name, cabang);
 
@@ -535,8 +508,22 @@ function setGuru(id, name, cabang) {
     `;
 }
 
-// Remove guru button
-document.getElementById('btnRemoveGuru').addEventListener('click', function() {
+function filterGuruList() {
+    const searchInput = document.getElementById('searchGuru');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const guruOptions = document.querySelectorAll('.guru-option-item');
+    
+    guruOptions.forEach(option => {
+        const name = option.getAttribute('data-name') || '';
+        if (searchTerm === '' || name.includes(searchTerm)) {
+            option.style.display = 'flex';
+        } else {
+            option.style.display = 'none';
+        }
+    });
+}
+
+function clearGuruSelection() {
     document.getElementById('guru_id').value = '';
 
     // Update display
@@ -550,7 +537,7 @@ document.getElementById('btnRemoveGuru').addEventListener('click', function() {
     // Close modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('guruModal'));
     if (modal) modal.hide();
-});
+}
 </script>
 
 {{-- Modal Pilih Guru --}}
@@ -570,7 +557,9 @@ document.getElementById('btnRemoveGuru').addEventListener('click', function() {
                         <i class="fas fa-search" style="color: #9ca3af; margin-right: 6px;"></i>
                         Cari Guru
                     </label>
-                    <input type="text" id="searchGuru" class="form-control" placeholder="Ketik nama guru..." style="border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px;">
+                    <input type="text" id="searchGuru" class="form-control" placeholder="Ketik nama guru..." 
+                           oninput="filterGuruList()"
+                           style="border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px;">
                 </div>
 
                 <div class="mb-3">
@@ -581,7 +570,9 @@ document.getElementById('btnRemoveGuru').addEventListener('click', function() {
                                  data-id="{{ $g->id }}"
                                  data-name="{{ strtolower($g->nama_lengkap) }}"
                                  onclick="selectGuru({{ $g->id }}, '{{ $g->nama_lengkap }}', '{{ $g->user->cabang->nama_cabang ?? '-' }}')"
-                                 style="padding: 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; border: 1px solid transparent;">
+                                 style="padding: 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; border: 1px solid transparent;"
+                                 onmouseenter="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db';"
+                                 onmouseleave="this.style.background='transparent'; this.style.borderColor='transparent';">
                                 <div class="guru-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0;">
                                     {{ substr($g->nama_lengkap, 0, 2) }}
                                 </div>
@@ -604,7 +595,7 @@ document.getElementById('btnRemoveGuru').addEventListener('click', function() {
                 </div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px 24px; gap: 12px;">
-                <button type="button" id="btnRemoveGuru" class="btn" style="background: #fef2f2; color: #dc2626; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
+                <button type="button" id="btnRemoveGuru" class="btn" onclick="clearGuruSelection()" style="background: #fef2f2; color: #dc2626; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
                     <i class="fas fa-times"></i> Hapus Guru
                 </button>
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background: #f3f4f6; color: #374151; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
@@ -614,6 +605,26 @@ document.getElementById('btnRemoveGuru').addEventListener('click', function() {
         </div>
     </div>
 </div>
+
+<script>
+// Initialize modal events after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const guruModal = document.getElementById('guruModal');
+    if (guruModal) {
+        guruModal.addEventListener('shown.bs.modal', function() {
+            const searchInput = document.getElementById('searchGuru');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+            }
+            // Reset all guru options to visible
+            document.querySelectorAll('.guru-option-item').forEach(option => {
+                option.style.display = 'flex';
+            });
+        });
+    }
+});
+</script>
 
 <style>
 #guruList::-webkit-scrollbar {
@@ -640,3 +651,4 @@ document.getElementById('btnRemoveGuru').addEventListener('click', function() {
 }
 </style>
 @endsection
+

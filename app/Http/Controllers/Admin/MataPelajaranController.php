@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MataPelajaran;
+use App\Imports\MataPelajaranImport;
+use App\Exports\Templates\MataPelajaranTemplate;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -132,4 +135,65 @@ class MataPelajaranController extends Controller
             ->route('admin.mata-pelajaran.index')
             ->with('success', 'Mata pelajaran berhasil dihapus!');
     }
+
+    /**
+     * Show the import form.
+     */
+    public function importForm()
+    {
+        return view('admin.mata-pelajaran.import');
+    }
+
+    /**
+     * Process the import from Excel file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120', // Max 5MB
+        ], [
+            'file.required' => 'File Excel wajib dipilih',
+            'file.mimes' => 'File harus berformat Excel (.xlsx atau .xls)',
+            'file.max' => 'Ukuran file maksimal 5MB',
+        ]);
+
+        try {
+            $import = new MataPelajaranImport();
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+            $failures = $import->failures();
+
+            $message = "Berhasil mengimport {$imported} mata pelajaran.";
+
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati (sudah ada).";
+            }
+
+            if ($failures->count() > 0) {
+                $errorRows = $failures->map(fn($f) => $f->row())->unique()->implode(', ');
+                $message .= " Baris dengan error: {$errorRows}";
+                return redirect()
+                    ->route('admin.mata-pelajaran.index')
+                    ->with('warning', $message);
+            }
+
+            return redirect()
+                ->route('admin.mata-pelajaran.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download the import template.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new MataPelajaranTemplate(), 'template_mata_pelajaran.xlsx');
+    }
 }
+

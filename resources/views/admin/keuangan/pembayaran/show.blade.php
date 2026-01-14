@@ -162,11 +162,8 @@
                         </tr>
                     </table>
 
-                    <div class="mt-3">
-                        <a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $pembayaran->siswa->id ?? 0) }}" class="btn btn-sm btn-info shadow-sm">
-                            <i class="fas fa-history me-1"></i> Lihat Riwayat Pembayaran
-                        </a>
-                    </div>
+                    {{-- Note: Riwayat pembayaran siswa tidak tersedia untuk admin --}}
+                    {{-- Fitur ini hanya tersedia di panel bendahara --}}
                 </div>
             </div>
         </div>

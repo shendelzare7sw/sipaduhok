@@ -73,4 +73,67 @@ class TagihanController extends BendaharaTagihanController
         // Use parent method which already returns the correct view
         return parent::cetak($siswa);
     }
+
+    /**
+     * Show import form.
+     */
+    public function importForm()
+    {
+        $tahunAjarans = \App\Models\TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+        return view('admin.keuangan.tagihan.import', compact('tahunAjarans'));
+    }
+
+    /**
+     * Process import from Excel.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+        ]);
+
+        try {
+            $import = new \App\Imports\TagihanImport($request->tahun_ajaran_id);
+            \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+            $missingSiswa = $import->getMissingSiswa();
+
+            $message = "Berhasil mengimport {$imported} tagihan.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati.";
+            }
+
+            // Build warning message
+            $warningMessage = '';
+            if (!empty($missingSiswa)) {
+                $warningMessage .= "Siswa tidak ditemukan: " . implode(', ', $missingSiswa) . ". ";
+            }
+
+            if (!empty($warningMessage)) {
+                return redirect()->route('admin.keuangan.tagihan.index')
+                    ->with('success', $message)
+                    ->with('warning', $warningMessage);
+            }
+
+            return redirect()->route('admin.keuangan.tagihan.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download import template.
+     */
+    public function downloadTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\Templates\TagihanTemplate(),
+            'template_tagihan.xlsx'
+        );
+    }
 }
+

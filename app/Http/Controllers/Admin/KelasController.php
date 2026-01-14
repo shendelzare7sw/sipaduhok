@@ -8,6 +8,9 @@ use App\Models\Cabang;
 use App\Models\TahunAjaran;
 use App\Models\TenagaPendidik;
 use App\Models\Siswa;
+use App\Imports\KelasImport;
+use App\Exports\Templates\KelasTemplate;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +22,7 @@ class KelasController extends Controller
     public function index(Request $request)
     {
         $query = Kelas::with(['cabang', 'tahunAjaran', 'waliKelas']);
-        
+
         // Filter by tahun ajaran
         if ($request->filled('tahun_ajaran_id')) {
             $query->where('tahun_ajaran_id', $request->tahun_ajaran_id);
@@ -30,36 +33,36 @@ class KelasController extends Controller
                 $query->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             }
         }
-        
+
         // Filter by jenjang
         if ($request->filled('jenjang')) {
             $query->where('jenjang', $request->jenjang);
         }
-        
+
         // Filter by cabang
         if ($request->filled('cabang_id')) {
             $query->where('cabang_id', $request->cabang_id);
         }
-        
+
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_kelas', 'like', "%{$search}%")
-                  ->orWhere('kode_kelas', 'like', "%{$search}%");
+                    ->orWhere('kode_kelas', 'like', "%{$search}%");
             });
         }
-        
+
         $kelas = $query->withCount('siswa')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->paginate(15);
-        
+
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-        
+
         // Get current tahun ajaran untuk display
         $currentTahunAjaran = null;
         if ($request->filled('tahun_ajaran_id')) {
@@ -67,7 +70,7 @@ class KelasController extends Controller
         } else {
             $currentTahunAjaran = TahunAjaran::where('is_active', true)->first();
         }
-        
+
         // Statistics
         $stats = [
             'totalKelas' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
@@ -77,10 +80,14 @@ class KelasController extends Controller
             'kelasWithoutWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereNull('wali_kelas_id')->count(),
         ];
-        
+
         return view('admin.kelas.index', compact(
-            'kelas', 'tahunAjarans', 'cabangs', 'jenjangs', 
-            'currentTahunAjaran', 'stats'
+            'kelas',
+            'tahunAjarans',
+            'cabangs',
+            'jenjangs',
+            'currentTahunAjaran',
+            'stats'
         ));
     }
 
@@ -94,9 +101,9 @@ class KelasController extends Controller
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         // Get tenaga pendidik yang bisa jadi wali kelas (hanya role wali_kelas)
-        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function ($q) {
             $q->where('name', 'wali_kelas');
-        })->whereHas('user', function($q) {
+        })->whereHas('user', function ($q) {
             $q->where('is_active', true);
         })->orderBy('nama_lengkap')->get();
 
@@ -128,16 +135,16 @@ class KelasController extends Controller
         $cabang = Cabang::find($validated['cabang_id']);
         $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
         $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
-        
-        $kodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' . 
-                     strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
-        
+
+        $kodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
+            strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
+
         // Check if kode_kelas already exists
         $existingKelas = Kelas::where('kode_kelas', $kodeKelas)->first();
         if ($existingKelas) {
             return back()->withInput()->with('error', 'Kelas dengan kode tersebut sudah ada. Silakan gunakan nama kelas yang berbeda.');
         }
-        
+
         $validated['kode_kelas'] = $kodeKelas;
 
         // PENTING: Hapus assignment lama jika wali kelas dipilih sudah mengajar di kelas lain
@@ -159,12 +166,12 @@ class KelasController extends Controller
     public function show(Kelas $kelas)
     {
         $kelas->load(['cabang', 'tahunAjaran', 'waliKelas']);
-        
+
         // Get siswa in this kelas
         $siswa = Siswa::where('kelas_id', $kelas->id)
             ->orderBy('nama_lengkap')
             ->paginate(20);
-        
+
         // Statistics
         $stats = [
             'totalSiswa' => Siswa::where('kelas_id', $kelas->id)->count(),
@@ -172,7 +179,7 @@ class KelasController extends Controller
             'siswaPerempuan' => Siswa::where('kelas_id', $kelas->id)->where('jenis_kelamin', 'P')->count(),
             'sisaKuota' => $kelas->kuota_siswa - Siswa::where('kelas_id', $kelas->id)->count(),
         ];
-        
+
         return view('admin.kelas.show', compact('kelas', 'siswa', 'stats'));
     }
 
@@ -186,9 +193,9 @@ class KelasController extends Controller
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         // Get tenaga pendidik yang bisa jadi wali kelas (hanya role wali_kelas)
-        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function($q) {
+        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function ($q) {
             $q->where('name', 'wali_kelas');
-        })->whereHas('user', function($q) {
+        })->whereHas('user', function ($q) {
             $q->where('is_active', true);
         })->orderBy('nama_lengkap')->get();
 
@@ -229,7 +236,7 @@ class KelasController extends Controller
         $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
 
         $newKodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
-                        strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
+            strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
 
         // Check if new kode_kelas already exists (excluding current)
         if ($newKodeKelas !== $kelas->kode_kelas) {
@@ -270,24 +277,24 @@ class KelasController extends Controller
     public function manageSiswa(Kelas $kelas)
     {
         $kelas->load(['cabang', 'tahunAjaran', 'waliKelas']);
-        
+
         // Siswa yang sudah ada di kelas ini
         $siswaInKelas = Siswa::where('kelas_id', $kelas->id)
             ->orderBy('nama_lengkap')
             ->get();
-        
+
         // Siswa yang belum memiliki kelas atau di kelas lain (untuk ditambahkan)
         $siswaAvailable = Siswa::where('status', 'aktif')
-            ->where(function($q) use ($kelas) {
+            ->where(function ($q) use ($kelas) {
                 $q->whereNull('kelas_id')
-                  ->orWhere('kelas_id', '!=', $kelas->id);
+                    ->orWhere('kelas_id', '!=', $kelas->id);
             })
             ->where('cabang_id', $kelas->cabang_id) // Filter by same cabang
             ->orderBy('nama_lengkap')
             ->get();
-        
+
         $sisaKuota = $kelas->kuota_siswa - $siswaInKelas->count();
-        
+
         return view('admin.kelas.manage-siswa', compact('kelas', 'siswaInKelas', 'siswaAvailable', 'sisaKuota'));
     }
 
@@ -300,19 +307,19 @@ class KelasController extends Controller
             'siswa_ids' => 'required|array',
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
-        
+
         // Check kuota
         $currentCount = Siswa::where('kelas_id', $kelas->id)->count();
         $newCount = count($validated['siswa_ids']);
-        
+
         if (($currentCount + $newCount) > $kelas->kuota_siswa) {
             return back()->with('error', 'Jumlah siswa melebihi kuota kelas. Sisa kuota: ' . ($kelas->kuota_siswa - $currentCount));
         }
-        
+
         // Update siswa kelas_id
         Siswa::whereIn('id', $validated['siswa_ids'])
             ->update(['kelas_id' => $kelas->id]);
-        
+
         return back()->with('success', $newCount . ' siswa berhasil ditambahkan ke kelas!');
     }
 
@@ -324,10 +331,10 @@ class KelasController extends Controller
         $validated = $request->validate([
             'siswa_id' => 'required|exists:siswa,id',
         ]);
-        
+
         $siswa = Siswa::find($validated['siswa_id']);
         $siswa->update(['kelas_id' => null]);
-        
+
         return back()->with('success', 'Siswa ' . $siswa->nama_lengkap . ' berhasil dikeluarkan dari kelas!');
     }
 
@@ -339,9 +346,9 @@ class KelasController extends Controller
         $validated = $request->validate([
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
         ]);
-        
+
         $kelas->update(['wali_kelas_id' => $validated['wali_kelas_id']]);
-        
+
         if ($validated['wali_kelas_id']) {
             $waliKelas = TenagaPendidik::find($validated['wali_kelas_id']);
             return back()->with('success', $waliKelas->nama_lengkap . ' berhasil ditunjuk sebagai Wali Kelas!');
@@ -357,30 +364,99 @@ class KelasController extends Controller
     {
         $query = Kelas::with(['cabang', 'tahunAjaran', 'waliKelas'])
             ->withCount('siswa');
-        
+
         // Filter by tahun ajaran
         if ($request->filled('tahun_ajaran_id')) {
             $query->where('tahun_ajaran_id', $request->tahun_ajaran_id);
         }
-        
+
         // Filter by jenjang
         if ($request->filled('jenjang')) {
             $query->where('jenjang', $request->jenjang);
         }
-        
+
         // Filter by cabang
         if ($request->filled('cabang_id')) {
             $query->where('cabang_id', $request->cabang_id);
         }
-        
+
         $kelas = $query->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
-        
-        $tahunAjaran = $request->filled('tahun_ajaran_id') 
-            ? TahunAjaran::find($request->tahun_ajaran_id) 
+
+        $tahunAjaran = $request->filled('tahun_ajaran_id')
+            ? TahunAjaran::find($request->tahun_ajaran_id)
             : TahunAjaran::where('is_active', true)->first();
-        
+
         return view('admin.kelas.print', compact('kelas', 'tahunAjaran'));
     }
+
+    /**
+     * Show the import form.
+     */
+    public function importForm()
+    {
+        return view('admin.kelas.import');
+    }
+
+    /**
+     * Process the import from Excel file.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ], [
+            'file.required' => 'File Excel wajib dipilih',
+            'file.mimes' => 'File harus berformat Excel (.xlsx atau .xls)',
+            'file.max' => 'Ukuran file maksimal 5MB',
+        ]);
+
+        try {
+            $import = new KelasImport();
+            Excel::import($import, $request->file('file'));
+
+            $imported = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+            $missingCabang = $import->getMissingCabang();
+            $missingWaliKelas = $import->getMissingWaliKelas();
+
+            $message = "Berhasil mengimport {$imported} kelas.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati.";
+            }
+
+            // Build warning message
+            $warningMessage = '';
+            if (!empty($missingCabang)) {
+                $warningMessage .= "Cabang tidak ditemukan: " . implode(', ', $missingCabang) . ". ";
+            }
+            if (!empty($missingWaliKelas)) {
+                $warningMessage .= "Wali Kelas tidak ditemukan: " . implode(', ', $missingWaliKelas) . ". ";
+            }
+
+            if (!empty($warningMessage)) {
+                return redirect()
+                    ->route('admin.kelas.index')
+                    ->with('success', $message)
+                    ->with('warning', $warningMessage);
+            }
+
+            return redirect()
+                ->route('admin.kelas.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download the import template.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new KelasTemplate(), 'template_kelas.xlsx');
+    }
 }
+

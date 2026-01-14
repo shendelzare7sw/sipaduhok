@@ -17,7 +17,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 fw-bold text-primary">Form Pembayaran untuk {{ $siswa->nama_lengkap }}</h5>
-                <a href="{{ route('bendahara.tagihan.show', $siswa->id) }}" class="btn btn-secondary shadow-sm">
+                <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="btn btn-secondary shadow-sm">
                     <i class="fas fa-arrow-left me-1"></i> Kembali
                 </a>
             </div>

@@ -52,16 +52,34 @@ class InfoPembayaranController extends Controller
                 'midtrans_client_key' => 'required|string',
                 'midtrans_is_production' => 'nullable|boolean',
             ]);
-            
+
+            // Validate key formats
+            $isProduction = $request->has('midtrans_is_production');
+            $serverKey = $request->midtrans_server_key;
+            $clientKey = $request->midtrans_client_key;
+
+            // Both Sandbox and Production use same prefix format
+            if (!str_starts_with($serverKey, 'Mid-server-')) {
+                return redirect()->back()
+                    ->with('error', 'Format Server Key tidak valid. Server Key harus diawali dengan "Mid-server-". Pastikan Anda copy dari Midtrans Dashboard yang benar (' . ($isProduction ? 'Production' : 'Sandbox') . ').')
+                    ->withInput();
+            }
+
+            if (!str_starts_with($clientKey, 'Mid-client-')) {
+                return redirect()->back()
+                    ->with('error', 'Format Client Key tidak valid. Client Key harus diawali dengan "Mid-client-". Pastikan Anda copy dari Midtrans Dashboard yang benar (' . ($isProduction ? 'Production' : 'Sandbox') . ').')
+                    ->withInput();
+            }
+
             // Encrypt sensitive keys
             $data = [
                 'midtrans_merchant_id' => $request->midtrans_merchant_id,
                 'midtrans_server_key' => Crypt::encryptString($request->midtrans_server_key),
                 'midtrans_client_key' => $request->midtrans_client_key, // Client key tidak perlu encrypt
-                'midtrans_is_production' => $request->has('midtrans_is_production') ? true : false,
+                'midtrans_is_production' => $isProduction,
                 'updated_by' => auth()->id(),
             ];
-            
+
             $message = 'Konfigurasi Midtrans berhasil diperbarui.';
             
         } else {

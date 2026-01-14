@@ -1,8 +1,8 @@
 {{--
-    Sidebar Menu untuk Admin Dashboard - Sneat Version
-    File: resources/views/admin/partials/sneat-sidebar-menu.blade.php
+Sidebar Menu untuk Admin Dashboard - Sneat Version
+File: resources/views/admin/partials/sneat-sidebar-menu.blade.php
 
-    Compatible dengan Sneat Bootstrap 5 Template
+Compatible dengan Sneat Bootstrap 5 Template
 --}}
 
 @php
@@ -101,7 +101,8 @@
 </li>
 
 <!-- Jadwal Pelajaran -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.jadwal-pelajaran') || Str::startsWith($currentRoute, 'admin.pengaturan-istirahat') ? 'active' : '' }}">
+<li
+    class="menu-item {{ Str::startsWith($currentRoute, 'admin.jadwal-pelajaran') || Str::startsWith($currentRoute, 'admin.pengaturan-istirahat') ? 'active' : '' }}">
     <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-calendar-week"></i>
         <div>Jadwal Pelajaran</div>
@@ -142,6 +143,14 @@
     <a href="{{ route('admin.keuangan.laporan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-chart-line"></i>
         <div>Laporan Keuangan</div>
+    </a>
+</li>
+
+<!-- Info Pembayaran (API Midtrans & Rekening Bank) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.info-pembayaran') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.info-pembayaran.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-cog"></i>
+        <div>Info Pembayaran</div>
     </a>
 </li>
 
@@ -226,7 +235,8 @@
 </li>
 
 <!-- Laporan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.laporan') && !Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
+<li
+    class="menu-item {{ Str::startsWith($currentRoute, 'admin.laporan') && !Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
     <a href="{{ route('admin.laporan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-file-alt"></i>
         <div>Laporan</div>

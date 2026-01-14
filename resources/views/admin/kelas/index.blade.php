@@ -580,6 +580,9 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                 <a href="{{ route('admin.kelas.print', request()->query()) }}" class="btn btn-print" target="_blank">
                     <i class="fas fa-print"></i> Cetak
                 </a>
+                <a href="{{ route('admin.kelas.import') }}" class="btn btn-outline" style="background: #dcfce7; border-color: #86efac; color: #166534;">
+                    <i class="fas fa-file-import"></i> Import Excel
+                </a>
                 <a href="{{ route('admin.kelas.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Tambah Kelas
                 </a>

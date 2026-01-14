@@ -347,18 +347,20 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
             </div>
         </div>
         <div class="row">
-            <div class="col">
-                <div class="form-group">
+            <div class="form-group" id="cabangGroup">
                     <label class="form-label">Cabang Penempatan <span style="color: #ef4444;">*</span></label>
-                    <select name="cabang_id" class="form-control" required>
+                    <select name="cabang_id" id="cabangSelect" class="form-control" required>
                         @foreach($cabangList as $cabang)
                             <option value="{{ $cabang->id }}" {{ $tenagaPendidik->user->cabang_id == $cabang->id ? 'selected' : '' }}>
                                 {{ $cabang->nama_cabang }}
                             </option>
                         @endforeach
                     </select>
+                    <input type="hidden" name="cabang_id_hidden" id="cabangHidden" value="" disabled>
+                    <small id="cabangInfo" class="text-muted" style="display: none; margin-top: 6px;">
+                        <i class="fas fa-info-circle"></i> Role ini bersifat fleksibel dan dapat mengakses semua cabang, sehingga penempatan otomatis di Gedung Utama.
+                    </small>
                 </div>
-            </div>
             <div class="col">
                 <div class="form-group">
                     <label class="form-label">Status Akun <span style="color: #ef4444;">*</span></label>
@@ -447,6 +449,42 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 </form>
 
 <script>
+// Flexible roles that should have locked cabang
+const flexibleRoles = ['ketua_pkbm', 'sekretaris', 'bendahara', 'wakil_kepala_sekolah'];
+const defaultCabangId = '1'; // PKBM House Of Knowledge (Gedung Utama)
+
+const roleSelect = document.querySelector('select[name="role"]');
+const cabangSelect = document.getElementById('cabangSelect');
+const cabangHidden = document.getElementById('cabangHidden');
+const cabangInfo = document.getElementById('cabangInfo');
+
+function handleRoleChange() {
+    const selectedRole = roleSelect.value;
+    const isFlexible = flexibleRoles.includes(selectedRole);
+    
+    if (isFlexible) {
+        // Lock cabang to Gedung Utama
+        cabangSelect.value = defaultCabangId;
+        cabangSelect.disabled = true;
+        cabangSelect.removeAttribute('name');
+        cabangHidden.value = defaultCabangId;
+        cabangHidden.name = 'cabang_id';
+        cabangHidden.disabled = false;
+        cabangInfo.style.display = 'block';
+    } else {
+        // Unlock cabang selection
+        cabangSelect.disabled = false;
+        cabangSelect.name = 'cabang_id';
+        cabangHidden.disabled = true;
+        cabangHidden.removeAttribute('name');
+        cabangInfo.style.display = 'none';
+    }
+}
+
+// Trigger on page load and role change
+roleSelect.addEventListener('change', handleRoleChange);
+document.addEventListener('DOMContentLoaded', handleRoleChange);
+
 function togglePassword(inputId) {
     const passwordInput = document.getElementById(inputId);
     const icon = document.getElementById(inputId + '-icon');

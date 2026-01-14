@@ -40,4 +40,29 @@ class Tagihan extends Model
     {
         return $this->hasMany(Pembayaran::class);
     }
+
+    /**
+     * Update status tagihan berdasarkan total pembayaran yang disetujui
+     */
+    public function updateStatusBayar()
+    {
+        // Hitung total pembayaran yang sudah disetujui
+        $totalDibayar = $this->pembayaran()
+            ->where('status_validasi', 'disetujui')
+            ->sum('jumlah_bayar');
+
+        // Update status tagihan based on payment progress
+        if ($totalDibayar >= $this->jumlah) {
+            // Fully paid
+            $this->update(['status' => 'sudah_bayar']);
+        } elseif ($totalDibayar > 0) {
+            // Partial payment (cicilan)
+            $this->update(['status' => 'cicilan']);
+        } else {
+            // Not paid yet
+            $this->update(['status' => 'belum_bayar']);
+        }
+
+        return $this;
+    }
 }
