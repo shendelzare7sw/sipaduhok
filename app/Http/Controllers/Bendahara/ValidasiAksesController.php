@@ -62,21 +62,22 @@ class ValidasiAksesController extends Controller
 
         // Hitung status keuangan per siswa
         $siswaList->getCollection()->transform(function($siswa) use ($tahunAjaranAktif) {
-            $totalTagihan = Tagihan::where('siswa_id', $siswa->id)
+            $tagihan = Tagihan::where('siswa_id', $siswa->id)
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
-                ->sum('jumlah');
+                ->get();
 
-            $totalBayar = Pembayaran::where('siswa_id', $siswa->id)
-                ->where('status_validasi', 'disetujui')
-                ->sum('jumlah_bayar');
+            $totalTagihan = $tagihan->sum('jumlah');
+            // Sisa tagihan berdasarkan status tagihan (lebih robust)
+            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+            $totalBayar = $totalTagihan - $sisaTagihan;
 
             $siswa->total_tagihan = $totalTagihan;
             $siswa->total_bayar = $totalBayar;
-            $siswa->sisa_tagihan = $totalTagihan - $totalBayar;
-            $siswa->is_lunas = $siswa->sisa_tagihan <= 0;
-            
+            $siswa->sisa_tagihan = $sisaTagihan;
+            $siswa->is_lunas = $sisaTagihan <= 0;
+
             return $siswa;
         });
 

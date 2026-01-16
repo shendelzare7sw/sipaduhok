@@ -102,6 +102,42 @@ class MidtransWebhookController extends Controller
                         'tagihan_id' => $pembayaran->tagihan_id,
                         'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
                     ]);
+
+                    // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
+                    // Ini mencegah double payment untuk produk/tagihan yang sama
+                    $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
+                        ->where('siswa_id', $pembayaran->siswa_id)
+                        ->where('id', '!=', $pembayaran->id) // Kecuali pembayaran yang baru saja sukses
+                        ->where('status_validasi', 'pending')
+                        ->update([
+                            'status_validasi' => 'ditolak',
+                            'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
+                        ]);
+
+                    if ($cancelledCount > 0) {
+                        Log::info('Auto-cancelled duplicate pending payments', [
+                            'tagihan_id' => $pembayaran->tagihan_id,
+                            'siswa_id' => $pembayaran->siswa_id,
+                            'cancelled_count' => $cancelledCount,
+                            'successful_order_id' => $orderId,
+                        ]);
+
+                        // Audit log untuk pembatalan otomatis
+                        FinancialAuditLog::create([
+                            'user_id' => null,
+                            'action' => 'auto_cancel_duplicates',
+                            'model_type' => 'Pembayaran',
+                            'model_id' => $pembayaran->id,
+                            'old_values' => null,
+                            'new_values' => json_encode([
+                                'cancelled_count' => $cancelledCount,
+                                'reason' => 'duplicate_payment_prevention',
+                            ]),
+                            'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$orderId} berhasil",
+                            'ip_address' => request()->ip(),
+                            'user_agent' => 'Midtrans Webhook - Auto Cancel',
+                        ]);
+                    }
                 }
             }
 

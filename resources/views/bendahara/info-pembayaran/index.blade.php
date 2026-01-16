@@ -149,25 +149,165 @@
                         <form action="{{ route('bendahara.info-pembayaran.update') }}" method="POST">
                             @csrf
                             <input type="hidden" name="type" value="midtrans">
+
+                            {{-- Warning Box untuk Switch Mode --}}
+                            <div class="alert alert-warning border-start border-warning border-4 mb-3">
+                                <div class="d-flex">
+                                    <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
+                                    <div>
+                                        <strong class="d-block mb-1">Penting: API Keys Berbeda!</strong>
+                                        <small>
+                                            API Keys untuk <strong>Sandbox</strong> dan <strong>Production</strong> BERBEDA.
+                                            Jika Anda mengganti mode, pastikan juga mengganti semua API Keys dari
+                                            <a href="https://dashboard.midtrans.com" target="_blank" class="fw-bold">Midtrans Dashboard</a>
+                                            sesuai environment yang dipilih.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-dark">MERCHANT ID <span class="text-danger">*</span></label>
-                                <input type="text" name="midtrans_merchant_id" class="form-control border-start border-success border-3 shadow-sm" value="{{ old('midtrans_merchant_id', $infoPembayaran->midtrans_merchant_id ?? '') }}" required>
+                                <input type="text" name="midtrans_merchant_id" class="form-control border-start border-success border-3 shadow-sm" value="{{ old('midtrans_merchant_id', $infoPembayaran->midtrans_merchant_id ?? '') }}" placeholder="Contoh: G12345678" required>
+                                <small class="text-muted">Merchant ID sama untuk Sandbox & Production</small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-dark">SERVER KEY <span class="text-danger">*</span></label>
-                                <input type="password" name="midtrans_server_key" class="form-control border-start border-success border-3 shadow-sm" value="{{ old('midtrans_server_key', $infoPembayaran->midtrans_server_key ?? '') }}" required>
+                                <input type="password" name="midtrans_server_key" class="form-control border-start border-success border-3 shadow-sm" placeholder="Mid-server-xxxxxxxx" required>
+                                <small class="text-muted">Awali dengan <code>Mid-server-</code> (jangan share ke siapapun)</small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-dark">CLIENT KEY <span class="text-danger">*</span></label>
-                                <input type="text" name="midtrans_client_key" class="form-control border-start border-success border-3 shadow-sm" value="{{ old('midtrans_client_key', $infoPembayaran->midtrans_client_key ?? '') }}" required>
+                                <input type="text" name="midtrans_client_key" class="form-control border-start border-success border-3 shadow-sm" placeholder="Mid-client-xxxxxxxx" required>
+                                <small class="text-muted">Awali dengan <code>Mid-client-</code></small>
                             </div>
-                            <div class="form-check mb-3 mt-4">
-                                <input type="checkbox" class="form-check-input" id="is_production" name="midtrans_is_production" value="1" {{ old('midtrans_is_production', $infoPembayaran->midtrans_is_production ?? false) ? 'checked' : '' }}>
-                                <label class="form-check-label fw-bold text-danger" for="is_production">Aktifkan Mode Production (Live Transaksi Nyata)</label>
+
+                            {{-- Mode Selection dengan visual yang lebih jelas --}}
+                            <div class="card mb-3 border-2" id="modeSelectionCard">
+                                <div class="card-body py-2">
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox" class="form-check-input" role="switch" id="is_production" name="midtrans_is_production" value="1" {{ old('midtrans_is_production', $infoPembayaran->midtrans_is_production ?? false) ? 'checked' : '' }} onchange="updateModeDisplay()">
+                                        <label class="form-check-label fw-bold" for="is_production" id="modeLabel">
+                                            @if($infoPembayaran->midtrans_is_production ?? false)
+                                                <span class="text-danger"><i class="fas fa-broadcast-tower me-1"></i> MODE PRODUCTION (LIVE)</span>
+                                            @else
+                                                <span class="text-warning"><i class="fas fa-vial me-1"></i> MODE SANDBOX (TESTING)</span>
+                                            @endif
+                                        </label>
+                                    </div>
+                                    <small class="text-muted d-block mt-1" id="modeDescription">
+                                        @if($infoPembayaran->midtrans_is_production ?? false)
+                                            Transaksi NYATA dengan uang sungguhan
+                                        @else
+                                            Simulasi pembayaran untuk testing (tidak memotong saldo)
+                                        @endif
+                                    </small>
+                                </div>
                             </div>
+
+                            {{-- Panduan Mendapatkan API Keys --}}
+                            <div class="accordion mb-3" id="accordionGuide">
+                                <div class="accordion-item border-0">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed py-2 px-3 bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#guideCollapse">
+                                            <i class="fas fa-question-circle me-2 text-info"></i>
+                                            <small class="fw-bold">Cara Mendapatkan API Keys</small>
+                                        </button>
+                                    </h2>
+                                    <div id="guideCollapse" class="accordion-collapse collapse" data-bs-parent="#accordionGuide">
+                                        <div class="accordion-body small bg-light">
+                                            <ol class="mb-0 ps-3">
+                                                <li>Login ke <a href="https://dashboard.midtrans.com" target="_blank">dashboard.midtrans.com</a></li>
+                                                <li>Pilih <strong>Environment</strong> (Sandbox/Production) di pojok kiri atas</li>
+                                                <li>Klik menu <strong>Settings → Access Keys</strong></li>
+                                                <li>Salin <strong>Merchant ID</strong>, <strong>Server Key</strong>, dan <strong>Client Key</strong></li>
+                                                <li>Pastikan environment yang dipilih sesuai dengan mode yang diaktifkan di sini</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-success fw-bold shadow-sm flex-fill">SIMPAN KONFIGURASI</button>
+                                <button type="submit" class="btn btn-success fw-bold shadow-sm flex-fill">
+                                    <i class="fas fa-save me-1"></i> SIMPAN KONFIGURASI
+                                </button>
                                 <button type="button" class="btn btn-light border" onclick="toggleEdit('midtrans')">BATAL</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- CARD: INFO PEMBAYARAN TUNAI --}}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 shadow">
+                <div class="card-header py-3 bg-white d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 fw-bold text-warning"><i class="fas fa-money-bill-wave me-2"></i>Informasi Pembayaran Tunai</h6>
+                    <button type="button" class="btn btn-sm btn-outline-warning fw-bold shadow-sm" onclick="toggleEdit('tunai')">
+                        <i class="fas fa-edit me-1"></i> Edit Info
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="tunai-view">
+                        @php $tunaiInfo = $infoPembayaran->tunai_info; @endphp
+                        <div class="p-3 bg-light rounded border">
+                            <div class="label-config">Lokasi Pembayaran</div>
+                            <div class="value-config text-dark">
+                                <i class="fas fa-building me-1 text-muted"></i>
+                                {{ $tunaiInfo['lokasi'] }}
+                            </div>
+
+                            <div class="label-config">Jam Operasional</div>
+                            <div class="value-config text-dark">
+                                <i class="fas fa-clock me-1 text-muted"></i>
+                                {{ $tunaiInfo['jam_operasional'] }}
+                            </div>
+
+                            <div class="label-config">Deskripsi / Petunjuk</div>
+                            <div class="value-config mb-0 text-dark">
+                                <i class="fas fa-info-circle me-1 text-muted"></i>
+                                {{ $tunaiInfo['deskripsi'] }}
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3 mb-0 py-2">
+                            <small>
+                                <i class="fas fa-lightbulb me-1"></i>
+                                Informasi ini akan ditampilkan kepada orang tua/siswa pada halaman pembayaran.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div id="tunai-edit" style="display: none;">
+                        <form action="{{ route('bendahara.info-pembayaran.update') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="type" value="tunai">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">LOKASI PEMBAYARAN</label>
+                                <input type="text" name="tunai_lokasi" class="form-control border-start border-warning border-3 shadow-sm"
+                                    value="{{ old('tunai_lokasi', $infoPembayaran->tunai_lokasi ?? '') }}"
+                                    placeholder="Contoh: Loket Pembayaran Sekolah">
+                                <small class="text-muted">Kosongkan untuk menggunakan default: "Loket Pembayaran Sekolah"</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">JAM OPERASIONAL</label>
+                                <input type="text" name="tunai_jam_operasional" class="form-control border-start border-warning border-3 shadow-sm"
+                                    value="{{ old('tunai_jam_operasional', $infoPembayaran->tunai_jam_operasional ?? '') }}"
+                                    placeholder="Contoh: Senin - Jumat, 08:00 - 15:00 WIB">
+                                <small class="text-muted">Kosongkan untuk menggunakan default: "Senin - Jumat, 08:00 - 15:00 WIB"</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-dark">DESKRIPSI / PETUNJUK</label>
+                                <textarea name="tunai_deskripsi" class="form-control border-start border-warning border-3 shadow-sm" rows="3"
+                                    placeholder="Contoh: Harap membawa kartu siswa atau bukti identitas.">{{ old('tunai_deskripsi', $infoPembayaran->tunai_deskripsi ?? '') }}</textarea>
+                                <small class="text-muted">Kosongkan untuk menggunakan default: "Harap membawa kartu siswa atau bukti identitas."</small>
+                            </div>
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-warning fw-bold shadow-sm flex-fill text-dark">
+                                    <i class="fas fa-save me-1"></i> SIMPAN PERUBAHAN
+                                </button>
+                                <button type="button" class="btn btn-light border" onclick="toggleEdit('tunai')">BATAL</button>
                             </div>
                         </form>
                     </div>
@@ -266,5 +406,31 @@ function toggleEdit(type) {
         editDiv.style.display = 'block';
     }
 }
+
+function updateModeDisplay() {
+    const checkbox = document.getElementById('is_production');
+    const modeLabel = document.getElementById('modeLabel');
+    const modeDescription = document.getElementById('modeDescription');
+    const modeCard = document.getElementById('modeSelectionCard');
+
+    if (checkbox.checked) {
+        // Production Mode
+        modeLabel.innerHTML = '<span class="text-danger"><i class="fas fa-broadcast-tower me-1"></i> MODE PRODUCTION (LIVE)</span>';
+        modeDescription.textContent = 'Transaksi NYATA dengan uang sungguhan';
+        modeCard.classList.remove('border-warning');
+        modeCard.classList.add('border-danger');
+    } else {
+        // Sandbox Mode
+        modeLabel.innerHTML = '<span class="text-warning"><i class="fas fa-vial me-1"></i> MODE SANDBOX (TESTING)</span>';
+        modeDescription.textContent = 'Simulasi pembayaran untuk testing (tidak memotong saldo)';
+        modeCard.classList.remove('border-danger');
+        modeCard.classList.add('border-warning');
+    }
+}
+
+// Initialize mode display on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateModeDisplay();
+});
 </script>
 @endsection

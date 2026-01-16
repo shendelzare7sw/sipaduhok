@@ -70,9 +70,15 @@ class PembayaranController extends BendaharaPembayaranController
     {
         // Call parent store but catch redirect to override destination
         try {
-            parent::store($request, $siswaId);
+            $response = parent::store($request, $siswaId);
+
+            // Get the flash message from parent
+            $message = $request->has('validasi_langsung')
+                ? 'Pembayaran tunai berhasil dicatat dan divalidasi.'
+                : 'Pembayaran berhasil dicatat. Menunggu validasi.';
+
             return redirect()->route('admin.keuangan.pembayaran.riwayat-siswa', $siswaId)
-                ->with('success', 'Pembayaran berhasil dicatat.');
+                ->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

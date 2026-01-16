@@ -5,6 +5,9 @@ namespace App\Http\Controllers\WakilKepalaSekolah;
 use App\Http\Controllers\Controller;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\Templates\MataPelajaranTemplate;
+use App\Imports\MataPelajaranImport;
 
 class MataPelajaranController extends Controller
 {
@@ -105,6 +108,41 @@ class MataPelajaranController extends Controller
                 ->with('success', 'Mata Pelajaran berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus mata pelajaran. Mungkin masih ada data terkait.');
+        }
+    }
+
+    public function import()
+    {
+        return view('waka.mata-pelajaran.import');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new MataPelajaranTemplate, 'template_mata_pelajaran.xlsx');
+    }
+
+    public function importStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        $import = new MataPelajaranImport;
+
+        try {
+            Excel::import($import, $request->file('file'));
+
+            $count = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+
+            $message = "Import selesai! {$count} data berhasil diimport.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati (duplikat/invalid).";
+            }
+
+            return redirect()->route('waka.mata-pelajaran.index')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal import: ' . $e->getMessage());
         }
     }
 }

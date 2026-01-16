@@ -20,6 +20,9 @@ class InfoPembayaran extends Model
         'midtrans_server_key',
         'midtrans_client_key',
         'midtrans_is_production',
+        'tunai_lokasi',
+        'tunai_jam_operasional',
+        'tunai_deskripsi',
         'updated_by',
     ];
 
@@ -115,6 +118,28 @@ class InfoPembayaran extends Model
             'merchant_id' => $this->midtrans_merchant_id,
             'client_key' => $this->midtrans_client_key,
             'is_production' => $this->midtrans_is_production,
+        ];
+    }
+
+    /**
+     * Check apakah info tunai sudah diatur
+     */
+    public function hasTunaiInfo()
+    {
+        return !empty($this->tunai_lokasi) ||
+               !empty($this->tunai_jam_operasional) ||
+               !empty($this->tunai_deskripsi);
+    }
+
+    /**
+     * Accessor untuk mendapatkan info tunai dalam format array
+     */
+    public function getTunaiInfoAttribute()
+    {
+        return [
+            'lokasi' => $this->tunai_lokasi ?? 'Loket Pembayaran Sekolah',
+            'jam_operasional' => $this->tunai_jam_operasional ?? 'Senin - Jumat, 08:00 - 15:00 WIB',
+            'deskripsi' => $this->tunai_deskripsi ?? 'Harap membawa kartu siswa atau bukti identitas.',
         ];
     }
 }

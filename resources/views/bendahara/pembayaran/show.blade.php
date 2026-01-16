@@ -90,7 +90,22 @@
                             <td>Status</td>
                             <td>
                                 @if($pembayaran->status_validasi === 'pending')
-                                    <span class="badge bg-warning badge-custom text-white shadow-sm"><i class="fas fa-clock me-1"></i> MENUNGGU VALIDASI</span>
+                                    @if($pembayaran->metode_pembayaran === 'midtrans')
+                                        @php
+                                            $isExpired = $pembayaran->created_at < now()->subHours(24);
+                                        @endphp
+                                        @if($isExpired)
+                                            <span class="badge bg-secondary badge-custom shadow-sm"><i class="fas fa-times-circle me-1"></i> KADALUARSA</span>
+                                            <div class="small text-muted mt-1">Sesi pembayaran digital telah berakhir</div>
+                                        @else
+                                            <span class="badge bg-info badge-custom shadow-sm"><i class="fas fa-hourglass-half me-1"></i> MENUNGGU BAYAR</span>
+                                            <div class="small text-muted mt-1">
+                                                Berlaku hingga {{ $pembayaran->created_at->addHours(24)->format('d M Y H:i') }}
+                                            </div>
+                                        @endif
+                                    @else
+                                        <span class="badge bg-warning badge-custom text-white shadow-sm"><i class="fas fa-clock me-1"></i> MENUNGGU VALIDASI</span>
+                                    @endif
                                 @elseif($pembayaran->status_validasi === 'disetujui')
                                     <span class="badge bg-success badge-custom shadow-sm"><i class="fas fa-check-circle me-1"></i> DISETUJUI</span>
                                 @else

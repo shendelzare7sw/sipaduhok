@@ -81,7 +81,23 @@ class InfoPembayaranController extends Controller
             ];
 
             $message = 'Konfigurasi Midtrans berhasil diperbarui.';
-            
+
+        } elseif ($type === 'tunai') {
+            $request->validate([
+                'tunai_lokasi' => 'nullable|string|max:255',
+                'tunai_jam_operasional' => 'nullable|string|max:255',
+                'tunai_deskripsi' => 'nullable|string|max:1000',
+            ]);
+
+            $data = [
+                'tunai_lokasi' => $request->tunai_lokasi,
+                'tunai_jam_operasional' => $request->tunai_jam_operasional,
+                'tunai_deskripsi' => $request->tunai_deskripsi,
+                'updated_by' => auth()->id(),
+            ];
+
+            $message = 'Informasi pembayaran tunai berhasil diperbarui.';
+
         } else {
             return redirect()->back()->with('error', 'Tipe update tidak valid.');
         }

@@ -17,6 +17,19 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
+<!-- Menu Header - Manajemen Konten -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Manajemen Konten</span>
+</li>
+
+<!-- Landing Page -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.landing-pages') ? 'active' : '' }}">
+    <a href="{{ route('admin.landing-pages.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-globe"></i>
+        <div>Landing Page</div>
+    </a>
+</li>
+
 <!-- Menu Header - Manajemen Pengguna -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Pengguna</span>

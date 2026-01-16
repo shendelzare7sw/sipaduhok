@@ -83,60 +83,31 @@ use App\Http\Controllers\Siswa\LmsUjianController;
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'notification'])->name('midtrans.notification');
 
 // Homepage
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::get('/', [\App\Http\Controllers\LandingPageController::class, 'home'])->name('home');
 
 // Menu Profil
-Route::get('/tentang-sekolah', function () {
-    return view('tentang-sekolah');
-});
+Route::get('/tentang-sekolah', [\App\Http\Controllers\LandingPageController::class, 'tentangSekolah']);
 
-Route::get('/visi-misi', function () {
-    return view('visi-misi');
-});
+Route::get('/visi-misi', [\App\Http\Controllers\LandingPageController::class, 'visiMisi']);
 
-Route::get('/struktur-organisasi', function () {
-    return view('struktur-organisasi');
-});
+Route::get('/struktur-organisasi', [\App\Http\Controllers\LandingPageController::class, 'strukturOrganisasi']);
 
-Route::get('/profil-guru', function () {
-    return view('profil-guru');
-});
+Route::get('/profil-guru', [\App\Http\Controllers\LandingPageController::class, 'profilGuru']);
 
 // Menu Program
-Route::get('/program-paud-tk', function () {
-    return view('program-paud-tk');
-});
-
-Route::get('/program-sd-sma', function () {
-    return view('program-sd-sma');
-});
-
-Route::get('/program-inklusi', function () {
-    return view('program-inklusi');
-});
-
-Route::get('/program-terapi', function () {
-    return view('program-terapi');
-});
+Route::get('/program-paud-tk', [\App\Http\Controllers\LandingPageController::class, 'programPaudTk']);
+Route::get('/program-sd-sma', [\App\Http\Controllers\LandingPageController::class, 'programSdSma']);
+Route::get('/program-inklusi', [\App\Http\Controllers\LandingPageController::class, 'programInklusi']);
+Route::get('/program-terapi', [\App\Http\Controllers\LandingPageController::class, 'programTerapi']);
 
 // Other Public Pages
-Route::get('/fasilitas', function () {
-    return view('fasilitas');
-})->name('fasilitas');
+Route::get('/fasilitas', [\App\Http\Controllers\LandingPageController::class, 'fasilitas'])->name('fasilitas');
 
-Route::get('/ppdb', function () {
-    return view('ppdb');
-})->name('ppdb');
+Route::get('/ppdb', [\App\Http\Controllers\LandingPageController::class, 'ppdb'])->name('ppdb');
 
-Route::get('/galeri', function () {
-    return view('galeri');
-})->name('galeri');
+Route::get('/galeri', [\App\Http\Controllers\LandingPageController::class, 'galeri'])->name('galeri');
 
-Route::get('/kontak', function () {
-    return view('kontak');
-})->name('kontak');
+Route::get('/kontak', [\App\Http\Controllers\LandingPageController::class, 'kontak'])->name('kontak');
 
 // Berita Public Page
 Route::get('/berita', [BeritaController::class, 'index'])->name('berita');
@@ -437,6 +408,18 @@ Route::middleware(['auth'])->group(function () {
 
         /*
         |--------------------------------------------------------------------------
+        | LANDING PAGE MANAGEMENT
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('landing-pages')->name('landing-pages.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'index'])->name('index');
+            Route::get('/{landingPage:slug}/edit', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'edit'])->name('edit');
+            Route::put('/{landingPage:slug}', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'update'])->name('update');
+            Route::get('/{landingPage:slug}/reset', [\App\Http\Controllers\Admin\LandingPage\LandingPageController::class, 'reset'])->name('reset');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | ADMIN MONITORING & LAPORAN (Copy of Ketua features for admin access)
         |--------------------------------------------------------------------------
         */
@@ -527,9 +510,15 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Mata Pelajaran
+        Route::get('mata-pelajaran/import', [WakaMataPelajaranController::class, 'import'])->name('mata-pelajaran.import');
+        Route::post('mata-pelajaran/import', [WakaMataPelajaranController::class, 'importStore'])->name('mata-pelajaran.import.store');
+        Route::get('mata-pelajaran/template', [WakaMataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
         Route::resource('mata-pelajaran', WakaMataPelajaranController::class);
 
         // Kelas
+        Route::get('kelas/import', [WakaKelasController::class, 'import'])->name('kelas.import');
+        Route::post('kelas/import', [WakaKelasController::class, 'importStore'])->name('kelas.import.store');
+        Route::get('kelas/template', [WakaKelasController::class, 'downloadTemplate'])->name('kelas.template');
         Route::get('/kelas/print', [WakaKelasController::class, 'print'])->name('kelas.print');
         Route::get('/kelas/{kelas}/manage-siswa', [WakaKelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
         Route::post('/kelas/{kelas}/add-siswa', [WakaKelasController::class, 'addSiswa'])->name('kelas.add-siswa');
@@ -538,6 +527,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Manajemen Siswa
         Route::prefix('manajemen-siswa')->name('manajemen-siswa.')->group(function () {
+
             Route::get('/', [WakaManajemenSiswaController::class, 'index'])->name('index');
             Route::get('/print', [WakaManajemenSiswaController::class, 'print'])->name('print');
             Route::get('/kelas/{kelas}', [WakaManajemenSiswaController::class, 'perKelas'])->name('per-kelas');
@@ -560,6 +550,9 @@ Route::middleware(['auth'])->group(function () {
 
         // Jadwal Pelajaran
         Route::prefix('jadwal-pelajaran')->name('jadwal-pelajaran.')->group(function () {
+            Route::get('/import', [WakaJadwalPelajaranController::class, 'import'])->name('import');
+            Route::post('/import', [WakaJadwalPelajaranController::class, 'importStore'])->name('import.store');
+            Route::get('/template', [WakaJadwalPelajaranController::class, 'downloadTemplate'])->name('template');
             Route::get('/', [WakaJadwalPelajaranController::class, 'index'])->name('index');
             Route::get('/create', [WakaJadwalPelajaranController::class, 'create'])->name('create');
             Route::post('/', [WakaJadwalPelajaranController::class, 'store'])->name('store');
@@ -1000,6 +993,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
             Route::get('/snap-finish', [OrangTuaController::class, 'snapFinish'])->name('snap.finish');
             Route::get('/snap/{pembayaran}', [OrangTuaController::class, 'snapPayment'])->name('snap');
+            Route::post('/continue/{pembayaran}', [OrangTuaController::class, 'continuePayment'])->name('continue');
         });
 
         // Monitoring Rapor Anak

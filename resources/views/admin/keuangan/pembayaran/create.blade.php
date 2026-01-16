@@ -1,8 +1,8 @@
 @extends('layouts.sneat')
 
-@section('title', 'Input Pembayaran Manual')
-@section('page-title', 'Input Pembayaran Manual')
-@section('page-subtitle', 'Input pembayaran tunai atau transfer manual')
+@section('title', 'Input Pembayaran Tunai')
+@section('page-title', 'Input Pembayaran Tunai')
+@section('page-subtitle', 'Input pembayaran tunai di loket sekolah')
 
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
@@ -55,9 +55,9 @@
             <div>
                 <strong>Catatan Penting:</strong>
                 <ul class="mb-0 mt-2">
-                    <li><strong>Pembayaran via Midtrans</strong> akan otomatis tercatat saat siswa bayar online (tidak perlu input manual)</li>
-                    <li><strong>Pembayaran Tunai/Loket</strong> dan <strong>Transfer Manual</strong> perlu diinput di form ini</li>
-                    <li>Semua pembayaran manual perlu divalidasi sebelum status tagihan berubah</li>
+                    <li>Form ini khusus untuk <strong>pembayaran tunai di loket sekolah</strong></li>
+                    <li>Pembayaran via <strong>Midtrans</strong> dan <strong>Transfer Bank</strong> akan otomatis tercatat dari sistem orang tua</li>
+                    <li>Centang "Langsung validasi" jika uang tunai sudah diterima</li>
                 </ul>
             </div>
         </div>
@@ -110,21 +110,15 @@
 
                     {{-- Kolom Kanan: Detail Pembayaran --}}
                     <div class="col-lg-6">
-                        <h6 class="fw-bold text-gray-800 mb-3">Detail Pembayaran Manual</h6>
+                        <h6 class="fw-bold text-gray-800 mb-3">Detail Pembayaran Tunai</h6>
 
+                        {{-- Metode Pembayaran - Fixed Tunai --}}
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Metode Pembayaran <span class="text-danger">*</span></label>
-                            <select name="metode_pembayaran" class="form-select shadow-sm" required>
-                                <option value="">-- Pilih Metode --</option>
-                                <option value="tunai" {{ old('metode_pembayaran') == 'tunai' ? 'selected' : '' }}>💵 Tunai / Loket (Cash)</option>
-                                <option value="transfer" {{ old('metode_pembayaran') == 'transfer' ? 'selected' : '' }}>🏦 Transfer Bank Manual</option>
-                            </select>
-                            <small class="text-muted fst-italic">
-                                <i class="fas fa-info-circle"></i> Pembayaran via Midtrans online otomatis tercatat dari sistem
-                            </small>
-                            @error('metode_pembayaran')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
+                            <label class="form-label fw-bold">Metode Pembayaran</label>
+                            <div class="form-control shadow-sm bg-light" style="font-weight: 600;">
+                                <i class="fas fa-money-bill-wave text-success me-2"></i> Tunai / Loket (Cash)
+                            </div>
+                            <input type="hidden" name="metode_pembayaran" value="tunai">
                         </div>
 
                         <div class="mb-3">
@@ -148,27 +142,19 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Upload Bukti Pembayaran</label>
-                            <input type="file" name="bukti_pembayaran" class="form-control shadow-sm" accept="image/*,.pdf">
-                            <small class="text-muted">Format: JPG, PNG, PDF. Maksimal: 2MB. Upload foto struk atau bukti transfer.</small>
-                            @error('bukti_pembayaran')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
                             <label class="form-label fw-bold">Catatan / Keterangan</label>
-                            <textarea name="catatan" class="form-control shadow-sm" rows="3" placeholder="Contoh: Dibayar oleh ibu siswa, via BCA">{{ old('catatan') }}</textarea>
+                            <textarea name="catatan" class="form-control shadow-sm" rows="3" placeholder="Contoh: Dibayar oleh {{ $siswa->waliMurid->name ?? 'wali murid' }}">{{ old('catatan') }}</textarea>
+                            <small class="text-muted">Opsional. Tambahkan catatan jika diperlukan.</small>
                         </div>
 
                         <div class="mb-3">
                             <label class="d-flex align-items-center p-3 bg-success bg-opacity-10 rounded border border-success border-2" style="cursor: pointer;">
-                                <input type="checkbox" name="validasi_langsung" value="1" class="form-check-input me-2" style="width: 20px; height: 20px;">
+                                <input type="checkbox" name="validasi_langsung" value="1" class="form-check-input me-2" style="width: 20px; height: 20px;" checked>
                                 <span class="text-success fw-bold">
-                                    <i class="fas fa-check-circle"></i> Langsung validasi pembayaran ini (untuk pembayaran tunai di loket)
+                                    <i class="fas fa-check-circle"></i> Langsung validasi pembayaran ini
                                 </span>
                             </label>
-                            <small class="text-muted">Centang jika uang tunai sudah diterima langsung di loket. Pembayaran transfer tetap perlu validasi manual.</small>
+                            <small class="text-muted">Centang jika uang tunai sudah diterima langsung di loket.</small>
                         </div>
 
                         {{-- Summary --}}
@@ -202,8 +188,8 @@
             <div>
                 <strong>Perhatian:</strong>
                 <ul class="mb-0 mt-2">
-                    <li>Pastikan jumlah pembayaran dan metode sudah benar sebelum menyimpan</li>
-                    <li>Bukti pembayaran sangat disarankan untuk diupload sebagai dokumentasi</li>
+                    <li>Pastikan jumlah pembayaran sudah benar sebelum menyimpan</li>
+                    <li>Pastikan uang tunai sudah diterima sebelum memvalidasi pembayaran</li>
                     <li>Pembayaran yang belum divalidasi tidak akan mengubah status tagihan siswa</li>
                 </ul>
             </div>

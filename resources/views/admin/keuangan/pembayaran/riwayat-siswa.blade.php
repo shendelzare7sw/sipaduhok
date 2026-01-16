@@ -204,8 +204,17 @@
                                                 @elseif($bayar->status_validasi === 'ditolak')
                                                     <span class="badge bg-danger shadow-sm"><i class="fas fa-times-circle"></i>
                                                         Ditolak</span>
+                                                @elseif($bayar->status_validasi === 'pending' && $bayar->metode_pembayaran === 'midtrans')
+                                                    @php
+                                                        $isExpired = $bayar->created_at < now()->subHours(24);
+                                                    @endphp
+                                                    @if($isExpired)
+                                                        <span class="badge bg-secondary shadow-sm"><i class="fas fa-times-circle"></i> Kadaluarsa</span>
+                                                    @else
+                                                        <span class="badge bg-info shadow-sm"><i class="fas fa-hourglass-half"></i> Menunggu Bayar</span>
+                                                    @endif
                                                 @else
-                                                    <span class="badge bg-warning shadow-sm">⏳ Pending</span>
+                                                    <span class="badge bg-warning shadow-sm"><i class="fas fa-clock"></i> Menunggu Validasi</span>
                                                 @endif
                                             </td>
                                             <td class="align-middle">

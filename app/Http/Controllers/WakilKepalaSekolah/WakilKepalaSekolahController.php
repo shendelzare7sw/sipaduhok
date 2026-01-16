@@ -12,6 +12,11 @@ use App\Models\MataPelajaran;
 use App\Models\Cabang;
 use App\Models\Catatan;
 use App\Models\GuruPengajarKelas;
+use App\Models\Rapor;
+use App\Models\Nilai;
+use App\Models\Ujian;
+use App\Models\Tagihan;
+use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -161,10 +166,10 @@ class WakilKepalaSekolahController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
             });
         }
 
@@ -301,11 +306,21 @@ class WakilKepalaSekolahController extends Controller
 
     public function monitoringGuruPengajar()
     {
-        $guruPengajar = TenagaPendidik::with(['user', 'guruKelas.kelas', 'guruKelas.mataPelajaran'])
-            ->whereHas('user', fn($q) => $q->whereIn('role', ['guru_pengajar', 'wali_kelas']))
+        $guruPengajar = TenagaPendidik::with(['guruKelas.kelas', 'guruKelas.mataPelajaran'])
+            ->whereHas('guruKelas')
             ->get()
-            ->map(function($tp) {
-                $tp->total_jadwal = $tp->guruKelas()->count();
+            ->map(function ($tp) {
+                $totalNilaiHarusDiisi = Nilai::where('guru_id', $tp->id)->whereNull('nilai_akhir')->count();
+                $nilaiSudahDiisi = Nilai::where('guru_id', $tp->id)->whereNotNull('nilai_akhir')->count();
+                $soalUjianDibuat = Ujian::where('guru_id', $tp->id)->count();
+
+                $tp->total_nilai_harus_diisi = $totalNilaiHarusDiisi;
+                $tp->nilai_sudah_diisi = $nilaiSudahDiisi;
+                $tp->soal_ujian_dibuat = $soalUjianDibuat;
+                $tp->progress_nilai = ($totalNilaiHarusDiisi + $nilaiSudahDiisi) > 0
+                    ? round(($nilaiSudahDiisi / ($totalNilaiHarusDiisi + $nilaiSudahDiisi)) * 100, 2)
+                    : 0;
+
                 return $tp;
             });
 
@@ -314,15 +329,21 @@ class WakilKepalaSekolahController extends Controller
 
     public function monitoringWaliKelas()
     {
-        $waliKelas = TenagaPendidik::with(['kelasWali.siswa', 'kelasWali.tahunAjaran', 'user'])
+        $waliKelas = TenagaPendidik::with(['kelasWali.siswa', 'kelasWali.tahunAjaran'])
             ->whereHas('kelasWali')
             ->get()
-            ->map(function($tp) {
+            ->map(function ($tp) {
                 $kelas = $tp->kelasWali->first();
                 if ($kelas) {
                     $totalSiswa = $kelas->siswa->count();
+                    $raporSelesai = Rapor::where('kelas_id', $kelas->id)
+                        ->where('status', 'diterbitkan')
+                        ->count();
+
                     $tp->kelas_info = $kelas;
                     $tp->total_siswa = $totalSiswa;
+                    $tp->rapor_selesai = $raporSelesai;
+                    $tp->progress_rapor = $totalSiswa > 0 ? round(($raporSelesai / $totalSiswa) * 100, 2) : 0;
                 }
                 return $tp;
             });
@@ -334,29 +355,32 @@ class WakilKepalaSekolahController extends Controller
     // MONITORING SISWA
     // ============================================
 
-    public function monitoringSiswa(Request $request)
+    public function monitoringSiswa()
     {
-        $query = Siswa::with(['kelas', 'cabang', 'user'])
-            ->where('status', 'aktif');
+        $siswa = Siswa::with(['kelas', 'tagihan', 'pembayaran', 'tugasSiswa'])
+            ->where('status', 'aktif')
+            ->get()
+            ->map(function ($s) {
+                $totalTugas = $s->tugasSiswa()->count();
+                $tugasSelesai = $s->tugasSiswa()->where('status', 'dinilai')->count();
 
-        // Filters
-        if ($request->filled('kelas_id')) {
-            $query->where('kelas_id', $request->kelas_id);
-        }
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
-        }
-        if ($request->filled('jenjang')) {
-            $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
-        }
+                $totalTagihan = $s->tagihan()->sum('jumlah');
+                // Sisa tagihan berdasarkan status tagihan (lebih robust)
+                $sisaTagihan = $s->tagihan()->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+                $totalBayar = $totalTagihan - $sisaTagihan;
 
-        $siswa = $query->orderBy('nama_lengkap')->paginate(20);
+                $s->total_tugas = $totalTugas;
+                $s->tugas_selesai = $tugasSelesai;
+                $s->progress_tugas = $totalTugas > 0 ? round(($tugasSelesai / $totalTugas) * 100, 2) : 0;
+                $s->total_tagihan = $totalTagihan;
+                $s->total_bayar = $totalBayar;
+                $s->sisa_tagihan = $sisaTagihan;
+                $s->status_bayar = $sisaTagihan <= 0 ? 'lunas' : 'belum_lunas';
 
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
-        $cabangList = Cabang::where('is_active', true)->get();
-        $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+                return $s;
+            });
 
-        return view('waka.monitoring.siswa', compact('siswa', 'kelasList', 'cabangList', 'jenjangs'));
+        return view('waka.monitoring.siswa', compact('siswa'));
     }
 
     // ============================================

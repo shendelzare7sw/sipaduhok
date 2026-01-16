@@ -577,6 +577,9 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                 <small style="color: #6b7280;">Kelola data kelas per tahun ajaran</small>
             </div>
             <div style="display: flex; gap: 10px;">
+                <a href="{{ route('waka.kelas.import') }}" class="btn btn-outline" style="background: #dcfce7; border-color: #86efac; color: #166534;">
+                    <i class="fas fa-file-import"></i> Import Excel
+                </a>
                 <a href="{{ route('waka.kelas.print', request()->query()) }}" class="btn btn-print" target="_blank">
                     <i class="fas fa-print"></i> Cetak
                 </a>

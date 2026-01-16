@@ -36,13 +36,11 @@ class SiaPembayaranController extends Controller
         // Total tagihan
         $totalTagihan = $tagihan->sum('jumlah');
 
-        // Total sudah dibayar
-        $totalBayar = Pembayaran::where('siswa_id', $siswa->id)
-            ->where('status_validasi', 'disetujui')
-            ->sum('jumlah_bayar');
+        // Sisa tagihan berdasarkan status tagihan (lebih robust)
+        $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
 
-        // Sisa tagihan
-        $sisaTagihan = $totalTagihan - $totalBayar;
+        // Total sudah dibayar = total tagihan - sisa tagihan
+        $totalBayar = $totalTagihan - $sisaTagihan;
 
         return view('siswa.sia.pembayaran.index', compact(
             'siswa',

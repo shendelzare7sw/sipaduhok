@@ -7,6 +7,9 @@ use App\Models\Siswa;
 use App\Models\Kelas;
 use App\Models\Cabang;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\Templates\SiswaTemplate;
+use App\Imports\SiswaImport;
 
 class ManajemenSiswaController extends Controller
 {
@@ -17,10 +20,10 @@ class ManajemenSiswaController extends Controller
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
             });
         }
 
@@ -150,10 +153,10 @@ class ManajemenSiswaController extends Controller
         // Apply same filters
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
             });
         }
 
@@ -264,3 +267,5 @@ class ManajemenSiswaController extends Controller
             ->with('success', 'Siswa berhasil dikeluarkan dari kelas');
     }
 }
+
+

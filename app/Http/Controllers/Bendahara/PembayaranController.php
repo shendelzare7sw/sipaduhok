@@ -90,23 +90,30 @@ class PembayaranController extends Controller
 
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
 
-        $pembayaranList = Pembayaran::with(['tagihan', 'validator'])
-            ->where('siswa_id', $siswaId)
-            ->orderBy('tanggal_bayar', 'desc')
-            ->paginate(20);
-
-        // Hitung total tagihan dan pembayaran
-        $totalTagihan = Tagihan::where('siswa_id', $siswaId)
+        // Ambil tagihan untuk tahun ajaran aktif
+        $tagihan = Tagihan::where('siswa_id', $siswaId)
             ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
-            ->sum('jumlah');
+            ->get();
 
-        $totalBayar = Pembayaran::where('siswa_id', $siswaId)
-            ->where('status_validasi', 'disetujui')
-            ->sum('jumlah_bayar');
+        $tagihanIds = $tagihan->pluck('id');
+
+        $pembayaranList = Pembayaran::with(['tagihan', 'validator'])
+            ->where('siswa_id', $siswaId)
+            ->whereIn('tagihan_id', $tagihanIds)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        // Hitung total tagihan
+        $totalTagihan = $tagihan->sum('jumlah');
+
+        // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
+        $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+        $totalTerbayar = $totalTagihan - $sisaTagihan;
 
         $totalPending = Pembayaran::where('siswa_id', $siswaId)
+            ->whereIn('tagihan_id', $tagihanIds)
             ->where('status_validasi', 'pending')
             ->sum('jumlah_bayar');
 
@@ -124,9 +131,9 @@ class PembayaranController extends Controller
             'siswa' => $siswa,
             'pembayaran' => $pembayaranList,
             'totalTagihan' => $totalTagihan,
-            'totalTerbayar' => $totalBayar,
+            'totalTerbayar' => $totalTerbayar,
             'totalPending' => $totalPending,
-            'sisaTagihan' => $totalTagihan - $totalBayar,
+            'sisaTagihan' => $sisaTagihan,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $jenisTagihan,
         ]);
@@ -203,7 +210,7 @@ class PembayaranController extends Controller
 
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
 
-        // Ambil tagihan yang belum lunas
+        // Ambil tagihan yang belum lunas untuk tahun ajaran aktif
         $tagihanBelumLunas = Tagihan::where('siswa_id', $siswaId)
             ->where('status', '!=', 'sudah_bayar')
             ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
@@ -211,18 +218,18 @@ class PembayaranController extends Controller
             })
             ->get();
 
-        // Hitung total tagihan dan sisa tagihan
+        // Sisa tagihan = total dari tagihan yang belum lunas
+        // Ini lebih akurat karena langsung dari status tagihan
+        $sisaTagihan = $tagihanBelumLunas->sum('jumlah');
+
+        // Total tagihan untuk tahun ajaran aktif (untuk info)
         $totalTagihan = Tagihan::where('siswa_id', $siswaId)
             ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
             ->sum('jumlah');
 
-        $totalBayar = Pembayaran::where('siswa_id', $siswaId)
-            ->where('status_validasi', 'disetujui')
-            ->sum('jumlah_bayar');
-
-        $sisaTagihan = $totalTagihan - $totalBayar;
+        $totalBayar = $totalTagihan - $sisaTagihan;
 
         // Get jenis tagihan mapping
         $jenisTagihan = config('sipaduhok.jenis_tagihan', [
@@ -246,49 +253,65 @@ class PembayaranController extends Controller
     }
 
     /**
-     * Simpan pembayaran manual
+     * Simpan pembayaran tunai dari loket
      */
     public function store(Request $request, $siswaId)
     {
         $siswa = Siswa::findOrFail($siswaId);
 
         $request->validate([
-            'tagihan_id' => 'required|exists:tagihan,id',
+            'tagihan_ids' => 'required|array|min:1',
+            'tagihan_ids.*' => 'exists:tagihan,id',
             'jumlah_bayar' => 'required|numeric|min:1',
             'tanggal_bayar' => 'required|date',
-            'metode_pembayaran' => 'required|in:tunai,transfer',
-            'bukti_pembayaran' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'metode_pembayaran' => 'required|in:tunai',
             'catatan' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
         try {
-            // Generate kode pembayaran
-            $kodePembayaran = 'PAY-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
+            $validasiLangsung = $request->has('validasi_langsung');
 
-            // Upload bukti pembayaran jika ada
-            $buktiPath = null;
-            if ($request->hasFile('bukti_pembayaran')) {
-                $buktiPath = $request->file('bukti_pembayaran')
-                    ->store('bukti_pembayaran/' . date('Y/m'), 'public');
+            // Proses setiap tagihan yang dipilih
+            foreach ($request->tagihan_ids as $tagihanId) {
+                $tagihan = Tagihan::findOrFail($tagihanId);
+
+                // Generate kode pembayaran unik per tagihan
+                $kodePembayaran = 'PAY-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
+
+                $pembayaran = Pembayaran::create([
+                    'tagihan_id' => $tagihanId,
+                    'siswa_id' => $siswaId,
+                    'kode_pembayaran' => $kodePembayaran,
+                    'jumlah_bayar' => $tagihan->jumlah,
+                    'tanggal_bayar' => $request->tanggal_bayar,
+                    'metode_pembayaran' => 'tunai',
+                    'status_validasi' => $validasiLangsung ? 'disetujui' : 'pending',
+                    'divalidasi_oleh' => $validasiLangsung ? auth()->id() : null,
+                    'tanggal_validasi' => $validasiLangsung ? now() : null,
+                    'catatan' => $request->catatan,
+                ]);
+
+                // Jika validasi langsung, update status tagihan
+                if ($validasiLangsung) {
+                    $totalBayar = Pembayaran::where('tagihan_id', $tagihanId)
+                        ->where('status_validasi', 'disetujui')
+                        ->sum('jumlah_bayar');
+
+                    if ($totalBayar >= $tagihan->jumlah) {
+                        $tagihan->update(['status' => 'sudah_bayar']);
+                    }
+                }
             }
 
-            $pembayaran = Pembayaran::create([
-                'tagihan_id' => $request->tagihan_id,
-                'siswa_id' => $siswaId,
-                'kode_pembayaran' => $kodePembayaran,
-                'jumlah_bayar' => $request->jumlah_bayar,
-                'tanggal_bayar' => $request->tanggal_bayar,
-                'metode_pembayaran' => $request->metode_pembayaran,
-                'bukti_pembayaran' => $buktiPath,
-                'status_validasi' => 'pending', // Perlu divalidasi
-                'catatan' => $request->catatan,
-            ]);
-
             DB::commit();
-            
+
+            $message = $validasiLangsung
+                ? 'Pembayaran tunai berhasil dicatat dan divalidasi.'
+                : 'Pembayaran berhasil dicatat. Menunggu validasi.';
+
             return redirect()->route('bendahara.pembayaran.riwayat-siswa', $siswaId)
-                ->with('success', 'Pembayaran berhasil dicatat. Kode: ' . $kodePembayaran);
+                ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

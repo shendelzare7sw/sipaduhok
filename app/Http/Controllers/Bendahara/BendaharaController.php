@@ -66,20 +66,21 @@ class BendaharaController extends Controller
             ->take(10)
             ->get()
             ->map(function($siswa) use ($tahunAjaranAktif) {
-                $totalTagihan = Tagihan::where('siswa_id', $siswa->id)
+                $tagihan = Tagihan::where('siswa_id', $siswa->id)
                     ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                         return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                     })
-                    ->sum('jumlah');
-                
-                $totalBayar = Pembayaran::where('siswa_id', $siswa->id)
-                    ->where('status_validasi', 'disetujui')
-                    ->sum('jumlah_bayar');
-                
+                    ->get();
+
+                $totalTagihan = $tagihan->sum('jumlah');
+                // Sisa tagihan berdasarkan status tagihan (lebih robust)
+                $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+                $totalBayar = $totalTagihan - $sisaTagihan;
+
                 $siswa->total_tagihan = $totalTagihan;
                 $siswa->total_bayar = $totalBayar;
-                $siswa->sisa_tagihan = $totalTagihan - $totalBayar;
-                
+                $siswa->sisa_tagihan = $sisaTagihan;
+
                 return $siswa;
             });
         

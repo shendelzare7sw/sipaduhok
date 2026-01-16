@@ -94,17 +94,19 @@ class KetuaController extends Controller
             ->map(function($s) {
                 $totalTugas = $s->tugasSiswa()->count();
                 $tugasSelesai = $s->tugasSiswa()->where('status', 'dinilai')->count();
-                
+
                 $totalTagihan = $s->tagihan()->sum('jumlah');
-                $totalBayar = $s->pembayaran()->where('status_validasi', 'disetujui')->sum('jumlah_bayar');
+                // Sisa tagihan berdasarkan status tagihan (lebih robust)
+                $sisaTagihan = $s->tagihan()->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+                $totalBayar = $totalTagihan - $sisaTagihan;
 
                 $s->total_tugas = $totalTugas;
                 $s->tugas_selesai = $tugasSelesai;
                 $s->progress_tugas = $totalTugas > 0 ? round(($tugasSelesai / $totalTugas) * 100, 2) : 0;
                 $s->total_tagihan = $totalTagihan;
                 $s->total_bayar = $totalBayar;
-                $s->sisa_tagihan = $totalTagihan - $totalBayar;
-                $s->status_bayar = $s->sisa_tagihan <= 0 ? 'lunas' : 'belum_lunas';
+                $s->sisa_tagihan = $sisaTagihan;
+                $s->status_bayar = $sisaTagihan <= 0 ? 'lunas' : 'belum_lunas';
 
                 return $s;
             });

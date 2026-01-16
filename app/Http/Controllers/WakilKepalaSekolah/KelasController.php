@@ -9,6 +9,9 @@ use App\Models\TahunAjaran;
 use App\Models\TenagaPendidik;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\Templates\KelasTemplate;
+use App\Imports\KelasImport;
 
 class KelasController extends Controller
 {
@@ -40,9 +43,9 @@ class KelasController extends Controller
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_kelas', 'like', "%{$search}%")
-                  ->orWhere('kode_kelas', 'like', "%{$search}%");
+                    ->orWhere('kode_kelas', 'like', "%{$search}%");
             });
         }
 
@@ -82,9 +85,9 @@ class KelasController extends Controller
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function($q) {
+        $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) {
             $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
-              ->where('is_active', true);
+                ->where('is_active', true);
         })->orderBy('nama_lengkap')->get();
 
         return view('waka.kelas.create', compact('tahunAjarans', 'cabangs', 'jenjangs', 'waliKelasOptions'));
@@ -134,9 +137,9 @@ class KelasController extends Controller
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $cabangs = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function($q) {
+        $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) {
             $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
-              ->where('is_active', true);
+                ->where('is_active', true);
         })->orderBy('nama_lengkap')->get();
 
         return view('waka.kelas.edit', compact('kelas', 'tahunAjarans', 'cabangs', 'jenjangs', 'waliKelasOptions'));
@@ -264,9 +267,9 @@ class KelasController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_kelas', 'like', "%{$search}%")
-                  ->orWhere('kode_kelas', 'like', "%{$search}%");
+                    ->orWhere('kode_kelas', 'like', "%{$search}%");
             });
         }
 
@@ -280,5 +283,47 @@ class KelasController extends Controller
         }
 
         return view('waka.kelas.print', compact('kelas', 'currentTahunAjaran'));
+    }
+
+    public function import()
+    {
+        return view('waka.kelas.import');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new KelasTemplate, 'template_kelas.xlsx');
+    }
+
+    public function importStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        $import = new KelasImport;
+
+        try {
+            Excel::import($import, $request->file('file'));
+
+            $count = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
+
+            $message = "Import selesai! {$count} data berhasil diimport.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati.";
+            }
+
+            if (count($warnings) > 0) {
+                return redirect()->route('waka.kelas.index')
+                    ->with('success', $message)
+                    ->with('warning', 'Beberapa data memiliki peringatan: ' . implode(', ', array_slice($warnings, 0, 5)) . (count($warnings) > 5 ? '...' : ''));
+            }
+
+            return redirect()->route('waka.kelas.index')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
     }
 }

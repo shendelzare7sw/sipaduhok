@@ -243,7 +243,11 @@ section {
     <x-navbar></x-navbar>
 
     <!-- ==================== HERO SECTION ==================== -->
-    <section class="relative min-h-screen flex items-center" style="background-image: url('{{ asset('img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
+    @php 
+        $hero = $page->getSection('hero');
+        $heroContent = $hero->content ?? []; 
+    @endphp
+    <section class="relative min-h-screen flex items-center" style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
         <div class="hero-overlay absolute inset-0"></div>
 
         <!-- Decorative Elements -->
@@ -257,20 +261,20 @@ section {
                 <!-- Left Content -->
                 <div class="text-center lg:text-left">
                     <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6">
-                        Selamat Datang di SipaduHOK!
+                        {{ $heroContent['badge'] ?? 'Selamat Datang di SipaduHOK!' }}
                     </span>
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                        Sistem<br>
-                        <span class="text-accent-yellow">Pembelajaran</span><br>
-                        dan
-                        <span class="text-accent-yellow">Akademik</span>
+                        {{ $heroContent['title_1'] ?? 'Sistem' }}<br>
+                        <span class="text-accent-yellow">{{ $heroContent['title_highlight_1'] ?? 'Pembelajaran' }}</span><br>
+                        {{ $heroContent['title_2'] ?? 'dan' }}
+                        <span class="text-accent-yellow">{{ $heroContent['title_highlight_2'] ?? 'Akademik' }}</span>
                     </h1>
                     <p class="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl">
-                        House Of Knowledge menyediakan media pembelajaran dan akademik berbasis website "SipaduHOK" sebagai media pembelajaran online yang lebih fleksibel
+                        {{ $heroContent['description'] ?? 'House Of Knowledge menyediakan media pembelajaran dan akademik berbasis website "SipaduHOK" sebagai media pembelajaran online yang lebih fleksibel' }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="#program" class="inline-flex items-center justify-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full shadow-lg transition-all duration-300 hover:-translate-y-1">
-                            Jelajahi Sekarang
+                        <a href="{{ $heroContent['button_link'] ?? '#program' }}" class="inline-flex items-center justify-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full shadow-lg transition-all duration-300 hover:-translate-y-1">
+                            {{ $heroContent['button_text'] ?? 'Jelajahi Sekarang' }}
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
@@ -285,7 +289,7 @@ section {
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
                     <div class="decorative-frame-tilt relative">
-                        <img src="{{ asset('img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
+                        <img src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
 
                         <!-- Floating Badge 1 -->
                         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
@@ -296,7 +300,7 @@ section {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-2xl font-bold text-gray-800">14+</p>
+                                    <p class="text-2xl font-bold text-gray-800">{{ $heroContent['experience_years'] ?? '14+' }}</p>
                                     <p class="text-sm text-gray-500">Tahun Pengalaman</p>
                                 </div>
                             </div>
@@ -305,7 +309,7 @@ section {
                         <!-- Floating Badge 2 -->
                         <div class="absolute -top-4 -right-4 bg-primary rounded-2xl p-4 shadow-xl transform rotate-6 hover:rotate-0 transition-transform duration-300">
                             <div class="text-center text-white">
-                                <p class="text-2xl font-bold">200+</p>
+                                <p class="text-2xl font-bold">{{ $heroContent['active_students'] ?? '200+' }}</p>
                                 <p class="text-xs">Siswa Aktif</p>
                             </div>
                         </div>
@@ -329,46 +333,37 @@ section {
     <section id="stats" class="relative -mt-16 z-20 pb-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-                <!-- Stat 1 -->
+                @php
+                    $statsSection = $page->getSection('stats');
+                    $statsItems = $statsSection->content ?? [];
+                @endphp
+
+                @foreach($statsItems as $index => $stat)
                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center">
-                        <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-{{ $stat['icon_color'] ?? 'primary' }}/10 rounded-2xl flex items-center justify-center">
+                        {{-- Icon logic based on index or type --}}
+                        @if($index == 0)
+                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
                         </svg>
-                    </div>
-                    <p class="text-3xl font-bold text-gray-800">200+</p>
-                    <p class="text-gray-500 text-sm">Siswa Aktif</p>
-                </div>
-                <!-- Stat 2 -->
-                <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-2xl flex items-center justify-center">
-                        <svg class="w-8 h-8 text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        @elseif($index == 1)
+                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
+                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                         </svg>
-                    </div>
-                    <p class="text-3xl font-bold text-gray-800">50+</p>
-                    <p class="text-gray-500 text-sm">Tenaga Pengajar</p>
-                </div>
-                <!-- Stat 3 -->
-                <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-accent-yellow/10 rounded-2xl flex items-center justify-center">
-                        <svg class="w-8 h-8 text-accent-yellow" fill="currentColor" viewBox="0 0 20 20">
+                        @elseif($index == 2)
+                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
                         </svg>
-                    </div>
-                    <p class="text-3xl font-bold text-gray-800">14+</p>
-                    <p class="text-gray-500 text-sm">Tahun Pengalaman</p>
-                </div>
-                <!-- Stat 4 -->
-                <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-accent-orange/10 rounded-2xl flex items-center justify-center">
-                        <svg class="w-8 h-8 text-accent-orange" fill="currentColor" viewBox="0 0 20 20">
+                        @else
+                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
+                        @endif
                     </div>
-                    <p class="text-3xl font-bold text-gray-800">98%</p>
-                    <p class="text-gray-500 text-sm">Tingkat Kelulusan</p>
+                    <p class="text-3xl font-bold text-gray-800">{{ $stat['value'] ?? '0' }}</p>
+                    <p class="text-gray-500 text-sm">{{ $stat['label'] ?? '' }}</p>
                 </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -388,66 +383,54 @@ section {
                 </p>
             </div>
 
+            @php
+                $program = $page->getSection('program');
+                $programContent = $program->content ?? [];
+                $programHeader = $programContent['header'] ?? [];
+                $programItems = $programContent['items'] ?? [];
+            @endphp
+            
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
+                    {{ $programHeader['badge'] ?? 'Program Kami' }}
+                </span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                    {{ $programHeader['title'] ?? 'Program PKBM House Of Knowledge' }}
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    {{ $programHeader['description'] ?? 'Alasan kenapa harus memilih untuk bergabung dengan PKBM House Of Knowledge?' }}
+                </p>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Card 1 - Pendidikan Inklusi -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-accent-orange group">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-accent-orange transition-colors duration-300">
-                        <svg class="w-10 h-10 text-accent-orange group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
+                @php
+                    $colorMap = [
+                        'primary' => 'blue',
+                        'secondary' => 'green',
+                        'accent-orange' => 'orange',
+                        'accent-yellow' => 'yellow'
+                    ];
+                @endphp
+                @foreach($programItems as $item)
+                @php
+                    $themeColor = $item['color'] ?? 'primary';
+                    $shadeColor = $colorMap[$themeColor] ?? 'blue';
+                @endphp
+                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-{{ $themeColor }} group">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-{{ $shadeColor }}-50 rounded-2xl flex items-center justify-center group-hover:bg-{{ $themeColor }} transition-colors duration-300">
+                        {{-- Icon placeholder --}}
+                        <svg class="w-10 h-10 text-{{ $themeColor }} group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Inklusi</h3>
-                    <p class="text-gray-600 text-sm mb-4">Program pendidikan untuk anak berkebutuhan khusus dengan pendekatan individual</p>
-                    <a href="{{ url('/program-inklusi') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] }}</h3>
+                    <p class="text-gray-600 text-sm mb-4">{{ $item['description'] }}</p>
+                    <a href="{{ url($item['link'] ?? '#') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
                         Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                 </div>
-
-                <!-- Card 2 - Pendidikan Kesetaraan -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-primary group">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
-                        <svg class="w-10 h-10 text-primary group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Kesetaraan</h3>
-                    <p class="text-gray-600 text-sm mb-4">Program Paket A, B, dan C untuk kesetaraan pendidikan SD, SMP, dan SMA</p>
-                    <a href="{{ url('/program-sd-sma') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya
-                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
-
-                <!-- Card 3 - Konseling ABK -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-secondary group">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-secondary transition-colors duration-300">
-                        <svg class="w-10 h-10 text-secondary group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Konseling Anak Berkebutuhan Khusus</h3>
-                    <p class="text-gray-600 text-sm mb-4">Layanan konseling profesional untuk mendukung tumbuh kembang anak</p>
-                    <a href="{{ url('/program-terapi') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya
-                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
-
-                <!-- Card 4 - PAUD -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-accent-yellow group">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-yellow-50 rounded-2xl flex items-center justify-center group-hover:bg-accent-yellow transition-colors duration-300">
-                        <svg class="w-10 h-10 text-accent-yellow group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Anak Usia Dini</h3>
-                    <p class="text-gray-600 text-sm mb-4">Program PAUD dengan metode bermain sambil belajar yang menyenangkan</p>
-                    <a href="{{ url('/program-paud-tk') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
-                        Selengkapnya
-                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -455,16 +438,21 @@ section {
     <!-- ==================== ABOUT SECTION ==================== -->
     <section class="py-20 bg-cream">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            @php
+                $aboutSection = $page->getSection('about');
+                $aboutContent = $aboutSection->content ?? [];
+                $features = $aboutContent['features'] ?? [];
+            @endphp
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <!-- Left - Image -->
                 <div class="relative">
                     <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                        <img src="{{ asset('img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">
+                        <img src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">
                     </div>
 
                     <!-- Experience Badge -->
                     <div class="absolute -bottom-6 -right-6 bg-primary text-white p-6 rounded-2xl shadow-xl hidden md:block">
-                        <p class="text-4xl font-bold">14+</p>
+                        <p class="text-4xl font-bold">{{ $page->getSection('hero')->content['experience_years'] ?? '14+' }}</p>
                         <p class="text-sm">Tahun<br>Pengalaman</p>
                     </div>
                 </div>
@@ -472,48 +460,34 @@ section {
                 <!-- Right - Content -->
                 <div>
                     <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                        Tentang Kami
+                        {{ $aboutContent['badge'] ?? 'Tentang Kami' }}
                     </span>
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
-                        PKBM House Of Knowledge
+                        {{ $aboutContent['title'] ?? 'PKBM House Of Knowledge' }}
                     </h2>
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        House Of Knowledge adalah lembaga pendidikan non-formal yang berkomitmen untuk memberikan layanan pendidikan berkualitas bagi semua kalangan, termasuk anak-anak berkebutuhan khusus.
+                        {{ $aboutContent['description_1'] ?? 'House Of Knowledge adalah lembaga pendidikan non-formal yang berkomitmen untuk memberikan layanan pendidikan berkualitas bagi semua kalangan, termasuk anak-anak berkebutuhan khusus.' }}
                     </p>
                     <p class="text-gray-600 mb-8 leading-relaxed">
-                        Dengan pengalaman lebih dari 14 tahun, kami telah membantu ribuan siswa mencapai potensi terbaik mereka melalui pendekatan pembelajaran yang inovatif dan personal.
+                        {{ $aboutContent['description_2'] ?? 'Dengan pengalaman lebih dari 14 tahun, kami telah membantu ribuan siswa mencapai potensi terbaik mereka melalui pendekatan pembelajaran yang inovatif dan personal.' }}
                     </p>
 
                     <!-- Features -->
                     <div class="space-y-4 mb-8">
+                        @foreach($features as $feature)
                         <div class="flex items-center gap-3">
                             <div class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
                                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
                             </div>
-                            <span class="text-gray-700">Kurikulum terakreditasi nasional</span>
+                            <span class="text-gray-700">{{ $feature }}</span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <span class="text-gray-700">Tenaga pengajar berpengalaman dan bersertifikasi</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <span class="text-gray-700">Fasilitas lengkap dan ramah anak</span>
-                        </div>
+                        @endforeach
                     </div>
 
-                    <a href="{{ url('/tentang-sekolah') }}" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
-                        Selengkapnya
+                    <a href="{{ url($aboutContent['button_link'] ?? '/tentang-sekolah') }}" class="inline-flex items-center px-8 py-4 bg-primary hover:bg-secondary text-white font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
+                        {{ $aboutContent['button_text'] ?? 'Selengkapnya' }}
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                         </svg>
@@ -547,50 +521,15 @@ section {
 
                 <!-- Carousel Items -->
                 <div id="carouselTrack" class="relative w-full h-full">
-                    <!-- Item 1 -->
-                    <div class="carousel-item" data-index="0">
-                        <img src="{{ asset('img/news-1.jpg') }}" alt="Kegiatan Pembelajaran" class="w-full h-full object-cover">
+                    @foreach($beritaList as $index => $berita)
+                    <div class="carousel-item" data-index="{{ $index }}">
+                        <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
                         <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="inline-block px-3 py-1 bg-secondary text-white text-xs rounded-full mb-2">Kegiatan</span>
-                            <h3 class="text-white font-bold">Kegiatan Pembelajaran Aktif</h3>
+                            <span class="inline-block px-3 py-1 {{ $berita->kategori_badge_class }} text-xs rounded-full mb-2">{{ $berita->kategori_label }}</span>
+                            <h3 class="text-white font-bold">{{ Str::limit($berita->judul, 50) }}</h3>
                         </div>
                     </div>
-
-                    <!-- Item 2 -->
-                    <div class="carousel-item" data-index="1">
-                        <img src="{{ asset('img/news-2.jpg') }}" alt="Prestasi Siswa" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="inline-block px-3 py-1 bg-accent-yellow text-gray-800 text-xs rounded-full mb-2">Prestasi</span>
-                            <h3 class="text-white font-bold">Prestasi Siswa Berprestasi</h3>
-                        </div>
-                    </div>
-
-                    <!-- Item 3 -->
-                    <div class="carousel-item" data-index="2">
-                        <img src="{{ asset('img/news-3.jpg') }}" alt="Program Terapi" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="inline-block px-3 py-1 bg-accent-orange text-white text-xs rounded-full mb-2">Terapi</span>
-                            <h3 class="text-white font-bold">Program Terapi Anak</h3>
-                        </div>
-                    </div>
-
-                    <!-- Item 4 -->
-                    <div class="carousel-item" data-index="3">
-                        <img src="{{ asset('img/news-4.jpg') }}" alt="Ekstrakurikuler" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="inline-block px-3 py-1 bg-primary text-white text-xs rounded-full mb-2">Ekskul</span>
-                            <h3 class="text-white font-bold">Kegiatan Ekstrakurikuler</h3>
-                        </div>
-                    </div>
-
-                    <!-- Item 5 -->
-                    <div class="carousel-item" data-index="4">
-                        <img src="{{ asset('img/news-5.jpg') }}" alt="Workshop Guru" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="inline-block px-3 py-1 bg-secondary text-white text-xs rounded-full mb-2">Workshop</span>
-                            <h3 class="text-white font-bold">Workshop Guru</h3>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
 
                 <!-- Navigation Right -->
@@ -776,13 +715,12 @@ section {
         const newsTitle = document.getElementById('newsTitle');
         const newsCategory = document.getElementById('newsCategory');
 
-        const newsData = [
-            { title: 'Kegiatan Pembelajaran Aktif', category: 'Kegiatan' },
-            { title: 'Prestasi Siswa Berprestasi', category: 'Prestasi' },
-            { title: 'Program Terapi Anak', category: 'Terapi' },
-            { title: 'Kegiatan Ekstrakurikuler', category: 'Ekskul' },
-            { title: 'Workshop Guru', category: 'Workshop' }
-        ];
+        const newsData = @json($beritaList->map(function($item) {
+            return [
+                'title' => $item->judul,
+                'category' => $item->kategori_label
+            ];
+        }));
 
         let currentIndex = 0;
         const totalItems = items.length;
@@ -797,10 +735,10 @@ section {
                     item.classList.add('center');
                 } else if (diff === 1) {
                     item.classList.add('right-1');
-                } else if (diff === 2) {
-                    item.classList.add('right-2');
                 } else if (diff === totalItems - 1) {
                     item.classList.add('left-1');
+                } else if (diff === 2) {
+                    item.classList.add('right-2');
                 } else if (diff === totalItems - 2) {
                     item.classList.add('left-2');
                 } else {
@@ -809,8 +747,10 @@ section {
             });
 
             // Update info
-            newsTitle.textContent = newsData[currentIndex].title;
-            newsCategory.textContent = newsData[currentIndex].category;
+            if(newsData && newsData[currentIndex]) {
+                newsTitle.textContent = newsData[currentIndex].title;
+                newsCategory.textContent = newsData[currentIndex].category;
+            }
         }
 
         function nextSlide() {

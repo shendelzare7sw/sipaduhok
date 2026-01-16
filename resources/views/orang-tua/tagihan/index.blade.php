@@ -182,10 +182,6 @@
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <div class="alert alert-info mb-3">
-                                                                <strong>{{ $item->keterangan }}</strong>
-                                                            </div>
-
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold">Jumlah Tagihan</label>
                                                                 <input type="text" class="form-control form-control-lg bg-light"
@@ -225,14 +221,18 @@
                                                                         class="form-select @if($errors->any() && old('tagihan_id') == $item->id) @error('metode_pembayaran') is-invalid @enderror @endif"
                                                                         required>
                                                                     <option value="">-- Pilih Metode Pembayaran --</option>
+                                                                    @if($infoPembayaran->hasMidtrans())
                                                                     <option value="midtrans" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'midtrans' ? 'selected' : '' }}>
                                                                         💳 Pembayaran Digital (Otomatis)
                                                                     </option>
+                                                                    @endif
+                                                                    @if($infoPembayaran->hasRekeningBank())
                                                                     <option value="transfer" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'transfer' ? 'selected' : '' }}>
                                                                         🏦 Transfer ke Rekening Sekolah
                                                                     </option>
-                                                                    <option value="tunai" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'tunai' ? 'selected' : '' }}>
-                                                                        💵 Tunai di Sekolah
+                                                                    @endif
+                                                                    <option value="tunai" disabled style="color: #adb5bd; background-color: #f8f9fa;">
+                                                                        💵 Tunai di Sekolah (Bayar di Loket)
                                                                     </option>
                                                                 </select>
                                                                 @if($errors->any() && old('tagihan_id') == $item->id)
@@ -240,14 +240,82 @@
                                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                                     @enderror
                                                                 @endif
-                                                                <small class="text-muted d-block mt-2">
-                                                                    <i class="fas fa-info-circle text-info"></i>
-                                                                    <strong>Pembayaran Digital:</strong> VA Bank, E-Wallet, QRIS, Kartu Kredit (tidak perlu upload bukti)<br>
-                                                                    <strong>Transfer/Tunai:</strong> Wajib upload bukti pembayaran
-                                                                </small>
+
+                                                                @if(!$infoPembayaran->hasMidtrans() && !$infoPembayaran->hasRekeningBank())
+                                                                <div class="alert alert-warning mt-2 mb-0 py-2 px-3">
+                                                                    <small>
+                                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                                        Metode pembayaran online belum tersedia. Silakan hubungi sekolah atau bayar tunai di loket.
+                                                                    </small>
+                                                                </div>
+                                                                @endif
                                                             </div>
 
-                                                            <div class="mb-3" id="buktiBayarSection{{ $item->id }}">
+                                                            {{-- Info Tunai (selalu tampil, data dari database) --}}
+                                                            @php $tunaiInfo = $infoPembayaran->tunai_info; @endphp
+                                                            <div class="card bg-warning bg-opacity-10 border-warning mb-3">
+                                                                <div class="card-body py-3">
+                                                                    <h6 class="card-title mb-2 text-warning">
+                                                                        <i class="fas fa-info-circle me-2"></i>
+                                                                        Informasi Pembayaran Tunai
+                                                                    </h6>
+                                                                    <div class="small text-muted">
+                                                                        <div class="mb-1">
+                                                                            <i class="fas fa-building me-1"></i>
+                                                                            <strong>Lokasi:</strong> {{ $tunaiInfo['lokasi'] }}
+                                                                        </div>
+                                                                        <div class="mb-1">
+                                                                            <i class="fas fa-clock me-1"></i>
+                                                                            <strong>Jam:</strong> {{ $tunaiInfo['jam_operasional'] }}
+                                                                        </div>
+                                                                        <div>
+                                                                            <i class="fas fa-sticky-note me-1"></i>
+                                                                            {{ $tunaiInfo['deskripsi'] }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {{-- Info Rekening Bank (muncul saat pilih Transfer) --}}
+                                                            @if($infoPembayaran->hasRekeningBank())
+                                                            <div class="mb-3" id="rekeningBankSection{{ $item->id }}" style="display: none;">
+                                                                <div class="card bg-light border-primary">
+                                                                    <div class="card-body py-3">
+                                                                        <h6 class="card-title mb-3">
+                                                                            <i class="fas fa-university text-primary me-2"></i>
+                                                                            Rekening Tujuan Transfer
+                                                                        </h6>
+                                                                        <div class="row">
+                                                                            <div class="col-12 mb-2">
+                                                                                <small class="text-muted d-block">Nama Bank</small>
+                                                                                <strong class="text-dark">{{ $infoPembayaran->nama_bank }}</strong>
+                                                                            </div>
+                                                                            <div class="col-12 mb-2">
+                                                                                <small class="text-muted d-block">Nomor Rekening</small>
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <strong class="text-primary fs-5 me-2" id="noRek{{ $item->id }}">{{ $infoPembayaran->rekening_bank }}</strong>
+                                                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="copyRekening(event, '{{ $infoPembayaran->rekening_bank }}', this)">
+                                                                                        <i class="fas fa-copy"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-12">
+                                                                                <small class="text-muted d-block">Atas Nama</small>
+                                                                                <strong class="text-dark">{{ $infoPembayaran->atas_nama }}</strong>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="alert alert-info mt-3 mb-0 py-2 px-3">
+                                                                            <small>
+                                                                                <i class="fas fa-info-circle me-1"></i>
+                                                                                Pastikan transfer sesuai jumlah tagihan. Simpan bukti transfer untuk diupload.
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            @endif
+
+                                                            <div class="mb-3" id="buktiBayarSection{{ $item->id }}" style="display: none;">
                                                                 <label class="form-label fw-bold">
                                                                     Bukti Pembayaran <span class="text-danger bukti-required-{{ $item->id }}">*</span>
                                                                 </label>
@@ -261,7 +329,7 @@
                                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                                     @enderror
                                                                 @endif
-                                                                <small class="text-muted bukti-help-{{ $item->id }}">Upload foto bukti transfer/struk (JPG, PNG, max 2MB)</small>
+                                                                <small class="text-muted bukti-help-{{ $item->id }}">Upload foto bukti transfer (JPG, PNG, max 2MB)</small>
                                                             </div>
 
                                                             <div class="mb-3">
@@ -276,7 +344,7 @@
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                                 <i class="fas fa-times me-1"></i>Batal
                                                             </button>
-                                                            <button type="submit" class="btn btn-primary">
+                                                            <button type="submit" class="btn btn-primary" id="submitBtn{{ $item->id }}">
                                                                 <i class="fas fa-paper-plane me-1"></i>Ajukan Pembayaran
                                                             </button>
                                                         </div>
@@ -318,36 +386,81 @@
                                 <th class="text-end">Jumlah</th>
                                 <th>Metode</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($riwayatPembayaran as $bayar)
+                                @php
+                                    // Cek apakah transaksi Midtrans masih bisa dilanjutkan (dalam 24 jam)
+                                    $canContinue = $bayar->metode_pembayaran == 'midtrans'
+                                        && $bayar->status_validasi == 'pending'
+                                        && $bayar->created_at >= now()->subHours(24);
+
+                                    // Hitung sisa waktu
+                                    $expiredAt = $bayar->created_at->addHours(24);
+                                    $remainingTime = $expiredAt->diffForHumans(now(), ['parts' => 2]);
+                                @endphp
                                 <tr>
                                     <td class="text-nowrap">{{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d M Y') }}</td>
-                                    <td>{{ $bayar->tagihan->keterangan ?? '-' }}</td>
+                                    <td>
+                                        <div class="fw-semibold">{{ $bayar->tagihan->jenis_tagihan ?? '-' }}</div>
+                                        @if($bayar->tagihan->keterangan)
+                                            <small class="text-muted">{{ $bayar->tagihan->keterangan }}</small>
+                                        @endif
+                                    </td>
                                     <td class="text-end fw-bold">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
                                     <td>
                                         @if($bayar->metode_pembayaran == 'tunai')
                                             <span class="badge bg-label-secondary">💵 Tunai</span>
                                         @elseif($bayar->metode_pembayaran == 'transfer')
                                             <span class="badge bg-label-info">🏦 Transfer</span>
+                                        @elseif($bayar->metode_pembayaran == 'midtrans')
+                                            <span class="badge bg-label-primary">💳 Digital</span>
                                         @else
-                                            <span class="badge bg-label-primary"><i class="fas fa-mobile-alt"></i> E-Wallet</span>
+                                            <span class="badge bg-label-secondary">{{ $bayar->metode_pembayaran }}</span>
                                         @endif
                                     </td>
                                     <td class="text-center">
                                         @if($bayar->status_validasi == 'disetujui')
                                             <span class="badge bg-success">
-                                                <i class="fas fa-check-circle me-1"></i>Disetujui
+                                                <i class="fas fa-check-circle me-1"></i>Lunas
                                             </span>
                                         @elseif($bayar->status_validasi == 'ditolak')
                                             <span class="badge bg-danger">
                                                 <i class="fas fa-times-circle me-1"></i>Ditolak
                                             </span>
+                                        @elseif($bayar->status_validasi == 'pending' && $bayar->metode_pembayaran == 'midtrans')
+                                            @if($canContinue)
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-hourglass-half me-1"></i>Menunggu Bayar
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-times-circle me-1"></i>Kadaluarsa
+                                                </span>
+                                            @endif
                                         @else
                                             <span class="badge bg-warning">
-                                                <i class="fas fa-clock me-1"></i>Pending
+                                                <i class="fas fa-clock me-1"></i>Menunggu Validasi
                                             </span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if($canContinue)
+                                            <form action="{{ route('orang-tua.pembayaran.continue', $bayar->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-primary" title="Lanjutkan pembayaran dalam {{ $remainingTime }}">
+                                                    <i class="fas fa-credit-card me-1"></i>Bayar
+                                                </button>
+                                            </form>
+                                            <div class="small text-muted mt-1">
+                                                <i class="fas fa-clock me-1"></i>{{ $remainingTime }}
+                                            </div>
+                                        @elseif($bayar->status_validasi == 'pending' && $bayar->metode_pembayaran == 'midtrans' && !$canContinue)
+                                            <span class="text-muted small">-</span>
+                                        @else
+                                            <span class="text-muted">-</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -504,11 +617,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Handle metode pembayaran change - toggle bukti bayar required
+    // Handle metode pembayaran change - toggle sections visibility
     document.querySelectorAll('[id^="metodePembayaran"]').forEach(selectEl => {
         const tagihanId = selectEl.id.replace('metodePembayaran', '');
         const buktiBayarInput = document.getElementById('buktiBayar' + tagihanId);
         const buktiBayarSection = document.getElementById('buktiBayarSection' + tagihanId);
+        const rekeningBankSection = document.getElementById('rekeningBankSection' + tagihanId);
         const requiredStar = document.querySelector('.bukti-required-' + tagihanId);
         const helpText = document.querySelector('.bukti-help-' + tagihanId);
 
@@ -516,18 +630,20 @@ document.addEventListener('DOMContentLoaded', function() {
         selectEl.addEventListener('change', function() {
             const selectedMethod = this.value;
 
+            // Hide conditional sections first
+            if (buktiBayarSection) buktiBayarSection.style.display = 'none';
+            if (rekeningBankSection) rekeningBankSection.style.display = 'none';
+            if (buktiBayarInput) buktiBayarInput.removeAttribute('required');
+
             if (selectedMethod === 'midtrans') {
-                // Pembayaran Digital - Bukti OPSIONAL
-                if (buktiBayarInput) buktiBayarInput.removeAttribute('required');
-                if (requiredStar) requiredStar.style.display = 'none';
-                if (helpText) helpText.innerHTML = '<span class="text-info"><i class="fas fa-check-circle"></i> Bukti pembayaran tidak diperlukan (validasi otomatis)</span>';
-                if (buktiBayarSection) buktiBayarSection.style.opacity = '0.6';
-            } else {
-                // Transfer Manual / Tunai - Bukti WAJIB
+                // Pembayaran Digital - No additional sections needed
+            } else if (selectedMethod === 'transfer') {
+                // Transfer Bank - Show rekening info and bukti section
+                if (rekeningBankSection) rekeningBankSection.style.display = 'block';
+                if (buktiBayarSection) buktiBayarSection.style.display = 'block';
                 if (buktiBayarInput) buktiBayarInput.setAttribute('required', 'required');
                 if (requiredStar) requiredStar.style.display = 'inline';
-                if (helpText) helpText.innerHTML = 'Upload foto bukti transfer/struk (JPG, PNG, max 2MB)';
-                if (buktiBayarSection) buktiBayarSection.style.opacity = '1';
+                if (helpText) helpText.innerHTML = 'Upload foto bukti transfer (JPG, PNG, max 2MB)';
             }
         });
 
@@ -537,6 +653,55 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Copy rekening function - using execCommand which works better in modals
+    window.copyRekening = function(event, text, btn) {
+        // Prevent form submission and event bubbling
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Create temporary input element (input works better than textarea in some browsers)
+        const tempInput = document.createElement('input');
+        tempInput.setAttribute('type', 'text');
+        tempInput.setAttribute('value', text);
+        tempInput.style.cssText = 'position:absolute;left:-9999px;top:-9999px;opacity:0;';
+
+        // Append to modal body for better focus handling
+        const modalBody = btn.closest('.modal-body') || document.body;
+        modalBody.appendChild(tempInput);
+
+        // Select and copy
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); // For mobile devices
+
+        let success = false;
+        try {
+            success = document.execCommand('copy');
+        } catch (err) {
+            console.error('Copy failed:', err);
+        }
+
+        // Remove temporary element
+        modalBody.removeChild(tempInput);
+
+        // Show feedback
+        if (success) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            setTimeout(function() {
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        } else {
+            // Show manual copy prompt
+            prompt('Salin nomor rekening ini:', text);
+        }
+
+        return false;
+    };
+
     // Handle form submission - validate based on payment method
     document.querySelectorAll('[id^="formBayar"]').forEach(formEl => {
         formEl.addEventListener('submit', function(e) {
@@ -544,13 +709,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const metodePembayaran = document.getElementById('metodePembayaran' + tagihanId);
             const buktiBayar = document.getElementById('buktiBayar' + tagihanId);
 
-            // Jika metode adalah transfer atau tunai, validasi bukti bayar
+            // Jika metode adalah transfer, validasi bukti bayar
             if (metodePembayaran && buktiBayar) {
                 const selectedMethod = metodePembayaran.value;
 
-                if ((selectedMethod === 'transfer' || selectedMethod === 'tunai') && !buktiBayar.files.length) {
+                if (selectedMethod === 'transfer' && !buktiBayar.files.length) {
                     e.preventDefault();
-                    alert('Bukti pembayaran wajib diupload untuk metode ' + (selectedMethod === 'transfer' ? 'Transfer ke Rekening Sekolah' : 'Tunai di Sekolah'));
+                    alert('Bukti transfer wajib diupload untuk metode Transfer ke Rekening Sekolah');
                     buktiBayar.focus();
                     return false;
                 }

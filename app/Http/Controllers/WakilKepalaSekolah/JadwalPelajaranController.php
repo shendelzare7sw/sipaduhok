@@ -12,6 +12,9 @@ use App\Models\TahunAjaran;
 use App\Models\PengaturanIstirahat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\Templates\JadwalPelajaranTemplate;
+use App\Imports\JadwalPelajaranImport;
 
 class JadwalPelajaranController extends Controller
 {
@@ -484,6 +487,48 @@ class JadwalPelajaranController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
+    }
+
+    public function import()
+    {
+        return view('waka.jadwal-pelajaran.import');
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new JadwalPelajaranTemplate, 'template_jadwal_pelajaran.xlsx');
+    }
+
+    public function importStore(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        $import = new JadwalPelajaranImport;
+
+        try {
+            Excel::import($import, $request->file('file'));
+
+            $count = $import->getImportedCount();
+            $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
+
+            $message = "Import selesai! {$count} data berhasil diimport.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} data dilewati.";
+            }
+
+            if (count($warnings) > 0) {
+                return redirect()->route('waka.jadwal-pelajaran.index')
+                    ->with('success', $message)
+                    ->with('warning', 'Beberapa data memiliki peringatan: ' . implode(', ', array_slice($warnings, 0, 5)) . (count($warnings) > 5 ? '...' : ''));
+            }
+
+            return redirect()->route('waka.jadwal-pelajaran.index')->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
     }
 
     public function bulkReplaceGuru(Request $request)

@@ -116,10 +116,17 @@ class ManajemenSiswaController extends Controller
             ->orderBy('nama_kelas')
             ->get();
 
-        // Get available parent users (role orang_tua)
-        $availableParents = \App\Models\User::whereHas('roleRelation', function ($q) {
-            $q->where('name', 'orang_tua');
-        })->where('is_active', true)
+        // Get available parent users (role orang_tua) - support both old enum and new role_id system
+        $availableParents = \App\Models\User::where(function ($query) {
+            // Old role enum system
+            $query->where('role', 'orang_tua')
+                // OR new role_id system
+                ->orWhereHas('roleRelation', function ($q) {
+                    $q->where('name', 'orang_tua');
+                });
+        })
+            ->where('is_active', true)
+            ->with(['studentParents.siswa'])
             ->orderBy('name')
             ->get();
 
@@ -174,9 +181,16 @@ class ManajemenSiswaController extends Controller
 
     /**
      * Attach parent (orang tua) to siswa.
+     * Supports both selecting existing parent and creating new parent.
      */
     public function attachParent(Request $request, Siswa $siswa)
     {
+        // Check if creating new parent
+        if ($request->has('create_new_parent') && $request->create_new_parent == '1') {
+            return $this->createAndAttachParent($request, $siswa);
+        }
+
+        // Attach existing parent
         $validated = $request->validate([
             'parent_id' => 'required|exists:users,id',
             'relationship' => 'required|in:ayah_kandung,ibu_kandung,ayah_tiri,ibu_tiri,kakek,nenek,paman,bibi,wali,lainnya',
@@ -210,7 +224,71 @@ class ManajemenSiswaController extends Controller
         ]);
 
         $parent = \App\Models\User::find($validated['parent_id']);
-        return back()->with('success', "Berhasil menghubungkan {$parent->name} sebagai {$validated['relationship']}!");
+        $relationLabel = ucwords(str_replace('_', ' ', $validated['relationship']));
+        return back()->with('success', "Berhasil menghubungkan {$parent->name} sebagai {$relationLabel}!");
+    }
+
+    /**
+     * Create new parent account and attach to siswa.
+     */
+    protected function createAndAttachParent(Request $request, Siswa $siswa)
+    {
+        $validated = $request->validate([
+            'new_parent_name' => 'required|string|max:255',
+            'new_parent_username' => 'required|string|max:255|unique:users,username',
+            'new_parent_email' => 'required|email|max:255|unique:users,email',
+            'new_parent_password' => 'required|string|min:8',
+            'new_parent_phone' => 'nullable|string|max:20',
+            'relationship' => 'required|in:ayah_kandung,ibu_kandung,ayah_tiri,ibu_tiri,kakek,nenek,paman,bibi,wali,lainnya',
+            'is_primary' => 'nullable|boolean',
+            'is_financial_responsible' => 'nullable|boolean',
+            'can_access_academic' => 'nullable|boolean',
+        ]);
+
+        // Check for duplicate ayah_kandung or ibu_kandung
+        if (in_array($validated['relationship'], ['ayah_kandung', 'ibu_kandung'])) {
+            $duplicateRelation = $siswa->parents()
+                ->wherePivot('relationship', $validated['relationship'])
+                ->exists();
+
+            if ($duplicateRelation) {
+                $relationLabel = $validated['relationship'] === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+                return back()->with('error', "Siswa sudah memiliki {$relationLabel}! Satu siswa hanya boleh memiliki 1 Ayah Kandung dan 1 Ibu Kandung.");
+            }
+        }
+
+        // Get orang_tua role - support both old and new role system
+        $orangTuaRole = \App\Models\Role::where('name', 'orang_tua')->first();
+
+        // Prepare user data
+        $userData = [
+            'name' => $validated['new_parent_name'],
+            'username' => $validated['new_parent_username'],
+            'email' => $validated['new_parent_email'],
+            'password' => bcrypt($validated['new_parent_password']),
+            'is_active' => true,
+        ];
+
+        // Use new role_id if available, otherwise use old role enum
+        if ($orangTuaRole) {
+            $userData['role_id'] = $orangTuaRole->id;
+        } else {
+            $userData['role'] = 'orang_tua';
+        }
+
+        // Create new user
+        $newParent = \App\Models\User::create($userData);
+
+        // Attach parent to siswa
+        $siswa->parents()->attach($newParent->id, [
+            'relationship' => $validated['relationship'],
+            'is_primary' => $request->has('is_primary'),
+            'is_financial_responsible' => $request->has('is_financial_responsible'),
+            'can_access_academic' => $request->has('can_access_academic'),
+        ]);
+
+        $relationLabel = ucwords(str_replace('_', ' ', $validated['relationship']));
+        return back()->with('success', "Berhasil membuat akun dan menghubungkan {$newParent->name} sebagai {$relationLabel}!");
     }
 
     /**

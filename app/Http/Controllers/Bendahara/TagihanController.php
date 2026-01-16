@@ -66,13 +66,15 @@ class TagihanController extends Controller
                 ->get();
 
             $totalTagihan = $tagihan->sum('jumlah');
-            $tagihanLunas = $tagihan->where('status', 'sudah_bayar')->sum('jumlah');
-            
+
+            // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
+            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+
             $siswa->total_tagihan = $totalTagihan;
-            $siswa->tagihan_lunas = $tagihanLunas;
-            $siswa->sisa_tagihan = $totalTagihan - $tagihanLunas;
+            $siswa->tagihan_lunas = $totalTagihan - $sisaTagihan;
+            $siswa->sisa_tagihan = $sisaTagihan;
             $siswa->tagihan_detail = $tagihan;
-            
+
             return $siswa;
         });
 
@@ -91,9 +93,9 @@ class TagihanController extends Controller
     public function show($siswaId)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
-        
+
         $tagihan = Tagihan::where('siswa_id', $siswaId)
             ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
@@ -102,14 +104,17 @@ class TagihanController extends Controller
             ->get();
 
         $totalTagihan = $tagihan->sum('jumlah');
-        $tagihanLunas = $tagihan->where('status', 'sudah_bayar')->sum('jumlah');
+
+        // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
+        $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+        $tagihanLunas = $totalTagihan - $sisaTagihan;
 
         return view('bendahara.tagihan.show', [
             'siswa' => $siswa,
             'tagihan' => $tagihan,
             'totalTagihan' => $totalTagihan,
             'tagihanLunas' => $tagihanLunas,
-            'sisaTagihan' => $totalTagihan - $tagihanLunas,
+            'sisaTagihan' => $sisaTagihan,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $this->jenisTagihan,
         ]);
