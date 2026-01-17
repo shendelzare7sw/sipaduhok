@@ -79,4 +79,22 @@ class Kelas extends Model
     {
         return $this->hasMany(\App\Models\GuruPengajarKelas::class, 'kelas_id');
     }
+
+    /**
+     * Get wali kelas assignments (many-to-many).
+     */
+    public function waliKelasAssignments()
+    {
+        return $this->hasMany(\App\Models\WaliKelasAssignment::class, 'kelas_id');
+    }
+
+    /**
+     * Get all wali kelas untuk kelas ini (via pivot).
+     */
+    public function waliKelasMultiple()
+    {
+        return $this->belongsToMany(TenagaPendidik::class, 'wali_kelas_assignments', 'kelas_id', 'tenaga_pendidik_id')
+            ->withPivot('assigned_at')
+            ->withTimestamps();
+    }
 }

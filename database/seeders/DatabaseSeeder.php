@@ -11,7 +11,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // New role-based system seeders (run first)
             RoleSeeder::class,
-            SuperAdminSeeder::class,
 
             // Existing seeders
             CabangSeeder::class,
@@ -21,6 +20,7 @@ class DatabaseSeeder extends Seeder
             MataPelajaranSeeder::class,
             KelasSeeder::class,
             SiswaSeeder::class,
+            LandingPageSeeder::class,
 
             // OrangTuaSeeder dibuat otomatis oleh SiswaSeeder
             // OrangTuaSeeder::class, // DISABLED - konflik dengan SiswaSeeder

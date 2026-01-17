@@ -569,14 +569,16 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                                     <span class="badge badge-info">{{ $kelas->siswa_count }} siswa</span>
                                 </td>
                                 <td class="wali-kelas-cell">
-                                    @if($kelas->waliKelas)
-                                        <div class="wali-info">
-                                            <div class="wali-avatar">{{ substr($kelas->waliKelas->nama_lengkap, 0, 2) }}</div>
-                                            <div class="wali-details">
-                                                <span class="wali-name">{{ $kelas->waliKelas->nama_lengkap }}</span>
-                                                <span class="wali-role">Wali Kelas</span>
+                                    @if($kelas->waliKelasAssignments->count() > 0)
+                                        @foreach($kelas->waliKelasAssignments as $assignment)
+                                            <div class="wali-info" style="margin-bottom: 4px;">
+                                                <div class="wali-avatar">{{ substr($assignment->tenagaPendidik->nama_lengkap, 0, 2) }}</div>
+                                                <div class="wali-details">
+                                                    <span class="wali-name">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
+                                                    <span class="wali-role">Wali Kelas</span>
+                                                </div>
                                             </div>
-                                        </div>
+                                        @endforeach
                                     @else
                                         <span class="status-unassigned">Belum ada wali kelas</span>
                                     @endif
@@ -665,28 +667,27 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                         <div id="waliList" style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px;">
                             @foreach($waliKelasOptions as $wk)
                                 @php
-                                    $assignedKelas = $wk->kelasWali->first();
-                                    $hasAssignment = $assignedKelas !== null;
+                                    $assignedKelasList = $wk->waliKelasAssignments ?? collect();
+                                    $hasAssignments = $assignedKelasList->count() > 0;
                                 @endphp
-                                <div class="wali-option {{ $hasAssignment ? 'has-assignment' : '' }}"
+                                <div class="wali-option"
                                      data-id="{{ $wk->id }}"
                                      data-name="{{ strtolower($wk->nama_lengkap) }}"
                                      data-cabang="{{ $wk->user->cabang_id ?? '' }}"
-                                     data-has-assignment="{{ $hasAssignment ? 'true' : 'false' }}"
-                                     data-assigned-kelas="{{ $hasAssignment ? $assignedKelas->nama_kelas : '' }}"
-                                     data-assigned-kelas-full="{{ $hasAssignment ? $assignedKelas->nama_kelas . ' - ' . $assignedKelas->cabang->nama_cabang : '' }}"
-                                     style="padding: 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; {{ $hasAssignment ? 'background: #fef3c7; border: 1px solid #f59e0b;' : '' }}">
+                                     style="padding: 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px;">
                                     <input type="radio" name="wali_kelas_id" value="{{ $wk->id }}" style="cursor: pointer;">
-                                    <div class="wali-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, {{ $hasAssignment ? '#f59e0b, #d97706' : '#8b5cf6, #7c3aed' }}); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0;">
+                                    <div class="wali-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0;">
                                         {{ substr($wk->nama_lengkap, 0, 2) }}
                                     </div>
                                     <div style="flex: 1;">
                                         <div style="font-weight: 600; color: #111827;">{{ $wk->nama_lengkap }}</div>
                                         <div style="font-size: 12px; color: #6b7280;">{{ $wk->user->cabang->nama_cabang ?? '-' }}</div>
-                                        @if($hasAssignment)
-                                            <div style="font-size: 11px; color: #92400e; margin-top: 4px; display: flex; align-items: center; gap: 4px;">
-                                                <i class="fas fa-info-circle"></i>
-                                                <span>Sudah mengajar: <strong>{{ $assignedKelas->nama_kelas }}</strong> ({{ $assignedKelas->jenjang }})</span>
+                                        @if($hasAssignments)
+                                            <div style="font-size: 11px; color: #6366f1; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                                @foreach($assignedKelasList as $assignment)
+                                                    <span style="background: #e0e7ff; padding: 2px 6px; border-radius: 4px;">{{ $assignment->kelas->nama_kelas }}</span>
+                                                @endforeach
                                             </div>
                                         @endif
                                     </div>
@@ -695,11 +696,11 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                         </div>
                     </div>
 
-                    <div style="padding: 12px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <div style="padding: 12px; background: #e0f2fe; border-radius: 8px; border-left: 4px solid #0284c7;">
                         <div style="display: flex; gap: 8px; align-items: start;">
-                            <i class="fas fa-info-circle" style="color: #f59e0b; margin-top: 2px;"></i>
-                            <div style="font-size: 13px; color: #92400e;">
-                                Untuk menghapus wali kelas yang sudah di-assign, klik tombol "Hapus Wali Kelas" di bawah.
+                            <i class="fas fa-info-circle" style="color: #0284c7; margin-top: 2px;"></i>
+                            <div style="font-size: 13px; color: #0369a1;">
+                                <strong>Multi-Kelas:</strong> Satu wali kelas bisa ditugaskan ke lebih dari satu kelas.
                             </div>
                         </div>
                     </div>
@@ -756,71 +757,15 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
     </div>
 </div>
 
-{{-- Modal Konfirmasi Pindah Wali Kelas --}}
-<div class="modal fade" id="confirmReassignModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
-            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding: 20px 24px; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);">
-                <h5 class="modal-title" style="font-weight: 600; color: #9a3412; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
-                    PERINGATAN!
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="padding: 24px;">
-                <p style="color: #374151; margin-bottom: 12px; font-weight: 500;">
-                    Wali kelas ini sudah mengajar kelas lain:
-                </p>
-                <div style="padding: 16px; background: #fef3c7; border-radius: 8px; margin-bottom: 20px; border: 2px solid #fbbf24;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="fas fa-chalkboard-teacher" style="color: #f59e0b; font-size: 24px;"></i>
-                        <div>
-                            <div style="font-weight: 600; color: #92400e; font-size: 15px;" id="reassignOldKelasName"></div>
-                            <div style="font-size: 13px; color: #92400e; margin-top: 4px;" id="reassignOldKelasCabang"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="padding: 16px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #22c55e; margin-bottom: 16px;">
-                    <div style="display: flex; gap: 8px; align-items: start;">
-                        <i class="fas fa-arrow-right" style="color: #16a34a; margin-top: 2px; font-size: 16px;"></i>
-                        <div>
-                            <div style="font-size: 13px; color: #166534; margin-bottom: 4px;">
-                                <strong>Jika Anda melanjutkan:</strong>
-                            </div>
-                            <ul style="margin: 0; padding-left: 20px; color: #166534; font-size: 13px;">
-                                <li>Assignment lama akan <strong>OTOMATIS DIHAPUS</strong></li>
-                                <li>Wali kelas akan dipindahkan ke kelas <strong id="reassignNewKelasName"></strong></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <p style="color: #374151; font-weight: 500; margin-bottom: 0;">
-                    Apakah Anda yakin ingin melanjutkan?
-                </p>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px 24px; gap: 12px;">
-                <button type="button" class="btn" data-bs-dismiss="modal" style="background: #f3f4f6; color: #374151; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
-                    <i class="fas fa-times"></i> Batal
-                </button>
-                <button type="button" id="confirmReassignBtn" class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 500;">
-                    <i class="fas fa-exchange-alt"></i> Ya, Pindahkan Wali Kelas
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+{{-- Modal konfirmasi reassign dihapus - sekarang dukung multi-kelas --}}
 
 <script>
 let currentKelasId = null;
 let currentKelasName = '';
-let isReassignConfirmed = false; // Flag untuk tracking konfirmasi
 
 function openAssignModal(kelasId, kelasName, currentWaliId) {
     currentKelasId = kelasId;
     currentKelasName = kelasName;
-    isReassignConfirmed = false; // Reset flag saat buka modal
     document.getElementById('kelasName').value = kelasName;
     document.getElementById('assignForm').action = `/waka/wali-kelas/${kelasId}/assign`;
 
@@ -870,16 +815,10 @@ function filterWaliList() {
 // Hover effect for wali options
 document.querySelectorAll('.wali-option').forEach(option => {
     option.addEventListener('mouseenter', function() {
-        const hasAssignment = this.classList.contains('has-assignment');
-        if (!hasAssignment) {
-            this.style.background = '#f9fafb';
-        }
+        this.style.background = '#f9fafb';
     });
     option.addEventListener('mouseleave', function() {
-        const hasAssignment = this.classList.contains('has-assignment');
-        if (!hasAssignment) {
-            this.style.background = 'transparent';
-        }
+        this.style.background = 'transparent';
     });
     option.addEventListener('click', function() {
         const radio = this.querySelector('input[type="radio"]');
@@ -887,73 +826,18 @@ document.querySelectorAll('.wali-option').forEach(option => {
     });
 });
 
-// Intercept form submit untuk konfirmasi jika wali kelas sudah punya assignment
-document.getElementById('assignForm').addEventListener('submit', function(e) {
-    const selectedRadio = document.querySelector('input[name="wali_kelas_id"]:checked');
-
-    if (selectedRadio) {
-        const waliOption = selectedRadio.closest('.wali-option');
-        const hasAssignment = waliOption.getAttribute('data-has-assignment') === 'true';
-        const assignedKelasFull = waliOption.getAttribute('data-assigned-kelas-full');
-
-        console.log('Form submit intercepted:', {hasAssignment, isReassignConfirmed, assignedKelasFull});
-
-        // Jika wali kelas sudah punya assignment DAN belum dikonfirmasi
-        if (hasAssignment && !isReassignConfirmed) {
-            console.log('Showing reassign confirmation modal');
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Populate modal dengan data
-            const assignedKelasArray = assignedKelasFull.split(' - ');
-            document.getElementById('reassignOldKelasName').textContent = assignedKelasArray[0];
-            document.getElementById('reassignOldKelasCabang').textContent = assignedKelasArray[1] || '';
-            document.getElementById('reassignNewKelasName').textContent = currentKelasName;
-
-            // Tutup modal assign
-            const assignModal = bootstrap.Modal.getInstance(document.getElementById('assignModal'));
-            if (assignModal) {
-                assignModal.hide();
-            }
-
-            // Tampilkan modal konfirmasi reassign
-            const confirmReassignModal = new bootstrap.Modal(document.getElementById('confirmReassignModal'));
-            confirmReassignModal.show();
-
-            return false; // Extra safety
-        }
-    }
-});
-
-// Handle konfirmasi reassign
-document.getElementById('confirmReassignBtn').addEventListener('click', function() {
-    // Set flag bahwa user sudah konfirmasi
-    isReassignConfirmed = true;
-
-    // Tutup modal konfirmasi
-    const confirmReassignModal = bootstrap.Modal.getInstance(document.getElementById('confirmReassignModal'));
-    if (confirmReassignModal) {
-        confirmReassignModal.hide();
-    }
-
-    // Submit form
-    document.getElementById('assignForm').submit();
-});
-
 // Open confirm delete modal
 document.getElementById('btnRemoveWali').addEventListener('click', function(e) {
-    e.preventDefault(); // Prevent any default action
-    e.stopPropagation(); // Stop event bubbling
+    e.preventDefault();
+    e.stopPropagation();
 
     document.getElementById('deleteKelasName').textContent = currentKelasName;
 
-    // Close the assign modal
     const assignModal = bootstrap.Modal.getInstance(document.getElementById('assignModal'));
     if (assignModal) {
         assignModal.hide();
     }
 
-    // Open confirm delete modal
     setTimeout(function() {
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
         confirmModal.show();
@@ -962,7 +846,6 @@ document.getElementById('btnRemoveWali').addEventListener('click', function(e) {
 
 // Confirm delete button
 document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
-    // Close confirm modal first
     const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
     if (confirmModal) {
         confirmModal.hide();
@@ -971,7 +854,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', function()
     // Uncheck all radios
     document.querySelectorAll('input[name="wali_kelas_id"]').forEach(r => r.checked = false);
 
-    // Submit form after a short delay to ensure modal is closed
+    // Submit form
     setTimeout(function() {
         document.getElementById('assignForm').submit();
     }, 300);

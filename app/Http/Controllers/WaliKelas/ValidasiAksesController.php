@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -12,17 +13,20 @@ use App\Models\Siswa;
 
 class ValidasiAksesController extends Controller
 {
+    use WaliKelasHelper;
+
     /**
      * Display halaman validasi akses
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.validasi-akses.index')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'siswaList' => collect(),
                 'stats' => [
                     'ujian_pending' => 0,
@@ -34,12 +38,13 @@ class ValidasiAksesController extends Controller
             ]);
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.validasi-akses.index')->with([
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'siswaList' => collect(),
                 'stats' => [
                     'ujian_pending' => 0,
@@ -49,6 +54,16 @@ class ValidasiAksesController extends Controller
                 ],
                 'filterStatus' => null,
             ]);
+        }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
         }
 
         // Get siswa di kelas
@@ -96,6 +111,7 @@ class ValidasiAksesController extends Controller
 
         return view('wali-kelas.validasi-akses.index', [
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'siswaList' => $siswaList,
             'stats' => $stats,
             'filterStatus' => $filterStatus,
@@ -109,12 +125,10 @@ class ValidasiAksesController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
-        // Cek apakah sudah divalidasi bendahara
         if (!$siswa->validasi_ujian_bendahara) {
             return back()->with('error', 'Akses ujian belum divalidasi oleh Bendahara!');
         }
 
-        // Validasi oleh wali kelas
         $siswa->update([
             'validasi_ujian_wali' => true,
             'tanggal_validasi_ujian_wali' => now(),
@@ -147,12 +161,10 @@ class ValidasiAksesController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
-        // Cek apakah sudah divalidasi bendahara
         if (!$siswa->validasi_rapor_bendahara) {
             return back()->with('error', 'Akses rapor belum divalidasi oleh Bendahara!');
         }
 
-        // Validasi oleh wali kelas
         $siswa->update([
             'validasi_rapor_wali' => true,
             'tanggal_validasi_rapor_wali' => now(),
@@ -192,7 +204,6 @@ class ValidasiAksesController extends Controller
         foreach ($request->siswa_ids as $siswaId) {
             $siswa = Siswa::find($siswaId);
             
-            // Cek apakah sudah divalidasi bendahara
             if ($siswa && $siswa->validasi_ujian_bendahara && !$siswa->validasi_ujian_wali) {
                 $siswa->update([
                     'validasi_ujian_wali' => true,
@@ -220,7 +231,6 @@ class ValidasiAksesController extends Controller
         foreach ($request->siswa_ids as $siswaId) {
             $siswa = Siswa::find($siswaId);
             
-            // Cek apakah sudah divalidasi bendahara
             if ($siswa && $siswa->validasi_rapor_bendahara && !$siswa->validasi_rapor_wali) {
                 $siswa->update([
                     'validasi_rapor_wali' => true,
@@ -239,8 +249,12 @@ class ValidasiAksesController extends Controller
      */
     public function validasiSemuaUjian(): RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
+        }
 
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
@@ -264,8 +278,12 @@ class ValidasiAksesController extends Controller
      */
     public function validasiSemuaRapor(): RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
+        }
 
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')

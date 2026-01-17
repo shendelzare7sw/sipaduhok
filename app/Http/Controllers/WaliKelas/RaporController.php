@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -17,33 +18,47 @@ use App\Models\MataPelajaran;
 
 class RaporController extends Controller
 {
+    use WaliKelasHelper;
+
     /**
      * Display daftar rapor
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.rapor.index')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'raporList' => collect(),
                 'semester' => 'ganjil',
                 'statusCount' => ['draft' => 0, 'diterbitkan' => 0],
             ]);
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.rapor.index')->with([
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'raporList' => collect(),
                 'semester' => 'ganjil',
                 'statusCount' => ['draft' => 0, 'diterbitkan' => 0],
             ]);
+        }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
         }
 
         // Filter semester
@@ -65,6 +80,7 @@ class RaporController extends Controller
 
         return view('wali-kelas.rapor.index', [
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'raporList' => $raporList,
             'semester' => $semester,
             'statusCount' => $statusCount,
@@ -80,13 +96,17 @@ class RaporController extends Controller
             'semester' => 'required|in:ganjil,genap',
         ]);
 
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (!$kelas) {
             return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
@@ -107,7 +127,6 @@ class RaporController extends Controller
                 ->exists();
 
             if (!$raporExists) {
-                // Generate rapor baru
                 $this->generateRaporSiswa($siswa, $kelas, $request->semester);
                 $generated++;
             }
@@ -122,7 +141,7 @@ class RaporController extends Controller
     private function generateRaporSiswa($siswa, $kelas, $semester)
     {
         // Hitung presensi
-        $bulanAwal = $semester == 'ganjil' ? 7 : 1; // Juli atau Januari
+        $bulanAwal = $semester == 'ganjil' ? 7 : 1;
         $bulanAkhir = $semester == 'ganjil' ? 12 : 6;
 
         $jumlahSakit = Presensi::where('siswa_id', $siswa->id)
@@ -167,12 +186,18 @@ class RaporController extends Controller
     /**
      * Show/edit rapor
      */
-    public function edit($raporId): View
+    public function edit($raporId): View|RedirectResponse
     {
+        $tenagaPendidik = $this->getTenagaPendidik();
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        $kelasList = $this->getKelasWali($tenagaPendidik);
+
         $rapor = Rapor::with(['siswa', 'kelas', 'raporNilai.mataPelajaran'])->findOrFail($raporId);
-        
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
 
         // Pastikan rapor ini milik kelas wali kelas
         if ($rapor->kelas_id != $kelas->id) {
@@ -183,6 +208,7 @@ class RaporController extends Controller
         return view('wali-kelas.rapor.edit', [
             'rapor' => $rapor,
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
         ]);
     }
 

@@ -674,11 +674,13 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                     <span style="color: #6b7280;">{{ $k->cabang->nama_cabang ?? '-' }}</span>
                                 </td>
                                 <td>
-                                    @if($k->waliKelas)
-                                        <div class="wali-kelas-info">
-                                            <div class="wali-avatar">{{ strtoupper(substr($k->waliKelas->nama_lengkap, 0, 1)) }}</div>
-                                            <span class="wali-name">{{ $k->waliKelas->nama_lengkap }}</span>
-                                        </div>
+                                    @if($k->waliKelasAssignments->count() > 0)
+                                        @foreach($k->waliKelasAssignments as $assignment)
+                                            <div class="wali-kelas-info" style="margin-bottom: 4px;">
+                                                <div class="wali-avatar">{{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}</div>
+                                                <span class="wali-name">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
+                                            </div>
+                                        @endforeach
                                     @else
                                         <span class="badge badge-warning">
                                             <i class="fas fa-exclamation-circle"></i> Belum ditunjuk

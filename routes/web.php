@@ -43,6 +43,7 @@ use App\Http\Controllers\Bendahara\LaporanPembayaranController;
 
 // Wali Kelas Controllers
 use App\Http\Controllers\WaliKelas\WaliKelasController;
+use App\Http\Controllers\WaliKelas\PilihKelasController;
 use App\Http\Controllers\WaliKelas\JadwalPelajaranController;
 use App\Http\Controllers\WaliKelas\PresensiController;
 use App\Http\Controllers\WaliKelas\NilaiController as WaliKelasNilaiController;
@@ -767,6 +768,10 @@ Route::middleware(['auth'])->group(function () {
 
         // Dashboard
         Route::get('/dashboard', [WaliKelasController::class, 'dashboard'])->name('dashboard');
+
+        // Pilih Kelas (untuk wali kelas yang memegang lebih dari 1 kelas)
+        Route::get('/pilih-kelas', [PilihKelasController::class, 'index'])->name('pilih-kelas');
+        Route::post('/pilih-kelas/{kelas}', [PilihKelasController::class, 'select'])->name('pilih-kelas.select');
 
         // Jadwal Pelajaran (READ-ONLY - data dikelola oleh Admin)
         Route::prefix('jadwal')->name('jadwal.')->group(function () {

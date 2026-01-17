@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use App\Models\TenagaPendidik;
 use App\Models\Kelas;
 use App\Models\JadwalPelajaran;
@@ -11,35 +13,49 @@ use App\Models\PengaturanIstirahat;
 
 class JadwalPelajaranController extends Controller
 {
+    use WaliKelasHelper;
+
     /**
      * Display jadwal pelajaran (READ-ONLY)
      * Wali kelas hanya bisa melihat jadwal yang sudah dibuat oleh admin
      */
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.jadwal.index')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'jadwalPerHari' => [],
                 'hariList' => []
             ]);
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)
-            ->with(['cabang', 'tahunAjaran'])
-            ->first();
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.jadwal.index')->with([
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'jadwalPerHari' => [],
                 'hariList' => []
             ]);
         }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas->load(['cabang', 'tahunAjaran']);
 
         // Get jadwal pelajaran per hari (READ-ONLY dari database)
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
@@ -55,6 +71,7 @@ class JadwalPelajaranController extends Controller
 
         return view('wali-kelas.jadwal.index', [
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'jadwalPerHari' => $jadwalPerHari,
             'hariList' => $hariList,
         ]);
@@ -65,13 +82,17 @@ class JadwalPelajaranController extends Controller
      */
     public function print()
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             abort(403, 'Data tenaga pendidik tidak ditemukan.');
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (!$kelas) {
             abort(403, 'Anda belum ditugaskan sebagai wali kelas.');

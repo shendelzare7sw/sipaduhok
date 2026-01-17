@@ -451,6 +451,7 @@ class OrangTuaController extends Controller
             $existingPresensi->update([
                 'status' => $validated['jenis'],
                 'keterangan' => $keterangan,
+                'diinput_oleh' => $user->id, // FIX: Set diinput_oleh on update too
             ]);
         } else {
             Presensi::create([
@@ -586,6 +587,7 @@ class OrangTuaController extends Controller
         $presensi->update([
             'status' => $validated['jenis'],
             'keterangan' => $keterangan,
+            'diinput_oleh' => $user->id, // FIX: Set diinput_oleh on update too
         ]);
 
         return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)

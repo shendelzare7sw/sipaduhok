@@ -8,6 +8,7 @@ use App\Models\Cabang;
 use App\Models\TahunAjaran;
 use App\Models\TenagaPendidik;
 use App\Models\Siswa;
+use App\Models\WaliKelasAssignment;
 use App\Imports\KelasImport;
 use App\Exports\Templates\KelasTemplate;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,7 +22,7 @@ class KelasController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Kelas::with(['cabang', 'tahunAjaran', 'waliKelas']);
+        $query = Kelas::with(['cabang', 'tahunAjaran', 'waliKelasAssignments.tenagaPendidik']);
 
         // Filter by tahun ajaran
         if ($request->filled('tahun_ajaran_id')) {
@@ -76,9 +77,9 @@ class KelasController extends Controller
             'totalKelas' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
             'totalSiswa' => Siswa::where('status', 'aktif')->count(),
             'kelasWithWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
-                ->whereNotNull('wali_kelas_id')->count(),
-            'kelasWithoutWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
-                ->whereNull('wali_kelas_id')->count(),
+            ->whereHas('waliKelasAssignments')->count(),
+        'kelasWithoutWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+            ->whereDoesntHave('waliKelasAssignments')->count(),
         ];
 
         return view('admin.kelas.index', compact(
@@ -147,17 +148,24 @@ class KelasController extends Controller
 
         $validated['kode_kelas'] = $kodeKelas;
 
-        // PENTING: Hapus assignment lama jika wali kelas dipilih sudah mengajar di kelas lain
-        if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
-            // Hapus wali kelas dari kelas lain (set jadi NULL)
-            Kelas::where('wali_kelas_id', $validated['wali_kelas_id'])
-                ->update(['wali_kelas_id' => null]);
-        }
+    // Create kelas
+    $kelas = Kelas::create($validated);
 
-        Kelas::create($validated);
+    // Sync with pivot table wali_kelas_assignments
+    if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
+        WaliKelasAssignment::updateOrCreate(
+            [
+                'tenaga_pendidik_id' => $validated['wali_kelas_id'],
+                'kelas_id' => $kelas->id,
+            ],
+            [
+                'assigned_at' => now(),
+            ]
+        );
+    }
 
-        return redirect()->route('admin.kelas.index')
-            ->with('success', 'Kelas berhasil ditambahkan!');
+    return redirect()->route('admin.kelas.index')
+        ->with('success', 'Kelas berhasil ditambahkan!');
     }
 
     /**
@@ -222,14 +230,6 @@ class KelasController extends Controller
             'kuota_siswa.required' => 'Kuota siswa harus diisi',
         ]);
 
-        // PENTING: Hapus assignment lama jika wali kelas dipilih sudah mengajar di kelas lain
-        if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
-            // Hapus wali kelas dari kelas lain (set jadi NULL)
-            Kelas::where('wali_kelas_id', $validated['wali_kelas_id'])
-                ->where('id', '!=', $kelas->id)
-                ->update(['wali_kelas_id' => null]);
-        }
-
         // Regenerate kode_kelas jika ada perubahan
         $cabang = Cabang::find($validated['cabang_id']);
         $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
@@ -249,8 +249,21 @@ class KelasController extends Controller
 
         $kelas->update($validated);
 
-        return redirect()->route('admin.kelas.index')
-            ->with('success', 'Kelas berhasil diperbarui!');
+    // Sync with pivot table wali_kelas_assignments
+    // First remove old assignment for this kelas
+    WaliKelasAssignment::where('kelas_id', $kelas->id)->delete();
+    
+    // Then add new assignment if wali_kelas_id is set
+    if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
+        WaliKelasAssignment::create([
+            'tenaga_pendidik_id' => $validated['wali_kelas_id'],
+            'kelas_id' => $kelas->id,
+            'assigned_at' => now(),
+        ]);
+    }
+
+    return redirect()->route('admin.kelas.index')
+        ->with('success', 'Kelas berhasil diperbarui!');
     }
 
     /**
@@ -349,12 +362,21 @@ class KelasController extends Controller
 
         $kelas->update(['wali_kelas_id' => $validated['wali_kelas_id']]);
 
-        if ($validated['wali_kelas_id']) {
-            $waliKelas = TenagaPendidik::find($validated['wali_kelas_id']);
-            return back()->with('success', $waliKelas->nama_lengkap . ' berhasil ditunjuk sebagai Wali Kelas!');
-        } else {
-            return back()->with('success', 'Wali Kelas berhasil dihapus dari kelas ini!');
-        }
+    // Sync with pivot table wali_kelas_assignments
+    WaliKelasAssignment::where('kelas_id', $kelas->id)->delete();
+    
+    if ($validated['wali_kelas_id']) {
+        WaliKelasAssignment::create([
+            'tenaga_pendidik_id' => $validated['wali_kelas_id'],
+            'kelas_id' => $kelas->id,
+            'assigned_at' => now(),
+        ]);
+        
+        $waliKelas = TenagaPendidik::find($validated['wali_kelas_id']);
+        return back()->with('success', $waliKelas->nama_lengkap . ' berhasil ditunjuk sebagai Wali Kelas!');
+    } else {
+        return back()->with('success', 'Wali Kelas berhasil dihapus dari kelas ini!');
+    }
     }
 
     /**

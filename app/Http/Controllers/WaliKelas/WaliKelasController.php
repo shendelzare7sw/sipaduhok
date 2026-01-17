@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use App\Models\TenagaPendidik;
 use App\Models\Kelas;
 use App\Models\Siswa;
@@ -14,18 +16,21 @@ use App\Models\JadwalPelajaran;
 
 class WaliKelasController extends Controller
 {
+    use WaliKelasHelper;
+
     /**
      * Display dashboard Wali Kelas
      */
-    public function dashboard(): View
+    public function dashboard(): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.dashboard')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'waliKelas' => null,
                 'kelas' => null,
+                'kelasList' => collect(),
                 'totalSiswa' => 0,
                 'siswa' => collect(),
                 'presensiStats' => ['hadir' => 0, 'sakit' => 0, 'izin' => 0, 'alpha' => 0],
@@ -35,13 +40,14 @@ class WaliKelasController extends Controller
             ]);
         }
 
-        // Get kelas yang diajar oleh wali kelas ini
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        // Get all kelas for this wali kelas
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.dashboard')->with([
                 'waliKelas' => $tenagaPendidik,
                 'kelas' => null,
+                'kelasList' => collect(),
                 'message' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'totalSiswa' => 0,
                 'siswa' => collect(),
@@ -50,6 +56,18 @@ class WaliKelasController extends Controller
                 'raporBelumSelesai' => 0,
                 'jadwalHariIni' => collect(),
             ]);
+        }
+
+        // Check if selection is needed (multiple kelas and no valid selection)
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return redirect()->route('wali.pilih-kelas');
+        }
+
+        // Get selected kelas
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return redirect()->route('wali.pilih-kelas');
         }
 
         // Get siswa di kelas ini
@@ -99,6 +117,7 @@ class WaliKelasController extends Controller
         return view('wali-kelas.dashboard', [
             'waliKelas' => $tenagaPendidik,
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'totalSiswa' => $siswa->count(),
             'siswa' => $siswa,
             'presensiStats' => $presensiStats,
@@ -111,31 +130,45 @@ class WaliKelasController extends Controller
     /**
      * Display jadwal pelajaran for wali kelas (read-only)
      */
-    public function jadwalPelajaran(): View
+    public function jadwalPelajaran(): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.jadwal-pelajaran')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'waliKelas' => null,
                 'kelas' => null,
+                'kelasList' => collect(),
                 'jadwalByHari' => collect(),
                 'hariList' => [],
             ]);
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->with('cabang', 'tahunAjaran')->first();
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.jadwal-pelajaran')->with([
                 'waliKelas' => $tenagaPendidik,
                 'kelas' => null,
+                'kelasList' => collect(),
                 'message' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'jadwalByHari' => collect(),
                 'hariList' => [],
             ]);
         }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return redirect()->route('wali.pilih-kelas');
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return redirect()->route('wali.pilih-kelas');
+        }
+
+        $kelas->load(['cabang', 'tahunAjaran']);
 
         $jadwalList = JadwalPelajaran::with(['mataPelajaran', 'guru'])
             ->where('kelas_id', $kelas->id)
@@ -153,6 +186,7 @@ class WaliKelasController extends Controller
         return view('wali-kelas.jadwal-pelajaran', [
             'waliKelas' => $tenagaPendidik,
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'jadwalByHari' => $jadwalByHari,
             'hariList' => $hariList,
         ]);

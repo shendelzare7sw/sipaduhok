@@ -77,4 +77,22 @@ class TenagaPendidik extends Model
     {
         return $this->hasMany(\App\Models\GuruPengajarKelas::class, 'tenaga_pendidik_id');
     }
+
+    /**
+     * Get wali kelas assignments (many-to-many).
+     */
+    public function waliKelasAssignments()
+    {
+        return $this->hasMany(\App\Models\WaliKelasAssignment::class, 'tenaga_pendidik_id');
+    }
+
+    /**
+     * Get all kelas yang dipegang sebagai wali kelas (via pivot).
+     */
+    public function kelasWaliMultiple()
+    {
+        return $this->belongsToMany(Kelas::class, 'wali_kelas_assignments', 'tenaga_pendidik_id', 'kelas_id')
+            ->withPivot('assigned_at')
+            ->withTimestamps();
+    }
 }

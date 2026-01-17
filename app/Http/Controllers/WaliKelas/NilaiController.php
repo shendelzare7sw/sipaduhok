@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use App\Models\Kelas;
 use App\Models\Siswa;
@@ -13,28 +14,27 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class NilaiController extends Controller
 {
+    use WaliKelasHelper;
+
     /**
      * Display nilai siswa page with optional filter
      */
     public function index(Request $request)
     {
-        // Get wali kelas data
-        $wali = TenagaPendidik::where('user_id', auth()->id())->first();
+        $wali = $this->getTenagaPendidik();
         
         if (!$wali) {
             return redirect()->route('wali.dashboard')
                 ->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
+
+        $kelasList = $this->getKelasWali($wali);
         
-        // Get kelas yang dipegang wali kelas ini
-        $kelas = Kelas::where('wali_kelas_id', $wali->id)
-            ->with(['siswa', 'tahunAjaran'])
-            ->first();
-        
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.nilai.index', [
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'siswaList' => collect(),
                 'mataPelajaranList' => collect(),
                 'selectedMapelId' => null,
@@ -46,6 +46,18 @@ class NilaiController extends Controller
                 'jumlahTuntas' => 0,
             ]);
         }
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas->load(['siswa', 'tahunAjaran']);
         
         // Get siswa list
         $siswaList = Siswa::where('kelas_id', $kelas->id)
@@ -59,7 +71,6 @@ class NilaiController extends Controller
             ->orderBy('nama_mapel', 'asc')
             ->get();
         
-        // ✅ SELALU DEFINE selectedMapelId (ini yang penting!)
         $selectedMapelId = $request->get('mata_pelajaran_id', null);
         
         // Initialize variables
@@ -70,22 +81,18 @@ class NilaiController extends Controller
         $nilaiTerendah = 0;
         $jumlahTuntas = 0;
         
-        // Jika ada mata pelajaran dipilih, ambil datanya
         if ($selectedMapelId) {
             $selectedMapel = MataPelajaran::find($selectedMapelId);
             
             if ($selectedMapel) {
-                // Get nilai data untuk mata pelajaran ini
                 $nilaiQuery = Nilai::where('kelas_id', $kelas->id)
                     ->where('mata_pelajaran_id', $selectedMapelId)
                     ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
                     ->with('siswa')
                     ->get();
                 
-                // Convert to keyed collection by siswa_id
                 $nilaiData = $nilaiQuery->keyBy('siswa_id');
                 
-                // Calculate statistics
                 if ($nilaiQuery->count() > 0) {
                     $nilaiAkhirArray = $nilaiQuery->pluck('nilai_akhir')->filter()->values();
                     
@@ -94,7 +101,6 @@ class NilaiController extends Controller
                         $nilaiTertinggi = $nilaiAkhirArray->max();
                         $nilaiTerendah = $nilaiAkhirArray->min();
                         
-                        // Hitung jumlah tuntas (nilai >= 70)
                         $jumlahTuntas = $nilaiAkhirArray->filter(function($nilai) {
                             return $nilai >= 70;
                         })->count();
@@ -103,12 +109,12 @@ class NilaiController extends Controller
             }
         }
         
-        // Return view dengan SEMUA variable yang dibutuhkan
         return view('wali-kelas.nilai.index', compact(
             'kelas',
+            'kelasList',
             'siswaList',
             'mataPelajaranList',
-            'selectedMapelId',      // ✅ HARUS ADA
+            'selectedMapelId',
             'selectedMapel',
             'nilaiData',
             'rataRataKelas',
@@ -123,37 +129,37 @@ class NilaiController extends Controller
      */
     public function show($siswaId)
     {
-        // Get wali kelas data
-        $wali = TenagaPendidik::where('user_id', auth()->id())->first();
+        $wali = $this->getTenagaPendidik();
         
         if (!$wali) {
             return redirect()->route('wali.dashboard')
                 ->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
-        
-        // Get kelas
-        $kelas = Kelas::where('wali_kelas_id', $wali->id)
-            ->with(['siswa', 'tahunAjaran'])
-            ->first();
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
         
         if (!$kelas) {
             return redirect()->route('wali.nilai.index')
                 ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
+
+        $kelasList = $this->getKelasWali($wali);
+        $kelas->load(['siswa', 'tahunAjaran']);
         
-        // Get siswa
         $siswa = Siswa::where('id', $siswaId)
             ->where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
             ->firstOrFail();
         
-        // Get all mata pelajaran for this jenjang
         $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
             ->where('is_active', true)
             ->orderBy('nama_mapel', 'asc')
             ->get();
         
-        // Get all nilai for this siswa
         $nilaiData = Nilai::where('siswa_id', $siswaId)
             ->where('kelas_id', $kelas->id)
             ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
@@ -161,7 +167,6 @@ class NilaiController extends Controller
             ->get()
             ->keyBy('mata_pelajaran_id');
         
-        // Calculate statistics
         $totalNilai = $nilaiData->pluck('nilai_akhir')->filter()->count();
         $rataRataSiswa = $totalNilai > 0 ? $nilaiData->pluck('nilai_akhir')->filter()->avg() : 0;
         $jumlahTuntas = $nilaiData->filter(function($nilai) {
@@ -172,6 +177,7 @@ class NilaiController extends Controller
         return view('wali-kelas.nilai.show', compact(
             'siswa',
             'kelas',
+            'kelasList',
             'mataPelajaranList',
             'nilaiData',
             'rataRataSiswa',
@@ -186,24 +192,25 @@ class NilaiController extends Controller
      */
     public function print(Request $request)
     {
-        // Get wali kelas data
-        $wali = TenagaPendidik::where('user_id', auth()->id())->first();
+        $wali = $this->getTenagaPendidik();
         
         if (!$wali) {
             return redirect()->route('wali.dashboard')
                 ->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
-        
-        // Get kelas
-        $kelas = Kelas::where('wali_kelas_id', $wali->id)
-            ->with(['siswa', 'tahunAjaran', 'cabang'])
-            ->first();
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
         
         if (!$kelas) {
             abort(404, 'Kelas tidak ditemukan');
         }
+
+        $kelas->load(['siswa', 'tahunAjaran', 'cabang']);
         
-        // Get siswa
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap', 'asc')
@@ -211,7 +218,6 @@ class NilaiController extends Controller
         
         $selectedMapelId = $request->get('mata_pelajaran_id', null);
         
-        // Jika ada filter mata pelajaran
         if ($selectedMapelId) {
             $selectedMapel = MataPelajaran::find($selectedMapelId);
             
@@ -219,7 +225,6 @@ class NilaiController extends Controller
                 abort(404, 'Mata pelajaran tidak ditemukan');
             }
             
-            // Get nilai untuk mata pelajaran ini
             $nilaiData = Nilai::where('kelas_id', $kelas->id)
                 ->where('mata_pelajaran_id', $selectedMapelId)
                 ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
@@ -237,19 +242,16 @@ class NilaiController extends Controller
             return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf');
             
         } else {
-            // Print semua mata pelajaran
             $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
                 ->where('is_active', true)
                 ->orderBy('nama_mapel', 'asc')
                 ->get();
             
-            // Get semua nilai untuk kelas ini
             $allNilai = Nilai::where('kelas_id', $kelas->id)
                 ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
                 ->with('mataPelajaran')
                 ->get();
             
-            // Group by siswa_id dan mata_pelajaran_id
             $nilaiData = [];
             foreach ($allNilai as $nilai) {
                 $nilaiData[$nilai->siswa_id][$nilai->mata_pelajaran_id] = $nilai;
@@ -268,23 +270,29 @@ class NilaiController extends Controller
     }
     
     /**
-     * Edit nilai siswa (optional - untuk input manual)
+     * Edit nilai siswa
      */
     public function edit($siswaId)
     {
-        $wali = TenagaPendidik::where('user_id', auth()->id())->first();
+        $wali = $this->getTenagaPendidik();
         
         if (!$wali) {
             return redirect()->route('wali.dashboard')
                 ->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
-        
-        $kelas = Kelas::where('wali_kelas_id', $wali->id)->first();
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
         
         if (!$kelas) {
             return redirect()->route('wali.nilai.index')
                 ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
+
+        $kelasList = $this->getKelasWali($wali);
         
         $siswa = Siswa::where('id', $siswaId)
             ->where('kelas_id', $kelas->id)
@@ -304,6 +312,7 @@ class NilaiController extends Controller
         return view('wali-kelas.nilai.edit', compact(
             'siswa',
             'kelas',
+            'kelasList',
             'mataPelajaranList',
             'nilaiData'
         ));
@@ -322,8 +331,13 @@ class NilaiController extends Controller
             'nilai.*.nilai_uas' => 'nullable|numeric|min:0|max:100',
         ]);
         
-        $wali = TenagaPendidik::where('user_id', auth()->id())->first();
-        $kelas = Kelas::where('wali_kelas_id', $wali->id)->first();
+        $wali = $this->getTenagaPendidik();
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
         
         $siswa = Siswa::where('id', $siswaId)
             ->where('kelas_id', $kelas->id)
@@ -345,7 +359,6 @@ class NilaiController extends Controller
                 ]
             );
             
-            // Auto calculate nilai akhir
             $nilai->hitungNilaiAkhir();
         }
         

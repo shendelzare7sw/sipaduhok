@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -14,17 +15,20 @@ use Carbon\Carbon;
 
 class PresensiController extends Controller
 {
+    use WaliKelasHelper;
+
     /**
      * Display presensi siswa
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.presensi.index')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'siswaList' => collect(),
                 'presensiData' => [],
                 'rekapBulan' => [],
@@ -34,12 +38,13 @@ class PresensiController extends Controller
             ]);
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.presensi.index')->with([
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'siswaList' => collect(),
                 'presensiData' => [],
                 'rekapBulan' => [],
@@ -47,6 +52,16 @@ class PresensiController extends Controller
                 'bulan' => now()->month,
                 'tahun' => now()->year,
             ]);
+        }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
         }
 
         // Filter tanggal
@@ -104,6 +119,7 @@ class PresensiController extends Controller
 
         return view('wali-kelas.presensi.index', [
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'siswaList' => $siswaList,
             'presensiData' => $presensiData,
             'rekapBulan' => $rekapBulan,
@@ -145,47 +161,63 @@ class PresensiController extends Controller
     /**
      * Display izin yang perlu divalidasi
      */
-    public function validasiIzin(): View
+    public function validasiIzin(): View|RedirectResponse
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             return view('wali-kelas.presensi.validasi-izin')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'pengajuanPending' => collect(),
             ]);
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        if (!$kelas) {
+        if ($kelasList->isEmpty()) {
             return view('wali-kelas.presensi.validasi-izin')->with([
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
                 'kelas' => null,
+                'kelasList' => collect(),
                 'pengajuanPending' => collect(),
             ]);
         }
 
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return $this->redirectToPilihKelas();
+        }
+
         // Get pengajuan izin yang belum divalidasi
-        // Cek apakah diinput oleh orang tua (role orang_tua) dan belum divalidasi wali kelas
+        // Query sederhana: cari presensi dengan keterangan "Diajukan oleh orang tua" yang belum divalidasi
         $pengajuanIzin = Presensi::where('kelas_id', $kelas->id)
             ->whereIn('status', ['sakit', 'izin'])
             ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
             ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
             ->whereNotNull('diinput_oleh')
             ->whereHas('inputBy', function($query) {
-                // Filter: hanya yang diinput oleh user dengan role orang_tua
-                $query->whereHas('roleRelation', function($q) {
-                    $q->where('name', 'orang_tua');
+                // Check via role field (string) atau roleRelation
+                $query->where(function($q) {
+                    $q->where('role', 'orang_tua')
+                      ->orWhereHas('roleRelation', function($rq) {
+                          $rq->where('name', 'orang_tua');
+                      });
                 });
             })
-            ->with(['siswa', 'inputBy.roleRelation'])
+            ->with(['siswa', 'inputBy'])
             ->orderBy('tanggal', 'desc')
             ->get();
 
         return view('wali-kelas.presensi.validasi-izin', [
             'kelas' => $kelas,
+            'kelasList' => $kelasList,
             'pengajuanPending' => $pengajuanIzin,
         ]);
     }
@@ -203,7 +235,6 @@ class PresensiController extends Controller
         $presensi = Presensi::findOrFail($presensiId);
 
         if ($request->status == 'setuju') {
-            // Setujui izin - tambahkan keterangan validasi wali kelas
             $keteranganBaru = $presensi->keterangan . ' - Divalidasi dan disetujui oleh wali kelas';
             if ($request->keterangan) {
                 $keteranganBaru .= ' (Catatan: ' . $request->keterangan . ')';
@@ -215,7 +246,6 @@ class PresensiController extends Controller
 
             return back()->with('success', 'Pengajuan izin disetujui!');
         } else {
-            // Tolak izin -> ubah jadi Alpha
             $keteranganBaru = 'Pengajuan izin ditolak oleh wali kelas';
             if ($request->keterangan) {
                 $keteranganBaru .= '. Alasan: ' . $request->keterangan;
@@ -266,13 +296,17 @@ class PresensiController extends Controller
      */
     public function printRekap(Request $request)
     {
-        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->first();
+        $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
             abort(403, 'Data tenaga pendidik tidak ditemukan.');
         }
 
-        $kelas = Kelas::where('wali_kelas_id', $tenagaPendidik->id)->first();
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (!$kelas) {
             abort(403, 'Anda belum ditugaskan sebagai wali kelas.');

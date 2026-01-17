@@ -15,23 +15,35 @@ class UserSeeder extends Seeder
         // Get role IDs
         $roles = Role::pluck('id', 'name');
 
-        // Admin
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@sipaduhok.com',
-            'username' => 'admin',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'role_id' => $roles['admin'],
-            'cabang_id' => 1,
-            'is_active' => true,
-        ]);
+        // Admin (2 orang) - dengan email_verified_at
+        $adminData = [
+            ['name' => 'Charoline Revlecya S. Mat.', 'email' => 'admincharol@sipaduhok.com', 'username' => 'admin1', 'phone' => '081234567890'],
+            ['name' => 'Linawati Rozali', 'email' => 'adminlinawati@sipaduhok.com', 'username' => 'admin2', 'phone' => '081234567891'],
+        ];
+
+        foreach ($adminData as $admin) {
+            User::updateOrCreate(
+                ['email' => $admin['email']],
+                [
+                    'name' => $admin['name'],
+                    'email' => $admin['email'],
+                    'username' => $admin['username'],
+                    'password' => Hash::make('password'),
+                    'phone' => $admin['phone'],
+                    'role' => 'admin',
+                    'role_id' => $roles['admin'],
+                    'cabang_id' => 1,
+                    'is_active' => true,
+                    'email_verified_at' => now(),
+                ]
+            );
+        }
 
         // Ketua PKBM
         User::create([
-            'name' => 'Dr. Budi Santoso',
-            'email' => 'ketua@sipaduhok.com',
-            'username' => 'ketua_pkbm',
+            'name' => 'Fransisda Tiodora Ferdiansyah S. Psi., M. M., Psikolog',
+            'email' => 'ketuafransisda@sipaduhok.com',
+            'username' => 'fransisdatiodora',
             'password' => Hash::make('password'),
             'role' => 'ketua_pkbm',
             'role_id' => $roles['ketua_pkbm'],
@@ -39,23 +51,32 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Wakil Kepala Sekolah
-        User::create([
-            'name' => 'Drs. Harianto Wijaya, M.Pd',
-            'email' => 'waka@sipaduhok.com',
-            'username' => 'wakil_kepala',
-            'password' => Hash::make('password'),
-            'role' => 'wakil_kepala_sekolah',
-            'role_id' => $roles['wakil_kepala_sekolah'],
-            'cabang_id' => 1,
-            'is_active' => true,
-        ]);
+        // Wakil Kepala Sekolah (4 orang)
+        $wakaData = [
+            ['name' => 'Charoline Revlecya S. Mat', 'email' => 'wakacharol@sipaduhok.com', 'username' => 'charolinerev'],
+            ['name' => 'Delia Parsauliani S.K.M.', 'email' => 'wakadelia@sipaduhok.com', 'username' => 'deliapar'],
+            ['name' => 'Meini', 'email' => 'wakameini@sipaduhok.com', 'username' => 'meini'],
+            ['name' => 'Eka Nurul', 'email' => 'wakanurul@sipaduhok.com', 'username' => 'nuruleka'],
+        ];
+
+        foreach ($wakaData as $waka) {
+            User::create([
+                'name' => $waka['name'],
+                'email' => $waka['email'],
+                'username' => $waka['username'],
+                'password' => Hash::make('password'),
+                'role' => 'wakil_kepala_sekolah',
+                'role_id' => $roles['wakil_kepala_sekolah'],
+                'cabang_id' => 1,
+                'is_active' => true,
+            ]);
+        }
 
         // Sekretaris
         User::create([
-            'name' => 'Siti Nurhaliza',
-            'email' => 'sekretaris@sipaduhok.com',
-            'username' => 'sekretaris',
+            'name' => 'Delia Parsauliani S. K. M.',
+            'email' => 'sekredelia@sipaduhok.com',
+            'username' => 'deliaparsa',
             'password' => Hash::make('password'),
             'role' => 'sekretaris',
             'role_id' => $roles['sekretaris'],
@@ -65,9 +86,9 @@ class UserSeeder extends Seeder
 
         // Bendahara
         User::create([
-            'name' => 'Ahmad Dahlan',
-            'email' => 'bendahara@sipaduhok.com',
-            'username' => 'bendahara',
+            'name' => 'Linawati Rozali',
+            'email' => 'bendaharalinawati@sipaduhok.com',
+            'username' => 'linawatitu',
             'password' => Hash::make('password'),
             'role' => 'bendahara',
             'role_id' => $roles['bendahara'],
@@ -75,12 +96,14 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Wali Kelas (12 orang) - Format: wali.namaguru@sipaduhok.com (TIDAK TERIKAT JENJANG)
+        // Wali Kelas - 4 data asli + 8 dummy
         $waliKelasData = [
-            ['name' => 'Hendra Kusuma, S.Pd', 'email' => 'wali.hendrakusuma@sipaduhok.com', 'username' => 'wali_hendrakusuma', 'cabang_id' => 1],
-            ['name' => 'Nurul Hidayah, S.Paud', 'email' => 'wali.nurulhidayah@sipaduhok.com', 'username' => 'wali_nurulhidayah', 'cabang_id' => 2],
-            ['name' => 'Arif Budiman, S.Pd', 'email' => 'wali.arifbudiman@sipaduhok.com', 'username' => 'wali_arifbudiman', 'cabang_id' => 3],
-            ['name' => 'Linda Permata, S.Pd', 'email' => 'wali.lindapermata@sipaduhok.com', 'username' => 'wali_lindapermata', 'cabang_id' => 3],
+            // Data asli (4 orang)
+            ['name' => 'Delia Parsauliani S.K.M.', 'email' => 'walidelia@sipaduhok.com', 'username' => 'deliapars', 'cabang_id' => 1],
+            ['name' => 'Charoline Revlecya S. Mat.', 'email' => 'walicharol@sipaduhok.com', 'username' => 'charolinerevc', 'cabang_id' => 1],
+            ['name' => 'Dyah Yossie S. I. Kom,', 'email' => 'walidyah@sipaduhok.com', 'username' => 'dyahyoss', 'cabang_id' => 1],
+            ['name' => 'Hiskia Oktaviandri', 'email' => 'walihiskia@sipaduhok.com', 'username' => 'hiskiaov', 'cabang_id' => 1],
+            // Data dummy (sisa)
             ['name' => 'Rudi Hartono, S.Pd', 'email' => 'wali.rudihartono@sipaduhok.com', 'username' => 'wali_rudihartono', 'cabang_id' => 1],
             ['name' => 'Mega Puspita, S.Paud', 'email' => 'wali.megapuspita@sipaduhok.com', 'username' => 'wali_megapuspita', 'cabang_id' => 2],
             ['name' => 'Faisal Rahman, S.Pd', 'email' => 'wali.faisalrahman@sipaduhok.com', 'username' => 'wali_faisalrahman', 'cabang_id' => 1],
@@ -104,13 +127,15 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Guru Pengajar (10 orang) - Format: guru.namaguru@sipaduhok.com
+        // Guru Pengajar - 5 data asli + 5 dummy
         $guruData = [
-            ['name' => 'Bambang Sutrisno, S.Si', 'email' => 'guru.bambangsutrisno@sipaduhok.com', 'username' => 'guru_bambangsutrisno', 'cabang_id' => 2],
-            ['name' => 'Ratna Sari, S.Pd', 'email' => 'guru.ratnasari@sipaduhok.com', 'username' => 'guru_ratnasari', 'cabang_id' => 3],
-            ['name' => 'Agus Setiawan, M.Si', 'email' => 'guru.agussetiawan@sipaduhok.com', 'username' => 'guru_agussetiawan', 'cabang_id' => 1],
-            ['name' => 'Wulan Dari, S.Pd', 'email' => 'guru.wulandari@sipaduhok.com', 'username' => 'guru_wulandari', 'cabang_id' => 1],
-            ['name' => 'Hendro Wijaya, S.Si', 'email' => 'guru.hendrowijaya@sipaduhok.com', 'username' => 'guru_hendrowijaya', 'cabang_id' => 3],
+            // Data asli (5 orang)
+            ['name' => 'IrenT Berliana Agustin', 'email' => 'guruberliana@sipaduhok.com', 'username' => 'iberliana', 'cabang_id' => 1],
+            ['name' => 'Delia Parsauliani S.K.M.', 'email' => 'gurudelia@sipaduhok.com', 'username' => 'deliaparsau', 'cabang_id' => 1],
+            ['name' => 'Charoline Revlecya S. Mat.', 'email' => 'gurucharol@sipaduhok.com', 'username' => 'charolinerevcy', 'cabang_id' => 1],
+            ['name' => 'Dyah Yossie S. I. Kom,', 'email' => 'gurudyah@sipaduhok.com', 'username' => 'dyahyos', 'cabang_id' => 1],
+            ['name' => 'Hiskia Oktaviandri', 'email' => 'guruhiskia@sipaduhok.com', 'username' => 'hiskiao', 'cabang_id' => 1],
+            // Data dummy (sisa)
             ['name' => 'Sinta Dewi, S.Pd', 'email' => 'guru.sintadewi@sipaduhok.com', 'username' => 'guru_sintadewi', 'cabang_id' => 1],
             ['name' => 'Yudi Santoso, M.Pd', 'email' => 'guru.yudisantoso@sipaduhok.com', 'username' => 'guru_yudisantoso', 'cabang_id' => 3],
             ['name' => 'Ani Susanti, S.Pd', 'email' => 'guru.anisusanti@sipaduhok.com', 'username' => 'guru_anisusanti', 'cabang_id' => 1],
@@ -131,9 +156,20 @@ class UserSeeder extends Seeder
             ]);
         }
 
-        // Siswa (18 orang - 6 per cabang)
+        // Siswa - 6 data asli + 18 dummy
         $siswaData = [
-            // Cabang Ruko (6 siswa)
+            // Data asli Gedung Utama (6 orang)
+            // 9A
+            ['name' => 'Jacqueline Key', 'email' => 'jacquelinekey@sipaduhok.sch.id', 'username' => 'keyy', 'cabang_id' => 1],
+            ['name' => 'Daniel Setiabudi', 'email' => 'danielsetiabudi@sipaduhok.sch.id', 'username' => 'daniels', 'cabang_id' => 1],
+            // 8A
+            ['name' => 'Zeaklyn Sean', 'email' => 'zeaklynsean@sipaduhok.sch.id', 'username' => 'seann', 'cabang_id' => 1],
+            ['name' => 'Kevin Imanuel', 'email' => 'kevinimanuel@sipaduhok.sch.id', 'username' => 'kevini', 'cabang_id' => 1],
+            // 7A
+            ['name' => 'Rikza', 'email' => 'Rikza@sipaduhok.sch.id', 'username' => 'rikzaa', 'cabang_id' => 1],
+            ['name' => 'Rakha', 'email' => 'rakhaa@sipaduhok.sch.id', 'username' => 'rakhaa', 'cabang_id' => 1],
+
+            // Data dummy Cabang Ruko (6 siswa)
             ['name' => 'Andi Wijaya', 'email' => 'andi.wijaya@student.com', 'username' => 'andi_wijaya', 'cabang_id' => 1],
             ['name' => 'Putri Maharani', 'email' => 'putri.maharani@student.com', 'username' => 'putri_maharani', 'cabang_id' => 1],
             ['name' => 'Dimas Saputra', 'email' => 'dimas.saputra@student.com', 'username' => 'dimas_saputra', 'cabang_id' => 1],
@@ -141,7 +177,7 @@ class UserSeeder extends Seeder
             ['name' => 'Fahmi Hidayat', 'email' => 'fahmi.hidayat@student.com', 'username' => 'fahmi_hidayat', 'cabang_id' => 1],
             ['name' => 'Nabila Azzahra', 'email' => 'nabila.azzahra@student.com', 'username' => 'nabila_azzahra', 'cabang_id' => 1],
 
-            // Cabang PAUD (6 siswa)
+            // Data dummy Cabang PAUD (6 siswa)
             ['name' => 'Rizki Ramadhan', 'email' => 'rizki.ramadhan@student.com', 'username' => 'rizki_ramadhan', 'cabang_id' => 2],
             ['name' => 'Aisyah Zahra', 'email' => 'aisyah.zahra@student.com', 'username' => 'aisyah_zahra', 'cabang_id' => 2],
             ['name' => 'Farhan Ahmad', 'email' => 'farhan.ahmad@student.com', 'username' => 'farhan_ahmad', 'cabang_id' => 2],
@@ -149,7 +185,7 @@ class UserSeeder extends Seeder
             ['name' => 'Raffi Akbar', 'email' => 'raffi.akbar@student.com', 'username' => 'raffi_akbar', 'cabang_id' => 2],
             ['name' => 'Nayla Putri', 'email' => 'nayla.putri@student.com', 'username' => 'nayla_putri', 'cabang_id' => 2],
 
-            // Cabang Cimanggis (6 siswa)
+            // Data dummy Cabang Cimanggis (6 siswa)
             ['name' => 'Siti Fatimah', 'email' => 'siti.fatimah@student.com', 'username' => 'siti_fatimah', 'cabang_id' => 3],
             ['name' => 'Rahman Hakim', 'email' => 'rahman.hakim@student.com', 'username' => 'rahman_hakim', 'cabang_id' => 3],
             ['name' => 'Intan Permata', 'email' => 'intan.permata@student.com', 'username' => 'intan_permata', 'cabang_id' => 3],
@@ -171,6 +207,29 @@ class UserSeeder extends Seeder
             ]);
         }
 
+        // Orang Tua - 2 data asli
+        $orangTuaData = [
+            ['name' => 'Rina Arsy', 'email' => 'orturinaarsy@sipaduhok.parent.id', 'username' => 'orturinaarsy'],
+            ['name' => 'Sara Elmira', 'email' => 'ortusarael@sipaduhok.parent.id', 'username' => 'ortusarael'],
+        ];
+
+        foreach ($orangTuaData as $ortu) {
+            User::create([
+                'name' => $ortu['name'],
+                'email' => $ortu['email'],
+                'username' => $ortu['username'],
+                'password' => Hash::make('password'),
+                'role' => 'orang_tua',
+                'role_id' => $roles['orang_tua'],
+                'cabang_id' => 1,
+                'is_active' => true,
+            ]);
+        }
+
         $this->command->info('Users seeded successfully with role_id!');
+        $this->command->warn('Admin credentials:');
+        $this->command->warn('  Email: admincharol@sipaduhok.com / adminlinawati@sipaduhok.com');
+        $this->command->warn('  Password: password');
+        $this->command->warn('Please change these passwords in production!');
     }
 }

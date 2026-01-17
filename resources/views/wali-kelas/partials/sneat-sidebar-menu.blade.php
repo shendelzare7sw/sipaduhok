@@ -7,7 +7,43 @@
 
 @php
     $currentRoute = Route::currentRouteName();
+    // Get selected kelas from session
+    $selectedKelasId = session('wali_kelas_selected');
+    $selectedKelas = null;
+    $hasMultipleKelas = false;
+    
+    if ($selectedKelasId) {
+        $selectedKelas = \App\Models\Kelas::with('cabang')->find($selectedKelasId);
+    }
+    
+    // Check if wali has multiple kelas
+    $tenagaPendidik = \App\Models\TenagaPendidik::where('user_id', auth()->id())->first();
+    if ($tenagaPendidik) {
+        $kelasCount = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tenagaPendidik->id)->count();
+        $hasMultipleKelas = $kelasCount > 1;
+    }
 @endphp
+
+@if($selectedKelas && $hasMultipleKelas)
+<!-- Current Class Indicator -->
+<li class="menu-item">
+    <div class="px-3 py-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; margin: 8px 12px 8px;">
+        <div style="color: rgba(255,255,255,0.8); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+            <i class="fas fa-school me-1"></i> Kelas Aktif
+        </div>
+        <div style="color: white; font-weight: 600; font-size: 14px;">
+            {{ $selectedKelas->nama_kelas }}
+        </div>
+        <div style="color: rgba(255,255,255,0.7); font-size: 12px;">
+            {{ $selectedKelas->cabang->nama_cabang ?? '' }} - {{ $selectedKelas->jenjang }}
+        </div>
+        <a href="{{ route('wali.pilih-kelas') }}" 
+           style="display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 12px; background: rgba(255,255,255,0.2); color: white; font-size: 12px; border-radius: 4px; text-decoration: none; transition: all 0.2s;">
+            <i class="fas fa-exchange-alt"></i> Ganti Kelas
+        </a>
+    </div>
+</li>
+@endif
 
 <!-- Dashboard -->
 <li class="menu-item {{ $currentRoute == 'wali.dashboard' ? 'active' : '' }}">
@@ -16,6 +52,16 @@
         <div>Dashboard</div>
     </a>
 </li>
+
+@if($hasMultipleKelas)
+<!-- Pilih Kelas -->
+<li class="menu-item {{ $currentRoute == 'wali.pilih-kelas' ? 'active' : '' }}">
+    <a href="{{ route('wali.pilih-kelas') }}" class="menu-link">
+        <i class="menu-icon fas fa-exchange-alt"></i>
+        <div>Pilih Kelas</div>
+    </a>
+</li>
+@endif
 
 <!-- Menu Header - Akademik -->
 <li class="menu-header small text-uppercase">

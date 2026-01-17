@@ -7,13 +7,14 @@ use App\Models\Kelas;
 use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
 use App\Models\Cabang;
+use App\Models\WaliKelasAssignment;
 use Illuminate\Http\Request;
 
 class WaliKelasController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelas'])->withCount('siswa');
+        $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelasAssignments.tenagaPendidik.user'])->withCount('siswa');
 
         // Filter by tahun ajaran
         if ($request->filled('tahun_ajaran_id')) {
@@ -31,7 +32,7 @@ class WaliKelasController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('nama_kelas', 'like', "%{$search}%")
                   ->orWhere('kode_kelas', 'like', "%{$search}%")
-                  ->orWhereHas('waliKelas', fn($wq) => $wq->where('nama_lengkap', 'like', "%{$search}%"));
+                  ->orWhereHas('waliKelasAssignments.tenagaPendidik', fn($wq) => $wq->where('nama_lengkap', 'like', "%{$search}%"));
             });
         }
 
@@ -48,9 +49,9 @@ class WaliKelasController extends Controller
         // Filter by status (assigned/unassigned)
         if ($request->filled('status')) {
             if ($request->status == 'assigned') {
-                $query->whereNotNull('wali_kelas_id');
+                $query->whereHas('waliKelasAssignments');
             } elseif ($request->status == 'unassigned') {
-                $query->whereNull('wali_kelas_id');
+                $query->whereDoesntHave('waliKelasAssignments');
             }
         }
 
@@ -70,7 +71,7 @@ class WaliKelasController extends Controller
         }
 
         // Available wali kelas options
-        $waliKelasOptions = TenagaPendidik::with(['user', 'kelasWali.cabang'])
+        $waliKelasOptions = TenagaPendidik::with(['user', 'waliKelasAssignments.kelas.cabang'])
             ->whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])->where('is_active', true))
             ->orderBy('nama_lengkap')
             ->get();
@@ -79,9 +80,9 @@ class WaliKelasController extends Controller
         $stats = [
             'totalKelas' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
             'kelasWithWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
-                ->whereNotNull('wali_kelas_id')->count(),
+                ->whereHas('waliKelasAssignments')->count(),
             'kelasWithoutWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
-                ->whereNull('wali_kelas_id')->count(),
+                ->whereDoesntHave('waliKelasAssignments')->count(),
             'totalWaliKelas' => TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar']))->count(),
         ];
 
@@ -104,17 +105,30 @@ class WaliKelasController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
 
-        // If wali_kelas_id is provided, check if this wali already assigned to other class
         if ($request->filled('wali_kelas_id')) {
-            // Remove this wali from any other class first (satu wali hanya untuk satu kelas)
-            Kelas::where('wali_kelas_id', $request->wali_kelas_id)
-                ->where('id', '!=', $kelasId)
-                ->update(['wali_kelas_id' => null]);
+            // Check if assignment already exists
+            $exists = WaliKelasAssignment::where('kelas_id', $kelas->id)
+                ->where('tenaga_pendidik_id', $request->wali_kelas_id)
+                ->exists();
 
+            if ($exists) {
+                return redirect()->route('waka.wali-kelas.index')
+                    ->with('info', 'Wali kelas ini sudah ditugaskan ke kelas ' . $kelas->nama_kelas);
+            }
+
+            // Create new assignment (keeping existing assignments - multi-class support)
+            WaliKelasAssignment::create([
+                'tenaga_pendidik_id' => $request->wali_kelas_id,
+                'kelas_id' => $kelas->id,
+                'assigned_at' => now(),
+            ]);
+
+            // Update legacy field for backward compatibility
             $kelas->wali_kelas_id = $request->wali_kelas_id;
             $message = 'Wali kelas berhasil ditugaskan';
         } else {
-            // Remove wali kelas
+            // Remove all wali kelas assignments
+            WaliKelasAssignment::where('kelas_id', $kelas->id)->delete();
             $kelas->wali_kelas_id = null;
             $message = 'Wali kelas berhasil dihapus dari kelas';
         }
@@ -127,10 +141,10 @@ class WaliKelasController extends Controller
 
     public function show(Kelas $kelas)
     {
-        $kelas->load(['waliKelas', 'siswa', 'tahunAjaran', 'cabang']);
+        $kelas->load(['waliKelasAssignments.tenagaPendidik.user', 'siswa', 'tahunAjaran', 'cabang']);
 
         // Available wali kelas options
-        $waliKelasOptions = TenagaPendidik::with(['user', 'kelasWali.cabang'])
+        $waliKelasOptions = TenagaPendidik::with(['user', 'waliKelasAssignments.kelas.cabang'])
             ->whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])->where('is_active', true))
             ->orderBy('nama_lengkap')
             ->get();
@@ -147,7 +161,7 @@ class WaliKelasController extends Controller
 
     public function print(Request $request)
     {
-        $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelas'])->withCount('siswa');
+        $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelasAssignments.tenagaPendidik'])->withCount('siswa');
 
         // Apply same filters
         if ($request->filled('tahun_ajaran_id')) {
@@ -169,9 +183,9 @@ class WaliKelasController extends Controller
 
         if ($request->filled('status')) {
             if ($request->status == 'assigned') {
-                $query->whereNotNull('wali_kelas_id');
+                $query->whereHas('waliKelasAssignments');
             } elseif ($request->status == 'unassigned') {
-                $query->whereNull('wali_kelas_id');
+                $query->whereDoesntHave('waliKelasAssignments');
             }
         }
 
