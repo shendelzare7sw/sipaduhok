@@ -12,7 +12,7 @@ class LandingPageController extends Controller
         $page = LandingPage::with('sections')->where('slug', $slug)->first();
 
         if (!$page) {
-            return null; // Handle 404 gracefully in view or abort
+            abort(404, "Page content for '{$slug}' not found. Please contact administrator to set up the landing page.");
         }
 
         // Transform content for easier access in view

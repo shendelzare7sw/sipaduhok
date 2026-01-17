@@ -98,6 +98,16 @@ class InfoPembayaranController extends Controller
 
             $message = 'Informasi pembayaran tunai berhasil diperbarui.';
 
+        } elseif ($type === 'midtrans_toggle') {
+            // Toggle enable/disable Midtrans
+            $data = [
+                'midtrans_enabled' => $request->has('midtrans_enabled'),
+                'updated_by' => auth()->id(),
+            ];
+
+            $status = $request->has('midtrans_enabled') ? 'diaktifkan' : 'dinonaktifkan';
+            $message = "Metode pembayaran Midtrans berhasil {$status}.";
+
         } else {
             return redirect()->back()->with('error', 'Tipe update tidak valid.');
         }

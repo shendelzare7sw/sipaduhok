@@ -20,6 +20,7 @@ class InfoPembayaran extends Model
         'midtrans_server_key',
         'midtrans_client_key',
         'midtrans_is_production',
+        'midtrans_enabled',
         'tunai_lokasi',
         'tunai_jam_operasional',
         'tunai_deskripsi',
@@ -28,6 +29,7 @@ class InfoPembayaran extends Model
 
     protected $casts = [
         'midtrans_is_production' => 'boolean',
+        'midtrans_enabled' => 'boolean',
     ];
 
     /**
@@ -71,6 +73,15 @@ class InfoPembayaran extends Model
         return !empty($this->midtrans_merchant_id) && 
                !empty($this->midtrans_server_key) && 
                !empty($this->midtrans_client_key);
+    }
+
+    /**
+     * Check apakah Midtrans aktif (dikonfigurasi DAN di-enable)
+     * Digunakan untuk menentukan apakah opsi Midtrans ditampilkan ke orang tua
+     */
+    public function isMidtransEnabled()
+    {
+        return $this->hasMidtrans() && ($this->midtrans_enabled ?? true);
     }
 
     /**

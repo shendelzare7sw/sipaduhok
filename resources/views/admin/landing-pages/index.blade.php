@@ -2,6 +2,9 @@
 
 @section('title', 'Manajemen Landing Page')
 
+@section('page-title', 'Manajemen Landing Page')
+@section('page-subtitle', 'Kelola konten halaman landing website')
+
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection

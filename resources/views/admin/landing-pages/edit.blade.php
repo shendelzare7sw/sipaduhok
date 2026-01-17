@@ -2,6 +2,9 @@
 
 @section('title', 'Edit ' . $landingPage->title)
 
+@section('page-title', 'Manajemen Landing Page')
+@section('page-subtitle', 'Edit Konten ' . $landingPage->title)
+
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
@@ -40,7 +43,8 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4">
-        <span class="text-muted fw-light">Manajemen Landing Page /</span> Edit {{ $landingPage->title }}
+        <a href="{{ route('admin.landing-pages.index') }}" class="text-muted fw-light" style="text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#696cff'" onmouseout="this.style.color=''">Manajemen Landing Page</a>
+        <span class="text-muted fw-light">/</span> Edit {{ $landingPage->title }}
     </h4>
 
     <div class="row">

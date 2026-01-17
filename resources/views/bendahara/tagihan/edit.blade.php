@@ -66,6 +66,17 @@
             </h6>
         </div>
         <div class="card-body">
+            {{-- Info Alert tentang SPP --}}
+            <div class="alert alert-info border-start border-info border-4 mb-4">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-info-circle me-2 mt-1"></i>
+                    <div>
+                        <strong>Informasi Penting:</strong>
+                        <p class="mb-0 mt-1">Untuk tagihan <strong>SPP Bulanan</strong>, silakan gunakan fitur <a href="{{ route('bendahara.tagihan.generate-spp') }}" class="alert-link fw-bold">"Generate SPP"</a> yang akan membuat 12 tagihan SPP otomatis (Januari-Desember) dengan tanggal jatuh tempo yang lebih akurat.</p>
+                    </div>
+                </div>
+            </div>
+
             <form action="{{ route('bendahara.tagihan.update', $siswa->id) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -93,12 +104,11 @@
                                     <td class="align-middle">
                                         <div class="input-group" style="max-width: 250px;">
                                             <span class="input-group-text bg-white">Rp</span>
-                                            <input type="number"
+                                            <input type="text"
                                                    name="tagihan[{{ $key }}]"
-                                                   class="form-control"
-                                                   value="{{ old('tagihan.'.$key, $tagihanExist[$key] ?? 0) }}"
-                                                   min="0"
-                                                   step="1000">
+                                                   class="form-control currency-input"
+                                                   value="{{ old('tagihan.'.$key, number_format($tagihanExist[$key] ?? 0, 0, ',', '.')) }}"
+                                                   placeholder="0">
                                         </div>
                                         @error('tagihan.'.$key)
                                             <small class="text-danger">{{ $message }}</small>
@@ -154,4 +164,23 @@
 
 </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    // Handle form submission - parse currency values before submit
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(e) {
+            // Parse all currency inputs before submission
+            const currencyInputs = form.querySelectorAll('.currency-input');
+            currencyInputs.forEach(input => {
+                // Remove dots (thousand separators) before submit
+                const rawValue = input.value.replace(/\./g, '');
+                input.value = rawValue || '0';
+            });
+        });
+    });
+</script>
 @endsection

@@ -129,10 +129,7 @@
                                     @foreach($items as $item)
                                         <tr>
                                             <td>
-                                                <div class="fw-bold">{{ $item->keterangan }}</div>
-                                                @if($item->bulan && $item->tahun)
-                                                    <small class="text-muted">{{ date('F Y', mktime(0, 0, 0, $item->bulan, 1, $item->tahun)) }}</small>
-                                                @endif
+                                                <div class="fw-bold">{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}</div>
                                             </td>
                                             <td class="text-nowrap">
                                                 <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
@@ -221,7 +218,7 @@
                                                                         class="form-select @if($errors->any() && old('tagihan_id') == $item->id) @error('metode_pembayaran') is-invalid @enderror @endif"
                                                                         required>
                                                                     <option value="">-- Pilih Metode Pembayaran --</option>
-                                                                    @if($infoPembayaran->hasMidtrans())
+                                                                    @if($infoPembayaran->isMidtransEnabled())
                                                                     <option value="midtrans" {{ old('tagihan_id') == $item->id && old('metode_pembayaran') == 'midtrans' ? 'selected' : '' }}>
                                                                         💳 Pembayaran Digital (Otomatis)
                                                                     </option>
@@ -241,7 +238,7 @@
                                                                     @enderror
                                                                 @endif
 
-                                                                @if(!$infoPembayaran->hasMidtrans() && !$infoPembayaran->hasRekeningBank())
+                                                                @if(!$infoPembayaran->isMidtransEnabled() && !$infoPembayaran->hasRekeningBank())
                                                                 <div class="alert alert-warning mt-2 mb-0 py-2 px-3">
                                                                     <small>
                                                                         <i class="fas fa-exclamation-triangle me-1"></i>
@@ -404,10 +401,7 @@
                                 <tr>
                                     <td class="text-nowrap">{{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d M Y') }}</td>
                                     <td>
-                                        <div class="fw-semibold">{{ $bayar->tagihan->jenis_tagihan ?? '-' }}</div>
-                                        @if($bayar->tagihan->keterangan)
-                                            <small class="text-muted">{{ $bayar->tagihan->keterangan }}</small>
-                                        @endif
+                                        <div class="fw-semibold">{{ $bayar->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan ?? '-')) }}</div>
                                     </td>
                                     <td class="text-end fw-bold">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
                                     <td>

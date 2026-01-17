@@ -299,9 +299,27 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'index'])->name('index');
                 Route::get('/bulk-create', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'bulkCreate'])->name('bulk-create');
                 Route::post('/bulk-create', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'bulkCreate'])->name('bulk-create.store');
+
+                // Custom Tagihan
+                Route::get('/create-custom', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'createCustom'])->name('create-custom');
+                Route::post('/store-custom', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'storeCustom'])->name('store-custom');
+
+                // Generate SPP
+                Route::get('/generate-spp', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'generateSppForm'])->name('generate-spp');
+                Route::post('/generate-spp', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'generateSpp'])->name('generate-spp.store');
+
+                // Duplicate Tagihan
+                Route::get('/duplicate', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'duplicateForm'])->name('duplicate');
+                Route::post('/duplicate', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'duplicate'])->name('duplicate.store');
+
+                // API Routes
+                Route::get('/api/siswa-by-kelas/{kelas}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'getSiswaByKelas'])->name('api.siswa-by-kelas');
+                Route::get('/api/tagihan-preview/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'getTagihanPreview'])->name('api.tagihan-preview');
+
                 Route::get('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'show'])->name('show');
                 Route::get('/{siswa}/edit', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'edit'])->name('edit');
                 Route::put('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'update'])->name('update');
+                Route::delete('/{tagihan}/destroy-item', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'destroyItem'])->name('destroy-item');
                 Route::get('/{siswa}/cetak', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'cetak'])->name('cetak');
             });
 
@@ -663,9 +681,27 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [TagihanController::class, 'index'])->name('index');
             Route::get('/bulk-create', [TagihanController::class, 'bulkCreate'])->name('bulk-create');
             Route::post('/bulk-create', [TagihanController::class, 'bulkCreate'])->name('bulk-create.store');
+
+            // Custom Tagihan
+            Route::get('/create-custom', [TagihanController::class, 'createCustom'])->name('create-custom');
+            Route::post('/store-custom', [TagihanController::class, 'storeCustom'])->name('store-custom');
+
+            // Generate SPP
+            Route::get('/generate-spp', [TagihanController::class, 'generateSppForm'])->name('generate-spp');
+            Route::post('/generate-spp', [TagihanController::class, 'generateSpp'])->name('generate-spp.store');
+
+            // Duplicate Tagihan
+            Route::get('/duplicate', [TagihanController::class, 'duplicateForm'])->name('duplicate');
+            Route::post('/duplicate', [TagihanController::class, 'duplicate'])->name('duplicate.store');
+
+            // API Routes
+            Route::get('/api/siswa-by-kelas/{kelas}', [TagihanController::class, 'getSiswaByKelas'])->name('api.siswa-by-kelas');
+            Route::get('/api/tagihan-preview/{siswa}', [TagihanController::class, 'getTagihanPreview'])->name('api.tagihan-preview');
+
             Route::get('/{siswa}', [TagihanController::class, 'show'])->name('show');
             Route::get('/{siswa}/edit', [TagihanController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [TagihanController::class, 'update'])->name('update');
+            Route::delete('/{tagihan}/destroy-item', [TagihanController::class, 'destroyItem'])->name('destroy-item');
             Route::get('/{siswa}/cetak', [TagihanController::class, 'cetak'])->name('cetak');
         });
 

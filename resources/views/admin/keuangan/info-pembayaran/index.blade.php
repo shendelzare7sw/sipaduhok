@@ -416,17 +416,44 @@
                             </div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <div
-                                class="status-box {{ ($infoPembayaran && $infoPembayaran->midtrans_merchant_id) ? 'active' : 'inactive' }}">
-                                <div class="d-flex align-items-center">
-                                    <i
-                                        class="fas fa-credit-card fa-2x me-3 text-{{ ($infoPembayaran && $infoPembayaran->midtrans_merchant_id) ? 'success' : 'danger' }}"></i>
-                                    <div>
-                                        <div class="fw-bold text-gray-800">Gateway Midtrans</div>
-                                        <div class="small">
-                                            {{ ($infoPembayaran && $infoPembayaran->midtrans_merchant_id) ? 'Kanal Aktif' : 'Belum Terhubung' }}
+                            @php
+                                $midtransConfigured = $infoPembayaran && $infoPembayaran->hasMidtrans();
+                                $midtransEnabled = $infoPembayaran && $infoPembayaran->isMidtransEnabled();
+                            @endphp
+                            <div class="status-box {{ $midtransEnabled ? 'active' : 'inactive' }}">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-credit-card fa-2x me-3 text-{{ $midtransEnabled ? 'success' : ($midtransConfigured ? 'warning' : 'danger') }}"></i>
+                                        <div>
+                                            <div class="fw-bold text-gray-800">Gateway Midtrans</div>
+                                            <div class="small">
+                                                @if(!$midtransConfigured)
+                                                    Belum Terhubung
+                                                @elseif($midtransEnabled)
+                                                    <span class="text-success">Kanal Aktif</span>
+                                                @else
+                                                    <span class="text-warning">Dinonaktifkan</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
+                                    @if($midtransConfigured)
+                                    <form action="{{ route('admin.keuangan.info-pembayaran.update') }}" method="POST" class="ms-2">
+                                        @csrf
+                                        <input type="hidden" name="type" value="midtrans_toggle">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" 
+                                                   class="form-check-input" 
+                                                   role="switch" 
+                                                   id="midtransEnabledToggle"
+                                                   name="midtrans_enabled" 
+                                                   value="1"
+                                                   {{ $infoPembayaran->midtrans_enabled ? 'checked' : '' }}
+                                                   onchange="this.form.submit()"
+                                                   title="{{ $infoPembayaran->midtrans_enabled ? 'Klik untuk menonaktifkan' : 'Klik untuk mengaktifkan' }}">
+                                        </div>
+                                    </form>
+                                    @endif
                                 </div>
                             </div>
                         </div>

@@ -58,7 +58,7 @@
                             <option value="">-- Semua Kelas --</option>
                             @foreach($kelasList as $kelas)
                                 <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
-                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
+                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
                                 </option>
                             @endforeach
                         </select>
@@ -90,8 +90,24 @@
             </span>
         </div>
         <div class="col-md-6 text-end">
-            <a href="{{ route('bendahara.tagihan.bulk-create') }}" class="btn btn-success btn-sm shadow-sm fw-bold px-4 py-2">
-                <i class="fas fa-plus-circle me-1"></i> BUAT TAGIHAN MASSAL
+            <div class="btn-group shadow-sm me-2" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-plus-circle me-1"></i> Buat Tagihan
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.bulk-create') }}">
+                        <i class="fas fa-users text-success me-2"></i> Tagihan Massal (Per Kelas)
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.create-custom') }}">
+                        <i class="fas fa-user-plus text-primary me-2"></i> Tagihan Custom (Individual)
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.generate-spp') }}">
+                        <i class="fas fa-calendar-alt text-info me-2"></i> Generate SPP Bulanan
+                    </a></li>
+                </ul>
+            </div>
+            <a href="{{ route('bendahara.tagihan.duplicate') }}" class="btn btn-outline-info btn-sm shadow-sm fw-bold px-3">
+                <i class="fas fa-copy me-1"></i> Duplikasi
             </a>
         </div>
     </div>

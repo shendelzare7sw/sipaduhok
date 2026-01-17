@@ -135,5 +135,47 @@ class TagihanController extends BendaharaTagihanController
             'template_tagihan.xlsx'
         );
     }
+
+    /**
+     * Override createCustom method to use admin view
+     */
+    public function createCustom()
+    {
+        $response = parent::createCustom();
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.tagihan.create-custom', $response->getData());
+        }
+
+        return $response;
+    }
+
+    /**
+     * Override generateSppForm method to use admin view
+     */
+    public function generateSppForm()
+    {
+        $response = parent::generateSppForm();
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.tagihan.generate-spp', $response->getData());
+        }
+
+        return $response;
+    }
+
+    /**
+     * Override duplicateForm method to use admin view
+     */
+    public function duplicateForm()
+    {
+        $response = parent::duplicateForm();
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.tagihan.duplicate', $response->getData());
+        }
+
+        return $response;
+    }
 }
 

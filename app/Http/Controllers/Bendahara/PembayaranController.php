@@ -9,6 +9,7 @@ use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use App\Models\FinancialAuditLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -173,7 +174,7 @@ class PembayaranController extends Controller
                 'catatan' => $request->catatan,
             ]);
 
-            // Jika disetujui, update status tagihan
+            // Jika disetujui, update status tagihan dan batalkan pembayaran pending lainnya
             if ($request->status_validasi === 'disetujui' && $pembayaran->tagihan) {
                 $tagihan = $pembayaran->tagihan;
                 
@@ -184,6 +185,40 @@ class PembayaranController extends Controller
 
                 if ($totalBayar >= $tagihan->jumlah) {
                     $tagihan->update(['status' => 'sudah_bayar']);
+                    
+                    // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
+                    // Ini mencegah double payment untuk tagihan yang sama
+                    $cancelledCount = Pembayaran::where('tagihan_id', $tagihan->id)
+                        ->where('siswa_id', $pembayaran->siswa_id)
+                        ->where('id', '!=', $pembayaran->id)
+                        ->where('status_validasi', 'pending')
+                        ->update([
+                            'status_validasi' => 'ditolak',
+                            'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: ' . $pembayaran->kode_pembayaran . ')',
+                            'divalidasi_oleh' => auth()->id(),
+                            'tanggal_validasi' => now(),
+                        ]);
+
+                    if ($cancelledCount > 0) {
+                        // Audit log untuk pembatalan otomatis
+                        FinancialAuditLog::create([
+                            'user_id' => auth()->id(),
+                            'action' => 'auto_cancel_duplicates',
+                            'model_type' => 'Pembayaran',
+                            'model_id' => $pembayaran->id,
+                            'old_values' => null,
+                            'new_values' => json_encode([
+                                'cancelled_count' => $cancelledCount,
+                                'reason' => 'duplicate_payment_prevention',
+                            ]),
+                            'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$pembayaran->kode_pembayaran} disetujui",
+                            'ip_address' => request()->ip(),
+                            'user_agent' => request()->userAgent(),
+                        ]);
+                    }
+                } elseif ($totalBayar > 0) {
+                    // Partial payment - set status cicilan
+                    $tagihan->update(['status' => 'cicilan']);
                 }
             }
 
@@ -292,7 +327,7 @@ class PembayaranController extends Controller
                     'catatan' => $request->catatan,
                 ]);
 
-                // Jika validasi langsung, update status tagihan
+                // Jika validasi langsung, update status tagihan dan batalkan pending lainnya
                 if ($validasiLangsung) {
                     $totalBayar = Pembayaran::where('tagihan_id', $tagihanId)
                         ->where('status_validasi', 'disetujui')
@@ -300,6 +335,37 @@ class PembayaranController extends Controller
 
                     if ($totalBayar >= $tagihan->jumlah) {
                         $tagihan->update(['status' => 'sudah_bayar']);
+                        
+                        // Batalkan semua pembayaran pending lainnya untuk tagihan ini
+                        $cancelledCount = Pembayaran::where('tagihan_id', $tagihanId)
+                            ->where('siswa_id', $siswaId)
+                            ->where('id', '!=', $pembayaran->id)
+                            ->where('status_validasi', 'pending')
+                            ->update([
+                                'status_validasi' => 'ditolak',
+                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: ' . $kodePembayaran . ')',
+                                'divalidasi_oleh' => auth()->id(),
+                                'tanggal_validasi' => now(),
+                            ]);
+
+                        if ($cancelledCount > 0) {
+                            FinancialAuditLog::create([
+                                'user_id' => auth()->id(),
+                                'action' => 'auto_cancel_duplicates',
+                                'model_type' => 'Pembayaran',
+                                'model_id' => $pembayaran->id,
+                                'old_values' => null,
+                                'new_values' => json_encode([
+                                    'cancelled_count' => $cancelledCount,
+                                    'reason' => 'cash_payment_at_counter',
+                                ]),
+                                'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending saat pembayaran tunai di loket untuk tagihan yang sama",
+                                'ip_address' => request()->ip(),
+                                'user_agent' => request()->userAgent(),
+                            ]);
+                        }
+                    } elseif ($totalBayar > 0) {
+                        $tagihan->update(['status' => 'cicilan']);
                     }
                 }
             }
@@ -357,6 +423,37 @@ class PembayaranController extends Controller
 
             if ($totalBayar >= $tagihan->jumlah) {
                 $tagihan->update(['status' => 'sudah_bayar']);
+                
+                // Batalkan semua pembayaran pending lainnya untuk tagihan ini
+                $cancelledCount = Pembayaran::where('tagihan_id', $tagihan->id)
+                    ->where('siswa_id', $siswaId)
+                    ->where('id', '!=', $pembayaran->id)
+                    ->where('status_validasi', 'pending')
+                    ->update([
+                        'status_validasi' => 'ditolak',
+                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: ' . $kodePembayaran . ')',
+                        'divalidasi_oleh' => auth()->id(),
+                        'tanggal_validasi' => now(),
+                    ]);
+
+                if ($cancelledCount > 0) {
+                    FinancialAuditLog::create([
+                        'user_id' => auth()->id(),
+                        'action' => 'auto_cancel_duplicates',
+                        'model_type' => 'Pembayaran',
+                        'model_id' => $pembayaran->id,
+                        'old_values' => null,
+                        'new_values' => json_encode([
+                            'cancelled_count' => $cancelledCount,
+                            'reason' => 'cash_payment_direct_validation',
+                        ]),
+                        'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending saat pembayaran tunai langsung divalidasi",
+                        'ip_address' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ]);
+                }
+            } elseif ($totalBayar > 0) {
+                $tagihan->update(['status' => 'cicilan']);
             }
 
             DB::commit();

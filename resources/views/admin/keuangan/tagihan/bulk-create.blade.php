@@ -29,6 +29,10 @@
                     Fitur ini akan membuat tagihan untuk <strong>seluruh siswa aktif</strong> dalam kelas yang dipilih.
                     Jika siswa sudah memiliki tagihan dengan jenis yang sama, maka tagihan tersebut akan <strong>diperbarui</strong>.
                 </p>
+                <p class="mb-0 mt-2">
+                    <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                    Untuk tagihan <strong>SPP Bulanan</strong>, gunakan fitur <a href="{{ route('admin.keuangan.tagihan.generate-spp') }}" class="alert-link fw-bold">"Generate SPP"</a> yang lebih akurat.
+                </p>
             </div>
         </div>
     </div>
@@ -51,7 +55,7 @@
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($kelasList as $kelas)
                                 <option value="{{ $kelas->id }}" {{ old('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
+                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
                                 </option>
                             @endforeach
                         </select>
@@ -73,28 +77,35 @@
 
                 <hr class="my-4">
 
-                <h5 class="mb-3 text-gray-800">
-                    <i class="fas fa-money-bill-wave text-warning me-2"></i>Nominal Tagihan
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 text-gray-800">
+                        <i class="fas fa-money-bill-wave text-warning me-2"></i>Nominal Tagihan
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTagihanField()">
+                        <i class="fas fa-plus me-1"></i> Tambah Jenis Tagihan
+                    </button>
+                </div>
                 <p class="text-muted mb-3 small">
                     Masukkan nominal untuk setiap jenis tagihan. Kosongkan atau isi 0 jika tidak ingin membuat tagihan jenis tersebut.
                 </p>
 
-                <div class="row g-3 mb-4">
+                <div class="row g-3 mb-4" id="tagihan-fields-container">
                     @foreach($jenisTagihan as $key => $label)
-                        <div class="col-md-6 col-lg-4">
-                            <div class="p-3 bg-light rounded shadow-sm">
+                        <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="default">
+                            <div class="p-3 bg-light rounded shadow-sm position-relative">
                                 <label class="form-label fw-bold small mb-2">{{ $label }}</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white">Rp</span>
-                                    <input type="number"
+                                    <input type="text"
                                            name="tagihan[{{ $key }}]"
-                                           class="form-control"
-                                           value="{{ old('tagihan.'.$key, 0) }}"
-                                           min="0"
-                                           step="1000"
+                                           class="form-control currency-input"
+                                           value="{{ old('tagihan.'.$key, '0') }}"
                                            placeholder="0">
                                 </div>
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                        onclick="removeTagihanField(this)" style="padding: 2px 8px;">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
                     @endforeach
@@ -129,4 +140,78 @@
 
 </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    let customFieldCounter = 0;
+
+    function addTagihanField() {
+        customFieldCounter++;
+        const container = document.getElementById('tagihan-fields-container');
+
+        const fieldHTML = `
+            <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="custom">
+                <div class="p-3 bg-light rounded shadow-sm position-relative border border-primary">
+                    <label class="form-label fw-bold small mb-2">
+                        <input type="text"
+                               name="custom_jenis_tagihan[${customFieldCounter}]"
+                               class="form-control form-control-sm mb-2"
+                               placeholder="Nama Jenis Tagihan (contoh: Les Tambahan)"
+                               required>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">Rp</span>
+                        <input type="text"
+                               name="custom_tagihan[${customFieldCounter}]"
+                               class="form-control currency-input"
+                               placeholder="0">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                            onclick="removeTagihanField(this)" style="padding: 2px 8px;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <small class="text-muted d-block mt-1">
+                        <i class="fas fa-info-circle me-1"></i>Jenis tagihan custom
+                    </small>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', fieldHTML);
+
+        // Re-initialize currency formatter for new field
+        if (typeof currencyFormatter !== 'undefined' && currencyFormatter.bindInputs) {
+            currencyFormatter.bindInputs();
+        }
+    }
+
+    function removeTagihanField(button) {
+        const fieldItem = button.closest('.tagihan-field-item');
+
+        showConfirm({
+            title: 'Konfirmasi Hapus',
+            message: 'Yakin ingin menghapus field tagihan ini?',
+            type: 'warning',
+            confirmText: 'Ya, Hapus',
+            onConfirm: function() {
+                fieldItem.remove();
+            }
+        });
+    }
+
+    // Handle form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(e) {
+            // Parse all currency inputs
+            const currencyInputs = form.querySelectorAll('.currency-input');
+            currencyInputs.forEach(input => {
+                const rawValue = input.value.replace(/\./g, '');
+                input.value = rawValue || '0';
+            });
+        });
+    });
+</script>
 @endsection

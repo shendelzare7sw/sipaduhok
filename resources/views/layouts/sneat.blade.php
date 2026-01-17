@@ -929,6 +929,15 @@
         </div>
     </div>
 
+    <!-- Confirm Modal Component (Reusable) -->
+    <x-confirm-modal />
+
+    <!-- Currency Format Script -->
+    <script src="{{ asset('js/currency-format.js') }}"></script>
+
+    <!-- Confirm Modal Script -->
+    <script src="{{ asset('js/confirm-modal.js') }}"></script>
+
     @yield('scripts')
 </body>
 </html>

@@ -79,7 +79,7 @@
                 <div class="stat-content">
                     <div class="stat-title">Pembayaran Ditolak</div>
                     <div class="stat-number">{{ $stats['ditolak'] }}</div>
-                    <div class="stat-label-sub">Butuh Revisi Siswa</div>
+                    <div class="stat-label-sub">Transaksi Dibatalkan</div>
                 </div>
                 <div class="stat-icon-bg"><i class="fas fa-times-circle"></i></div>
             </div>

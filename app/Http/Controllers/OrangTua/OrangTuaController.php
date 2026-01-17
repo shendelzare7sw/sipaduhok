@@ -201,7 +201,7 @@ class OrangTuaController extends Controller
                             'id' => 'TAGIHAN-' . $tagihan->id,
                             'price' => (int) $existingPendingPayment->jumlah_bayar,
                             'quantity' => 1,
-                            'name' => $tagihan->jenis_tagihan . ' - ' . $tagihan->keterangan,
+                            'name' => $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)),
                         ]
                     ];
 
@@ -239,7 +239,7 @@ class OrangTuaController extends Controller
                         'id' => 'TAGIHAN-' . $tagihan->id,
                         'price' => (int) $validated['jumlah_bayar'],
                         'quantity' => 1,
-                        'name' => $tagihan->jenis_tagihan . ' - ' . $tagihan->keterangan,
+                        'name' => $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)),
                     ]
                 ];
 
@@ -649,7 +649,7 @@ class OrangTuaController extends Controller
                         'id' => 'TAGIHAN-' . $pembayaran->tagihan_id,
                         'price' => (int) $pembayaran->jumlah_bayar,
                         'quantity' => 1,
-                        'name' => $pembayaran->tagihan->jenis_tagihan . ' - ' . $pembayaran->tagihan->nama_tagihan,
+                        'name' => $pembayaran->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan)),
                     ]
                 ];
 

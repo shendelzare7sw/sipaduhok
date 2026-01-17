@@ -15,6 +15,7 @@ class Tagihan extends Model
         'siswa_id',
         'tahun_ajaran_id',
         'jenis_tagihan',
+        'keterangan',
         'jumlah',
         'tanggal_jatuh_tempo',
         'status',
