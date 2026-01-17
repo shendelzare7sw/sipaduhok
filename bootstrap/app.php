@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.level' => \App\Http\Middleware\EnsureRoleLevel::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
+        
+        // Exclude Midtrans webhook from CSRF verification
+        // This is required because Midtrans sends POST requests from external servers
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/*',
+            'midtrans/notification',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
