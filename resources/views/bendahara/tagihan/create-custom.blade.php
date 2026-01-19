@@ -9,7 +9,29 @@
 @endsection
 
 @section('styles')
+    {{-- SweetAlert2 --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
+        /* Custom SweetAlert styling to match theme */
+        .swal2-popup {
+            font-family: 'Public Sans', sans-serif;
+            border-radius: 1rem;
+        }
+
+        .swal2-title {
+            font-size: 1.5rem;
+            color: #566a7f;
+        }
+
+        .swal2-html-container {
+            color: #697a8d;
+        }
+
+        .btn-confirm-swal {
+            padding: 0.5rem 2rem;
+            font-weight: 600;
+        }
+
         .siswa-table thead th {
             background: #f8f9fc;
             color: #4e73df;
@@ -267,37 +289,13 @@
 
 
 
-    <!-- Confirm Modal -->
-    <div class="modal fade" id="confirmTagihanModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">
-                        <i class="bx bx-error me-2"></i>Konfirmasi Tagihan Custom
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <i class="bx bx-error text-warning" style="font-size: 4rem;"></i>
-                    </div>
-                    <p id="confirmTagihanMessage" class="text-center mb-0"></p>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bx bx-x me-1"></i> Batal
-                    </button>
-                    <button type="button" class="btn btn-warning" id="confirmTagihanBtn">
-                        <i class="bx bx-check me-1"></i> Ya, Simpan
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Confirm Modal Removed (Replaced by SweetAlert2) --}}
 
 @endsection
 
 @section('scripts')
+    {{-- SweetAlert2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const filterCabang = document.getElementById('filterCabang');
@@ -351,12 +349,7 @@
             filterKelas.addEventListener('change', filterSiswa);
             searchInput.addEventListener('input', filterSiswa);
 
-            // Confirm button handler
-            document.getElementById('confirmTagihanBtn').addEventListener('click', function () {
-                const jumlahInput = document.getElementById('jumlah');
-                jumlahInput.value = jumlahInput.value.replace(/\./g, '') || '0';
-                document.getElementById('customTagihanForm').submit();
-            });
+            // Confirm button handler (Removed - specific logic moved to SwAl callback)
         });
 
         function toggleSelectAll() {
@@ -377,7 +370,17 @@
             const checked = document.querySelectorAll('.siswa-checkbox:checked:not(#selectAll)');
 
             if (checked.length === 0) {
-                alert('Silakan pilih minimal satu siswa!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Belum ada siswa!',
+                    text: 'Silakan pilih minimal satu siswa dari daftar.',
+                    confirmButtonText: 'Oke',
+                    confirmButtonColor: '#696cff',
+                    customClass: {
+                        confirmButton: 'btn btn-primary btn-confirm-swal'
+                    },
+                    buttonsStyling: false
+                });
                 return;
             }
 
@@ -385,22 +388,62 @@
             const jumlah = document.getElementById('jumlah').value;
 
             if (!jenisTagihan) {
-                alert('Silakan isi jenis tagihan!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Jenis Tagihan Kosong',
+                    text: 'Silakan isi jenis tagihan terlebih dahulu.',
+                    confirmButtonText: 'Oke',
+                    confirmButtonColor: '#696cff',
+                    customClass: {
+                        confirmButton: 'btn btn-primary btn-confirm-swal'
+                    },
+                    buttonsStyling: false
+                });
                 return;
             }
 
             if (!jumlah || jumlah === '0') {
-                alert('Silakan isi jumlah tagihan!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nominal Kosong',
+                    text: 'Silakan isi jumlah tagihan dengan benar.',
+                    confirmButtonText: 'Oke',
+                    confirmButtonColor: '#696cff',
+                    customClass: {
+                        confirmButton: 'btn btn-primary btn-confirm-swal'
+                    },
+                    buttonsStyling: false
+                });
                 return;
             }
 
-            // Set modal message
-            document.getElementById('confirmTagihanMessage').innerHTML =
-                `Anda akan membuat tagihan "<strong>${jenisTagihan}</strong>" dengan nominal <strong>Rp ${jumlah}</strong> untuk <strong>${checked.length}</strong> siswa. Lanjutkan?`;
-
-            // Show modal
-            const confirmModal = new bootstrap.Modal(document.getElementById('confirmTagihanModal'));
-            confirmModal.show();
+            // Custom SweetAlert Confirmation
+            Swal.fire({
+                title: 'Konfirmasi Tagihan',
+                html: `Anda akan membuat tagihan "<strong>${jenisTagihan}</strong>"<br>
+                                   dengan nominal <strong>Rp ${jumlah}</strong><br>
+                                   untuk <strong>${checked.length}</strong> siswa.<br><br>
+                                   <small class="text-muted">Proses ini tidak dapat dibatalkan secara otomatis.</small>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save me-1"></i> Ya, Simpan',
+                cancelButtonText: '<i class="fas fa-times me-1"></i> Batal',
+                confirmButtonColor: '#696cff',
+                cancelButtonColor: '#8592a3',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-2',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false,
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const jumlahInput = document.getElementById('jumlah');
+                    jumlahInput.value = jumlahInput.value.replace(/\./g, '') || '0';
+                    document.getElementById('customTagihanForm').submit();
+                }
+            });
+            // confirmModal code removed as we use SweetAlert now
         }
     </script>
 @endsection

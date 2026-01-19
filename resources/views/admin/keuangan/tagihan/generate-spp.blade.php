@@ -7,7 +7,23 @@
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
+{{-- SweetAlert2 --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+    .swal2-popup {
+        font-family: 'Public Sans', sans-serif;
+        border-radius: 1rem;
+    }
 
+    .swal2-title {
+        font-size: 1.5rem;
+        color: #566a7f;
+    }
+
+    .swal2-html-container {
+        color: #697a8d;
+    }
+</style>
 @section('styles')
     <style>
         .siswa-table thead th {
@@ -292,37 +308,13 @@
     </div>
 
 
-    <!-- Confirm Modal -->
-    <div class="modal fade" id="confirmSppModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">
-                        <i class="bx bx-error me-2"></i>Konfirmasi Generate SPP
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <i class="bx bx-error text-warning" style="font-size: 4rem;"></i>
-                    </div>
-                    <p id="confirmSppMessage" class="text-center mb-0"></p>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bx bx-x me-1"></i> Batal
-                    </button>
-                    <button type="button" class="btn btn-warning" id="confirmSppBtn">
-                        <i class="bx bx-check me-1"></i> Ya, Generate
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Confirm Modal Removed (Replaced by SweetAlert2) --}}
 
 @endsection
 
 @section('scripts')
+    {{-- SweetAlert2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const filterCabang = document.getElementById('filterCabang');
@@ -375,12 +367,7 @@
             filterKelas.addEventListener('change', filterSiswa);
             searchInput.addEventListener('input', filterSiswa);
 
-            // Confirm button handler
-            document.getElementById('confirmSppBtn').addEventListener('click', function () {
-                const jumlahInput = document.getElementById('jumlah_spp');
-                jumlahInput.value = jumlahInput.value.replace(/\./g, '') || '0';
-                document.getElementById('generateSppForm').submit();
-            });
+            // Confirm button handler (removed as we use inline onClick/Swal callback)
         });
 
         function toggleTargetType() {
@@ -415,7 +402,12 @@
             if (targetType === 'kelas') {
                 const kelasSelect = document.getElementById('kelas_id');
                 if (!kelasSelect.value) {
-                    alert('Silakan pilih kelas terlebih dahulu!');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Pilih Kelas',
+                        text: 'Silakan pilih kelas terlebih dahulu!',
+                        confirmButtonColor: '#696cff'
+                    });
                     return;
                 }
                 targetName = kelasSelect.options[kelasSelect.selectedIndex].text;
@@ -423,24 +415,43 @@
             } else {
                 const checked = document.querySelectorAll('.siswa-checkbox:checked:not(#selectAll)');
                 if (checked.length === 0) {
-                    alert('Silakan pilih minimal satu siswa!');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Belum ada siswa',
+                        text: 'Silakan pilih minimal satu siswa!',
+                        confirmButtonColor: '#696cff'
+                    });
                     return;
                 }
                 targetCount = checked.length + ' siswa terpilih';
             }
 
             if (!jumlahSpp || jumlahSpp === '0') {
-                alert('Silakan isi jumlah SPP per bulan!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nominal Kosong',
+                    text: 'Silakan isi jumlah SPP per bulan!',
+                    confirmButtonColor: '#696cff'
+                });
                 return;
             }
 
-            // Set modal message
-            document.getElementById('confirmSppMessage').innerHTML =
-                `Anda akan membuat 12 tagihan SPP dengan nominal <strong>Rp ${jumlahSpp}</strong> untuk <strong>${targetCount}</strong>. Lanjutkan?`;
-
-            // Show modal
-            const confirmModal = new bootstrap.Modal(document.getElementById('confirmSppModal'));
-            confirmModal.show();
+            Swal.fire({
+                title: 'Konfirmasi Generate SPP',
+                html: `Anda akan membuat 12 tagihan SPP dengan nominal <strong>Rp ${jumlahSpp}</strong> untuk <strong>${targetCount}</strong>.<br><br><small class="text-muted">Proses ini akan membuat tagihan untuk satu tahun ajaran penuh.</small>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#696cff',
+                cancelButtonColor: '#8592a3',
+                confirmButtonText: 'Ya, Generate SPP',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const jumlahInput = document.getElementById('jumlah_spp');
+                    jumlahInput.value = jumlahInput.value.replace(/\./g, '') || '0';
+                    document.getElementById('generateSppForm').submit();
+                }
+            });
         }
     </script>
 @endsection

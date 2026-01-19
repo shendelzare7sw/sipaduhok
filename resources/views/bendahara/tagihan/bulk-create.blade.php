@@ -7,7 +7,23 @@
 @section('sidebar-menu')
     @include('bendahara.partials.sneat-sidebar-menu')
 @endsection
+{{-- SweetAlert2 --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+    .swal2-popup {
+        font-family: 'Public Sans', sans-serif;
+        border-radius: 1rem;
+    }
 
+    .swal2-title {
+        font-size: 1.5rem;
+        color: #566a7f;
+    }
+
+    .swal2-html-container {
+        color: #697a8d;
+    }
+</style>
 @section('content')
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
         <div class="container-fluid px-0">
@@ -136,7 +152,8 @@
                         <ul class="mb-0 mt-2">
                             <li>Pastikan kelas yang dipilih sudah benar sebelum menyimpan.</li>
                             <li>Tagihan akan dibuat untuk tahun ajaran:
-                                <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong></li>
+                                <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong>
+                            </li>
                             <li>Proses ini tidak dapat dibatalkan. Jika terjadi kesalahan, Anda harus mengedit tagihan satu
                                 per satu.</li>
                         </ul>
@@ -147,37 +164,13 @@
         </div>
     </div>
 
-    <!-- Confirm Modal for Remove Field -->
-    <div class="modal fade" id="confirmRemoveFieldModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">
-                        <i class="bx bx-error me-2"></i>Konfirmasi Hapus
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <i class="bx bx-error text-warning" style="font-size: 4rem;"></i>
-                    </div>
-                    <p class="text-center mb-0">Yakin ingin menghapus field tagihan ini?</p>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bx bx-x me-1"></i> Batal
-                    </button>
-                    <button type="button" class="btn btn-warning" id="confirmRemoveFieldBtn">
-                        <i class="bx bx-check me-1"></i> Ya, Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Confirm Modal Removed (Replaced by SweetAlert2) --}}
 
 @endsection
 
 @section('scripts')
+    {{-- SweetAlert2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let customFieldCounter = 0;
         let fieldToRemove = null;
@@ -187,32 +180,32 @@
             const container = document.getElementById('tagihan-fields-container');
 
             const fieldHTML = `
-                <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="custom">
-                    <div class="p-3 bg-light rounded shadow-sm position-relative border border-primary">
-                        <label class="form-label fw-bold small mb-2">
-                            <input type="text"
-                                   name="custom_jenis_tagihan[${customFieldCounter}]"
-                                   class="form-control form-control-sm mb-2"
-                                   placeholder="Nama Jenis Tagihan (contoh: Les Tambahan)"
-                                   required>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white">Rp</span>
-                            <input type="text"
-                                   name="custom_tagihan[${customFieldCounter}]"
-                                   class="form-control currency-input"
-                                   placeholder="0">
+                    <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="custom">
+                        <div class="p-3 bg-light rounded shadow-sm position-relative border border-primary">
+                            <label class="form-label fw-bold small mb-2">
+                                <input type="text"
+                                       name="custom_jenis_tagihan[${customFieldCounter}]"
+                                       class="form-control form-control-sm mb-2"
+                                       placeholder="Nama Jenis Tagihan (contoh: Les Tambahan)"
+                                       required>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">Rp</span>
+                                <input type="text"
+                                       name="custom_tagihan[${customFieldCounter}]"
+                                       class="form-control currency-input"
+                                       placeholder="0">
+                            </div>
+                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
+                                    onclick="removeTagihanField(this)" style="padding: 2px 8px;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-info-circle me-1"></i>Jenis tagihan custom
+                            </small>
                         </div>
-                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
-                                onclick="removeTagihanField(this)" style="padding: 2px 8px;">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <small class="text-muted d-block mt-1">
-                            <i class="fas fa-info-circle me-1"></i>Jenis tagihan custom
-                        </small>
                     </div>
-                </div>
-            `;
+                `;
 
             container.insertAdjacentHTML('beforeend', fieldHTML);
 
@@ -224,8 +217,25 @@
 
         function removeTagihanField(button) {
             fieldToRemove = button.closest('.tagihan-field-item');
-            const confirmModal = new bootstrap.Modal(document.getElementById('confirmRemoveFieldModal'));
-            confirmModal.show();
+
+            Swal.fire({
+                title: 'Hapus Field?',
+                text: "Anda yakin ingin menghapus jenis tagihan ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#8592a3',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (fieldToRemove) {
+                        fieldToRemove.remove();
+                        fieldToRemove = null;
+                        Swal.fire('Terhapus!', 'Field tagihan telah dihapus.', 'success');
+                    }
+                }
+            });
         }
 
         // Handle form submission
@@ -241,14 +251,7 @@
                 });
             });
 
-            // Confirm remove field button handler
-            document.getElementById('confirmRemoveFieldBtn').addEventListener('click', function () {
-                if (fieldToRemove) {
-                    fieldToRemove.remove();
-                    fieldToRemove = null;
-                }
-                bootstrap.Modal.getInstance(document.getElementById('confirmRemoveFieldModal')).hide();
-            });
+            // Confirm remove field button handler (removed as we use inline onClick/Swal callback)
         });
     </script>
 @endsection

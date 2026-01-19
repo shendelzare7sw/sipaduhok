@@ -7,7 +7,21 @@
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
-
+    {{-- SweetAlert2 --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .swal2-popup {
+            font-family: 'Public Sans', sans-serif;
+            border-radius: 1rem;
+        }
+        .swal2-title {
+            font-size: 1.5rem;
+            color: #566a7f;
+        }
+        .swal2-html-container {
+            color: #697a8d;
+        }
+    </style>
 @section('content')
 <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
     <div class="container-fluid px-0">
@@ -182,37 +196,13 @@
     </div>
 </div>
 
-<!-- Confirm Modal -->
-<div class="modal fade" id="confirmDuplicateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title">
-                    <i class="bx bx-error me-2"></i>Konfirmasi Duplikasi
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center mb-3">
-                    <i class="bx bx-error text-warning" style="font-size: 4rem;"></i>
-                </div>
-                <p id="confirmDuplicateMessage" class="text-center mb-0"></p>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bx bx-x me-1"></i> Batal
-                </button>
-                <button type="button" class="btn btn-warning" id="confirmDuplicateBtn">
-                    <i class="bx bx-check me-1"></i> Ya, Duplikasi
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+{{-- Confirm Modal Removed (Replaced by SweetAlert2) --}}
 
 @endsection
 
 @section('scripts')
+{{-- SweetAlert2 JS --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sourceSiswaSelect = document.getElementById('source_siswa_id');
@@ -276,10 +266,7 @@
             });
         });
 
-        // Confirm button handler
-        document.getElementById('confirmDuplicateBtn').addEventListener('click', function() {
-            document.getElementById('duplicateForm').submit();
-        });
+        // Confirm button handler (removed as we use inline onClick for confirmDuplicate calling Swal)
     });
 
     function selectAll() {
@@ -303,24 +290,41 @@
         const checkedCount = document.querySelectorAll('.target-siswa-checkbox:checked').length;
 
         if (!sourceSiswaSelect.value) {
-            alert('Pilih siswa sumber terlebih dahulu');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Siswa Sumber',
+                text: 'Silakan pilih siswa sumber terlebih dahulu.',
+                confirmButtonColor: '#696cff'
+            });
             return;
         }
 
         if (checkedCount === 0) {
-            alert('Pilih minimal 1 siswa target');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Belum ada target',
+                text: 'Silakan pilih minimal 1 siswa target.',
+                confirmButtonColor: '#696cff'
+            });
             return;
         }
 
         const sourceName = sourceSiswaSelect.options[sourceSiswaSelect.selectedIndex].text;
 
-        // Set modal message
-        document.getElementById('confirmDuplicateMessage').innerHTML = 
-            `Anda akan menyalin tagihan dari "<strong>${sourceName}</strong>" ke <strong>${checkedCount}</strong> siswa. Lanjutkan?`;
-        
-        // Show modal
-        const confirmModal = new bootstrap.Modal(document.getElementById('confirmDuplicateModal'));
-        confirmModal.show();
+        Swal.fire({
+            title: 'Konfirmasi Duplikasi',
+            html: `Anda akan menyalin tagihan dari "<strong>${sourceName}</strong>"<br> ke <strong>${checkedCount}</strong> siswa target.<br><br><small class="text-muted">Pastikan data sudah benar sebelum melanjutkan.</small>`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#696cff',
+            cancelButtonColor: '#8592a3',
+            confirmButtonText: 'Ya, Duplikasi',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('duplicateForm').submit();
+            }
+        });
     }
 </script>
 @endsection
