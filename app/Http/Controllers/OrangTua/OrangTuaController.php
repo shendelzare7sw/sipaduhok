@@ -10,10 +10,62 @@ use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Rapor;
 use App\Models\Presensi;
+use Illuminate\Support\Facades\DB;
 use App\Services\MidtransService;
 
 class OrangTuaController extends Controller
 {
+    /**
+     * Helper untuk mengurutkan jenis tagihan sesuai ketentuan
+     */
+    private function sortTagihanGroup($groupedTagihan)
+    {
+        $order = [
+            'uang_pendaftaran', // Formulir
+            'uang_pangkal',
+            'kegiatan',         // Uang Kegiatan
+            'buku',             // Buku Paket
+            'seragam',
+            'rapor_foto',
+            'ujian',            // Ujian & Wisuda
+            'akm',
+            'spp'
+        ];
+
+        // Sort keys by priority index, then by original key
+        return $groupedTagihan->sort(function ($itemsA, $itemsB) use ($order) {
+            $keyA = $itemsA[0]->jenis_tagihan ?? '';
+            $keyB = $itemsB[0]->jenis_tagihan ?? '';
+
+            $indexA = 999;
+            $indexB = 999;
+
+            // Find index for A
+            foreach ($order as $i => $orderKey) {
+                if ($keyA === $orderKey || str_starts_with($keyA, $orderKey . '_')) {
+                    $indexA = $i;
+                    break;
+                }
+            }
+
+            // Find index for B
+            foreach ($order as $i => $orderKey) {
+                if ($keyB === $orderKey || str_starts_with($keyB, $orderKey . '_')) {
+                    $indexB = $i;
+                    break;
+                }
+            }
+
+            if ($indexA === $indexB) {
+                // If same group (e.g. both SPP), sort by jatuh tempo
+                $dateA = $itemsA[0]->tanggal_jatuh_tempo ?? '';
+                $dateB = $itemsB[0]->tanggal_jatuh_tempo ?? '';
+                return $dateA <=> $dateB;
+            }
+
+            return $indexA <=> $indexB;
+        });
+    }
     /**
      * Dashboard Orang Tua - Menampilkan ringkasan semua anak
      */
@@ -72,6 +124,7 @@ class OrangTuaController extends Controller
 
         // Group tagihan berdasarkan jenis
         $tagihanGroup = $tagihan->groupBy('jenis_tagihan');
+        $tagihanGroup = $this->sortTagihanGroup($tagihanGroup);
 
         // Total tagihan
         $totalTagihan = $tagihan->sum('jumlah');
@@ -208,7 +261,7 @@ class OrangTuaController extends Controller
                     // Build transaction params dengan order_id baru
                     $transactionParams = $midtransService->buildTransactionParams(
                         $newOrderId,
-                        $existingPendingPayment->jumlah_bayar,
+                        (int) $existingPendingPayment->jumlah_bayar,
                         $customerDetails,
                         $itemDetails
                     );
@@ -246,7 +299,7 @@ class OrangTuaController extends Controller
                 // Build transaction params
                 $transactionParams = $midtransService->buildTransactionParams(
                     $orderId,
-                    $validated['jumlah_bayar'],
+                    (int) $validated['jumlah_bayar'],
                     $customerDetails,
                     $itemDetails
                 );
@@ -280,6 +333,119 @@ class OrangTuaController extends Controller
 
         return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
             ->with('success', 'Pembayaran berhasil diajukan. Menunggu validasi dari bendahara.');
+    }
+
+    /**
+     * Proses Pembayaran Massal (Bulk Payment)
+     */
+    public function processBulkPay(Request $request, $siswaId)
+    {
+        $user = Auth::user();
+
+        // Pastikan siswa ini adalah anak dari orang tua yang login
+        $siswa = $user->children()->find($siswaId);
+
+        if (!$siswa) {
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
+        }
+
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.tagihan_id' => 'required|exists:tagihan,id',
+            'items.*.jumlah_bayar' => 'required|numeric|min:1',
+            'total_bayar' => 'required|numeric|min:1',
+            'metode_pembayaran' => 'required|in:transfer,midtrans',
+            'bukti_bayar' => 'required_if:metode_pembayaran,transfer|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $orderId = $this->generateKodePembayaran(); // One Order ID for the batch
+        $buktiPath = null;
+
+        if ($request->hasFile('bukti_bayar')) {
+            $buktiPath = $request->file('bukti_bayar')->store('pembayaran/bukti', 'public');
+        }
+
+        DB::beginTransaction();
+        try {
+            $pembayaranIds = [];
+            $itemDetails = [];
+
+            foreach ($validated['items'] as $index => $item) {
+                $tagihan = Tagihan::findOrFail($item['tagihan_id']);
+
+                // Security check: tagihan must belong to siswa
+                if ($tagihan->siswa_id != $siswa->id)
+                    continue;
+
+                // Generate unique code for this specific record
+                $uniqueKode = $this->generateKodePembayaran() . '-' . ($index + 1);
+
+                $pembayaran = Pembayaran::create([
+                    'kode_pembayaran' => $uniqueKode, // Unique per record
+                    'siswa_id' => $siswa->id,
+                    'tagihan_id' => $tagihan->id,
+                    'tanggal_bayar' => now(),
+                    'jumlah_bayar' => $item['jumlah_bayar'],
+                    'metode_pembayaran' => $validated['metode_pembayaran'],
+                    'status_validasi' => 'pending',
+                    'bukti_pembayaran' => $buktiPath,
+                    'payment_gateway' => $validated['metode_pembayaran'] === 'midtrans' ? 'midtrans' : null,
+                    'order_id' => $orderId, // Shared Order ID for Bulk Group
+                    'paid_by_parent_id' => $user->id,
+                ]);
+
+                $pembayaranIds[] = $pembayaran->id;
+
+                if ($validated['metode_pembayaran'] === 'midtrans') {
+                    $itemDetails[] = [
+                        'id' => 'TAGIHAN-' . $tagihan->id,
+                        'price' => (int) $item['jumlah_bayar'],
+                        'quantity' => 1,
+                        'name' => mb_substr($tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)), 0, 50),
+                    ];
+                }
+            }
+
+            if (empty($pembayaranIds)) {
+                throw new \Exception('Tidak ada tagihan valid yang dipilih.');
+            }
+
+            if ($validated['metode_pembayaran'] === 'midtrans') {
+                $midtransService = new MidtransService();
+                $customerDetails = [
+                    'first_name' => $siswa->nama_lengkap,
+                    'email' => $user->email ?? 'noreply@sipaduhok.sch.id',
+                    'phone' => $user->no_hp ?? '',
+                ];
+
+                $transactionParams = $midtransService->buildTransactionParams(
+                    $orderId,
+                    (int) $validated['total_bayar'],
+                    $customerDetails,
+                    $itemDetails
+                );
+
+                $snapToken = $midtransService->createSnapToken($transactionParams);
+
+                DB::commit();
+
+                // Redirect to snap (using the first pembayaran ID for the route placeholder, but token covers all)
+                return redirect()->route('orang-tua.pembayaran.snap', [
+                    'pembayaran' => $pembayaranIds[0],
+                    'token' => encrypt($snapToken)
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+                ->with('success', 'Pembayaran massal berhasil diajukan. Menunggu validasi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -352,7 +518,7 @@ class OrangTuaController extends Controller
             ->whereYear('tanggal', $tahunIni)
             ->orderBy('tanggal', 'desc')
             ->get()
-            ->groupBy(function($item) {
+            ->groupBy(function ($item) {
                 return \Carbon\Carbon::parse($item->tanggal)->weekOfMonth;
             });
 
@@ -612,6 +778,13 @@ class OrangTuaController extends Controller
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 
+        // Fetch ALL payments with same order_id (for bulk display)
+        $allPayments = Pembayaran::with('tagihan')
+            ->where('order_id', $pembayaran->order_id)
+            ->get();
+
+        $totalBayar = $allPayments->sum('jumlah_bayar');
+
         // Check if payment is already rejected/expired or approved
         if ($pembayaran->status_validasi === 'ditolak') {
             return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
@@ -646,18 +819,20 @@ class OrangTuaController extends Controller
                     'phone' => $user->no_hp ?? '08123456789',
                 ];
 
-                $itemDetails = [
-                    [
-                        'id' => 'TAGIHAN-' . $pembayaran->tagihan_id,
-                        'price' => (int) $pembayaran->jumlah_bayar,
+                // Build item details from ALL payments for BULK
+                $itemDetails = [];
+                foreach ($allPayments as $item) {
+                    $itemDetails[] = [
+                        'id' => 'TAGIHAN-' . $item->tagihan_id,
+                        'price' => (int) $item->jumlah_bayar,
                         'quantity' => 1,
-                        'name' => $pembayaran->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan)),
-                    ]
-                ];
+                        'name' => mb_substr($item->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $item->tagihan->jenis_tagihan)), 0, 50),
+                    ];
+                }
 
                 $transactionParams = $midtransService->buildTransactionParams(
                     $pembayaran->order_id,
-                    $pembayaran->jumlah_bayar,
+                    (int) $totalBayar,
                     $customerDetails,
                     $itemDetails
                 );
@@ -681,7 +856,13 @@ class OrangTuaController extends Controller
             ? \App\Models\InfoPembayaran::getInstance()->midtrans_client_key
             : null;
 
-        return view('orang-tua.pembayaran.snap', compact('pembayaran', 'snapToken', 'clientKey'));
+        return view('orang-tua.pembayaran.snap', [
+            'pembayaran' => $pembayaran,
+            'allPayments' => $allPayments,
+            'totalBayar' => $totalBayar,
+            'snapToken' => $snapToken,
+            'clientKey' => $clientKey
+        ]);
     }
 
     /**
@@ -699,104 +880,94 @@ class OrangTuaController extends Controller
             'transaction_status' => $transactionStatus,
         ]);
 
-        // Find pembayaran by order_id
-        $pembayaran = Pembayaran::where('order_id', $orderId)->first();
+        // Find ALL pembayaran by order_id
+        $payments = Pembayaran::where('order_id', $orderId)->get();
 
-        if (!$pembayaran) {
-            \Log::error('Pembayaran not found in snapFinish', ['order_id' => $orderId]);
+        if ($payments->isEmpty()) {
+            \Log::error('Pembayaran (Bulk) not found in snapFinish', ['order_id' => $orderId]);
 
             return redirect()->route('orang-tua.dashboard')
                 ->with('error', 'Data pembayaran tidak ditemukan. Order ID: ' . $orderId);
         }
 
-        // Update status if webhook hasn't been called yet (fallback)
+        // Use the first record to identify student and generic details
+        $firstPayment = $payments->first();
+
+        // Update status for ALL payments in this order if webhook hasn't been called yet (fallback)
         $midtransService = new MidtransService();
         $newStatus = $midtransService->mapTransactionStatus($transactionStatus);
-        $oldStatus = $pembayaran->status_validasi;
 
-        // Only update if webhook hasn't updated it yet
-        if ($oldStatus === 'pending' && $newStatus !== 'pending') {
-            $pembayaran->update([
-                'status_validasi' => $newStatus,
-                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
-            ]);
+        foreach ($payments as $pembayaran) {
+            $oldStatus = $pembayaran->status_validasi;
 
-            // Create audit log for bendahara tracking
-            \App\Models\FinancialAuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'update_status',
-                'model_type' => 'Pembayaran',
-                'model_id' => $pembayaran->id,
-                'old_values' => json_encode(['status_validasi' => $oldStatus]),
-                'new_values' => json_encode(['status_validasi' => $newStatus]),
-                'description' => "Pembayaran digital {$orderId} status updated from redirect (fallback): {$transactionStatus} → {$newStatus}",
-                'ip_address' => request()->ip(),
-                'user_agent' => request()->userAgent(),
-            ]);
-
-            // Auto-update status tagihan if payment approved
-            if ($newStatus === 'disetujui') {
-                $pembayaran->tagihan->updateStatusBayar();
-
-                \Log::info('Tagihan status auto-updated from snapFinish', [
-                    'tagihan_id' => $pembayaran->tagihan_id,
-                    'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
+            // Only update if webhook hasn't updated it yet
+            if ($oldStatus === 'pending' && $newStatus !== 'pending') {
+                $pembayaran->update([
+                    'status_validasi' => $newStatus,
+                    'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
                 ]);
 
-                // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
-                // Ini mencegah double payment untuk produk/tagihan yang sama
-                $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
-                    ->where('siswa_id', $pembayaran->siswa_id)
-                    ->where('id', '!=', $pembayaran->id)
-                    ->where('status_validasi', 'pending')
-                    ->update([
-                        'status_validasi' => 'ditolak',
-                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
-                    ]);
+                // Create audit log for bendahara tracking
+                \App\Models\FinancialAuditLog::create([
+                    'user_id' => Auth::id(),
+                    'action' => 'update_status',
+                    'model_type' => 'Pembayaran',
+                    'model_id' => $pembayaran->id,
+                    'old_values' => json_encode(['status_validasi' => $oldStatus]),
+                    'new_values' => json_encode(['status_validasi' => $newStatus]),
+                    'description' => "Pembayaran digital {$orderId} status updated from redirect (fallback): {$transactionStatus} → {$newStatus}",
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
 
-                if ($cancelledCount > 0) {
-                    \Log::info('Auto-cancelled duplicate pending payments from snapFinish', [
+                // Auto-update status tagihan if payment approved
+                if ($newStatus === 'disetujui') {
+                    $pembayaran->tagihan->updateStatusBayar();
+
+                    \Log::info('Tagihan status auto-updated from snapFinish', [
                         'tagihan_id' => $pembayaran->tagihan_id,
-                        'siswa_id' => $pembayaran->siswa_id,
-                        'cancelled_count' => $cancelledCount,
-                        'successful_order_id' => $orderId,
+                        'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
                     ]);
 
-                    // Audit log untuk pembatalan otomatis
-                    \App\Models\FinancialAuditLog::create([
-                        'user_id' => Auth::id(),
-                        'action' => 'auto_cancel_duplicates',
-                        'model_type' => 'Pembayaran',
-                        'model_id' => $pembayaran->id,
-                        'old_values' => null,
-                        'new_values' => json_encode([
-                            'cancelled_count' => $cancelledCount,
-                            'reason' => 'duplicate_payment_prevention',
-                        ]),
-                        'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$orderId} berhasil (fallback)",
-                        'ip_address' => request()->ip(),
-                        'user_agent' => request()->userAgent(),
-                    ]);
+                    // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
+                    $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
+                        ->where('siswa_id', $pembayaran->siswa_id)
+                        ->where('id', '!=', $pembayaran->id)
+                        ->where('status_validasi', 'pending')
+                        ->update([
+                            'status_validasi' => 'ditolak',
+                            'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
+                        ]);
+
+                    if ($cancelledCount > 0) {
+                        \App\Models\FinancialAuditLog::create([
+                            'user_id' => Auth::id(),
+                            'action' => 'auto_cancel_duplicates',
+                            'model_type' => 'Pembayaran',
+                            'model_id' => $pembayaran->id,
+                            'old_values' => null,
+                            'new_values' => json_encode([
+                                'cancelled_count' => $cancelledCount,
+                                'reason' => 'duplicate_payment_prevention',
+                            ]),
+                            'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama",
+                            'ip_address' => request()->ip(),
+                            'user_agent' => request()->userAgent(),
+                        ]);
+                    }
                 }
             }
-
-            \Log::info('Pembayaran status updated from snapFinish', [
-                'pembayaran_id' => $pembayaran->id,
-                'order_id' => $orderId,
-                'old_status' => $oldStatus,
-                'new_status' => $newStatus,
-            ]);
         }
 
         // Redirect to tagihan page with appropriate message
         if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('orang-tua.tagihan.anak', $firstPayment->siswa_id)
                 ->with('success', 'Pembayaran berhasil! Transaksi telah dikonfirmasi.');
         } elseif ($transactionStatus === 'pending') {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('orang-tua.tagihan.anak', $firstPayment->siswa_id)
                 ->with('info', 'Pembayaran Anda sedang diproses. Mohon tunggu konfirmasi dari bank.');
         } else {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('orang-tua.tagihan.anak', $firstPayment->siswa_id)
                 ->with('warning', 'Pembayaran dibatalkan atau gagal. Status: ' . $transactionStatus);
         }
     }
@@ -872,7 +1043,7 @@ class OrangTuaController extends Controller
             // Build transaction params dengan order_id baru
             $transactionParams = $midtransService->buildTransactionParams(
                 $newOrderId,
-                $pembayaran->jumlah_bayar,
+                (int) $pembayaran->jumlah_bayar,
                 $customerDetails,
                 $itemDetails
             );

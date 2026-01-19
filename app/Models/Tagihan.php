@@ -66,4 +66,29 @@ class Tagihan extends Model
 
         return $this;
     }
+
+    /**
+     * Get Human Readable Label for Jenis Tagihan
+     */
+    public static function getLabelJenis($jenis)
+    {
+        $labels = [
+            'uang_pendaftaran' => 'Formulir Pendaftaran/ Daftar Ulang',
+            'uang_pangkal' => 'Uang Pangkal',
+            'kegiatan' => 'Uang Kegiatan',
+            'buku' => 'Buku Paket',
+            'seragam' => 'Seragam',
+            'rapor_foto' => 'Rapor Foto',
+            'ujian' => 'Ujian & Wisuda',
+            'akm' => 'AKM',
+            'spp' => 'SPP',
+        ];
+
+        // Handle SPP with suffixes like spp_juli
+        if (str_starts_with($jenis, 'spp')) {
+            return 'SPP';
+        }
+
+        return $labels[$jenis] ?? null;
+    }
 }

@@ -21,7 +21,7 @@ class PembayaranController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+        $kelasList = Kelas::when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
@@ -39,7 +39,7 @@ class PembayaranController extends Controller
 
         // Filter kelas
         if ($request->filled('kelas_id')) {
-            $query->whereHas('siswa', function($q) use ($request) {
+            $query->whereHas('siswa', function ($q) use ($request) {
                 $q->where('kelas_id', $request->kelas_id);
             });
         }
@@ -54,11 +54,11 @@ class PembayaranController extends Controller
 
         // Pencarian
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('kode_pembayaran', 'like', '%' . $request->search . '%')
-                  ->orWhereHas('siswa', function($q2) use ($request) {
-                      $q2->where('nama_lengkap', 'like', '%' . $request->search . '%');
-                  });
+                    ->orWhereHas('siswa', function ($q2) use ($request) {
+                        $q2->where('nama_lengkap', 'like', '%' . $request->search . '%');
+                    });
             });
         }
 
@@ -93,7 +93,7 @@ class PembayaranController extends Controller
 
         // Ambil tagihan untuk tahun ajaran aktif
         $tagihan = Tagihan::where('siswa_id', $siswaId)
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
             ->get();
@@ -158,7 +158,7 @@ class PembayaranController extends Controller
      */
     public function validasi(Request $request, $id)
     {
-        $pembayaran = Pembayaran::findOrFail($id);
+        $targetPembayaran = Pembayaran::findOrFail($id);
 
         $request->validate([
             'status_validasi' => 'required|in:disetujui,ditolak',
@@ -167,67 +167,90 @@ class PembayaranController extends Controller
 
         DB::beginTransaction();
         try {
-            $pembayaran->update([
-                'status_validasi' => $request->status_validasi,
-                'divalidasi_oleh' => auth()->id(),
-                'tanggal_validasi' => now(),
-                'catatan' => $request->catatan,
-            ]);
+            // Check if this payment is part of a bulk transaction (has order_id)
+            $relatedPayments = collect([$targetPembayaran]);
 
-            // Jika disetujui, update status tagihan dan batalkan pembayaran pending lainnya
-            if ($request->status_validasi === 'disetujui' && $pembayaran->tagihan) {
-                $tagihan = $pembayaran->tagihan;
-                
-                // Hitung total pembayaran yang disetujui untuk tagihan ini
-                $totalBayar = Pembayaran::where('tagihan_id', $tagihan->id)
-                    ->where('status_validasi', 'disetujui')
-                    ->sum('jumlah_bayar');
+            if ($targetPembayaran->order_id) {
+                $relatedPayments = Pembayaran::where('order_id', $targetPembayaran->order_id)
+                    ->where('status_validasi', 'pending')
+                    ->get();
 
-                if ($totalBayar >= $tagihan->jumlah) {
-                    $tagihan->update(['status' => 'sudah_bayar']);
-                    
-                    // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
-                    // Ini mencegah double payment untuk tagihan yang sama
-                    $cancelledCount = Pembayaran::where('tagihan_id', $tagihan->id)
-                        ->where('siswa_id', $pembayaran->siswa_id)
-                        ->where('id', '!=', $pembayaran->id)
-                        ->where('status_validasi', 'pending')
-                        ->update([
-                            'status_validasi' => 'ditolak',
-                            'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: ' . $pembayaran->kode_pembayaran . ')',
-                            'divalidasi_oleh' => auth()->id(),
-                            'tanggal_validasi' => now(),
-                        ]);
+                // If for some reason the target ID isn't in the list (e.g. status changed concurrently), ensure it's included or handled
+                if (!$relatedPayments->contains('id', $targetPembayaran->id)) {
+                    $relatedPayments->push($targetPembayaran);
+                }
+            }
 
-                    if ($cancelledCount > 0) {
-                        // Audit log untuk pembatalan otomatis
-                        FinancialAuditLog::create([
-                            'user_id' => auth()->id(),
-                            'action' => 'auto_cancel_duplicates',
-                            'model_type' => 'Pembayaran',
-                            'model_id' => $pembayaran->id,
-                            'old_values' => null,
-                            'new_values' => json_encode([
-                                'cancelled_count' => $cancelledCount,
-                                'reason' => 'duplicate_payment_prevention',
-                            ]),
-                            'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$pembayaran->kode_pembayaran} disetujui",
-                            'ip_address' => request()->ip(),
-                            'user_agent' => request()->userAgent(),
-                        ]);
+            $countUpdated = 0;
+
+            foreach ($relatedPayments as $pembayaran) {
+                $pembayaran->update([
+                    'status_validasi' => $request->status_validasi,
+                    'divalidasi_oleh' => auth()->id(),
+                    'tanggal_validasi' => now(),
+                    'catatan' => $request->catatan,
+                ]);
+                $countUpdated++;
+
+                // Jika disetujui, update status tagihan dan batalkan pembayaran pending lainnya
+                if ($request->status_validasi === 'disetujui' && $pembayaran->tagihan) {
+                    $tagihan = $pembayaran->tagihan;
+
+                    // Hitung total pembayaran yang disetujui untuk tagihan ini (termasuk yang baru saja diupdate)
+                    $totalBayar = Pembayaran::where('tagihan_id', $tagihan->id)
+                        ->where('status_validasi', 'disetujui')
+                        ->sum('jumlah_bayar');
+
+                    if ($totalBayar >= $tagihan->jumlah) {
+                        $tagihan->update(['status' => 'sudah_bayar']);
+
+                        // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
+                        $cancelledCount = Pembayaran::where('tagihan_id', $tagihan->id)
+                            ->where('siswa_id', $pembayaran->siswa_id)
+                            ->where('id', '!=', $pembayaran->id)
+                            ->where('status_validasi', 'pending')
+                            ->update([
+                                'status_validasi' => 'ditolak',
+                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: ' . $pembayaran->kode_pembayaran . ')',
+                                'divalidasi_oleh' => auth()->id(),
+                                'tanggal_validasi' => now(),
+                            ]);
+
+                        if ($cancelledCount > 0) {
+                            FinancialAuditLog::create([
+                                'user_id' => auth()->id(),
+                                'action' => 'auto_cancel_duplicates',
+                                'model_type' => 'Pembayaran',
+                                'model_id' => $pembayaran->id,
+                                'old_values' => null,
+                                'new_values' => json_encode([
+                                    'cancelled_count' => $cancelledCount,
+                                    'reason' => 'duplicate_payment_prevention',
+                                ]),
+                                'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$pembayaran->kode_pembayaran} disetujui",
+                                'ip_address' => request()->ip(),
+                                'user_agent' => request()->userAgent(),
+                            ]);
+                        }
+                    } elseif ($totalBayar > 0) {
+                        // Partial payment - set status cicilan
+                        $tagihan->update(['status' => 'cicilan']);
                     }
-                } elseif ($totalBayar > 0) {
-                    // Partial payment - set status cicilan
-                    $tagihan->update(['status' => 'cicilan']);
                 }
             }
 
             DB::commit();
-            
-            $message = $request->status_validasi === 'disetujui' 
-                ? 'Pembayaran berhasil divalidasi.' 
-                : 'Pembayaran ditolak.';
-            
+
+            $message = $request->status_validasi === 'disetujui'
+                ? 'Pembayaran berhasil divalidasi'
+                : 'Pembayaran ditolak';
+
+            if ($countUpdated > 1) {
+                $message .= " ({$countUpdated} item dalam transaksi bulk).";
+            } else {
+                $message .= ".";
+            }
+
             return redirect()->route('bendahara.pembayaran.index')
                 ->with('success', $message);
         } catch (\Exception $e) {
@@ -248,7 +271,7 @@ class PembayaranController extends Controller
         // Ambil tagihan yang belum lunas untuk tahun ajaran aktif
         $tagihanBelumLunas = Tagihan::where('siswa_id', $siswaId)
             ->where('status', '!=', 'sudah_bayar')
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
             ->get();
@@ -259,7 +282,7 @@ class PembayaranController extends Controller
 
         // Total tagihan untuk tahun ajaran aktif (untuk info)
         $totalTagihan = Tagihan::where('siswa_id', $siswaId)
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
             ->sum('jumlah');
@@ -335,7 +358,7 @@ class PembayaranController extends Controller
 
                     if ($totalBayar >= $tagihan->jumlah) {
                         $tagihan->update(['status' => 'sudah_bayar']);
-                        
+
                         // Batalkan semua pembayaran pending lainnya untuk tagihan ini
                         $cancelledCount = Pembayaran::where('tagihan_id', $tagihanId)
                             ->where('siswa_id', $siswaId)
@@ -423,7 +446,7 @@ class PembayaranController extends Controller
 
             if ($totalBayar >= $tagihan->jumlah) {
                 $tagihan->update(['status' => 'sudah_bayar']);
-                
+
                 // Batalkan semua pembayaran pending lainnya untuk tagihan ini
                 $cancelledCount = Pembayaran::where('tagihan_id', $tagihan->id)
                     ->where('siswa_id', $siswaId)
@@ -457,7 +480,7 @@ class PembayaranController extends Controller
             }
 
             DB::commit();
-            
+
             return redirect()->route('bendahara.pembayaran.riwayat-siswa', $siswaId)
                 ->with('success', 'Pembayaran tunai berhasil dicatat dan divalidasi.');
         } catch (\Exception $e) {

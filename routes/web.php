@@ -1028,6 +1028,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('tagihan')->name('tagihan.')->group(function () {
             Route::get('/anak/{siswa}', [OrangTuaController::class, 'tagihanAnak'])->name('anak');
             Route::post('/anak/{siswa}/bayar', [OrangTuaController::class, 'prosesBayar'])->name('bayar');
+            Route::post('/anak/{siswa}/bulk-pay', [OrangTuaController::class, 'processBulkPay'])->name('bulk-pay');
         });
 
         // Pembayaran Digital (Midtrans)

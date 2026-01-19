@@ -8,6 +8,14 @@ use Illuminate\Http\Request;
 class TagihanController extends BendaharaTagihanController
 {
     /**
+     * Override getRoutePrefix for admin redirects
+     */
+    protected function getRoutePrefix()
+    {
+        return 'admin.keuangan.tagihan';
+    }
+
+    /**
      * Override index method to use admin view
      */
     public function index(Request $request)

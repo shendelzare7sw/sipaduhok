@@ -181,6 +181,35 @@
 
     </div>
 </div>
+
+<!-- Confirm Modal -->
+<div class="modal fade" id="confirmDuplicateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="bx bx-error me-2"></i>Konfirmasi Duplikasi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="bx bx-error text-warning" style="font-size: 4rem;"></i>
+                </div>
+                <p id="confirmDuplicateMessage" class="text-center mb-0"></p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bx bx-x me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-warning" id="confirmDuplicateBtn">
+                    <i class="bx bx-check me-1"></i> Ya, Duplikasi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -246,6 +275,11 @@
                 }
             });
         });
+
+        // Confirm button handler
+        document.getElementById('confirmDuplicateBtn').addEventListener('click', function() {
+            document.getElementById('duplicateForm').submit();
+        });
     });
 
     function selectAll() {
@@ -280,15 +314,13 @@
 
         const sourceName = sourceSiswaSelect.options[sourceSiswaSelect.selectedIndex].text;
 
-        showConfirm({
-            title: 'Konfirmasi Duplikasi',
-            message: `Anda akan menyalin tagihan dari "${sourceName}" ke ${checkedCount} siswa. Lanjutkan?`,
-            type: 'warning',
-            confirmText: 'Ya, Duplikasi',
-            onConfirm: function() {
-                form.submit();
-            }
-        });
+        // Set modal message
+        document.getElementById('confirmDuplicateMessage').innerHTML = 
+            `Anda akan menyalin tagihan dari "<strong>${sourceName}</strong>" ke <strong>${checkedCount}</strong> siswa. Lanjutkan?`;
+        
+        // Show modal
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmDuplicateModal'));
+        confirmModal.show();
     }
 </script>
 @endsection

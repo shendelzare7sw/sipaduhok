@@ -1076,15 +1076,17 @@
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
-                <div class="modal-header"
+                <div class="modal-header d-flex justify-content-between align-items-center"
                     style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; padding: 20px 24px;">
                     <h5 class="modal-title" id="detachParentModalLabel"
                         style="display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 600;">
                         <i class="fas fa-unlink"></i>
                         Konfirmasi Hapus Hubungan
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button type="button" data-bs-dismiss="modal" aria-label="Close"
+                        style="background: transparent; border: none; color: white; font-size: 1.25rem; opacity: 0.9; padding: 0; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: background 0.2s;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <div class="modal-body" style="padding: 24px;">
                     <p style="margin-bottom: 16px; color: #374151; font-size: 15px;">Apakah Anda yakin ingin menghapus

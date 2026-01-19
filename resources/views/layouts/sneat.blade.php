@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="id" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('/') }}" data-template="vertical-menu-template-free">
+<html lang="id" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default"
+    data-assets-path="{{ asset('/') }}" data-template="vertical-menu-template-free">
+
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -16,7 +19,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet">
 
     <!-- Icons (Font Awesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -30,8 +35,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     <!-- Sneat Core CSS from CDN -->
-    <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css">
-    <link rel="stylesheet" href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css">
+    <link rel="stylesheet"
+        href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css">
+    <link rel="stylesheet"
+        href="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css">
 
     <!-- Custom SIPADUHOK Styles -->
     <style>
@@ -60,7 +67,7 @@
         }
 
         /* Menu aktif */
-        .menu-item.active > .menu-link {
+        .menu-item.active>.menu-link {
             background-color: rgba(255, 255, 255, 0.15) !important;
             color: #fff !important;
             font-weight: 600;
@@ -148,7 +155,7 @@
         }
 
         /* Prevent parent elements from receiving pointer events when modal is open */
-        body.modal-open > *:not(.modal):not(.modal-backdrop) {
+        body.modal-open>*:not(.modal):not(.modal-backdrop) {
             pointer-events: none;
         }
 
@@ -168,6 +175,7 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -347,6 +355,7 @@
            MOBILE MENU TOGGLE - ONLY MOBILE STYLES
            ========================================== */
         @media (max-width: 1199.98px) {
+
             /* Hide menu off-screen by default */
             .layout-menu {
                 position: fixed !important;
@@ -402,7 +411,8 @@
 
             /* Transform hamburger to X when menu is open */
             .menu-open .layout-menu-toggle.navbar-nav a i.fa-bars::before {
-                content: "\f00d"; /* FontAwesome times/X icon */
+                content: "\f00d";
+                /* FontAwesome times/X icon */
             }
 
             /* Sidebar toggle button styling */
@@ -458,7 +468,8 @@
             }
 
             .navbar-page-title small {
-                display: none; /* Hide subtitle on mobile for cleaner look */
+                display: none;
+                /* Hide subtitle on mobile for cleaner look */
             }
 
             /* Hamburger icon size */
@@ -523,11 +534,13 @@
                         <span class="app-brand-logo demo">
                             <img src="{{ asset('img/logo.png') }}" alt="Logo" class="app-brand-logo img">
                         </span>
-                        <span class="app-brand-text demo menu-text fw-bold ms-2" style="font-size: 1rem;">SIPADUHOK</span>
+                        <span class="app-brand-text demo menu-text fw-bold ms-2"
+                            style="font-size: 1rem;">SIPADUHOK</span>
                     </a>
 
                     <!-- Toggle button in sidebar (mobile only) -->
-                    <a href="javascript:void(0);" class="layout-menu-toggle-sidebar menu-link text-large d-xl-none" id="sidebarToggle" style="margin-left: 1rem;">
+                    <a href="javascript:void(0);" class="layout-menu-toggle-sidebar menu-link text-large d-xl-none"
+                        id="sidebarToggle" style="margin-left: 1rem;">
                         <i class="fas fa-bars fa-lg"></i>
                     </a>
                 </div>
@@ -543,7 +556,8 @@
             <div class="layout-page">
 
                 <!-- Navbar -->
-                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+                    id="layout-navbar">
                     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
                         <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
                             <i class="fas fa-bars fa-lg"></i>
@@ -565,7 +579,8 @@
 
                             <!-- Notifications -->
                             <li class="nav-item navbar-dropdown dropdown me-3 me-xl-4">
-                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
+                                    data-bs-toggle="dropdown">
                                     <i class="fas fa-bell fa-lg"></i>
                                     <span class="badge rounded-pill bg-danger badge-notifications">3</span>
                                 </a>
@@ -596,10 +611,13 @@
 
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                                <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
+                                    data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
                                         @if(auth()->user()->foto_profil)
-                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar"
+                                                class="rounded-circle"
+                                                style="width: 40px; height: 40px; object-fit: cover;">
                                         @else
                                             <span class="avatar-initial rounded-circle bg-primary">
                                                 {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
@@ -614,7 +632,9 @@
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
                                                         @if(auth()->user()->foto_profil)
-                                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}"
+                                                                alt="Avatar" class="rounded-circle"
+                                                                style="width: 40px; height: 40px; object-fit: cover;">
                                                         @else
                                                             <span class="avatar-initial rounded-circle bg-primary">
                                                                 {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
@@ -650,7 +670,8 @@
                                         <div class="dropdown-divider my-1"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                                        <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
+                                            data-bs-target="#logoutModal">
                                             <i class="fas fa-sign-out-alt me-2"></i>
                                             <span class="align-middle">Logout</span>
                                         </a>
@@ -709,10 +730,12 @@
 
                     <!-- Footer -->
                     <footer class="content-footer footer bg-footer-theme">
-                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                        <div
+                            class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
                             <div class="mb-2 mb-md-0">
                                 Copyright © {{ date('Y') }}
-                                <a href="{{ route('home') }}" target="_blank" class="footer-link fw-semibold">SIPADUHOK</a> -
+                                <a href="{{ route('home') }}" target="_blank"
+                                    class="footer-link fw-semibold">SIPADUHOK</a> -
                                 PKBM House of Knowledge
                             </div>
                         </div>
@@ -732,26 +755,29 @@
     <!-- / Layout wrapper -->
 
     <!-- Scroll to Top Button -->
-    <a href="#" class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle" id="scrollToTop" style="width: 48px; height: 48px; display: none; z-index: 1050;">
+    <a href="#" class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle" id="scrollToTop"
+        style="width: 48px; height: 48px; display: none; z-index: 1050;">
         <i class="fas fa-angle-up"></i>
     </a>
 
     <!-- jQuery (load first) -->
-    <script src="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/libs/jquery/jquery.js"></script>
+    <script
+        src="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/libs/jquery/jquery.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Sneat Menu JS (only menu, skip helpers that might conflict) -->
-    <script src="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/js/menu.js"></script>
+    <script
+        src="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/js/menu.js"></script>
 
     <!-- Custom SIPADUHOK Scripts -->
     <script>
         // Auto dismiss alerts after 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
                 const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                alerts.forEach(function (alert) {
                     const bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
                 });
@@ -759,7 +785,7 @@
 
             // Scroll to top button
             const scrollBtn = document.getElementById('scrollToTop');
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 if (window.scrollY > 300) {
                     scrollBtn.style.display = 'flex';
                     scrollBtn.style.alignItems = 'center';
@@ -769,7 +795,7 @@
                 }
             });
 
-            scrollBtn.addEventListener('click', function(e) {
+            scrollBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -810,7 +836,7 @@
 
             // Toggle menu when clicking hamburger/X
             if (menuToggleBtn) {
-                menuToggleBtn.addEventListener('click', function(e) {
+                menuToggleBtn.addEventListener('click', function (e) {
                     e.preventDefault();
                     toggleMenu();
                 });
@@ -819,7 +845,7 @@
             // Close menu when clicking sidebar toggle button
             const sidebarToggleBtn = document.getElementById('sidebarToggle');
             if (sidebarToggleBtn) {
-                sidebarToggleBtn.addEventListener('click', function(e) {
+                sidebarToggleBtn.addEventListener('click', function (e) {
                     e.preventDefault();
                     closeMenu();
                 });
@@ -827,14 +853,14 @@
 
             // Close menu when clicking overlay
             if (layoutOverlay) {
-                layoutOverlay.addEventListener('click', function() {
+                layoutOverlay.addEventListener('click', function () {
                     closeMenu();
                 });
             }
 
             // Close menu when clicking content area (only on mobile)
             if (contentArea) {
-                contentArea.addEventListener('click', function() {
+                contentArea.addEventListener('click', function () {
                     if (window.innerWidth < 1200 && layoutMenu.classList.contains('menu-shown')) {
                         closeMenu();
                     }
@@ -842,7 +868,7 @@
             }
 
             // Close menu on window resize to desktop
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 if (window.innerWidth >= 1200) {
                     closeMenu();
                 }
@@ -850,8 +876,8 @@
 
             // Close menu when clicking any menu item (only on mobile)
             const menuLinks = document.querySelectorAll('.layout-menu .menu-link:not(.menu-toggle)');
-            menuLinks.forEach(function(link) {
-                link.addEventListener('click', function() {
+            menuLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
                     if (window.innerWidth < 1200) {
                         closeMenu();
                     }
@@ -862,8 +888,8 @@
             // SUBMENU DROPDOWN TOGGLE
             // ==========================================
             const menuToggles = document.querySelectorAll('.menu-toggle');
-            menuToggles.forEach(function(toggle) {
-                toggle.addEventListener('click', function(e) {
+            menuToggles.forEach(function (toggle) {
+                toggle.addEventListener('click', function (e) {
                     e.preventDefault();
                     const menuItem = this.closest('.menu-item');
                     const submenu = menuItem.querySelector('.menu-sub');
@@ -877,7 +903,7 @@
                             submenu.style.display = 'none';
                         } else {
                             // Close other submenus
-                            document.querySelectorAll('.menu-sub').forEach(function(sub) {
+                            document.querySelectorAll('.menu-sub').forEach(function (sub) {
                                 if (sub !== submenu) {
                                     sub.style.display = 'none';
                                     sub.closest('.menu-item').classList.remove('open');
@@ -891,7 +917,7 @@
 
             // Open submenu if already active
             const activeMenuItems = document.querySelectorAll('.menu-item.active.open');
-            activeMenuItems.forEach(function(item) {
+            activeMenuItems.forEach(function (item) {
                 const submenu = item.querySelector('.menu-sub');
                 if (submenu) {
                     submenu.style.display = 'block';
@@ -912,10 +938,12 @@
                 </div>
                 <div class="modal-body" style="font-size: 1rem;">
                     Apakah Anda yakin ingin keluar dari sistem? <br>
-                    <small class="text-muted" style="font-size: 0.9rem;">Anda perlu login kembali untuk mengakses dashboard.</small>
+                    <small class="text-muted" style="font-size: 0.9rem;">Anda perlu login kembali untuk mengakses
+                        dashboard.</small>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 0.95rem; padding: 0.5rem 1rem;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        style="font-size: 0.95rem; padding: 0.5rem 1rem;">
                         <i class="fas fa-times me-1"></i> Batal
                     </button>
                     <form action="{{ route('logout') }}" method="POST" class="d-inline">
@@ -929,15 +957,10 @@
         </div>
     </div>
 
-    <!-- Confirm Modal Component (Reusable) -->
-    <x-confirm-modal />
-
     <!-- Currency Format Script -->
     <script src="{{ asset('js/currency-format.js') }}"></script>
 
-    <!-- Confirm Modal Script -->
-    <script src="{{ asset('js/confirm-modal.js') }}"></script>
-
     @yield('scripts')
 </body>
+
 </html>

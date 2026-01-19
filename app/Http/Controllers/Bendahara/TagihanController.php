@@ -13,17 +13,26 @@ use Illuminate\Support\Facades\DB;
 class TagihanController extends Controller
 {
     /**
+     * Get route prefix for redirects
+     */
+    protected function getRoutePrefix()
+    {
+        return 'bendahara.tagihan';
+    }
+
+    /**
      * Jenis-jenis tagihan yang tersedia
      * Note: SPP dihapus karena sudah ada fitur "Generate SPP Bulanan" yang lebih akurat
      */
     protected $jenisTagihan = [
-        'uang_pendaftaran' => 'Uang Pendaftaran',
+        'uang_pendaftaran' => 'Formulir Pendaftaran/ Daftar Ulang',
         'uang_pangkal' => 'Uang Pangkal',
+        'kegiatan' => 'Uang Kegiatan',
+        'buku' => 'Buku Paket',
         'seragam' => 'Seragam',
-        'buku' => 'Buku',
-        'ujian' => 'Ujian',
+        'rapor_foto' => 'Rapor Foto',
+        'ujian' => 'Ujian & Wisuda',
         'akm' => 'AKM',
-        'kegiatan' => 'Kegiatan',
     ];
 
     /**
@@ -33,7 +42,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $kelasList = Kelas::with('cabang')
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
             ->orderBy('jenjang')
@@ -58,13 +67,13 @@ class TagihanController extends Controller
         $siswaList = $query->orderBy(
             Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
         )->orderBy('nama_lengkap', 'asc')
-        ->paginate(15)
-        ->appends($request->query());
+            ->paginate(15)
+            ->appends($request->query());
 
         // Hitung total tagihan per siswa
-        $siswaList->getCollection()->transform(function($siswa) use ($tahunAjaranAktif) {
+        $siswaList->getCollection()->transform(function ($siswa) use ($tahunAjaranAktif) {
             $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
                 ->get();
@@ -101,11 +110,28 @@ class TagihanController extends Controller
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
 
         $tagihan = Tagihan::where('siswa_id', $siswaId)
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
-            ->orderBy('jenis_tagihan')
             ->get();
+
+        // Custom Sort Order
+        $order = array_keys($this->jenisTagihan);
+
+        $tagihan = $tagihan->sortBy(function ($item) use ($order) {
+            $key = $item->jenis_tagihan;
+            $index = array_search($key, $order);
+
+            if ($index !== false) {
+                return $index;
+            }
+
+            if (str_starts_with($key, 'spp_')) {
+                return 99; // After defined types
+            }
+
+            return 999; // Others at end
+        });
 
         $totalTagihan = $tagihan->sum('jumlah');
 
@@ -172,7 +198,7 @@ class TagihanController extends Controller
     public function update(Request $request, $siswaId)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         if (!$tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
@@ -220,7 +246,9 @@ class TagihanController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('bendahara.tagihan.show', $siswaId)
+
+            DB::commit();
+            return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
                 ->with('success', 'Tagihan siswa berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -234,11 +262,11 @@ class TagihanController extends Controller
     public function cetak($siswaId)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
-        
+
         $tagihan = Tagihan::where('siswa_id', $siswaId)
-            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
             ->orderBy('jenis_tagihan')
@@ -264,7 +292,7 @@ class TagihanController extends Controller
     public function bulkCreate(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         if (!$tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
@@ -343,7 +371,9 @@ class TagihanController extends Controller
                 }
 
                 DB::commit();
-                return redirect()->route('bendahara.tagihan.index')
+
+                DB::commit();
+                return redirect()->route($this->getRoutePrefix() . '.index')
                     ->with('success', "Tagihan berhasil dibuat untuk {$siswaList->count()} siswa.");
             } catch (\Exception $e) {
                 DB::rollBack();
@@ -432,7 +462,9 @@ class TagihanController extends Controller
 
             DB::commit();
 
-            return redirect()->route('bendahara.tagihan.index')
+            DB::commit();
+
+            return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', "Tagihan custom berhasil ditambahkan untuk {$count} siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
@@ -457,7 +489,10 @@ class TagihanController extends Controller
             $siswaId = $tagihan->siswa_id;
             $tagihan->delete();
 
-            return redirect()->route('bendahara.tagihan.show', $siswaId)
+            $siswaId = $tagihan->siswa_id;
+            $tagihan->delete();
+
+            return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
                 ->with('success', 'Tagihan berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus tagihan: ' . $e->getMessage());
@@ -542,9 +577,18 @@ class TagihanController extends Controller
 
         // Nama bulan
         $namaBulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
         ];
 
         DB::beginTransaction();
@@ -581,7 +625,9 @@ class TagihanController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('bendahara.tagihan.index')
+
+            DB::commit();
+            return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', "Berhasil generate $totalCreated tagihan SPP untuk {$siswaList->count()} siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
@@ -698,7 +744,9 @@ class TagihanController extends Controller
 
             DB::commit();
             $targetCount = count($request->target_siswa_ids);
-            return redirect()->route('bendahara.tagihan.index')
+            DB::commit();
+            $targetCount = count($request->target_siswa_ids);
+            return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', "Berhasil menduplikasi $totalDuplicated tagihan ke $targetCount siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
