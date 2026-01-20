@@ -22,16 +22,16 @@ class GuruMateriController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+
         $materiList = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('tanggal_upload', 'desc')
             ->paginate(10);
-        
+
         return view('guru.lms.materi.index', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
@@ -39,25 +39,32 @@ class GuruMateriController extends Controller
             'guru' => $tenagaPendidik,
         ]);
     }
-    
+
     /**
      * Form tambah materi
      */
-    public function create($kelasId, $mapelId): View
+    /**
+     * Form tambah materi
+     */
+    public function create(Request $request, $kelasId, $mapelId): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+        $pertemuanId = $request->get('pertemuan_id');
+        $kategori = $request->get('kategori', 'materi');
+
         return view('guru.lms.materi.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
+            'pertemuanId' => $pertemuanId,
+            'kategori' => $kategori,
         ]);
     }
-    
+
     /**
      * Simpan materi baru
      */
@@ -65,35 +72,45 @@ class GuruMateriController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $validated = $request->validate([
             'judul_materi' => 'required|string|max:255',
+            'kategori' => 'required|in:materi,modul_ajar',
             'deskripsi' => 'nullable|string',
             'file_materi' => 'nullable|file|max:51200', // 50MB
             'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+            'pertemuan_id' => 'nullable|exists:pertemuans,id',
         ]);
-        
+
         $filePath = null;
         if ($request->hasFile('file_materi')) {
             $filePath = $request->file('file_materi')->store('materi', 'public');
         }
-        
+
         Materi::create([
             'kelas_id' => $kelasId,
             'mata_pelajaran_id' => $mapelId,
+            'pertemuan_id' => $validated['pertemuan_id'] ?? null,
             'guru_id' => $tenagaPendidik->id,
             'judul_materi' => $validated['judul_materi'],
+            'kategori' => $validated['kategori'],
             'deskripsi' => $validated['deskripsi'],
             'file_materi' => $filePath,
             'tipe_file' => $validated['tipe_file'],
             'tanggal_upload' => now(),
         ]);
-        
+
+        if (!empty($validated['pertemuan_id'])) {
+            return redirect()
+                ->route('guru.lms.pertemuan.show', [$kelasId, $mapelId, $validated['pertemuan_id']])
+                ->with('success', 'Materi berhasil ditambahkan ke pertemuan');
+        }
+
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
             ->with('success', 'Materi berhasil ditambahkan');
     }
-    
+
     /**
      * Form edit materi
      */
@@ -101,16 +118,16 @@ class GuruMateriController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $materi = Materi::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+
         return view('guru.lms.materi.edit', [
             'materi' => $materi,
             'kelas' => $kelas,
@@ -118,7 +135,7 @@ class GuruMateriController extends Controller
             'guru' => $tenagaPendidik,
         ]);
     }
-    
+
     /**
      * Update materi
      */
@@ -126,36 +143,37 @@ class GuruMateriController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $materi = Materi::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
-        
+
         $validated = $request->validate([
             'judul_materi' => 'required|string|max:255',
+            'kategori' => 'required|in:materi,modul_ajar',
             'deskripsi' => 'nullable|string',
             'file_materi' => 'nullable|file|max:51200',
             'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
         ]);
-        
+
         if ($request->hasFile('file_materi')) {
             // Hapus file lama
             if ($materi->file_materi) {
                 Storage::disk('public')->delete($materi->file_materi);
             }
-            
+
             $validated['file_materi'] = $request->file('file_materi')->store('materi', 'public');
         }
-        
+
         $materi->update($validated);
-        
+
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
             ->with('success', 'Materi berhasil diperbarui');
     }
-    
+
     /**
      * Hapus materi
      */
@@ -163,25 +181,25 @@ class GuruMateriController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $materi = Materi::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
-        
+
         // Hapus file
         if ($materi->file_materi) {
             Storage::disk('public')->delete($materi->file_materi);
         }
-        
+
         $materi->delete();
-        
+
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
             ->with('success', 'Materi berhasil dihapus');
     }
-    
+
     /**
      * Verifikasi akses guru
      */
@@ -191,7 +209,7 @@ class GuruMateriController extends Controller
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-        
+
         if (!$access) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }

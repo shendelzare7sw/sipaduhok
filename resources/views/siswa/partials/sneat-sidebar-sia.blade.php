@@ -1,15 +1,20 @@
 {{--
-    Sidebar Menu untuk Siswa SIA (Sneat Template)
-    File: resources/views/siswa/partials/sneat-sidebar-sia.blade.php
+Sidebar Menu untuk Siswa SIA (Sneat Template)
+File: resources/views/siswa/partials/sneat-sidebar-sia.blade.php
 
-    Compatible dengan Sneat Bootstrap 5 Template
+Compatible dengan Sneat Bootstrap 5 Template
 --}}
 
 @php
     $currentRoute = Route::currentRouteName();
     // Logika pengecekan akses LMS
     $siswa = \App\Models\Siswa::where('user_id', auth()->id())->with('kelas')->first();
-    $showLms = $siswa && $siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA']);
+
+    // Ambil setting dari database
+    $setting = \App\Models\AppSetting::where('key', 'lms_allowed_jenjang')->first();
+    $allowedJenjang = $setting ? json_decode($setting->value, true) : [];
+
+    $showLms = $siswa && $siswa->kelas && in_array($siswa->kelas->jenjang, $allowedJenjang);
 @endphp
 
 <!-- Dashboard SIA -->

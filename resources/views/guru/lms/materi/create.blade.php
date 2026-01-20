@@ -10,9 +10,16 @@
 
 @section('content')
     <div class="mb-3">
-        <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>Kembali
-        </a>
+        @if(!empty($pertemuanId))
+            <a href="{{ route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) }}"
+                class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Kembali ke Pertemuan
+            </a>
+        @else
+            <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Kembali
+            </a>
+        @endif
     </div>
 
     <div class="card-custom">
@@ -20,17 +27,29 @@
             <i class="fas fa-plus-circle me-2"></i>Form Tambah Materi
         </div>
         <div class="p-4">
-            <form action="{{ route('guru.lms.materi.store', [$kelas->id, $mapel->id]) }}" 
-                  method="POST" enctype="multipart/form-data">
+            <form action="{{ route('guru.lms.materi.store', [$kelas->id, $mapel->id]) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="pertemuan_id" value="{{ $pertemuanId ?? '' }}">
 
-                <div class="mb-3">
-                    <label class="form-label">Judul Materi <span class="text-danger">*</span></label>
-                    <input type="text" name="judul_materi" class="form-control @error('judul_materi') is-invalid @enderror" 
-                           value="{{ old('judul_materi') }}" required>
-                    @error('judul_materi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Judul Materi <span class="text-danger">*</span></label>
+                        <input type="text" name="judul_materi"
+                            class="form-control @error('judul_materi') is-invalid @enderror"
+                            value="{{ old('judul_materi') }}" required>
+                        @error('judul_materi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                        <select name="kategori" class="form-control @error('kategori') is-invalid @enderror" required>
+                            <option value="materi" {{ (old('kategori') ?? $kategori ?? '') == 'materi' ? 'selected' : '' }}>
+                                Materi Pendukung</option>
+                            <option value="modul_ajar" {{ (old('kategori') ?? $kategori ?? '') == 'modul_ajar' ? 'selected' : '' }}>Modul Ajar (Utama)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -56,8 +75,8 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Upload <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_upload" class="form-control" 
-                               value="{{ old('tanggal_upload', date('Y-m-d')) }}" required>
+                        <input type="date" name="tanggal_upload" class="form-control"
+                            value="{{ old('tanggal_upload', date('Y-m-d')) }}" required>
                     </div>
                 </div>
 
@@ -71,8 +90,8 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Simpan Materi
                     </button>
-                    <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}" 
-                       class="btn btn-secondary">Batal</a>
+                    <a href="{{ !empty($pertemuanId) ? route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) : route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}"
+                        class="btn btn-secondary">Batal</a>
                 </div>
             </form>
         </div>

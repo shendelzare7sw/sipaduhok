@@ -10,9 +10,16 @@
 
 @section('content')
     <div class="mb-3">
-        <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>Kembali
-        </a>
+        @if(!empty($pertemuanId))
+            <a href="{{ route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) }}"
+                class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Kembali ke Pertemuan
+            </a>
+        @else
+            <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Kembali
+            </a>
+        @endif
     </div>
 
     <div class="card-custom">
@@ -20,14 +27,15 @@
             <i class="fas fa-plus-circle me-2"></i>Form Buat Tugas
         </div>
         <div class="p-4">
-            <form action="{{ route('guru.lms.tugas.store', [$kelas->id, $mapel->id]) }}" 
-                  method="POST" enctype="multipart/form-data">
+            <form action="{{ route('guru.lms.tugas.store', [$kelas->id, $mapel->id]) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="pertemuan_id" value="{{ $pertemuanId ?? '' }}">
 
                 <div class="mb-3">
                     <label class="form-label">Judul Tugas <span class="text-danger">*</span></label>
-                    <input type="text" name="judul_tugas" class="form-control @error('judul_tugas') is-invalid @enderror" 
-                           value="{{ old('judul_tugas') }}" required>
+                    <input type="text" name="judul_tugas" class="form-control @error('judul_tugas') is-invalid @enderror"
+                        value="{{ old('judul_tugas') }}" required>
                     @error('judul_tugas')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -35,8 +43,8 @@
 
                 <div class="mb-3">
                     <label class="form-label">Deskripsi / Instruksi <span class="text-danger">*</span></label>
-                    <textarea name="deskripsi" class="form-control @error('deskripsi') is-invalid @enderror" 
-                              rows="5" required>{{ old('deskripsi') }}</textarea>
+                    <textarea name="deskripsi" class="form-control @error('deskripsi') is-invalid @enderror" rows="5"
+                        required>{{ old('deskripsi') }}</textarea>
                     @error('deskripsi')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -45,8 +53,9 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_mulai" class="form-control @error('tanggal_mulai') is-invalid @enderror" 
-                               value="{{ old('tanggal_mulai', date('Y-m-d')) }}" required>
+                        <input type="date" name="tanggal_mulai"
+                            class="form-control @error('tanggal_mulai') is-invalid @enderror"
+                            value="{{ old('tanggal_mulai', date('Y-m-d')) }}" required>
                         @error('tanggal_mulai')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -54,8 +63,9 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Deadline <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_deadline" class="form-control @error('tanggal_deadline') is-invalid @enderror" 
-                               value="{{ old('tanggal_deadline') }}" required>
+                        <input type="date" name="tanggal_deadline"
+                            class="form-control @error('tanggal_deadline') is-invalid @enderror"
+                            value="{{ old('tanggal_deadline') }}" required>
                         @error('tanggal_deadline')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -72,8 +82,8 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Buat Tugas
                     </button>
-                    <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" 
-                       class="btn btn-secondary">Batal</a>
+                    <a href="{{ !empty($pertemuanId) ? route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) : route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
+                        class="btn btn-secondary">Batal</a>
                 </div>
             </form>
         </div>

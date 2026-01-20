@@ -26,7 +26,7 @@ class SiaDashboardController extends Controller
     {
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)
-            ->with(['kelas', 'cabang'])
+            ->with(['kelas.tahunAjaran', 'kelas.waliKelas', 'cabang'])
             ->first();
 
         if (!$siswa) {
@@ -60,9 +60,12 @@ class SiaDashboardController extends Controller
             ->orderBy('jam_mulai')
             ->get();
 
-        // Tugas & Deadline (untuk LMS - SMP & SMA)
+        // Tugas & Deadline (untuk LMS - Check Settings)
+        $setting = \App\Models\AppSetting::where('key', 'lms_allowed_jenjang')->first();
+        $allowedJenjang = $setting ? json_decode($setting->value, true) : [];
+
         $tugasList = collect();
-        if ($siswa->kelas && in_array($siswa->kelas->jenjang, ['SMP', 'SMA'])) {
+        if ($siswa->kelas && in_array($siswa->kelas->jenjang, $allowedJenjang)) {
             $tugasList = Tugas::where('kelas_id', $siswa->kelas_id)
                 ->where('tanggal_deadline', '>=', now())
                 ->with(['mataPelajaran', 'guru'])
@@ -82,17 +85,22 @@ class SiaDashboardController extends Controller
         // Show LMS Button
         $showLmsButton = true;
 
-        return view('siswa.sia.dashboard', compact(
-            'siswa',
-            'pengumumanList',
-            'flyerList',
-            'performaData',
-            'rekapAbsen',
-            'jadwalHariIni',
-            'tugasList',
-            'nilaiTerbaru',
-            'showLmsButton'
-        ));
+        // Determine Semester
+        $bulan = now()->month;
+        $semester = ($bulan >= 7 && $bulan <= 12) ? 'Ganjil' : 'Genap';
+
+        return view('siswa.sia.dashboard', [
+            'siswa' => $siswa,
+            'pengumuman' => $pengumumanList,
+            'flyers' => $flyerList,
+            'performa' => $performaData,
+            'absensi' => $rekapAbsen,
+            'jadwalHariIni' => $jadwalHariIni,
+            'tugasList' => $tugasList,
+            'nilaiTerbaru' => $nilaiTerbaru,
+            'showLmsButton' => $showLmsButton,
+            'semester' => $semester
+        ]);
     }
 
     /**
@@ -234,20 +242,20 @@ class SiaDashboardController extends Controller
         $totalTugas = Tugas::where('kelas_id', $kelasId)->count();
 
         // Tugas Selesai
-        $tugasSelesai = Tugas::whereHas('tugasSiswa', function($q) use ($siswaId) {
-                $q->where('siswa_id', $siswaId)
-                  ->whereIn('status', ['dikerjakan', 'dinilai']);
-            })
+        $tugasSelesai = Tugas::whereHas('tugasSiswa', function ($q) use ($siswaId) {
+            $q->where('siswa_id', $siswaId)
+                ->whereIn('status', ['dikerjakan', 'dinilai']);
+        })
             ->count();
 
         // Total Ujian
         $totalUjian = Ujian::where('kelas_id', $kelasId)->count();
 
         // Ujian Selesai
-        $ujianSelesai = Ujian::whereHas('ujianSiswa', function($q) use ($siswaId) {
-                $q->where('siswa_id', $siswaId)
-                  ->whereIn('status', ['selesai', 'dinilai']);
-            })
+        $ujianSelesai = Ujian::whereHas('ujianSiswa', function ($q) use ($siswaId) {
+            $q->where('siswa_id', $siswaId)
+                ->whereIn('status', ['selesai', 'dinilai']);
+        })
             ->count();
 
         // Total Materi

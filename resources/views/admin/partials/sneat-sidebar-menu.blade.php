@@ -60,6 +60,14 @@ Compatible dengan Sneat Bootstrap 5 Template
     </ul>
 </li>
 
+<!-- Pengaturan LMS -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.lms-settings') ? 'active' : '' }}">
+    <a href="{{ route('admin.lms-settings.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-cogs"></i>
+        <div>Pengaturan LMS</div>
+    </a>
+</li>
+
 <!-- Tahun Ajaran -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.tahun-ajaran') ? 'active' : '' }}">
     <a href="{{ route('admin.tahun-ajaran.index') }}" class="menu-link">

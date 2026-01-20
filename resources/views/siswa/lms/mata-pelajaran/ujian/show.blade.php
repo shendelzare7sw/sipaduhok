@@ -217,35 +217,76 @@
         @csrf
 
         @foreach($soalList as $index => $soal)
-        <div class="soal-card">
-            <div class="d-flex">
-                <div class="soal-number">{{ $index + 1 }}</div>
-                <div style="flex: 1;">
-                    <h5 style="color: #1a1a1a; margin-bottom: 15px;">
-                        {{ $soal->pertanyaan }}
-                    </h5>
-
-                    @if($soal->tipe_soal === 'pilihan_ganda')
-                        @php $pilihan = json_decode($soal->pilihan_jawaban, true); @endphp
-                        @foreach($pilihan as $key => $value)
-                        <label class="pilihan-label">
-                            <input type="radio" 
-                                   name="jawaban[{{ $soal->id }}]" 
-                                   value="{{ $key }}" 
-                                   required>
-                            <span>{{ $key }}. {{ $value }}</span>
-                        </label>
-                        @endforeach
-                    @else
-                        <textarea name="jawaban[{{ $soal->id }}]" 
-                                  rows="5" 
-                                  class="form-control" 
-                                  placeholder="Tulis jawaban Anda di sini..."
-                                  required></textarea>
-                    @endif
+        @php
+            $answers = $existingAnswers ?? [];
+        @endphp
+        
+        @switch($soal->tipe_soal)
+            @case('pilihan_ganda')
+                @include('siswa.lms.partials._soal_pilgan', [
+                    'soal' => $soal, 
+                    'index' => $index + 1, 
+                    'answers' => $answers, 
+                    'disabled' => false
+                ])
+                @break
+                
+            @case('pilihan_ganda_kompleks')
+                @include('siswa.lms.partials._soal_pilgan_kompleks', [
+                    'soal' => $soal, 
+                    'index' => $index + 1, 
+                    'answers' => $answers, 
+                    'disabled' => false
+                ])
+                @break
+                
+            @case('benar_salah')
+                @include('siswa.lms.partials._soal_benar_salah', [
+                    'soal' => $soal, 
+                    'index' => $index + 1, 
+                    'answers' => $answers, 
+                    'disabled' => false
+                ])
+                @break
+                
+            @case('isian_singkat')
+                @include('siswa.lms.partials._soal_isian_singkat', [
+                    'soal' => $soal, 
+                    'index' => $index + 1, 
+                    'answers' => $answers, 
+                    'disabled' => false
+                ])
+                @break
+                
+            @case('uraian')
+            @case('essay')
+                @include('siswa.lms.partials._soal_uraian', [
+                    'soal' => $soal, 
+                    'index' => $index + 1, 
+                    'answers' => $answers, 
+                    'disabled' => false,
+                    'allowFileUpload' => true
+                ])
+                @break
+                
+            @default
+                {{-- Fallback untuk tipe soal yang tidak dikenal --}}
+                <div class="soal-card">
+                    <div class="d-flex">
+                        <div class="soal-number">{{ $index + 1 }}</div>
+                        <div style="flex: 1;">
+                            <h5 style="color: #1a1a1a; margin-bottom: 15px;">
+                                {{ $soal->pertanyaan }}
+                            </h5>
+                            <textarea name="jawaban[{{ $soal->id }}]" 
+                                      rows="5" 
+                                      class="form-control" 
+                                      placeholder="Tulis jawaban Anda di sini..."
+                                      required></textarea>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+        @endswitch
         @endforeach
 
         <div style="background: #fef3c7; padding: 20px; border-radius: 12px; margin-top: 30px; text-align: center;">

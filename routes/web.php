@@ -59,6 +59,7 @@ use App\Http\Controllers\Guru\GuruKoreksiController;
 use App\Http\Controllers\Guru\GuruUjianController;
 use App\Http\Controllers\Guru\GuruNilaiController;
 use App\Http\Controllers\Guru\GuruForumController;
+use App\Http\Controllers\Guru\GuruPertemuanController;
 
 // Siswa Controllers
 use App\Http\Controllers\Siswa\SiswaDashboardController;
@@ -470,6 +471,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/', [$monitoringController, 'catatanStore'])->name('store');
             Route::get('/{id}', [$monitoringController, 'catatanShow'])->name('show');
         });
+
+        // Pengaturan LMS
+        Route::prefix('lms-settings')->name('lms-settings.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\LmsSettingController::class, 'index'])->name('index');
+            Route::put('/update', [\App\Http\Controllers\Admin\LmsSettingController::class, 'update'])->name('update');
+        });
     });
 
     /*
@@ -854,6 +861,15 @@ Route::middleware(['auth'])->group(function () {
             // Dashboard LMS (Beranda)
             Route::get('/dashboard', [GuruLmsController::class, 'dashboard'])->name('dashboard');
 
+            // Pertemuan (Session)
+            Route::prefix('pertemuan')->name('pertemuan.')->group(function () {
+                Route::get('/', [GuruPertemuanController::class, 'index'])->name('index');
+                Route::get('/create', [GuruPertemuanController::class, 'create'])->name('create');
+                Route::post('/', [GuruPertemuanController::class, 'store'])->name('store');
+                Route::get('/{pertemuan}', [GuruPertemuanController::class, 'show'])->name('show');
+                Route::delete('/{pertemuan}', [GuruPertemuanController::class, 'destroy'])->name('destroy');
+            });
+
             // Materi
             Route::prefix('materi')->name('materi.')->group(function () {
                 Route::get('/', [GuruMateriController::class, 'index'])->name('index');
@@ -891,14 +907,31 @@ Route::middleware(['auth'])->group(function () {
                 // Hasil & Koreksi Ujian
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
                 Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksi'])->name('koreksi');
+
+                // Manajemen Soal
+                Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
+                Route::get('/{ujian}/soal/create', [GuruUjianController::class, 'createSoal'])->name('soal.create');
+                Route::post('/{ujian}/soal', [GuruUjianController::class, 'storeSoal'])->name('soal.store');
+                Route::get('/{ujian}/soal/{soal}/edit', [GuruUjianController::class, 'editSoal'])->name('soal.edit');
+                Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
+                Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
             });
 
             // Nilai Siswa
             Route::get('/nilai', [GuruNilaiController::class, 'index'])->name('nilai.index');
             Route::post('/nilai/update', [GuruNilaiController::class, 'update'])->name('nilai.update');
 
-            // Forum Diskusi (Fase 2 - placeholder)
-            Route::get('/forum', [GuruForumController::class, 'index'])->name('forum.index');
+            // Forum Diskusi
+            Route::prefix('forum')->name('forum.')->group(function () {
+                Route::get('/', [GuruForumController::class, 'index'])->name('index');
+                Route::get('/create', [GuruForumController::class, 'create'])->name('create');
+                Route::post('/', [GuruForumController::class, 'store'])->name('store');
+                Route::get('/{forum}', [GuruForumController::class, 'show'])->name('show');
+                Route::post('/{forum}/reply', [GuruForumController::class, 'reply'])->name('reply');
+                Route::patch('/{forum}/pin', [GuruForumController::class, 'togglePin'])->name('pin');
+                Route::patch('/{forum}/close', [GuruForumController::class, 'toggleClose'])->name('close');
+                Route::delete('/{forum}', [GuruForumController::class, 'destroy'])->name('destroy');
+            });
         });
     });
 
@@ -961,7 +994,7 @@ Route::middleware(['auth'])->group(function () {
         | LMS (Learning Management System) Routes
         |--------------------------------------------------------------------------
         */
-        Route::prefix('lms')->name('lms.')->group(function () {
+        Route::prefix('lms')->name('lms.')->middleware('lms.access')->group(function () {
 
             // Dashboard LMS
             Route::get('/dashboard', [LmsDashboardController::class, 'index'])->name('dashboard');
@@ -1002,8 +1035,13 @@ Route::middleware(['auth'])->group(function () {
 
                 // Forum Diskusi
                 Route::prefix('{mapelId}/forum')->name('forum.')->group(function () {
-                    Route::get('/', [LmsMateriController::class, 'forum'])->name('index');
-                    Route::post('/', [LmsMateriController::class, 'postForum'])->name('post');
+                    Route::get('/', [App\Http\Controllers\Siswa\LmsForumController::class, 'index'])->name('index');
+                    Route::get('/create', [App\Http\Controllers\Siswa\LmsForumController::class, 'create'])->name('create');
+                    Route::post('/', [App\Http\Controllers\Siswa\LmsForumController::class, 'store'])->name('store');
+                    Route::get('/{diskusiId}', [App\Http\Controllers\Siswa\LmsForumController::class, 'show'])->name('show');
+                    Route::post('/{diskusiId}/reply', [App\Http\Controllers\Siswa\LmsForumController::class, 'reply'])->name('reply');
+                    Route::put('/{diskusiId}/reply/{replyId}', [App\Http\Controllers\Siswa\LmsForumController::class, 'updateReply'])->name('reply.update');
+                    Route::delete('/{diskusiId}/reply/{replyId}', [App\Http\Controllers\Siswa\LmsForumController::class, 'destroyReply'])->name('reply.destroy');
                 });
             });
 
@@ -1071,6 +1109,22 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/update', [App\Http\Controllers\ProfileController::class, 'update'])->name('update');
         Route::post('/upload-foto', [App\Http\Controllers\ProfileController::class, 'uploadFoto'])->name('upload-foto');
         Route::delete('/delete-foto', [App\Http\Controllers\ProfileController::class, 'deleteFoto'])->name('delete-foto');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFIKASI (Semua Role)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+        Route::get('/recent', [App\Http\Controllers\NotificationController::class, 'recent'])->name('recent');
+        Route::get('/unread-count', [App\Http\Controllers\NotificationController::class, 'unreadCount'])->name('unread-count');
+        Route::get('/today', [App\Http\Controllers\NotificationController::class, 'today'])->name('today');
+        Route::post('/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-read');
+        Route::post('/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{id}', [App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
+        Route::get('/type/{tipe}', [App\Http\Controllers\NotificationController::class, 'byType'])->name('by-type');
     });
 
     /*

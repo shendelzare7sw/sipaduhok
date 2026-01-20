@@ -53,4 +53,10 @@ class Pembayaran extends Model
     {
         return $this->belongsTo(User::class, 'divalidasi_oleh');
     }
+
+    // Relationship to find all payments in the same bulk transaction
+    public function groupTransactions()
+    {
+        return $this->hasMany(Pembayaran::class, 'order_id', 'order_id');
+    }
 }

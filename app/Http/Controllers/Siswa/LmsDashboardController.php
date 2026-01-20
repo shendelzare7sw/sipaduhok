@@ -34,32 +34,28 @@ class LmsDashboardController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Cek akses LMS (hanya SMP & SMA)
-        if (!in_array($siswa->kelas->jenjang ?? '', ['SMP', 'SMA'])) {
-            return redirect()->route('siswa.sia.dashboard')
-                ->with('error', 'Akses LMS hanya tersedia untuk siswa SMP dan SMA');
-        }
+        // Cek akses LMS ditangani oleh middleware 'lms.access'
 
         // Statistik Kehadiran
         $totalHariAktif = Presensi::where('siswa_id', $siswa->id)
             ->whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
             ->count();
-        
+
         $hadir = Presensi::where('siswa_id', $siswa->id)
             ->where('status', 'hadir')
             ->whereMonth('tanggal', now()->month)
             ->whereYear('tanggal', now()->year)
             ->count();
-        
+
         $persenKehadiran = $totalHariAktif > 0 ? round(($hadir / $totalHariAktif) * 100) : 0;
 
         // Tugas Pending
         $tugasPending = Tugas::where('kelas_id', $siswa->kelas_id)
             ->where('tanggal_deadline', '>=', now())
-            ->whereDoesntHave('tugasSiswa', function($q) use ($siswa) {
+            ->whereDoesntHave('tugasSiswa', function ($q) use ($siswa) {
                 $q->where('siswa_id', $siswa->id)
-                  ->whereIn('status', ['dikerjakan', 'dinilai']);
+                    ->whereIn('status', ['dikerjakan', 'dinilai']);
             })
             ->count();
 
@@ -87,13 +83,82 @@ class LmsDashboardController extends Controller
             ->orderBy('tanggal_pengumuman', 'desc')
             ->first();
 
+        // ============ DATA TAMBAHAN UNTUK ENHANCED DASHBOARD ============
+
+        // Kalender Mini - Kegiatan minggu ini
+        $kalenderMingguIni = KalenderAkademik::where('status', 'aktif')
+            ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id ?? null)
+            ->where(function ($q) {
+                $q->whereBetween('tanggal_mulai', [now()->startOfWeek(), now()->endOfWeek()])
+                    ->orWhere(function ($q2) {
+                        $q2->where('tanggal_mulai', '<=', now()->endOfWeek())
+                            ->where('tanggal_selesai', '>=', now()->startOfWeek());
+                    });
+            })
+            ->orderBy('tanggal_mulai')
+            ->take(5)
+            ->get();
+
+        // Notifikasi Hari Ini
+        $notifikasiHariIni = \App\Models\Notification::where('user_id', $user->id)
+            ->today()
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Daftar Mata Pelajaran untuk Kelas Ini
+        $mataPelajaranList = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+            ->with(['mataPelajaran', 'guru'])
+            ->get()
+            ->unique('mata_pelajaran_id')
+            ->take(8);
+
+        // Daftar Guru Pengajar
+        $guruPengajar = TenagaPendidik::whereHas('guruKelas', function ($q) use ($siswa) {
+            $q->where('kelas_id', $siswa->kelas_id);
+        })
+            ->with([
+                'guruKelas' => function ($q) use ($siswa) {
+                    $q->where('kelas_id', $siswa->kelas_id)->with('mataPelajaran');
+                }
+            ])
+            ->take(6)
+            ->get();
+
+        // Ujian Mendatang
+        $ujianMendatang = Ujian::where('kelas_id', $siswa->kelas_id)
+            ->where('tanggal_mulai', '>', now())
+            ->where('tanggal_mulai', '<=', now()->addDays(7))
+            ->orderBy('tanggal_mulai')
+            ->take(3)
+            ->get();
+
+        // Tugas Deadline Terdekat
+        $tugasDeadline = Tugas::where('kelas_id', $siswa->kelas_id)
+            ->where('tanggal_deadline', '>=', now())
+            ->where('tanggal_deadline', '<=', now()->addDays(7))
+            ->whereDoesntHave('tugasSiswa', function ($q) use ($siswa) {
+                $q->where('siswa_id', $siswa->id)
+                    ->whereIn('status', ['dikerjakan', 'dinilai']);
+            })
+            ->with('mataPelajaran')
+            ->orderBy('tanggal_deadline')
+            ->take(5)
+            ->get();
+
         return view('siswa.lms.dashboard', compact(
             'siswa',
             'persenKehadiran',
             'tugasPending',
             'agendaBulanIni',
             'jadwalHariIni',
-            'pengumuman'
+            'pengumuman',
+            'kalenderMingguIni',
+            'notifikasiHariIni',
+            'mataPelajaranList',
+            'guruPengajar',
+            'ujianMendatang',
+            'tugasDeadline'
         ));
     }
 
@@ -117,7 +182,7 @@ class LmsDashboardController extends Controller
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->orderBy('tanggal_mulai', 'asc')
             ->get()
-            ->groupBy(function($item) {
+            ->groupBy(function ($item) {
                 return Carbon::parse($item->tanggal_mulai)->format('Y-m');
             });
 
@@ -140,9 +205,9 @@ class LmsDashboardController extends Controller
         $kegiatan = KalenderAkademik::where('status', 'aktif')
             ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id)
             ->whereDate('tanggal_mulai', '<=', $tanggal)
-            ->where(function($q) use ($tanggal) {
+            ->where(function ($q) use ($tanggal) {
                 $q->whereDate('tanggal_selesai', '>=', $tanggal)
-                  ->orWhereNull('tanggal_selesai');
+                    ->orWhereNull('tanggal_selesai');
             })
             ->get();
 
@@ -261,12 +326,14 @@ class LmsDashboardController extends Controller
             return redirect()->route('siswa.lms.dashboard');
         }
 
-        $guruPengajar = TenagaPendidik::whereHas('guruKelas', function($q) use ($siswa) {
-                $q->where('kelas_id', $siswa->kelas_id);
-            })
-            ->with(['guruKelas' => function($q) use ($siswa) {
-                $q->where('kelas_id', $siswa->kelas_id)->with('mataPelajaran');
-            }])
+        $guruPengajar = TenagaPendidik::whereHas('guruKelas', function ($q) use ($siswa) {
+            $q->where('kelas_id', $siswa->kelas_id);
+        })
+            ->with([
+                'guruKelas' => function ($q) use ($siswa) {
+                    $q->where('kelas_id', $siswa->kelas_id)->with('mataPelajaran');
+                }
+            ])
             ->get();
 
         return view('siswa.lms.guru', compact('siswa', 'guruPengajar'));

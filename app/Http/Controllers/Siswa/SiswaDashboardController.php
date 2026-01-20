@@ -35,7 +35,7 @@ class SiswaDashboardController extends Controller
     {
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)
-            ->with(['kelas', 'cabang'])
+            ->with(['kelas.tahunAjaran', 'kelas.waliKelas', 'cabang'])
             ->first();
 
         if (!$siswa) {
@@ -59,12 +59,17 @@ class SiswaDashboardController extends Controller
         // Rekap Absensi Bulan Ini
         $absensi = $this->getRekapAbsensi($siswa->id);
 
+        // Determine Semester (Logic Sederhana berdasarkan bulan)
+        $bulan = now()->month;
+        $semester = ($bulan >= 7 && $bulan <= 12) ? 'Ganjil' : 'Genap';
+
         return view('siswa.sia.dashboard', compact(
             'siswa',
             'pengumuman',
             'flyers',
             'performa',
-            'absensi'
+            'absensi',
+            'semester'
         ));
     }
 
@@ -82,11 +87,7 @@ class SiswaDashboardController extends Controller
             return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Cek apakah siswa memiliki akses LMS (hanya SMP & SMA)
-        if (!in_array($siswa->kelas->jenjang, ['SMP', 'SMA'])) {
-            return redirect()->route('siswa.sia.dashboard')
-                ->with('error', 'Akses LMS hanya tersedia untuk siswa SMP dan SMA');
-        }
+        // Cek akses LMS ditangani oleh middleware 'lms.access'
 
         // Kalender Akademik Bulan Ini
         $kalenderBulanIni = KalenderAkademik::aktif()
@@ -112,9 +113,9 @@ class SiswaDashboardController extends Controller
             ->groupBy('hari');
 
         // Daftar Guru Pengajar
-        $guruPengajar = TenagaPendidik::whereHas('guruKelas', function($q) use ($siswa) {
-                $q->where('kelas_id', $siswa->kelas_id);
-            })
+        $guruPengajar = TenagaPendidik::whereHas('guruKelas', function ($q) use ($siswa) {
+            $q->where('kelas_id', $siswa->kelas_id);
+        })
             ->with(['guruKelas.mataPelajaran'])
             ->get();
 
@@ -151,7 +152,7 @@ class SiswaDashboardController extends Controller
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->orderBy('tanggal_mulai', 'asc')
             ->get()
-            ->groupBy(function($item) {
+            ->groupBy(function ($item) {
                 return Carbon::parse($item->tanggal_mulai)->format('Y-m');
             });
 
@@ -174,9 +175,9 @@ class SiswaDashboardController extends Controller
         $kegiatan = KalenderAkademik::aktif()
             ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id)
             ->whereDate('tanggal_mulai', '<=', $tanggal)
-            ->where(function($q) use ($tanggal) {
+            ->where(function ($q) use ($tanggal) {
                 $q->whereDate('tanggal_selesai', '>=', $tanggal)
-                  ->orWhereNull('tanggal_selesai');
+                    ->orWhereNull('tanggal_selesai');
             })
             ->get();
 
@@ -204,37 +205,37 @@ class SiswaDashboardController extends Controller
     private function getPerformaSiswa($siswaId)
     {
         // Total Tugas
-        $totalTugas = Tugas::whereHas('kelas', function($q) use ($siswaId) {
-                $q->whereHas('siswa', function($q2) use ($siswaId) {
-                    $q2->where('siswa.id', $siswaId);
-                });
-            })
+        $totalTugas = Tugas::whereHas('kelas', function ($q) use ($siswaId) {
+            $q->whereHas('siswa', function ($q2) use ($siswaId) {
+                $q2->where('siswa.id', $siswaId);
+            });
+        })
             ->count();
 
         // Tugas Selesai
-        $tugasSelesai = Tugas::whereHas('tugasSiswa', function($q) use ($siswaId) {
-                $q->where('siswa_id', $siswaId)
-                  ->whereIn('status', ['dikerjakan', 'dinilai']);
-            })
+        $tugasSelesai = Tugas::whereHas('tugasSiswa', function ($q) use ($siswaId) {
+            $q->where('siswa_id', $siswaId)
+                ->whereIn('status', ['dikerjakan', 'dinilai']);
+        })
             ->count();
 
         // Total Ujian
-        $totalUjian = Ujian::whereHas('kelas.siswa', function($q) use ($siswaId) {
-                $q->where('siswa.id', $siswaId);
-            })
+        $totalUjian = Ujian::whereHas('kelas.siswa', function ($q) use ($siswaId) {
+            $q->where('siswa.id', $siswaId);
+        })
             ->count();
 
         // Ujian Selesai
-        $ujianSelesai = Ujian::whereHas('ujianSiswa', function($q) use ($siswaId) {
-                $q->where('siswa_id', $siswaId)
-                  ->whereIn('status', ['selesai', 'dinilai']);
-            })
+        $ujianSelesai = Ujian::whereHas('ujianSiswa', function ($q) use ($siswaId) {
+            $q->where('siswa_id', $siswaId)
+                ->whereIn('status', ['selesai', 'dinilai']);
+        })
             ->count();
 
         // Total Materi
-        $totalMateri = Materi::whereHas('kelas.siswa', function($q) use ($siswaId) {
-                $q->where('siswa.id', $siswaId);
-            })
+        $totalMateri = Materi::whereHas('kelas.siswa', function ($q) use ($siswaId) {
+            $q->where('siswa.id', $siswaId);
+        })
             ->count();
 
         // Materi Dipelajari (anggap semua materi bisa diakses)

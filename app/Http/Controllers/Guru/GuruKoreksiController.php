@@ -23,15 +23,15 @@ class GuruKoreksiController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $tugas = Tugas::findOrFail($tugasId);
-        
+
         $submissions = TugasSiswa::with('siswa')
             ->where('tugas_id', $tugasId)
             ->get();
-        
+
         // Statistik
         $stats = [
             'total' => $submissions->count(),
@@ -40,8 +40,8 @@ class GuruKoreksiController extends Controller
             'terlambat' => $submissions->where('status', 'terlambat')->count(),
             'dinilai' => $submissions->where('status', 'dinilai')->count(),
         ];
-        
-        return view('guru.lms.koreksi.index', [
+
+        return view('guru.lms.tugas.koreksi', [
             'kelas' => $kelas,
             'mataPelajaran' => $mataPelajaran,
             'tugas' => $tugas,
@@ -50,7 +50,7 @@ class GuruKoreksiController extends Controller
             'guru' => $tenagaPendidik,
         ]);
     }
-    
+
     /**
      * Form koreksi individual
      */
@@ -58,13 +58,13 @@ class GuruKoreksiController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $tugas = Tugas::findOrFail($tugasId);
         $submission = TugasSiswa::with('siswa')->findOrFail($submissionId);
-        
-        return view('guru.lms.koreksi.show', [
+
+        return view('guru.lms.tugas.koreksi-show', [
             'kelas' => $kelas,
             'mataPelajaran' => $mataPelajaran,
             'tugas' => $tugas,
@@ -72,7 +72,7 @@ class GuruKoreksiController extends Controller
             'guru' => $tenagaPendidik,
         ]);
     }
-    
+
     /**
      * Simpan nilai
      */
@@ -80,24 +80,24 @@ class GuruKoreksiController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $validated = $request->validate([
             'nilai' => 'required|numeric|min:0|max:100',
             'feedback_guru' => 'nullable|string',
         ]);
-        
+
         $submission = TugasSiswa::findOrFail($submissionId);
         $submission->update([
             'nilai' => $validated['nilai'],
             'feedback_guru' => $validated['feedback_guru'],
             'status' => 'dinilai',
         ]);
-        
+
         return redirect()
             ->route('guru.lms.koreksi.index', [$kelasId, $mapelId, $tugasId])
             ->with('success', 'Nilai berhasil disimpan');
     }
-    
+
     /**
      * Bulk grading (beri nilai yang sama untuk beberapa siswa)
      */
@@ -105,26 +105,26 @@ class GuruKoreksiController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $validated = $request->validate([
             'siswa_ids' => 'required|array',
             'siswa_ids.*' => 'exists:tugas_siswa,id',
             'nilai' => 'required|numeric|min:0|max:100',
             'feedback_guru' => 'nullable|string',
         ]);
-        
+
         TugasSiswa::whereIn('id', $validated['siswa_ids'])
             ->update([
                 'nilai' => $validated['nilai'],
                 'feedback_guru' => $validated['feedback_guru'],
                 'status' => 'dinilai',
             ]);
-        
+
         return redirect()
             ->route('guru.lms.koreksi.index', [$kelasId, $mapelId, $tugasId])
             ->with('success', count($validated['siswa_ids']) . ' siswa berhasil dinilai');
     }
-    
+
     /**
      * Verifikasi akses guru
      */
@@ -134,7 +134,7 @@ class GuruKoreksiController extends Controller
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-        
+
         if (!$access) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }

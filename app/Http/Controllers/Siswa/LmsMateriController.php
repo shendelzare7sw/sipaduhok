@@ -28,27 +28,36 @@ class LmsMateriController extends Controller
 
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
-        // Materi
+        // Ambil semua pertemuan dengan eager loading resources
+        $pertemuans = \App\Models\Pertemuan::where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->with(['materi', 'tugas', 'ujian', 'forumDiskusi'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Ambil resource yang TIDAK terkait pertemuan (General Resources)
         $materiList = Materi::where('kelas_id', $siswa->kelas_id)
             ->where('mata_pelajaran_id', $mapelId)
+            ->whereNull('pertemuan_id')
             ->orderBy('tanggal_upload', 'desc')
             ->get();
 
-        // Tugas & Latihan
         $tugasList = Tugas::where('kelas_id', $siswa->kelas_id)
             ->where('mata_pelajaran_id', $mapelId)
+            ->whereNull('pertemuan_id')
             ->orderBy('tanggal_mulai', 'desc')
             ->get();
 
-        // Ujian
         $ujianList = Ujian::where('kelas_id', $siswa->kelas_id)
             ->where('mata_pelajaran_id', $mapelId)
+            ->whereNull('pertemuan_id')
             ->orderBy('tanggal_mulai', 'desc')
             ->get();
 
         return view('siswa.lms.mata-pelajaran.show', compact(
             'siswa',
             'mataPelajaran',
+            'pertemuans',
             'materiList',
             'tugasList',
             'ujianList'

@@ -23,33 +23,33 @@ class GuruLmsController extends Controller
     public function dashboard($kelasId, $mapelId): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        
+
         // Verifikasi akses
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+
         // Statistik
         $totalMateri = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->count();
-        
+
         $totalTugas = Tugas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->count();
-        
+
         $totalUjian = Ujian::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->count();
-        
+
         $totalSiswa = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
             ->count();
-        
+
         // Tugas yang perlu dikoreksi (submitted tapi belum dinilai)
         $tugasBelumDikoreksi = \DB::table('tugas_siswa')
             ->join('tugas', 'tugas_siswa.tugas_id', '=', 'tugas.id')
@@ -59,7 +59,7 @@ class GuruLmsController extends Controller
             ->where('tugas_siswa.status', 'dikerjakan')
             ->whereNull('tugas_siswa.nilai')
             ->count();
-        
+
         // Recent activities
         $recentMateri = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
@@ -67,14 +67,21 @@ class GuruLmsController extends Controller
             ->orderBy('tanggal_upload', 'desc')
             ->limit(5)
             ->get();
-        
+
         $recentTugas = Tugas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-        
+
+        // Fetch pertemuans with eager loading
+        $pertemuans = \App\Models\Pertemuan::where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->with(['materi', 'tugas', 'ujian', 'forumDiskusi'])
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
         return view('guru.lms.dashboard', [
             'kelas' => $kelas,
             'mataPelajaran' => $mataPelajaran,
@@ -92,9 +99,10 @@ class GuruLmsController extends Controller
             'materiTerbaru' => $recentMateri,       // Alias untuk view
             'recentTugas' => $recentTugas,
             'tugasTerbaru' => $recentTugas,         // Alias untuk view
+            'pertemuans' => $pertemuans,
         ]);
     }
-    
+
     /**
      * Verifikasi akses guru ke kelas dan mata pelajaran
      */
@@ -104,7 +112,7 @@ class GuruLmsController extends Controller
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-        
+
         if (!$access) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }

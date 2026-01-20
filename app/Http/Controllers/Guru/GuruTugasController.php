@@ -24,21 +24,21 @@ class GuruTugasController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+
         $tugasList = Tugas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->withCount([
-                'tugasSiswa as submitted_count' => function($query) {
+                'tugasSiswa as submitted_count' => function ($query) {
                     $query->where('status', '!=', 'belum_dikerjakan');
                 }
             ])
             ->orderBy('tanggal_mulai', 'desc')
             ->paginate(10);
-        
+
         return view('guru.lms.tugas.index', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
@@ -46,25 +46,30 @@ class GuruTugasController extends Controller
             'guru' => $tenagaPendidik,
         ]);
     }
-    
+
     /**
      * Form tambah tugas
      */
-    public function create($kelasId, $mapelId): View
+    /**
+     * Form tambah tugas
+     */
+    public function create(Request $request, $kelasId, $mapelId): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+        $pertemuanId = $request->get('pertemuan_id');
+
         return view('guru.lms.tugas.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
+            'pertemuanId' => $pertemuanId,
         ]);
     }
-    
+
     /**
      * Simpan tugas baru
      */
@@ -72,23 +77,25 @@ class GuruTugasController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $validated = $request->validate([
             'judul_tugas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'file_tugas' => 'nullable|file|max:10240', // 10MB
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
+            'pertemuan_id' => 'nullable|exists:pertemuans,id',
         ]);
-        
+
         $filePath = null;
         if ($request->hasFile('file_tugas')) {
             $filePath = $request->file('file_tugas')->store('tugas', 'public');
         }
-        
+
         $tugas = Tugas::create([
             'kelas_id' => $kelasId,
             'mata_pelajaran_id' => $mapelId,
+            'pertemuan_id' => $validated['pertemuan_id'] ?? null,
             'guru_id' => $tenagaPendidik->id,
             'judul_tugas' => $validated['judul_tugas'],
             'deskripsi' => $validated['deskripsi'],
@@ -96,12 +103,12 @@ class GuruTugasController extends Controller
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_deadline' => $validated['tanggal_deadline'],
         ]);
-        
+
         // Buat TugasSiswa untuk setiap siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
             ->get();
-        
+
         foreach ($siswaList as $siswa) {
             TugasSiswa::create([
                 'tugas_id' => $tugas->id,
@@ -109,12 +116,18 @@ class GuruTugasController extends Controller
                 'status' => 'belum_dikerjakan',
             ]);
         }
-        
+
+        if (!empty($validated['pertemuan_id'])) {
+            return redirect()
+                ->route('guru.lms.pertemuan.show', [$kelasId, $mapelId, $validated['pertemuan_id']])
+                ->with('success', 'Tugas berhasil ditambahkan ke pertemuan');
+        }
+
         return redirect()
             ->route('guru.lms.tugas.index', [$kelasId, $mapelId])
             ->with('success', 'Tugas berhasil ditambahkan');
     }
-    
+
     /**
      * Form edit tugas
      */
@@ -122,16 +135,16 @@ class GuruTugasController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $tugas = Tugas::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        
+
         return view('guru.lms.tugas.edit', [
             'tugas' => $tugas,
             'kelas' => $kelas,
@@ -139,7 +152,7 @@ class GuruTugasController extends Controller
             'guru' => $tenagaPendidik,
         ]);
     }
-    
+
     /**
      * Update tugas
      */
@@ -147,13 +160,13 @@ class GuruTugasController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $tugas = Tugas::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
-        
+
         $validated = $request->validate([
             'judul_tugas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
@@ -161,22 +174,22 @@ class GuruTugasController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
         ]);
-        
+
         if ($request->hasFile('file_tugas')) {
             if ($tugas->file_tugas) {
                 Storage::disk('public')->delete($tugas->file_tugas);
             }
-            
+
             $validated['file_tugas'] = $request->file('file_tugas')->store('tugas', 'public');
         }
-        
+
         $tugas->update($validated);
-        
+
         return redirect()
             ->route('guru.lms.tugas.index', [$kelasId, $mapelId])
             ->with('success', 'Tugas berhasil diperbarui');
     }
-    
+
     /**
      * Hapus tugas
      */
@@ -184,24 +197,24 @@ class GuruTugasController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $tugas = Tugas::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
-        
+
         if ($tugas->file_tugas) {
             Storage::disk('public')->delete($tugas->file_tugas);
         }
-        
+
         $tugas->delete();
-        
+
         return redirect()
             ->route('guru.lms.tugas.index', [$kelasId, $mapelId])
             ->with('success', 'Tugas berhasil dihapus');
     }
-    
+
     /**
      * Verifikasi akses guru
      */
@@ -211,7 +224,7 @@ class GuruTugasController extends Controller
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-        
+
         if (!$access) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }

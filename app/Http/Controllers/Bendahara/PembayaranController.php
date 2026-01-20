@@ -25,7 +25,8 @@ class PembayaranController extends Controller
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
-        $query = Pembayaran::with(['siswa', 'siswa.kelas', 'tagihan', 'validator']);
+        $query = Pembayaran::with(['siswa', 'siswa.kelas', 'tagihan', 'validator'])
+            ->withCount('groupTransactions');
 
         // Filter status validasi
         if ($request->filled('status')) {
