@@ -60,7 +60,7 @@
                         <div id="sectionPilgan" class="tipe-section" style="display:none;">
                             @php 
                                 $pilganOpts = ['A','B','C','D','E']; 
-                                $existingPilgan = json_decode($soal->pilihan_jawaban ?? '{}', true);
+                                $existingPilgan = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '{}', true);
                                 $kunciPilgan = $soal->kunci_jawaban ?? '';
                             @endphp
                             @foreach($pilganOpts as $opt)
@@ -78,8 +78,8 @@
                         {{-- 2. Pilihan Ganda Kompleks (Multiple) --}}
                         <div id="sectionPilganKompleks" class="tipe-section" style="display:none;">
                             @php 
-                                $existingKompleks = json_decode($soal->pilihan_jawaban ?? '{}', true);
-                                $kunciKompleks = json_decode($soal->kunci_jawaban ?? '[]', true) ?? [];
+                                $existingKompleks = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '{}', true);
+                                $kunciKompleks = is_array($soal->kunci_jawaban ?? null) ? $soal->kunci_jawaban : (json_decode($soal->kunci_jawaban ?? '[]', true) ?? []);
                             @endphp
                             @foreach($pilganOpts as $opt)
                             <div class="input-group mb-2">
@@ -105,7 +105,8 @@
                                 <tbody id="bsTbody">
                                     {{-- JS generated rows or loops --}}
                                     @php
-                                        $existingBS = json_decode($soal->pilihan_jawaban ?? '[]', true) ?? [['pernyataan' => '', 'kunci' => 'B']];
+                                        $rawBS = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '[]', true);
+                                        $existingBS = $rawBS ?? [['pernyataan' => '', 'kunci' => 'B']];
                                         // Format storage: pilihan_jawaban = [{pernyataan: "...", kunci: "B"}, ...]
                                     @endphp
                                     @foreach($existingBS as $idx => $bs)

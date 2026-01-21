@@ -16,11 +16,14 @@ class ForumReply extends Model
         'user_id',
         'parent_id',
         'isi',
+        'attachment',
+        'attachment_type',
         'is_answer',
     ];
 
     protected $casts = [
         'is_answer' => 'boolean',
+        'attachment' => 'array',
     ];
 
     // Relationships

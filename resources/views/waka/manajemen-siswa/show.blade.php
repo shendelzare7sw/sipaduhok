@@ -354,13 +354,6 @@
             <span class="current">{{ $siswa->nama_lengkap }}</span>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
         <div class="header-card {{ $siswa->jenis_kelamin == 'P' ? 'female' : '' }}">
             <div class="header-content">
                 <div class="header-top">

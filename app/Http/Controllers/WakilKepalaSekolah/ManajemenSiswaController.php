@@ -148,7 +148,7 @@ class ManajemenSiswaController extends Controller
 
     public function print(Request $request)
     {
-        $query = Siswa::with(['kelas.tahunAjaran.waliKelas', 'cabang']);
+        $query = Siswa::with(['kelas.waliKelas', 'kelas.tahunAjaran', 'cabang']);
 
         // Apply same filters
         if ($request->filled('search')) {

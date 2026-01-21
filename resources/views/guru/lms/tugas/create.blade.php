@@ -10,14 +10,8 @@
 
 @section('content')
     <div class="mb-3">
-        @if(!empty($pertemuanId))
-            <a href="{{ route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) }}"
-                class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i>Kembali ke Pertemuan
-            </a>
-        @else
-            <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i>Kembali
+        <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Kembali
             </a>
         @endif
     </div>
@@ -30,7 +24,6 @@
             <form action="{{ route('guru.lms.tugas.store', [$kelas->id, $mapel->id]) }}" method="POST"
                 enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="pertemuan_id" value="{{ $pertemuanId ?? '' }}">
 
                 <div class="mb-3">
                     <label class="form-label">Judul Tugas <span class="text-danger">*</span></label>
@@ -82,7 +75,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Buat Tugas
                     </button>
-                    <a href="{{ !empty($pertemuanId) ? route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) : route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
+                    <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
                         class="btn btn-secondary">Batal</a>
                 </div>
             </form>

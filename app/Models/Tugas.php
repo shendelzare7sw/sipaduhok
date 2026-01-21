@@ -14,7 +14,6 @@ class Tugas extends Model
     protected $fillable = [
         'kelas_id',
         'mata_pelajaran_id',
-        'pertemuan_id',
         'guru_id',
         'jenis_tugas',
         'urutan',
@@ -45,11 +44,6 @@ class Tugas extends Model
     public function mataPelajaran()
     {
         return $this->belongsTo(MataPelajaran::class);
-    }
-
-    public function pertemuan()
-    {
-        return $this->belongsTo(Pertemuan::class);
     }
 
     public function guru()

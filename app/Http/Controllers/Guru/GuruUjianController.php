@@ -28,10 +28,23 @@ class GuruUjianController extends Controller
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
-        $ujianList = Ujian::where('kelas_id', $kelasId)
+        // Determine if this is kuis or ujian based on route
+        $isKuis = request()->routeIs('guru.lms.kuis.*');
+        $tipeUjian = $isKuis ? 'kuis' : 'ujian';
+
+        $query = Ujian::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
-            ->orderBy('tanggal_mulai', 'desc')
+            ->where('guru_id', $tenagaPendidik->id);
+
+        // Filter by type
+        if ($isKuis) {
+            $query->where('tipe_ujian', 'kuis');
+        } else {
+            // Ujian includes: ulangan_harian, pts_ganjil, pas_ganjil, pts_genap, pas_genap
+            $query->where('tipe_ujian', '!=', 'kuis');
+        }
+
+        $ujianList = $query->orderBy('tanggal_mulai', 'desc')
             ->paginate(10);
 
         return view('guru.lms.ujian.index', [
@@ -39,6 +52,7 @@ class GuruUjianController extends Controller
             'mapel' => $mataPelajaran,
             'ujianList' => $ujianList,
             'guru' => $tenagaPendidik,
+            'tipeUjian' => $tipeUjian,
         ]);
     }
 
@@ -55,13 +69,13 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $pertemuanId = $request->get('pertemuan_id');
+        $tipeUjian = request()->routeIs('guru.lms.kuis.*') ? 'kuis' : 'ujian';
 
         return view('guru.lms.ujian.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
-            'pertemuanId' => $pertemuanId,
+            'tipeUjian' => $tipeUjian,
         ]);
     }
 
@@ -73,20 +87,25 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
+        $isKuis = request()->routeIs('guru.lms.kuis.*');
+
         $validated = $request->validate([
             'judul_ujian' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'tipe_ujian' => 'required|in:harian,uts,uas',
+            'tipe_ujian' => 'required|in:ulangan_harian,kuis,uts,uas,pts_ganjil,pas_ganjil,pts_genap,pas_genap',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
-            'durasi_menit' => 'required|integer|min:1',
-            'pertemuan_id' => 'nullable|exists:pertemuans,id',
+            'durasi_menit' => 'nullable|integer|min:0',
         ]);
+
+        // Jika dari kuis route, pastikan tipe_ujian adalah kuis
+        if ($isKuis) {
+            $validated['tipe_ujian'] = 'kuis';
+        }
 
         $ujian = Ujian::create([
             'kelas_id' => $kelasId,
             'mata_pelajaran_id' => $mapelId,
-            'pertemuan_id' => $validated['pertemuan_id'] ?? null,
             'guru_id' => $tenagaPendidik->id,
             'judul_ujian' => $validated['judul_ujian'],
             'deskripsi' => $validated['deskripsi'],
@@ -109,15 +128,10 @@ class GuruUjianController extends Controller
             ]);
         }
 
-        if (!empty($validated['pertemuan_id'])) {
-            return redirect()
-                ->route('guru.lms.pertemuan.show', [$kelasId, $mapelId, $validated['pertemuan_id']])
-                ->with('success', 'Ujian berhasil ditambahkan ke pertemuan');
-        }
-
+        $routeName = $isKuis ? 'guru.lms.kuis.index' : 'guru.lms.ujian.index';
         return redirect()
-            ->route('guru.lms.ujian.index', [$kelasId, $mapelId])
-            ->with('success', 'Ujian berhasil ditambahkan');
+            ->route($routeName, [$kelasId, $mapelId])
+            ->with('success', $isKuis ? 'Kuis berhasil ditambahkan' : 'Ujian berhasil ditambahkan');
     }
 
     /**
@@ -134,6 +148,17 @@ class GuruUjianController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
+        $isKuis = request()->routeIs('guru.lms.kuis.*');
+        $tipeUjian = $isKuis ? 'kuis' : 'ujian';
+
+        // Verify tipe_ujian matches route
+        if ($isKuis && $ujian->tipe_ujian !== 'kuis') {
+            abort(404, 'Kuis tidak ditemukan');
+        }
+        if (!$isKuis && $ujian->tipe_ujian === 'kuis') {
+            abort(404, 'Ujian tidak ditemukan');
+        }
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
@@ -142,6 +167,7 @@ class GuruUjianController extends Controller
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
+            'tipeUjian' => $tipeUjian,
         ]);
     }
 
@@ -159,20 +185,36 @@ class GuruUjianController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
+        $isKuis = request()->routeIs('guru.lms.kuis.*');
+
+        // Verify tipe_ujian matches route
+        if ($isKuis && $ujian->tipe_ujian !== 'kuis') {
+            abort(404, 'Kuis tidak ditemukan');
+        }
+        if (!$isKuis && $ujian->tipe_ujian === 'kuis') {
+            abort(404, 'Ujian tidak ditemukan');
+        }
+
         $validated = $request->validate([
             'judul_ujian' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'tipe_ujian' => 'required|in:harian,uts,uas',
+            'tipe_ujian' => 'required|in:ulangan_harian,kuis,uts,uas,pts_ganjil,pas_ganjil,pts_genap,pas_genap',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
-            'durasi_menit' => 'required|integer|min:1',
+            'durasi_menit' => 'nullable|integer|min:0',
         ]);
+
+        // Prevent changing tipe_ujian when updating from kuis route
+        if ($isKuis) {
+            $validated['tipe_ujian'] = 'kuis';
+        }
 
         $ujian->update($validated);
 
+        $routeName = $isKuis ? 'guru.lms.kuis.index' : 'guru.lms.ujian.index';
         return redirect()
-            ->route('guru.lms.ujian.index', [$kelasId, $mapelId])
-            ->with('success', 'Ujian berhasil diperbarui');
+            ->route($routeName, [$kelasId, $mapelId])
+            ->with('success', $isKuis ? 'Kuis berhasil diperbarui' : 'Ujian berhasil diperbarui');
     }
 
     /**
@@ -226,8 +268,10 @@ class GuruUjianController extends Controller
         return view('guru.lms.ujian.hasil', [
             'kelas' => $kelas,
             'mataPelajaran' => $mataPelajaran,
+            'mapel' => $mataPelajaran,
             'ujian' => $ujian,
             'results' => $results,
+            'hasilUjian' => $results,
             'stats' => $stats,
             'guru' => $tenagaPendidik,
         ]);
@@ -329,7 +373,7 @@ class GuruUjianController extends Controller
             'pertanyaan' => $validated['pertanyaan'],
             'pilihan_jawaban' => $pilihanJawaban,
             'kunci_jawaban' => $kunciJawaban,
-            'bobot' => $validated['bobot'],
+            'bobot_nilai' => $validated['bobot'],
             'urutan' => $validated['urutan'],
         ]);
 
@@ -409,6 +453,12 @@ class GuruUjianController extends Controller
         $validated['pilihan_jawaban'] = $pilihanJawaban;
         $validated['kunci_jawaban'] = $kunciJawaban;
 
+        // Rename bobot to bobot_nilai for database
+        if (isset($validated['bobot'])) {
+            $validated['bobot_nilai'] = $validated['bobot'];
+            unset($validated['bobot']);
+        }
+
         $soal->update($validated);
 
         return redirect()
@@ -433,8 +483,157 @@ class GuruUjianController extends Controller
     }
 
     /**
-     * Verifikasi akses guru
+     * Halaman Manage Soal (Multi-Soal)
      */
+    public function manageSoal($kelasId, $mapelId, $ujianId): View
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $kelas = Kelas::findOrFail($kelasId);
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $ujian = Ujian::where('id', $ujianId)->firstOrFail();
+
+        $soalList = SoalUjian::where('ujian_id', $ujianId)->orderBy('urutan', 'asc')->get();
+
+        return view('guru.lms.ujian.manage_soal', [
+            'kelas' => $kelas,
+            'mapel' => $mataPelajaran,
+            'ujian' => $ujian,
+            'soalList' => $soalList,
+            'guru' => $tenagaPendidik,
+        ]);
+    }
+
+    /**
+     * Simpan Semua Soal (Bulk Update)
+     */
+    public function storeAllSoal(Request $request, $kelasId, $mapelId, $ujianId): RedirectResponse
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        // Validasi dasar
+        $request->validate([
+            'soal' => 'nullable|array',
+            'soal.*.tipe_soal' => 'required|string',
+            'soal.*.pertanyaan' => 'required|string',
+            'soal.*.bobot_nilai' => 'required|integer|min:0',
+        ]);
+
+        $inputSoals = $request->input('soal', []); // Array of soal data
+
+        // 1. Ambil ID soal yang ada di database
+        $existingIds = SoalUjian::where('ujian_id', $ujianId)->pluck('id')->toArray();
+        $submittedIds = array_filter(array_column($inputSoals, 'id')); // Filter null/empty IDs
+
+        // 2. Hapus soal yang tidak ada di input (yang di-remove user)
+        $idsToDelete = array_diff($existingIds, $submittedIds);
+        if (!empty($idsToDelete)) {
+            SoalUjian::whereIn('id', $idsToDelete)->delete();
+        }
+
+        // 3. Loop update/create
+        foreach ($inputSoals as $index => $data) {
+            $pilihanJawaban = [];
+            $kunciJawaban = null;
+            $jawabanBenarStr = null;
+
+            // Proses sesuai tipe soal (Logic mirip storeSoal tapi disederhanakan untuk bulk)
+            switch ($data['tipe_soal']) {
+                case 'pilihan_ganda':
+                    $pilihanJawaban = $data['pilihan_jawaban_pilgan'] ?? [];
+                    // Ensure keys are A, B, C, D, E for storage consistency
+                    $kunciJawaban = $data['kunci_jawaban_pilgan'] ?? null;
+                    $jawabanBenarStr = $kunciJawaban;
+                    break;
+
+                case 'pilihan_ganda_kompleks':
+                    $pilihanJawaban = $data['pilihan_jawaban_kompleks'] ?? [];
+                    $kunciJawaban = $data['kunci_jawaban_kompleks'] ?? []; // Array
+                    // Normalize for complex to include 'jawaban_benar' inside pilihan structure if needed by frontend
+                    // But model expects keys: options, jawaban_benar separately usually or standard structure.
+                    // Let's stick to standard: pilihan_jawaban = inputs, kunci_jawaban = selected keys
+                    break;
+
+                case 'benar_salah':
+                    // Reconstruct structure: [{pernyataan: "...", kunci: "B"}, ...]
+                    $rawBS = $data['pilihan_jawaban_bs'] ?? [];
+                    $formattedBS = [];
+                    foreach ($rawBS as $row) {
+                        if (!empty($row['pernyataan'])) {
+                            $formattedBS[] = [
+                                'pernyataan' => $row['pernyataan'],
+                                'kunci' => $row['kunci'] ?? 'B' // Default Benar
+                            ];
+                        }
+                    }
+                    $pilihanJawaban = $formattedBS;
+                    // For BS, key is actually stored inside the structure usually, or separate.
+                    // Model checkBenarSalah uses 'pernyataan' which has 'benar' boolean or 'kunci' char.
+                    // Let's adapt to Model: checkBenarSalah reads $pilihanData['pernyataan'] where items have 'benar' => true/false.
+                    // We need to map 'B'->true, 'S'->false.
+                    $mappedBS = [];
+                    foreach ($formattedBS as $fbs) {
+                        $mappedBS[] = [
+                            'text' => $fbs['pernyataan'], // Model uses 'text'? existing logic used 'pernyataan' or 'text'
+                            'benar' => ($fbs['kunci'] === 'B')
+                        ];
+                    }
+                    $pilihanJawaban = ['pernyataan' => $mappedBS];
+                    break;
+
+                case 'isian_singkat':
+                    $jawabanBenarStr = $data['kunci_jawaban_isian'] ?? '';
+                    $kunciJawaban = $jawabanBenarStr; // Store simple string in kunci_jawaban col
+                    // Optional: store multiple possibilities in pilihan_jawaban if supported
+                    break;
+
+                case 'uraian':
+                    // No key
+                    break;
+            }
+
+            // Prepare Update/Create Data
+            $saveData = [
+                'ujian_id' => $ujianId,
+                'urutan' => $index + 1, // Auto number by loop index
+                'tipe_soal' => $data['tipe_soal'],
+                'pertanyaan' => $data['pertanyaan'],
+                'bobot_nilai' => $data['bobot_nilai'],
+                'pilihan_jawaban' => $pilihanJawaban,
+                'kunci_jawaban' => $kunciJawaban, // Array or String
+                'jawaban_benar' => $jawabanBenarStr, // String columns
+            ];
+
+            if (!empty($data['id'])) {
+                SoalUjian::where('id', $data['id'])->update($saveData);
+            } else {
+                SoalUjian::create($saveData);
+            }
+        }
+
+        return redirect()
+            ->route('guru.lms.ujian.soal.manage', [$kelasId, $mapelId, $ujianId])
+            ->with('success', 'Semua soal berhasil disimpan!');
+    }
+
+    /**
+     * Toggle Status Ujian (Rilis/Tarik)
+     */
+    public function toggleStatus(Request $request, $kelasId, $mapelId, $ujianId): RedirectResponse
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $ujian = Ujian::findOrFail($ujianId);
+        // Toggle is_active
+        $ujian->is_active = !$ujian->is_active;
+        $ujian->save();
+
+        $status = $ujian->is_active ? 'dirilis' : 'ditarik kembali';
+        return back()->with('success', "Ujian berhasil $status.");
+    }
     private function verifyAccess($guruId, $kelasId, $mapelId)
     {
         $access = GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)

@@ -41,13 +41,18 @@ class GuruKoreksiController extends Controller
             'dinilai' => $submissions->where('status', 'dinilai')->count(),
         ];
 
+        $submitted = $submissions->where('status', '!=', 'belum_dikerjakan')->count();
+        $belumDinilai = $submissions->whereIn('status', ['dikerjakan', 'terlambat'])->count();
+
         return view('guru.lms.tugas.koreksi', [
             'kelas' => $kelas,
-            'mataPelajaran' => $mataPelajaran,
+            'mapel' => $mataPelajaran,
             'tugas' => $tugas,
-            'submissions' => $submissions,
+            'daftarSiswa' => $submissions,
             'stats' => $stats,
             'guru' => $tenagaPendidik,
+            'submitted' => $submitted,
+            'belumDinilai' => $belumDinilai,
         ]);
     }
 
@@ -66,7 +71,7 @@ class GuruKoreksiController extends Controller
 
         return view('guru.lms.tugas.koreksi-show', [
             'kelas' => $kelas,
-            'mataPelajaran' => $mataPelajaran,
+            'mapel' => $mataPelajaran,
             'tugas' => $tugas,
             'submission' => $submission,
             'guru' => $tenagaPendidik,

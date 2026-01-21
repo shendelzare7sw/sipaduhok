@@ -447,8 +447,9 @@ class TagihanController extends Controller
             DB::beginTransaction();
 
             $count = 0;
+            $createdTagihan = [];
             foreach ($request->siswa_ids as $siswaId) {
-                Tagihan::create([
+                $tagihan = Tagihan::create([
                     'siswa_id' => $siswaId,
                     'tahun_ajaran_id' => $tahunAjaranAktif->id,
                     'jenis_tagihan' => $jenisTagihanSlug,
@@ -457,12 +458,17 @@ class TagihanController extends Controller
                     'status' => 'belum_bayar',
                     'keterangan' => $request->keterangan ?: $request->jenis_tagihan,
                 ]);
+                $createdTagihan[] = $tagihan;
                 $count++;
             }
 
             DB::commit();
 
-            DB::commit();
+            // Notify orang tua about new tagihan
+            foreach ($createdTagihan as $tagihan) {
+                $tagihan->load('siswa.orangTua');
+                app(\App\Services\NotificationService::class)->notifyTagihanBaru($tagihan);
+            }
 
             return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', "Tagihan custom berhasil ditambahkan untuk {$count} siswa.");

@@ -1,7 +1,7 @@
 {{-- Notification Bell Component for Navbar --}}
 <div class="dropdown" id="notification-dropdown">
-    <button class="btn btn-link nav-link position-relative" type="button" id="notificationDropdown"
-        data-bs-toggle="dropdown" aria-expanded="false" onclick="loadNotifications()">
+    <button class="btn btn-link nav-link position-relative notification-bell-btn" type="button"
+        id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" onclick="loadNotifications()">
         <i class="fas fa-bell fa-lg"></i>
         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge"
             style="display: none;" id="notification-count">
@@ -72,6 +72,23 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+    }
+
+    /* Notification Bell Button Hover Fix */
+    .notification-bell-btn {
+        color: #555;
+        transition: all 0.2s ease;
+    }
+
+    .notification-bell-btn:hover {
+        color: #fbbf24 !important;
+        /* Yellow/amber on hover */
+        transform: scale(1.1);
+    }
+
+    .notification-bell-btn:focus {
+        color: #fbbf24 !important;
+        box-shadow: none;
     }
 </style>
 

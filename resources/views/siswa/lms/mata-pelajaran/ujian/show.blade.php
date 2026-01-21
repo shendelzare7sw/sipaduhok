@@ -1,366 +1,630 @@
-@extends('layouts.lms')
-
-@section('title', 'Ujian - ' . $ujian->judul_ujian)
-@section('page-title', $mataPelajaran->nama_mapel)
-@section('page-subtitle', 'Ujian ' . ucwords(str_replace('_', ' ', $ujian->tipe_ujian)))
-
-@section('content')
-<style>
-    .ujian-card {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .timer-box {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-        text-align: center;
-        margin-bottom: 25px;
-        position: sticky;
-        top: 20px;
-        z-index: 100;
-    }
-    .timer-box.warning {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-    }
-    .timer-display {
-        font-size: 48px;
-        font-weight: 700;
-        font-family: 'Courier New', monospace;
-        margin: 10px 0;
-    }
-    .soal-card {
-        background: white;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 20px;
-        transition: all 0.3s;
-    }
-    .soal-card:hover {
-        border-color: #165fac;
-        box-shadow: 0 4px 12px rgba(22, 95, 172, 0.1);
-    }
-    .soal-number {
-        background: linear-gradient(135deg, #165fac, #0d3f7a);
-        color: white;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin-right: 15px;
-        flex-shrink: 0;
-    }
-    .pilihan-label {
-        display: flex;
-        align-items: center;
-        padding: 12px 15px;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        margin-bottom: 10px;
-    }
-    .pilihan-label:hover {
-        border-color: #165fac;
-        background: #f0f9ff;
-    }
-    .pilihan-label input[type="radio"] {
-        margin-right: 12px;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-    }
-    .access-denied {
-        background: linear-gradient(135deg, #fecaca, #fee2e2);
-        border: 2px solid #ef4444;
-        border-radius: 12px;
-        padding: 40px;
-        text-align: center;
-    }
-</style>
-
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" style="margin-bottom: 20px;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}">Dashboard LMS</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}">{{ $mataPelajaran->nama_mapel }}</a></li>
-        <li class="breadcrumb-item active">{{ $ujian->judul_ujian }}</li>
-    </ol>
-</nav>
-
 @php
-    $now = now();
-    $isOngoing = $ujian->isOngoing();
-    $needsValidation = in_array($ujian->tipe_ujian, ['uts', 'uas']);
-    $hasAccess = !$needsValidation || ($siswa->validasi_ujian_bendahara && $siswa->validasi_ujian_wali);
+    $layout = ($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan') ? 'layouts.lms-ujian' : 'layouts.lms';
 @endphp
 
-<!-- Cek Akses Validasi untuk UTS/UAS -->
-@if($needsValidation && !$hasAccess)
-<div class="access-denied">
-    <i class="fas fa-lock fa-4x mb-3" style="color: #ef4444;"></i>
-    <h3 style="color: #991b1b; margin-bottom: 15px;">
-        Belum Memiliki Akses Ujian
-    </h3>
-    <p style="color: #666; font-size: 16px; margin-bottom: 20px;">
-        Silakan Periksa Tagihan Anda dan Hubungi Wali Kelas
-    </p>
-    
-    <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px auto; max-width: 500px;">
-        <h5 style="color: #165fac; margin-bottom: 15px;">Status Validasi:</h5>
-        <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
-            <span>Validasi Bendahara:</span>
-            <span class="badge {{ $siswa->validasi_ujian_bendahara ? 'bg-success' : 'bg-danger' }}">
-                {{ $siswa->validasi_ujian_bendahara ? 'Disetujui' : 'Belum Disetujui' }}
-            </span>
-        </div>
-        <div style="display: flex; justify-content: space-between; padding: 10px 0;">
-            <span>Validasi Wali Kelas:</span>
-            <span class="badge {{ $siswa->validasi_ujian_wali ? 'bg-success' : 'bg-danger' }}">
-                {{ $siswa->validasi_ujian_wali ? 'Disetujui' : 'Belum Disetujui' }}
-            </span>
-        </div>
-    </div>
+@extends($layout)
 
-    <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary mt-3">
-        <i class="fas fa-arrow-left"></i> Kembali
-    </a>
-</div>
+@section('title', $ujian->judul_ujian)
 
-@elseif(!$isOngoing)
-<!-- Ujian Belum/Sudah Berlangsung -->
-<div class="ujian-card">
-    <div style="text-align: center; padding: 40px;">
-        @if($now->lt($ujian->tanggal_mulai))
-            <i class="fas fa-clock fa-3x mb-3" style="color: #f59e0b;"></i>
-            <h3 style="color: #92400e;">Ujian Belum Dimulai</h3>
-            <p style="color: #666; margin: 15px 0;">
-                Ujian akan dimulai pada:<br>
-                <strong>{{ $ujian->tanggal_mulai->format('d F Y, H:i') }} WIB</strong>
-            </p>
-        @else
-            <i class="fas fa-check-circle fa-3x mb-3" style="color: #10b981;"></i>
-            <h3 style="color: #065f46;">Ujian Sudah Selesai</h3>
-            <p style="color: #666; margin: 15px 0;">
-                Periode ujian berakhir pada:<br>
-                <strong>{{ $ujian->tanggal_selesai->format('d F Y, H:i') }} WIB</strong>
-            </p>
+{{-- Section for Standard Layout (Start/Result screens) --}}
+@if(!isset($ujianSiswa) || $ujianSiswa->status !== 'sedang_mengerjakan')
+    @section('page-title', $mataPelajaran->nama_mapel)
+    @section('page-subtitle', 'Ujian ' . ucwords(str_replace('_', ' ', $ujian->tipe_ujian)))
+    @section('sidebar-menu')
+        @include('siswa.partials.sidebar-lms')
+    @endsection
+@endif
+
+@section('content')
+
+@if(!$ujianSiswa || $ujianSiswa->status !== 'sedang_mengerjakan')
+    {{-- LAYOUT 1: START SCREEN / RESULT SCREEN --}}
+    <style>
+        .ujian-card {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-box i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .info-box h5 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <div class="container-fluid">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         @endif
-        
-        <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary mt-3">
-            <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
-        </a>
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                @if($ujianSiswa && $ujianSiswa->status === 'selesai')
+                     <!-- RESULT SCREEN -->
+                     <div class="ujian-card text-center">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h3 class="text-success mb-2">Ujian Selesai!</h3>
+                        <p class="text-muted mb-4">Semua jawaban Anda telah tersimpan.</p>
+
+                        <div class="alert alert-light border">
+                            <p class="mb-1 small text-muted">Diselesaikan pada:</p>
+                            <strong>{{ $ujianSiswa->waktu_selesai->format('d F Y, H:i') }} WIB</strong>
+                        </div>
+
+                        @if($ujianSiswa->nilai !== null)
+                            <div class="my-4">
+                                <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai, 1) }}</h1>
+                                <span class="text-muted">Nilai Akhir</span>
+                            </div>
+                        @else
+                            <div class="my-4">
+                                <i class="fas fa-hourglass-half fa-3x text-warning mb-2"></i>
+                                <h5 class="text-secondary">Menunggu Penilaian Guru</h5>
+                            </div>
+                        @endif
+
+                        <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-arrow-left me-2"></i> Kembali ke Mata Pelajaran
+                        </a>
+                     </div>
+                @else
+                    <!-- START SCREEN -->
+                    <div class="ujian-card">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold text-primary">{{ $ujian->judul_ujian }}</h3>
+                            <span class="badge bg-secondary">{{ strtoupper(str_replace('_', ' ', $ujian->tipe_ujian)) }}</span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <i class="fas fa-clock text-warning"></i>
+                                    <h5>{{ $ujian->durasi_menit }} Menit</h5>
+                                    <small class="text-muted">Durasi</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <i class="fas fa-list-ol text-info"></i>
+                                    <h5>{{ $soalList->count() }} Soal</h5>
+                                    <small class="text-muted">Jumlah Soal</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <i class="fas fa-calendar-alt text-success"></i>
+                                    <h5>{{ $ujian->tanggal_mulai->format('d M') }} - {{ $ujian->tanggal_selesai->format('d M') }}</h5>
+                                    <small class="text-muted">Periode</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong><i class="fas fa-info-circle me-2"></i>Petunjuk:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Berdoalah sebelum mengerjakan</li>
+                                <li>Waktu berjalan otomatis saat tombol "Mulai" diklik</li>
+                                <li>Tidak dapat mengulang ujian yang sudah disubmit</li>
+                                <li>Pastikan koneksi internet stabil</li>
+                            </ul>
+                        </div>
+
+                        @if(!$ujian->is_active)
+                            <div class="text-center mt-4">
+                                <button class="btn btn-secondary btn-lg" disabled>
+                                    <i class="fas fa-lock me-2"></i> Belum Dirilis
+                                </button>
+                            </div>
+                        @elseif($ujian->isOngoing())
+                             <div class="text-center mt-4">
+                                <form action="{{ route('siswa.lms.mapel.ujian.mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-play me-2"></i> Mulai Ujian Sekarang
+                                    </button>
+                                </form>
+                            </div>
+                        @elseif($ujian->tanggal_mulai->isFuture())
+                             <div class="text-center mt-4">
+                                <button class="btn btn-secondary btn-lg" disabled>
+                                    <i class="fas fa-hourglass-start me-2"></i> Belum Dimulai
+                                </button>
+                            </div>
+                        @else
+                             <div class="text-center mt-4">
+                                <button class="btn btn-secondary btn-lg" disabled>
+                                    <i class="fas fa-history me-2"></i> Ujian Sudah Berakhir
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
-</div>
 
 @else
-<!-- Ujian Sedang Berlangsung -->
-<div class="ujian-card">
-    <!-- Info Ujian -->
-    <div style="background: #f0f9ff; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #165fac;">
-        <h3 style="color: #165fac; margin: 0 0 15px 0;">
-            <i class="fas fa-file-signature"></i> {{ $ujian->judul_ujian }}
-        </h3>
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; color: #666; font-size: 14px;">
-            <div><i class="fas fa-stopwatch"></i> <strong>Durasi:</strong> {{ $ujian->durasi_menit }} menit</div>
-            <div><i class="fas fa-list-ol"></i> <strong>Jumlah Soal:</strong> {{ $soalList->count() }} soal</div>
-            <div><i class="fas fa-calendar"></i> <strong>Berlangsung:</strong> {{ $ujian->tanggal_mulai->format('d M Y, H:i') }} - {{ $ujian->tanggal_selesai->format('H:i') }}</div>
-        </div>
-    </div>
+    {{-- LAYOUT 2: EXAM INTERFACE (FOCUS MODE) - Simple CBT Style --}}
+    <style>
+        body {
+            background: #e9ecef;
+        }
 
-    @if($ujianSiswa && $ujianSiswa->status === 'selesai')
-    <!-- Ujian Sudah Dikerjakan -->
-    <div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">
-            <i class="fas fa-check-circle"></i> Ujian Sudah Selesai
-        </h4>
-        <p style="margin: 10px 0;">
-            Anda sudah menyelesaikan ujian ini pada:<br>
-            <strong>{{ $ujianSiswa->waktu_selesai->format('d F Y, H:i') }} WIB</strong>
-        </p>
-        @if($ujianSiswa->nilai !== null)
-        <hr>
-        <p style="margin: 10px 0 0 0;">
-            <strong>Nilai Anda:</strong> <span style="font-size: 24px; color: #165fac;">{{ number_format($ujianSiswa->nilai, 1) }}</span>
-        </p>
-        @else
-        <hr>
-        <p style="margin: 10px 0 0 0;">
-            <i class="fas fa-hourglass-half"></i> Nilai sedang diproses oleh guru
-        </p>
-        @endif
-    </div>
+        /* Remove default Bootstrap container padding and use custom */
+        .container-fluid {
+            max-width: 100% !important;
+        }
 
-    @elseif($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan')
-    <!-- Timer Countdown -->
-    <div class="timer-box" id="timerBox">
-        <div style="font-size: 14px; opacity: 0.9;">
-            <i class="fas fa-hourglass-half"></i> Sisa Waktu
-        </div>
-        <div class="timer-display" id="timerDisplay">00:00:00</div>
-        <div style="font-size: 14px; opacity: 0.9;">
-            Ujian akan otomatis tersubmit saat waktu habis
-        </div>
-    </div>
+        /* Question Card - Simple */
+        .question-card {
+            background: white;
+            border-radius: 4px;
+            padding: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
 
-    <!-- Form Soal -->
-    <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" 
-          method="POST" 
-          id="ujianForm">
+        .question-header {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #212529;
+            margin-bottom: 20px;
+        }
+
+        /* Options - Simple */
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .option-item:hover {
+            background: #f8f9fa;
+        }
+
+        .option-item input[type="radio"] {
+            margin-right: 10px;
+            margin-top: 3px;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Navigation Grid - Smaller */
+        .q-nav-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .q-nav-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            background: #6c757d;
+            color: white;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .q-nav-item:hover {
+            opacity: 0.8;
+        }
+
+        .q-nav-item.active {
+            background: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.3);
+        }
+
+        .q-nav-item.answered {
+            background: #198754;
+        }
+
+        .q-nav-item.doubt {
+            background: #fd7e14;
+        }
+
+        /* Sidebar - Simple */
+        .exam-sidebar {
+            background: white;
+            border-radius: 4px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Timer - Simple */
+        .timer-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .timer-badge {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #dc3545;
+        }
+
+        /* Buttons */
+        .btn-nav-q {
+            min-width: 140px;
+        }
+
+        /* Legend */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .q-nav-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+    </style>
+
+    <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
+        <div class="container-fluid px-0">
+            <div class="row g-3 mx-0">
+                <!-- Left: Question Area (70%) -->
+                <div class="col-lg-9">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="question-header">
+                            <strong>SOAL NO. <span id="q-no-display" class="badge bg-primary">1</span></strong>
+                        </div>
 
-        @foreach($soalList as $index => $soal)
-        @php
-            $answers = $existingAnswers ?? [];
-        @endphp
-        
-        @switch($soal->tipe_soal)
-            @case('pilihan_ganda')
-                @include('siswa.lms.partials._soal_pilgan', [
-                    'soal' => $soal, 
-                    'index' => $index + 1, 
-                    'answers' => $answers, 
-                    'disabled' => false
-                ])
-                @break
-                
-            @case('pilihan_ganda_kompleks')
-                @include('siswa.lms.partials._soal_pilgan_kompleks', [
-                    'soal' => $soal, 
-                    'index' => $index + 1, 
-                    'answers' => $answers, 
-                    'disabled' => false
-                ])
-                @break
-                
-            @case('benar_salah')
-                @include('siswa.lms.partials._soal_benar_salah', [
-                    'soal' => $soal, 
-                    'index' => $index + 1, 
-                    'answers' => $answers, 
-                    'disabled' => false
-                ])
-                @break
-                
-            @case('isian_singkat')
-                @include('siswa.lms.partials._soal_isian_singkat', [
-                    'soal' => $soal, 
-                    'index' => $index + 1, 
-                    'answers' => $answers, 
-                    'disabled' => false
-                ])
-                @break
-                
-            @case('uraian')
-            @case('essay')
-                @include('siswa.lms.partials._soal_uraian', [
-                    'soal' => $soal, 
-                    'index' => $index + 1, 
-                    'answers' => $answers, 
-                    'disabled' => false,
-                    'allowFileUpload' => true
-                ])
-                @break
-                
-            @default
-                {{-- Fallback untuk tipe soal yang tidak dikenal --}}
-                <div class="soal-card">
-                    <div class="d-flex">
-                        <div class="soal-number">{{ $index + 1 }}</div>
-                        <div style="flex: 1;">
-                            <h5 style="color: #1a1a1a; margin-bottom: 15px;">
-                                {{ $soal->pertanyaan }}
-                            </h5>
-                            <textarea name="jawaban[{{ $soal->id }}]" 
-                                      rows="5" 
-                                      class="form-control" 
-                                      placeholder="Tulis jawaban Anda di sini..."
-                                      required></textarea>
+                        <!-- Timer Mobile -->
+                        <div class="d-lg-none">
+                            <div class="timer-box d-inline-block px-3 py-2">
+                                <small class="d-block text-muted" style="font-size: 0.75rem;">SISA WAKTU</small>
+                                <span class="timer-badge mobile-timer">00:00:00</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-        @endswitch
-        @endforeach
 
-        <div style="background: #fef3c7; padding: 20px; border-radius: 12px; margin-top: 30px; text-align: center;">
-            <h5 style="color: #92400e; margin-bottom: 15px;">
-                <i class="fas fa-exclamation-triangle"></i> Perhatian
-            </h5>
-            <p style="color: #666; margin-bottom: 20px;">
-                Pastikan semua soal sudah dijawab sebelum submit. Setelah submit, jawaban tidak dapat diubah.
-            </p>
-            <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Apakah Anda yakin ingin mengumpulkan ujian? Jawaban tidak dapat diubah setelah dikumpulkan.')">
-                <i class="fas fa-paper-plane"></i> Submit Ujian
-            </button>
+                    <!-- Question Card -->
+                    <div class="question-card">
+                        @if($soalList->count() > 0)
+                            @foreach($soalList as $index => $soal)
+                                <div class="question-item" id="q-item-{{ $index }}" style="display: {{ $index === 0 ? 'block' : 'none' }};">
+                                    <!-- Question Text -->
+                                    <div class="question-text">
+                                        {!! nl2br(e($soal->pertanyaan)) !!}
+                                    </div>
+
+                                    <!-- Answers -->
+                                    <div>
+                                        @if($soal->tipe_soal === 'pilihan_ganda')
+                                            @php
+                                                $pilihan = is_array($soal->pilihan_jawaban)
+                                                    ? $soal->pilihan_jawaban
+                                                    : json_decode($soal->pilihan_jawaban, true);
+                                            @endphp
+                                            @if(is_array($pilihan))
+                                                @foreach($pilihan as $key => $value)
+                                                    <label class="option-item">
+                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="selectOption({{ $index }}, '{{ $key }}')">
+                                                        <span><strong>{{ $key }}.</strong> {{ $value }}</span>
+                                                    </label>
+                                                @endforeach
+                                            @endif
+                                        @elseif($soal->tipe_soal === 'benar_salah')
+                                            <label class="option-item">
+                                                <input type="radio" name="jawaban[{{ $soal->id }}]" value="benar" onchange="selectOption({{ $index }}, 'benar')">
+                                                <span><strong>BENAR</strong></span>
+                                            </label>
+                                            <label class="option-item">
+                                                <input type="radio" name="jawaban[{{ $soal->id }}]" value="salah" onchange="selectOption({{ $index }}, 'salah')">
+                                                <span><strong>SALAH</strong></span>
+                                            </label>
+                                        @else
+                                            <textarea name="jawaban[{{ $soal->id }}]" rows="6" class="form-control"
+                                                placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, 'text')"></textarea>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-5">
+                                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                                <h5 class="text-muted">Soal tidak ditemukan!</h5>
+                                <p class="text-muted small mt-2">
+                                    ID Ujian: {{ $ujian->id }}<br>
+                                    Mata Pelajaran: {{ $mataPelajaran->nama_mapel ?? 'N/A' }}<br>
+                                    Jumlah Soal: {{ $soalList->count() ?? 0 }}
+                                </p>
+
+                                @if($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan')
+                                <div class="mt-4">
+                                    <p class="text-muted mb-3">Anda sedang dalam sesi ujian tanpa ada soal. Pilih aksi di bawah:</p>
+                                    <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Anda akan mengakhiri ujian tanpa menjawab soal. Lanjutkan?')">
+                                            <i class="fas fa-times-circle"></i> Akhiri Ujian Sekarang
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary ms-2">
+                                        <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
+                                    </a>
+                                </div>
+                                @else
+                                <div class="mt-4">
+                                    <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
+                                    </a>
+                                </div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <button type="button" class="btn btn-primary btn-nav-q" id="btn-prev" onclick="prevQuestion()">
+                            <i class="fas fa-chevron-left"></i> SOAL SEBELUMNYA
+                        </button>
+
+                        <button type="button" class="btn btn-warning text-white" id="btn-ragu" onclick="toggleRagu()">
+                            <i class="fas fa-flag"></i> RAGU-RAGU
+                        </button>
+
+                        <button type="button" class="btn btn-primary btn-nav-q" id="btn-next" onclick="nextQuestion()">
+                            SOAL SELANJUTNYA <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Sidebar (30%) -->
+                <div class="col-lg-3">
+                    <div class="exam-sidebar">
+                        <!-- Timer Desktop -->
+                        <div class="timer-box">
+                            <small class="d-block text-muted mb-1" style="font-size: 0.75rem;">SISA WAKTU</small>
+                            <div class="timer-badge" id="timer-display-main">00:00:00</div>
+                        </div>
+
+                        <!-- Navigation Title -->
+                        <h6 class="fw-bold mb-2 small">NOMOR SOAL</h6>
+
+                        <!-- Navigation Grid -->
+                        <div class="q-nav-grid mb-3">
+                            @foreach($soalList as $index => $soal)
+                                <div class="q-nav-item" id="nav-item-{{ $index }}" onclick="jumpToQuestion({{ $index }})">
+                                    {{ $index + 1 }}
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="mb-3">
+                            <div class="legend-item">
+                                <div class="legend-box bg-success"></div>
+                                <span>Hijau = Sudah dijawab</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box bg-warning"></div>
+                                <span>Orange = Ragu-ragu</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-box bg-secondary"></div>
+                                <span>Abu-abu = Belum dijawab</span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="button" class="btn btn-danger w-100 fw-bold" onclick="finishExam()">
+                            HENTIKAN UJIAN
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </form>
 
-    @else
-    <!-- Belum Mulai Ujian -->
-    <div style="text-align: center; padding: 40px;">
-        <i class="fas fa-play-circle fa-3x mb-3" style="color: #165fac;"></i>
-        <h3 style="color: #165fac;">Siap Memulai Ujian?</h3>
-        <p style="color: #666; margin: 15px 0 25px 0;">
-            Klik tombol di bawah untuk memulai ujian. Timer akan berjalan setelah Anda klik tombol ini.
-        </p>
-        
-        <form action="{{ route('siswa.lms.mapel.ujian.mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-play"></i> Mulai Ujian
-            </button>
-        </form>
-    </div>
-    @endif
-</div>
-@endif
+    <!-- JS Logic -->
+    <script>
+        let currentIndex = 0;
+        const totalQuestions = {{ $soalList->count() }};
+        const answersState = new Array(totalQuestions).fill(false);
+        const doubtState = new Array(totalQuestions).fill(false);
 
-@if($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const waktuMulai = new Date("{{ $ujianSiswa->waktu_mulai }}").getTime();
-    const durasiMenit = {{ $ujian->durasi_menit }};
-    const waktuSelesai = waktuMulai + (durasiMenit * 60 * 1000);
-    
-    const timerDisplay = document.getElementById('timerDisplay');
-    const timerBox = document.getElementById('timerBox');
-    const form = document.getElementById('ujianForm');
-    
-    const countdown = setInterval(function() {
-        const now = new Date().getTime();
-        const distance = waktuSelesai - now;
-        
-        if (distance < 0) {
-            clearInterval(countdown);
-            timerDisplay.innerHTML = "00:00:00";
-            alert("Waktu habis! Ujian akan otomatis disubmit.");
-            form.submit();
-            return;
+        // Timer
+        const endTime = new Date("{{ $ujianSiswa->waktu_mulai }}").getTime() + ({{ $ujian->durasi_menit }} * 60 * 1000);
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                document.getElementById("timer-display-main").innerHTML = "00:00:00";
+                document.querySelectorAll(".mobile-timer").forEach(el => el.innerHTML = "00:00:00");
+                Swal.fire({
+                    title: 'Waktu Habis!',
+                    text: 'Ujian akan disubmit otomatis.',
+                    icon: 'warning',
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    document.getElementById('examForm').submit();
+                });
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const timerStr =
+                (hours < 10 ? "0" + hours : hours) + ":" +
+                (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                (seconds < 10 ? "0" + seconds : seconds);
+
+            document.getElementById("timer-display-main").innerHTML = timerStr;
+            document.querySelectorAll(".mobile-timer").forEach(el => el.innerHTML = timerStr);
         }
-        
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        
-        timerDisplay.innerHTML = 
-            String(hours).padStart(2, '0') + ":" + 
-            String(minutes).padStart(2, '0') + ":" + 
-            String(seconds).padStart(2, '0');
-        
-        // Warning jika kurang dari 5 menit
-        if (distance < 5 * 60 * 1000) {
-            timerBox.classList.add('warning');
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // Navigation
+        function jumpToQuestion(index) {
+            document.getElementById(`q-item-${currentIndex}`).style.display = 'none';
+            document.getElementById(`q-item-${index}`).style.display = 'block';
+            currentIndex = index;
+            updateUI();
         }
-    }, 1000);
-});
-</script>
+
+        function nextQuestion() {
+            if (currentIndex < totalQuestions - 1) {
+                jumpToQuestion(currentIndex + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                jumpToQuestion(currentIndex - 1);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('q-no-display').innerText = currentIndex + 1;
+            document.getElementById('btn-prev').disabled = (currentIndex === 0);
+            document.getElementById('btn-next').disabled = (currentIndex === totalQuestions - 1);
+
+            // Update ragu button style
+            const btnRagu = document.getElementById('btn-ragu');
+            if(doubtState[currentIndex]) {
+                btnRagu.classList.remove('btn-warning');
+                btnRagu.classList.add('btn-outline-warning');
+            } else {
+                btnRagu.classList.remove('btn-outline-warning');
+                btnRagu.classList.add('btn-warning', 'text-white');
+            }
+
+            document.querySelectorAll('.q-nav-item').forEach((el, idx) => {
+                if (idx === currentIndex) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+        }
+
+        function selectOption(index, value) {
+            if(value && value.trim() !== '') {
+                answersState[index] = true;
+            } else {
+                answersState[index] = false;
+            }
+            updateNavColor(index);
+        }
+
+        function toggleRagu() {
+            doubtState[currentIndex] = !doubtState[currentIndex];
+            updateNavColor(currentIndex);
+            updateUI();
+        }
+
+        function updateNavColor(index) {
+            const navItem = document.getElementById(`nav-item-${index}`);
+            navItem.classList.remove('answered', 'doubt');
+
+            if (doubtState[index]) {
+                navItem.classList.add('doubt');
+            } else if (answersState[index]) {
+                navItem.classList.add('answered');
+            }
+        }
+
+        function finishExam() {
+            const unanswered = answersState.filter(x => !x).length;
+            const doubts = doubtState.filter(x => x).length;
+
+            let msg = '';
+            if (unanswered > 0) msg += `Masih ada ${unanswered} soal belum dijawab.\n`;
+            if (doubts > 0) msg += `Masih ada ${doubts} soal ditandai ragu-ragu.\n`;
+            msg += '\nApakah Anda yakin ingin menyelesaikan ujian ini?';
+
+            Swal.fire({
+                title: 'Konfirmasi Submit',
+                text: msg,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Selesaikan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('examForm').submit();
+                }
+            });
+        }
+
+        // Initialize
+        updateUI();
+
+        // Prevent back
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+    </script>
 @endif
 
 @endsection

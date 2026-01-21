@@ -428,7 +428,11 @@ class WakilKepalaSekolahController extends Controller
         $validated['pengirim_id'] = auth()->id();
         $validated['tanggal_kirim'] = now();
 
-        Catatan::create($validated);
+        $catatan = Catatan::create($validated);
+
+        // Send notifications to recipients
+        $catatan->load('pengirim');
+        app(\App\Services\NotificationService::class)->notifyCatatan($catatan);
 
         return redirect()->route('waka.catatan.index')->with('success', 'Catatan berhasil dikirim!');
     }

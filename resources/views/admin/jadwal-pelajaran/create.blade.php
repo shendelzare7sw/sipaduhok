@@ -48,14 +48,8 @@
 @endsection
 
 @section('content')
-    {{-- Error Messages --}}
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
+{{-- Error Messages --}}
+@section('content')
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle me-2"></i>
@@ -453,16 +447,16 @@
             // Update display
             const display = document.querySelector('.guru-display');
             display.innerHTML = `
-            <div class="guru-info" style="display: flex; align-items: center; gap: 12px;">
-                <div class="guru-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
-                    ${name.substring(0, 2)}
+                <div class="guru-info" style="display: flex; align-items: center; gap: 12px;">
+                    <div class="guru-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+                        ${name.substring(0, 2)}
+                    </div>
+                    <div class="guru-details">
+                        <div class="guru-name" style="font-weight: 600; color: #111827;">${name}</div>
+                        <div class="guru-role" style="font-size: 12px; color: #6b7280;">${cabang}</div>
+                    </div>
                 </div>
-                <div class="guru-details">
-                    <div class="guru-name" style="font-weight: 600; color: #111827;">${name}</div>
-                    <div class="guru-role" style="font-size: 12px; color: #6b7280;">${cabang}</div>
-                </div>
-            </div>
-        `;
+            `;
         }
 
         function filterGuruList() {
@@ -486,10 +480,10 @@
             // Update display
             const display = document.querySelector('.guru-display');
             display.innerHTML = `
-            <div style="color: #f59e0b; font-style: italic;">
-                <i class="fas fa-chalkboard-teacher"></i> Klik untuk memilih guru pengajar
-            </div>
-        `;
+                <div style="color: #f59e0b; font-style: italic;">
+                    <i class="fas fa-chalkboard-teacher"></i> Klik untuk memilih guru pengajar
+                </div>
+            `;
 
             // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('guruModal'));

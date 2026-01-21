@@ -122,62 +122,62 @@
     </style>
 
     <div style="max-width:800px;margin:0 auto;padding:0 1rem">
-        @if(session('error'))
-        <div class="alert-danger"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>@endif
-
-        <div class="instructions">
-            <h6><i class="fas fa-info-circle"></i> Petunjuk Import Orang Tua</h6>
-            <ol>
-                <li>Nama orang tua WAJIB diisi</li>
-                <li>Username & email opsional (auto-generate jika kosong)</li>
-                <li>nis_anak: NIS siswa yang akan dihubungkan (pisah koma jika lebih dari satu)</li>
-                <li>Password default: <code>password</code></li>
-            </ol>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-file-import" style="color:#ea580c;margin-right:10px"></i>Upload File Excel</h5>
+        <div style="max-width:800px;margin:0 auto;padding:0 1rem">
+            <div class="instructions">
+                <h6><i class="fas fa-info-circle"></i> Petunjuk Import Orang Tua</h6>
+                <ol>
+                    <li>Nama orang tua WAJIB diisi</li>
+                    <li>Username & email opsional (auto-generate jika kosong)</li>
+                    <li>nis_anak: NIS siswa yang akan dihubungkan (pisah koma jika lebih dari satu)</li>
+                    <li>Password default: <code>password</code></li>
+                </ol>
             </div>
-            <div class="card-body">
-                <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid #e5e7eb">
-                    <a href="{{ route('admin.users.orang-tua-template') }}" class="btn btn-success"><i
-                            class="fas fa-download"></i> Download Template</a>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-file-import" style="color:#ea580c;margin-right:10px"></i>Upload File Excel</h5>
                 </div>
-                <form action="{{ route('admin.users.import-orang-tua.store') }}" method="POST"
-                    enctype="multipart/form-data">
-                    @csrf
-                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-                        <div style="font-size:48px;color:#9ca3af;margin-bottom:16px"><i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div style="font-size:16px;color:#374151">Klik untuk memilih file atau drag & drop</div>
-                        <div style="font-size:13px;color:#6b7280">Format: .xlsx, .xls (Maks 5MB)</div>
+                <div class="card-body">
+                    <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid #e5e7eb">
+                        <a href="{{ route('admin.users.orang-tua-template') }}" class="btn btn-success"><i
+                                class="fas fa-download"></i> Download Template</a>
                     </div>
-                    <input type="file" name="file" id="fileInput" style="display:none" accept=".xlsx,.xls">
-                    <div class="file-selected" id="fileSelected">
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <i class="fas fa-file-excel" style="color:#ea580c;font-size:24px"></i>
-                            <div><strong id="fileName">-</strong>
-                                <div style="font-size:12px;color:#6b7280" id="fileSize">-</div>
+                    <form action="{{ route('admin.users.import-orang-tua.store') }}" method="POST"
+                        enctype="multipart/form-data">
+                        @csrf
+                        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                            <div style="font-size:48px;color:#9ca3af;margin-bottom:16px"><i
+                                    class="fas fa-cloud-upload-alt"></i>
                             </div>
+                            <div style="font-size:16px;color:#374151">Klik untuk memilih file atau drag & drop</div>
+                            <div style="font-size:13px;color:#6b7280">Format: .xlsx, .xls (Maks 5MB)</div>
                         </div>
-                        <button type="button" class="btn btn-secondary" onclick="clearFile()" style="padding:6px 12px"><i
-                                class="fas fa-times"></i></button>
-                    </div>
-                    <div style="display:flex;gap:12px;margin-top:24px">
-                        <a href="{{ route('admin.users.orang-tua') }}" class="btn btn-secondary"><i
-                                class="fas fa-arrow-left"></i> Kembali</a>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" disabled><i class="fas fa-upload"></i>
-                            Import Data</button>
-                    </div>
-                </form>
+                        <input type="file" name="file" id="fileInput" style="display:none" accept=".xlsx,.xls">
+                        <div class="file-selected" id="fileSelected">
+                            <div style="display:flex;align-items:center;gap:10px">
+                                <i class="fas fa-file-excel" style="color:#ea580c;font-size:24px"></i>
+                                <div><strong id="fileName">-</strong>
+                                    <div style="font-size:12px;color:#6b7280" id="fileSize">-</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary" onclick="clearFile()"
+                                style="padding:6px 12px"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div style="display:flex;gap:12px;margin-top:24px">
+                            <a href="{{ route('admin.users.orang-tua') }}" class="btn btn-secondary"><i
+                                    class="fas fa-arrow-left"></i> Kembali</a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn" disabled><i
+                                    class="fas fa-upload"></i>
+                                Import Data</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        const fi = document.getElementById('fileInput'), fs = document.getElementById('fileSelected'), fn = document.getElementById('fileName'), fz = document.getElementById('fileSize'), sb = document.getElementById('submitBtn');
-        fi.onchange = function () { if (this.files.length) { fn.textContent = this.files[0].name; fz.textContent = (this.files[0].size / 1024).toFixed(2) + ' KB'; fs.classList.add('show'); document.querySelector('.upload-area').style.display = 'none'; sb.disabled = false } };
-        function clearFile() { fi.value = ''; fs.classList.remove('show'); document.querySelector('.upload-area').style.display = 'block'; sb.disabled = true }
-    </script>
+        <script>
+            const fi = document.getElementById('fileInput'), fs = document.getElementById('fileSelected'), fn = document.getElementById('fileName'), fz = document.getElementById('fileSize'), sb = document.getElementById('submitBtn');
+            fi.onchange = function () { if (this.files.length) { fn.textContent = this.files[0].name; fz.textContent = (this.files[0].size / 1024).toFixed(2) + ' KB'; fs.classList.add('show'); document.querySelector('.upload-area').style.display = 'none'; sb.disabled = false } };
+            function clearFile() { fi.value = ''; fs.classList.remove('show'); document.querySelector('.upload-area').style.display = 'block'; sb.disabled = true }
+        </script>
 @endsection

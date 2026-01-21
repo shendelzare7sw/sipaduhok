@@ -36,6 +36,10 @@ class Notification extends Model
     const TIPE_PENGUMUMAN = 'pengumuman';
     const TIPE_DEADLINE = 'deadline';
     const TIPE_NILAI = 'nilai';
+    const TIPE_IZIN = 'izin';
+    const TIPE_CATATAN = 'catatan';
+    const TIPE_PEMBAYARAN = 'pembayaran';
+    const TIPE_RAPOR = 'rapor';
 
     // Icon mapping
     public static function getIcon($tipe)
@@ -48,6 +52,10 @@ class Notification extends Model
             self::TIPE_PENGUMUMAN => 'fas fa-bullhorn',
             self::TIPE_DEADLINE => 'fas fa-clock',
             self::TIPE_NILAI => 'fas fa-star',
+            self::TIPE_IZIN => 'fas fa-file-medical',
+            self::TIPE_CATATAN => 'fas fa-sticky-note',
+            self::TIPE_PEMBAYARAN => 'fas fa-money-check-alt',
+            self::TIPE_RAPOR => 'fas fa-graduation-cap',
             default => 'fas fa-bell',
         };
     }
@@ -63,6 +71,10 @@ class Notification extends Model
             self::TIPE_PENGUMUMAN => 'success',
             self::TIPE_DEADLINE => 'danger',
             self::TIPE_NILAI => 'success',
+            self::TIPE_IZIN => 'warning',
+            self::TIPE_CATATAN => 'info',
+            self::TIPE_PEMBAYARAN => 'success',
+            self::TIPE_RAPOR => 'primary',
             default => 'secondary',
         };
     }

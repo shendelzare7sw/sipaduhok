@@ -163,21 +163,17 @@ class MataPelajaranController extends Controller
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
-            $failures = $import->failures();
 
             $message = "Berhasil mengimport {$imported} mata pelajaran.";
 
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada).";
+                $message .= " {$skipped} data dilewati (sudah ada atau format salah).";
             }
 
-            if ($failures->count() > 0) {
-                $errorRows = $failures->map(fn($f) => $f->row())->unique()->implode(', ');
-                $message .= " Baris dengan error: {$errorRows}";
-                return redirect()
-                    ->route('admin.mata-pelajaran.index')
-                    ->with('warning', $message);
-            }
+            return redirect()
+                ->route('admin.mata-pelajaran.index')
+                ->with('warning', $message); // Using warning color to indicate mixed results if any
+        } catch (\Exception $e) {
 
             return redirect()
                 ->route('admin.mata-pelajaran.index')

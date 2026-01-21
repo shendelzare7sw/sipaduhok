@@ -291,11 +291,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 @endif
 
 {{-- Display Success Message --}}
-@if (session('success'))
-    <div class="alert alert-success">
-        <i class="fas fa-check-circle"></i> {{ session('success') }}
-    </div>
-@endif
+
 
 <form action="{{ route('admin.users.update-tenaga-pendidik', $tenagaPendidik->id) }}" method="POST">
     @csrf

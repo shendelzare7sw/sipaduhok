@@ -202,13 +202,13 @@ class PresensiController extends Controller
             ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
             ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
             ->whereNotNull('diinput_oleh')
-            ->whereHas('inputBy', function($query) {
+            ->whereHas('inputBy', function ($query) {
                 // Check via role field (string) atau roleRelation
-                $query->where(function($q) {
+                $query->where(function ($q) {
                     $q->where('role', 'orang_tua')
-                      ->orWhereHas('roleRelation', function($rq) {
-                          $rq->where('name', 'orang_tua');
-                      });
+                        ->orWhereHas('roleRelation', function ($rq) {
+                            $rq->where('name', 'orang_tua');
+                        });
                 });
             })
             ->with(['siswa', 'inputBy'])
@@ -242,7 +242,12 @@ class PresensiController extends Controller
 
             $presensi->update([
                 'keterangan' => $keteranganBaru,
+                'status_validasi' => 'disetujui',
             ]);
+
+            // Notify orang tua about izin approval
+            $presensi->load('siswa.orangTua');
+            app(\App\Services\NotificationService::class)->notifyIzinStatus($presensi);
 
             return back()->with('success', 'Pengajuan izin disetujui!');
         } else {
@@ -254,7 +259,12 @@ class PresensiController extends Controller
             $presensi->update([
                 'status' => 'alpha',
                 'keterangan' => $keteranganBaru,
+                'status_validasi' => 'ditolak',
             ]);
+
+            // Notify orang tua about izin rejection
+            $presensi->load('siswa.orangTua');
+            app(\App\Services\NotificationService::class)->notifyIzinStatus($presensi);
 
             return back()->with('success', 'Pengajuan izin ditolak, status diubah menjadi Alpha.');
         }

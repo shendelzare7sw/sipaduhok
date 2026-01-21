@@ -14,47 +14,47 @@ use App\Models\LmsMeeting;
 
 class GuruLmsMeetingController extends Controller
 {
-    public function index($kelasId, $mapelId): View
+    public function index($kelas, $mapel): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
 
-        $kelas = Kelas::findOrFail($kelasId);
-        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $kelasModel = Kelas::findOrFail($kelas);
+        $mataPelajaran = MataPelajaran::findOrFail($mapel);
 
-        $meetings = LmsMeeting::where('kelas_id', $kelasId)
-            ->where('mata_pelajaran_id', $mapelId)
+        $meetings = LmsMeeting::where('kelas_id', $kelas)
+            ->where('mata_pelajaran_id', $mapel)
             ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('waktu_mulai', 'desc')
             ->paginate(10);
 
         return view('guru.lms.meeting.index', [
-            'kelas' => $kelas,
+            'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
             'meetings' => $meetings,
             'guru' => $tenagaPendidik,
         ]);
     }
 
-    public function create($kelasId, $mapelId): View
+    public function create($kelas, $mapel): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
 
-        $kelas = Kelas::findOrFail($kelasId);
-        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $kelasModel = Kelas::findOrFail($kelas);
+        $mataPelajaran = MataPelajaran::findOrFail($mapel);
 
         return view('guru.lms.meeting.create', [
-            'kelas' => $kelas,
+            'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
         ]);
     }
 
-    public function store(Request $request, $kelasId, $mapelId): RedirectResponse
+    public function store(Request $request, $kelas, $mapel): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
@@ -66,8 +66,8 @@ class GuruLmsMeetingController extends Controller
         ]);
 
         LmsMeeting::create([
-            'kelas_id' => $kelasId,
-            'mata_pelajaran_id' => $mapelId,
+            'kelas_id' => $kelas,
+            'mata_pelajaran_id' => $mapel,
             'guru_id' => $tenagaPendidik->id,
             'judul' => $validated['judul'],
             'platform' => $validated['platform'],
@@ -78,36 +78,36 @@ class GuruLmsMeetingController extends Controller
         ]);
 
         return redirect()
-            ->route('guru.lms.meeting.index', [$kelasId, $mapelId])
+            ->route('guru.lms.meeting.index', [$kelas, $mapel])
             ->with('success', 'Meeting berhasil dijadwalkan');
     }
 
-    public function edit($kelasId, $mapelId, $id): View
+    public function edit($kelas, $mapel, $meeting): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
 
-        $meeting = LmsMeeting::where('id', $id)
+        $meetingModel = LmsMeeting::where('id', $meeting)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        $kelas = Kelas::findOrFail($kelasId);
-        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $kelasModel = Kelas::findOrFail($kelas);
+        $mataPelajaran = MataPelajaran::findOrFail($mapel);
 
         return view('guru.lms.meeting.edit', [
-            'kelas' => $kelas,
+            'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
-            'meeting' => $meeting,
+            'meeting' => $meetingModel,
             'guru' => $tenagaPendidik,
         ]);
     }
 
-    public function update(Request $request, $kelasId, $mapelId, $id): RedirectResponse
+    public function update(Request $request, $kelas, $mapel, $meeting): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
 
-        $meeting = LmsMeeting::where('id', $id)
+        $meetingModel = LmsMeeting::where('id', $meeting)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
@@ -121,26 +121,26 @@ class GuruLmsMeetingController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $meeting->update($validated);
+        $meetingModel->update($validated);
 
         return redirect()
-            ->route('guru.lms.meeting.index', [$kelasId, $mapelId])
+            ->route('guru.lms.meeting.index', [$kelas, $mapel])
             ->with('success', 'Meeting berhasil diperbarui');
     }
 
-    public function destroy($kelasId, $mapelId, $id): RedirectResponse
+    public function destroy($kelas, $mapel, $meeting): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
-        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
 
-        $meeting = LmsMeeting::where('id', $id)
+        $meetingModel = LmsMeeting::where('id', $meeting)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        $meeting->delete();
+        $meetingModel->delete();
 
         return redirect()
-            ->route('guru.lms.meeting.index', [$kelasId, $mapelId])
+            ->route('guru.lms.meeting.index', [$kelas, $mapel])
             ->with('success', 'Meeting berhasil dihapus');
     }
 

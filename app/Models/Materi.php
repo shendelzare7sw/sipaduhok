@@ -14,7 +14,6 @@ class Materi extends Model
     protected $fillable = [
         'kelas_id',
         'mata_pelajaran_id',
-        'pertemuan_id',
         'guru_id',
         'judul_materi',
         'kategori',
@@ -37,11 +36,6 @@ class Materi extends Model
     public function mataPelajaran()
     {
         return $this->belongsTo(MataPelajaran::class);
-    }
-
-    public function pertemuan()
-    {
-        return $this->belongsTo(Pertemuan::class);
     }
 
     public function guru()

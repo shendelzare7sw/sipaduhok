@@ -200,20 +200,6 @@
 
     <div style="max-width: 800px; margin: 0 auto; padding: 0 1rem;">
         {{-- Alert Messages --}}
-        @if(session('error'))
-            <div class="alert alert-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if(session('warning'))
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                {{ session('warning') }}
-            </div>
-        @endif
-
         {{-- Instructions Card --}}
         <div class="instructions">
             <h6><i class="fas fa-info-circle"></i> Petunjuk Import</h6>

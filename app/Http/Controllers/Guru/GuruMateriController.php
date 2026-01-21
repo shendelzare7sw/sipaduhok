@@ -53,14 +53,12 @@ class GuruMateriController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $pertemuanId = $request->get('pertemuan_id');
         $kategori = $request->get('kategori', 'materi');
 
         return view('guru.lms.materi.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
-            'pertemuanId' => $pertemuanId,
             'kategori' => $kategori,
         ]);
     }
@@ -79,7 +77,6 @@ class GuruMateriController extends Controller
             'deskripsi' => 'nullable|string',
             'file_materi' => 'nullable|file|max:51200', // 50MB
             'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
-            'pertemuan_id' => 'nullable|exists:pertemuans,id',
         ]);
 
         $filePath = null;
@@ -90,7 +87,6 @@ class GuruMateriController extends Controller
         Materi::create([
             'kelas_id' => $kelasId,
             'mata_pelajaran_id' => $mapelId,
-            'pertemuan_id' => $validated['pertemuan_id'] ?? null,
             'guru_id' => $tenagaPendidik->id,
             'judul_materi' => $validated['judul_materi'],
             'kategori' => $validated['kategori'],
@@ -99,12 +95,6 @@ class GuruMateriController extends Controller
             'tipe_file' => $validated['tipe_file'],
             'tanggal_upload' => now(),
         ]);
-
-        if (!empty($validated['pertemuan_id'])) {
-            return redirect()
-                ->route('guru.lms.pertemuan.show', [$kelasId, $mapelId, $validated['pertemuan_id']])
-                ->with('success', 'Materi berhasil ditambahkan ke pertemuan');
-        }
 
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])

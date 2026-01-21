@@ -9,194 +9,8 @@
 @endsection
 
 @section('content')
-    <style>
-        /* Shared CSS from Prototype */
-        .forum-container {
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .post {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            background: white;
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .post.hidden {
-            display: none;
-        }
-
-        .post.highlight {
-            animation: highlight 3s ease-out;
-        }
-
-        @keyframes highlight {
-            0% {
-                background-color: #e3f2fd;
-            }
-
-            100% {
-                background-color: white;
-            }
-        }
-
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #6c757d;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            margin-right: 15px;
-            flex-shrink: 0;
-            text-transform: uppercase;
-        }
-
-        .avatar.teacher {
-            background: #1565c0;
-        }
-
-        .avatar.student {
-            background: #10b981;
-        }
-
-        .post-info {
-            flex-grow: 1;
-        }
-
-        .author-name {
-            font-weight: 600;
-            color: #2c5282;
-            margin-right: 10px;
-            font-size: 15px;
-        }
-
-        .badge-role {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 5px;
-        }
-
-        .badge-siswa {
-            background: #00a8e8;
-            color: white;
-        }
-
-        .badge-guru {
-            background: #4caf50;
-            color: white;
-        }
-
-        .post-date {
-            color: #666;
-            font-size: 13px;
-            margin-top: 3px;
-        }
-
-        .post-content {
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 15px;
-            padding-left: 63px;
-            white-space: pre-wrap;
-        }
-
-        .reply-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background 0.3s;
-        }
-
-        .reply-btn:hover {
-            background: #45a049;
-        }
-
-        .reply-node {
-            margin-left: 40px;
-            border-left: 3px solid #e0e0e0;
-            padding-left: 20px;
-        }
-
-        .reply-form {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            margin-left: 63px;
-        }
-
-        .reply-form.active {
-            display: block;
-        }
-
-        .edit-form {
-            display: none;
-        }
-
-        .media-attachment {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 4px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .action-icons {
-            position: absolute;
-            top: 60px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            opacity: 0.6;
-            transition: opacity 0.3s;
-        }
-
-        .action-icon:hover {
-            opacity: 1;
-        }
-    </style>
+    {{-- Include Shared Styles --}}
+    @include('lms.forum.styles')
 
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-3">
@@ -235,20 +49,61 @@
         </div>
 
         <div id="postsContainer">
-            <!-- Main Topic Post (Guru) -->
-            <div class="post" data-author="{{ $forum->user->name }}">
+            <!-- Main Topic Post (Guru/Creator) -->
+            <div class="post" data-author="{{ $forum->user->name ?? 'User' }}"
+                data-role="{{ $forum->isFromTeacher() ? 'teacher' : 'student' }}">
                 <div class="post-header">
-                    <div class="avatar teacher">{{ substr($forum->user->name, 0, 2) }}</div>
+                    <div class="avatar {{ $forum->isFromTeacher() ? 'teacher' : 'student' }}">
+                        @if($forum->user && $forum->user->foto_profil)
+                            <img src="{{ asset('storage/' . $forum->user->foto_profil) }}" alt="{{ $forum->user->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        @else
+                            {{ substr($forum->user->name ?? '?', 0, 2) }}
+                        @endif
+                    </div>
                     <div class="post-info">
                         <div>
-                            <span class="author-name">{{ $forum->user->name }}</span>
-                            <span class="badge-role badge-guru">Guru (Penulis)</span>
+                            <span class="author-name">{{ $forum->user->name ?? 'User' }}</span>
+                            @if($forum->isFromTeacher())
+                                <span class="badge-role badge-guru">Guru (Penulis)</span>
+                            @else
+                                <span class="badge-role badge-siswa">Siswa</span>
+                            @endif
                         </div>
-                        <div class="post-date">{{ $forum->created_at->translatedFormat('l, d F Y pukul H:i') }}</div>
+                        <div class="post-date">{{ $forum->created_at->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}</div>
                     </div>
                 </div>
                 <div class="post-content">
-                    {!! nl2br(e($forum->content)) !!}
+                    {!! nl2br(e($forum->content ?? $forum->isi)) !!}
+
+                    @if($forum->lampiran)
+                        <div class="media-attachment mt-3">
+                            @php
+                                $ext = strtolower(pathinfo($forum->lampiran, PATHINFO_EXTENSION));
+                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif']);
+                                $isVideo = in_array($ext, ['mp4', 'avi', 'mov']);
+                                $isPdf = $ext === 'pdf';
+                               @endphp
+
+                            @if($isImage)
+                                <a href="{{ Storage::url($forum->lampiran) }}" target="_blank">
+                                    <img src="{{ Storage::url($forum->lampiran) }}" alt="Lampiran" class="img-fluid rounded"
+                                        style="max-height: 300px;">
+                                </a>
+                            @elseif($isVideo)
+                                <video controls class="w-100 rounded" style="max-height: 300px;">
+                                    <source src="{{ Storage::url($forum->lampiran) }}">
+                                    Browser Anda tidak mendukung tag video.
+                                </video>
+                            @elseif($isPdf)
+                                <iframe src="{{ Storage::url($forum->lampiran) }}" width="100%" height="400px"
+                                    style="border: 1px solid #ddd; border-radius: 4px;"></iframe>
+                            @else
+                                <a href="{{ Storage::url($forum->lampiran) }}" target="_blank" class="btn btn-sm btn-light border">
+                                    <i class="fas fa-paperclip me-1"></i> Lihat Lampiran
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 @if(!$forum->is_closed)
@@ -264,14 +119,25 @@
                             <textarea name="isi" class="form-control" rows="3" placeholder="Tulis balasan Anda..."
                                 required></textarea>
                         </div>
-                        <div class="form-group mb-3">
-                            <label class="small text-muted">Lampiran (Opsional)</label>
-                            <input type="file" name="attachment" class="form-control form-control-sm">
+
+                        {{-- Attachment Dropzone --}}
+                        <button type="button" class="attachment-toggle-btn" onclick="toggleAttachment('reply-form-main')">
+                            <i class="fas fa-paperclip"></i> Lampirkan File
+                        </button>
+                        <div id="attachment-area-reply-form-main" class="attachment-area">
+                            <div class="dropzone-wrapper">
+                                <div class="dropzone-desc">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p class="mb-0">Drag & Drop file disini atau klik untuk memilih</p>
+                                </div>
+                                <input type="file" name="attachment" class="dropzone-file-input" onchange="updateFileName(this, 'reply-form-main')">
+                            </div>
+                            <div id="file-name-reply-form-main" class="file-preview-name"></div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary btn-sm">Kirim Balasan</button>
+                        <div class="d-flex gap-2 justify-content-end">
                             <button type="button" class="btn btn-secondary btn-sm"
                                 onclick="toggleReplyForm('reply-form-main')">Batal</button>
+                            <button type="submit" class="btn btn-primary btn-sm">Kirim Balasan</button>
                         </div>
                     </form>
                 </div>
@@ -285,78 +151,137 @@
     </div>
 
     <!-- Scroll to Top -->
-    <button class="scroll-btn" onclick="scrollToTop()"
-        style="position: fixed; bottom: 30px; right: 30px; width: 48px; height: 48px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">↓</button>
+    <button class="scroll-btn" onclick="scrollToTop()">↓</button>
 
-    <script>
-        function toggleReplyForm(id) {
-            const form = document.getElementById(id);
-            if (form.style.display === 'block') {
-                form.style.display = 'none';
-            } else {
-                document.querySelectorAll('.reply-form').forEach(el => el.style.display = 'none');
+    @push('scripts')
+        <script>
+            function toggleReplyForm(id) {
+                const form = document.getElementById(id);
+                if (!form) return;
+
+                // Close others
+                document.querySelectorAll('.reply-form').forEach(el => {
+                    if (el.id !== id) el.style.display = 'none';
+                });
+                // Also close edit forms
                 document.querySelectorAll('.edit-form').forEach(el => el.style.display = 'none');
-                form.style.display = 'block';
-            }
-        }
+                document.querySelectorAll('.post-content').forEach(el => el.style.display = 'block');
 
-        function toggleEditForm(id) {
-            const display = document.getElementById('content-' + id);
-            const form = document.getElementById('edit-' + id);
-
-            if (form.style.display === 'block') {
-                form.style.display = 'none';
-                display.style.display = 'block';
-            } else {
-                form.style.display = 'block';
-                display.style.display = 'none';
-            }
-        }
-
-        // Search Logic
-        const searchInput = document.getElementById('searchInput');
-        const filterRole = document.getElementById('filterRole');
-
-        [searchInput, filterRole].forEach(el => el.addEventListener('input', performSearch));
-
-        function performSearch() {
-            const term = searchInput.value.toLowerCase();
-            const role = filterRole.value;
-            const posts = document.querySelectorAll('.post');
-
-            let visible = 0;
-            posts.forEach(post => {
-                const content = post.dataset.content || '';
-                const postRole = post.dataset.role || '';
-
-                const matchTerm = term === '' || content.includes(term);
-                const matchRole = role === 'all' || postRole === role;
-
-                if (matchTerm && matchRole) {
-                    post.classList.remove('hidden');
-                    visible++;
+                if (form.style.display === 'block') {
+                    form.style.display = 'none';
                 } else {
-                    post.classList.add('hidden');
+                    form.style.display = 'block';
                 }
-            });
+            }
 
-            document.getElementById('searchResults').innerText = term || role !== 'all' ? `Menampilkan ${visible} pesan` : '';
-        }
+            function toggleEditForm(id) {
+                const display = document.getElementById('content-' + id);
+                const form = document.getElementById('edit-' + id);
+                if (!form || !display) return;
 
-        function clearFilters() {
-            searchInput.value = '';
-            filterRole.value = 'all';
-            performSearch();
-        }
+                // Close others
+                document.querySelectorAll('.edit-form').forEach(el => {
+                    if (el.id !== 'edit-' + id) el.style.display = 'none';
+                });
+                document.querySelectorAll('.post-content').forEach(el => el.style.display = 'block'); // reset others
+                document.querySelectorAll('.reply-form').forEach(el => el.style.display = 'none');
 
-        window.onscroll = function () {
-            const btn = document.querySelector('.scroll-btn');
-            if (window.scrollY > 300) btn.innerHTML = '↑';
-            else btn.innerHTML = '↓';
-        };
+                if (form.style.display === 'block') {
+                    form.style.display = 'none';
+                    display.style.display = 'block';
+                } else {
+                    form.style.display = 'block';
+                    display.style.display = 'none';
+                }
+            }
 
-        function scrollToTop() {
-            window.scrollTo({ top: window.scrollY > 300 ? 0 : document.body.scrollHeight, behavior: 'smooth' });
-        }
-    </script>
+            // Search Logic
+            const searchInput = document.getElementById('searchInput');
+            const filterRole = document.getElementById('filterRole');
+
+            [searchInput, filterRole].forEach(el => el.addEventListener('input', performSearch));
+
+            function performSearch() {
+                const term = searchInput.value.toLowerCase();
+                const role = filterRole.value;
+                const posts = document.querySelectorAll('.post');
+
+                let visible = 0;
+                posts.forEach(post => {
+                    // Check post content (for root posts)
+                    let contentText = '';
+                    const contentEl = post.querySelector('.post-content');
+                    if (contentEl) contentText = contentEl.innerText.toLowerCase();
+                    // Check data attributes which might be set on parent .post divs in partials
+                    const author = (post.getAttribute('data-author') || '').toLowerCase();
+                    const postRole = post.getAttribute('data-role') || '';
+
+                    const matchTerm = term === '' || contentText.includes(term) || author.includes(term);
+                    const matchRole = role === 'all' || postRole === role;
+
+                    if (matchTerm && matchRole) {
+                        post.classList.remove('hidden');
+                        visible++;
+                    } else {
+                        post.classList.add('hidden');
+                    }
+                });
+
+                const resDiv = document.getElementById('searchResults');
+                if (term || role !== 'all') {
+                    resDiv.innerText = `Menampilkan ${visible} pesan`;
+                } else {
+                    resDiv.innerText = '';
+                }
+            }
+
+            function clearFilters() {
+                searchInput.value = '';
+                filterRole.value = 'all';
+                performSearch();
+            }
+
+            window.onscroll = function () {
+                const btn = document.querySelector('.scroll-btn');
+                if (!btn) return;
+                if (window.scrollY > 300) btn.innerText = '↑';
+                else btn.innerHTML = '↓';
+            };
+
+            function scrollToTop() {
+                window.scrollTo({ top: window.scrollY > 300 ? 0 : document.body.scrollHeight, behavior: 'smooth' });
+            }
+
+            // Attachment Toggle & Dropzone Logic
+            function toggleAttachment(id) {
+                const area = document.getElementById('attachment-area-' + id);
+                // Find button that triggered it
+                const btn = document.querySelector(`.attachment-toggle-btn[onclick="toggleAttachment('${id}')"]`);
+
+                if(area) {
+                    if(window.getComputedStyle(area).display !== 'none') {
+                         area.style.display = 'none';
+                         if(btn) btn.classList.remove('active');
+                    } else {
+                         area.style.display = 'block';
+                         if(btn) btn.classList.add('active');
+                    }
+                }
+            }
+
+            function updateFileName(input, id) {
+                const nameDisplay = document.getElementById('file-name-' + id);
+                if (input.files && input.files[0]) {
+                    nameDisplay.textContent = 'File terpilih: ' + input.files[0].name;
+                    nameDisplay.style.display = 'block';
+
+                    // Add active class to wrapper
+                    const wrapper = input.closest('.dropzone-wrapper');
+                    if(wrapper) wrapper.style.borderColor = '#2196f3';
+                } else {
+                    nameDisplay.style.display = 'none';
+                }
+            }
+        </script>
+    @endpush
 @endsection

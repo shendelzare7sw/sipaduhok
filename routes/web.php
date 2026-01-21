@@ -59,7 +59,6 @@ use App\Http\Controllers\Guru\GuruKoreksiController;
 use App\Http\Controllers\Guru\GuruUjianController;
 use App\Http\Controllers\Guru\GuruNilaiController;
 use App\Http\Controllers\Guru\GuruForumController;
-use App\Http\Controllers\Guru\GuruPertemuanController;
 
 // Siswa Controllers
 use App\Http\Controllers\Siswa\SiswaDashboardController;
@@ -861,15 +860,6 @@ Route::middleware(['auth'])->group(function () {
             // Dashboard LMS (Beranda)
             Route::get('/dashboard', [GuruLmsController::class, 'dashboard'])->name('dashboard');
 
-            // Pertemuan (Session)
-            Route::prefix('pertemuan')->name('pertemuan.')->group(function () {
-                Route::get('/', [GuruPertemuanController::class, 'index'])->name('index');
-                Route::get('/create', [GuruPertemuanController::class, 'create'])->name('create');
-                Route::post('/', [GuruPertemuanController::class, 'store'])->name('store');
-                Route::get('/{pertemuan}', [GuruPertemuanController::class, 'show'])->name('show');
-                Route::delete('/{pertemuan}', [GuruPertemuanController::class, 'destroy'])->name('destroy');
-            });
-
             // Materi
             Route::prefix('materi')->name('materi.')->group(function () {
                 Route::get('/', [GuruMateriController::class, 'index'])->name('index');
@@ -915,11 +905,44 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/soal/{soal}/edit', [GuruUjianController::class, 'editSoal'])->name('soal.edit');
                 Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
+
+                // Manajemen Soal (Bulk / Multi-Soal)
+                Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
+                Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
+                Route::post('/{ujian}/toggle-status', [GuruUjianController::class, 'toggleStatus'])->name('toggleStatus');
+            });
+
+            // Kuis
+            Route::prefix('kuis')->name('kuis.')->group(function () {
+                Route::get('/', [GuruUjianController::class, 'index'])->name('index');
+                Route::get('/create', [GuruUjianController::class, 'create'])->name('create');
+                Route::post('/', [GuruUjianController::class, 'store'])->name('store');
+                Route::get('/{ujian}/edit', [GuruUjianController::class, 'edit'])->name('edit');
+                Route::put('/{ujian}', [GuruUjianController::class, 'update'])->name('update');
+                Route::delete('/{ujian}', [GuruUjianController::class, 'destroy'])->name('destroy');
+
+                // Hasil & Koreksi Kuis
+                Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
+                Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksi'])->name('koreksi');
+
+                // Manajemen Soal Kuis
+                Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
+                Route::get('/{ujian}/soal/create', [GuruUjianController::class, 'createSoal'])->name('soal.create');
+                Route::post('/{ujian}/soal', [GuruUjianController::class, 'storeSoal'])->name('soal.store');
+                Route::get('/{ujian}/soal/{soal}/edit', [GuruUjianController::class, 'editSoal'])->name('soal.edit');
+                Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
+                Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
+
+                // Manajemen Soal Kuis (Bulk)
+                Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
+                Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
+                Route::post('/{ujian}/toggle-status', [GuruUjianController::class, 'toggleStatus'])->name('toggleStatus');
             });
 
             // Nilai Siswa
             Route::get('/nilai', [GuruNilaiController::class, 'index'])->name('nilai.index');
             Route::post('/nilai/update', [GuruNilaiController::class, 'update'])->name('nilai.update');
+            Route::post('/nilai/recalculate', [GuruNilaiController::class, 'recalculate'])->name('nilai.recalculate');
 
             // Forum Diskusi
             Route::prefix('forum')->name('forum.')->group(function () {
@@ -928,9 +951,21 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/', [GuruForumController::class, 'store'])->name('store');
                 Route::get('/{forum}', [GuruForumController::class, 'show'])->name('show');
                 Route::post('/{forum}/reply', [GuruForumController::class, 'reply'])->name('reply');
+                Route::put('/{forum}/reply/{reply}', [GuruForumController::class, 'updateReply'])->name('reply.update');
+                Route::delete('/{forum}/reply/{reply}', [GuruForumController::class, 'destroyReply'])->name('reply.destroy');
                 Route::patch('/{forum}/pin', [GuruForumController::class, 'togglePin'])->name('pin');
                 Route::patch('/{forum}/close', [GuruForumController::class, 'toggleClose'])->name('close');
                 Route::delete('/{forum}', [GuruForumController::class, 'destroy'])->name('destroy');
+            });
+
+            // Meeting / Kelas Virtual
+            Route::prefix('meeting')->name('meeting.')->group(function () {
+                Route::get('/', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'index'])->name('index');
+                Route::get('/create', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'create'])->name('create');
+                Route::post('/', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'store'])->name('store');
+                Route::get('/{meeting}/edit', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'edit'])->name('edit');
+                Route::put('/{meeting}', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'update'])->name('update');
+                Route::delete('/{meeting}', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'destroy'])->name('destroy');
             });
         });
     });
@@ -1043,6 +1078,9 @@ Route::middleware(['auth'])->group(function () {
                     Route::put('/{diskusiId}/reply/{replyId}', [App\Http\Controllers\Siswa\LmsForumController::class, 'updateReply'])->name('reply.update');
                     Route::delete('/{diskusiId}/reply/{replyId}', [App\Http\Controllers\Siswa\LmsForumController::class, 'destroyReply'])->name('reply.destroy');
                 });
+
+                // Meeting / Kelas Virtual
+                Route::get('{mapelId}/meeting', [App\Http\Controllers\Siswa\SiswaLmsMeetingController::class, 'index'])->name('meeting.index');
             });
 
             // Daftar Semua Tugas (Global)

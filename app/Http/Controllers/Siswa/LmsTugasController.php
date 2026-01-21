@@ -38,10 +38,15 @@ class LmsTugasController extends Controller
         // Cek apakah sudah deadline
         $isDeadline = now()->gt($tugas->tanggal_deadline);
 
+        $mataPelajaran = $tugas->mataPelajaran;
+        $existingSubmission = $tugasSiswa;
+
         return view('siswa.lms.mata-pelajaran.tugas.show', compact(
             'siswa',
+            'mataPelajaran',
             'tugas',
             'tugasSiswa',
+            'existingSubmission',
             'isDeadline'
         ));
     }
@@ -77,7 +82,7 @@ class LmsTugasController extends Controller
         }
 
         // Simpan atau update jawaban
-        TugasSiswa::updateOrCreate(
+        $tugasSiswa = TugasSiswa::updateOrCreate(
             [
                 'tugas_id' => $tugasId,
                 'siswa_id' => $siswa->id,
@@ -89,6 +94,10 @@ class LmsTugasController extends Controller
                 'status' => now()->gt($tugas->tanggal_deadline) ? 'terlambat' : 'dikerjakan',
             ]
         );
+
+        // Notify guru about tugas submission
+        $tugasSiswa->load(['tugas', 'siswa']);
+        app(\App\Services\NotificationService::class)->notifyTugasDikumpulkan($tugasSiswa);
 
         return back()->with('success', 'Tugas berhasil dikumpulkan!');
     }

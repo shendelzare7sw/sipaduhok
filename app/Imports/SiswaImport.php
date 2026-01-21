@@ -44,6 +44,15 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+            // Skip instruction/header rows
+            $namaLower = strtolower(trim($row['nama_lengkap']));
+            if (in_array($namaLower, ['contoh', 'petunjuk', 'instruksi', 'nama lengkap', 'nama siswa'])) {
+                continue;
+            }
+            if (str_contains($namaLower, 'contoh') || str_contains($namaLower, 'petunjuk')) {
+                continue;
+            }
+
             // Check for duplicate NIS or NISN
             $exists = false;
             if (!empty($row['nis'])) {

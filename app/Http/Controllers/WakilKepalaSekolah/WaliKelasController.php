@@ -29,10 +29,10 @@ class WaliKelasController extends Controller
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_kelas', 'like', "%{$search}%")
-                  ->orWhere('kode_kelas', 'like', "%{$search}%")
-                  ->orWhereHas('waliKelasAssignments.tenagaPendidik', fn($wq) => $wq->where('nama_lengkap', 'like', "%{$search}%"));
+                    ->orWhere('kode_kelas', 'like', "%{$search}%")
+                    ->orWhereHas('waliKelasAssignments.tenagaPendidik', fn($wq) => $wq->where('nama_lengkap', 'like', "%{$search}%"));
             });
         }
 
@@ -72,7 +72,12 @@ class WaliKelasController extends Controller
 
         // Available wali kelas options
         $waliKelasOptions = TenagaPendidik::with(['user', 'waliKelasAssignments.kelas.cabang'])
-            ->whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])->where('is_active', true))
+            ->whereHas('user', function ($q) {
+                $q->where(function ($sq) {
+                    $sq->where('role', 'wali_kelas')
+                        ->orWhereHas('roleRelation', fn($rq) => $rq->where('name', 'wali_kelas'));
+                })->where('is_active', true);
+            })
             ->orderBy('nama_lengkap')
             ->get();
 

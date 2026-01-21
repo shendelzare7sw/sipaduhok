@@ -15,6 +15,8 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 
+    @stack('styles')
+
     <style>
         :root {
             --primary: #165fac;

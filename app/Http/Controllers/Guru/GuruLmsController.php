@@ -75,13 +75,6 @@ class GuruLmsController extends Controller
             ->limit(5)
             ->get();
 
-        // Fetch pertemuans with eager loading
-        $pertemuans = \App\Models\Pertemuan::where('kelas_id', $kelasId)
-            ->where('mata_pelajaran_id', $mapelId)
-            ->with(['materi', 'tugas', 'ujian', 'forumDiskusi'])
-            ->orderBy('tanggal', 'desc')
-            ->get();
-
         return view('guru.lms.dashboard', [
             'kelas' => $kelas,
             'mataPelajaran' => $mataPelajaran,
@@ -99,7 +92,6 @@ class GuruLmsController extends Controller
             'materiTerbaru' => $recentMateri,       // Alias untuk view
             'recentTugas' => $recentTugas,
             'tugasTerbaru' => $recentTugas,         // Alias untuk view
-            'pertemuans' => $pertemuans,
         ]);
     }
 

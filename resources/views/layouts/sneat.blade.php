@@ -578,35 +578,8 @@
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
 
                             <!-- Notifications -->
-                            <li class="nav-item navbar-dropdown dropdown me-3 me-xl-4">
-                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
-                                    data-bs-toggle="dropdown">
-                                    <i class="fas fa-bell fa-lg"></i>
-                                    <span class="badge rounded-pill bg-danger badge-notifications">3</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-envelope me-2"></i> 4 pesan baru
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-users me-2"></i> 8 permintaan mengikuti
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fas fa-file me-2"></i> 3 laporan baru
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#">Lihat semua notifikasi</a>
-                                    </li>
-                                </ul>
+                            <li class="nav-item me-3 me-xl-4">
+                                <x-notification-bell />
                             </li>
 
                             <!-- User -->

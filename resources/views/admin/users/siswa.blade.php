@@ -551,12 +551,6 @@
 
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
         {{-- Success Message --}}
-        @if (session('success'))
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                {{ session('success') }}
-            </div>
-        @endif
 
         {{-- Search/Filter Info --}}
         @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))

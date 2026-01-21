@@ -111,6 +111,8 @@ class LmsForumController extends Controller
         $validated = $request->validate([
             'isi' => 'required|string|min:3',
             'parent_id' => 'nullable|exists:forum_replies,id',
+            'attachment' => 'nullable|array',
+            'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,avi,mov|max:10240',
         ]);
 
         $siswa = Siswa::where('user_id', Auth::id())->first();
@@ -124,11 +126,20 @@ class LmsForumController extends Controller
             return back()->with('error', 'Diskusi ini sudah ditutup.');
         }
 
+        // Process multiple attachments
+        $attachmentPaths = [];
+        if ($request->hasFile('attachment')) {
+            foreach ($request->file('attachment') as $file) {
+                $attachmentPaths[] = $file->store('forum-attachments', 'public');
+            }
+        }
+
         $reply = ForumReply::create([
             'forum_diskusi_id' => $diskusiId,
             'user_id' => Auth::id(),
             'parent_id' => $validated['parent_id'] ?? null,
             'isi' => $validated['isi'],
+            'attachment' => !empty($attachmentPaths) ? $attachmentPaths : null,
         ]);
 
         // Notify if replying to someone else's post
@@ -146,6 +157,8 @@ class LmsForumController extends Controller
     {
         $validated = $request->validate([
             'isi' => 'required|string|min:3',
+            'attachment' => 'nullable|array',
+            'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,avi,mov|max:10240',
         ]);
 
         $reply = ForumReply::where('id', $replyId)
@@ -156,8 +169,24 @@ class LmsForumController extends Controller
             return back()->with('error', 'Waktu edit (1 jam) telah habis atau Anda tidak memiliki izin.');
         }
 
+        // Process new attachments
+        $newAttachmentPaths = [];
+        if ($request->hasFile('attachment')) {
+            foreach ($request->file('attachment') as $file) {
+                $newAttachmentPaths[] = $file->store('forum-attachments', 'public');
+            }
+        }
+
+        // Merge with existing attachments
+        $existingAttachments = $reply->attachment ?? [];
+        if (!is_array($existingAttachments)) {
+            $existingAttachments = [];
+        }
+        $allAttachments = array_merge($existingAttachments, $newAttachmentPaths);
+
         $reply->update([
-            'isi' => $validated['isi']
+            'isi' => $validated['isi'],
+            'attachment' => !empty($allAttachments) ? $allAttachments : null,
         ]);
 
         return back()->with('success', 'Balasan berhasil diperbarui');

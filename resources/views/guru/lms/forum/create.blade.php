@@ -29,7 +29,6 @@
         <div class="p-4">
             <form action="{{ route('guru.lms.forum.store', [$kelas->id, $mapel->id]) }}" method="POST">
                 @csrf
-                <input type="hidden" name="pertemuan_id" value="{{ $pertemuanId ?? '' }}">
 
                 <div class="mb-3">
                     <label class="form-label">Topik Diskusi <span class="text-danger">*</span></label>
@@ -42,10 +41,10 @@
 
                 <div class="mb-3">
                     <label class="form-label">Isi Diskusi / Pertanyaan Pemicu <span class="text-danger">*</span></label>
-                    <textarea name="content" class="form-control @error('content') is-invalid @enderror" rows="6"
+                    <textarea name="isi" class="form-control @error('isi') is-invalid @enderror" rows="6"
                         placeholder="Tuliskan materi diskusi atau pertanyaan pemantik disini..."
-                        required>{{ old('content') }}</textarea>
-                    @error('content')
+                        required>{{ old('isi') }}</textarea>
+                    @error('isi')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

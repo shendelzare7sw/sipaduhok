@@ -258,27 +258,9 @@
 @endsection
 
 @section('content')
+{{-- Success/Error Messages --}}
+@section('content')
     {{-- Success/Error Messages --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>{{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     {{-- Stats Section --}}
     <div class="row mb-4">
@@ -485,7 +467,8 @@
                                             @if($jadwal->guru)
                                                 <div class="guru-info">
                                                     <div class="guru-avatar-sm">
-                                                        {{ strtoupper(substr($jadwal->guru->nama_lengkap, 0, 1)) }}</div>
+                                                        {{ strtoupper(substr($jadwal->guru->nama_lengkap, 0, 1)) }}
+                                                    </div>
                                                     <span class="guru-name">{{ $jadwal->guru->nama_lengkap }}</span>
                                                 </div>
                                             @else
@@ -620,7 +603,8 @@
                                     <div><i
                                             class="fas fa-calendar-day me-2 text-primary"></i><strong>{{ $jadwal->hari }}</strong>,
                                         {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</div>
+                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                                    </div>
                                     <div class="mt-1"><i
                                             class="fas fa-school me-2 text-success"></i>{{ $jadwal->kelas->nama_kelas }}</div>
                                 </div>
@@ -633,50 +617,56 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Guru Baru <small class="text-muted fw-normal">(Kosongkan
                                         untuk set jadwal kosong)</small></label>
-                                
+
                                 {{-- Search Input --}}
                                 <div class="mb-2">
                                     <input type="text" class="form-control" id="searchGuru{{ $jadwal->id }}"
                                         placeholder="🔍 Cari nama guru..." oninput="filterGuruOptions({{ $jadwal->id }})">
                                 </div>
-                                
+
                                 {{-- Guru Display Selected --}}
-                                <div id="selectedGuruDisplay{{ $jadwal->id }}" class="mb-2" style="display: none;
-                                    background: #d1fae5; border: 1px solid #10b981; padding: 10px 12px; border-radius: 8px;">
+                                <div id="selectedGuruDisplay{{ $jadwal->id }}" class="mb-2"
+                                    style="display: none;
+                                            background: #d1fae5; border: 1px solid #10b981; padding: 10px 12px; border-radius: 8px;">
                                     <div style="display: flex; align-items: center; justify-content: space-between;">
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             <i class="fas fa-user-check text-success"></i>
                                             <span id="selectedGuruName{{ $jadwal->id }}" style="font-weight: 500;"></span>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearGuruSelection{{ $jadwal->id }}()">
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="clearGuruSelection{{ $jadwal->id }}()">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 {{-- Guru List --}}
-                                <div id="guruList{{ $jadwal->id }}" 
+                                <div id="guruList{{ $jadwal->id }}"
                                     style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
-                                    <div class="guru-opt-item" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6;"
+                                    <div class="guru-opt-item"
+                                        style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6;"
                                         onclick="selectGuruForJadwal({{ $jadwal->id }}, '', 'Kosongkan (Menunggu Guru)')"
-                                        onmouseenter="this.style.background='#fef3c7'" onmouseleave="this.style.background='white'">
+                                        onmouseenter="this.style.background='#fef3c7'"
+                                        onmouseleave="this.style.background='white'">
                                         <i class="fas fa-user-slash text-warning me-2"></i>
                                         <span style="color: #92400e;">-- Kosongkan (Menunggu Guru) --</span>
                                     </div>
                                     @foreach($guruList as $guru)
                                         <div class="guru-opt-item" data-name="{{ strtolower($guru->nama_lengkap) }}"
-                                            data-id="{{ $guru->id }}"
-                                            data-jadwal="{{ $jadwal->id }}"
+                                            data-id="{{ $guru->id }}" data-jadwal="{{ $jadwal->id }}"
                                             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 10px;
-                                            {{ $jadwal->guru_id == $guru->id ? 'background: #e5e7eb; opacity: 0.6; pointer-events: none;' : '' }}"
+                                                        {{ $jadwal->guru_id == $guru->id ? 'background: #e5e7eb; opacity: 0.6; pointer-events: none;' : '' }}"
                                             onclick="selectGuruForJadwal({{ $jadwal->id }}, {{ $guru->id }}, '{{ addslashes($guru->nama_lengkap) }}')"
-                                            onmouseenter="this.style.background='#ecfdf5'" onmouseleave="this.style.background='{{ $jadwal->guru_id == $guru->id ? '#e5e7eb' : 'white' }}'">
-                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">
+                                            onmouseenter="this.style.background='#ecfdf5'"
+                                            onmouseleave="this.style.background='{{ $jadwal->guru_id == $guru->id ? '#e5e7eb' : 'white' }}'">
+                                            <div
+                                                style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">
                                                 {{ substr($guru->nama_lengkap, 0, 2) }}
                                             </div>
                                             <div>
                                                 <div style="font-weight: 500; color: #111827;">{{ $guru->nama_lengkap }}</div>
-                                                <div style="font-size: 11px; color: #6b7280;">{{ $guru->user->cabang->nama_cabang ?? '-' }}</div>
+                                                <div style="font-size: 11px; color: #6b7280;">
+                                                    {{ $guru->user->cabang->nama_cabang ?? '-' }}</div>
                                             </div>
                                             @if($jadwal->guru_id == $guru->id)
                                                 <span class="badge bg-secondary ms-auto">Saat Ini</span>
@@ -704,13 +694,13 @@
                 </form>
             </div>
         </div>
-        
+
         <script>
             function filterGuruOptions(jadwalId) {
                 const searchInput = document.getElementById('searchGuru' + jadwalId);
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 const guruList = document.querySelectorAll('#guruList' + jadwalId + ' .guru-opt-item[data-name]');
-                
+
                 guruList.forEach(item => {
                     const name = item.getAttribute('data-name') || '';
                     if (searchTerm === '' || name.includes(searchTerm)) {
@@ -720,12 +710,12 @@
                     }
                 });
             }
-            
+
             function selectGuruForJadwal(jadwalId, guruId, guruName) {
                 document.getElementById('guruIdBaru' + jadwalId).value = guruId;
                 const display = document.getElementById('selectedGuruDisplay' + jadwalId);
                 const nameSpan = document.getElementById('selectedGuruName' + jadwalId);
-                
+
                 if (guruId === '' || guruName.includes('Kosongkan')) {
                     display.style.display = 'none';
                 } else {
@@ -733,7 +723,7 @@
                     nameSpan.textContent = guruName;
                 }
             }
-            
+
             function clearGuruSelection{{ $jadwal->id }}() {
                 document.getElementById('guruIdBaru{{ $jadwal->id }}').value = '';
                 document.getElementById('selectedGuruDisplay{{ $jadwal->id }}').style.display = 'none';

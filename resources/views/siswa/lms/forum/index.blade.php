@@ -100,9 +100,6 @@
                     <div class="forum-meta">
                         <span><i class="fas fa-user me-1"></i>{{ $forum->user->name ?? 'Guru' }}</span>
                         <span><i class="far fa-clock me-1"></i>{{ $forum->created_at->diffForHumans() }}</span>
-                        @if($forum->pertemuan_id)
-                            <span><i class="fas fa-calendar me-1"></i>Pekan {{ $forum->pertemuan->pekan ?? '-' }}</span>
-                        @endif
                     </div>
                 </div>
                 <div class="reply-count">

@@ -451,9 +451,21 @@
                                 @foreach($tugasList as $tugas)
                                     @php
                                         $deadline = \Carbon\Carbon::parse($tugas->tanggal_deadline);
-                                        $diffDays = now()->diffInDays($deadline, false);
+                                        $now = now();
+                                        $diff = $now->diff($deadline);
+                                        $diffDays = $now->diffInDays($deadline, false); // Keep for logic
+
                                         $isUrgent = $diffDays <= 1;
                                         $isWarning = $diffDays > 1 && $diffDays <= 3;
+
+                                        $timeStringParts = [];
+                                        if ($diff->days > 0)
+                                            $timeStringParts[] = $diff->days . ' hari';
+                                        if ($diff->h > 0)
+                                            $timeStringParts[] = $diff->h . ' jam';
+                                        if ($diff->i > 0)
+                                            $timeStringParts[] = $diff->i . ' menit';
+                                        $formattedDiff = empty($timeStringParts) ? 'Kurang dari 1 menit' : implode(' ', $timeStringParts);
                                     @endphp
 
                                     @if($isUrgent)
@@ -480,7 +492,7 @@
                                                     <strong>{{ $deadline->locale('id')->isoFormat('dddd, D MMM Y - HH:mm') }}</strong>
                                                 </p>
                                                 <div class="d-flex gap-2">
-                                                    <span class="badge bg-warning text-dark">{{ $diffDays }} Hari Lagi</span>
+                                                    <span class="badge bg-warning text-dark">{{ $formattedDiff }} Lagi</span>
                                                     <a href="{{ route('siswa.lms.mapel.show', $tugas->mata_pelajaran_id) }}"
                                                         class="badge bg-white text-warning text-decoration-none">Lihat Tugas</a>
                                                 </div>

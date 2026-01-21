@@ -60,13 +60,11 @@ class GuruTugasController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $pertemuanId = $request->get('pertemuan_id');
 
         return view('guru.lms.tugas.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
-            'pertemuanId' => $pertemuanId,
         ]);
     }
 
@@ -84,7 +82,6 @@ class GuruTugasController extends Controller
             'file_tugas' => 'nullable|file|max:10240', // 10MB
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
-            'pertemuan_id' => 'nullable|exists:pertemuans,id',
         ]);
 
         $filePath = null;
@@ -95,7 +92,6 @@ class GuruTugasController extends Controller
         $tugas = Tugas::create([
             'kelas_id' => $kelasId,
             'mata_pelajaran_id' => $mapelId,
-            'pertemuan_id' => $validated['pertemuan_id'] ?? null,
             'guru_id' => $tenagaPendidik->id,
             'judul_tugas' => $validated['judul_tugas'],
             'deskripsi' => $validated['deskripsi'],
@@ -115,12 +111,6 @@ class GuruTugasController extends Controller
                 'siswa_id' => $siswa->id,
                 'status' => 'belum_dikerjakan',
             ]);
-        }
-
-        if (!empty($validated['pertemuan_id'])) {
-            return redirect()
-                ->route('guru.lms.pertemuan.show', [$kelasId, $mapelId, $validated['pertemuan_id']])
-                ->with('success', 'Tugas berhasil ditambahkan ke pertemuan');
         }
 
         return redirect()

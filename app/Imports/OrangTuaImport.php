@@ -27,6 +27,15 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+            // Skip instruction/header rows
+            $namaLower = strtolower(trim($row['nama']));
+            if (in_array($namaLower, ['contoh', 'petunjuk', 'instruksi', 'nama lengkap', 'nama orang tua'])) {
+                continue;
+            }
+            if (str_contains($namaLower, 'contoh') || str_contains($namaLower, 'petunjuk')) {
+                continue;
+            }
+
             // Prepare username and email
             $username = !empty($row['username']) ? $row['username'] : Str::slug($row['nama']) . '-' . rand(100, 999);
             $email = !empty($row['email']) ? $row['email'] : $username . '@orangtua.sipaduhok.com';

@@ -613,14 +613,16 @@ class OrangTuaController extends Controller
         $keterangan .= " - Diajukan oleh orang tua ({$user->name})";
 
         // Simpan atau update presensi
+        $presensi = null;
         if ($existingPresensi) {
             $existingPresensi->update([
                 'status' => $validated['jenis'],
                 'keterangan' => $keterangan,
                 'diinput_oleh' => $user->id, // FIX: Set diinput_oleh on update too
             ]);
+            $presensi = $existingPresensi;
         } else {
-            Presensi::create([
+            $presensi = Presensi::create([
                 'siswa_id' => $siswa->id,
                 'kelas_id' => $siswa->kelas_id,
                 'tanggal' => $validated['tanggal'],
@@ -628,6 +630,12 @@ class OrangTuaController extends Controller
                 'keterangan' => $keterangan,
                 'diinput_oleh' => $user->id,
             ]);
+        }
+
+        // Notify wali kelas about new izin request
+        if ($presensi) {
+            $presensi->load('siswa');
+            app(\App\Services\NotificationService::class)->notifyIzinBaru($presensi);
         }
 
         return redirect()->route('orang-tua.dashboard')

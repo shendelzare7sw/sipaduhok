@@ -256,6 +256,10 @@ class RaporController extends Controller
         $rapor = Rapor::findOrFail($raporId);
         $rapor->terbitkan();
 
+        // Notify siswa and orang tua about published rapor
+        $rapor->load('siswa.orangTua');
+        app(\App\Services\NotificationService::class)->notifyRaporTerbit($rapor);
+
         return back()->with('success', 'Rapor berhasil diterbitkan!');
     }
 

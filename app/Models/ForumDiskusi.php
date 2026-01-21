@@ -13,12 +13,12 @@ class ForumDiskusi extends Model
 
     protected $fillable = [
         'mata_pelajaran_id',
-        'pertemuan_id',
         'kelas_id',
         'user_id',
         'topik',
         'judul',
         'isi',
+        'lampiran',
         'reference_id',
         'is_pinned',
         'is_closed',
@@ -27,6 +27,7 @@ class ForumDiskusi extends Model
     protected $casts = [
         'is_pinned' => 'boolean',
         'is_closed' => 'boolean',
+        'lampiran' => 'array',
     ];
 
     // Topik constants
@@ -39,11 +40,6 @@ class ForumDiskusi extends Model
     public function mataPelajaran()
     {
         return $this->belongsTo(MataPelajaran::class);
-    }
-
-    public function pertemuan()
-    {
-        return $this->belongsTo(Pertemuan::class);
     }
 
     public function kelas()

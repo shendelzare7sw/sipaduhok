@@ -45,14 +45,51 @@ class LmsUjianController extends Controller
             ->where('siswa_id', $siswa->id)
             ->first();
 
+        // HANDLE: Ujian ditarik guru saat siswa sedang mengerjakan
+        if ($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan' && !$ujian->is_active) {
+            // Reset ujian ke belum_mulai karena guru menarik ujian
+            $ujianSiswa->update([
+                'status' => 'belum_mulai',
+                'waktu_mulai' => null,
+                'waktu_selesai' => null,
+                'nilai' => null,
+            ]);
+
+            // Hapus semua jawaban siswa yang sudah dijawab
+            JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)->delete();
+
+            \Log::warning("Ujian ID {$ujianId} ditarik guru. Ujian siswa ID {$ujianSiswa->id} direset ke belum_mulai");
+
+            return redirect()->route('siswa.lms.mapel.show', $mapelId)
+                ->with('error', 'Maaf, ujian ini telah ditarik kembali oleh guru. Sesi ujian Anda telah dibatalkan. Semua jawaban yang telah Anda masukkan telah dihapus.');
+        }
+
         // Cek apakah ujian sedang berlangsung
         $isOngoing = $ujian->isOngoing();
+
+        // Get soal ujian - pastikan soal di-load dengan benar
+        // Query soal secara langsung dan urutkan
+        $soalList = SoalUjian::where('ujian_id', $ujianId)
+            ->orderBy('urutan', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        // Jika tidak ada soal, return empty collection
+        if ($soalList->isEmpty()) {
+            // Log untuk debugging
+            \Log::warning("Tidak ada soal untuk ujian ID: {$ujianId}");
+            $soalList = collect();
+        }
+
+        $mataPelajaran = $ujian->mataPelajaran;
 
         return view('siswa.lms.mata-pelajaran.ujian.show', compact(
             'siswa',
             'ujian',
             'ujianSiswa',
-            'isOngoing'
+            'isOngoing',
+            'soalList',
+            'mataPelajaran'
         ));
     }
 
@@ -69,6 +106,11 @@ class LmsUjianController extends Controller
         }
 
         $ujian = Ujian::findOrFail($ujianId);
+
+        // Cek apakah ujian sudah ditarik guru (tidak aktif)
+        if (!$ujian->is_active) {
+            return back()->with('error', 'Ujian ini telah ditarik kembali oleh guru dan tidak dapat dimulai');
+        }
 
         // Validasi waktu ujian
         if (!$ujian->isOngoing()) {
@@ -87,7 +129,18 @@ class LmsUjianController extends Controller
                 'waktu_mulai' => now(),
                 'status' => 'sedang_mengerjakan',
             ]);
+        } else {
+            // Jika sudah ada tapi belum mulai, update status
+            if ($ujianSiswa->status !== 'sedang_mengerjakan') {
+                $ujianSiswa->update([
+                    'waktu_mulai' => now(),
+                    'status' => 'sedang_mengerjakan',
+                ]);
+            }
         }
+
+        // Force refresh dari database
+        $ujianSiswa = $ujianSiswa->fresh();
 
         return redirect()->route('siswa.lms.mapel.ujian.show', [$mapelId, $ujianId])
             ->with('success', 'Ujian dimulai. Waktu: ' . $ujian->durasi_menit . ' menit');
@@ -111,7 +164,7 @@ class LmsUjianController extends Controller
         }
 
         $ujian = Ujian::findOrFail($ujianId);
-        
+
         $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
             ->where('siswa_id', $siswa->id)
             ->firstOrFail();
@@ -131,7 +184,7 @@ class LmsUjianController extends Controller
 
         foreach ($request->jawaban as $soalId => $jawaban) {
             $soal = $soalList->where('id', $soalId)->first();
-            
+
             if ($soal) {
                 $jawabanSiswa = JawabanSiswa::updateOrCreate(
                     [
@@ -157,6 +210,10 @@ class LmsUjianController extends Controller
             'nilai' => $totalNilai,
             'status' => 'selesai',
         ]);
+
+        // Notify guru about ujian completion
+        $ujianSiswa->load(['ujian', 'siswa']);
+        app(\App\Services\NotificationService::class)->notifyUjianSelesai($ujianSiswa);
 
         return redirect()->route('siswa.lms.mapel.show', $mapelId)
             ->with('success', 'Ujian berhasil dikumpulkan! Nilai: ' . $totalNilai);

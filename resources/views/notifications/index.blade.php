@@ -1,6 +1,29 @@
-@extends('layouts.app')
+@php
+    $userRole = auth()->user()->role ?? 'siswa';
+    $layout = match ($userRole) {
+        'siswa' => 'layouts.lms',
+        'guru_pengajar' => 'layouts.lms-guru',
+        default => 'layouts.sneat',
+    };
+@endphp
+
+@extends($layout)
 
 @section('title', 'Notifikasi')
+
+@if($userRole === 'siswa')
+@section('sidebar-menu')
+    @include('siswa.partials.sidebar-lms')
+@endsection
+@section('page-title', 'Notifikasi')
+@section('page-subtitle', 'Semua notifikasi untuk Anda')
+@elseif($userRole === 'guru_pengajar')
+@section('sidebar-menu')
+    @include('guru.partials.sidebar-lms')
+@endsection
+@section('page-title', 'Notifikasi')
+@section('page-subtitle', 'Semua notifikasi untuk Anda')
+@endif
 
 @section('content')
     <div class="container-fluid py-4">
@@ -51,6 +74,30 @@
                                 <a class="nav-link {{ ($tipe ?? '') === 'forum' ? 'active' : '' }}"
                                     href="{{ route('notifications.by-type', 'forum') }}">
                                     <i class="fas fa-comments text-info"></i> Forum
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($tipe ?? '') === 'izin' ? 'active' : '' }}"
+                                    href="{{ route('notifications.by-type', 'izin') }}">
+                                    <i class="fas fa-file-medical text-warning"></i> Izin
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($tipe ?? '') === 'catatan' ? 'active' : '' }}"
+                                    href="{{ route('notifications.by-type', 'catatan') }}">
+                                    <i class="fas fa-sticky-note text-info"></i> Catatan
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($tipe ?? '') === 'pembayaran' ? 'active' : '' }}"
+                                    href="{{ route('notifications.by-type', 'pembayaran') }}">
+                                    <i class="fas fa-money-check-alt text-success"></i> Pembayaran
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($tipe ?? '') === 'rapor' ? 'active' : '' }}"
+                                    href="{{ route('notifications.by-type', 'rapor') }}">
+                                    <i class="fas fa-graduation-cap text-primary"></i> Rapor
                                 </a>
                             </li>
                         </ul>

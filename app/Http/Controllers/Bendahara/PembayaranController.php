@@ -242,6 +242,14 @@ class PembayaranController extends Controller
 
             DB::commit();
 
+            // Notify orang tua about payment validation (only on approval)
+            if ($request->status_validasi === 'disetujui') {
+                foreach ($relatedPayments as $pembayaran) {
+                    $pembayaran->load('siswa.orangTua');
+                    app(\App\Services\NotificationService::class)->notifyPembayaranValidasi($pembayaran);
+                }
+            }
+
             $message = $request->status_validasi === 'disetujui'
                 ? 'Pembayaran berhasil divalidasi'
                 : 'Pembayaran ditolak';
