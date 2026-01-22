@@ -23,11 +23,13 @@ class KalenderAkademik extends Model
         'jenis_kegiatan',
         'lampiran_surat',
         'status',
+        'is_hidden_siswa',
     ];
 
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
+        'is_hidden_siswa' => 'boolean',
     ];
 
     /**

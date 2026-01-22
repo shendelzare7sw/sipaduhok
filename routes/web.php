@@ -388,9 +388,11 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/cetak', [$controller, 'kalenderCetak'])->name('cetak');
                 Route::get('/create', [$controller, 'kalenderCreate'])->name('create');
                 Route::post('/', [$controller, 'kalenderStore'])->name('store');
+                Route::get('/{id}', [$controller, 'kalenderShow'])->name('show');
                 Route::get('/{id}/edit', [$controller, 'kalenderEdit'])->name('edit');
                 Route::put('/{id}', [$controller, 'kalenderUpdate'])->name('update');
                 Route::delete('/{id}', [$controller, 'kalenderDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-visibility', [$controller, 'kalenderToggleVisibility'])->name('toggle-visibility');
             });
 
             // Pengumuman
@@ -636,9 +638,11 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/cetak', [SekretarisController::class, 'kalenderCetak'])->name('cetak');
             Route::get('/create', [SekretarisController::class, 'kalenderCreate'])->name('create');
             Route::post('/', [SekretarisController::class, 'kalenderStore'])->name('store');
+            Route::get('/{id}', [SekretarisController::class, 'kalenderShow'])->name('show');
             Route::get('/{id}/edit', [SekretarisController::class, 'kalenderEdit'])->name('edit');
             Route::put('/{id}', [SekretarisController::class, 'kalenderUpdate'])->name('update');
             Route::delete('/{id}', [SekretarisController::class, 'kalenderDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-visibility', [SekretarisController::class, 'kalenderToggleVisibility'])->name('toggle-visibility');
         });
 
         // Pengumuman
@@ -1037,6 +1041,9 @@ Route::middleware(['auth'])->group(function () {
             // Kalender Akademik
             Route::get('/kalender', [SiswaDashboardController::class, 'kalenderTahunan'])->name('kalender');
             Route::get('/kalender/{tanggal}', [SiswaDashboardController::class, 'kalenderDetail'])->name('kalender.detail');
+
+            // Pengumuman
+            Route::get('/pengumuman/{id}', [LmsDashboardController::class, 'pengumumanDetail'])->name('pengumuman.show');
 
             // Jadwal Pelajaran
             Route::get('/jadwal', [LmsDashboardController::class, 'jadwal'])->name('jadwal');

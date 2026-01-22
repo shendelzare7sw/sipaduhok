@@ -221,6 +221,9 @@
                                 <div class="day-number">{{ $day['date'] }}</div>
                                 @foreach($day['events'] as $event)
                                     <div class="event {{ $event->jenis_kegiatan }}" title="{{ $event->nama_kegiatan }}">
+                                        @if($event->is_hidden_siswa)
+                                            <span style="font-size: 8px; margin-right: 2px;">👁️‍🗨️</span> 
+                                        @endif
                                         {{ Str::limit($event->nama_kegiatan, 20) }}
                                     </div>
                                 @endforeach
@@ -289,6 +292,9 @@
                         | <i class="fas fa-clock"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}
                     @endif
                     | <i class="fas fa-tag"></i> {{ $event->jenis_label }}
+                    @if($event->is_hidden_siswa)
+                        | <span style="color: #6b7280; font-weight: bold;">(Disembunyikan)</span>
+                    @endif
                 </div>
                 @if($event->keterangan)
                     <div class="desc">{{ $event->keterangan }}</div>

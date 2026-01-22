@@ -61,6 +61,7 @@ class LmsDashboardController extends Controller
 
         // Agenda Bulan Ini
         $agendaBulanIni = KalenderAkademik::where('status', 'aktif')
+            ->where('is_hidden_siswa', false) // Filter hidden
             ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id ?? null)
             ->whereMonth('tanggal_mulai', now()->month)
             ->whereYear('tanggal_mulai', now()->year)
@@ -76,12 +77,13 @@ class LmsDashboardController extends Controller
             ->orderBy('jam_mulai')
             ->get();
 
-        // Pengumuman Terbaru
-        $pengumuman = Pengumuman::where('status', 'aktif')
+        // Pengumuman Terbaru (Ambil 5)
+        $pengumumanList = Pengumuman::where('status', 'aktif')
             ->where('tanggal_pengumuman', '>=', now()->toDateString())
             ->orderBy('prioritas', 'desc')
             ->orderBy('tanggal_pengumuman', 'desc')
-            ->first();
+            ->take(5)
+            ->get();
 
         // ============ DATA TAMBAHAN UNTUK ENHANCED DASHBOARD ============
 
@@ -95,6 +97,7 @@ class LmsDashboardController extends Controller
                             ->where('tanggal_selesai', '>=', now()->startOfWeek());
                     });
             })
+            ->where('is_hidden_siswa', false) // Filter hidden
             ->orderBy('tanggal_mulai')
             ->take(5)
             ->get();
@@ -152,7 +155,7 @@ class LmsDashboardController extends Controller
             'tugasPending',
             'agendaBulanIni',
             'jadwalHariIni',
-            'pengumuman',
+            'pengumumanList',
             'kalenderMingguIni',
             'notifikasiHariIni',
             'mataPelajaranList',
@@ -163,30 +166,135 @@ class LmsDashboardController extends Controller
     }
 
     /**
-     * Kalender Akademik
+     * Detail Pengumuman
      */
-    public function kalender()
+    public function pengumumanDetail($id)
     {
         $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->with('kelas')->first();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return redirect()->route('siswa.lms.dashboard');
+        }
+
+        $pengumuman = Pengumuman::findOrFail($id);
+
+        return view('siswa.lms.pengumuman.show', compact('siswa', 'pengumuman'));
+    }
+
+    /**
+     * Kalender Akademik
+     */
+    public function kalender(Request $request)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->with('kelas.tahunAjaran')->first();
 
         if (!$siswa || !$siswa->kelas) {
             return redirect()->route('siswa.lms.dashboard')
                 ->with('error', 'Data kelas tidak ditemukan');
         }
 
+        $tahunAjaran = $siswa->kelas->tahunAjaran;
         $tahunAjaranId = $siswa->kelas->tahun_ajaran_id;
 
-        // Ambil semua kegiatan dalam tahun ajaran ini
-        $kalenderTahunan = KalenderAkademik::where('status', 'aktif')
+        // Get month and year from request or use current
+        $month = $request->get('month', now()->month);
+        $year = $request->get('year', now()->year);
+
+        // Build calendar dates
+        $startOfMonth = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+        // Get first day of week (0 = Sunday)
+        $firstDayOfWeek = $startOfMonth->dayOfWeek;
+
+        // Get events for this month
+        $events = KalenderAkademik::where('status', 'aktif')
+            ->where('is_hidden_siswa', false) // Filter hidden
             ->where('tahun_ajaran_id', $tahunAjaranId)
-            ->orderBy('tanggal_mulai', 'asc')
-            ->get()
-            ->groupBy(function ($item) {
-                return Carbon::parse($item->tanggal_mulai)->format('Y-m');
+            ->where(function ($q) use ($startOfMonth, $endOfMonth) {
+                $q->whereBetween('tanggal_mulai', [$startOfMonth, $endOfMonth])
+                    ->orWhereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
+                    ->orWhere(function ($q2) use ($startOfMonth, $endOfMonth) {
+                        $q2->where('tanggal_mulai', '<=', $startOfMonth)
+                            ->where('tanggal_selesai', '>=', $endOfMonth);
+                    });
+            })
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        // Build calendar days array
+        $calendarDays = [];
+
+        // Add empty cells for days before the 1st
+        for ($i = 0; $i < $firstDayOfWeek; $i++) {
+            $prevDate = $startOfMonth->copy()->subDays($firstDayOfWeek - $i);
+            $calendarDays[] = [
+                'day' => $prevDate->day,
+                'fullDate' => $prevDate->format('Y-m-d'),
+                'isOtherMonth' => true,
+                'isToday' => false,
+                'events' => collect([]),
+            ];
+        }
+
+        // Add days of the month
+        for ($day = 1; $day <= $endOfMonth->day; $day++) {
+            $currentDate = Carbon::createFromDate($year, $month, $day);
+
+            // Filter events for this day
+            $dayEvents = $events->filter(function ($event) use ($currentDate) {
+                $start = Carbon::parse($event->tanggal_mulai)->startOfDay();
+                $end = $event->tanggal_selesai
+                    ? Carbon::parse($event->tanggal_selesai)->endOfDay()
+                    : $start->copy()->endOfDay();
+                return $currentDate->between($start, $end);
             });
 
-        return view('siswa.lms.kalender.index', compact('siswa', 'kalenderTahunan'));
+            $calendarDays[] = [
+                'day' => $day,
+                'fullDate' => $currentDate->format('Y-m-d'),
+                'isOtherMonth' => false,
+                'isToday' => $currentDate->isToday(),
+                'events' => $dayEvents,
+            ];
+        }
+
+        // Fill remaining cells to complete the last week
+        $remaining = 7 - (count($calendarDays) % 7);
+        if ($remaining < 7) {
+            for ($i = 1; $i <= $remaining; $i++) {
+                $nextDate = $endOfMonth->copy()->addDays($i);
+                $calendarDays[] = [
+                    'day' => $nextDate->day,
+                    'fullDate' => $nextDate->format('Y-m-d'),
+                    'isOtherMonth' => true,
+                    'isToday' => false,
+                    'events' => collect([]),
+                ];
+            }
+        }
+
+        // Navigation helpers
+        $prevMonth = [
+            'month' => $startOfMonth->copy()->subMonth()->month,
+            'year' => $startOfMonth->copy()->subMonth()->year,
+        ];
+        $nextMonth = [
+            'month' => $startOfMonth->copy()->addMonth()->month,
+            'year' => $startOfMonth->copy()->addMonth()->year,
+        ];
+
+        return view('siswa.lms.kalender.index', compact(
+            'siswa',
+            'tahunAjaran',
+            'year',
+            'month',
+            'calendarDays',
+            'prevMonth',
+            'nextMonth'
+        ));
     }
 
     /**
@@ -203,6 +311,7 @@ class LmsDashboardController extends Controller
 
         // Kegiatan di tanggal tersebut
         $kegiatan = KalenderAkademik::where('status', 'aktif')
+            ->where('is_hidden_siswa', false) // Filter hidden
             ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id)
             ->whereDate('tanggal_mulai', '<=', $tanggal)
             ->where(function ($q) use ($tanggal) {
@@ -235,20 +344,69 @@ class LmsDashboardController extends Controller
     public function jadwal()
     {
         $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->with('kelas')->first();
+        $siswa = Siswa::where('user_id', $user->id)->with(['kelas.tahunAjaran', 'kelas.waliKelas'])->first();
 
         if (!$siswa) {
             return redirect()->route('siswa.lms.dashboard');
         }
 
-        $jadwalMingguIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
-            ->with(['mataPelajaran', 'guru'])
-            ->orderByRaw("FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu')")
-            ->orderBy('jam_mulai')
-            ->get()
-            ->groupBy('hari');
+        $kelas = $siswa->kelas;
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
 
-        return view('siswa.lms.jadwal', compact('siswa', 'jadwalMingguIni'));
+        // Get all jadwal for this class
+        $allJadwal = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+            ->with(['mataPelajaran', 'guru'])
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Group jadwal by hari
+        $jadwalByHari = collect();
+        foreach ($hariList as $hari) {
+            $jadwalByHari[$hari] = $allJadwal->where('hari', $hari)->values();
+        }
+
+        // Get unique time slots from jadwal
+        $timeSlots = $allJadwal->map(function ($j) {
+            return [
+                'mulai' => Carbon::parse($j->jam_mulai)->format('H:i'),
+                'selesai' => Carbon::parse($j->jam_selesai)->format('H:i'),
+                'sort' => $j->jam_mulai,
+            ];
+        })->unique(function ($item) {
+            return $item['mulai'] . '-' . $item['selesai'];
+        })->sortBy('sort')->values();
+
+        // Get break times for this jenjang
+        $istirahatList = PengaturanIstirahat::jenjang($kelas->jenjang)
+            ->aktif()
+            ->orderBy('jam_mulai')
+            ->get();
+
+        // Today's schedule
+        $hariIni = Carbon::now()->locale('id')->dayName;
+        $hariIni = ucfirst($hariIni);
+        $jadwalHariIni = $allJadwal->where('hari', $hariIni)->sortBy('jam_mulai')->values();
+
+        // Complete subject list (unique)
+        $mataPelajaranList = $allJadwal->unique('mata_pelajaran_id')
+            ->map(function ($j) {
+                return $j->mataPelajaran;
+            })
+            ->filter()
+            ->sortBy('nama_mapel')
+            ->values();
+
+        return view('siswa.lms.jadwal', compact(
+            'siswa',
+            'kelas',
+            'hariList',
+            'jadwalByHari',
+            'timeSlots',
+            'istirahatList',
+            'hariIni',
+            'jadwalHariIni',
+            'mataPelajaranList'
+        ));
     }
 
     /**

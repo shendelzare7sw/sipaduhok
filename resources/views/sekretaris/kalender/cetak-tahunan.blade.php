@@ -57,6 +57,9 @@
                             <tr>
                                 <td>
                                     <strong>{{ $event->nama_kegiatan }}</strong>
+                                    @if($event->is_hidden_siswa)
+                                        <span class="badge" style="background: #e5e7eb; color: #374151; font-size: 7pt; margin-left: 5px;">Hidden</span>
+                                    @endif
                                     @if($event->keterangan)
                                         <br><small style="color: #6b7280;">{{ Str::limit($event->keterangan, 80) }}</small>
                                     @endif

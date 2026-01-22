@@ -5,22 +5,31 @@
         'guru_pengajar' => 'layouts.lms-guru',
         default => 'layouts.sneat',
     };
+
+    // Determine sidebar partial based on role
+    $sidebarPartial = match ($userRole) {
+        'siswa' => 'siswa.partials.sidebar-lms',
+        'guru_pengajar' => 'guru.partials.sidebar-lms',
+        'admin' => 'admin.partials.sneat-sidebar-menu',
+        'bendahara' => 'bendahara.partials.sneat-sidebar-menu',
+        'wali_kelas' => 'wali-kelas.partials.sneat-sidebar-menu',
+        'ketua_pkbm' => 'ketua.partials.sneat-sidebar-menu',
+        'wakil_kepala_sekolah' => 'waka.partials.sneat-sidebar-menu',
+        'sekretaris' => 'sekretaris.partials.sneat-sidebar-menu',
+        'orang_tua' => 'orang-tua.partials.sneat-sidebar-menu',
+        default => 'partials.sneat-sidebar',
+    };
 @endphp
 
 @extends($layout)
 
 @section('title', 'Notifikasi')
 
-@if($userRole === 'siswa')
 @section('sidebar-menu')
-    @include('siswa.partials.sidebar-lms')
+    @include($sidebarPartial)
 @endsection
-@section('page-title', 'Notifikasi')
-@section('page-subtitle', 'Semua notifikasi untuk Anda')
-@elseif($userRole === 'guru_pengajar')
-@section('sidebar-menu')
-    @include('guru.partials.sidebar-lms')
-@endsection
+
+@if(in_array($userRole, ['siswa', 'guru_pengajar']))
 @section('page-title', 'Notifikasi')
 @section('page-subtitle', 'Semua notifikasi untuk Anda')
 @endif

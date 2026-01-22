@@ -2,7 +2,7 @@
 
 @php
     $title = 'Jadwal Pelajaran';
-    $subtitle = 'Jadwal mingguan kelas ' . ($siswa->kelas->nama_kelas ?? '-');
+    $subtitle = 'Jadwal mingguan kelas ' . ($kelas->nama_kelas ?? '-');
 @endphp
 
 @section('title', $title)
@@ -14,158 +14,410 @@
 @endsection
 
 @section('content')
-<div class="d-flex justify-content-end mb-3">
-    <a href="{{ route('siswa.lms.jadwal.print') }}" target="_blank" class="btn btn-primary btn-sm">
-        <i class="fas fa-print me-1"></i> Cetak Jadwal
-    </a>
-</div>
-
-<style>
-    /* Gunakan warna yang sudah ada di sistem, jangan buat variabel baru yang bentrok */
-    .day-section-card {
-        background: white;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        overflow: hidden;
-        border: none;
-    }
-
-    .day-header-blue {
-        /* Menggunakan warna biru standar dashboard Anda */
-        background: linear-gradient(135deg, #1565c0, #0d47a1);
-        color: white;
-        padding: 16px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .day-header-blue h6 {
-        margin: 0;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-
-    .jadwal-list-container {
-        padding: 20px;
-        background: #fff;
-    }
-
-    .jadwal-row-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        border-left: 4px solid #1565c0;
-        text-decoration: none;
-        color: #333 !important;
-        transition: all 0.2s ease-in-out;
-    }
-
-    .jadwal-row-item:hover {
-        background: #eef2ff;
-        transform: translateX(8px);
-        border-left: 4px solid #0d47a1;
-    }
-
-    .time-box {
-        background: white;
-        color: #1565c0;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-weight: 700;
-        min-width: 100px;
-        text-align: center;
-        border: 1px solid rgba(21, 101, 192, 0.1);
-    }
-
-    .mapel-content {
-        flex: 1;
-    }
-
-    .mapel-title {
-        font-weight: 700;
-        font-size: 1.05rem;
-        display: block;
-        margin-bottom: 2px;
-    }
-
-    .guru-subtitle {
-        color: #6c757d;
-        font-size: 0.85rem;
-    }
-
-    .empty-schedule {
-        text-align: center;
-        padding: 60px;
-        background: white;
-        border-radius: 12px;
-        color: #adb5bd;
-    }
-
-    .info-alert-custom {
-        background: #fff;
-        border: none;
-        border-left: 5px solid #06b6d4;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-</style>
-
-@if($jadwalMingguIni->isEmpty())
-    <div class="empty-schedule shadow-sm">
-        <i class="fas fa-calendar-alt fa-4x mb-3" style="opacity: 0.2;"></i>
-        <h5 class="fw-bold">Belum Ada Jadwal Tersedia</h5>
-        <p>Silakan hubungi admin atau wali kelas Anda.</p>
+    {{-- Print Button --}}
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ route('siswa.lms.jadwal.print') }}" target="_blank" class="btn btn-primary btn-sm">
+            <i class="fas fa-print me-1"></i> Cetak Jadwal
+        </a>
     </div>
-@else
-    @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as $hari)
-        @if($jadwalMingguIni->has($hari))
-        <div class="day-section-card shadow-sm">
-            <div class="day-header-blue">
-                <h6><i class="fas fa-calendar-day me-2"></i>{{ $hari }}</h6>
-                <span class="badge bg-light text-primary rounded-pill">
-                    {{ $jadwalMingguIni[$hari]->count() }} Mata Pelajaran
-                </span>
-            </div>
 
-            <div class="jadwal-list-container">
-                @foreach($jadwalMingguIni[$hari] as $jadwal)
-                <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="jadwal-row-item">
-                    <div class="time-box">
-                        <i class="far fa-clock me-1"></i>
-                        {{ date('H:i', strtotime($jadwal->jam_mulai)) }}
-                    </div>
-                    <div class="mapel-content">
-                        <span class="mapel-title text-primary">{{ $jadwal->mataPelajaran->nama_mapel }}</span>
-                        <span class="guru-subtitle">
-                            <i class="fas fa-chalkboard-teacher me-1"></i> {{ $jadwal->guru->nama_lengkap ?? 'Guru Pengajar' }}
-                        </span>
-                    </div>
-                    <div class="ms-auto text-primary">
-                        <i class="fas fa-chevron-right"></i>
-                    </div>
-                </a>
-                @endforeach
+    <style>
+        /* Weekly Schedule Table */
+        .schedule-table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 24px;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 800px;
+        }
+
+        .schedule-table th {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #0d47a1;
+        }
+
+        .schedule-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            vertical-align: middle;
+            min-width: 100px;
+        }
+
+        .schedule-table .time-cell {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .schedule-table .subject-cell {
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .schedule-table .subject-cell:hover {
+            background: #dbeafe;
+        }
+
+        .schedule-table .break-row td {
+            background: #fef9c3 !important;
+            color: #854d0e;
+            font-weight: 600;
+        }
+
+        .schedule-table .break-row td.break-label {
+            font-style: italic;
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            color: white;
+            padding: 14px 18px;
+            font-weight: 700;
+            font-size: 15px;
+            border-bottom: none;
+        }
+
+        .section-body {
+            padding: 16px;
+        }
+
+        /* Today Schedule Links */
+        .today-link {
+            display: block;
+            padding: 10px 14px;
+            color: #1565c0;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .today-link:hover {
+            background: #dbeafe;
+            color: #0d47a1;
+            transform: translateX(4px);
+        }
+
+        .today-link i {
+            margin-left: 8px;
+            font-size: 11px;
+        }
+
+        /* Subject Grid */
+        .subject-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .subject-item {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #f1f5f9;
+            color: #1565c0;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .subject-item:hover {
+            background: #dbeafe;
+            color: #0d47a1;
+        }
+
+        /* Search Input */
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 10px 14px 10px 36px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input-wrapper input:focus {
+            border-color: #1565c0;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* Class Info Header */
+        .class-info-header {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .class-info-header h5 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .class-info-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .class-info-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+
+    {{-- Class Info Header --}}
+    <div class="class-info-header">
+        <h5><i class="fas fa-calendar-alt me-2"></i>Jadwal Pelajaran {{ $kelas->nama_kelas }}</h5>
+        <div class="class-info-meta">
+            <span><i class="fas fa-graduation-cap"></i> {{ strtoupper($kelas->jenjang) }}</span>
+            <span><i class="fas fa-calendar"></i> {{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
+            <span><i class="fas fa-user-tie"></i> Wali: {{ $kelas->waliKelas->nama_lengkap ?? '-' }}</span>
+        </div>
+    </div>
+
+    {{-- Section 1: Weekly Schedule Table --}}
+    <div class="card mb-4">
+        <div class="card-body p-0">
+            <div class="schedule-table-wrapper">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Jam</th>
+                            @foreach($hariList as $hari)
+                                <th>{{ $hari }}</th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            // Merge time slots with break times for complete timeline
+                            $allSlots = collect();
+                            
+                            // Add regular time slots
+                            foreach ($timeSlots as $slot) {
+                                $allSlots->push([
+                                    'mulai' => $slot['mulai'],
+                                    'selesai' => $slot['selesai'],
+                                    'sort' => $slot['sort'],
+                                ]);
+                            }
+                            
+                            // Add break times as time slots (avoid duplicates)
+                            foreach ($istirahatList as $ist) {
+                                $mulai = \Carbon\Carbon::parse($ist->jam_mulai)->format('H:i');
+                                $selesai = \Carbon\Carbon::parse($ist->jam_selesai)->format('H:i');
+                                
+                                $exists = $allSlots->first(function($s) use ($mulai, $selesai) {
+                                    return $s['mulai'] === $mulai && $s['selesai'] === $selesai;
+                                });
+                                
+                                if (!$exists) {
+                                    $allSlots->push([
+                                        'mulai' => $mulai,
+                                        'selesai' => $selesai,
+                                        'sort' => $ist->jam_mulai,
+                                    ]);
+                                }
+                            }
+                            
+                            // Sort by time
+                            $allSlots = $allSlots->sortBy('sort')->values();
+                        @endphp
+                        
+                        @forelse($allSlots as $slot)
+                            <tr>
+                                <td class="time-cell">{{ $slot['mulai'] }} - {{ $slot['selesai'] }}</td>
+                                @foreach($hariList as $hari)
+                                    @php
+                                        // Check if there's a break for this specific day and time
+                                        $istirahat = $istirahatList->first(function($ist) use ($hari, $slot) {
+                                            $istMulai = \Carbon\Carbon::parse($ist->jam_mulai)->format('H:i');
+                                            $hariAktif = $ist->hari_aktif ?? [];
+                                            return $istMulai === $slot['mulai'] && in_array($hari, $hariAktif);
+                                        });
+                                        
+                                        // Check if there's a regular jadwal for this day and time
+                                        $jadwal = $jadwalByHari[$hari]->first(function ($j) use ($slot) {
+                                            return \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') === $slot['mulai'];
+                                        });
+                                    @endphp
+                                    
+                                    @if($istirahat)
+                                        <td class="subject-cell" style="background: #fef9c3; color: #854d0e; font-weight: 600; font-style: italic;">
+                                            <i class="fas fa-coffee me-1"></i> {{ $istirahat->nama_istirahat ?? 'Istirahat' }}
+                                        </td>
+                                    @elseif($jadwal)
+                                        <td class="subject-cell">
+                                            <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}"
+                                                class="text-decoration-none text-dark">
+                                                <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
+                                            </a>
+                                        </td>
+                                    @else
+                                        <td class="subject-cell">
+                                            <span class="text-muted">-</span>
+                                        </td>
+                                    @endif
+                                @endforeach
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ count($hariList) + 1 }}" class="empty-state">
+                                    Belum ada jadwal pelajaran
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
-        @endif
-    @endforeach
-@endif
-
-<div class="alert info-alert-custom p-4 mt-2">
-    <div class="d-flex align-items-center mb-2">
-        <i class="fas fa-info-circle text-info me-2"></i>
-        <h6 class="fw-bold mb-0">Informasi Penting</h6>
     </div>
-    <ul class="mb-0 small text-muted">
-        <li>Klik pada nama mata pelajaran untuk melihat materi dan mengumpulkan tugas.</li>
-        <li>Jadwal ini merupakan jadwal rutin mingguan Anda.</li>
-    </ul>
-</div>
+
+    {{-- Section 2 & 3: Today's Schedule + Subject List --}}
+    <div class="row">
+        {{-- Today's Schedule --}}
+        <div class="col-md-4 mb-4">
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="fas fa-sun me-2"></i>Hari ini ({{ $hariIni }})
+                </div>
+                <div class="section-body">
+                    @forelse($jadwalHariIni as $jadwal)
+                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="today-link">
+                            {{ $jadwal->mataPelajaran->nama_mapel }}
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    @empty
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times fa-2x mb-2 d-block"></i>
+                            Tidak ada jadwal hari ini
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Subject List with Search --}}
+        <div class="col-md-8 mb-4">
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="fas fa-book me-2"></i>Mata Pelajaran Lengkap
+                </div>
+                <div class="section-body">
+                    {{-- Search Input --}}
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchMapel" placeholder="Cari mata pelajaran...">
+                    </div>
+
+                    {{-- Subject Grid --}}
+                    <div class="subject-grid" id="subjectGrid">
+                        @forelse($mataPelajaranList as $mapel)
+                            <a href="{{ route('siswa.lms.mapel.show', $mapel->id) }}" class="subject-item"
+                                data-name="{{ strtolower($mapel->nama_mapel) }}">
+                                {{ $mapel->nama_mapel }}
+                                <i class="fas fa-chevron-right ms-1" style="font-size: 10px;"></i>
+                            </a>
+                        @empty
+                            <div class="empty-state w-100">
+                                Belum ada mata pelajaran
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Info Alert --}}
+    <div class="alert bg-white border-0 border-start border-5 border-info shadow-sm p-4">
+        <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-info-circle text-info me-2"></i>
+            <h6 class="fw-bold mb-0">Informasi Penting</h6>
+        </div>
+        <ul class="mb-0 small text-muted">
+            <li>Klik pada nama mata pelajaran untuk melihat materi dan mengumpulkan tugas.</li>
+            <li>Jadwal ini merupakan jadwal rutin mingguan Anda.</li>
+        </ul>
+    </div>
 
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchMapel');
+            const subjectItems = document.querySelectorAll('.subject-item');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const query = this.value.toLowerCase().trim();
+
+                    subjectItems.forEach(function (item) {
+                        const name = item.getAttribute('data-name');
+                        if (name.includes(query)) {
+                            item.style.display = 'inline-block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+@endpush

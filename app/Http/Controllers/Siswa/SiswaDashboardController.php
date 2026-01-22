@@ -92,6 +92,7 @@ class SiswaDashboardController extends Controller
         // Kalender Akademik Bulan Ini
         $kalenderBulanIni = KalenderAkademik::aktif()
             ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id)
+            ->where('is_hidden_siswa', false)
             ->whereMonth('tanggal_mulai', now()->month)
             ->whereYear('tanggal_mulai', now()->year)
             ->orderBy('tanggal_mulai', 'asc')
@@ -135,30 +136,231 @@ class SiswaDashboardController extends Controller
     /**
      * Lihat Kalender Akademik Setahun
      */
-    public function kalenderTahunan()
+    public function kalenderTahunan(Request $request)
     {
+        \Carbon\Carbon::setLocale('id');
         $user = Auth::user();
-        $siswa = Siswa::where('user_id', $user->id)->with('kelas')->first();
+        $siswa = Siswa::where('user_id', $user->id)->with('kelas.tahunAjaran')->first();
 
         if (!$siswa || !$siswa->kelas) {
             return redirect()->route('siswa.lms.dashboard')
                 ->with('error', 'Data kelas tidak ditemukan');
         }
 
+        $tahunAjaran = $siswa->kelas->tahunAjaran;
         $tahunAjaranId = $siswa->kelas->tahun_ajaran_id;
 
-        // Ambil semua kegiatan dalam tahun ajaran ini
-        $kalenderTahunan = KalenderAkademik::aktif()
-            ->where('tahun_ajaran_id', $tahunAjaranId)
-            ->orderBy('tanggal_mulai', 'asc')
-            ->get()
-            ->groupBy(function ($item) {
-                return Carbon::parse($item->tanggal_mulai)->format('Y-m');
-            });
+        // View Mode: 'bulan' (default), 'minggu', 'tahun'
+        $viewMode = $request->get('mode', 'bulan');
 
-        return view('siswa.lms.kalender', compact('siswa', 'kalenderTahunan'));
+        // Parameter Tanggal/Bulan/Tahun
+        $month = $request->get('month', now()->month);
+        $year = $request->get('year', now()->year);
+
+        // Base Date untuk navigasi Mingguan (jika mode minggu)
+        $dateParam = $request->get('date');
+        $baseDate = $dateParam ? Carbon::parse($dateParam) : Carbon::createFromDate($year, $month, 1);
+
+        // Jika mode minggu, override month/year dari baseDate agar konsisten
+        if ($viewMode === 'minggu') {
+            $month = $baseDate->month;
+            $year = $baseDate->year;
+        }
+
+        // Query Utama
+        $queryEvents = KalenderAkademik::aktif()
+            ->where('tahun_ajaran_id', $tahunAjaranId)
+            ->where('is_hidden_siswa', false);
+
+        // --- DATA LOGIC: TAHUNAN ---
+        $eventsTahun = collect([]);
+        if ($viewMode === 'tahun') {
+            $startOfYear = Carbon::createFromDate($year, 1, 1)->startOfYear();
+            $endOfYear = Carbon::createFromDate($year, 12, 31)->endOfYear();
+
+            $eventsTahun = (clone $queryEvents)->where(function ($q) use ($startOfYear, $endOfYear) {
+                $q->whereBetween('tanggal_mulai', [$startOfYear, $endOfYear])
+                    ->orWhereBetween('tanggal_selesai', [$startOfYear, $endOfYear])
+                    ->orWhere(function ($sq) use ($startOfYear, $endOfYear) {
+                        $sq->where('tanggal_mulai', '<=', $startOfYear)
+                            ->where('tanggal_selesai', '>=', $endOfYear);
+                    });
+            })->orderBy('tanggal_mulai')->get();
+        }
+
+        // --- DATA LOGIC: MINGGUAN ---
+        $eventsMinggu = collect([]);
+        $startOfWeek = $baseDate->copy()->startOfWeek();
+        $endOfWeek = $baseDate->copy()->endOfWeek();
+
+        if ($viewMode === 'minggu') {
+            $eventsMinggu = (clone $queryEvents)->where(function ($q) use ($startOfWeek, $endOfWeek) {
+                // Event mulai di minggu ini OR Event selesai di minggu ini OR Event melibas minggu ini
+                $q->whereBetween('tanggal_mulai', [$startOfWeek, $endOfWeek])
+                    ->orWhereBetween('tanggal_selesai', [$startOfWeek, $endOfWeek])
+                    ->orWhere(function ($sq) use ($startOfWeek, $endOfWeek) {
+                        $sq->where('tanggal_mulai', '<=', $startOfWeek)
+                            ->where('tanggal_selesai', '>=', $endOfWeek);
+                    });
+            })->orderBy('tanggal_mulai')->get();
+
+            // Generate header days for the week grid (Min, Sen, ... Sab)
+            $weekDays = [];
+            $tmpDate = $startOfWeek->copy();
+            while ($tmpDate->lte($endOfWeek)) {
+                $weekDays[] = $tmpDate->copy();
+                $tmpDate->addDay();
+            }
+        } else {
+            // Default empty if not in week mode to avoid undefined variable
+            $weekDays = [];
+        }
+
+        // --- DATA LOGIC: BULANAN (Default & Sidebar) ---
+        // Kita tetap butuh $events bulanan untuk Sidebar/Keterangan walaupun mode 'minggu'/'tahun'
+        $startOfMonth = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endOfMonth = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+
+        $events = (clone $queryEvents)->where(function ($q) use ($startOfMonth, $endOfMonth) {
+            $q->whereBetween('tanggal_mulai', [$startOfMonth, $endOfMonth])
+                ->orWhereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
+                ->orWhere(function ($q2) use ($startOfMonth, $endOfMonth) {
+                    $q2->where('tanggal_mulai', '<=', $startOfMonth)
+                        ->where('tanggal_selesai', '>=', $endOfMonth);
+                });
+        })
+            ->orderBy('tanggal_mulai')
+            ->get();
+
+        // --- GRID CALENDAR GENERATION (Hanya jika mode bulan) ---
+        $calendarDays = [];
+        // Kita generate structure kalender jika mode 'bulan' atau default
+        if ($viewMode === 'bulan') {
+            $firstDayOfWeek = $startOfMonth->dayOfWeek; // 0 (Minggu) - 6 (Sabtu)
+
+            // Add empty cells for days before the 1st
+            for ($i = 0; $i < $firstDayOfWeek; $i++) {
+                $prevDate = $startOfMonth->copy()->subDays($firstDayOfWeek - $i);
+                $calendarDays[] = [
+                    'day' => $prevDate->day,
+                    'fullDate' => $prevDate->format('Y-m-d'),
+                    'isOtherMonth' => true,
+                    'isToday' => false,
+                    'events' => collect([]),
+                ];
+            }
+
+            // Add days of the month
+            for ($day = 1; $day <= $endOfMonth->day; $day++) {
+                $currentDate = Carbon::createFromDate($year, $month, $day);
+
+                // Filter events for this day
+                $dayEvents = $events->filter(function ($event) use ($currentDate) {
+                    $start = Carbon::parse($event->tanggal_mulai)->startOfDay();
+                    $end = $event->tanggal_selesai
+                        ? Carbon::parse($event->tanggal_selesai)->endOfDay()
+                        : $start->copy()->endOfDay();
+                    return $currentDate->between($start, $end);
+                });
+
+                $calendarDays[] = [
+                    'day' => $day,
+                    'fullDate' => $currentDate->format('Y-m-d'),
+                    'isOtherMonth' => false,
+                    'isToday' => $currentDate->isToday(),
+                    'events' => $dayEvents,
+                ];
+            }
+
+            // Fill remaining cells to complete the last week
+            $remaining = 7 - (count($calendarDays) % 7);
+            if ($remaining < 7) {
+                for ($i = 1; $i <= $remaining; $i++) {
+                    $nextDate = $endOfMonth->copy()->addDays($i);
+                    $calendarDays[] = [
+                        'day' => $nextDate->day,
+                        'fullDate' => $nextDate->format('Y-m-d'),
+                        'isOtherMonth' => true,
+                        'isToday' => false,
+                        'events' => collect([]),
+                    ];
+                }
+            }
+        }
+
+        // --- NAVIGATION HELPERS ---
+        // Navigation for Month Mode
+        $prevMonth = [
+            'month' => $startOfMonth->copy()->subMonth()->month,
+            'year' => $startOfMonth->copy()->subMonth()->year,
+        ];
+        $nextMonth = [
+            'month' => $startOfMonth->copy()->addMonth()->month,
+            'year' => $startOfMonth->copy()->addMonth()->year,
+        ];
+
+        // Navigation for Week Mode
+        $prevWeekDate = $startOfWeek->copy()->subWeek()->format('Y-m-d');
+        $nextWeekDate = $startOfWeek->copy()->addWeek()->format('Y-m-d');
+
+        // Navigation for Year Mode
+        $prevYear = $year - 1;
+        $nextYear = $year + 1;
+
+        if ($request->ajax()) {
+            // Return only the calendar-section and legend for AJAX requests
+            // User JavaScript will replace these parts in the DOM
+            return response()->json([
+                'html' => view('siswa.lms.kalender.index', compact(
+                    'siswa',
+                    'tahunAjaran',
+                    'year',
+                    'month',
+                    'calendarDays',
+                    'prevMonth',
+                    'nextMonth',
+                    'events',
+                    'viewMode',
+                    'eventsMinggu',
+                    'eventsTahun',
+                    'startOfWeek',
+                    'endOfWeek',
+                    'prevWeekDate',
+                    'nextWeekDate',
+                    'prevYear',
+                    'nextYear',
+                    'baseDate',
+                    'weekDays'
+                ))->render()
+            ]);
+        }
+
+        return view('siswa.lms.kalender.index', compact(
+            'siswa',
+            'tahunAjaran',
+            'year',
+            'month',
+            'calendarDays',
+            'prevMonth',
+            'nextMonth',
+            'events',
+            'viewMode',
+            'eventsMinggu',
+            'eventsTahun',
+            'startOfWeek',
+            'endOfWeek',
+            'prevWeekDate',
+            'nextWeekDate',
+            'prevYear',
+            'nextYear',
+            'baseDate',
+            'weekDays'
+        ));
     }
 
+    /**
+     * Lihat Detail Hari Tertentu di Kalender
+     */
     /**
      * Lihat Detail Hari Tertentu di Kalender
      */
@@ -171,32 +373,47 @@ class SiswaDashboardController extends Controller
             return redirect()->route('siswa.lms.dashboard');
         }
 
+        // Parse tanggal to Carbon
+        $date = Carbon::parse($tanggal);
+
         // Kegiatan di tanggal tersebut
-        $kegiatan = KalenderAkademik::aktif()
+        $events = KalenderAkademik::aktif()
             ->where('tahun_ajaran_id', $siswa->kelas->tahun_ajaran_id)
-            ->whereDate('tanggal_mulai', '<=', $tanggal)
-            ->where(function ($q) use ($tanggal) {
-                $q->whereDate('tanggal_selesai', '>=', $tanggal)
+            ->where('is_hidden_siswa', false)
+            ->whereDate('tanggal_mulai', '<=', $date)
+            ->where(function ($q) use ($date) {
+                $q->whereDate('tanggal_selesai', '>=', $date)
                     ->orWhereNull('tanggal_selesai');
             })
             ->get();
 
         // Jadwal Pelajaran di hari tersebut
-        $hariIndo = Carbon::parse($tanggal)->locale('id')->dayName;
+        $hariIndo = $date->locale('id')->dayName;
         $hariIndo = ucfirst($hariIndo);
 
-        $jadwalHariIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $jadwalPelajaran = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
             ->where('hari', $hariIndo)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
             ->get();
 
-        return view('siswa.lms.kalender-detail', compact(
+        // Navigation dates
+        $prevDate = $date->copy()->subDay();
+        $nextDate = $date->copy()->addDay();
+
+        // Check if weekday (Senin-Jumat)
+        $isWeekday = $date->isWeekday();
+
+        return view('siswa.lms.kalender.detail', compact(
             'siswa',
-            'tanggal',
-            'kegiatan',
-            'jadwalHariIni'
-        ));
+            'tanggal', // Keep string or overwrite with object? View expects object.
+            'events',
+            'jadwalPelajaran',
+            'prevDate',
+            'nextDate',
+            'isWeekday'
+        ))
+            ->with('tanggal', $date); // Overwrite with Carbon object
     }
 
     /**

@@ -15,58 +15,58 @@
         <div class="welcome-content">
             <div class="welcome-text">
                 <h4 class="welcome-title">Halo, {{ $siswa->nama_lengkap }}! 👋</h4>
-                <p class="welcome-subtitle">Selamat belajar! Jangan lupa cek jadwal dan tugas hari ini.</p>
+                <p class="welcome-subtitle">Siap untuk belajar hari ini? Cek jadwal dan tugas terbarumu.</p>
             </div>
             <div class="welcome-actions">
-                <a href="{{ route('siswa.sia.dashboard') }}" class="btn btn-light">
+                <a href="{{ route('siswa.sia.dashboard') }}" class="btn btn-glass">
                     <i class="fas fa-external-link-alt me-2"></i>Akses SIA
                 </a>
             </div>
         </div>
-        <div class="welcome-illustration">
-            <i class="fas fa-graduation-cap"></i>
+        <div class="welcome-decoration">
+            <i class="fas fa-shapes"></i>
         </div>
     </div>
 
     {{-- STATISTIK SINGKAT --}}
     <div class="stats-grid">
-        <div class="stat-card" style="border-left: 4px solid var(--primary);">
-            <div class="stat-icon" style="background: rgba(22, 95, 172, 0.1); color: var(--primary);">
+        <div class="stat-card">
+            <div class="stat-icon-bg primary">
                 <i class="fas fa-user-check"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">Kehadiran</div>
-                <div class="stat-value" style="color: var(--primary);">{{ $persenKehadiran }}%</div>
+                <p class="stat-label">Kehadiran</p>
+                <h3 class="stat-value text-primary">{{ $persenKehadiran }}%</h3>
             </div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #f59e0b;">
-            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+        <div class="stat-card">
+            <div class="stat-icon-bg warning">
                 <i class="fas fa-clipboard-list"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">Tugas Pending</div>
-                <div class="stat-value" style="color: #ea580c;">{{ $tugasPending }}</div>
+                <p class="stat-label">Tugas Pending</p>
+                <h3 class="stat-value text-warning">{{ $tugasPending }}</h3>
             </div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #06b6d4;">
-            <div class="stat-icon" style="background: rgba(6, 182, 212, 0.1); color: #06b6d4;">
+        <div class="stat-card">
+            <div class="stat-icon-bg info">
                 <i class="fas fa-calendar-day"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">Agenda Bulan Ini</div>
-                <div class="stat-value" style="color: #0891b2;">{{ $agendaBulanIni }}</div>
+                <p class="stat-label">Agenda Bulan Ini</p>
+                <h3 class="stat-value text-info">{{ $agendaBulanIni }}</h3>
             </div>
         </div>
 
-        <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
-            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+        <div class="stat-card">
+            <div class="stat-icon-bg purple">
                 <i class="fas fa-file-alt"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">Ujian Mendatang</div>
-                <div class="stat-value" style="color: #7c3aed;">{{ $ujianMendatang->count() }}</div>
+                <p class="stat-label">Ujian Mendatang</p>
+                <h3 class="stat-value text-purple">{{ $ujianMendatang->count() }}</h3>
             </div>
         </div>
     </div>
@@ -76,100 +76,108 @@
         {{-- LEFT COLUMN --}}
         <div class="dashboard-main">
             {{-- Jadwal Hari Ini --}}
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-clock me-2 text-primary"></i>Jadwal Hari Ini
-                        <span class="badge bg-primary ms-2">{{ now()->locale('id')->dayName }}</span>
-                    </h6>
-                    <a href="{{ route('siswa.lms.jadwal') }}" class="btn btn-sm btn-outline-primary">
-                        Lihat Semua
-                    </a>
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-clock text-primary me-2"></i>Jadwal Hari Ini
+                        <span class="badge badge-date ms-2">{{ now()->locale('id')->dayName }}</span>
+                    </div>
+                    <a href="{{ route('siswa.lms.jadwal') }}" class="btn-link-custom">Lihat Semua</a>
                 </div>
-                <div class="schedule-list">
+                
+                <div class="timeline-container">
                     @forelse($jadwalHariIni as $jadwal)
-                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="schedule-item">
-                            <div class="schedule-time">
-                                {{ date('H:i', strtotime($jadwal->jam_mulai)) }}
+                        <div class="timeline-item">
+                            <div class="timeline-time">
+                                <span class="time-start">{{ date('H:i', strtotime($jadwal->jam_mulai)) }}</span>
+                                <span class="time-end">{{ date('H:i', strtotime($jadwal->jam_selesai)) }}</span>
                             </div>
-                            <div class="schedule-content">
-                                <div class="schedule-title">{{ $jadwal->mataPelajaran->nama_mapel ?? 'N/A' }}</div>
-                                <div class="schedule-teacher">
-                                    <i class="fas fa-user-tie me-1"></i>{{ $jadwal->guru->nama_lengkap ?? 'N/A' }}
-                                </div>
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="timeline-card">
+                                    <div class="timeline-info">
+                                        <h5 class="timeline-subject">{{ $jadwal->mataPelajaran->nama_mapel ?? 'N/A' }}</h5>
+                                        <p class="timeline-teacher">
+                                            <i class="fas fa-chalkboard-teacher me-1"></i>{{ $jadwal->guru->nama_lengkap ?? 'N/A' }}
+                                        </p>
+                                    </div>
+                                    <div class="timeline-action">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </div>
+                                </a>
                             </div>
-                            <div class="schedule-action">
-                                <i class="fas fa-chevron-right"></i>
-                            </div>
-                        </a>
+                        </div>
                     @empty
                         <div class="empty-state">
-                            <i class="fas fa-calendar-times"></i>
-                            <p>Tidak ada jadwal hari ini</p>
+                            <i class="fas fa-mug-hot"></i>
+                            <p>Tidak ada jadwal pelajaran hari ini. Selamat beristirahat!</p>
                         </div>
                     @endforelse
                 </div>
             </div>
 
             {{-- Tugas Deadline Terdekat --}}
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-tasks me-2 text-warning"></i>Tugas Deadline Terdekat
-                    </h6>
-                    <a href="{{ route('siswa.lms.tugas.index') }}" class="btn btn-sm btn-outline-warning">
-                        Lihat Semua
-                    </a>
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-tasks text-warning me-2"></i>Tugas Deadline Terdekat
+                    </div>
+                    <a href="{{ route('siswa.lms.tugas.index') }}" class="btn-link-custom">Lihat Semua</a>
                 </div>
-                <div class="task-list">
+
+                <div class="task-grid">
                     @forelse($tugasDeadline as $tugas)
-                        <div class="task-item">
-                            <div class="task-icon {{ $tugas->jenis_tugas === 'latihan' ? 'bg-info' : 'bg-warning' }}">
-                                <i class="fas {{ $tugas->jenis_tugas === 'latihan' ? 'fa-dumbbell' : 'fa-edit' }}"></i>
+                        <div class="task-card-modern">
+                            <div class="task-priority {{ $tugas->tanggal_deadline->diffInDays(now()) <= 1 ? 'urgent' : 'normal' }}">
                             </div>
-                            <div class="task-content">
-                                <div class="task-title">{{ $tugas->judul_tugas }}</div>
-                                <div class="task-meta">
-                                    <span class="badge bg-light text-dark">{{ $tugas->mataPelajaran->nama_mapel ?? '-' }}</span>
-                                    <span
-                                        class="task-deadline {{ $tugas->tanggal_deadline->diffInDays(now()) <= 1 ? 'text-danger' : 'text-muted' }}">
-                                        <i class="fas fa-clock me-1"></i>{{ $tugas->tanggal_deadline->diffForHumans() }}
+                            <div class="task-details">
+                                <div class="task-badge {{ $tugas->jenis_tugas === 'latihan' ? 'badge-blue' : 'badge-orange' }}">
+                                    {{ ucfirst($tugas->jenis_tugas) }}
+                                </div>
+                                <h5 class="task-name">{{ $tugas->judul_tugas }}</h5>
+                                <p class="task-subject">{{ $tugas->mataPelajaran->nama_mapel ?? '-' }}</p>
+                                <div class="task-footer">
+                                    <span class="task-due">
+                                        <i class="far fa-clock me-1"></i> {{ $tugas->tanggal_deadline->diffForHumans() }}
                                     </span>
+                                    <a href="{{ route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]) }}" class="btn-task-action">
+                                        Kerjakan
+                                    </a>
                                 </div>
                             </div>
-                            <a href="{{ route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]) }}"
-                                class="btn btn-sm btn-primary">
-                                Kerjakan
-                            </a>
                         </div>
                     @empty
-                        <div class="empty-state small-empty">
+                        <div class="empty-state">
                             <i class="fas fa-check-circle text-success"></i>
-                            <p>Tidak ada tugas yang mendesak</p>
+                            <p>Semua tugas aman! Tidak ada deadline mendesak.</p>
                         </div>
                     @endforelse
                 </div>
             </div>
 
             {{-- Mata Pelajaran --}}
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-book me-2 text-primary"></i>Mata Pelajaran
-                    </h6>
+            <div class="section-container">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-book text-primary me-2"></i>Mata Pelajaran
+                    </div>
                 </div>
-                <div class="mapel-grid">
+                <div class="courses-grid">
                     @forelse($mataPelajaranList as $jadwal)
-                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="mapel-card">
-                            <div class="mapel-icon">
-                                <i class="fas fa-book-open"></i>
+                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="course-card">
+                            <div class="course-icon">
+                                <span class="course-initial">
+                                    {{ substr($jadwal->mataPelajaran->nama_mapel ?? '?', 0, 1) }}
+                                </span>
                             </div>
-                            <div class="mapel-name">{{ $jadwal->mataPelajaran->nama_mapel ?? 'N/A' }}</div>
-                            <div class="mapel-teacher">{{ Str::limit($jadwal->guru->nama_lengkap ?? 'N/A', 20) }}</div>
+                            <div class="course-info">
+                                <h6 class="course-name">{{ $jadwal->mataPelajaran->nama_mapel ?? 'N/A' }}</h6>
+                                <p class="course-teacher">{{ Str::limit($jadwal->guru->nama_lengkap ?? 'N/A', 20) }}</p>
+                            </div>
                         </a>
                     @empty
-                        <div class="empty-state full-width">
-                            <p class="text-muted small">Belum ada mata pelajaran</p>
+                        <div class="empty-state w-100">
+                            <p>Belum ada mata pelajaran.</p>
                         </div>
                     @endforelse
                 </div>
@@ -179,124 +187,87 @@
         {{-- RIGHT SIDEBAR --}}
         <div class="dashboard-sidebar">
             {{-- Pengumuman --}}
-            <div class="card-custom announcement-card">
-                <div class="announcement-header">
-                    <i class="fas fa-bullhorn me-2"></i>Pengumuman
+            <div class="sidebar-widget widget-announcement">
+                <div class="widget-header">
+                    <i class="fas fa-bullhorn"></i> Pengumuman
                 </div>
-                @if($pengumuman)
-                    <div class="announcement-body">
-                        <span
-                            class="badge bg-warning text-dark mb-2">{{ strtoupper($pengumuman->prioritas ?? 'Normal') }}</span>
-                        <h6 class="announcement-title">{{ $pengumuman->judul }}</h6>
-                        <p class="announcement-text">{{ Str::limit($pengumuman->isi_pengumuman, 100) }}</p>
-                        @if($pengumuman->file_lampiran)
-                            <a href="{{ asset('storage/' . $pengumuman->file_lampiran) }}" target="_blank"
-                                class="btn btn-sm btn-light w-100 mb-2">
-                                <i class="fas fa-file-pdf me-1"></i>Lihat Lampiran
-                            </a>
-                        @endif
-                        <a href="{{ route('siswa.lms.kalender') }}" class="btn btn-light w-100">
-                            <i class="fas fa-calendar-alt me-1"></i>Lihat Kalender
-                        </a>
-                    </div>
-                @else
-                    <div class="announcement-body empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>Tidak ada pengumuman</p>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Notifikasi Hari Ini --}}
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-bell me-2 text-danger"></i>Notifikasi
-                    </h6>
-                    <a href="{{ route('notifications.index') }}" class="text-primary small">Semua</a>
-                </div>
-                <div class="notification-list">
-                    @forelse($notifikasiHariIni as $notif)
-                        <a href="{{ $notif->link ?? '#' }}" class="notification-item {{ $notif->read_at ? '' : 'unread' }}">
-                            <div class="notification-icon bg-{{ $notif->color ?? 'secondary' }}">
-                                <i class="{{ $notif->icon ?? 'fas fa-bell' }}"></i>
+                <div class="widget-body p-0">
+                    @forelse($pengumumanList as $ann)
+                        <div class="announcement-item p-3 border-bottom border-white-10">
+                            @if($ann->prioritas == 'tinggi')
+                                <span class="badge bg-danger mb-2">PENTING</span>
+                            @endif
+                            <h5 class="ann-title mb-2 text-white" style="font-size: 0.95rem;">{{ $ann->judul }}</h5>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="text-white-50 small" style="font-size: 0.75rem;">
+                                    {{ \Carbon\Carbon::parse($ann->tanggal_pengumuman)->diffForHumans() }}
+                                </span>
+                                <a href="{{ route('siswa.lms.pengumuman.show', $ann->id) }}" class="btn btn-sm btn-light py-1 px-3" style="font-size: 0.75rem;">
+                                    Lihat
+                                </a>
                             </div>
-                            <div class="notification-content">
-                                <div class="notification-title">{{ $notif->judul }}</div>
-                                <div class="notification-time">{{ $notif->created_at->diffForHumans() }}</div>
-                            </div>
-                        </a>
+                        </div>
                     @empty
-                        <div class="empty-state small-empty">
-                            <i class="fas fa-bell-slash text-muted"></i>
-                            <p>Tidak ada notifikasi hari ini</p>
+                        <div class="empty-mini p-4 text-white-50">
+                            <i class="fas fa-inbox mb-2"></i>
+                            <p>Tidak ada pengumuman baru</p>
                         </div>
                     @endforelse
                 </div>
             </div>
 
             {{-- Kegiatan Minggu Ini --}}
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-calendar-week me-2 text-info"></i>Minggu Ini
-                    </h6>
-                    <a href="{{ route('siswa.lms.kalender') }}" class="text-primary small">Kalender</a>
+            <div class="sidebar-widget">
+                <div class="widget-header-simple">
+                    <h6><i class="fas fa-calendar-week me-2 text-info"></i>Minggu Ini</h6>
+                    <a href="{{ route('siswa.lms.kalender') }}" class="small-link">Kalender</a>
                 </div>
-                <div class="event-list">
+                <div class="events-list">
                     @forelse($kalenderMingguIni as $event)
-                        <div class="event-item">
-                            <div class="event-date">
-                                <div class="event-day">{{ \Carbon\Carbon::parse($event->tanggal_mulai)->format('d') }}</div>
-                                <div class="event-month">{{ \Carbon\Carbon::parse($event->tanggal_mulai)->format('M') }}</div>
+                        <div class="event-row">
+                            <div class="event-date-box">
+                                <span class="event-d">{{ \Carbon\Carbon::parse($event->tanggal_mulai)->format('d') }}</span>
+                                <span class="event-m">{{ \Carbon\Carbon::parse($event->tanggal_mulai)->format('M') }}</span>
                             </div>
-                            <div class="event-content">
-                                <div class="event-title">{{ $event->nama_kegiatan }}</div>
-                                <div class="event-type">
-                                    <span class="badge bg-{{ $event->jenis_kegiatan === 'libur' ? 'danger' : 'info' }}">
-                                        {{ ucfirst($event->jenis_kegiatan) }}
-                                    </span>
-                                </div>
+                            <div class="event-info">
+                                <h6 class="event-name">{{ $event->nama_kegiatan }}</h6>
+                                <span class="event-tag {{ $event->jenis_kegiatan === 'libur' ? 'tag-red' : 'tag-blue' }}">
+                                    {{ ucfirst($event->jenis_kegiatan) }}
+                                </span>
                             </div>
                         </div>
                     @empty
-                        <div class="empty-state small-empty">
-                            <i class="fas fa-calendar-check text-muted"></i>
-                            <p>Tidak ada kegiatan minggu ini</p>
+                        <div class="empty-mini">
+                            <p>Tidak ada agenda minggu ini</p>
                         </div>
                     @endforelse
                 </div>
             </div>
 
-            {{-- Daftar Guru --}}
-            <div class="card-custom">
-                <div class="card-header-custom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">
-                        <i class="fas fa-chalkboard-teacher me-2 text-success"></i>Guru Pengajar
-                    </h6>
-                    <a href="{{ route('siswa.lms.guru') }}" class="text-primary small">Semua</a>
+            {{-- Guru Pengajar --}}
+            <div class="sidebar-widget">
+                <div class="widget-header-simple">
+                    <h6><i class="fas fa-users me-2 text-success"></i>Pengajar</h6>
+                    <a href="{{ route('siswa.lms.guru') }}" class="small-link">Semua</a>
                 </div>
-                <div class="teacher-list">
+                <div class="teachers-list">
                     @forelse($guruPengajar as $guru)
-                        <div class="teacher-item">
-                            <div class="teacher-avatar">
+                        <div class="teacher-row">
+                            <div class="teacher-img">
                                 @if($guru->foto)
                                     <img src="{{ asset('storage/' . $guru->foto) }}" alt="{{ $guru->nama_lengkap }}">
                                 @else
-                                    <div class="avatar-placeholder">{{ substr($guru->nama_lengkap, 0, 1) }}</div>
+                                    <span class="initial">{{ substr($guru->nama_lengkap, 0, 1) }}</span>
                                 @endif
                             </div>
-                            <div class="teacher-info">
-                                <div class="teacher-name">{{ Str::limit($guru->nama_lengkap, 18) }}</div>
-                                <div class="teacher-subject">
-                                    {{ $guru->guruKelas->first()->mataPelajaran->nama_mapel ?? '-' }}
-                                </div>
+                            <div class="teacher-detail">
+                                <h6 class="t-name">{{ Str::limit($guru->nama_lengkap, 18) }}</h6>
+                                <p class="t-mapel">{{ $guru->guruKelas->first()->mataPelajaran->nama_mapel ?? 'Pengajar' }}</p>
                             </div>
                         </div>
                     @empty
-                        <div class="empty-state small-empty">
-                            <i class="fas fa-users text-muted"></i>
-                            <p>Belum ada guru pengajar</p>
+                        <div class="empty-mini">
+                            <p>Data guru belum tersedia</p>
                         </div>
                     @endforelse
                 </div>
@@ -307,462 +278,748 @@
 
 @push('styles')
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4f46e5, #3730a3);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+        }
+
         /* Welcome Banner */
         .welcome-banner {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark, #0d3f7a));
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
+            background: var(--primary-gradient);
+            border-radius: var(--border-radius);
+            padding: 30px 40px;
+            color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: white;
+            margin-bottom: 24px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+        }
+
+        .welcome-decoration {
+            position: absolute;
+            right: -20px;
+            bottom: -40px;
+            font-size: 15rem;
+            opacity: 0.1;
+            transform: rotate(-15deg);
         }
 
         .welcome-content {
+            position: relative;
+            z-index: 2;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex: 1;
-            gap: 16px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
         }
 
         .welcome-title {
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-weight: 800;
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
         }
 
         .welcome-subtitle {
+            font-size: 1rem;
             opacity: 0.9;
             margin: 0;
-            font-size: 14px;
+            font-weight: 300;
         }
 
-        .welcome-illustration {
-            font-size: 80px;
-            opacity: 0.15;
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-glass:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: var(--border-radius);
+            padding: 24px;
             display: flex;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            cursor: default;
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
         }
 
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+        .stat-icon-bg {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon-bg.primary { background: #e0e7ff; color: #4338ca; }
+        .stat-icon-bg.warning { background: #ffedd5; color: #ea580c; }
+        .stat-icon-bg.info { background: #cffafe; color: #0891b2; }
+        .stat-icon-bg.purple { background: #ede9fe; color: #7c3aed; }
+
+        .stat-content {
+            flex-grow: 1;
         }
 
         .stat-label {
-            font-size: 13px;
+            font-size: 0.875rem;
             color: #6b7280;
             margin-bottom: 4px;
+            font-weight: 500;
         }
 
         .stat-value {
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: 700;
+            margin: 0;
+            line-height: 1;
         }
 
-        /* Dashboard Grid */
+        .text-purple { color: #7c3aed; }
+
+        /* Dashboard Grid Layout */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 360px;
+            grid-template-columns: 1fr 340px;
             gap: 24px;
         }
 
         .dashboard-main {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 30px;
         }
 
         .dashboard-sidebar {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
 
-        /* Schedule List */
-        .schedule-list {
-            padding: 0;
+        /* Section Styling */
+        .section-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
         }
 
-        .schedule-item {
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-            border-bottom: 1px solid #f3f4f6;
-            text-decoration: none;
-            color: inherit;
-            transition: background 0.2s;
         }
 
-        .schedule-item:hover {
-            background: #f9fafb;
-        }
-
-        .schedule-time {
-            font-weight: 700;
-            font-size: 15px;
-            color: var(--primary);
-            min-width: 50px;
-        }
-
-        .schedule-content {
-            flex: 1;
-        }
-
-        .schedule-title {
+        .badge-date {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .btn-link-custom {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .btn-link-custom:hover {
+            color: #312e81;
+            text-decoration: underline;
+        }
+
+        /* Timeline Schedule */
+        .timeline-container {
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 87px;
+            top: 25px;
+            bottom: -30px;
+            width: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-time {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 60px;
+            padding-top: 5px;
+        }
+
+        .time-start {
+            font-weight: 700;
             color: #1f2937;
+            font-size: 1rem;
         }
 
-        .schedule-teacher {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .schedule-action {
+        .time-end {
+            font-size: 0.75rem;
             color: #9ca3af;
         }
 
-        /* Task List */
-        .task-list {
-            padding: 0;
+        .timeline-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid #e0e7ff;
+            z-index: 2;
+            margin-top: 8px;
+            flex-shrink: 0;
         }
 
-        .task-item {
+        .timeline-content {
+            flex-grow: 1;
+        }
+
+        .timeline-card {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            border-bottom: 1px solid #f3f4f6;
+            background: #f9fafb;
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid transparent;
+            transition: all 0.2s;
         }
 
-        .task-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+        .timeline-card:hover {
+            background: white;
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transform: translateX(4px);
+        }
+
+        .timeline-subject {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .timeline-teacher {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .timeline-action {
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .timeline-card:hover .timeline-action {
+            opacity: 1;
+        }
+
+        /* Task Grid */
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .task-card-modern {
+            border: 1px solid #f3f4f6;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .task-card-modern:hover {
+            box-shadow: var(--card-hover-shadow);
+            border-color: #e5e7eb;
+        }
+
+        .task-priority {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 4px;
+        }
+
+        .task-priority.urgent { background: #ef4444; }
+        .task-priority.normal { background: #10b981; }
+
+        .task-details {
+            padding: 16px 16px 16px 24px;
+        }
+
+        .task-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .badge-blue { background: #e0f2fe; color: #0284c7; }
+        .badge-orange { background: #ffedd5; color: #ea580c; }
+
+        .task-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .task-subject {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 12px;
+        }
+
+        .task-due {
+            font-size: 0.75rem;
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .btn-task-action {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-task-action:hover {
+            background: #111827;
             color: white;
         }
 
-        .task-content {
-            flex: 1;
+        /* Courses Grid */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
         }
 
-        .task-title {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .task-meta {
+        .course-card {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 4px;
-            font-size: 12px;
-        }
-
-        .task-deadline {
-            font-size: 12px;
-        }
-
-        /* Mapel Grid */
-        .mapel-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             padding: 16px;
-        }
-
-        .mapel-card {
             background: #f9fafb;
             border-radius: 12px;
-            padding: 16px;
-            text-align: center;
             text-decoration: none;
             color: inherit;
             transition: all 0.2s;
         }
 
-        .mapel-card:hover {
-            background: var(--primary);
-            color: white;
+        .course-card:hover {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
             transform: translateY(-2px);
         }
 
-        .mapel-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-            color: var(--primary);
-        }
-
-        .mapel-card:hover .mapel-icon {
+        .course-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--primary);
             color: white;
-        }
-
-        .mapel-name {
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .mapel-teacher {
-            font-size: 11px;
-            opacity: 0.7;
-        }
-
-        /* Announcement Card */
-        .announcement-card {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark, #0d3f7a));
-            color: white;
-        }
-
-        .announcement-header {
-            padding: 16px 20px;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .announcement-body {
-            padding: 20px;
-        }
-
-        .announcement-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .announcement-text {
-            font-size: 13px;
-            opacity: 0.9;
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-
-        /* Notification List */
-        .notification-list {
-            padding: 0;
-        }
-
-        .notification-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            text-decoration: none;
-            color: inherit;
-            border-bottom: 1px solid #f3f4f6;
-            transition: background 0.2s;
-        }
-
-        .notification-item:hover {
-            background: #f9fafb;
-        }
-
-        .notification-item.unread {
-            background: #eff6ff;
-        }
-
-        .notification-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 12px;
-        }
-
-        .notification-title {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .notification-time {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        /* Event List */
-        .event-list {
-            padding: 0;
-        }
-
-        .event-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .event-date {
-            background: #f3f4f6;
-            border-radius: 8px;
-            padding: 8px 12px;
-            text-align: center;
-            min-width: 50px;
-        }
-
-        .event-day {
-            font-size: 18px;
             font-weight: 700;
-            color: var(--primary);
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
 
-        .event-month {
-            font-size: 11px;
-            color: #6b7280;
-            text-transform: uppercase;
-        }
-
-        .event-title {
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        /* Teacher List */
-        .teacher-list {
-            padding: 0;
-        }
-
-        .teacher-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .teacher-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .course-info {
             overflow: hidden;
         }
 
-        .teacher-avatar img {
+        .course-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .course-teacher {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Sidebar Widgets */
+        .sidebar-widget {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .widget-announcement {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .widget-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .widget-body {
+            padding: 20px;
+        }
+
+        .ann-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .ann-text {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            color: #e0e7ff;
+        }
+
+        .ann-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ann-action {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-ann-action.primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-ann-action.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-ann-action:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Simple Widget Header */
+        .widget-header-simple {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .widget-header-simple h6 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #374151;
+        }
+
+        .small-link {
+            font-size: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Events List */
+        .events-list, .teachers-list {
+            padding: 10px 0;
+        }
+
+        .event-row {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .event-row:last-child {
+            border-bottom: none;
+        }
+
+        .event-date-box {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 6px 10px;
+            text-align: center;
+            min-width: 50px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-d {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #1f2937;
+            line-height: 1;
+        }
+
+        .event-m {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .event-info {
+            flex-grow: 1;
+        }
+
+        .event-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .event-tag {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .tag-red { background: #fee2e2; color: #ef4444; }
+        .tag-blue { background: #e0f2fe; color: #0284c7; }
+
+        /* Teachers List */
+        .teacher-row {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .teacher-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .teacher-img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
-        .avatar-placeholder {
+        .teacher-img .initial {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark, #0d3f7a));
+            background: var(--primary);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 0.9rem;
         }
 
-        .teacher-name {
-            font-size: 13px;
+        .teacher-detail {
+            overflow: hidden;
+        }
+
+        .t-name {
+            font-size: 0.85rem;
             font-weight: 600;
+            margin-bottom: 1px;
+            color: #374151;
         }
 
-        .teacher-subject {
-            font-size: 11px;
-            color: #6b7280;
+        .t-mapel {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
         }
 
-        /* Empty State */
-        .empty-state {
+        /* Empty States */
+        .empty-mini {
+            padding: 20px;
             text-align: center;
-            padding: 40px 20px;
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        .empty-state {
+            padding: 30px;
+            text-align: center;
             color: #9ca3af;
         }
 
         .empty-state i {
-            font-size: 40px;
-            margin-bottom: 12px;
-            opacity: 0.3;
-        }
-
-        .empty-state.small-empty {
-            padding: 24px 16px;
-        }
-
-        .empty-state.small-empty i {
-            font-size: 28px;
-        }
-
-        .full-width {
-            grid-column: 1 / -1;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
         }
 
         /* Responsive */
-        @media (max-width: 1200px) {
+        @media (max-width: 991px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
 
-            .dashboard-sidebar {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .mapel-grid {
-                grid-template-columns: repeat(2, 1fr);
+             .welcome-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
             }
+            
+            .welcome-actions {
+                width: 100%;
+            }
+            
+            .btn-glass {
+                width: 100%;
+                text-align: center;
+                display: block;
+            }
+        }
 
-            .dashboard-sidebar {
+        @media (max-width: 576px) {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
 
-            .welcome-banner {
-                padding: 20px;
+            .timeline-item {
+                gap: 12px;
             }
 
-            .welcome-illustration {
-                display: none;
+            .timeline-item::before {
+                left: 77px;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>

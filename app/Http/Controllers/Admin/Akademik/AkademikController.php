@@ -20,9 +20,9 @@ class AkademikController extends SekretarisController
     }
 
     // Kalender Akademik
-    public function kalenderIndex()
+    public function kalenderIndex(Request $request)
     {
-        $response = parent::kalenderIndex();
+        $response = parent::kalenderIndex($request);
         return $this->wrapView($response, 'kalender.index');
     }
 
@@ -58,6 +58,12 @@ class AkademikController extends SekretarisController
 
         return redirect()->route('admin.akademik.kalender.index')
             ->with('success', 'Kalender akademik berhasil ditambahkan!');
+    }
+
+    public function kalenderShow($id)
+    {
+        $response = parent::kalenderShow($id);
+        return $this->wrapView($response, 'kalender.show');
     }
 
     public function kalenderEdit($id)
@@ -118,6 +124,29 @@ class AkademikController extends SekretarisController
 
         return redirect()->route('admin.akademik.kalender.index')
             ->with('success', 'Kalender akademik berhasil dihapus!');
+    }
+
+    public function kalenderToggleVisibility($id)
+    {
+        try {
+            \Log::info('Admin Toggle Visibility Request for ID: ' . $id);
+            $kalender = \App\Models\KalenderAkademik::findOrFail($id);
+            \Log::info('Current status: ' . $kalender->is_hidden_siswa);
+            
+            $kalender->is_hidden_siswa = !$kalender->is_hidden_siswa;
+            $saved = $kalender->save();
+            
+            \Log::info('New status: ' . $kalender->is_hidden_siswa . ' | Saved: ' . ($saved ? 'Yes' : 'No'));
+
+            return response()->json([
+                'success' => true,
+                'is_hidden' => $kalender->is_hidden_siswa,
+                'message' => $kalender->is_hidden_siswa ? 'Kegiatan disembunyikan dari siswa' : 'Kegiatan ditampilkan ke siswa'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Admin Toggle Error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function kalenderBulanan(Request $request)
@@ -278,7 +307,7 @@ class AkademikController extends SekretarisController
                 $validated['gambar_thumbnail'] = $filename;
             } catch (\Exception $e) {
                 return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: ' . $e->getMessage()])
-                            ->withInput();
+                    ->withInput();
             }
         }
 
@@ -349,7 +378,7 @@ class AkademikController extends SekretarisController
                 $validated['gambar_thumbnail'] = $filename;
             } catch (\Exception $e) {
                 return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: ' . $e->getMessage()])
-                            ->withInput();
+                    ->withInput();
             }
         }
 
