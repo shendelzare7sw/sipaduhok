@@ -69,7 +69,7 @@
     </section>
 
     @php
-        $aboutSection = $page->getSection('about');
+        $aboutSection = $page->getSection('intro');
         $aboutContent = $aboutSection->content ?? [];
     @endphp
     <!-- About Section -->
@@ -83,7 +83,7 @@
                         class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                     <div
                         class="absolute -bottom-6 -right-6 bg-[#165fac] text-white p-6 rounded-2xl shadow-lg hidden md:block">
-                        <p class="text-4xl font-bold">{{ $aboutContent['experience_years'] ?? '14+' }}</p>
+                        <p class="text-4xl font-bold">{{ $aboutContent['stats_years'] ?? '14+' }}</p>
                         <p class="text-sm">Tahun Pengalaman</p>
                     </div>
                 </div>
@@ -94,12 +94,9 @@
                         class="inline-block bg-[#165fac]/10 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">{{ $aboutContent['badge'] ?? 'Tentang Kami' }}</span>
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
                         {{ $aboutContent['title'] ?? 'PKBM House Of Knowledge' }}</h2>
-                    <p class="text-gray-600 mb-6 leading-relaxed">
-                        {{ $aboutContent['description_1'] ?? 'PKBM House Of Knowledge adalah lembaga pendidikan yang berdedikasi untuk memberikan pendidikan berkualitas bagi semua kalangan. Kami percaya bahwa setiap anak memiliki potensi unik yang perlu dikembangkan dengan pendekatan yang tepat.' }}
-                    </p>
-                    <p class="text-gray-600 mb-6 leading-relaxed">
-                        {{ $aboutContent['description_2'] ?? 'Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah membantu ribuan siswa mencapai potensi terbaik mereka melalui program pendidikan yang inovatif dan inklusif.' }}
-                    </p>
+                    <div class="text-gray-600 mb-6 leading-relaxed space-y-4">
+                        {!! nl2br(e($aboutContent['content'] ?? 'PKBM House Of Knowledge adalah lembaga pendidikan yang berdedikasi untuk memberikan pendidikan berkualitas bagi semua kalangan.')) !!}
+                    </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="flex items-center gap-3">

@@ -51,17 +51,30 @@ class LoginController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
+        // Check for intended URL but avoid AJAX/API endpoints
+        $intendedUrl = redirect()->intended()->getTargetUrl();
+        if (str_contains($intendedUrl, 'notifications/unread-count') || 
+            str_contains($intendedUrl, 'api/') || 
+            str_contains($intendedUrl, 'get-') ||
+            str_contains($intendedUrl, 'check-')) {
+            $intendedUrl = null;
+        }
+
         // Redirect based on role
+        if ($intendedUrl && $intendedUrl !== route('dashboard') && $intendedUrl !== url('/')) {
+            return redirect($intendedUrl);
+        }
+
         return match($roleName) {
-            'admin' => redirect()->intended(route('admin.dashboard')),
-            'ketua_pkbm' => redirect()->intended(route('ketua.dashboard')),
-            'sekretaris' => redirect()->intended(route('sekretaris.dashboard')),
-            'bendahara' => redirect()->intended(route('bendahara.dashboard')),
-            'wali_kelas' => redirect()->intended(route('wali.dashboard')),
-            'guru_pengajar' => redirect()->intended(route('guru.dashboard')),
-            'orang_tua' => redirect()->intended(route('orang-tua.dashboard')),
-            'siswa' => redirect()->intended(route('siswa.dashboard')),
-            default => redirect()->intended(route('dashboard')),
+            'admin' => redirect()->route('admin.dashboard'),
+            'ketua_pkbm' => redirect()->route('ketua.dashboard'),
+            'sekretaris' => redirect()->route('sekretaris.dashboard'),
+            'bendahara' => redirect()->route('bendahara.dashboard'),
+            'wali_kelas' => redirect()->route('wali.dashboard'),
+            'guru_pengajar' => redirect()->route('guru.dashboard'),
+            'orang_tua' => redirect()->route('orang-tua.dashboard'),
+            'siswa' => redirect()->route('siswa.dashboard'),
+            default => redirect()->route('dashboard'),
         };
     }
 

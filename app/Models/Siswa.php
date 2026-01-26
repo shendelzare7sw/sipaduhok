@@ -28,6 +28,15 @@ class Siswa extends Model
         'foto',
         'tanggal_masuk',
         'status',
+        // Validasi Akses fields
+        'validasi_ujian_bendahara',
+        'validasi_ujian_wali',
+        'tanggal_validasi_ujian_wali',
+        'validasi_ujian_oleh',
+        'validasi_rapor_bendahara',
+        'validasi_rapor_wali',
+        'tanggal_validasi_rapor_wali',
+        'validasi_rapor_oleh',
     ];
 
     protected $casts = [

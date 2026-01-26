@@ -69,7 +69,34 @@
         <div>Jadwal Pelajaran</div>
     </a>
 </li>
+<!-- Menu Header - Kenaikan Kelas -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Kenaikan Kelas</span>
+</li>
 
+<!-- Pengaturan KKM -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.kkm') ? 'active' : '' }}">
+    <a href="{{ route('waka.promotion.kkm.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-chart-line"></i>
+        <div>Pengaturan KKM</div>
+    </a>
+</li>
+
+<!-- Pengaturan Kenaikan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.settings') ? 'active' : '' }}">
+    <a href="{{ route('waka.promotion.settings.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-cogs"></i>
+        <div>Pengaturan Naik Kelas</div>
+    </a>
+</li>
+
+<!-- Rekap Kenaikan (Report) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.report') ? 'active' : '' }}">
+    <a href="{{ route('waka.promotion.report') }}" class="menu-link">
+        <i class="menu-icon fas fa-file-alt"></i>
+        <div>Proses & Rekap</div>
+    </a>
+</li>
 <!-- Menu Header - Monitoring -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring</span>

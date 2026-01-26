@@ -25,6 +25,18 @@ class SiaRaporController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan');
         }
 
+        // BLOCK ACCESS FOR STUDENT ROLE
+        // User request: "orang tua yang nantinya akan diberi akses melihat rapor bukan siswa"
+        // We redirect them back with a message.
+        if (!Auth::user()->hasRole('orang_tua')) { 
+             // Double check if this controller is shared. The route middleware is 'role:siswa'.
+             // If parents use this, checking role is good. 
+             // But wait, parents use OrangTuaController.
+             // So this controller is ONLY for students.
+             return redirect()->route('siswa.sia.dashboard')
+                ->with('error', 'Akses Rapor hanya diperuntukkan bagi Orang Tua/Wali.');
+        }
+
         // Ambil rapor yang sudah diterbitkan
         $raporList = Rapor::where('siswa_id', $siswa->id)
             ->where('status', 'diterbitkan')

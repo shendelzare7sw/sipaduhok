@@ -32,26 +32,58 @@
             </div>
         </div>
 
+        {{-- Validation Errors --}}
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Terdapat kesalahan pada input Anda:</div>
+                <ul class="mb-0 mt-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <!-- Summary Cards -->
         <div class="row mb-4">
-            <div class="col-md-4 mb-3 mb-md-0">
+            <div class="col-md-3 mb-3 mb-md-0">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
                                 <span class="avatar-initial rounded bg-primary">
-                                    <i class="fas fa-receipt"></i>
+                                    <i class="fas fa-calendar-day"></i>
                                 </span>
                             </div>
                             <div class="flex-grow-1">
-                                <small class="text-muted d-block">Total Tagihan</small>
-                                <h4 class="mb-0 fw-bold">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</h4>
+                                <small class="text-muted d-block">Tagihan Tahun Ini</small>
+                                <h4 class="mb-0 fw-bold">Rp {{ number_format($totalTagihanCurrent, 0, ',', '.') }}</h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3 mb-md-0">
+            
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card border-0 shadow-sm h-100 {{ $totalTunggakan > 0 ? 'border-danger border' : '' }}">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-danger">
+                                    <i class="fas fa-history"></i>
+                                </span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block">Total Tunggakan</small>
+                                <h4 class="mb-0 text-danger fw-bold">Rp {{ number_format($totalTunggakan, 0, ',', '.') }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3 mb-md-0">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -61,26 +93,27 @@
                                 </span>
                             </div>
                             <div class="flex-grow-1">
-                                <small class="text-muted d-block">Sudah Dibayar</small>
-                                <h4 class="mb-0 text-success fw-bold">Rp {{ number_format($totalBayar, 0, ',', '.') }}</h4>
+                                <small class="text-muted d-block">Sudah Dibayar (Thn Ini)</small>
+                                <h4 class="mb-0 text-success fw-bold">Rp {{ number_format($totalBayarCurrent, 0, ',', '.') }}</h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
+            
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100 bg-label-warning">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded {{ $sisaTagihan > 0 ? 'bg-danger' : 'bg-success' }}">
+                                <span class="avatar-initial rounded bg-warning">
                                     <i class="fas fa-wallet"></i>
                                 </span>
                             </div>
                             <div class="flex-grow-1">
-                                <small class="text-muted d-block">Sisa Tagihan</small>
-                                <h4 class="mb-0 {{ $sisaTagihan > 0 ? 'text-danger' : 'text-success' }} fw-bold">
-                                    Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
+                                <small class="text-muted d-block">Total Kewajiban</small>
+                                <h4 class="mb-0 text-dark fw-bold">
+                                    Rp {{ number_format($grandTotalUnpaid, 0, ',', '.') }}
                                 </h4>
                             </div>
                         </div>
@@ -96,10 +129,10 @@
                     <i class="fas fa-list me-2 text-primary"></i>
                     Daftar Tagihan
                 </h5>
-                @if($sisaTagihan > 0)
-                    <span class="badge bg-danger">{{ $tagihan->where('status', 'belum_bayar')->count() }} Belum Lunas</span>
+                @if($sisaTagihanCurrent > 0)
+                    <span class="badge bg-warning">{{ $tagihan->where('status', 'belum_bayar')->where('tahun_ajaran_id', $activeYear->id ?? 0)->count() }} Belum Lunas</span>
                 @else
-                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Semua Lunas</span>
+                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Lunas (Tahun Ini)</span>
                 @endif
             </div>
             <div class="card-body">
@@ -109,6 +142,73 @@
                         <div>Tidak ada tagihan untuk siswa ini.</div>
                     </div>
                 @else
+                    {{-- Section: Tunggakan Tahun Lalu --}}
+                    @if($arrearsGroup->isNotEmpty())
+                        <div class="mb-5">
+                            <div class="alert alert-danger d-flex align-items-center mb-3">
+                                <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+                                <div>
+                                    <strong>Perhatian:</strong> Terdapat tunggakan dari tahun ajaran sebelumnya yang belum dilunasi.
+                                </div>
+                            </div>
+                            
+                            @foreach($arrearsGroup as $tahunId => $tagihans)
+                                @php $tahunLabel = $tagihans->first()->tahunAjaran->nama_tahun_ajaran ?? 'Tahun Lalu'; @endphp
+                                <h6 class="text-danger fw-bold border-bottom border-danger pb-2 mb-3">
+                                    <i class="fas fa-history me-2"></i>Tunggakan Tahun Ajaran {{ $tahunLabel }}
+                                </h6>
+                                
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-hover align-middle border border-danger">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 50px;" class="text-center">Pilih</th>
+                                                <th>Keterangan</th>
+                                                <th class="text-nowrap" style="width: 150px;">Jatuh Tempo</th>
+                                                <th class="text-end text-nowrap" style="width: 150px;">Tagihan</th>
+                                                <th class="text-center" style="width: 100px;">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($tagihans as $item)
+                                                @php
+                                                    $isSpp = str_contains($item->jenis_tagihan, 'spp');
+                                                @endphp
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <input type="checkbox" class="form-check-input item-checkbox group-arrears-{{ $tahunId }}"
+                                                            value="{{ $item->id }}" data-amount="{{ $item->jumlah }}"
+                                                            data-label="{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }} ({{ $tahunLabel }})"
+                                                            data-is-spp="{{ $isSpp ? 'true' : 'false' }}">
+                                                    </td>
+                                                    <td>
+                                                        <div class="fw-bold text-danger">
+                                                            {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
+                                                        </div>
+                                                        <small class="text-muted">Dispensasi: {{ $item->status == 'cicilan' ? 'Cicilan' : 'Belum Lunas' }}</small>
+                                                    </td>
+                                                    <td class="text-nowrap">
+                                                        <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span class="fw-bold text-danger">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-danger">Tunggakan</span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endforeach
+                        </div>
+                        
+                        <h5 class="mb-4 mt-5">
+                            <i class="fas fa-calendar-check me-2 text-primary"></i>
+                            Tagihan Tahun Ajaran Ini
+                        </h5>
+                    @endif
                     @foreach($tagihanGroup as $jenis => $items)
                         <div class="mb-4">
                             <h6 class="text-uppercase text-muted mb-3 fw-bold border-bottom pb-2">
@@ -332,7 +432,7 @@
                                         </label>
                                         <input type="file" name="bukti_bayar" id="bulkBuktiInput" class="form-control"
                                             accept="image/*">
-                                        <small class="text-muted">Upload foto bukti transfer total nominal.</small>
+                                        <small class="text-muted">Upload foto bukti transfer total nominal (Max: 10MB).</small>
                                     </div>
                                 </div>
                             @endif
@@ -683,6 +783,19 @@
             methodRadios.forEach(radio => {
                 radio.addEventListener('change', handleMethodChange);
             });
+
+            // File Size Validation
+            if (buktiInput) {
+                buktiInput.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        const fileSize = this.files[0].size / 1024 / 1024; // in MB
+                        if (fileSize > 10) {
+                            alert('Ukuran file terlalu besar! Maksimal 10MB. File Anda: ' + fileSize.toFixed(2) + 'MB');
+                            this.value = ''; // Clear input
+                        }
+                    }
+                });
+            }
 
             // Copy Helper
             window.copyRekening = function (event, text, btn) {

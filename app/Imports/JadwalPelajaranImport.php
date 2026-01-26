@@ -30,7 +30,16 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
     public function __construct($tahunAjaranId = null)
     {
         $this->tahunAjaranId = $tahunAjaranId ?? TahunAjaran::where('is_active', true)->first()?->id;
-        $this->kelasList = Kelas::pluck('id', 'nama_kelas')->toArray();
+        
+        // Load classes with cabang info
+        $this->kelasList = Kelas::with('cabang')->get()->map(function($kelas) {
+            return [
+                'id' => $kelas->id,
+                'nama_kelas' => strtolower(trim($kelas->nama_kelas)),
+                'nama_cabang' => strtolower(trim($kelas->cabang->nama_cabang ?? '')),
+            ];
+        });
+
         $this->mapelList = MataPelajaran::pluck('id', 'nama_mapel')->toArray();
         $this->guruList = TenagaPendidik::pluck('id', 'nama_lengkap')->toArray();
     }
@@ -57,13 +66,16 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
             }
 
             // Lookup kelas
-            $kelasId = $this->findKelas($row['nama_kelas']);
+            $namaCabang = isset($row['nama_cabang']) ? trim($row['nama_cabang']) : null;
+            $kelasId = $this->findKelas($row['nama_kelas'], $namaCabang);
+            
             if (!$kelasId) {
                 $kelasName = trim($row['nama_kelas']);
-                if (!in_array($kelasName, $this->missingKelas)) {
-                    $this->missingKelas[] = $kelasName;
+                $cabangInfo = $namaCabang ? " (Cabang: {$namaCabang})" : "";
+                if (!in_array($kelasName . $cabangInfo, $this->missingKelas)) {
+                    $this->missingKelas[] = $kelasName . $cabangInfo;
                 }
-                $this->warnings[] = "Baris {$rowNumber}: Kelas '{$kelasName}' tidak ditemukan";
+                $this->warnings[] = "Baris {$rowNumber}: Kelas '{$kelasName}'{$cabangInfo} tidak ditemukan";
                 $this->skippedCount++;
                 continue;
             }
@@ -128,15 +140,24 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
         }
     }
 
-    private function findKelas($name)
+    private function findKelas($name, $cabangName = null)
     {
-        $name = trim($name);
-        if (isset($this->kelasList[$name])) {
-            return $this->kelasList[$name];
-        }
-        foreach ($this->kelasList as $n => $id) {
-            if (strtolower(trim($n)) === strtolower($name)) {
-                return $id;
+        $name = strtolower(trim($name));
+        $cabangName = $cabangName ? strtolower(trim($cabangName)) : null;
+
+        foreach ($this->kelasList as $kelas) {
+            if ($kelas['nama_kelas'] === $name) {
+                // If cabang specified, match it. If not, maybe verify if only 1 exists?
+                // For now, if cabang specified, MUST match.
+                if ($cabangName) {
+                    if ($kelas['nama_cabang'] === $cabangName) {
+                        return $kelas['id'];
+                    }
+                } else {
+                    // If no branch specified, return first match (backward compatibility/risk of wrong branch)
+                    // Ideal: User must specify branch if duplicates.
+                    return $kelas['id'];
+                }
             }
         }
         return null;

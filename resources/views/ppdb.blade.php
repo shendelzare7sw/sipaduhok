@@ -1263,7 +1263,19 @@
         </div>
     </div>
 
-    <!-- Cost Detail Modal SMA -->
+    <!-- Cost Detail Modal SMA (Paket C) -->
+    @php
+        $smaPokokItems = collect($biayaSmaItems)->where('type', 'pokok');
+        $smaTambahanItems = collect($biayaSmaItems)->where('type', 'tambahan');
+        $smaPokokTotal = 0;
+        $smaTambahanTotal = 0;
+        foreach ($smaPokokItems as $item) {
+            $smaPokokTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
+        }
+        foreach ($smaTambahanItems as $item) {
+            $smaTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
+        }
+    @endphp
     <div id="costModalPaketC"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
@@ -1272,7 +1284,7 @@
                     <span
                         class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3"><i
                             class="fas fa-money-bill-wave"></i></span>
-                    Rincian Biaya Sekolah Menengan Atas
+                    Rincian Biaya {{ $biayaSmaContent['header']['title'] ?? 'SMA' }}
                 </h3>
                 <button onclick="closeCostModalPaketC()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1292,17 +1304,15 @@
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Pendaftaran</span>
-                            <span class="font-semibold text-secondary">Rp 200.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">SPP/Bulan</span>
-                            <span class="font-semibold text-gray-800">Rp 1.300.000</span>
-                        </div>
+                        @foreach($smaPokokItems as $item)
+                            <div class="flex justify-between items-center py-2 {{ $loop->last ? '' : 'border-b border-gray-200' }}">
+                                <span class="text-gray-700">{{ $item['name'] ?? '' }}</span>
+                                <span class="font-semibold text-secondary">{{ $item['price'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                         <div class="flex justify-between items-center py-2 bg-accent-yellow/5 rounded-lg px-3">
                             <span class="font-bold text-gray-800">Total Biaya Pokok</span>
-                            <span class="font-bold text-accent-yellow">Rp 1.500.000</span>
+                            <span class="font-bold text-accent-yellow">Rp {{ number_format($smaPokokTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1316,33 +1326,15 @@
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Buku & Alat Tulis</span>
-                            <span class="font-semibold text-gray-800">Rp 900.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Seragam (2 stel)</span>
-                            <span class="font-semibold text-gray-800">Rp 550.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Kegiatan Ekstrakurikuler</span>
-                            <span class="font-semibold text-gray-800">Rp 1.600.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Foto Rapot</span>
-                            <span class="font-semibold text-gray-800">Rp 200.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Wisuda & Ijazah</span>
-                            <span class="font-semibold text-gray-800">Rp 700.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Ujian Nasional & Tty Out</span>
-                            <span class="font-semibold text-gray-800">Rp 5.850.000</span>
-                        </div>
+                        @foreach($smaTambahanItems as $item)
+                            <div class="flex justify-between items-center py-2 {{ $loop->last ? '' : 'border-b border-gray-200' }}">
+                                <span class="text-gray-700">{{ $item['name'] ?? '' }}</span>
+                                <span class="font-semibold text-gray-800">{{ $item['price'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                         <div class="flex justify-between items-center py-2 bg-primary/5 rounded-lg px-3">
                             <span class="font-bold text-gray-800">Total Biaya Tambahan</span>
-                            <span class="font-bold text-primary">Rp 9.800.000</span>
+                            <span class="font-bold text-primary">Rp {{ number_format($smaTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1359,16 +1351,16 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center py-2 border-b border-gray-300">
                             <span class="text-gray-700">Biaya Pokok</span>
-                            <span class="font-semibold text-gray-800">Rp 1.500.000</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($smaPokokTotal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-300">
                             <span class="text-gray-700">Biaya Tambahan</span>
-                            <span class="font-semibold text-gray-800">Rp 9.800.000</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($smaTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                         <div
                             class="flex justify-between items-center py-3 bg-secondary/10 rounded-lg px-3 border-2 border-secondary">
                             <span class="text-lg font-bold text-gray-800">Total Estimasi</span>
-                            <span class="text-lg font-bold text-secondary">Rp 11.300.000</span>
+                            <span class="text-lg font-bold text-secondary">Rp {{ number_format($smaPokokTotal + $smaTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1394,7 +1386,19 @@
         </div>
     </div>
 
-    <!-- Cost Detail Modal sekolah dasar -->
+    <!-- Cost Detail Modal SD (Paket A) -->
+    @php
+        $sdPokokItems = collect($biayaSdItems)->where('type', 'pokok');
+        $sdTambahanItems = collect($biayaSdItems)->where('type', 'tambahan');
+        $sdPokokTotal = 0;
+        $sdTambahanTotal = 0;
+        foreach ($sdPokokItems as $item) {
+            $sdPokokTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
+        }
+        foreach ($sdTambahanItems as $item) {
+            $sdTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
+        }
+    @endphp
     <div id="costModalPaketA"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
@@ -1402,7 +1406,7 @@
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3"><i
                             class="fas fa-money-bill-wave"></i></span>
-                    Rincian Biaya Sekolah Dasar
+                    Rincian Biaya {{ $biayaSdContent['header']['title'] ?? 'SD' }}
                 </h3>
                 <button onclick="closeCostModalPaketA()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1422,17 +1426,15 @@
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Pendaftaran</span>
-                            <span class="font-semibold text-secondary">Rp 200.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">SPP/Bulan</span>
-                            <span class="font-semibold text-gray-800">Rp 1.000.000</span>
-                        </div>
+                        @foreach($sdPokokItems as $item)
+                            <div class="flex justify-between items-center py-2 {{ $loop->last ? '' : 'border-b border-gray-200' }}">
+                                <span class="text-gray-700">{{ $item['name'] ?? '' }}</span>
+                                <span class="font-semibold text-secondary">{{ $item['price'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                         <div class="flex justify-between items-center py-2 bg-accent-yellow/5 rounded-lg px-3">
                             <span class="font-bold text-gray-800">Total Biaya Pokok</span>
-                            <span class="font-bold text-accent-yellow">Rp 1.200.000</span>
+                            <span class="font-bold text-accent-yellow">Rp {{ number_format($sdPokokTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1446,33 +1448,15 @@
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Buku & Alat Tulis</span>
-                            <span class="font-semibold text-gray-800">Rp 650.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Seragam (2 stel)</span>
-                            <span class="font-semibold text-gray-800">Rp 550.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Kegiatan Ekstrakurikuler</span>
-                            <span class="font-semibold text-gray-800">Rp 1.500.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Foto Rapot</span>
-                            <span class="font-semibold text-gray-800">Rp 200.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Wisuda & Ijazah</span>
-                            <span class="font-semibold text-gray-800">Rp 700.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Ujian Nasional & Tty Out</span>
-                            <span class="font-semibold text-gray-800">Rp 4.500.000</span>
-                        </div>
+                        @foreach($sdTambahanItems as $item)
+                            <div class="flex justify-between items-center py-2 {{ $loop->last ? '' : 'border-b border-gray-200' }}">
+                                <span class="text-gray-700">{{ $item['name'] ?? '' }}</span>
+                                <span class="font-semibold text-gray-800">{{ $item['price'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                         <div class="flex justify-between items-center py-2 bg-primary/5 rounded-lg px-3">
                             <span class="font-bold text-gray-800">Total Biaya Tambahan</span>
-                            <span class="font-bold text-primary">Rp 8.100.000</span>
+                            <span class="font-bold text-primary">Rp {{ number_format($sdTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1488,16 +1472,16 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center py-2 border-b border-gray-300">
                             <span class="text-gray-700">Biaya Pokok</span>
-                            <span class="font-semibold text-gray-800">Rp 2.400.000</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($sdPokokTotal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-300">
                             <span class="text-gray-700">Biaya Tambahan</span>
-                            <span class="font-semibold text-gray-800">Rp 8.100.000</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($sdTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                         <div
                             class="flex justify-between items-center py-3 bg-primary/10 rounded-lg px-3 border-2 border-primary">
                             <span class="text-lg font-bold text-gray-800">Total Estimasi</span>
-                            <span class="text-lg font-bold text-primary">Rp 10.500.000</span>
+                            <span class="text-lg font-bold text-primary">Rp {{ number_format($sdPokokTotal + $sdTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1523,7 +1507,19 @@
         </div>
     </div>
 
-    <!-- Cost Detail Modal SMP-->
+    <!-- Cost Detail Modal SMP (Paket B) -->
+    @php
+        $smpPokokItems = collect($biayaSmpItems)->where('type', 'pokok');
+        $smpTambahanItems = collect($biayaSmpItems)->where('type', 'tambahan');
+        $smpPokokTotal = 0;
+        $smpTambahanTotal = 0;
+        foreach ($smpPokokItems as $item) {
+            $smpPokokTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
+        }
+        foreach ($smpTambahanItems as $item) {
+            $smpTambahanTotal += (int) preg_replace('/[^0-9]/', '', $item['price'] ?? '0');
+        }
+    @endphp
     <div id="costModalPaketB"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
@@ -1532,7 +1528,7 @@
                     <span
                         class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3"><i
                             class="fas fa-money-bill-wave"></i></span>
-                    Rincian Biaya Sekolam Menengah Pertama
+                    Rincian Biaya {{ $biayaSmpContent['header']['title'] ?? 'SMP' }}
                 </h3>
                 <button onclick="closeCostModalPaketB()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1552,17 +1548,15 @@
                         Biaya Pokok Pendidikan
                     </h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Pendaftaran</span>
-                            <span class="font-semibold text-secondary">Rp 200.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">SPP/Bulan</span>
-                            <span class="font-semibold text-gray-800">Rp 1.300.000</span>
-                        </div>
+                        @foreach($smpPokokItems as $item)
+                            <div class="flex justify-between items-center py-2 {{ $loop->last ? '' : 'border-b border-gray-200' }}">
+                                <span class="text-gray-700">{{ $item['name'] ?? '' }}</span>
+                                <span class="font-semibold text-secondary">{{ $item['price'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                         <div class="flex justify-between items-center py-2 bg-secondary/5 rounded-lg px-3">
                             <span class="font-bold text-gray-800">Total Biaya Pokok</span>
-                            <span class="font-bold text-secondary">Rp 1.5000.000</span>
+                            <span class="font-bold text-secondary">Rp {{ number_format($smpPokokTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1576,33 +1570,15 @@
                         Biaya Tambahan (Opsional)
                     </h4>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Buku & Alat Tulis</span>
-                            <span class="font-semibold text-gray-800">Rp 900.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Seragam (2 stel)</span>
-                            <span class="font-semibold text-gray-800">Rp 550.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Kegiatan Ekstrakurikuler</span>
-                            <span class="font-semibold text-gray-800">Rp 1.600.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Foto Rapot</span>
-                            <span class="font-semibold text-gray-800">Rp 200.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Wisuda & Ijazah</span>
-                            <span class="font-semibold text-gray-800">Rp 700.000</span>
-                        </div>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-200">
-                            <span class="text-gray-700">Ujian Nasional & Tty Out</span>
-                            <span class="font-semibold text-gray-800">Rp 5.850.000</span>
-                        </div>
+                        @foreach($smpTambahanItems as $item)
+                            <div class="flex justify-between items-center py-2 {{ $loop->last ? '' : 'border-b border-gray-200' }}">
+                                <span class="text-gray-700">{{ $item['name'] ?? '' }}</span>
+                                <span class="font-semibold text-gray-800">{{ $item['price'] ?? '' }}</span>
+                            </div>
+                        @endforeach
                         <div class="flex justify-between items-center py-2 bg-primary/5 rounded-lg px-3">
                             <span class="font-bold text-gray-800">Total Biaya Tambahan</span>
-                            <span class="font-bold text-primary">Rp 9.800.000</span>
+                            <span class="font-bold text-primary">Rp {{ number_format($smpTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -1618,16 +1594,16 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center py-2 border-b border-gray-300">
                             <span class="text-gray-700">Biaya Pokok</span>
-                            <span class="font-semibold text-gray-800">Rp 1.500.000</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($smpPokokTotal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b border-gray-300">
                             <span class="text-gray-700">Biaya Tambahan</span>
-                            <span class="font-semibold text-gray-800">Rp 9.800.000</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($smpTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                         <div
                             class="flex justify-between items-center py-3 bg-secondary/10 rounded-lg px-3 border-2 border-secondary">
                             <span class="text-lg font-bold text-gray-800">Total Estimasi</span>
-                            <span class="text-lg font-bold text-secondary">Rp 11.300.000</span>
+                            <span class="text-lg font-bold text-secondary">Rp {{ number_format($smpPokokTotal + $smpTambahanTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>

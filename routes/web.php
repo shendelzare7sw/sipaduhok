@@ -130,6 +130,13 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| FILE PREVIEW ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::get('/storage-preview', [\App\Http\Controllers\FileController::class, 'preview'])->name('storage.preview');
+
+/*
+|--------------------------------------------------------------------------
 | PROTECTED ROUTES - Require Authentication
 |--------------------------------------------------------------------------
 */
@@ -371,6 +378,12 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'index'])->name('index');
                 Route::post('/update', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'update'])->name('update');
             });
+
+            // Promotion Validation (New Admin Access)
+            Route::prefix('promotion')->name('promotion.')->group(function () {
+                Route::get('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'index'])->name('validation.index');
+                Route::post('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'store'])->name('validation.store');
+            });
         });
 
         /*
@@ -424,6 +437,18 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{id}/edit', [$controller, 'flyerEdit'])->name('edit');
                 Route::put('/{id}', [$controller, 'flyerUpdate'])->name('update');
                 Route::delete('/{id}', [$controller, 'flyerDestroy'])->name('destroy');
+            });
+            
+            // Promotion System (Report, KKM, Settings)
+            Route::prefix('promotion')->name('promotion.')->group(function () {
+                Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
+                Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
+                
+                // KKM (New Admin Access)
+                Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
+                
+                // Settings (New Admin Access)
+                Route::resource('settings', \App\Http\Controllers\Admin\Akademik\PromotionSettingsController::class)->only(['index', 'store']);
             });
         });
 
@@ -513,6 +538,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', [KetuaController::class, 'catatanCreate'])->name('create');
             Route::post('/', [KetuaController::class, 'catatanStore'])->name('store');
             Route::get('/{id}', [KetuaController::class, 'catatanShow'])->name('show');
+        });
+
+        // Promotion Approval
+        Route::prefix('promotion')->name('promotion.')->group(function() {
+            Route::get('/approval', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'index'])->name('approval.index');
+            Route::put('/approval/{id}', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'update'])->name('approval.update');
         });
     });
 
@@ -620,6 +651,16 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{id}', [WakaPengaturanIstirahatController::class, 'update'])->name('update');
             Route::delete('/{id}', [WakaPengaturanIstirahatController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [WakaPengaturanIstirahatController::class, 'toggleStatus'])->name('toggle-status');
+        });
+
+        // Promotion System Settings
+        Route::prefix('promotion')->name('promotion.')->group(function() {
+            Route::resource('kkm', \App\Http\Controllers\WakilKepalaSekolah\PengaturanKKMController::class)->only(['index', 'store']);
+            Route::resource('settings', \App\Http\Controllers\WakilKepalaSekolah\PengaturanNaikKelasController::class)->only(['index', 'store']);
+            
+            // Report Access
+            Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
+            Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
         });
     });
 
@@ -767,6 +808,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/belum-lunas', [LaporanPembayaranController::class, 'belumLunas'])->name('belum-lunas');
             Route::get('/cetak-belum-lunas', [LaporanPembayaranController::class, 'cetakBelumLunas'])->name('cetak-belum-lunas');
         });
+
+        // Promotion Validation (Overrides)
+        Route::prefix('promotion')->name('promotion.')->group(function() {
+            Route::get('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'index'])->name('validation.index');
+            Route::post('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'store'])->name('validation.store');
+        });
     });
 
     /*
@@ -801,6 +848,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/validasi-izin/{id}', [PresensiController::class, 'prosesValidasiIzin'])->name('proses-validasi-izin');
             Route::get('/print-rekap', [PresensiController::class, 'printRekap'])->name('print-rekap');
         });
+
+        // Promotion Prediction
+        Route::get('/promotion/prediction', [\App\Http\Controllers\WaliKelas\PromotionController::class, 'index'])->name('promotion.prediction');
 
         // Nilai Siswa
         Route::prefix('nilai')->name('nilai.')->group(function () {

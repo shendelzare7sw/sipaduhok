@@ -157,7 +157,7 @@ class User extends Authenticatable
         if ($this->role_id && $this->roleRelation) {
             return $this->roleRelation->name === 'orang_tua';
         }
-        return false; // No old enum for this
+        return $this->attributes['role'] === 'orang_tua';
     }
 
     // Check if user has role level equal or higher

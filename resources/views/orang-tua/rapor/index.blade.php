@@ -71,7 +71,16 @@
             <span class="badge bg-label-primary">{{ $rapor->count() }} Rapor</span>
         </div>
         <div class="card-body">
-            @if($rapor->isEmpty())
+            @if(isset($locked) && $locked)
+                <div class="alert alert-warning d-flex align-items-center mb-0">
+                    <i class="fas fa-lock me-2"></i>
+                    <div>
+                        <strong>Akses Terkunci.</strong><br>
+                        Rapor belum dapat dilihat karena belum divalidasi oleh Wali Kelas. 
+                        Silakan hubungi Wali Kelas atau selesaikan administrasi jika diperlukan.
+                    </div>
+                </div>
+            @elseif($rapor->isEmpty())
                 <div class="alert alert-info d-flex align-items-center mb-0">
                     <i class="fas fa-info-circle me-2"></i>
                     <div>Belum ada rapor yang tersedia untuk siswa ini.</div>

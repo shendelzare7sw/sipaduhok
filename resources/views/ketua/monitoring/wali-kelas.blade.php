@@ -150,19 +150,29 @@
             <div class="card-header"
                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <h5><i class="fas fa-user-tie"></i> Monitoring Wali Kelas & Progress Rapor</h5>
-                <div class="filter-group" style="display: flex; gap: 12px; align-items: center;">
-                    <input type="text" id="searchWali" class="form-control" placeholder="Cari nama wali kelas..."
-                        style="width: 200px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                    <select id="filterProgress" class="form-control"
-                        style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        <option value="">Semua Progress</option>
-                        <option value="100">Selesai (100%)</option>
-                        <option value="below">Belum Selesai (&lt;100%)</option>
+                
+                <form action="{{ route('ketua.monitoring.wali-kelas') }}" method="GET" class="filter-group" style="display: flex; gap: 12px; align-items: center;">
+                    <!-- Search -->
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama wali kelas..." value="{{ request('search') }}" style="width: 200px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                    
+                    <!-- Filter Cabang -->
+                    <select name="cabang_id" class="form-control" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        <option value="">Semua Cabang</option>
+                        @foreach($cabangs as $cabang)
+                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
+                        @endforeach
                     </select>
-                </div>
+
+                    <noscript><button type="submit" class="btn btn-primary">Filter</button></noscript>
+                    
+                     @if(request()->anyFilled(['search', 'cabang_id']))
+                        <a href="{{ route('ketua.monitoring.wali-kelas') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Reset</a>
+                    @endif
+                </form>
             </div>
             <div class="card-body">
                 @if($waliKelas->count() > 0)
+                <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
@@ -180,6 +190,7 @@
                                     <td><strong>{{ $wali->nama_lengkap }}</strong></td>
                                     <td>
                                         <span class="badge badge-info">{{ $wali->kelas_info->nama_kelas }}</span>
+                                        <br><small class="text-muted">{{ $wali->kelas_info->cabang->nama_cabang ?? '-' }}</small>
                                     </td>
                                     <td>{{ $wali->kelas_info->tahunAjaran->nama_tahun_ajaran }}</td>
                                     <td style="text-align: center;">
@@ -215,10 +226,16 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4">
+                    {{ $waliKelas->withQueryString()->links() }}
+                </div>
                 @else
                     <div class="empty-state">
                         <i class="fas fa-user-tie"></i>
-                        <p style="font-weight: 500; font-size: 16px; margin-bottom: 8px;">Belum Ada Wali Kelas</p>
+                        <p style="font-weight: 500; font-size: 16px; margin-bottom: 8px;">Tidak Ada Data Wali Kelas</p>
                         <small>Data wali kelas akan muncul setelah ditugaskan oleh Admin</small>
                     </div>
                 @endif
@@ -246,40 +263,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Filter functionality for wali kelas
-        const searchWali = document.getElementById('searchWali');
-        const filterProgress = document.getElementById('filterProgress');
-
-        function filterTable() {
-            const searchTerm = searchWali.value.toLowerCase();
-            const progressFilter = filterProgress.value;
-            const rows = document.querySelectorAll('tbody tr');
-
-            rows.forEach(row => {
-                let showRow = true;
-                const namaWali = row.cells[0].textContent.toLowerCase();
-                const progressBar = row.cells[5].querySelector('.progress-bar-fill');
-                const progressValue = progressBar ? parseFloat(progressBar.textContent) : 0;
-
-                // Search filter
-                if (searchTerm && !namaWali.includes(searchTerm)) {
-                    showRow = false;
-                }
-
-                // Progress filter
-                if (progressFilter === '100' && progressValue < 100) {
-                    showRow = false;
-                } else if (progressFilter === 'below' && progressValue >= 100) {
-                    showRow = false;
-                }
-
-                row.style.display = showRow ? '' : 'none';
-            });
-        }
-
-        searchWali.addEventListener('input', filterTable);
-        filterProgress.addEventListener('change', filterTable);
-    </script>
 @endsection

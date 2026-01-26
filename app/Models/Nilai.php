@@ -210,6 +210,35 @@ class Nilai extends Model
         return $this->nilai_akhir;
     }
 
+    // Helper: Hitung nilai rapor tengah semester (PTS)
+    // Bobot default: Tugas 25%, Latihan 25%, UH 25%, PTS 25% (Total 100%) - Tanpa PAS
+    public function hitungNilaiTengahSemester($bobot = null)
+    {
+        $bobot = $bobot ?? [
+            'tugas' => 25,
+            'latihan' => 25,
+            'uh' => 25,
+            'pts' => 25,
+        ];
+
+        // Hitung rata-rata dulu
+        $this->hitungSemuaRata();
+
+        $rataTugas = $this->rata_tugas ?? 0;
+        $rataLatihan = $this->rata_latihan ?? 0;
+        $rataUH = $this->rata_uh ?? 0;
+        $pts = $this->pts ?? 0;
+
+        $total =
+            ($rataTugas * $bobot['tugas']) +
+            ($rataLatihan * $bobot['latihan']) +
+            ($rataUH * $bobot['uh']) +
+            ($pts * $bobot['pts']);
+
+        // Return nilai angka tanpa save ke nilai_akhir database (karena nilai_akhir di DB utk PAS)
+        return $total / 100;
+    }
+
     // Helper: Konversi nilai angka ke huruf
     public function nilaiHuruf()
     {

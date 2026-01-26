@@ -40,7 +40,7 @@ class DashboardController extends Controller
         } elseif ($user->isSiswa()) {
             return redirect()->route('siswa.dashboard');
         } elseif ($user->isOrangTua()) {
-            return redirect()->route('parent.dashboard');
+            return redirect()->route('orang-tua.dashboard');
         }
 
         // Default fallback

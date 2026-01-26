@@ -61,13 +61,15 @@ class RaporController extends Controller
             return $this->redirectToPilihKelas();
         }
 
-        // Filter semester
+        // Filter semester & jenis rapor
         $semester = $request->get('semester', 'ganjil');
+        $jenisRapor = $request->get('jenis_rapor', 'akhir_semester'); // Default akhir semester if not present
 
         // Get rapor siswa
         $raporList = Rapor::where('kelas_id', $kelas->id)
             ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
             ->where('semester', $semester)
+            ->where('jenis_rapor', $jenisRapor)
             ->with('siswa')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -83,6 +85,7 @@ class RaporController extends Controller
             'kelasList' => $kelasList,
             'raporList' => $raporList,
             'semester' => $semester,
+            'jenisRapor' => $jenisRapor,
             'statusCount' => $statusCount,
         ]);
     }
@@ -94,6 +97,7 @@ class RaporController extends Controller
     {
         $request->validate([
             'semester' => 'required|in:ganjil,genap',
+            'jenis_rapor' => 'required|in:tengah_semester,akhir_semester',
         ]);
 
         $tenagaPendidik = $this->getTenagaPendidik();
@@ -124,10 +128,11 @@ class RaporController extends Controller
                 ->where('kelas_id', $kelas->id)
                 ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
                 ->where('semester', $request->semester)
+                ->where('jenis_rapor', $request->jenis_rapor)
                 ->exists();
 
             if (!$raporExists) {
-                $this->generateRaporSiswa($siswa, $kelas, $request->semester);
+                $this->generateRaporSiswa($siswa, $kelas, $request->semester, $request->jenis_rapor);
                 $generated++;
             }
         }
@@ -138,7 +143,7 @@ class RaporController extends Controller
     /**
      * Generate rapor untuk satu siswa
      */
-    private function generateRaporSiswa($siswa, $kelas, $semester)
+    private function generateRaporSiswa($siswa, $kelas, $semester, $jenisRapor)
     {
         // Hitung presensi
         $bulanAwal = $semester == 'ganjil' ? 7 : 1;
@@ -171,6 +176,7 @@ class RaporController extends Controller
             'kelas_id' => $kelas->id,
             'tahun_ajaran_id' => $kelas->tahun_ajaran_id,
             'semester' => $semester,
+            'jenis_rapor' => $jenisRapor,
             'jumlah_sakit' => $jumlahSakit,
             'jumlah_izin' => $jumlahIzin,
             'jumlah_alpha' => $jumlahAlpha,

@@ -112,6 +112,7 @@
         </div>
     </section>
 
+
     <!-- Jenis Terapi -->
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -123,252 +124,79 @@
                 </p>
             </div>
 
+            @php
+                // Configuration for Icons and specific styles based on Title
+                // This preserves the beautiful visuals while allowing text/color updates from DB
+                $therapyConfig = [
+                    'Terapi Wicara' => [
+                        'icon_path' => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
+                    ],
+                    'Terapi Okupasi' => [
+                        'icon_path' => 'M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11',
+                    ],
+                    'Sensori Integrasi' => [ // DB might name it just "Sensori Integrasi"
+                        'icon_path' => 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+                    ],
+                     'Terapi Sensori Integrasi' => [ // Fallback if name varies
+                        'icon_path' => 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+                    ],
+                    'Terapi Perilaku (ABA)' => [
+                        'icon_path' => 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                    ],
+                    'Fisioterapi' => [
+                        'icon_path' => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+                    ],
+                    'Konseling Psikologi' => [
+                        'icon_path' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
+                    ],
+                ];
+
+                $defaultIcon = 'M13 10V3L4 14h7v7l9-11h-7z'; // Lightning bolt as default
+            @endphp
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Terapi Wicara -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="h-48 bg-[#165fac]/10 flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#165fac]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Terapi Wicara</h3>
-                        <p class="text-gray-600 text-sm mb-4">Membantu anak mengembangkan kemampuan berbicara, bahasa,
-                            dan komunikasi secara efektif.</p>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Artikulasi dan pengucapan
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Pengembangan bahasa
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Komunikasi sosial
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                @foreach($therapyItems as $item)
+                    @php
+                        $colorKey = $item['color'] ?? 'blue';
+                        $colors = $colorMap[$colorKey] ?? $colorMap['blue'];
+                        // Match by title, or fallback to default
+                        $config = $therapyConfig[$item['title']] ?? ['icon_path' => $defaultIcon];
+                        
+                        // Parse features (pipe separated)
+                        $features = isset($item['features']) ? explode('|', $item['features']) : [];
+                    @endphp
 
-                <!-- Terapi Okupasi -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="h-48 bg-[#287f3b]/10 flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#287f3b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                        </svg>
+                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" style="border-top: 4px solid {{ $colors['border'] }}">
+                        <div class="h-48 flex items-center justify-center relative">
+                            <!-- Helper div for background opacity -->
+                             <div class="absolute inset-0 opacity-10" style="background-color: {{ $colors['bg'] }}"></div>
+                             
+                            <svg class="w-20 h-20 relative z-10" style="color: {{ $colors['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="{{ $config['icon_path'] }}" />
+                            </svg>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] ?? 'Program Terapi' }}</h3>
+                            <p class="text-gray-600 text-sm mb-4">{{ $item['description'] ?? '' }}</p>
+                            
+                            @if(!empty($features))
+                                <ul class="text-sm text-gray-600 space-y-2">
+                                    @foreach($features as $feature)
+                                        <li class="flex items-center gap-2">
+                                            <svg class="w-4 h-4" style="color: {{ $colors['text'] }}" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            {{ trim($feature) }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Terapi Okupasi</h3>
-                        <p class="text-gray-600 text-sm mb-4">Mengembangkan keterampilan motorik halus dan kemandirian
-                            dalam aktivitas sehari-hari.</p>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Motorik halus
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Kemandirian (ADL)
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Koordinasi tangan-mata
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Terapi Sensori Integrasi -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="h-48 bg-[#d45930]/10 flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#d45930]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Sensori Integrasi</h3>
-                        <p class="text-gray-600 text-sm mb-4">Membantu anak memproses dan merespons informasi sensorik
-                            dengan lebih baik.</p>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Pengolahan sensorik
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Regulasi emosi
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Keseimbangan tubuh
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Terapi Perilaku -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="h-48 bg-[#fac030]/10 flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#fac030]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Terapi Perilaku (ABA)</h3>
-                        <p class="text-gray-600 text-sm mb-4">Applied Behavior Analysis untuk mengembangkan perilaku
-                            positif dan mengurangi perilaku yang tidak diinginkan.</p>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Modifikasi perilaku
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Keterampilan sosial
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Penguatan positif
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Fisioterapi -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="h-48 bg-[#165fac]/10 flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#165fac]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Fisioterapi</h3>
-                        <p class="text-gray-600 text-sm mb-4">Meningkatkan kemampuan motorik kasar, keseimbangan, dan
-                            kekuatan otot anak.</p>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Motorik kasar
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Kekuatan & fleksibilitas
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Postur tubuh
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Konseling Psikologi -->
-                <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
-                    <div class="h-48 bg-[#287f3b]/10 flex items-center justify-center">
-                        <svg class="w-20 h-20 text-[#287f3b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-3">Konseling Psikologi</h3>
-                        <p class="text-gray-600 text-sm mb-4">Layanan konseling untuk membantu anak mengatasi masalah
-                            emosional dan psikologis.</p>
-                        <ul class="text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Asesmen psikologi
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Konseling keluarga
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                Manajemen emosi
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>

@@ -499,4 +499,32 @@ class NotificationService
             ->unread()
             ->update(['read_at' => now()]);
     }
+
+    /**
+     * Notify Admin & Bendahara about new bulk payment
+     */
+    public function notifyNewPayment($pembayaranIds, $user)
+    {
+        $count = count($pembayaranIds);
+        $pembayaran = \App\Models\Pembayaran::find($pembayaranIds[0]);
+        
+        if (!$pembayaran) return;
+
+        $amount = \App\Models\Pembayaran::whereIn('id', $pembayaranIds)->sum('jumlah_bayar');
+        $siswaName = $pembayaran->siswa->nama_lengkap ?? 'Siswa';
+
+        // Notify Bendahara & Admin
+        $targets = User::whereIn('role', ['admin', 'bendahara'])->get();
+        
+        foreach ($targets as $target) {
+            $this->create(
+                $target->id,
+                Notification::TIPE_PEMBAYARAN,
+                'Pembayaran Baru (' . $count . ' Item)',
+                $user->name . ' membayar Rp ' . number_format($amount, 0, ',', '.') . ' untuk ' . $siswaName,
+                route('bendahara.pembayaran.index'), // Link to index since it's bulk
+                ['siswa_id' => $pembayaran->siswa_id]
+            );
+        }
+    }
 }

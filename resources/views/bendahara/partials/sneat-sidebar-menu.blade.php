@@ -59,6 +59,19 @@
     </a>
 </li>
 
+<!-- Menu Header - Kenaikan Kelas -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Kenaikan Kelas</span>
+</li>
+
+<!-- Validasi Dispensasi -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.promotion.validation') ? 'active' : '' }}">
+    <a href="{{ route('bendahara.promotion.validation.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-hand-holding-usd"></i>
+        <div>Validasi Dispensasi</div>
+    </a>
+</li>
+
 <!-- Menu Header - Laporan -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Laporan</span>

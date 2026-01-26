@@ -84,6 +84,7 @@ class SiswaSeeder extends Seeder
                     'email' => $username . '@siswa.sipaduhok.sch.id',
                     'password' => Hash::make('password123'),
                     'role' => 'siswa',
+                    'role_id' => 9, // Hardcoded ID from RoleSeeder for siswa
                     'is_active' => true,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -122,6 +123,7 @@ class SiswaSeeder extends Seeder
                     'email' => $usernameOrtu . '@ortu.sipaduhok.sch.id',
                     'password' => Hash::make('password123'),
                     'role' => 'orang_tua',
+                    'role_id' => 8, // Hardcoded ID from RoleSeeder for orang_tua
                     'is_active' => true,
                     'created_at' => now(),
                     'updated_at' => now(),

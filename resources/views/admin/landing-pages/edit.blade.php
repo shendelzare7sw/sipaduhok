@@ -94,6 +94,10 @@
                                                 // Direct array structure (like Stats)
                                                 $items = $content;
                                             }
+
+                                            // Complex sections with icons/special styling should NOT have Add/Remove buttons
+                                            $complexSections = ['programs', 'kurikulum', 'fasilitas', 'services', 'therapy_types', 'coordinators', 'stats', 'contact_info'];
+                                            $isComplexSection = in_array($section->section_key, $complexSections);
                                         @endphp
 
                                         {{-- Render header fields if exists --}}
@@ -121,9 +125,11 @@
                                             <div class="border p-3 rounded mb-3 bg-light list-item-container">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <h6 class="fw-bold mb-0"><i class="bx bx-list-ul"></i> Item #{{ $itemIndex + 1 }}</h6>
+                                                    @if(!$isComplexSection)
                                                     <button type="button" class="btn btn-outline-danger btn-sm remove-item-btn" onclick="removeItem(this)">
                                                         <i class="bx bx-trash"></i> Hapus
                                                     </button>
+                                                    @endif
                                                 </div>
                                                 <div class="row">
                                                     @foreach($item as $key => $value)
@@ -154,13 +160,7 @@
                                         @endforeach
 
                                         {{-- Add New Item Button - Only for simple sections --}}
-                                        @php
-                                            // Complex sections with icons/special styling should NOT have Add button
-                                            $complexSections = ['programs', 'kurikulum', 'fasilitas', 'services', 'therapy_types', 'coordinators'];
-                                            $canAddItems = !in_array($section->section_key, $complexSections);
-                                        @endphp
-                                        
-                                        @if($canAddItems)
+                                        @if(!$isComplexSection)
                                         <div class="mt-3">
                                             <button type="button" class="btn btn-outline-success btn-sm add-item-btn" 
                                                 data-section-id="{{ $section->id }}"

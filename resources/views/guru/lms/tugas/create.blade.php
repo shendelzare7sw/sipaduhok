@@ -13,7 +13,7 @@
         <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
             </a>
-        @endif
+
     </div>
 
     <div class="card-custom">

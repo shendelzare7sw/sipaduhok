@@ -165,71 +165,82 @@
             <div class="card-header"
                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <h5><i class="fas fa-chalkboard-teacher"></i> Data Tenaga Pendidik</h5>
-                <div class="filter-group" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="searchTP" placeholder="Cari nama..."
+                <form action="{{ route('ketua.monitoring.pengguna') }}" method="GET" class="filter-group" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <!-- Preserve parameters from other table if any -->
+                    @foreach(request()->except(['search_tp', 'role_tp', 'status_tp', 'tp_page']) as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+
+                    <input type="text" name="search_tp" value="{{ request('search_tp') }}" placeholder="Cari nama..."
                         style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; width: 180px;">
-                    <select id="filterRoleTP"
+                    
+                    <select name="role_tp" onchange="this.form.submit()"
                         style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                         <option value="">Semua Role</option>
-                        <option value="ketua_pkbm">Ketua PKBM</option>
-                        <option value="sekretaris">Sekretaris</option>
-                        <option value="bendahara">Bendahara</option>
-                        <option value="waka">Waka</option>
-                        <option value="wali_kelas">Wali Kelas</option>
-                        <option value="guru_pengajar">Guru Pengajar</option>
+                        <option value="ketua_pkbm" {{ request('role_tp') == 'ketua_pkbm' ? 'selected' : '' }}>Ketua PKBM</option>
+                        <option value="sekretaris" {{ request('role_tp') == 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
+                        <option value="bendahara" {{ request('role_tp') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
+                        <option value="waka" {{ request('role_tp') == 'waka' ? 'selected' : '' }}>Waka</option>
+                        <option value="wali_kelas" {{ request('role_tp') == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
+                        <option value="guru_pengajar" {{ request('role_tp') == 'guru_pengajar' ? 'selected' : '' }}>Guru Pengajar</option>
                     </select>
-                    <select id="filterStatusTP"
+
+                    <select name="status_tp" onchange="this.form.submit()"
                         style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                         <option value="">Semua Status</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Non-Aktif</option>
+                        <option value="aktif" {{ request('status_tp') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="nonaktif" {{ request('status_tp') == 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
                     </select>
-                </div>
+                    
+                     <noscript><button type="submit" class="btn btn-primary">Filter</button></noscript>
+                </form>
             </div>
             <div class="card-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>NIP</th>
-                            <th>Nama Lengkap</th>
-                            <th>Role</th>
-                            <th>Email</th>
-                            <th>Status Akun</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($tenagaPendidik as $tp)
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>{{ $tp->nip ?? '-' }}</td>
-                                <td><strong>{{ $tp->nama_lengkap }}</strong></td>
-                                <td>
-                                    <span class="badge badge-success">
-                                        {{ ucwords(str_replace('_', ' ', $tp->user->role)) }}
-                                    </span>
-                                </td>
-                                <td>{{ $tp->email ?? $tp->user->email }}</td>
-                                <td>
-                                    @if($tp->user->is_active)
-                                        <span class="badge badge-success">✓ Aktif</span>
-                                    @else
-                                        <span class="badge badge-secondary">✗ Non-Aktif</span>
-                                    @endif
-                                </td>
+                                <th>NIP</th>
+                                <th>Nama Lengkap</th>
+                                <th>Role</th>
+                                <th>Email</th>
+                                <th>Status Akun</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 40px;">
-                                    <i class="fas fa-user-times fa-3x" style="color: #d1d5db; margin-bottom: 16px;"></i>
-                                    <p style="color: #9ca3af; margin: 0;">Belum ada data tenaga pendidik</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @forelse($tenagaPendidik as $tp)
+                                <tr>
+                                    <td>{{ $tp->nip ?? '-' }}</td>
+                                    <td><strong>{{ $tp->nama_lengkap }}</strong></td>
+                                    <td>
+                                        <span class="badge badge-success">
+                                            {{ ucwords(str_replace('_', ' ', $tp->user->role)) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $tp->email ?? $tp->user->email }}</td>
+                                    <td>
+                                        @if($tp->user->is_active)
+                                            <span class="badge badge-success">✓ Aktif</span>
+                                        @else
+                                            <span class="badge badge-secondary">✗ Non-Aktif</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 40px;">
+                                        <i class="fas fa-user-times fa-3x" style="color: #d1d5db; margin-bottom: 16px;"></i>
+                                        <p style="color: #9ca3af; margin: 0;">Belum ada data tenaga pendidik</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
 
                 @if($tenagaPendidik->hasPages())
                     <div style="margin-top: 20px;">
-                        {{ $tenagaPendidik->links() }}
+                        {{ $tenagaPendidik->appends(request()->all())->links() }}
                     </div>
                 @endif
             </div>
@@ -240,131 +251,82 @@
             <div class="card-header"
                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
                 <h5><i class="fas fa-user-graduate"></i> Data Siswa</h5>
-                <div class="filter-group" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="searchSiswa" placeholder="Cari nama siswa..."
+                <form action="{{ route('ketua.monitoring.pengguna') }}" method="GET" class="filter-group" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                     <!-- Preserve parameters from other table if any -->
+                    @foreach(request()->except(['search_siswa', 'status_siswa', 'siswa_page']) as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+
+                    <input type="text" name="search_siswa" value="{{ request('search_siswa') }}" placeholder="Cari nama siswa..."
                         style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; width: 180px;">
-                    <select id="filterStatusSiswa"
+                    
+                    <select name="status_siswa" onchange="this.form.submit()"
                         style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                         <option value="">Semua Status</option>
-                        <option value="aktif">Aktif</option>
-                        <option value="nonaktif">Non-Aktif</option>
+                        <option value="aktif" {{ request('status_siswa') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="nonaktif" {{ request('status_siswa') == 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
                     </select>
-                </div>
+
+                     <noscript><button type="submit" class="btn btn-primary">Filter</button></noscript>
+                </form>
             </div>
             <div class="card-body">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>NISN</th>
-                            <th>Nama Lengkap</th>
-                            <th>Kelas</th>
-                            <th>Status Siswa</th>
-                            <th>Status Akun</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($siswa as $s)
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td>{{ $s->nisn }}</td>
-                                <td><strong>{{ $s->nama_lengkap }}</strong></td>
-                                <td>
-                                    @if($s->kelas)
-                                        <span class="badge badge-success">{{ $s->kelas->nama_kelas }}</span>
-                                    @else
-                                        <span class="badge badge-warning">Belum ada kelas</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($s->status === 'aktif')
-                                        <span class="badge badge-success">✓ Aktif</span>
-                                    @else
-                                        <span class="badge badge-secondary">{{ ucfirst($s->status) }}</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($s->user->is_active)
-                                        <span class="badge badge-success">✓ Aktif</span>
-                                    @else
-                                        <span class="badge badge-secondary">✗ Non-Aktif</span>
-                                    @endif
-                                </td>
+                                <th>NISN</th>
+                                <th>Nama Lengkap</th>
+                                <th>Kelas</th>
+                                <th>Status Siswa</th>
+                                <th>Status Akun</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 40px;">
-                                    <i class="fas fa-user-times fa-3x" style="color: #d1d5db; margin-bottom: 16px;"></i>
-                                    <p style="color: #9ca3af; margin: 0;">Belum ada data siswa</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @forelse($siswa as $s)
+                                <tr>
+                                    <td>{{ $s->nisn }}</td>
+                                    <td><strong>{{ $s->nama_lengkap }}</strong></td>
+                                    <td>
+                                        @if($s->kelas)
+                                            <span class="badge badge-success">{{ $s->kelas->nama_kelas }}</span>
+                                        @else
+                                            <span class="badge badge-warning">Belum ada kelas</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($s->status === 'aktif')
+                                            <span class="badge badge-success">✓ Aktif</span>
+                                        @else
+                                            <span class="badge badge-secondary">{{ ucfirst($s->status) }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($s->user->is_active)
+                                            <span class="badge badge-success">✓ Aktif</span>
+                                        @else
+                                            <span class="badge badge-secondary">✗ Non-Aktif</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 40px;">
+                                        <i class="fas fa-user-times fa-3x" style="color: #d1d5db; margin-bottom: 16px;"></i>
+                                        <p style="color: #9ca3af; margin: 0;">Belum ada data siswa</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
 
                 @if($siswa->hasPages())
                     <div style="margin-top: 20px;">
-                        {{ $siswa->links() }}
+                        {{ $siswa->appends(request()->all())->links() }}
                     </div>
                 @endif
             </div>
         </div>
     </div>
-
-    <script>
-        // Filter for Tenaga Pendidik table
-        const searchTP = document.getElementById('searchTP');
-        const filterRoleTP = document.getElementById('filterRoleTP');
-        const filterStatusTP = document.getElementById('filterStatusTP');
-        const tpTable = document.querySelector('.card:nth-child(2) tbody');
-
-        function filterTPTable() {
-            const search = searchTP.value.toLowerCase();
-            const role = filterRoleTP.value.toLowerCase();
-            const status = filterStatusTP.value;
-            const rows = tpTable.querySelectorAll('tr');
-
-            rows.forEach(row => {
-                let show = true;
-                const nama = row.cells[1]?.textContent.toLowerCase() || '';
-                const roleCell = row.cells[2]?.textContent.toLowerCase() || '';
-                const statusCell = row.cells[4]?.textContent.toLowerCase() || '';
-
-                if (search && !nama.includes(search)) show = false;
-                if (role && !roleCell.includes(role.replace('_', ' '))) show = false;
-                if (status === 'aktif' && !statusCell.includes('aktif')) show = false;
-                if (status === 'nonaktif' && statusCell.includes('aktif') && !statusCell.includes('non')) show = false;
-
-                row.style.display = show ? '' : 'none';
-            });
-        }
-
-        searchTP.addEventListener('input', filterTPTable);
-        filterRoleTP.addEventListener('change', filterTPTable);
-        filterStatusTP.addEventListener('change', filterTPTable);
-
-        // Filter for Siswa table
-        const searchSiswa = document.getElementById('searchSiswa');
-        const filterStatusSiswa = document.getElementById('filterStatusSiswa');
-        const siswaTable = document.querySelector('.card:nth-child(3) tbody');
-
-        function filterSiswaTable() {
-            const search = searchSiswa.value.toLowerCase();
-            const status = filterStatusSiswa.value;
-            const rows = siswaTable.querySelectorAll('tr');
-
-            rows.forEach(row => {
-                let show = true;
-                const nama = row.cells[1]?.textContent.toLowerCase() || '';
-                const statusAkun = row.cells[4]?.textContent.toLowerCase() || '';
-
-                if (search && !nama.includes(search)) show = false;
-                if (status === 'aktif' && !statusAkun.includes('aktif')) show = false;
-                if (status === 'nonaktif' && statusAkun.includes('aktif') && !statusAkun.includes('non')) show = false;
-
-                row.style.display = show ? '' : 'none';
-            });
-        }
-
-        searchSiswa.addEventListener('input', filterSiswaTable);
-        filterStatusSiswa.addEventListener('change', filterSiswaTable);
-    </script>
 @endsection

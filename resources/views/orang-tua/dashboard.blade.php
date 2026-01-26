@@ -31,7 +31,7 @@
         </div>
     @else
         <!-- Children Summary Cards -->
-        <div class="row">
+        <div class="row g-4">
             @foreach($children as $child)
                 @php
                     $childSummary = $summary[$child->id] ?? [
@@ -43,7 +43,7 @@
                         ? ($childSummary['total_bayar'] / $childSummary['total_tagihan']) * 100
                         : 0;
                 @endphp
-                <div class="col-md-6 col-xl-4 mb-4">
+                <div class="col-12 col-lg-6">
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-3">
@@ -53,77 +53,86 @@
                                             <i class="fas fa-user-graduate"></i>
                                         </div>
                                     </div>
-                                    <div>
-                                        <h5 class="mb-0">{{ $child->nama_lengkap }}</h5>
-                                        <small class="text-muted">
-                                            {{ $child->kelas->nama_kelas ?? 'Belum ada kelas' }}
-                                        </small>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h5 class="mb-0 me-2">{{ $child->nama_lengkap }}</h5>
+                                        @if($child->status === 'lulus')
+                                            <span class="badge bg-dark">ALUMNI</span>
+                                        @endif
                                     </div>
+                                    <small class="text-muted d-none d-sm-inline-block ms-2">
+                                        ({{ $child->kelas->nama_kelas ?? 'Belum ada kelas' }})
+                                    </small>
                                 </div>
-                                @if($childSummary['sisa_tagihan'] <= 0)
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle me-1"></i>Lunas
-                                    </span>
-                                @elseif($persentaseBayar >= 50)
-                                    <span class="badge bg-warning">Sebagian</span>
-                                @else
-                                    <span class="badge bg-danger">Belum Lunas</span>
-                                @endif
+                            </div>
+                            <!-- Mobile-only Class info -->
+                            <div class="d-sm-none mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-school me-1"></i>{{ $child->kelas->nama_kelas ?? 'Belum ada kelas' }}
+                                </small>
                             </div>
 
-                            <div class="mb-2">
+                            @if($child->status !== 'lulus')
+                                <div class="mb-3">
+                                    @if($childSummary['sisa_tagihan'] <= 0)
+                                        <span class="badge bg-success w-100 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>Lunas
+                                        </span>
+                                    @elseif($persentaseBayar >= 50)
+                                        <span class="badge bg-warning w-100 py-2">Pembayaran Sebagian</span>
+                                    @else
+                                        <span class="badge bg-danger w-100 py-2">Belum Lunas</span>
+                                    @endif
+                                </div>
+                            @endif
+
+                            <div class="mb-3">
                                 <small class="text-muted">
                                     <i class="fas fa-building me-1"></i>{{ $child->cabang->nama_cabang ?? '-' }}
                                 </small>
                             </div>
-
-                            <hr class="my-3">
-
-                            <!-- Financial Summary -->
-                            <div class="mb-3">
-                                <div class="row g-2 mb-3">
-                                    <div class="col-4 text-center">
-                                        <div class="border rounded p-2">
-                                            <small class="d-block text-muted mb-1">Total</small>
-                                            <strong class="d-block text-primary small">
-                                                {{ number_format($childSummary['total_tagihan'] / 1000, 0) }}K
-                                            </strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-4 text-center">
-                                        <div class="border rounded p-2">
-                                            <small class="d-block text-muted mb-1">Dibayar</small>
-                                            <strong class="d-block text-success small">
-                                                {{ number_format($childSummary['total_bayar'] / 1000, 0) }}K
-                                            </strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-4 text-center">
-                                        <div class="border rounded p-2">
-                                            <small class="d-block text-muted mb-1">Sisa</small>
-                                            <strong class="d-block {{ $childSummary['sisa_tagihan'] > 0 ? 'text-danger' : 'text-success' }} small">
-                                                {{ number_format($childSummary['sisa_tagihan'] / 1000, 0) }}K
-                                            </strong>
-                                        </div>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-4 text-center">
+                                    <div class="border rounded p-2 bg-light">
+                                        <small class="d-block text-muted mb-1" style="font-size: 0.7rem;">Total</small>
+                                        <strong class="d-block text-primary" style="font-size: 0.85rem;">
+                                            {{ number_format($childSummary['total_tagihan'] / 1000, 0) }}K
+                                        </strong>
                                     </div>
                                 </div>
-
-                                <!-- Progress Bar -->
-                                <div class="mb-2">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <small class="text-muted">Progress Pembayaran</small>
-                                        <small class="fw-bold {{ $persentaseBayar >= 100 ? 'text-success' : ($persentaseBayar >= 50 ? 'text-warning' : 'text-danger') }}">
-                                            {{ number_format($persentaseBayar, 0) }}%
-                                        </small>
+                                <div class="col-4 text-center">
+                                    <div class="border rounded p-2 bg-light">
+                                        <small class="d-block text-muted mb-1" style="font-size: 0.7rem;">Dibayar</small>
+                                        <strong class="d-block text-success" style="font-size: 0.85rem;">
+                                            {{ number_format($childSummary['total_bayar'] / 1000, 0) }}K
+                                        </strong>
                                     </div>
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar {{ $persentaseBayar >= 100 ? 'bg-success' : ($persentaseBayar >= 50 ? 'bg-warning' : 'bg-danger') }}"
-                                             role="progressbar"
-                                             style="width: {{ min($persentaseBayar, 100) }}%"
-                                             aria-valuenow="{{ $persentaseBayar }}"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100">
-                                        </div>
+                                </div>
+                                <div class="col-4 text-center">
+                                    <div class="border rounded p-2 bg-light">
+                                        <small class="d-block text-muted mb-1" style="font-size: 0.7rem;">Sisa</small>
+                                        <strong class="d-block {{ $childSummary['sisa_tagihan'] > 0 ? 'text-danger' : 'text-success' }}" style="font-size: 0.85rem;">
+                                            {{ number_format($childSummary['sisa_tagihan'] / 1000, 0) }}K
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small class="text-muted" style="font-size: 0.75rem;">Progress Pembayaran</small>
+                                    <small class="fw-bold {{ $persentaseBayar >= 100 ? 'text-success' : ($persentaseBayar >= 50 ? 'text-warning' : 'text-danger') }}">
+                                        {{ number_format($persentaseBayar, 0) }}%
+                                    </small>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar {{ $persentaseBayar >= 100 ? 'bg-success' : ($persentaseBayar >= 50 ? 'bg-warning' : 'bg-danger') }}"
+                                         role="progressbar"
+                                         style="width: {{ min($persentaseBayar, 100) }}%"
+                                         aria-valuenow="{{ $persentaseBayar }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
                                     </div>
                                 </div>
                             </div>
@@ -132,26 +141,28 @@
                             <div class="row g-2">
                                 <div class="col-6">
                                     <a href="{{ route('orang-tua.tagihan.anak', $child->id) }}" class="btn btn-primary btn-sm w-100">
-                                        <i class="fas fa-wallet me-1"></i>
-                                        <span class="d-none d-sm-inline">Tagihan</span>
+                                        <i class="fas fa-wallet me-1"></i> Tagihan
                                     </a>
                                 </div>
                                 <div class="col-6">
                                     <a href="{{ route('orang-tua.rapor.anak', $child->id) }}" class="btn btn-outline-secondary btn-sm w-100">
-                                        <i class="fas fa-file-alt me-1"></i>
-                                        <span class="d-none d-sm-inline">Rapor</span>
+                                        <i class="fas fa-file-alt me-1"></i> Rapor
                                     </a>
                                 </div>
                                 <div class="col-6">
+                                    @if($child->status !== 'lulus')
                                     <a href="{{ route('orang-tua.presensi.ajukan-izin', $child->id) }}" class="btn btn-warning btn-sm w-100">
-                                        <i class="fas fa-notes-medical me-1"></i>
-                                        <span class="d-none d-sm-inline">Ajukan Izin</span>
+                                        <i class="fas fa-paper-plane me-1"></i> Izin
                                     </a>
+                                    @else
+                                    <button class="btn btn-secondary btn-sm w-100" disabled>
+                                        Lulus
+                                    </button>
+                                    @endif
                                 </div>
                                 <div class="col-6">
                                     <a href="{{ route('orang-tua.presensi.riwayat-izin', $child->id) }}" class="btn btn-outline-info btn-sm w-100">
-                                        <i class="fas fa-history me-1"></i>
-                                        <span class="d-none d-sm-inline">Riwayat Izin</span>
+                                        <i class="fas fa-history me-1"></i> Riwayat
                                     </a>
                                 </div>
                             </div>

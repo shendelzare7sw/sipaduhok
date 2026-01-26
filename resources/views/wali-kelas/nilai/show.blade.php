@@ -163,8 +163,10 @@
                             <th class="text-center" width="50">NO</th>
                             <th>MATA PELAJARAN</th>
                             <th class="text-center">TUGAS</th>
-                            <th class="text-center">UTS</th>
-                            <th class="text-center">UAS</th>
+                            <th class="text-center">LATIHAN</th>
+                            <th class="text-center">UH</th>
+                            <th class="text-center">PTS</th>
+                            <th class="text-center">PAS</th>
                             <th class="text-center">AKHIR</th>
                             <th class="text-center">PREDIKAT</th>
                             <th class="text-center">STATUS</th>
@@ -193,13 +195,19 @@
                                     <div class="small text-muted text-uppercase">Wajib / Kelompok A</div>
                                 </td>
                                 <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->nilai_tugas ? number_format($nilai->nilai_tugas, 1) : '-' }}
+                                    {{ $nilai && $nilai->rata_tugas ? number_format($nilai->rata_tugas, 1) : '-' }}
                                 </td>
                                 <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->nilai_uts ? number_format($nilai->nilai_uts, 1) : '-' }}
+                                    {{ $nilai && $nilai->rata_latihan ? number_format($nilai->rata_latihan, 1) : '-' }}
                                 </td>
                                 <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->nilai_uas ? number_format($nilai->nilai_uas, 1) : '-' }}
+                                    {{ $nilai && $nilai->rata_uh ? number_format($nilai->rata_uh, 1) : '-' }}
+                                </td>
+                                <td class="text-center align-middle score-cell">
+                                    {{ $nilai && $nilai->pts ? number_format($nilai->pts, 1) : '-' }}
+                                </td>
+                                <td class="text-center align-middle score-cell">
+                                    {{ $nilai && $nilai->pas ? number_format($nilai->pas, 1) : '-' }}
                                 </td>
                                 <td class="text-center align-middle">
                                     @if($nilaiAkhir)
@@ -246,7 +254,7 @@
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Metode Perhitungan Nilai Akhir</div>
                         <p class="mb-0 small text-gray-700">
                             Sistem menghitung Nilai Akhir secara otomatis berdasarkan komposisi bobot: 
-                            <strong>Tugas (30%)</strong>, <strong>UTS (30%)</strong>, dan <strong>UAS (40%)</strong>. 
+                            <strong>Tugas (15%)</strong>, <strong>Latihan (15%)</strong>, <strong>UH (20%)</strong>, <strong>PTS (20%)</strong>, dan <strong>PAS (30%)</strong>. 
                             Ambang batas ketuntasan minimal (KKM) ditetapkan sebesar <strong>70.00</strong>.
                         </p>
                     </div>

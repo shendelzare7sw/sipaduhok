@@ -137,9 +137,10 @@ class JadwalPelajaranController extends Controller
         $mataPelajaranList = MataPelajaran::orderBy('jenjang')->orderBy('nama_mapel')->get();
 
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
+        // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function ($q) {
             $q->where('is_active', true)->where('role', 'guru_pengajar');
-        })->orderBy('nama_lengkap')->get();
+        })->with('user')->orderBy('nama_lengkap')->get();
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -175,6 +176,8 @@ class JadwalPelajaranController extends Controller
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'keterangan' => 'nullable|string',
+            'siswa_ids' => 'nullable|array',
+            'siswa_ids.*' => 'exists:siswa,id',
         ]);
 
         // Validasi bentrok
@@ -184,7 +187,8 @@ class JadwalPelajaranController extends Controller
             $validated['guru_id'],
             $validated['hari'],
             $validated['jam_mulai'],
-            $validated['jam_selesai']
+            $validated['jam_selesai'],
+            $validated['mata_pelajaran_id']
         );
 
         if ($conflicts['hasConflict']) {
@@ -260,7 +264,7 @@ class JadwalPelajaranController extends Controller
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function ($q) {
             $q->where('is_active', true)->where('role', 'guru_pengajar');
-        })->orderBy('nama_lengkap')->get();
+        })->with('user')->orderBy('nama_lengkap')->get();
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -296,8 +300,11 @@ class JadwalPelajaranController extends Controller
             'jam_mulai' => 'required|date_format:H:i',
             'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
             'keterangan' => 'nullable|string',
+            'siswa_ids' => 'nullable|array',
+            'siswa_ids.*' => 'exists:siswa,id',
         ]);
 
+        // Validasi bentrok (exclude current jadwal)
         // Validasi bentrok (exclude current jadwal)
         $conflicts = $this->checkConflicts(
             $validated['tahun_ajaran_id'],
@@ -306,6 +313,7 @@ class JadwalPelajaranController extends Controller
             $validated['hari'],
             $validated['jam_mulai'],
             $validated['jam_selesai'],
+            $validated['mata_pelajaran_id'],
             $jadwalPelajaran->id
         );
 
@@ -361,6 +369,7 @@ class JadwalPelajaranController extends Controller
                 $jadwalPelajaran->hari,
                 $jadwalPelajaran->jam_mulai,
                 $jadwalPelajaran->jam_selesai,
+                $jadwalPelajaran->mata_pelajaran_id,
                 $jadwalPelajaran->id
             );
 
@@ -427,6 +436,7 @@ class JadwalPelajaranController extends Controller
                     $jadwal->hari,
                     $jadwal->jam_mulai,
                     $jadwal->jam_selesai,
+                    $jadwal->mata_pelajaran_id,
                     $jadwal->id
                 );
 
@@ -489,6 +499,20 @@ class JadwalPelajaranController extends Controller
     }
 
     /**
+     * Get students by kelas (AJAX).
+     */
+    public function getStudents(Request $request, $kelasId)
+    {
+        $students = \App\Models\Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->select('id', 'nama_lengkap', 'nis')
+            ->get();
+
+        return response()->json($students);
+    }
+
+    /**
      * Get jadwal by guru (AJAX).
      */
     public function getByGuru(Request $request, $guruId)
@@ -506,34 +530,42 @@ class JadwalPelajaranController extends Controller
     /**
      * Check for schedule conflicts.
      */
-    private function checkConflicts($tahunAjaranId, $kelasId, $guruId, $hari, $jamMulai, $jamSelesai, $excludeId = null)
+    private function checkConflicts($tahunAjaranId, $kelasId, $guruId, $hari, $jamMulai, $jamSelesai, $mataPelajaranId = null, $excludeId = null)
     {
         $result = ['hasConflict' => false, 'message' => ''];
 
-        // Check bentrok dengan waktu istirahat
-        $kelas = Kelas::find($kelasId);
-        if ($kelas) {
-            $istirahatConflict = PengaturanIstirahat::jenjang($kelas->jenjang)
-                ->aktif()
-                ->untukHari($hari)
-                ->get()
-                ->first(function ($istirahat) use ($jamMulai, $jamSelesai) {
-                    // Check if time overlaps
-                    // Menggunakan <= dan >= agar jadwal yang berakhir/mulai TEPAT pada boundary
-                    // istirahat TIDAK dianggap bentrok
-                    // Contoh: Jadwal 07:00-08:30 dengan Istirahat 08:30-09:00 = TIDAK bentrok ✅
-                    return !($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
-                });
+        // Get Current Class Data
+        $kelas = Kelas::with('cabang')->find($kelasId);
+        if (!$kelas) {
+            return ['hasConflict' => true, 'message' => 'Kelas tidak ditemukan'];
+        }
 
-            if ($istirahatConflict) {
-                $result['hasConflict'] = true;
-                $result['message'] = "Bentrok dengan waktu istirahat '{$istirahatConflict->nama_istirahat}' pada {$hari} jam " . substr($istirahatConflict->jam_mulai, 0, 5) . " - " . substr($istirahatConflict->jam_selesai, 0, 5);
-                return $result;
+        // Check bentrok dengan waktu istirahat
+        $istirahatConflict = PengaturanIstirahat::jenjang($kelas->jenjang)
+            ->aktif()
+            ->untukHari($hari)
+            ->get()
+            ->first(function ($istirahat) use ($jamMulai, $jamSelesai) {
+                return !($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
+            });
+
+        if ($istirahatConflict) {
+            $result['hasConflict'] = true;
+            $result['message'] = "Bentrok dengan waktu istirahat '{$istirahatConflict->nama_istirahat}' pada {$hari} jam " . substr($istirahatConflict->jam_mulai, 0, 5) . " - " . substr($istirahatConflict->jam_selesai, 0, 5);
+            return $result;
+        }
+
+        // Check if subject is Religion
+        $isAgama = false;
+        if ($mataPelajaranId) {
+            $mapel = MataPelajaran::find($mataPelajaranId);
+            if ($mapel && (stripos($mapel->nama_mapel, 'Agama') !== false || stripos($mapel->nama_mapel, 'Religi') !== false)) {
+                $isAgama = true;
             }
         }
 
         // Check bentrok kelas
-        $kelasConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
+        $kelasConflictQuery = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
             ->byKelas($kelasId)
             ->byHari($hari)
             ->where(function ($q) use ($jamMulai, $jamSelesai) {
@@ -544,8 +576,17 @@ class JadwalPelajaranController extends Controller
                             ->where('jam_selesai', '>=', $jamSelesai);
                     });
             })
-            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-            ->first();
+            ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId));
+
+        // If Agama, allow overlapping with OTHER Agama subjects
+        if ($isAgama) {
+            $kelasConflictQuery->whereHas('mataPelajaran', function($q) {
+                 $q->where('nama_mapel', 'not like', '%Agama%')
+                   ->where('nama_mapel', 'not like', '%Religi%');
+            });
+        }
+
+        $kelasConflict = $kelasConflictQuery->first();
 
         if ($kelasConflict) {
             $result['hasConflict'] = true;
@@ -567,13 +608,30 @@ class JadwalPelajaranController extends Controller
                         });
                 })
                 ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-                ->with('kelas')
+                ->with(['kelas.cabang', 'mataPelajaran'])
                 ->first();
 
             if ($guruConflict) {
-                $result['hasConflict'] = true;
-                $result['message'] = "Guru bentrok pada {$hari} jam {$guruConflict->jam_mulai} - {$guruConflict->jam_selesai} di kelas {$guruConflict->kelas->nama_kelas}";
-                return $result;
+                // Check if Merge Exception applies:
+                // Same Subject AND Same Branch (Teacher teaches same subject in same branch at same time)
+                $sameSubject = $mataPelajaranId && $guruConflict->mata_pelajaran_id == $mataPelajaranId;
+                
+                // Check branch match
+                $conflictingClassBranchId = $guruConflict->kelas->cabang_id ?? null;
+                $currentClassBranchId = $kelas->cabang_id ?? null;
+                
+                $sameBranch = $conflictingClassBranchId && $currentClassBranchId && $conflictingClassBranchId == $currentClassBranchId;
+
+                // Also we can check Jenjang match if needed, but "Same Branch" is the user requirement "cabang sama".
+                // User said "misalnya SMP berada pada 7A,8A,9A". This implies Same Jenjang too, but Same Branch is the hard constraint mentioned.
+                
+                if ($sameSubject && $sameBranch) {
+                    // It is a valid merge. No conflict.
+                } else {
+                    $result['hasConflict'] = true;
+                    $result['message'] = "Guru bentrok pada {$hari} jam {$guruConflict->jam_mulai} - {$guruConflict->jam_selesai} di kelas {$guruConflict->kelas->nama_kelas}";
+                    return $result;
+                }
             }
         }
 
@@ -592,6 +650,7 @@ class JadwalPelajaranController extends Controller
             'hari' => 'Hari',
             'jam_mulai' => 'Jam Mulai',
             'jam_selesai' => 'Jam Selesai',
+            'siswa_ids' => 'Siswa Khusus',
         ];
 
         foreach ($fieldsToTrack as $field => $label) {
@@ -630,6 +689,9 @@ class JadwalPelajaranController extends Controller
             case 'mata_pelajaran_id':
                 $mapel = MataPelajaran::find($value);
                 return $mapel ? $mapel->nama_mapel : '-';
+            case 'siswa_ids':
+                if (empty($value)) return 'Semua Siswa';
+                return count($value) . ' Siswa Dipilih';
             default:
                 return $value;
         }

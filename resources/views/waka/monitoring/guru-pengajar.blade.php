@@ -188,19 +188,30 @@
             <div class="card-header"
                 style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
                 <h5><i class="fas fa-chalkboard-teacher"></i> Monitoring Guru Pengajar & Progress Tugas</h5>
-                <div class="filter-group" style="display: flex; gap: 12px; align-items: center;">
-                    <input type="text" id="searchGuru" class="form-control" placeholder="Cari nama guru..."
+                
+                <form action="{{ route('waka.monitoring.guru-pengajar') }}" method="GET" class="filter-group" style="display: flex; gap: 12px; align-items: center;">
+                    <!-- Search -->
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama guru..." value="{{ request('search') }}"
                         style="width: 200px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                    <select id="filterProgress" class="form-control"
-                        style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        <option value="">Semua Progress</option>
-                        <option value="100">Selesai (100%)</option>
-                        <option value="below">Belum Selesai (&lt;100%)</option>
+
+                    <!-- Filter Cabang -->
+                    <select name="cabang_id" class="form-control" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+                        <option value="">Semua Cabang</option>
+                        @foreach($cabangs as $cabang)
+                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
+                        @endforeach
                     </select>
-                </div>
+
+                    <noscript><button type="submit" class="btn btn-primary">Filter</button></noscript>
+                    
+                    @if(request()->anyFilled(['search', 'cabang_id']))
+                        <a href="{{ route('waka.monitoring.guru-pengajar') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Reset</a>
+                    @endif
+                </form>
             </div>
             <div class="card-body">
                 @if($guruPengajar->count() > 0)
+                <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
@@ -222,6 +233,10 @@
                                             </span>
                                             @if(!$loop->last)<br>@endif
                                         @endforeach
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ $guru->guruKelas->first()?->kelas->cabang->nama_cabang ?? '' }}
+                                        </small>
                                     </td>
                                     <td>
                                         <div class="stat-mini-inline">
@@ -244,11 +259,11 @@
                                     </td>
                                     <td style="text-align: center;">
                                         <div class="progress-circle 
-                                                        @if($guru->progress_nilai == 100) progress-100
-                                                        @elseif($guru->progress_nilai >= 75) progress-75
-                                                        @elseif($guru->progress_nilai >= 50) progress-50
-                                                        @else progress-25
-                                                        @endif">
+                                            @if($guru->progress_nilai == 100) progress-100
+                                            @elseif($guru->progress_nilai >= 75) progress-75
+                                            @elseif($guru->progress_nilai >= 50) progress-50
+                                            @else progress-25
+                                            @endif">
                                             {{ number_format($guru->progress_nilai, 0) }}%
                                         </div>
                                     </td>
@@ -256,10 +271,17 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-4">
+                    {{ $guruPengajar->withQueryString()->links() }}
+                </div>
+
                 @else
                     <div class="empty-state">
                         <i class="fas fa-chalkboard-teacher"></i>
-                        <p style="font-weight: 500; font-size: 16px; margin-bottom: 8px;">Belum Ada Guru Pengajar</p>
+                        <p style="font-weight: 500; font-size: 16px; margin-bottom: 8px;">Tidak Ada Data Guru Pengajar</p>
                         <small>Data guru pengajar akan muncul setelah ditugaskan oleh Admin</small>
                     </div>
                 @endif
@@ -280,44 +302,8 @@
                             <li>Progress 100% = Semua nilai sudah diisi</li>
                             <li>Progress <50%=Perlu follow-up ke guru terkait</li>
                         </ul>
-                    </div>
                 </div>
             </div>
         </div>
-
-        <script>
-            // Filter functionality for guru pengajar
-            const searchGuru = document.getElementById('searchGuru');
-            const filterProgress = document.getElementById('filterProgress');
-
-            function filterTable() {
-                const searchTerm = searchGuru.value.toLowerCase();
-                const progressFilter = filterProgress.value;
-                const rows = document.querySelectorAll('tbody tr');
-
-                rows.forEach(row => {
-                    let showRow = true;
-                    const namaGuru = row.cells[0].textContent.toLowerCase();
-                    const progressCell = row.cells[4].textContent.trim();
-                    const progressValue = parseInt(progressCell.replace('%', ''));
-
-                    // Search filter
-                    if (searchTerm && !namaGuru.includes(searchTerm)) {
-                        showRow = false;
-                    }
-
-                    // Progress filter
-                    if (progressFilter === '100' && progressValue !== 100) {
-                        showRow = false;
-                    } else if (progressFilter === 'below' && progressValue >= 100) {
-                        showRow = false;
-                    }
-
-                    row.style.display = showRow ? '' : 'none';
-                });
-            }
-
-            searchGuru.addEventListener('input', filterTable);
-            filterProgress.addEventListener('change', filterTable);
-        </script>
+    </div>
 @endsection

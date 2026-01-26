@@ -71,27 +71,44 @@ class GuruNilaiController extends Controller
     /**
      * Update nilai manual
      */
+    /**
+     * Update nilai manual
+     */
     public function update(Request $request, $kelasId, $mapelId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
-        $validated = $request->validate([
+
+        $rules = [
             'nilai_id' => 'required|exists:nilai,id',
-            'nilai_tugas' => 'nullable|numeric|min:0|max:100',
-            'nilai_uts' => 'nullable|numeric|min:0|max:100',
-            'nilai_uas' => 'nullable|numeric|min:0|max:100',
-        ]);
+            'pts' => 'nullable|numeric|min:0|max:100',
+            'pas' => 'nullable|numeric|min:0|max:100',
+            'keterampilan' => 'nullable|numeric|min:0|max:100',
+            'to_1' => 'nullable|numeric|min:0|max:100',
+            'to_2' => 'nullable|numeric|min:0|max:100',
+            'to_3' => 'nullable|numeric|min:0|max:100',
+            'upk' => 'nullable|numeric|min:0|max:100',
+            'ujian_praktek' => 'nullable|numeric|min:0|max:100',
+        ];
+
+        // Add validations for 1-5
+        foreach (range(1, 5) as $i) {
+            $rules["tugas_$i"] = 'nullable|numeric|min:0|max:100';
+            $rules["latihan_$i"] = 'nullable|numeric|min:0|max:100';
+            $rules["uh_$i"] = 'nullable|numeric|min:0|max:100';
+        }
+
+        $validated = $request->validate($rules);
         
         $nilai = Nilai::findOrFail($validated['nilai_id']);
         
-        $nilai->update([
-            'nilai_tugas' => $validated['nilai_tugas'],
-            'nilai_uts' => $validated['nilai_uts'],
-            'nilai_uas' => $validated['nilai_uas'],
-        ]);
+        // Remove nilai_id from validated array before update
+        $dataToUpdate = collect($validated)->except(['nilai_id'])->toArray();
         
-        // Recalculate nilai_akhir
+        $nilai->update($dataToUpdate);
+        
+        // Recalculate averages and final score
+        $nilai->hitungSemuaRata();
         $nilai->hitungNilaiAkhir();
         
         return redirect()
@@ -138,44 +155,74 @@ class GuruNilaiController extends Controller
     /**
      * Calculate nilai from tugas and ujian
      */
+    /**
+     * Calculate nilai from tugas and ujian
+     */
     private function calculateNilai($nilai)
     {
-        // Hitung rata-rata nilai tugas
-        $avgTugas = TugasSiswa::whereHas('tugas', function($q) use ($nilai) {
+        // 1. Fetch Assignments (Tugas & Latihan)
+        $tugasSiswa = TugasSiswa::whereHas('tugas', function($q) use ($nilai) {
                 $q->where('mata_pelajaran_id', $nilai->mata_pelajaran_id)
                   ->where('kelas_id', $nilai->kelas_id);
             })
+            ->with('tugas')
             ->where('siswa_id', $nilai->siswa_id)
             ->where('status', 'dinilai')
-            ->avg('nilai');
-        
-        // Hitung rata-rata UTS
-        $avgUts = UjianSiswa::whereHas('ujian', function($q) use ($nilai) {
+            ->get();
+
+        $updateData = [];
+
+        // Map Tugas 1-5 & Latihan 1-5
+        foreach ($tugasSiswa as $ts) {
+            $jenis = $ts->tugas->jenis_tugas ?? 'tugas'; // tugas or latihan
+            $urutan = $ts->tugas->urutan ?? 1;
+            
+            if ($urutan >= 1 && $urutan <= 5) {
+                $column = "{$jenis}_{$urutan}"; // e.g., tugas_1, latihan_2
+                $updateData[$column] = $ts->nilai;
+            }
+        }
+
+        // 2. Fetch Exams (UH, PTS, PAS)
+        $ujianSiswa = UjianSiswa::whereHas('ujian', function($q) use ($nilai) {
                 $q->where('mata_pelajaran_id', $nilai->mata_pelajaran_id)
-                  ->where('kelas_id', $nilai->kelas_id)
-                  ->where('tipe_ujian', 'uts');
+                  ->where('kelas_id', $nilai->kelas_id);
             })
+            ->with('ujian')
             ->where('siswa_id', $nilai->siswa_id)
             ->where('status', 'selesai')
-            ->avg('nilai');
+            ->get();
+
+        foreach ($ujianSiswa as $us) {
+            $tipe = $us->ujian->tipe_ujian; // uh, uts, uas
+            
+            // Map UTS -> PTS, UAS -> PAS
+            if ($tipe === 'uts') {
+                $updateData['pts'] = $us->nilai;
+            } elseif ($tipe === 'uas') {
+                $updateData['pas'] = $us->nilai;
+            } elseif ($tipe === 'uh') {
+                // Assuming UH has urutan or we take latest? 
+                // For now, let's assume UH works similarly if 'ujian' table has 'urutan' or name parsing.
+                // If 'ujian' doesn't have 'urutan', we might need to rely on 'nama_ujian' or created_at.
+                // Checking previous analysis: `ujian` table exists but `urutan` column check needed.
+                // If missing, we skip mapping UH automatically for now or use name 'UH 1'.
+                // Let's check name:
+                if (preg_match('/(UH|Ulangan Harian)\s*(\d+)/i', $us->ujian->nama_ujian, $matches)) {
+                    $urutan = intval($matches[2]);
+                    if ($urutan >= 1 && $urutan <= 5) {
+                        $updateData["uh_{$urutan}"] = $us->nilai;
+                    }
+                }
+            }
+        }
+
+        if (!empty($updateData)) {
+            $nilai->update($updateData);
+        }
         
-        // Hitung rata-rata UAS
-        $avgUas = UjianSiswa::whereHas('ujian', function($q) use ($nilai) {
-                $q->where('mata_pelajaran_id', $nilai->mata_pelajaran_id)
-                  ->where('kelas_id', $nilai->kelas_id)
-                  ->where('tipe_ujian', 'uas');
-            })
-            ->where('siswa_id', $nilai->siswa_id)
-            ->where('status', 'selesai')
-            ->avg('nilai');
-        
-        $nilai->update([
-            'nilai_tugas' => $avgTugas,
-            'nilai_uts' => $avgUts,
-            'nilai_uas' => $avgUas,
-        ]);
-        
-        // Auto-calculate nilai_akhir via model method
+        // Auto-calculate properties
+        $nilai->hitungSemuaRata();
         $nilai->hitungNilaiAkhir();
     }
     

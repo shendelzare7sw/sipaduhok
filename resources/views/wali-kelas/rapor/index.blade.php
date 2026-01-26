@@ -60,16 +60,23 @@
             </div>
         </div>
 
-        {{-- FILTER SEMESTER --}}
+        {{-- FILTER SEMESTER & JENIS RAPOR --}}
         <div class="card shadow mb-4">
             <div class="card-body py-3">
                 <form action="{{ route('wali.rapor.index') }}" method="GET">
                     <div class="row align-items-end">
-                        <div class="col-md-10">
-                            <label class="small fw-bold text-uppercase">Pilih Semester Aktif</label>
+                        <div class="col-md-5">
+                            <label class="small fw-bold text-uppercase">Pilih Semester</label>
                             <select name="semester" class="form-select" onchange="this.form.submit()">
                                 <option value="ganjil" {{ $semester == 'ganjil' ? 'selected' : '' }}>Semester Ganjil</option>
                                 <option value="genap" {{ $semester == 'genap' ? 'selected' : '' }}>Semester Genap</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="small fw-bold text-uppercase">Jenis Rapor</label>
+                            <select name="jenis_rapor" class="form-select" onchange="this.form.submit()">
+                                <option value="akhir_semester" {{ $jenisRapor == 'akhir_semester' ? 'selected' : '' }}>Akhir Semester (PAS)</option>
+                                <option value="tengah_semester" {{ $jenisRapor == 'tengah_semester' ? 'selected' : '' }}>Tengah Semester (PTS)</option>
                             </select>
                         </div>
                         <div class="col-md-2 mt-2">
@@ -84,7 +91,7 @@
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-white">
                 <h6 class="m-0 fw-bold text-primary">
-                    <i class="fas fa-graduation-cap me-2"></i>Daftar Rapor Siswa - Semester {{ ucfirst($semester) }}
+                    <i class="fas fa-graduation-cap me-2"></i>Daftar Rapor - {{ ucwords(str_replace('_', ' ', $jenisRapor)) }} {{ ucfirst($semester) }}
                 </h6>
             </div>
             <div class="card-body p-0">
@@ -106,13 +113,21 @@
                                     $rapor = $raporData[$siswa->id] ?? null;
                                     $status = $rapor ? $rapor->status : 'draft';
 
-                                    // Hitung rata-rata
+                                    // Hitung rata-rata preview (kasar)
+                                    // Idealnya dari RaporNilai jika sudah ada, atau hitung on-the-fly
                                     $nilaiSiswa = \App\Models\Nilai::where('siswa_id', $siswa->id)
                                         ->where('kelas_id', $kelas->id)
                                         ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
                                         ->get();
-                                    $totalNilai = $nilaiSiswa->sum('nilai_akhir');
-                                    $rataRata = $nilaiSiswa->count() > 0 ? $totalNilai / $nilaiSiswa->count() : 0;
+                                    
+                                    // Kalkulasi sederhana untuk preview di tabel
+                                    // Akuratnya ada di dalam Rapor (rapor_nilai)
+                                    if ($rapor && $rapor->raporNilai->count() > 0) {
+                                        $rataRata = $rapor->raporNilai->avg('nilai_angka');
+                                    } else {
+                                        $rataRata = 0; 
+                                        // Kalau belum generate, kita tampilkan 0 atau hitung manual (optional, expensive)
+                                    }
                                 @endphp
                                 <tr>
                                     <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
@@ -198,9 +213,8 @@
                 <i class="fas fa-file-invoice fa-3x text-primary mb-3"></i>
                 <h6 class="fw-bold mb-2">Generate rapor untuk semua siswa?</h6>
                 <p class="text-muted small mb-0">
-                    Sistem akan membuat draf rapor secara otomatis untuk <strong>semua siswa</strong> di kelas ini
+                    Sistem akan membuat draf rapor <strong>{{ ucwords(str_replace('_', ' ', $jenisRapor)) }}</strong> secara otomatis untuk <strong>semua siswa</strong> di kelas ini
                     berdasarkan nilai semester <strong>{{ ucfirst($semester) }}</strong> yang tersedia.
-                    Proses ini mungkin memerlukan waktu beberapa saat.
                 </p>
             </div>
             <div class="modal-footer bg-light">
@@ -210,6 +224,7 @@
                 <form action="{{ route('wali.rapor.generate-all') }}" method="POST" class="d-inline">
                     @csrf
                     <input type="hidden" name="semester" value="{{ $semester }}">
+                    <input type="hidden" name="jenis_rapor" value="{{ $jenisRapor }}">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-check me-1"></i> Ya, Generate Sekarang
                     </button>

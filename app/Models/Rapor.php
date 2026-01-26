@@ -16,6 +16,7 @@ class Rapor extends Model
         'kelas_id',
         'tahun_ajaran_id',
         'semester',
+        'jenis_rapor', // Added
         'catatan_wali_kelas',
         'jumlah_sakit',
         'jumlah_izin',
@@ -78,6 +79,15 @@ class Rapor extends Model
             ->get();
 
         foreach ($nilaiList as $nilai) {
+            // Tentukan nilai angka berdasarkan jenis rapor
+            $nilaiAngka = 0;
+            if ($this->jenis_rapor == 'tengah_semester') {
+                $nilaiAngka = $nilai->hitungNilaiTengahSemester();
+            } else {
+                // Akhir Semester (Default)
+                $nilaiAngka = $nilai->nilai_akhir;
+            }
+
             // Buat atau update rapor nilai
             RaporNilai::updateOrCreate(
                 [
@@ -86,12 +96,22 @@ class Rapor extends Model
                 ],
                 [
                     'nilai_id' => $nilai->id,
-                    'nilai_angka' => $nilai->nilai_akhir,
-                    'nilai_huruf' => $nilai->nilaiHuruf(),
+                    'nilai_angka' => $nilaiAngka,
+                    'nilai_huruf' => $this->konversiHuruf($nilaiAngka), // Use helper for consistency
                 ]
             );
         }
 
         return $this;
+    }
+
+    // Helper local untuk konversi huruf jika logic beda atau reuse
+    private function konversiHuruf($nilai)
+    {
+        if ($nilai >= 90) return 'A';
+        if ($nilai >= 80) return 'B';
+        if ($nilai >= 70) return 'C';
+        if ($nilai >= 60) return 'D';
+        return 'E';
     }
 }

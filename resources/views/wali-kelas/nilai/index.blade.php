@@ -174,8 +174,10 @@
                                 <th class="text-start col-siswa">NAMA LENGKAP SISWA</th>
                                 @if(isset($selectedMapelId) && $selectedMapelId)
                                     <th>TUGAS</th>
-                                    <th>UTS</th>
-                                    <th>UAS</th>
+                                    <th>LATIHAN</th>
+                                    <th>UH</th>
+                                    <th>PTS</th>
+                                    <th>PAS</th>
                                     <th>N. AKHIR</th>
                                     <th>PRED.</th>
                                 @endif
@@ -196,11 +198,13 @@
                                     </td>
 
                                     @if(isset($selectedMapelId) && $selectedMapelId)
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->nilai_tugas, 1) : '-' }}</td>
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->nilai_uts, 1) : '-' }}</td>
-                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->nilai_uas, 1) : '-' }}</td>
+                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->rata_tugas ?? 0, 1) : '-' }}</td>
+                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->rata_latihan ?? 0, 1) : '-' }}</td>
+                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->rata_uh ?? 0, 1) : '-' }}</td>
+                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->pts ?? 0, 1) : '-' }}</td>
+                                        <td class="text-center align-middle fw-bold">{{ $nilai ? number_format($nilai->pas ?? 0, 1) : '-' }}</td>
                                         <td class="text-center align-middle">
-                                            <span class="nilai-akhir">{{ $nilai ? number_format($nilai->nilai_akhir, 1) : '-' }}</span>
+                                            <span class="nilai-akhir">{{ $nilai ? number_format($nilai->nilai_akhir ?? 0, 1) : '-' }}</span>
                                         </td>
                                         <td class="text-center align-middle">
                                             @if($nilai)

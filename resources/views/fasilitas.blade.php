@@ -372,6 +372,9 @@
 
         $areaBermainSection = $page->getSection('area_bermain');
         $areaBermainContent = $areaBermainSection->content ?? [];
+
+        $perpustakaanSection = $page->getSection('perpustakaan');
+        $perpustakaanContent = $perpustakaanSection->content ?? [];
     @endphp
 
     <x-navbar></x-navbar>
@@ -608,14 +611,12 @@
                                 </svg>
                             </div>
                             <span
-                                class="px-4 py-2 bg-accent-orange/10 text-accent-orange text-sm font-medium rounded-full">Program
-                                Terapi</span>
+                                class="px-4 py-2 bg-accent-orange/10 text-accent-orange text-sm font-medium rounded-full">{{ $ruangTerapiContent['badge'] ?? 'Program Terapi' }}</span>
                         </div>
 
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Ruang Terapi</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $ruangTerapiContent['title'] ?? 'Ruang Terapi' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            Menyediakan berbagai alat terapi yang digunakan khusus untuk mendukung perkembangan motorik
-                            dan sensorik pada anak-anak berkebutuhan khusus.
+                            {{ $ruangTerapiContent['description'] ?? 'Menyediakan berbagai alat terapi yang digunakan khusus untuk mendukung perkembangan motorik dan sensorik pada anak-anak berkebutuhan khusus.' }}
                         </p>
 
                         <div class="space-y-4">
@@ -629,8 +630,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Banyak Variasi</h4>
-                                    <p class="text-gray-600 text-sm">Disesuaikan Kebutuhan Siswa</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $ruangTerapiContent['feature_1_title'] ?? 'Banyak Variasi' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $ruangTerapiContent['feature_1_desc'] ?? 'Disesuaikan Kebutuhan Siswa' }}</p>
                                 </div>
                             </div>
 
@@ -644,8 +645,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Warna dan Bentuk Menarik</h4>
-                                    <p class="text-gray-600 text-sm">Menarik perhatian siswa</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $ruangTerapiContent['feature_2_title'] ?? 'Warna dan Bentuk Menarik' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $ruangTerapiContent['feature_2_desc'] ?? 'Menarik perhatian siswa' }}</p>
                                 </div>
                             </div>
 
@@ -659,8 +660,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Aman Digunakan</h4>
-                                    <p class="text-gray-600 text-sm">Terjamin menggunakan alat terapi yang aman</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $ruangTerapiContent['feature_3_title'] ?? 'Aman Digunakan' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $ruangTerapiContent['feature_3_desc'] ?? 'Terjamin menggunakan alat terapi yang aman' }}</p>
                                 </div>
                             </div>
 
@@ -787,14 +788,12 @@
                                 </svg>
                             </div>
                             <span
-                                class="px-4 py-2 bg-accent-yellow/10 text-accent-yellow text-sm font-medium rounded-full">Fasilitas
-                                Rekreasi</span>
+                                class="px-4 py-2 bg-accent-yellow/10 text-accent-yellow text-sm font-medium rounded-full">{{ $areaBermainContent['badge'] ?? 'Fasilitas Rekreasi' }}</span>
                         </div>
 
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Area Bermain</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $areaBermainContent['title'] ?? 'Area Bermain' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            Area bermain yang luas dan aman untuk mengembangkan motorik kasar anak. Dilengkapi dengan
-                            berbagai permainan edukatif yang mendukung perkembangan fisik dan sosial anak.
+                            {{ $areaBermainContent['description'] ?? 'Area bermain yang luas dan aman untuk mengembangkan motorik kasar anak. Dilengkapi dengan berbagai permainan edukatif yang mendukung perkembangan fisik dan sosial anak.' }}
                         </p>
 
                         <div class="space-y-4">
@@ -808,8 +807,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Playground Aman</h4>
-                                    <p class="text-gray-600 text-sm">Fasilitas bermain dengan standar keamanan tinggi
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $areaBermainContent['feature_1_title'] ?? 'Playground Aman' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $areaBermainContent['feature_1_desc'] ?? 'Fasilitas bermain dengan standar keamanan tinggi' }}
                                     </p>
                                 </div>
                             </div>
@@ -824,8 +823,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Permainan Edukatif</h4>
-                                    <p class="text-gray-600 text-sm">Bermain sambil belajar untuk perkembangan optimal
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $areaBermainContent['feature_2_title'] ?? 'Permainan Edukatif' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $areaBermainContent['feature_2_desc'] ?? 'Bermain sambil belajar untuk perkembangan optimal' }}
                                     </p>
                                 </div>
                             </div>
@@ -840,8 +839,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Area Luas & Bersih</h4>
-                                    <p class="text-gray-600 text-sm">Ruang bermain yang lapang dan terawat</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $areaBermainContent['feature_3_title'] ?? 'Area Luas & Bersih' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $areaBermainContent['feature_3_desc'] ?? 'Ruang bermain yang lapang dan terawat' }}</p>
                                 </div>
                             </div>
 
@@ -864,13 +863,12 @@
                                 </svg>
                             </div>
                             <span
-                                class="px-4 py-2 bg-secondary/10 text-secondary text-sm font-medium rounded-full">Literasi</span>
+                                class="px-4 py-2 bg-secondary/10 text-secondary text-sm font-medium rounded-full">{{ $perpustakaanContent['badge'] ?? 'Fasilitas Edukasi' }}</span>
                         </div>
 
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Perpustakaan</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $perpustakaanContent['title'] ?? 'Perpustakaan' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            Perpustakaan dengan koleksi lengkap untuk menumbuhkan minat baca dan literasi siswa. Ruangan
-                            yang nyaman dengan koleksi buku yang terus diperbarui.
+                            {{ $perpustakaanContent['description'] ?? 'Perpustakaan dengan koleksi lengkap untuk menumbuhkan minat baca dan literasi siswa. Ruangan yang nyaman dengan koleksi buku yang terus diperbarui.' }}
                         </p>
 
                         <div class="space-y-4">
@@ -884,8 +882,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">1000+ Koleksi Buku</h4>
-                                    <p class="text-gray-600 text-sm">Beragam buku pelajaran, fiksi, dan non-fiksi</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $perpustakaanContent['feature_1_title'] ?? '1000+ Koleksi Buku' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $perpustakaanContent['feature_1_desc'] ?? 'Beragam buku pelajaran, fiksi, dan non-fiksi' }}</p>
                                 </div>
                             </div>
 
@@ -899,8 +897,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Ruang Baca Nyaman</h4>
-                                    <p class="text-gray-600 text-sm">Suasana tenang untuk membaca dan belajar</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $perpustakaanContent['feature_2_title'] ?? 'Ruang Baca Nyaman' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $perpustakaanContent['feature_2_desc'] ?? 'Suasana tenang untuk membaca dan belajar' }}</p>
                                 </div>
                             </div>
 
@@ -914,8 +912,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">Sistem Peminjaman Mudah</h4>
-                                    <p class="text-gray-600 text-sm">Akses mudah untuk meminjam dan mengembalikan buku
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $perpustakaanContent['feature_3_title'] ?? 'Sistem Peminjaman Mudah' }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $perpustakaanContent['feature_3_desc'] ?? 'Akses mudah untuk meminjam dan mengembalikan buku' }}
                                     </p>
                                 </div>
                             </div>

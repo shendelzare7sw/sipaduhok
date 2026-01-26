@@ -94,7 +94,7 @@
                             <select name="kelas_id" id="kelasSelect" class="form-select" required>
                                 <option value="">-- Pilih Kelas --</option>
                                 @foreach($kelasList as $kls)
-                                    <option value="{{ $kls->id }}" data-jenjang="{{ $kls->jenjang }}" {{ old('kelas_id') == $kls->id ? 'selected' : '' }}>
+                                    <option value="{{ $kls->id }}" data-jenjang="{{ $kls->jenjang }}" data-cabang-id="{{ $kls->cabang_id }}" {{ old('kelas_id') == $kls->id ? 'selected' : '' }}>
                                         {{ $kls->nama_kelas }} - {{ $kls->cabang->nama_cabang }} ({{ $kls->jenjang }})
                                     </option>
                                 @endforeach
@@ -133,6 +133,23 @@
                             <small class="text-muted">Guru bisa mengajar di banyak kelas. Kosongkan jika belum
                                 ditentukan.</small>
                         </div>
+                    </div>
+                </div>
+
+                {{-- Siswa Khusus Section (Hidden by default) --}}
+                <div class="form-section" id="siswaSection" style="display: none;">
+                    <div class="form-section-title">Peserta Khusus (Opsional)</div>
+                    <div class="alert alert-info py-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Pilih siswa jika mata pelajaran ini hanya diikuti oleh siswa tertentu (misalnya Agama).
+                        Jika dikosongkan, maka berlaku untuk <strong>SEMUA SISWA</strong> di kelas tersebut.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Siswa</label>
+                        <select name="siswa_ids[]" id="siswaSelect" class="form-select" multiple size="10">
+                            {{-- Populated via AJAX --}}
+                        </select>
+                        <small class="text-muted">Tahan tombol CTRL (Windows) atau Command (Mac) untuk memilih lebih dari satu siswa.</small>
                     </div>
                 </div>
 
@@ -313,7 +330,86 @@
 
                 // Update istirahat info
                 filterIstirahatDisplay();
+                // Update istirahat info
+                filterIstirahatDisplay();
+
+                // Load Students if Class Selected
+                loadStudents(this.value);
+
+                // Filter Guru by Branch
+                filterGuruByCabang();
             });
+            
+            mapelSelect.addEventListener('change', function() {
+                checkAgama();
+            });
+
+            function checkAgama() {
+                const selectedText = mapelSelect.options[mapelSelect.selectedIndex].text;
+                const siswaSection = document.getElementById('siswaSection');
+                
+                if (selectedText.includes('Agama') || selectedText.includes('Religi')) {
+                    siswaSection.style.display = 'block';
+                } else {
+                    siswaSection.style.display = 'none';
+                    // Optional: Clear selection? No, keep it just in case user switches back.
+                    // But if submitting, backend treats null as All.
+                }
+            }
+
+            function loadStudents(kelasId) {
+                if (!kelasId) return;
+                
+                const siswaSelect = document.getElementById('siswaSelect');
+                siswaSelect.innerHTML = '<option>Loading...</option>';
+                
+                fetch(`/admin/jadwal-pelajaran/get-students/${kelasId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        siswaSelect.innerHTML = '';
+                        if(data.length === 0) {
+                            siswaSelect.innerHTML = '<option disabled>Tidak ada siswa aktif</option>';
+                            return;
+                        }
+                        
+                        data.forEach(siswa => {
+                            const option = document.createElement('option');
+                            option.value = siswa.id;
+                            option.text = `${siswa.nama_lengkap} (${siswa.nis})`;
+                            siswaSelect.appendChild(option);
+                        });
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        siswaSelect.innerHTML = '<option disabled>Gagal memuat siswa</option>';
+                    });
+            }
+
+            // Filter Guru Logic
+            function filterGuruByCabang() {
+                const kelasSelect = document.getElementById('kelasSelect');
+                const selectedOption = kelasSelect.options[kelasSelect.selectedIndex];
+                const cabangId = selectedOption ? selectedOption.getAttribute('data-cabang-id') : null;
+                const guruOptions = document.querySelectorAll('.guru-option-item');
+                
+                if (!cabangId) {
+                    guruOptions.forEach(el => el.setAttribute('data-visible-branch', 'true'));
+                    return;
+                }
+
+                // Show only matching branch. Hide others.
+                guruOptions.forEach(el => {
+                    const guruCabang = el.getAttribute('data-cabang-id');
+                    // Use data attribute strictly
+                    if (!guruCabang || guruCabang == cabangId) {
+                         el.setAttribute('data-visible-branch', 'true');
+                         el.style.display = 'flex';
+                    } else {
+                         el.setAttribute('data-visible-branch', 'false');
+                         el.style.display = 'none';
+                    }
+                });
+            }
 
             // Update istirahat info when hari changes
             hariSelect.addEventListener('change', function () {
@@ -466,7 +562,9 @@
 
             guruOptions.forEach(option => {
                 const name = option.getAttribute('data-name') || '';
-                if (searchTerm === '' || name.includes(searchTerm)) {
+                const isVisibleByBranch = option.getAttribute('data-visible-branch') !== 'false';
+                
+                if (isVisibleByBranch && (searchTerm === '' || name.includes(searchTerm))) {
                     option.style.display = 'flex';
                 } else {
                     option.style.display = 'none';
@@ -520,6 +618,8 @@
                             @foreach($guruList as $g)
                                 <div class="guru-option-item" data-id="{{ $g->id }}"
                                     data-name="{{ strtolower($g->nama_lengkap) }}"
+                                    data-cabang-id="{{ $g->user->cabang_id ?? '' }}"
+                                    data-visible-branch="true"
                                     onclick="selectGuru({{ $g->id }}, '{{ $g->nama_lengkap }}', '{{ $g->user->cabang->nama_cabang ?? '-' }}')"
                                     style="padding: 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; border: 1px solid transparent;"
                                     onmouseenter="this.style.background='#f9fafb'; this.style.borderColor='#d1d5db';"

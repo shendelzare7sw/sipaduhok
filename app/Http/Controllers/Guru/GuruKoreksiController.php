@@ -73,7 +73,7 @@ class GuruKoreksiController extends Controller
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'tugas' => $tugas,
-            'submission' => $submission,
+            'tugasSiswa' => $submission,
             'guru' => $tenagaPendidik,
         ]);
     }

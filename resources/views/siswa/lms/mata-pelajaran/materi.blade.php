@@ -122,53 +122,17 @@
     <!-- File Preview/Download -->
     @if($materi->file_materi)
     <div class="file-preview">
-        <div class="file-icon">
-            @if($materi->tipe_file === 'pdf')
-                <i class="fas fa-file-pdf"></i>
-            @elseif($materi->tipe_file === 'video')
-                <i class="fas fa-file-video"></i>
-            @elseif(in_array($materi->tipe_file, ['ppt', 'pptx']))
-                <i class="fas fa-file-powerpoint"></i>
-            @elseif(in_array($materi->tipe_file, ['doc', 'docx']))
-                <i class="fas fa-file-word"></i>
-            @elseif($materi->tipe_file === 'link')
-                <i class="fas fa-link"></i>
-            @else
-                <i class="fas fa-file-alt"></i>
-            @endif
-        </div>
-
-        <h4 style="color: #1a1a1a; margin-bottom: 10px;">
-            {{ basename($materi->file_materi) }}
-        </h4>
-        
-        <p style="color: #666; margin-bottom: 20px;">
-            @if($materi->tipe_file === 'link')
-                Link eksternal ke materi pembelajaran
-            @else
-                File materi tersedia untuk diunduh
-            @endif
-        </p>
-
         @if($materi->tipe_file === 'link')
+            <div class="file-icon">
+                <i class="fas fa-link"></i>
+            </div>
+            <h4 style="color: #1a1a1a; margin-bottom: 10px;">Link Materi</h4>
+            <p style="color: #666; margin-bottom: 20px;">Link eksternal ke materi pembelajaran</p>
             <a href="{{ $materi->file_materi }}" target="_blank" class="download-btn">
                 <i class="fas fa-external-link-alt"></i> Buka Link
             </a>
         @else
-            <a href="{{ asset('storage/' . $materi->file_materi) }}" 
-               download 
-               class="download-btn">
-                <i class="fas fa-download"></i> Download Materi
-            </a>
-            
-            @if($materi->tipe_file === 'pdf')
-            <a href="{{ asset('storage/' . $materi->file_materi) }}" 
-               target="_blank" 
-               class="btn btn-info"
-               style="margin-left: 10px;">
-                <i class="fas fa-eye"></i> Preview PDF
-            </a>
-            @endif
+            <x-file-preview :path="$materi->file_materi" label="Download Materi" />
         @endif
     </div>
     @else

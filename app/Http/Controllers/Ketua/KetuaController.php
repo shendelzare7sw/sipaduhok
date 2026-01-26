@@ -24,11 +24,45 @@ class KetuaController extends Controller
     // MONITORING & DASHBOARD
     // ============================================
 
-    public function monitoringPengguna()
+    public function monitoringPengguna(Request $request)
     {
-        $tenagaPendidik = TenagaPendidik::with('user')->paginate(15);
-        $siswa = Siswa::with('user')->paginate(15);
+        // Query Tenaga Pendidik
+        $queryTP = TenagaPendidik::with('user');
 
+        if ($request->filled('search_tp')) {
+            $queryTP->where('nama_lengkap', 'like', '%' . $request->search_tp . '%');
+        }
+
+        if ($request->filled('role_tp')) {
+            $queryTP->whereHas('user', function ($q) use ($request) {
+                $q->where('role', $request->role_tp);
+            });
+        }
+
+        if ($request->filled('status_tp')) {
+            $isActive = $request->status_tp == 'aktif';
+            $queryTP->whereHas('user', function ($q) use ($isActive) {
+                $q->where('is_active', $isActive);
+            });
+        }
+
+        $tenagaPendidik = $queryTP->paginate(10, ['*'], 'tp_page');
+
+        // Query Siswa
+        $querySiswa = Siswa::with(['user', 'kelas']);
+
+        if ($request->filled('search_siswa')) {
+            $querySiswa->where('nama_lengkap', 'like', '%' . $request->search_siswa . '%');
+        }
+
+        if ($request->filled('status_siswa')) {
+            $isActive = $request->status_siswa == 'aktif';
+            $querySiswa->where('status', $request->status_siswa);
+        }
+
+        $siswa = $querySiswa->paginate(10, ['*'], 'siswa_page');
+
+        // Stats (Calculated once)
         $stats = [
             'totalTenagaPendidik' => TenagaPendidik::count(),
             'totalSiswa' => Siswa::count(),
@@ -39,79 +73,138 @@ class KetuaController extends Controller
         return view('ketua.monitoring.pengguna', compact('tenagaPendidik', 'siswa', 'stats'));
     }
 
-    public function monitoringWaliKelas()
+    public function monitoringWaliKelas(Request $request)
     {
-        $waliKelas = TenagaPendidik::with(['kelasWali.siswa', 'kelasWali.tahunAjaran'])
-            ->whereHas('kelasWali')
-            ->get()
-            ->map(function ($tp) {
-                $kelas = $tp->kelasWali->first();
-                if ($kelas) {
-                    $totalSiswa = $kelas->siswa->count();
-                    $raporSelesai = Rapor::where('kelas_id', $kelas->id)
-                        ->where('status', 'diterbitkan')
-                        ->count();
+        $query = TenagaPendidik::with(['kelasWali.siswa', 'kelasWali.tahunAjaran'])
+            ->whereHas('kelasWali');
 
-                    $tp->kelas_info = $kelas;
-                    $tp->total_siswa = $totalSiswa;
-                    $tp->rapor_selesai = $raporSelesai;
-                    $tp->progress_rapor = $totalSiswa > 0 ? round(($raporSelesai / $totalSiswa) * 100, 2) : 0;
-                }
-                return $tp;
+        // Search
+        if ($request->filled('search')) {
+            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter Cabang (via Kelas Wali)
+        if ($request->filled('cabang_id')) {
+            $query->whereHas('kelasWali', function ($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
             });
+        }
 
-        return view('ketua.monitoring.wali-kelas', compact('waliKelas'));
+        $waliKelas = $query->paginate(15);
+
+        // Map data
+        $waliKelas->getCollection()->transform(function ($tp) {
+            $kelas = $tp->kelasWali->first(); // Assuming single wali kelas for now based on original code
+            if ($kelas) {
+                $totalSiswa = $kelas->siswa->count();
+                $raporSelesai = Rapor::where('kelas_id', $kelas->id)
+                    ->where('status', 'diterbitkan')
+                    ->count();
+
+                $tp->kelas_info = $kelas;
+                $tp->total_siswa = $totalSiswa;
+                $tp->rapor_selesai = $raporSelesai;
+                $tp->progress_rapor = $totalSiswa > 0 ? round(($raporSelesai / $totalSiswa) * 100, 2) : 0;
+            }
+            return $tp;
+        });
+
+        $cabangs = Cabang::all();
+
+        return view('ketua.monitoring.wali-kelas', compact('waliKelas', 'cabangs'));
     }
 
-    public function monitoringGuruPengajar()
+    public function monitoringGuruPengajar(Request $request)
     {
-        $guruPengajar = TenagaPendidik::with(['guruKelas.kelas', 'guruKelas.mataPelajaran'])
-            ->whereHas('guruKelas')
-            ->get()
-            ->map(function ($tp) {
-                $totalNilaiHarusDiisi = Nilai::where('guru_id', $tp->id)->whereNull('nilai_akhir')->count();
-                $nilaiSudahDiisi = Nilai::where('guru_id', $tp->id)->whereNotNull('nilai_akhir')->count();
-                $soalUjianDibuat = Ujian::where('guru_id', $tp->id)->count();
+        $query = TenagaPendidik::with(['guruKelas.kelas', 'guruKelas.mataPelajaran'])
+            ->whereHas('guruKelas');
 
-                $tp->total_nilai_harus_diisi = $totalNilaiHarusDiisi;
-                $tp->nilai_sudah_diisi = $nilaiSudahDiisi;
-                $tp->soal_ujian_dibuat = $soalUjianDibuat;
-                $tp->progress_nilai = ($totalNilaiHarusDiisi + $nilaiSudahDiisi) > 0
-                    ? round(($nilaiSudahDiisi / ($totalNilaiHarusDiisi + $nilaiSudahDiisi)) * 100, 2)
-                    : 0;
+        // Search
+        if ($request->filled('search')) {
+            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+        }
 
-                return $tp;
+        // Filter Cabang (via Guru Kelas -> Kelas)
+        if ($request->filled('cabang_id')) {
+            $query->whereHas('guruKelas.kelas', function ($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
             });
+        }
 
-        return view('ketua.monitoring.guru-pengajar', compact('guruPengajar'));
+        $guruPengajar = $query->paginate(15);
+
+        $guruPengajar->getCollection()->transform(function ($tp) {
+            $totalNilaiHarusDiisi = Nilai::where('guru_id', $tp->id)->whereNull('nilai_akhir')->count();
+            $nilaiSudahDiisi = Nilai::where('guru_id', $tp->id)->whereNotNull('nilai_akhir')->count();
+            $soalUjianDibuat = Ujian::where('guru_id', $tp->id)->count();
+
+            $tp->total_nilai_harus_diisi = $totalNilaiHarusDiisi;
+            $tp->nilai_sudah_diisi = $nilaiSudahDiisi;
+            $tp->soal_ujian_dibuat = $soalUjianDibuat;
+            $tp->progress_nilai = ($totalNilaiHarusDiisi + $nilaiSudahDiisi) > 0
+                ? round(($nilaiSudahDiisi / ($totalNilaiHarusDiisi + $nilaiSudahDiisi)) * 100, 2)
+                : 0;
+
+            return $tp;
+        });
+
+        $cabangs = Cabang::all();
+
+        return view('ketua.monitoring.guru-pengajar', compact('guruPengajar', 'cabangs'));
     }
 
-    public function monitoringSiswa()
+    public function monitoringSiswa(Request $request)
     {
-        $siswa = Siswa::with(['kelas', 'tagihan', 'pembayaran', 'tugasSiswa'])
-            ->where('status', 'aktif')
-            ->get()
-            ->map(function ($s) {
-                $totalTugas = $s->tugasSiswa()->count();
-                $tugasSelesai = $s->tugasSiswa()->where('status', 'dinilai')->count();
+        $query = Siswa::with(['kelas', 'tagihan', 'pembayaran', 'tugasSiswa'])
+            ->where('status', 'aktif');
 
-                $totalTagihan = $s->tagihan()->sum('jumlah');
-                // Sisa tagihan berdasarkan status tagihan (lebih robust)
-                $sisaTagihan = $s->tagihan()->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-                $totalBayar = $totalTagihan - $sisaTagihan;
+        // Search
+        if ($request->filled('search')) {
+            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+        }
 
-                $s->total_tugas = $totalTugas;
-                $s->tugas_selesai = $tugasSelesai;
-                $s->progress_tugas = $totalTugas > 0 ? round(($tugasSelesai / $totalTugas) * 100, 2) : 0;
-                $s->total_tagihan = $totalTagihan;
-                $s->total_bayar = $totalBayar;
-                $s->sisa_tagihan = $sisaTagihan;
-                $s->status_bayar = $sisaTagihan <= 0 ? 'lunas' : 'belum_lunas';
+        // Filter Cabang
+        if ($request->filled('cabang_id')) {
+            $query->where('cabang_id', $request->cabang_id);
+        }
 
-                return $s;
-            });
+        // Filter Kelas
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+        }
 
-        return view('ketua.monitoring.siswa', compact('siswa'));
+        // Get Pagination
+        $siswa = $query->paginate(20);
+
+        // Map data for display (only for current page)
+        $siswa->getCollection()->transform(function ($s) {
+            $totalTugas = $s->tugasSiswa()->count();
+            $tugasSelesai = $s->tugasSiswa()->where('status', 'dinilai')->count();
+
+            $totalTagihan = $s->tagihan()->sum('jumlah');
+            $sisaTagihan = $s->tagihan()->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+            $totalBayar = $totalTagihan - $sisaTagihan;
+
+            $s->total_tugas = $totalTugas;
+            $s->tugas_selesai = $tugasSelesai;
+            $s->progress_tugas = $totalTugas > 0 ? round(($tugasSelesai / $totalTugas) * 100, 2) : 0;
+            $s->total_tagihan = $totalTagihan;
+            $s->total_bayar = $totalBayar;
+            $s->sisa_tagihan = $sisaTagihan;
+            $s->status_bayar = $sisaTagihan <= 0 ? 'lunas' : 'belum_lunas';
+
+            return $s;
+        });
+
+        // Data for Filters
+        $cabangs = Cabang::all();
+        $kelasList = Kelas::query();
+        if ($request->filled('cabang_id')) {
+            $kelasList->where('cabang_id', $request->cabang_id);
+        }
+        $kelasList = $kelasList->orderBy('jenjang')->orderBy('nama_kelas')->get();
+
+        return view('ketua.monitoring.siswa', compact('siswa', 'cabangs', 'kelasList'));
     }
 
     // ============================================

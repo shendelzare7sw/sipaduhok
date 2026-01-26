@@ -17,6 +17,19 @@
     </a>
 </li>
 
+<!-- Menu Header - Kenaikan Kelas -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Kenaikan Kelas</span>
+</li>
+
+<!-- Approval Dispensasi -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.promotion.approval') ? 'active' : '' }}">
+    <a href="{{ route('ketua.promotion.approval.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-check-double"></i>
+        <div>Approval Dispensasi</div>
+    </a>
+</li>
+
 <!-- Menu Header - Monitoring -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring</span>

@@ -175,12 +175,50 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
+<!-- Promotion Validation (New) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.promotion.validation') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-user-clock"></i>
+        <div>Validasi Dispensasi</div>
+    </a>
+</li>
+
 <!-- Validasi Akses -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.validasi-akses') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.validasi-akses.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-circle"></i>
         <div>Validasi Akses</div>
     </a>
+</li>
+
+<!-- Menu Header - Kenaikan Kelas -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Kenaikan Kelas</span>
+</li>
+
+<!-- Kenaikan Kelas (New Group) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.promotion') ? 'active open' : '' }}">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-level-up-alt"></i>
+        <div>Kenaikan Kelas</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.kkm.index' ? 'active' : '' }}">
+            <a href="{{ route('admin.akademik.promotion.kkm.index') }}" class="menu-link">
+                <div>Pengaturan KKM</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.settings.index' ? 'active' : '' }}">
+            <a href="{{ route('admin.akademik.promotion.settings.index') }}" class="menu-link">
+                <div>Pengaturan Kenaikan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.report' ? 'active' : '' }}">
+            <a href="{{ route('admin.akademik.promotion.report') }}" class="menu-link">
+                <div>Proses & Rekap</div>
+            </a>
+        </li>
+    </ul>
 </li>
 
 <!-- Menu Header - Akademik -->

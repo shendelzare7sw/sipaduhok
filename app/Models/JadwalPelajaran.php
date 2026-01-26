@@ -22,11 +22,13 @@ class JadwalPelajaran extends Model
         'status',
         'keterangan',
         'updated_by',
+        'siswa_ids',
     ];
 
     protected $casts = [
         'jam_mulai' => 'datetime:H:i',
         'jam_selesai' => 'datetime:H:i',
+        'siswa_ids' => 'array',
     ];
 
     // Relationships

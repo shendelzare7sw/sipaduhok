@@ -20,27 +20,27 @@ class MonitoringController extends KetuaController
     }
 
     // Monitoring
-    public function monitoringPengguna()
+    public function monitoringPengguna(Request $request)
     {
-        $response = parent::monitoringPengguna();
+        $response = parent::monitoringPengguna($request);
         return $this->wrapView($response, 'monitoring.pengguna');
     }
 
-    public function monitoringWaliKelas()
+    public function monitoringWaliKelas(Request $request)
     {
-        $response = parent::monitoringWaliKelas();
+        $response = parent::monitoringWaliKelas($request);
         return $this->wrapView($response, 'monitoring.wali-kelas');
     }
 
-    public function monitoringGuruPengajar()
+    public function monitoringGuruPengajar(Request $request)
     {
-        $response = parent::monitoringGuruPengajar();
+        $response = parent::monitoringGuruPengajar($request);
         return $this->wrapView($response, 'monitoring.guru-pengajar');
     }
 
-    public function monitoringSiswa()
+    public function monitoringSiswa(Request $request)
     {
-        $response = parent::monitoringSiswa();
+        $response = parent::monitoringSiswa($request);
         return $this->wrapView($response, 'monitoring.siswa');
     }
 

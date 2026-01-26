@@ -150,9 +150,7 @@
                 <h5 style="color: #92400e; margin-bottom: 10px;">
                     <i class="fas fa-paperclip"></i> Lampiran dari Guru
                 </h5>
-                <a href="{{ asset('storage/' . $tugas->file_tugas) }}" target="_blank" class="btn btn-warning btn-sm">
-                    <i class="fas fa-download"></i> Download File Tugas
-                </a>
+                <x-file-preview :path="$tugas->file_tugas" label="Download File Tugas" />
             </div>
         @endif
 
@@ -204,15 +202,12 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
 
-                        @if($existingSubmission && $existingSubmission->file_jawaban)
-                            <div class="mt-2">
-                                <small class="text-muted">File sebelumnya: </small>
-                                <a href="{{ asset('storage/' . $existingSubmission->file_jawaban) }}" target="_blank"
-                                    class="btn btn-sm btn-info">
-                                    <i class="fas fa-file"></i> Lihat File
-                                </a>
-                            </div>
-                        @endif
+                            @if($existingSubmission && $existingSubmission->file_jawaban)
+                                <div class="mt-3">
+                                    <small class="text-muted">File sebelumnya: </small>
+                                    <x-file-preview :path="$existingSubmission->file_jawaban" label="Lihat File" />
+                                </div>
+                            @endif
                     </div>
 
                     <!-- Submit Button -->

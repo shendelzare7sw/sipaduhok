@@ -27,10 +27,10 @@
                     <p class="mb-2"><strong>Deskripsi:</strong></p>
                     <p class="text-muted">{{ $tugas->deskripsi }}</p>
                     @if($tugas->file_tugas)
-                        <a href="{{ asset('storage/' . $tugas->file_tugas) }}" 
-                           class="btn btn-sm btn-outline-primary" target="_blank">
-                            <i class="fas fa-download me-1"></i>Download Soal
-                        </a>
+                        <div class="mt-3">
+                            <strong>File Soal:</strong>
+                            <x-file-preview :path="$tugas->file_tugas" label="Download Soal" />
+                        </div>
                     @endif
                 </div>
             </div>
@@ -49,12 +49,9 @@
                     @endif
 
                     @if($tugasSiswa->file_jawaban)
-                        <div>
-                            <strong>File Jawaban:</strong><br>
-                            <a href="{{ asset('storage/' . $tugasSiswa->file_jawaban) }}" 
-                               class="btn btn-sm btn-success mt-2" target="_blank">
-                                <i class="fas fa-download me-1"></i>Download Jawaban Siswa
-                            </a>
+                        <div class="mt-3">
+                            <strong>File Jawaban:</strong>
+                            <x-file-preview :path="$tugasSiswa->file_jawaban" label="Download Jawaban Siswa" />
                         </div>
                     @endif
 

@@ -182,6 +182,8 @@ class TagihanController extends Controller
                 $jenisTagihanWithExisting[$tagihan->jenis_tagihan] = $label;
             }
         }
+        
+        $allYears = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
         return view('bendahara.tagihan.edit', [
             'siswa' => $siswa,
@@ -189,6 +191,7 @@ class TagihanController extends Controller
             'allTagihan' => $allTagihan,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $jenisTagihanWithExisting,
+            'allYears' => $allYears,
         ]);
     }
 
@@ -210,6 +213,7 @@ class TagihanController extends Controller
             'tagihan.*' => 'nullable|numeric|min:0',
             'tanggal_jatuh_tempo' => 'required|array',
             'tanggal_jatuh_tempo.*' => 'nullable|date',
+            'tahun_ajaran_id' => 'nullable|array', // Optional validation
         ]);
 
         DB::beginTransaction();
@@ -219,24 +223,29 @@ class TagihanController extends Controller
 
             foreach ($submittedTagihan as $key => $jumlah) {
                 $jatuhTempo = $request->input("tanggal_jatuh_tempo.{$key}");
+                $targetYearId = $request->input("tahun_ajaran_id.{$key}") ?? $tahunAjaranAktif->id;
 
-                // Cek apakah tagihan sudah ada
+                // Cek apakah tagihan sudah ada di TAHUN AKTIF (karena form edit load data tahun aktif)
+                // Jika user mengubah tahun, kita update record yang ada di tahun aktif ini ke tahun baru.
+                // Jika user membuat baru dengan tahun berbeda, create new.
+                
                 $tagihan = Tagihan::where('siswa_id', $siswaId)
                     ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
                     ->where('jenis_tagihan', $key)
                     ->first();
 
                 if ($tagihan) {
-                    // Update jika ada
+                    // Update jika ada (bisa pindah tahun)
                     $tagihan->update([
                         'jumlah' => $jumlah ?? 0,
                         'tanggal_jatuh_tempo' => $jatuhTempo ?? now()->addMonth(),
+                        'tahun_ajaran_id' => $targetYearId,
                     ]);
                 } else {
                     // Buat baru jika belum ada
                     Tagihan::create([
                         'siswa_id' => $siswaId,
-                        'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                        'tahun_ajaran_id' => $targetYearId,
                         'jenis_tagihan' => $key,
                         'jumlah' => $jumlah ?? 0,
                         'tanggal_jatuh_tempo' => $jatuhTempo ?? now()->addMonth(),

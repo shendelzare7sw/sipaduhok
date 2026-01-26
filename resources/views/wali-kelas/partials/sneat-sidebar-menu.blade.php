@@ -100,6 +100,19 @@
     </a>
 </li>
 
+<!-- Menu Header - Kenaikan Kelas -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Kenaikan Kelas</span>
+</li>
+
+<!-- Prediksi Kenaikan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.promotion.prediction') ? 'active' : '' }}">
+    <a href="{{ route('wali.promotion.prediction') }}" class="menu-link">
+        <i class="menu-icon fas fa-chart-bar"></i>
+        <div>Prediksi Kenaikan</div>
+    </a>
+</li>
+
 <!-- Menu Header - Validasi -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Validasi</span>

@@ -87,8 +87,9 @@
                             <tr>
                                 <th class="text-center" width="50">No</th>
                                 <th style="min-width: 200px;">Jenis Tagihan</th>
+                                <th style="min-width: 180px;">Tahun Ajaran</th>
                                 <th style="min-width: 200px;">Jumlah (Rp)</th>
-                                <th style="min-width: 180px;">Jatuh Tempo</th>
+                                <th style="min-width: 150px;">Jatuh Tempo</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,7 +103,16 @@
                                         @endif
                                     </td>
                                     <td class="align-middle">
-                                        <div class="input-group" style="max-width: 250px;">
+                                        <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm">
+                                            @foreach($allYears as $thn)
+                                                <option value="{{ $thn->id }}" {{ ($tahunAjaran->id == $thn->id) ? 'selected' : '' }}>
+                                                    {{ $thn->nama_tahun_ajaran }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="input-group input-group-sm" style="max-width: 250px;">
                                             <span class="input-group-text bg-white">Rp</span>
                                             <input type="text"
                                                    name="tagihan[{{ $key }}]"
@@ -117,7 +127,7 @@
                                     <td class="align-middle">
                                         <input type="date"
                                                name="tanggal_jatuh_tempo[{{ $key }}]"
-                                               class="form-control"
+                                               class="form-control form-control-sm"
                                                value="{{ old('tanggal_jatuh_tempo.'.$key, now()->addMonth()->format('Y-m-d')) }}"
                                                style="max-width: 200px;">
                                     </td>

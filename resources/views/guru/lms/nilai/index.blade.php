@@ -36,10 +36,12 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th width="5%" class="text-center">No</th>
-                                    <th width="30%">Nama Siswa</th>
-                                    <th width="15%" class="text-center">Rata2 Tugas</th>
-                                    <th width="15%" class="text-center">Nilai UTS</th>
-                                    <th width="15%" class="text-center">Nilai UAS</th>
+                                    <th width="20%">Nama Siswa</th>
+                                    <th width="10%" class="text-center">Tugas (15%)</th>
+                                    <th width="10%" class="text-center">Latihan (15%)</th>
+                                    <th width="10%" class="text-center">UH (20%)</th>
+                                    <th width="10%" class="text-center">PTS (20%)</th>
+                                    <th width="10%" class="text-center">PAS (30%)</th>
                                     <th width="10%" class="text-center">Nilai Akhir</th>
                                     <th width="10%" class="text-center">Aksi</th>
                                 </tr>
@@ -59,19 +61,29 @@
                                             <input type="hidden" name="nilai_id" value="{{ $nilai->id }}">
 
                                             <td class="text-center">
-                                                <input type="number" step="0.01" name="nilai_tugas"
+                                                <input type="number" step="0.01" name="tugas_1"
                                                     class="form-control form-control-sm text-center"
-                                                    value="{{ round($nilai->nilai_tugas, 2) }}">
+                                                    value="{{ round($nilai->rata_tugas ?? $nilai->tugas_1, 2) }}">
                                             </td>
                                             <td class="text-center">
-                                                <input type="number" step="0.01" name="nilai_uts"
+                                                <input type="number" step="0.01" name="latihan_1"
                                                     class="form-control form-control-sm text-center"
-                                                    value="{{ round($nilai->nilai_uts, 2) }}">
+                                                    value="{{ round($nilai->rata_latihan ?? $nilai->latihan_1, 2) }}">
                                             </td>
                                             <td class="text-center">
-                                                <input type="number" step="0.01" name="nilai_uas"
+                                                <input type="number" step="0.01" name="uh_1"
                                                     class="form-control form-control-sm text-center"
-                                                    value="{{ round($nilai->nilai_uas, 2) }}">
+                                                    value="{{ round($nilai->rata_uh ?? $nilai->uh_1, 2) }}">
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" step="0.01" name="pts"
+                                                    class="form-control form-control-sm text-center"
+                                                    value="{{ round($nilai->pts, 2) }}">
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="number" step="0.01" name="pas"
+                                                    class="form-control form-control-sm text-center"
+                                                    value="{{ round($nilai->pas, 2) }}">
                                             </td>
                                             <td class="text-center fw-bold text-primary">
                                                 {{ round($nilai->nilai_akhir, 2) }}

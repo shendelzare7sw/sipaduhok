@@ -42,6 +42,11 @@ class SiswaDashboardController extends Controller
             return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan');
         }
 
+        // Check if Alumni (Lulus)
+        if ($siswa->status === 'lulus') {
+            return $this->dashboardAlumni($siswa);
+        }
+
         // Pengumuman Aktif Hari Ini & Mendatang
         $pengumuman = Pengumuman::aktif()
             ->where('tanggal_pengumuman', '>=', now()->toDateString())
@@ -85,6 +90,11 @@ class SiswaDashboardController extends Controller
 
         if (!$siswa) {
             return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        // Check if Alumni (Lulus)
+        if ($siswa->status === 'lulus') {
+            return $this->dashboardAlumni($siswa);
         }
 
         // Cek akses LMS ditangani oleh middleware 'lms.access'
@@ -537,5 +547,19 @@ class SiswaDashboardController extends Controller
             'tugas' => $tugasBaru,
             'ujian' => $ujianHariIni
         ];
+    }
+
+    /**
+     * Dashboard khusus Alumni (Status Lulus)
+     */
+    private function dashboardAlumni($siswa)
+    {
+        // Ambil riwayat rapor terakhir
+        $raporTerakhir = \App\Models\Rapor::where('siswa_id', $siswa->id)
+            ->with('tahunAjaran')
+            ->orderBy('semester', 'desc')
+            ->first();
+        
+        return view('siswa.alumni.dashboard', compact('siswa', 'raporTerakhir'));
     }
 }

@@ -99,32 +99,47 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <!-- Final Score Hidden per User Request -->
+                    <!-- 
                     <div class="d-inline-block final-score-box">
                         <div class="text-xs text-uppercase fw-bold opacity-75">Nilai Akhir</div>
                         <div class="final-score-val">{{ $nilai->nilai_akhir ? number_format($nilai->nilai_akhir, 1) : '-' }}</div>
                     </div>
+                    -->
                 </div>
             </div>
         </div>
 
         <div class="card-body p-4">
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-2 mb-3">
                     <div class="mini-stat-card border-start-tugas shadow-sm">
-                        <div class="mini-stat-label">Nilai Tugas / Latihan</div>
-                        <div class="mini-stat-val text-info">{{ $nilai->nilai_tugas ? number_format($nilai->nilai_tugas, 1) : '-' }}</div>
+                        <div class="mini-stat-label">Rata Tugas (15%)</div>
+                        <div class="mini-stat-val text-primary">{{ $nilai->rata_tugas ? number_format($nilai->rata_tugas, 1) : '-' }}</div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-2 mb-3">
+                    <div class="mini-stat-card border-start-tugas shadow-sm" style="border-left-color: #4e73df !important;">
+                        <div class="mini-stat-label">Rata Latihan (15%)</div>
+                        <div class="mini-stat-val text-info">{{ $nilai->rata_latihan ? number_format($nilai->rata_latihan, 1) : '-' }}</div>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <div class="mini-stat-card border-start-tugas shadow-sm" style="border-left-color: #36b9cc !important;">
+                        <div class="mini-stat-label">Rata UH (20%)</div>
+                        <div class="mini-stat-val text-info">{{ $nilai->rata_uh ? number_format($nilai->rata_uh, 1) : '-' }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
                     <div class="mini-stat-card border-start-uts shadow-sm">
-                        <div class="mini-stat-label">Nilai Ujian Tengah Semester</div>
-                        <div class="mini-stat-val text-warning">{{ $nilai->nilai_uts ? number_format($nilai->nilai_uts, 1) : '-' }}</div>
+                        <div class="mini-stat-label">Nilai PTS (20%)</div>
+                        <div class="mini-stat-val text-warning">{{ $nilai->pts ? number_format($nilai->pts, 1) : '-' }}</div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <div class="mini-stat-card border-start-uas shadow-sm">
-                        <div class="mini-stat-label">Nilai Ujian Akhir Semester</div>
-                        <div class="mini-stat-val text-danger">{{ $nilai->nilai_uas ? number_format($nilai->nilai_uas, 1) : '-' }}</div>
+                        <div class="mini-stat-label">Nilai PAS (30%)</div>
+                        <div class="mini-stat-val text-danger">{{ $nilai->pas ? number_format($nilai->pas, 1) : '-' }}</div>
                     </div>
                 </div>
             </div>

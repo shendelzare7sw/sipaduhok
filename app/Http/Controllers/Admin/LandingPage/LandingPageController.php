@@ -29,8 +29,10 @@ class LandingPageController extends Controller
 
         foreach ($landingPage->sections as $section) {
             if (!isset($data[$section->id])) {
-                continue; // Should not happen if form is correct, or maybe section content not changed?
+                continue; 
             }
+
+            \Illuminate\Support\Facades\Log::info("Updating Section ID: {$section->id}", ['input' => $data[$section->id]]);
 
             $sectionInput = $data[$section->id];
 
@@ -38,51 +40,87 @@ class LandingPageController extends Controller
             if ($section->type === 'list') {
                 $content = $section->content;
 
-                // Check if input has 'items' key (Program-style: {items: [...], header: {...}})
-                if (isset($sectionInput['items']) && is_array($sectionInput['items'])) {
-                    $newItems = [];
-                    foreach ($sectionInput['items'] as $index => $item) {
-                        $processedItem = $item;
-
-                        // Handle image upload for list item
-                        $sectionIdStr = (string) $section->id;
-                        $allFiles = $request->allFiles();
-                        if (isset($allFiles['sections'][$sectionIdStr]['items'][$index])) {
-                            foreach ($allFiles['sections'][$sectionIdStr]['items'][$index] as $fileKey => $file) {
-                                if ($file instanceof \Illuminate\Http\UploadedFile) {
-                                    $path = $file->store('landing-pages', 'public');
-                                    $processedItem[$fileKey] = 'storage/' . $path;
-                                }
-                            }
-                        }
-
-                        $newItems[] = $processedItem;
-                    }
-
-                    $content['items'] = $newItems;
-
-                    // Handle Header fields if any
-                    if (isset($sectionInput['header'])) {
-                        $content['header'] = array_merge($content['header'] ?? [], $sectionInput['header']);
-                    }
-
-                    $section->content = $content;
+                // Check structure of existing content
+                // If it has 'items' key, it's Program-style.
+                // If it's a direct array (index 0 exists), it's Stats-style.
+                $isDirectArray = false;
+                if (is_array($content) && !empty($content) && isset($content[0])) {
+                     $isDirectArray = true;
+                } elseif (isset($content['items']) && is_array($content['items'])) {
+                     $isDirectArray = false;
                 } else {
-                    // Direct array structure (Stats-style: [...])
-                    // The form sends items under 'items' key, but we store as direct array
-                    // Actually, let's check if content IS a direct array
-                    $existingContent = $section->content;
-                    $isDirectArray = is_array($existingContent) && !empty($existingContent) && isset($existingContent[0]);
-
-                    if ($isDirectArray && isset($sectionInput['items'])) {
-                        // Save as direct array (no 'items' wrapper)
-                        $newItems = [];
-                        foreach ($sectionInput['items'] as $index => $item) {
-                            $newItems[] = $item;
-                        }
-                        $section->content = $newItems;
+                    // Fallback/Empty: Check if input looks like direct array items without 'items' wrapper in input?
+                    // Actually, the form ALWAYS sends `items` array for list types (see edit.blade.php).
+                    // So we must rely on what the section is SUPPOSED to be.
+                    // Let's assume complex sections (Programs) have 'items' key structure.
+                    // Simple lists (Stats) tend to be direct arrays.
+                    // If content is empty/null, default to 'items' structure UNLESS it is specifically 'stats' key? 
+                    // But we don't have section key here easily available unless we load it. 
+                    // Fortunately $section->section_key is available.
+                    if ($section->section_key === 'stats') {
+                        $isDirectArray = true;
                     }
                 }
+
+                if ($isDirectArray) {
+                     // STATS Style: Direct Array
+                     // The form input still comes as ['items' => [...]] because of how the form is built.
+                     // We need to extract that and save as direct array.
+                     
+                     if (isset($sectionInput['items']) && is_array($sectionInput['items'])) {
+                        $newItems = [];
+                        foreach ($sectionInput['items'] as $index => $item) {
+                            $processedItem = $item;
+
+                            // Handle image upload for list item
+                            $sectionIdStr = (string) $section->id;
+                            $allFiles = $request->allFiles();
+                            if (isset($allFiles['sections'][$sectionIdStr]['items'][$index])) {
+                                foreach ($allFiles['sections'][$sectionIdStr]['items'][$index] as $fileKey => $file) {
+                                    if ($file instanceof \Illuminate\Http\UploadedFile) {
+                                        $path = $file->store('landing-pages', 'public');
+                                        $processedItem[$fileKey] = 'storage/' . $path;
+                                    }
+                                }
+                            }
+                            
+                            $newItems[] = $processedItem;
+                        }
+                        $section->content = $newItems;
+                     }
+                } else {
+                    // PROGRAM Style: {items: [...], header: {...}}
+                    if (isset($sectionInput['items']) && is_array($sectionInput['items'])) {
+                        $newItems = [];
+                        foreach ($sectionInput['items'] as $index => $item) {
+                            $processedItem = $item;
+
+                            // Handle image upload for list item
+                            $sectionIdStr = (string) $section->id;
+                            $allFiles = $request->allFiles();
+                            if (isset($allFiles['sections'][$sectionIdStr]['items'][$index])) {
+                                foreach ($allFiles['sections'][$sectionIdStr]['items'][$index] as $fileKey => $file) {
+                                    if ($file instanceof \Illuminate\Http\UploadedFile) {
+                                        $path = $file->store('landing-pages', 'public');
+                                        $processedItem[$fileKey] = 'storage/' . $path;
+                                    }
+                                }
+                            }
+
+                            $newItems[] = $processedItem;
+                        }
+
+                        $content['items'] = $newItems;
+
+                        // Handle Header fields if any
+                        if (isset($sectionInput['header'])) {
+                            $content['header'] = array_merge($content['header'] ?? [], $sectionInput['header']);
+                        }
+
+                        $section->content = $content;
+                    }
+                }
+
             } else {
                 // Text / Rich Text / Image
                 $content = $section->content;
@@ -125,6 +163,7 @@ class LandingPageController extends Controller
         // Since LandingPageSeeder uses updateOrCreate based on slug/keys, it will restore the default values
 
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'LandingPageSeeder']);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'FasilitasLibrarySeeder']);
 
         return redirect()->back()->with('success', 'Konten halaman berhasil direset ke pengaturan awal.');
     }

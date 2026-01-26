@@ -40,16 +40,18 @@ class UserSeeder extends Seeder
         }
 
         // Ketua PKBM
-        User::create([
-            'name' => 'Fransisda Tiodora Ferdiansyah S. Psi., M. M., Psikolog',
-            'email' => 'ketuafransisda@sipaduhok.com',
-            'username' => 'fransisdatiodora',
-            'password' => Hash::make('password'),
-            'role' => 'ketua_pkbm',
-            'role_id' => $roles['ketua_pkbm'],
-            'cabang_id' => 1,
-            'is_active' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'ketuafransisda@sipaduhok.com'],
+            [
+                'name' => 'Fransisda Tiodora Ferdiansyah S. Psi., M. M., Psikolog',
+                'username' => 'fransisdatiodora',
+                'password' => Hash::make('password'),
+                'role' => 'ketua_pkbm',
+                'role_id' => $roles['ketua_pkbm'],
+                'cabang_id' => 1,
+                'is_active' => true,
+            ]
+        );
 
         // Wakil Kepala Sekolah (4 orang)
         $wakaData = [
@@ -60,41 +62,47 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($wakaData as $waka) {
-            User::create([
-                'name' => $waka['name'],
-                'email' => $waka['email'],
-                'username' => $waka['username'],
-                'password' => Hash::make('password'),
-                'role' => 'wakil_kepala_sekolah',
-                'role_id' => $roles['wakil_kepala_sekolah'],
-                'cabang_id' => 1,
-                'is_active' => true,
-            ]);
+            User::firstOrCreate(
+                ['email' => $waka['email']],
+                [
+                    'name' => $waka['name'],
+                    'username' => $waka['username'],
+                    'password' => Hash::make('password'),
+                    'role' => 'wakil_kepala_sekolah',
+                    'role_id' => $roles['wakil_kepala_sekolah'],
+                    'cabang_id' => 1,
+                    'is_active' => true,
+                ]
+            );
         }
 
         // Sekretaris
-        User::create([
-            'name' => 'Delia Parsauliani S. K. M.',
-            'email' => 'sekredelia@sipaduhok.com',
-            'username' => 'deliaparsa',
-            'password' => Hash::make('password'),
-            'role' => 'sekretaris',
-            'role_id' => $roles['sekretaris'],
-            'cabang_id' => 1,
-            'is_active' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'sekredelia@sipaduhok.com'],
+            [
+                'name' => 'Delia Parsauliani S. K. M.',
+                'username' => 'deliaparsa',
+                'password' => Hash::make('password'),
+                'role' => 'sekretaris',
+                'role_id' => $roles['sekretaris'],
+                'cabang_id' => 1,
+                'is_active' => true,
+            ]
+        );
 
         // Bendahara
-        User::create([
-            'name' => 'Linawati Rozali',
-            'email' => 'bendaharalinawati@sipaduhok.com',
-            'username' => 'linawatitu',
-            'password' => Hash::make('password'),
-            'role' => 'bendahara',
-            'role_id' => $roles['bendahara'],
-            'cabang_id' => 1,
-            'is_active' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'bendaharalinawati@sipaduhok.com'],
+            [
+                'name' => 'Linawati Rozali',
+                'username' => 'linawatitu',
+                'password' => Hash::make('password'),
+                'role' => 'bendahara',
+                'role_id' => $roles['bendahara'],
+                'cabang_id' => 1,
+                'is_active' => true,
+            ]
+        );
 
         // Wali Kelas - 4 data asli + 8 dummy
         $waliKelasData = [
@@ -115,16 +123,18 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($waliKelasData as $wali) {
-            User::create([
-                'name' => $wali['name'],
-                'email' => $wali['email'],
-                'username' => $wali['username'],
-                'password' => Hash::make('password'),
-                'role' => 'wali_kelas',
-                'role_id' => $roles['wali_kelas'],
-                'cabang_id' => $wali['cabang_id'],
-                'is_active' => true,
-            ]);
+            User::firstOrCreate(
+                ['email' => $wali['email']],
+                [
+                    'name' => $wali['name'],
+                    'username' => $wali['username'],
+                    'password' => Hash::make('password'),
+                    'role' => 'wali_kelas',
+                    'role_id' => $roles['wali_kelas'],
+                    'cabang_id' => $wali['cabang_id'],
+                    'is_active' => true,
+                ]
+            );
         }
 
         // Guru Pengajar - 5 data asli + 5 dummy
@@ -144,16 +154,18 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($guruData as $guru) {
-            User::create([
-                'name' => $guru['name'],
-                'email' => $guru['email'],
-                'username' => $guru['username'],
-                'password' => Hash::make('password'),
-                'role' => 'guru_pengajar',
-                'role_id' => $roles['guru_pengajar'],
-                'cabang_id' => $guru['cabang_id'],
-                'is_active' => true,
-            ]);
+            User::firstOrCreate(
+                ['email' => $guru['email']],
+                [
+                    'name' => $guru['name'],
+                    'username' => $guru['username'],
+                    'password' => Hash::make('password'),
+                    'role' => 'guru_pengajar',
+                    'role_id' => $roles['guru_pengajar'],
+                    'cabang_id' => $guru['cabang_id'],
+                    'is_active' => true,
+                ]
+            );
         }
 
         // Siswa - 6 data asli + 18 dummy
@@ -195,16 +207,18 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($siswaData as $siswa) {
-            User::create([
-                'name' => $siswa['name'],
-                'email' => $siswa['email'],
-                'username' => $siswa['username'],
-                'password' => Hash::make('password'),
-                'role' => 'siswa',
-                'role_id' => $roles['siswa'],
-                'cabang_id' => $siswa['cabang_id'],
-                'is_active' => true,
-            ]);
+            User::firstOrCreate(
+                ['email' => $siswa['email']],
+                [
+                    'name' => $siswa['name'],
+                    'username' => $siswa['username'],
+                    'password' => Hash::make('password'),
+                    'role' => 'siswa',
+                    'role_id' => $roles['siswa'],
+                    'cabang_id' => $siswa['cabang_id'],
+                    'is_active' => true,
+                ]
+            );
         }
 
         // Orang Tua - 2 data asli
@@ -214,16 +228,18 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($orangTuaData as $ortu) {
-            User::create([
-                'name' => $ortu['name'],
-                'email' => $ortu['email'],
-                'username' => $ortu['username'],
-                'password' => Hash::make('password'),
-                'role' => 'orang_tua',
-                'role_id' => $roles['orang_tua'],
-                'cabang_id' => 1,
-                'is_active' => true,
-            ]);
+            User::firstOrCreate(
+                ['email' => $ortu['email']],
+                [
+                    'name' => $ortu['name'],
+                    'username' => $ortu['username'],
+                    'password' => Hash::make('password'),
+                    'role' => 'orang_tua',
+                    'role_id' => $roles['orang_tua'],
+                    'cabang_id' => 1,
+                    'is_active' => true,
+                ]
+            );
         }
 
         $this->command->info('Users seeded successfully with role_id!');
