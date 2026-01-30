@@ -414,8 +414,7 @@
                 <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 fade-in-up"
                     style="animation-delay: 0.2s;">
                     {{ $heroContent['title'] ?? 'Fasilitas' }}<br>
-                    <span class="text-accent-yellow">{{ $heroContent['title_highlight'] ?? 'Terbaik' }}</span> Untuk<br>
-                    Pembelajaran Optimal
+                    <span class="text-accent-yellow">{{ $heroContent['title_highlight'] ?? 'Terbaik' }}</span>
                 </h1>
                 <p class="text-lg md:text-xl text-white/90 mb-12 leading-relaxed max-w-3xl mx-auto fade-in-up"
                     style="animation-delay: 0.4s;">
