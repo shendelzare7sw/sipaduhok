@@ -357,8 +357,7 @@ class LmsDashboardController extends Controller
         }
 
         $kelas = $siswa->kelas;
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-
+        
         // Get all jadwal for this class
         $allJadwal = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
             ->with(['mataPelajaran', 'guru'])
@@ -367,28 +366,14 @@ class LmsDashboardController extends Controller
             ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
             ->values();
 
-        // Group jadwal by hari
-        $jadwalByHari = collect();
-        foreach ($hariList as $hari) {
-            $jadwalByHari[$hari] = $allJadwal->where('hari', $hari)->values();
-        }
-
-        // Get unique time slots from jadwal
-        $timeSlots = $allJadwal->map(function ($j) {
-            return [
-                'mulai' => Carbon::parse($j->jam_mulai)->format('H:i'),
-                'selesai' => Carbon::parse($j->jam_selesai)->format('H:i'),
-                'sort' => $j->jam_mulai,
-            ];
-        })->unique(function ($item) {
-            return $item['mulai'] . '-' . $item['selesai'];
-        })->sortBy('sort')->values();
-
         // Get break times for this jenjang
         $istirahatList = PengaturanIstirahat::jenjang($kelas->jenjang)
             ->aktif()
             ->orderBy('jam_mulai')
             ->get();
+
+        // Build Grid using the helper
+        $scheduleGrid = $this->buildScheduleGrid($allJadwal, $istirahatList);
 
         // Today's schedule
         $hariIni = Carbon::now()->locale('id')->dayName;
@@ -407,10 +392,7 @@ class LmsDashboardController extends Controller
         return view('siswa.lms.jadwal', compact(
             'siswa',
             'kelas',
-            'hariList',
-            'jadwalByHari',
-            'timeSlots',
-            'istirahatList',
+            'scheduleGrid',
             'hariIni',
             'jadwalHariIni',
             'mataPelajaranList'
@@ -418,8 +400,178 @@ class LmsDashboardController extends Controller
     }
 
     /**
+     * Build grid structure for schedule
+     */
+    private function buildScheduleGrid($jadwalList, $istirahatList)
+    {
+        // 1. Collect all unique Start Times to define Grid Rows
+        $startTimes = collect();
+        
+        foreach ($jadwalList as $jadwal) {
+            $startTimes->push($jadwal->jam_mulai->format('H:i'));
+        }
+        
+        foreach ($istirahatList as $ist) {
+            $startTimes->push(substr($ist->jam_mulai, 0, 5));
+        }
+
+        $gridRows = $startTimes->unique()->sort()->values(); 
+
+        // 2. Build the Grid
+        $grid = [];
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; 
+        
+        // Check if we have Sabtu data
+        if ($jadwalList->where('hari', 'Sabtu')->count() > 0) {
+            $hariList[] = 'Sabtu';
+        }
+
+        // Initialize Grid
+        foreach ($gridRows as $index => $time) {
+            $grid[$index] = [
+                'time_start' => $time,
+                'days' => []
+            ];
+            foreach ($hariList as $hari) {
+                $grid[$index]['days'][$hari] = ['type' => 'empty'];
+            }
+        }
+
+        // Helper to find grid index for a given time
+        $getGridIndex = function($time) use ($gridRows) {
+            return $gridRows->search($time);
+        };
+
+        // 3. Place Items into Grid
+        
+        // A. Place Lessons
+        foreach ($jadwalList as $jadwal) {
+            $startTime = $jadwal->jam_mulai->format('H:i');
+            $endTime = $jadwal->jam_selesai->format('H:i');
+            $day = $jadwal->hari;
+            
+            if (!in_array($day, $hariList)) continue;
+
+            $startIndex = $getGridIndex($startTime);
+            if ($startIndex === false) continue; 
+
+            // Calculate Rowspan
+            $span = 0;
+            for ($i = $startIndex; $i < count($gridRows); $i++) {
+                if ($gridRows[$i] < $endTime) {
+                    $span++;
+                } else {
+                    break;
+                }
+            }
+            if ($span < 1) $span = 1;
+
+            // Mark cells
+            if (isset($grid[$startIndex]['days'][$day]['type']) && $grid[$startIndex]['days'][$day]['type'] == 'taken') {
+                $existing = $grid[$startIndex]['days'][$day];
+                 if (isset($existing['type']) && $existing['type'] == 'lesson') {
+                     // Append content
+                     $grid[$startIndex]['days'][$day]['data'][] = $jadwal;
+                 } else {
+                     // Create new if conflict (should be handled better but for now overwrite if taken by span?)
+                     // Actually logic from Admin controller handles this: if taken, try to append?
+                     // If it is 'taken' it means it is covered by a previous rowspan. 
+                     // Ideally we shouldn't be here if schedule is non-overlapping.
+                     // But if overlapping, we might lose display. 
+                     // Let's assume Valid Data for now, or just force create.
+                     if ($existing['type'] == 'taken') {
+                        // Conflict with previous span.
+                        // Can't easily merge into previous span.
+                        // Ideally we should start a new item here? But grid structure is fixed.
+                        // For simplicity, we overwrite 'taken' with 'lesson' (renders on top) or we just ignore?
+                        // Admin logic handles "if ($grid[$startIndex]['days'][$day]['type'] == 'taken')".
+                        // Wait, looking at Admin logic:
+                        /*
+                        if (isset($grid[$startIndex]['days'][$day]['type']) && $grid[$startIndex]['days'][$day]['type'] == 'taken') {
+                            $existing = $grid[$startIndex]['days'][$day];
+                             if ($existing['type'] == 'lesson') { ... } 
+                             else { 
+                                // It was 'taken'. Admin logic creates new lesson here effectively overwriting the 'taken' status for this cell.
+                                // This means the previous rowspan might visually clash? 
+                                // HTML table handles overlapping rowspan poorly (pushes cells).
+                                // But let's stick to Admin logic.
+                                 $grid[$startIndex]['days'][$day] = [ 'type' => 'lesson', ... ];
+                             }
+                        }
+                        */
+                         $grid[$startIndex]['days'][$day] = [
+                             'type' => 'lesson',
+                             'rowspan' => $span,
+                             'data' => [$jadwal]
+                         ];
+                     }
+                 }
+            } else if ($grid[$startIndex]['days'][$day]['type'] == 'empty') {
+                 $grid[$startIndex]['days'][$day] = [
+                     'type' => 'lesson',
+                     'rowspan' => $span,
+                     'data' => [$jadwal]
+                 ];
+                 // Mark covered
+                 for ($r = 1; $r < $span; $r++) {
+                     if (isset($grid[$startIndex + $r])) {
+                        $grid[$startIndex + $r]['days'][$day] = ['type' => 'taken'];
+                     }
+                 }
+            }
+        }
+
+        // B. Place Breaks
+        foreach ($istirahatList as $ist) {
+            $startTime = substr($ist->jam_mulai, 0, 5);
+            $endTime = substr($ist->jam_selesai, 0, 5);
+            $targetDays = is_array($ist->hari_aktif) ? $ist->hari_aktif : json_decode($ist->hari_aktif, true);
+            
+            if (!$targetDays) $targetDays = $hariList;
+
+            $startIndex = $getGridIndex($startTime);
+            if ($startIndex === false) continue;
+
+             $span = 0;
+            for ($i = $startIndex; $i < count($gridRows); $i++) {
+                if ($gridRows[$i] < $endTime) {
+                    $span++;
+                } else {
+                    break;
+                }
+            }
+            if ($span < 1) $span = 1;
+
+            foreach ($targetDays as $day) {
+                if (!in_array($day, $hariList)) continue;
+                
+                $grid[$startIndex]['days'][$day] = [
+                    'type' => 'break',
+                    'rowspan' => $span,
+                    'data' => $ist
+                ];
+
+                 // Mark covered
+                 for ($r = 1; $r < $span; $r++) {
+                     if (isset($grid[$startIndex + $r])) {
+                        $grid[$startIndex + $r]['days'][$day] = ['type' => 'taken'];
+                     }
+                 }
+            }
+        }
+        
+        return [
+            'rows' => $grid,
+            'days' => $hariList
+        ];
+    }
+    
+
+    /**
      * Print Jadwal Pelajaran
      */
+
+
     public function printJadwal()
     {
         $user = Auth::user();
@@ -456,7 +608,7 @@ class LmsDashboardController extends Controller
                 $merged->push([
                     'type' => 'jadwal',
                     'data' => $jadwal,
-                    'jam_mulai' => $jadwal->jam_mulai,
+                    'jam_mulai' => $jadwal->jam_mulai->format('H:i:s'),
                 ]);
             }
 
@@ -465,7 +617,7 @@ class LmsDashboardController extends Controller
                 $merged->push([
                     'type' => 'istirahat',
                     'data' => $istirahat,
-                    'jam_mulai' => $istirahat->jam_mulai,
+                    'jam_mulai' => Carbon::parse($istirahat->jam_mulai)->format('H:i:s'),
                 ]);
             }
 
@@ -479,6 +631,8 @@ class LmsDashboardController extends Controller
             'hariList' => $hariList,
         ]);
     }
+
+
 
     /**
      * Daftar Guru Pengajar
