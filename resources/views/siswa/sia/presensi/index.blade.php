@@ -145,18 +145,37 @@
                     <td class="align-middle text-muted">{{ ucfirst($item->tanggal->locale('id')->dayName) }}</td>
                     <td class="text-center align-middle">
                         @php
-                            $map = [
-                                'hadir' => 'success',
-                                'sakit' => 'warning',
-                                'izin'  => 'info',
-                                'alpha' => 'danger',
-                            ];
+                            $badgeClass = 'secondary';
+                            $statusLabel = strtoupper($item->status);
+
+                            if ($item->status_validasi == 'pending') {
+                                $statusLabel = 'MENUNGGU VALIDASI';
+                                $badgeClass = 'warning';
+                            } elseif ($item->status_validasi == 'ditolak') {
+                                $statusLabel = 'DITOLAK';
+                                $badgeClass = 'danger';
+                            } else {
+                                $map = [
+                                    'hadir' => 'success',
+                                    'sakit' => 'warning',
+                                    'izin'  => 'info',
+                                    'alpha' => 'danger',
+                                ];
+                                $badgeClass = $map[$item->status] ?? 'secondary';
+                            }
                         @endphp
-                        <span class="badge rounded-pill px-3 py-2 fw-bold bg-{{ $map[$item->status] ?? 'secondary' }} shadow-sm">
-                            {{ strtoupper($item->status) }}
+                        <span class="badge rounded-pill px-3 py-2 fw-bold bg-{{ $badgeClass }} shadow-sm">
+                            {{ $statusLabel }}
                         </span>
                     </td>
-                    <td class="align-middle small text-muted">{{ $item->keterangan ?? 'Tidak ada catatan' }}</td>
+                    <td class="align-middle small text-muted">
+                        <div class="mb-1">{{ $item->keterangan ?? 'Tidak ada catatan' }}</div>
+                        @if($item->bukti_file)
+                            <a href="{{ asset('storage/' . $item->bukti_file) }}" target="_blank" class="text-primary text-decoration-none fw-bold">
+                                <i class="fas fa-paperclip me-1"></i>Lihat Bukti
+                            </a>
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
