@@ -176,6 +176,22 @@
                         @forelse($mataPelajaranList as $index => $mapel)
                             @php
                                 $nilai = $nilaiData[$mapel->id] ?? null;
+
+                                // DETEKSI DATA KOSONG/INISIALISASI
+                                // Jika nilai akhir 0.00 TAPI semua komponen (tugas, uh, dll) masih NULL/Kosong,
+                                // maka kita anggap data ini belum ada (bukan sekedar belum tuntas).
+                                $isDataKosong = $nilai &&
+                                                ($nilai->nilai_akhir == 0) &&
+                                                is_null($nilai->rata_tugas) &&
+                                                is_null($nilai->rata_latihan) &&
+                                                is_null($nilai->rata_uh) &&
+                                                is_null($nilai->pts) &&
+                                                is_null($nilai->pas);
+
+                                if ($isDataKosong) {
+                                    $nilai = null; // Paksa jadi null agar tampilan konsisten menjadi 'BELUM ADA'
+                                }
+
                                 $nilaiAkhir = $nilai ? $nilai->nilai_akhir : null;
                                 $predikat = $nilai ? $nilai->nilaiHuruf() : '-';
                                 $status = ($nilaiAkhir && $nilaiAkhir >= 70) ? 'TUNTAS' : 'BELUM TUNTAS';
