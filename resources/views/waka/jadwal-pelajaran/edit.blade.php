@@ -49,9 +49,6 @@
 
 @section('content')
 {{-- Error Messages --}}
-@section('content')
-{{-- Error Messages --}}
-
 @if($errors->any())
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <i class="fas fa-exclamation-circle me-2"></i>
@@ -154,6 +151,9 @@
                     </div>
                 </div>
             </div>
+            
+             {{-- Siswa Section (For Religion/Specific Subjects) --}}
+
 
             {{-- Waktu Section --}}
             <div class="form-section">
@@ -250,7 +250,7 @@
                         <i class="fas fa-exclamation-triangle"></i>
                         <div>
                             <strong>Belum ada pengaturan waktu istirahat</strong>
-                            <p class="mb-0 small">Silakan konfigurasi waktu istirahat terlebih dahulu di menu <a href="{{ route('admin.pengaturan-istirahat.index') }}" class="alert-link">Pengaturan Istirahat</a></p>
+                            <p class="mb-0 small">Silakan konfigurasi waktu istirahat terlebih dahulu di menu <a href="{{ route('waka.pengaturan-istirahat.index') }}" class="alert-link">Pengaturan Istirahat</a></p>
                         </div>
                     </div>
                 </div>
@@ -369,7 +369,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Trigger filter on page load
     kelasSelect.dispatchEvent(new Event('change'));
+    
+
 });
+
+
 
 // Function to filter istirahat display based on jenjang and hari
 function filterIstirahatDisplay() {

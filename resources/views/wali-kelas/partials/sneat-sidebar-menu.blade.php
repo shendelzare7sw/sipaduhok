@@ -77,11 +77,31 @@
 </li>
 
 <!-- Presensi Siswa -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.presensi') ? 'active' : '' }}">
-    <a href="{{ route('wali.presensi.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.presensi') ? 'active open' : '' }}">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-clipboard-check"></i>
         <div>Presensi Siswa</div>
     </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ $currentRoute == 'wali.presensi.index' ? 'active' : '' }}">
+            <a href="{{ route('wali.presensi.index') }}" class="menu-link">
+                <i class="fas fa-edit me-2" style="font-size: 10px;"></i>
+                <div>Input Harian</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'wali.presensi.validasi-izin' ? 'active' : '' }}">
+            <a href="{{ route('wali.presensi.validasi-izin') }}" class="menu-link">
+                <i class="fas fa-check-circle me-2" style="font-size: 10px;"></i>
+                <div>Validasi Izin</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'wali.presensi.riwayat' ? 'active' : '' }}">
+            <a href="{{ route('wali.presensi.riwayat') }}" class="menu-link">
+                <i class="fas fa-history me-2" style="font-size: 10px;"></i>
+                <div>Riwayat & Edit</div>
+            </a>
+        </li>
+    </ul>
 </li>
 
 <!-- Nilai Siswa -->

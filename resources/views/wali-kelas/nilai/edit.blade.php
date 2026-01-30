@@ -113,7 +113,7 @@
                                     $nilai = $nilaiData[$mapel->id] ?? null;
                                 @endphp
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
+                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
                                     <td class="align-middle">
                                         <div class="fw-bold text-gray-900">{{ $mapel->nama_mapel }}</div>
                                         <small class="text-muted text-uppercase">{{ $mapel->kode_mapel }}</small>

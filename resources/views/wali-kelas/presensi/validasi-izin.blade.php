@@ -87,15 +87,13 @@
                                             <strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($presensi->tanggal)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}
                                         </div>
                                         @php
-                                            // Extract bukti path from keterangan
-                                            $keterangan = $presensi->keterangan ?? '-';
-                                            $buktiPath = null;
-                                            $keteranganText = $keterangan;
+                                            // Extract bukti using column first, then legacy regex
+                                            $buktiPath = $presensi->bukti_file;
+                                            $keteranganText = $presensi->keterangan ?? '-';
 
-                                            if (preg_match('/\(Bukti: (.+?)\)/', $keterangan, $matches)) {
+                                            if (!$buktiPath && preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan, $matches)) {
                                                 $buktiPath = $matches[1];
-                                                // Remove bukti info from display text
-                                                $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $keterangan);
+                                                $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan);
                                             }
                                         @endphp
 
@@ -139,11 +137,12 @@
                                                         @elseif($isPdf)
                                                             <!-- Preview PDF -->
                                                             <div class="d-grid gap-2">
-                                                                <a href="{{ asset('storage/' . $buktiPath) }}"
-                                                                   target="_blank"
-                                                                   class="btn btn-sm btn-danger">
-                                                                    <i class="fas fa-file-pdf me-1"></i>Buka PDF
-                                                                </a>
+                                                                <button type="button"
+                                                                   class="btn btn-sm btn-danger"
+                                                                   data-bs-toggle="modal"
+                                                                   data-bs-target="#previewModalPdf{{ $presensi->id }}">
+                                                                    <i class="fas fa-file-pdf me-1"></i>Lihat PDF
+                                                                </button>
                                                                 <a href="{{ asset('storage/' . $buktiPath) }}"
                                                                    download
                                                                    class="btn btn-sm btn-primary">
@@ -202,14 +201,13 @@
         <!-- Modals - Outside the card -->
         @foreach($pengajuanPending as $presensi)
             @php
-                // Extract bukti for modal
-                $keterangan = $presensi->keterangan ?? '';
-                $buktiPath = null;
-                if (preg_match('/\(Bukti: (.+?)\)/', $keterangan, $matches)) {
+                $buktiPath = $presensi->bukti_file;
+                if (!$buktiPath && preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan ?? '', $matches)) {
                     $buktiPath = $matches[1];
                 }
                 $extension = $buktiPath ? pathinfo($buktiPath, PATHINFO_EXTENSION) : '';
                 $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                $isPdf = strtolower($extension) === 'pdf';
             @endphp
 
             <!-- Modal Preview Gambar -->
@@ -234,6 +232,31 @@
                                    download
                                    class="btn btn-primary">
                                     <i class="fas fa-download me-1"></i>Download
+                                </a>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Modal Preview PDF -->
+            @if($buktiPath && $isPdf)
+                <div class="modal fade" id="previewModalPdf{{ $presensi->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                        <div class="modal-content" style="height: 90vh;">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-file-pdf me-2"></i>Preview Bukti PDF - {{ $presensi->siswa->nama_lengkap }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0 h-100">
+                                <iframe src="" data-src="{{ route('wali.presensi.preview-bukti', $presensi->id) }}" width="100%" height="100%" style="border:none;"></iframe>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="{{ asset('storage/' . $buktiPath) }}" download class="btn btn-primary">
+                                    <i class="fas fa-download me-1"></i>Download PDF
                                 </a>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                             </div>
@@ -313,4 +336,19 @@
     @endif
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lazy load PDF iframes
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(function(modal) {
+            modal.addEventListener('shown.bs.modal', function() {
+                var iframe = modal.querySelector('iframe');
+                if (iframe && !iframe.getAttribute('src')) {
+                    iframe.setAttribute('src', iframe.getAttribute('data-src'));
+                }
+            });
+        });
+    });
+</script>
 @endsection

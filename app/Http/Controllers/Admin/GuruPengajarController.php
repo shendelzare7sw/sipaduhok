@@ -146,14 +146,15 @@ class GuruPengajarController extends Controller
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
         ]);
 
-        // Check if already assigned
-        $existing = GuruPengajarKelas::where('tenaga_pendidik_id', $guruPengajar->id)
-            ->where('kelas_id', $validated['kelas_id'])
+        // Check if already assigned (to ANY teacher)
+        $existing = GuruPengajarKelas::where('kelas_id', $validated['kelas_id'])
             ->where('mata_pelajaran_id', $validated['mata_pelajaran_id'])
+            ->with('tenagaPendidik') // Eager load to show who has it
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'Penugasan sudah ada!');
+            $currentGuru = $existing->tenagaPendidik ? $existing->tenagaPendidik->nama_lengkap : 'Guru lain';
+            return back()->with('error', "Gagal! Mata pelajaran ini sudah diajar oleh {$currentGuru} di kelas tersebut.");
         }
 
         GuruPengajarKelas::create([
@@ -218,14 +219,15 @@ class GuruPengajarController extends Controller
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
         ]);
 
-        // Check if already assigned
-        $existing = GuruPengajarKelas::where('tenaga_pendidik_id', $validated['tenaga_pendidik_id'])
-            ->where('kelas_id', $kelas->id)
+        // Check if already assigned (to ANY teacher)
+        $existing = GuruPengajarKelas::where('kelas_id', $kelas->id)
             ->where('mata_pelajaran_id', $validated['mata_pelajaran_id'])
+            ->with('tenagaPendidik')
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'Penugasan sudah ada!');
+             $currentGuru = $existing->tenagaPendidik ? $existing->tenagaPendidik->nama_lengkap : 'Guru lain';
+            return back()->with('error', "Gagal! Mata pelajaran ini sudah diajar oleh {$currentGuru} di kelas ini.");
         }
 
         GuruPengajarKelas::create([

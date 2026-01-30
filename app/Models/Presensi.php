@@ -18,6 +18,8 @@ class Presensi extends Model
         'tanggal',
         'status',
         'keterangan',
+        'bukti_file',
+        'status_validasi',
         'diinput_oleh',
     ];
 

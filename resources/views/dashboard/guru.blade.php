@@ -116,7 +116,7 @@
                                                 {{ $jadwal->kelas->nama_kelas }} • {{ $jadwal->mataPelajaran->nama_mapel }}
                                             </div>
                                         </div>
-                                        <a href="{{ route('guru.lms.dashboard', [$jadwal->kelas_id, $jadwal->mata_pelajaran_id]) }}"
+                                        <a href="{{ route('guru.lms.dashboard', [$jadwal->kelas_id, $jadwal->link_mapel_id]) }}"
                                             class="btn btn-primary btn-sm shadow-sm">
                                             <i class="fas fa-door-open me-1"></i>Masuk
                                         </a>

@@ -85,6 +85,10 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                             <td style="padding: 10px 0; color: #64748b;">Alamat</td>
                             <td style="padding: 10px 0; font-weight: 500;">{{ $siswa->alamat }}</td>
                         </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #64748b;">Agama</td>
+                            <td style="padding: 10px 0; font-weight: 500;">{{ $siswa->agama ?? '-' }}</td>
+                        </tr>
                     </table>
                 </div>
 

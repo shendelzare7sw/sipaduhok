@@ -33,10 +33,11 @@ class Siswa extends Model
         'validasi_ujian_wali',
         'tanggal_validasi_ujian_wali',
         'validasi_ujian_oleh',
-        'validasi_rapor_bendahara',
         'validasi_rapor_wali',
         'tanggal_validasi_rapor_wali',
         'validasi_rapor_oleh',
+        // New Religion Fields
+        'agama',
     ];
 
     protected $casts = [
@@ -125,5 +126,58 @@ class Siswa extends Model
     public function studentParents()
     {
         return $this->hasMany(StudentParent::class, 'siswa_id');
+    }
+
+    /**
+     * Check if student can access the subject based on religion.
+     */
+    public function canAccessMapel($mapel)
+    {
+        if (!$mapel) return true;
+        
+        $mapelName = strtolower($mapel->nama_mapel);
+        $myAgama = strtolower($this->agama ?? '');
+
+        // List of basic religion keywords
+        $religions = [
+            'islam' => 'islam',
+            'kristen' => 'kristen',
+            'katolik' => 'katolik',
+            'katholik' => 'katolik',
+            'hindu' => 'hindu',
+            'buddha' => 'buddha',
+            'budha' => 'buddha',
+            'konghucu' => 'konghucu'
+        ];
+
+        // Check mapel name for religion keywords
+        $targetReligion = null;
+        foreach ($religions as $keyword => $standardName) {
+            if (str_contains($mapelName, $keyword)) {
+                // Special check: Only if it really implies a religion class
+                // e.g. "Sejarah Islam" might be history, not religion class?
+                // User said "Agama Islam" or "Religi".
+                // But usually "Pendidikan Agama Islam".
+                // If the mapel name contains "agama" or "religi", treat as strict.
+                // Or if it simply mentions the religion?
+                
+                // Let's check for 'agama' or 'religi' context first?
+                // Or just assume any subject named "Islam" is restricted?
+                // Safe bet: if it has "Agama" or "Religi" AND the keyword.
+                // BUT User's request implied filtering "Agama Islam".
+                // Let's go with permissive detection but strict matching.
+                
+                if (str_contains($mapelName, 'agama') || str_contains($mapelName, 'religi')) {
+                    $targetReligion = $standardName;
+                    break;
+                }
+            }
+        }
+
+        if ($targetReligion) {
+            return str_contains($myAgama, $targetReligion);
+        }
+
+        return true;
     }
 }

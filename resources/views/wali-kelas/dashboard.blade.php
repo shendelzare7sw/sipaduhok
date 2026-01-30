@@ -168,7 +168,7 @@
                                                 {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
                                             </td>
                                             <td>{{ $jadwal->mataPelajaran->nama_mapel }}</td>
-                                            <td><small class="fw-bold">{{ $jadwal->guru->nama_lengkap }}</small></td>
+                                            <td><small class="fw-bold">{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : 'Belum ditentukan' }}</small></td>
                                         </tr>
                                     @empty
                                         <tr>

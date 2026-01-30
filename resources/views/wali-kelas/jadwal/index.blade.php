@@ -110,7 +110,7 @@
                                         <small class="text-muted">{{ $jadwal->mataPelajaran->kode_mapel }}</small>
                                     </td>
                                     <td class="align-middle small fw-bold text-gray-600">
-                                        {{ $jadwal->guru->nama_lengkap }}
+                                        {{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}
                                     </td>
                                 </tr>
                                 @endforeach

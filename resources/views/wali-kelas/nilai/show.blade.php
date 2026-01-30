@@ -189,7 +189,7 @@
                                 };
                             @endphp
                             <tr>
-                                <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
+                                <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
                                 <td class="align-middle">
                                     <div class="fw-bold text-gray-900">{{ $mapel->nama_mapel }}</div>
                                     <div class="small text-muted text-uppercase">Wajib / Kelompok A</div>

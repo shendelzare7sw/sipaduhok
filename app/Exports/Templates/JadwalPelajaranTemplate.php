@@ -17,9 +17,9 @@ class JadwalPelajaranTemplate implements FromArray, WithHeadings, WithStyles, Wi
     public function array(): array
     {
         return [
-            ['Utama', 'Kelas 1 SD', 'Matematika', 'Ahmad Wijaya', 'Senin', '07:30', '08:30', ''],
-            ['Utama', 'Kelas 1 SD', 'Bahasa Indonesia', 'Siti Nurhaliza', 'Senin', '08:30', '09:15', ''],
-            ['Cabang B', 'Kelas 2 SD', 'IPA', '', 'Selasa', '07:30', '08:30', 'Guru belum ditentukan'],
+            ['Utama', 'X IPA 1', 'Matematika Wajib', 'Budi Santoso', 'Senin', '07:00', '08:30', ''],
+            ['Utama', 'TK A1', 'Motorik Kasar', 'Siti Aminah', 'Senin', '08:00', '08:30', ''],
+            ['Cabang B', 'VII A', 'Bahasa Indonesia', '', 'Selasa', '07:00', '08:20', 'Guru belum ditentukan'],
         ];
     }
 
@@ -41,7 +41,7 @@ class JadwalPelajaranTemplate implements FromArray, WithHeadings, WithStyles, Wi
 
         $sheet->setCellValue('A6', 'PETUNJUK:');
         $sheet->setCellValue('A7', '1. Hapus baris contoh (baris 2-4) sebelum mengisi data Anda');
-        $sheet->setCellValue('A8', '2. nama_cabang dan nama_kelas WAJIB diisi dan harus PERSIS dengan yang ada di database');
+        $sheet->setCellValue('A8', '2. nama_cabang dan nama_kelas WAJIB diisi dan harus PERSIS dengan yang ada di database. Support: KB, TK A, TK B, SD, SMP, SMA');
         $sheet->setCellValue('A9', '3. hari: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu');
         $sheet->setCellValue('A10', '4. jam_mulai/jam_selesai format: HH:MM (contoh: 07:30)');
         $sheet->setCellValue('A11', '5. nama_guru harus PERSIS dengan nama_lengkap di data Tenaga Pendidik (lihat daftar di bawah)');
@@ -57,10 +57,10 @@ class JadwalPelajaranTemplate implements FromArray, WithHeadings, WithStyles, Wi
         $sheet->setCellValue('B15', $kelasStr ?: '(belum ada)');
 
         $sheet->setCellValue('A16', 'MAPEL TERSEDIA:');
-        $sheet->setCellValue('B16', MataPelajaran::pluck('nama_mapel')->take(20)->implode(', ') ?: '(belum ada)');
+        $sheet->setCellValue('B16', MataPelajaran::pluck('nama_mapel')->take(50)->implode(', ') ?: '(belum ada)');
 
         $sheet->setCellValue('A17', 'GURU TERSEDIA:');
-        $guruList = TenagaPendidik::pluck('nama_lengkap')->take(20)->implode(', ');
+        $guruList = TenagaPendidik::pluck('nama_lengkap')->take(50)->implode(', ');
         $sheet->setCellValue('B17', $guruList ?: '(belum ada guru)');
 
         $sheet->getStyle('A6')->getFont()->setBold(true);

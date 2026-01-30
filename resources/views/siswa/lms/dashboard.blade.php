@@ -147,9 +147,11 @@
                             </div>
                         </div>
                     @empty
-                        <div class="empty-state">
-                            <i class="fas fa-check-circle text-success"></i>
-                            <p>Semua tugas aman! Tidak ada deadline mendesak.</p>
+                        <div class="empty-state text-center p-4">
+                            <div class="d-flex justify-content-center mb-0">
+                                <i class="fas fa-check-circle text-success fa-2x"></i>
+                            </div>
+                            <p class="mt-2 mb-0">Semua tugas aman! Tidak ada deadline mendesak.</p>
                         </div>
                     @endforelse
                 </div>
@@ -176,8 +178,11 @@
                             </div>
                         </a>
                     @empty
-                        <div class="empty-state w-100">
-                            <p>Belum ada mata pelajaran.</p>
+                        <div class="empty-state w-100 text-center p-4">
+                             <div class="d-flex justify-content-center mb-0">
+                                <i class="fas fa-book-open text-muted fa-2x"></i>
+                            </div>
+                            <p class="mt-2 mb-0">Belum ada mata pelajaran.</p>
                         </div>
                     @endforelse
                 </div>

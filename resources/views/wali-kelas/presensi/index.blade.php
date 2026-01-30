@@ -47,8 +47,11 @@
                     <a href="{{ route('wali.presensi.validasi-izin') }}" class="btn btn-warning btn-sm shadow-sm fw-bold text-white mb-2 mb-sm-0">
                         <i class="fas fa-check-circle me-1"></i> Validasi Izin
                     </a>
-                    <a href="{{ route('wali.presensi.print-rekap', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-secondary btn-sm shadow-sm ms-sm-2 fw-bold">
+                    <a href="{{ route('wali.presensi.print-rekap', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-secondary btn-sm shadow-sm ms-sm-2 fw-bold mb-2 mb-sm-0">
                         <i class="fas fa-print me-1"></i> Cetak Rekap
+                    </a>
+                    <a href="{{ route('wali.presensi.riwayat') }}" class="btn btn-info btn-sm shadow-sm ms-sm-2 fw-bold text-white mb-2 mb-sm-0">
+                        <i class="fas fa-history me-1"></i> Riwayat & Edit
                     </a>
                 </div>
             </div>

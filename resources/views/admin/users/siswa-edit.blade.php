@@ -315,8 +315,9 @@
     <div class="info-box">
         <i class="fas fa-info-circle"></i>
         <div>
-            <strong>Catatan:</strong> Form ini hanya untuk mengubah data akun dan status siswa. Data lengkap biodata siswa
-            lainnya tetap tersimpan di sistem.
+        <div>
+            <strong>Catatan:</strong> Form ini untuk mengubah seluruh data siswa, termasuk biodata lengkap dan data akun.
+        </div>
         </div>
     </div>
 
@@ -400,6 +401,49 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Jenis Kelamin <span style="color: #ef4444;">*</span></label>
+                        <select name="jenis_kelamin" class="form-control" required>
+                            <option value="">-- Pilih Jenis Kelamin --</option>
+                            <option value="L" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="P" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Tempat Lahir <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="tempat_lahir" class="form-control" value="{{ old('tempat_lahir', $siswa->tempat_lahir) }}"
+                            placeholder="Kota tempat lahir" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Lahir <span style="color: #ef4444;">*</span></label>
+                        <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ? $siswa->tanggal_lahir->format('Y-m-d') : '') }}"
+                            required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Alamat Lengkap <span style="color: #ef4444;">*</span></label>
+                <textarea name="alamat" class="form-control" rows="3" placeholder="Alamat lengkap tempat tinggal"
+                    required>{{ old('alamat', $siswa->alamat) }}</textarea>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Agama <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="agama" class="form-control" value="{{ old('agama', $siswa->agama) }}"
+                            placeholder="Contoh: Kristen, Islam, dll" required>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Section 3: Academic Information --}}
@@ -436,6 +480,11 @@
                         </select>
                     </div>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tanggal Masuk <span style="color: #ef4444;">*</span></label>
+                <input type="date" name="tanggal_masuk" class="form-control" value="{{ old('tanggal_masuk', $siswa->tanggal_masuk ? $siswa->tanggal_masuk->format('Y-m-d') : '') }}" required>
             </div>
 
             <div class="form-group">

@@ -1,33 +1,103 @@
 @php
     $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-    $isPreviewable = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf']);
+    $isPdf = $extension === 'pdf';
+    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+    
     // URL for direct download (asset)
     $downloadUrl = asset('storage/' . $path);
-    // URL for preview (via controller to force inline)
+    // URL for preview (via controller)
     $previewUrl = route('storage.preview', ['path' => $path]);
     
-    // Determine icon based on extension
+    // Unique ID for this component instance
+    $modalId = 'modal-' . md5($path . uniqid()); 
+    
+    // Determine icon
     $icon = 'fa-file';
-    if ($extension == 'pdf') $icon = 'fa-file-pdf';
-    elseif (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) $icon = 'fa-file-image';
+    if ($isPdf) $icon = 'fa-file-pdf';
+    elseif ($isImage) $icon = 'fa-file-image';
     elseif (in_array($extension, ['doc', 'docx'])) $icon = 'fa-file-word';
     elseif (in_array($extension, ['xls', 'xlsx'])) $icon = 'fa-file-excel';
     elseif (in_array($extension, ['ppt', 'pptx'])) $icon = 'fa-file-powerpoint';
 @endphp
 
 <div class="d-flex align-items-center gap-2 mb-2">
-    @if($isPreviewable)
-        <!-- Preview in New Tab (Browser Native) -->
-        <a href="{{ $previewUrl }}" target="_blank" class="btn btn-sm btn-info text-white">
-            <i class="fas {{ $icon }} me-1"></i>Preview
-        </a>
+    @if($isPdf)
+        <!-- PDF Preview Modal Trigger -->
+        <button type="button" 
+                class="btn btn-sm btn-danger" 
+                data-bs-toggle="modal" 
+                data-bs-target="#{{ $modalId }}"
+                onclick="document.getElementById('iframe-{{ $modalId }}').src = '{{ $previewUrl }}'">
+            <i class="fas fa-file-pdf me-1"></i>Lihat PDF
+        </button>
         
-        <!-- Optional Download Button -->
+        <!-- Download Button -->
         <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Download File">
             <i class="fas fa-download"></i>
         </a>
+
+        <!-- PDF Modal -->
+        <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content" style="height: 90vh;">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-file-pdf me-2"></i>Preview PDF
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0 h-100">
+                        <iframe id="iframe-{{ $modalId }}" src="" width="100%" height="100%" style="border:none;"></iframe>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="{{ $downloadUrl }}" download class="btn btn-primary">
+                            <i class="fas fa-download me-1"></i>Download PDF
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    @elseif($isImage)
+        <!-- Image Preview Modal Trigger -->
+        <button type="button" 
+                class="btn btn-sm btn-info text-white" 
+                data-bs-toggle="modal" 
+                data-bs-target="#{{ $modalId }}">
+            <i class="fas fa-image me-1"></i>Lihat Gambar
+        </button>
+        
+        <!-- Download Button -->
+        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Download File">
+            <i class="fas fa-download"></i>
+        </a>
+
+        <!-- Image Modal -->
+        <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-image me-2"></i>Preview Gambar
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center bg-light">
+                        <img src="{{ $downloadUrl }}" alt="Preview" class="img-fluid" style="max-height: 80vh;">
+                    </div>
+                    <div class="modal-footer">
+                        <a href="{{ $downloadUrl }}" download class="btn btn-primary">
+                            <i class="fas fa-download me-1"></i>Download Gambar
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     @else
-        <!-- Direct Download for non-previewable files -->
+        <!-- Direct Download -->
         <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-primary">
             <i class="fas {{ $icon }} me-1"></i>Download {{ strtoupper($extension) }}
         </a>

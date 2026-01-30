@@ -280,6 +280,7 @@ class UserController extends Controller
             'nama_ibu' => 'nullable|string|max:255',
             'telepon_orangtua' => 'nullable|string|max:20',
             'tanggal_masuk' => 'required|date',
+            'agama' => 'required|string|max:50',
             'parent_option' => 'nullable|in:existing,new,none',
             'parent_id' => 'exclude_unless:parent_option,existing|required|exists:users,id',
             'existing_relationship' => 'exclude_unless:parent_option,existing|required|string',
@@ -322,6 +323,7 @@ class UserController extends Controller
             'nama_ibu' => $validated['nama_ibu'],
             'telepon_orangtua' => $validated['telepon_orangtua'],
             'tanggal_masuk' => $validated['tanggal_masuk'],
+            'agama' => $validated['agama'],
             'status' => 'aktif',
         ]);
 
@@ -408,6 +410,7 @@ class UserController extends Controller
             'nama_ibu' => 'nullable|string|max:255',
             'telepon_orangtua' => 'nullable|string|max:20',
             'tanggal_masuk' => 'required|date',
+            'agama' => 'required|string|max:50',
             'status' => 'required|in:aktif,lulus,pindah,keluar',
             'is_active' => 'required|boolean',
             'remove_parents' => 'nullable|array',
@@ -451,6 +454,7 @@ class UserController extends Controller
             'nama_ibu' => $validated['nama_ibu'],
             'telepon_orangtua' => $validated['telepon_orangtua'],
             'tanggal_masuk' => $validated['tanggal_masuk'],
+            'agama' => $validated['agama'],
             'status' => $validated['status'],
         ]);
 

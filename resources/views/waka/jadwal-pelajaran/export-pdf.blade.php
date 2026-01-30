@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,7 +127,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
         }
 
@@ -144,35 +143,12 @@
             font-weight: bold;
         }
 
-        .badge-senin {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .badge-selasa {
-            background: #f3e5f5;
-            color: #6a1b9a;
-        }
-
-        .badge-rabu {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .badge-kamis {
-            background: #fff3e0;
-            color: #e65100;
-        }
-
-        .badge-jumat {
-            background: #fce4ec;
-            color: #c2185b;
-        }
-
-        .badge-sabtu {
-            background: #f1f8e9;
-            color: #558b2f;
-        }
+        .badge-senin { background: #e3f2fd; color: #1565c0; }
+        .badge-selasa { background: #f3e5f5; color: #6a1b9a; }
+        .badge-rabu { background: #e8f5e9; color: #2e7d32; }
+        .badge-kamis { background: #fff3e0; color: #e65100; }
+        .badge-jumat { background: #fce4ec; color: #c2185b; }
+        .badge-sabtu { background: #f1f8e9; color: #558b2f; }
 
         .istirahat-row {
             background-color: #fff9c4 !important;
@@ -195,7 +171,6 @@
         }
     </style>
 </head>
-
 <body>
     <button class="print-button no-print" onclick="window.print()">
         <i class="fas fa-print"></i> Cetak / Simpan PDF
@@ -205,22 +180,21 @@
         <h1>Jadwal Pelajaran</h1>
         <h2>{{ $tahunAjaran ? $tahunAjaran->nama_tahun_ajaran : 'Semua Tahun Ajaran' }}</h2>
         @if($filterInfo['cabang'] || $filterInfo['jenjang'] || $filterInfo['kelas'] || $filterInfo['guru'])
-            <p style="font-size: 11px; color: #333; margin-top: 5px; font-weight: bold;">
-                Filter:
-                @if($filterInfo['cabang'])
-                    Cabang: {{ $filterInfo['cabang'] }}
-                @endif
-                @if($filterInfo['jenjang'])
-                    {{ $filterInfo['cabang'] ? ' | ' : '' }}Jenjang: {{ $filterInfo['jenjang'] }}
-                @endif
-                @if($filterInfo['kelas'])
-                    {{ ($filterInfo['cabang'] || $filterInfo['jenjang']) ? ' | ' : '' }}Kelas: {{ $filterInfo['kelas'] }}
-                @endif
-                @if($filterInfo['guru'])
-                    {{ ($filterInfo['cabang'] || $filterInfo['jenjang'] || $filterInfo['kelas']) ? ' | ' : '' }}Guru:
-                    {{ $filterInfo['guru'] }}
-                @endif
-            </p>
+        <p style="font-size: 11px; color: #333; margin-top: 5px; font-weight: bold;">
+            Filter:
+            @if($filterInfo['cabang'])
+                Cabang: {{ $filterInfo['cabang'] }}
+            @endif
+            @if($filterInfo['jenjang'])
+                {{ $filterInfo['cabang'] ? ' | ' : '' }}Jenjang: {{ $filterInfo['jenjang'] }}
+            @endif
+            @if($filterInfo['kelas'])
+                {{ ($filterInfo['cabang'] || $filterInfo['jenjang']) ? ' | ' : '' }}Kelas: {{ $filterInfo['kelas'] }}
+            @endif
+            @if($filterInfo['guru'])
+                {{ ($filterInfo['cabang'] || $filterInfo['jenjang'] || $filterInfo['kelas']) ? ' | ' : '' }}Guru: {{ $filterInfo['guru'] }}
+            @endif
+        </p>
         @endif
         <p>Dicetak pada: {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y HH:mm') }} WIB</p>
     </div>
@@ -236,7 +210,7 @@
         $jenjangs = $jadwalList->pluck('kelas.jenjang')->unique()->values()->toArray();
 
         // Filter istirahat by relevant jenjang
-        $relevanIstirahat = isset($pengaturanIstirahat) ? $pengaturanIstirahat->filter(function ($ist) use ($jenjangs, $filterInfo) {
+        $relevanIstirahat = isset($pengaturanIstirahat) ? $pengaturanIstirahat->filter(function($ist) use ($jenjangs, $filterInfo) {
             // If jenjang filter is applied, only show istirahat for that jenjang
             if ($filterInfo['jenjang']) {
                 return $ist->jenjang === $filterInfo['jenjang'];
@@ -273,7 +247,7 @@
                         $jadwalHari = isset($jadwalByHari[$hari]) ? $jadwalByHari[$hari] : collect();
 
                         // Get istirahat for this day
-                        $istirahatHari = $relevanIstirahat->filter(function ($ist) use ($hari) {
+                        $istirahatHari = $relevanIstirahat->filter(function($ist) use ($hari) {
                             $hariAktif = is_array($ist->hari_aktif) ? $ist->hari_aktif : json_decode($ist->hari_aktif, true);
                             return in_array($hari, $hariAktif ?? []);
                         });
@@ -368,11 +342,10 @@
 
     <script>
         // Auto print on load (optional - user can also use the button)
-        window.onload = function () {
+        window.onload = function() {
             // Uncomment line below to auto-print on page load
             // setTimeout(() => window.print(), 500);
         }
     </script>
 </body>
-
 </html>

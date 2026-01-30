@@ -258,11 +258,9 @@
 @endsection
 
 @section('content')
-    {{-- Success/Error Messages --}}
+{{-- Success/Error Messages --}}
 @section('content')
     {{-- Success/Error Messages --}}
-
-    {{-- Stats Section --}}
 
     {{-- Stats Section --}}
     <div class="row mb-4">
@@ -335,6 +333,9 @@
                     class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel me-1"></i> Export Excel
                 </a>
+                <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
+                    <i class="fas fa-print me-1"></i> Cetak Jadwal Kelas
+                </button>
                 <a href="{{ route('waka.jadwal-pelajaran.import') }}" class="btn btn-outline-success btn-sm">
                     <i class="fas fa-file-import me-1"></i> Import Excel
                 </a>
@@ -469,7 +470,8 @@
                                             @if($jadwal->guru)
                                                 <div class="guru-info">
                                                     <div class="guru-avatar-sm">
-                                                        {{ strtoupper(substr($jadwal->guru->nama_lengkap, 0, 1)) }}</div>
+                                                        {{ strtoupper(substr($jadwal->guru->nama_lengkap, 0, 1)) }}
+                                                    </div>
                                                     <span class="guru-name">{{ $jadwal->guru->nama_lengkap }}</span>
                                                 </div>
                                             @else
@@ -587,6 +589,7 @@
             <div class="modal-dialog modal-dialog-centered" style="max-width: 600px; margin: 1.75rem auto;">
                 <form action="{{ route('waka.jadwal-pelajaran.ganti-guru', $jadwal) }}" method="POST" style="width: 100%;">
                     @csrf
+                    <input type="hidden" name="guru_id_baru" id="guruIdBaru{{ $jadwal->id }}" value="">
                     <div class="modal-content">
                         <div class="modal-header bg-info text-white">
                             <h5 class="modal-title" id="gantiGuruModalLabel{{ $jadwal->id }}">
@@ -603,7 +606,8 @@
                                     <div><i
                                             class="fas fa-calendar-day me-2 text-primary"></i><strong>{{ $jadwal->hari }}</strong>,
                                         {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</div>
+                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                                    </div>
                                     <div class="mt-1"><i
                                             class="fas fa-school me-2 text-success"></i>{{ $jadwal->kelas->nama_kelas }}</div>
                                 </div>
@@ -616,20 +620,68 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Guru Baru <small class="text-muted fw-normal">(Kosongkan
                                         untuk set jadwal kosong)</small></label>
-                                <select name="guru_id_baru" class="form-select" required>
-                                    <option value="">-- Kosongkan (Menunggu Guru) --</option>
+
+                                {{-- Search Input --}}
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="searchGuru{{ $jadwal->id }}"
+                                        placeholder="🔍 Cari nama guru..." oninput="filterGuruOptions({{ $jadwal->id }})">
+                                </div>
+
+                                {{-- Guru Display Selected --}}
+                                <div id="selectedGuruDisplay{{ $jadwal->id }}" class="mb-2"
+                                    style="display: none;
+                                            background: #d1fae5; border: 1px solid #10b981; padding: 10px 12px; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <i class="fas fa-user-check text-success"></i>
+                                            <span id="selectedGuruName{{ $jadwal->id }}" style="font-weight: 500;"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            onclick="clearGuruSelection{{ $jadwal->id }}()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Guru List --}}
+                                <div id="guruList{{ $jadwal->id }}"
+                                    style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                    <div class="guru-opt-item"
+                                        style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6;"
+                                        onclick="selectGuruForJadwal({{ $jadwal->id }}, '', 'Kosongkan (Menunggu Guru)')"
+                                        onmouseenter="this.style.background='#fef3c7'"
+                                        onmouseleave="this.style.background='white'">
+                                        <i class="fas fa-user-slash text-warning me-2"></i>
+                                        <span style="color: #92400e;">-- Kosongkan (Menunggu Guru) --</span>
+                                    </div>
                                     @foreach($guruList as $guru)
-                                        <option value="{{ $guru->id }}" {{ $jadwal->guru_id == $guru->id ? 'disabled' : '' }}>
-                                            {{ $guru->nama_lengkap }}
-                                            {{ $jadwal->guru_id == $guru->id ? '(Guru Saat Ini)' : '' }}
-                                        </option>
+                                        <div class="guru-opt-item" data-name="{{ strtolower($guru->nama_lengkap) }}"
+                                            data-id="{{ $guru->id }}" data-jadwal="{{ $jadwal->id }}"
+                                            style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 10px;
+                                                        {{ $jadwal->guru_id == $guru->id ? 'background: #e5e7eb; opacity: 0.6; pointer-events: none;' : '' }}"
+                                            onclick="selectGuruForJadwal({{ $jadwal->id }}, {{ $guru->id }}, '{{ addslashes($guru->nama_lengkap) }}')"
+                                            onmouseenter="this.style.background='#ecfdf5'"
+                                            onmouseleave="this.style.background='{{ $jadwal->guru_id == $guru->id ? '#e5e7eb' : 'white' }}'">
+                                            <div
+                                                style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">
+                                                {{ substr($guru->nama_lengkap, 0, 2) }}
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 500; color: #111827;">{{ $guru->nama_lengkap }}</div>
+                                                <div style="font-size: 11px; color: #6b7280;">
+                                                    {{ $guru->user->cabang->nama_cabang ?? '-' }}</div>
+                                            </div>
+                                            @if($jadwal->guru_id == $guru->id)
+                                                <span class="badge bg-secondary ms-auto">Saat Ini</span>
+                                            @endif
+                                        </div>
                                     @endforeach
-                                </select>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Alasan Penggantian <small
                                         class="text-muted fw-normal">(Opsional)</small></label>
-                                <textarea name="alasan" class="form-control" rows="3"
+                                <textarea name="alasan" class="form-control" rows="2"
                                     placeholder="Contoh: Guru resign, Guru mutasi, Penyesuaian jadwal, dll"></textarea>
                             </div>
                         </div>
@@ -645,6 +697,41 @@
                 </form>
             </div>
         </div>
+
+        <script>
+            function filterGuruOptions(jadwalId) {
+                const searchInput = document.getElementById('searchGuru' + jadwalId);
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const guruList = document.querySelectorAll('#guruList' + jadwalId + ' .guru-opt-item[data-name]');
+
+                guruList.forEach(item => {
+                    const name = item.getAttribute('data-name') || '';
+                    if (searchTerm === '' || name.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            function selectGuruForJadwal(jadwalId, guruId, guruName) {
+                document.getElementById('guruIdBaru' + jadwalId).value = guruId;
+                const display = document.getElementById('selectedGuruDisplay' + jadwalId);
+                const nameSpan = document.getElementById('selectedGuruName' + jadwalId);
+
+                if (guruId === '' || guruName.includes('Kosongkan')) {
+                    display.style.display = 'none';
+                } else {
+                    display.style.display = 'block';
+                    nameSpan.textContent = guruName;
+                }
+            }
+
+            function clearGuruSelection{{ $jadwal->id }}() {
+                document.getElementById('guruIdBaru{{ $jadwal->id }}').value = '';
+                document.getElementById('selectedGuruDisplay{{ $jadwal->id }}').style.display = 'none';
+            }
+        </script>
     @endforeach
 
     {{-- Modal Bulk Replace Guru --}}
@@ -944,7 +1031,7 @@
             // Create and submit form
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route("admin.jadwal-pelajaran.bulk-update-status") }}';
+            form.action = '{{ route("waka.jadwal-pelajaran.bulk-update-status") }}';
 
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -966,6 +1053,99 @@
 
             document.body.appendChild(form);
             form.submit();
+        }
+    </script>
+    {{-- Modal Cetak Per Kelas --}}
+    <div class="modal fade" id="cetakKelasModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-print me-2"></i>Cetak Jadwal Pelajaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2">
+                        <small>Pilih Cabang dan Kelas untuk mencetak jadwal spesifik.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cabang</label>
+                        <select id="printCabangId" class="form-select" onchange="filterPrintKelas()">
+                            <option value="">-- Pilih Cabang --</option>
+                            @foreach($cabangList as $cabang)
+                                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Kelas</label>
+                        <select id="printKelasId" class="form-select" disabled>
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($allKelasList as $kelas)
+                                <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}" style="display: none;">
+                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCetakKelas('pdf')">
+                        <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="submitCetakKelas('excel')">
+                        <i class="fas fa-file-excel me-1"></i> Cetak Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterPrintKelas() {
+            const cabangId = document.getElementById('printCabangId').value;
+            const kelasSelect = document.getElementById('printKelasId');
+            const options = kelasSelect.querySelectorAll('option[data-cabang]');
+
+            kelasSelect.value = "";
+            kelasSelect.disabled = cabangId === "";
+
+            options.forEach(opt => {
+                if (cabangId === "" || opt.getAttribute('data-cabang') == cabangId) {
+                    opt.style.display = "";
+                } else {
+                    opt.style.display = "none";
+                    // If selected option is hidden, deselect
+                    if (opt.selected) kelasSelect.value = "";
+                }
+            });
+        }
+
+        function submitCetakKelas(type) {
+            const kelasId = document.getElementById('printKelasId').value;
+            if (!kelasId) {
+                alert('Silakan pilih kelas terlebih dahulu!');
+                return;
+            }
+
+            let url = "";
+            const tahunAjaranParam = "?tahun_ajaran_id={{ request('tahun_ajaran_id', $currentTahunAjaran->id) }}";
+
+            if (type === 'excel') {
+                // Endpoint Export Excel: /waka/jadwal-pelajaran/kelas/{id}/export-excel
+                url = "{{ url('waka/jadwal-pelajaran/kelas') }}/" + kelasId + "/export-excel" + tahunAjaranParam;
+            } else {
+                // Endpoint Export PDF: /waka/jadwal-pelajaran/kelas/{id}/print
+                url = "{{ url('waka/jadwal-pelajaran/kelas') }}/" + kelasId + "/print" + tahunAjaranParam;
+            }
+            
+            window.open(url, '_blank');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cetakKelasModal'));
+            modal.hide();
         }
     </script>
 @endsection

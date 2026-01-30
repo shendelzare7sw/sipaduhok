@@ -137,21 +137,7 @@
                 </div>
 
                 {{-- Siswa Khusus Section (Hidden by default) --}}
-                <div class="form-section" id="siswaSection" style="display: none;">
-                    <div class="form-section-title">Peserta Khusus (Opsional)</div>
-                    <div class="alert alert-info py-2">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Pilih siswa jika mata pelajaran ini hanya diikuti oleh siswa tertentu (misalnya Agama).
-                        Jika dikosongkan, maka berlaku untuk <strong>SEMUA SISWA</strong> di kelas tersebut.
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Pilih Siswa</label>
-                        <select name="siswa_ids[]" id="siswaSelect" class="form-select" multiple size="10">
-                            {{-- Populated via AJAX --}}
-                        </select>
-                        <small class="text-muted">Tahan tombol CTRL (Windows) atau Command (Mac) untuk memilih lebih dari satu siswa.</small>
-                    </div>
-                </div>
+
 
                 {{-- Waktu Section --}}
                 <div class="form-section">
@@ -334,56 +320,13 @@
                 filterIstirahatDisplay();
 
                 // Load Students if Class Selected
-                loadStudents(this.value);
+                // loadStudents(this.value);
 
                 // Filter Guru by Branch
                 filterGuruByCabang();
             });
             
-            mapelSelect.addEventListener('change', function() {
-                checkAgama();
-            });
 
-            function checkAgama() {
-                const selectedText = mapelSelect.options[mapelSelect.selectedIndex].text;
-                const siswaSection = document.getElementById('siswaSection');
-                
-                if (selectedText.includes('Agama') || selectedText.includes('Religi')) {
-                    siswaSection.style.display = 'block';
-                } else {
-                    siswaSection.style.display = 'none';
-                    // Optional: Clear selection? No, keep it just in case user switches back.
-                    // But if submitting, backend treats null as All.
-                }
-            }
-
-            function loadStudents(kelasId) {
-                if (!kelasId) return;
-                
-                const siswaSelect = document.getElementById('siswaSelect');
-                siswaSelect.innerHTML = '<option>Loading...</option>';
-                
-                fetch(`/admin/jadwal-pelajaran/get-students/${kelasId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        siswaSelect.innerHTML = '';
-                        if(data.length === 0) {
-                            siswaSelect.innerHTML = '<option disabled>Tidak ada siswa aktif</option>';
-                            return;
-                        }
-                        
-                        data.forEach(siswa => {
-                            const option = document.createElement('option');
-                            option.value = siswa.id;
-                            option.text = `${siswa.nama_lengkap} (${siswa.nis})`;
-                            siswaSelect.appendChild(option);
-                        });
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        siswaSelect.innerHTML = '<option disabled>Gagal memuat siswa</option>';
-                    });
-            }
 
             // Filter Guru Logic
             function filterGuruByCabang() {

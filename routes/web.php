@@ -257,6 +257,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/kelas/{kelas}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'show'])->name('show');
             Route::get('/kelas/{kelas}/preview-print', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'previewPrint'])->name('preview-print');
             Route::get('/kelas/{kelas}/print', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportPdf'])->name('print');
+    Route::get('/kelas/{kelas}/export-excel', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportExcelClass'])->name('export-excel-class');
             Route::get('/export-pdf', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportPdfAll'])->name('export-pdf');
             Route::get('/export-excel', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'exportExcel'])->name('export-excel');
             Route::post('/duplicate', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'duplicate'])->name('duplicate');
@@ -267,6 +268,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/bulk-replace-guru', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkReplaceGuru'])->name('bulk-replace-guru');
             Route::delete('/bulk-delete', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
             Route::post('/bulk-update-status', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+            Route::get('/get-students/{kelas}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'getStudents'])->name('get-students');
             Route::get('/api/kelas/{kelas}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'getByKelas'])->name('api.by-kelas');
             Route::get('/api/guru/{guru}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'getByGuru'])->name('api.by-guru');
         });
@@ -608,23 +610,29 @@ Route::middleware(['auth'])->group(function () {
 
         // Jadwal Pelajaran
         Route::prefix('jadwal-pelajaran')->name('jadwal-pelajaran.')->group(function () {
-            Route::get('/import', [WakaJadwalPelajaranController::class, 'import'])->name('import');
-            Route::post('/import', [WakaJadwalPelajaranController::class, 'importStore'])->name('import.store');
+            Route::get('/import', [WakaJadwalPelajaranController::class, 'importForm'])->name('import');
+            Route::post('/import', [WakaJadwalPelajaranController::class, 'import'])->name('import.store');
             Route::get('/template', [WakaJadwalPelajaranController::class, 'downloadTemplate'])->name('template');
             Route::get('/', [WakaJadwalPelajaranController::class, 'index'])->name('index');
             Route::get('/create', [WakaJadwalPelajaranController::class, 'create'])->name('create');
             Route::post('/', [WakaJadwalPelajaranController::class, 'store'])->name('store');
-            Route::get('/print', [WakaJadwalPelajaranController::class, 'print'])->name('print');
-            Route::get('/export-pdf', [WakaJadwalPelajaranController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/kelas/{kelas}/show', [WakaJadwalPelajaranController::class, 'show'])->name('show');
+            Route::get('/kelas/{kelas}/preview-print', [WakaJadwalPelajaranController::class, 'previewPrint'])->name('preview-print');
+            Route::get('/kelas/{kelas}/print', [WakaJadwalPelajaranController::class, 'exportPdf'])->name('print');
+            Route::get('/kelas/{kelas}/export-excel', [WakaJadwalPelajaranController::class, 'exportExcelClass'])->name('export-excel-class');
+            Route::get('/export-pdf', [WakaJadwalPelajaranController::class, 'exportPdfAll'])->name('export-pdf');
             Route::get('/export-excel', [WakaJadwalPelajaranController::class, 'exportExcel'])->name('export-excel');
             Route::post('/duplicate', [WakaJadwalPelajaranController::class, 'duplicate'])->name('duplicate');
-            Route::post('/bulk-replace-guru', [WakaJadwalPelajaranController::class, 'bulkReplaceGuru'])->name('bulk-replace-guru');
-            Route::delete('/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
-            Route::get('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'show'])->name('show');
             Route::get('/{jadwalPelajaran}/edit', [WakaJadwalPelajaranController::class, 'edit'])->name('edit');
             Route::put('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'update'])->name('update');
             Route::delete('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'destroy'])->name('destroy');
             Route::post('/{jadwalPelajaran}/ganti-guru', [WakaJadwalPelajaranController::class, 'gantiGuru'])->name('ganti-guru');
+            Route::post('/bulk-replace-guru', [WakaJadwalPelajaranController::class, 'bulkReplaceGuru'])->name('bulk-replace-guru');
+            Route::delete('/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::post('/bulk-update-status', [WakaJadwalPelajaranController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+            Route::get('/get-students/{kelas}', [WakaJadwalPelajaranController::class, 'getStudents'])->name('get-students');
+            Route::get('/api/kelas/{kelas}', [WakaJadwalPelajaranController::class, 'getByKelas'])->name('api.by-kelas');
+            Route::get('/api/guru/{guru}', [WakaJadwalPelajaranController::class, 'getByGuru'])->name('api.by-guru');
         });
 
         // Monitoring
@@ -845,8 +853,11 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/update', [PresensiController::class, 'updatePresensi'])->name('update');
             Route::post('/input-harian', [PresensiController::class, 'inputHarian'])->name('input-harian');
             Route::get('/validasi-izin', [PresensiController::class, 'validasiIzin'])->name('validasi-izin');
+            Route::get('/preview-bukti/{id}', [PresensiController::class, 'previewBukti'])->name('preview-bukti');
             Route::post('/validasi-izin/{id}', [PresensiController::class, 'prosesValidasiIzin'])->name('proses-validasi-izin');
             Route::get('/print-rekap', [PresensiController::class, 'printRekap'])->name('print-rekap');
+            Route::get('/riwayat', [PresensiController::class, 'riwayat'])->name('riwayat');
+            Route::put('/riwayat/{id}', [PresensiController::class, 'updateRiwayat'])->name('riwayat.update');
         });
 
         // Promotion Prediction

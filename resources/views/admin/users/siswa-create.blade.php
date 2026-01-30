@@ -432,6 +432,16 @@
                 <textarea name="alamat" class="form-control" rows="3" placeholder="Alamat lengkap tempat tinggal"
                     required>{{ old('alamat') }}</textarea>
             </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label class="form-label">Agama <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="agama" class="form-control" value="{{ old('agama') }}"
+                            placeholder="Contoh: Kristen, Islam, dll" required>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- Section 4: Parent Biodata --}}

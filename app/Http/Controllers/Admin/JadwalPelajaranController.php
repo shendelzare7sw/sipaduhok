@@ -81,7 +81,33 @@ class JadwalPelajaranController extends Controller
             ->with('cabang')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
+            ->orderBy('nama_kelas')
             ->get();
+
+        // Get ALL kelas for the dropdown in Modal (ignoring filters)
+        $allKelasList = Kelas::where('tahun_ajaran_id', $tahunAjaranId)
+            ->with('cabang')
+            ->get()
+            ->sortBy(function ($kelas) {
+                // Parse grade number from nama_kelas (e.g. "10 IPA 1" -> 10)
+                // Use regex to capture the leading number
+                if (preg_match('/^(\d+)/', $kelas->nama_kelas, $matches)) {
+                    $grade = (int)$matches[1];
+                } else {
+                    // Handle non-numeric classes (TK, KB) - assign low value
+                    // TK B > TK A > KB if needed, or just grouping
+                    $grade = 0; 
+                }
+
+                // Custom Jenjang Priority for grouping if needed, but User emphasized Grade Order
+                // "SMA Plus" and "SMA" are treated same in grade logic (both have 10,11,12)
+                
+                return [
+                    $kelas->cabang->nama_cabang, // Sort by Cabang first
+                    -$grade,                    // Sort by Grade DESC (negative for asc sort)
+                    $kelas->nama_kelas          // Then by Name (e.g., 10 IPA 1 vs 10 IPA 2)
+                ];
+            });
 
         // Hanya ambil guru dengan role 'guru_pengajar' (bukan wali_kelas)
         $guruList = TenagaPendidik::whereHas('user', function ($q) {
@@ -108,8 +134,8 @@ class JadwalPelajaranController extends Controller
             'stats',
             'cabangId',
             'jenjang',
-            'kelasId',
-            'guruId'
+            'guruId',
+            'allKelasList'
         ));
     }
 
@@ -193,6 +219,12 @@ class JadwalPelajaranController extends Controller
 
         if ($conflicts['hasConflict']) {
             return back()->withInput()->with('error', $conflicts['message']);
+        }
+
+        // Auto-filter students for Religion subjects
+        $filteredSiswaIds = $this->getFilteredSiswaIds($validated['kelas_id'], $validated['mataPelajaran_id'] ?? $validated['mata_pelajaran_id']);
+        if ($filteredSiswaIds !== null) {
+            $validated['siswa_ids'] = $filteredSiswaIds;
         }
 
         $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
@@ -323,6 +355,12 @@ class JadwalPelajaranController extends Controller
 
         // Track changes untuk history
         $this->trackChanges($jadwalPelajaran, $validated);
+
+        // Auto-filter students for Religion subjects
+        $filteredSiswaIds = $this->getFilteredSiswaIds($validated['kelas_id'], $validated['mataPelajaran_id'] ?? $validated['mata_pelajaran_id']);
+        if ($filteredSiswaIds !== null) {
+            $validated['siswa_ids'] = $filteredSiswaIds;
+        }
 
         $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
         $validated['updated_by'] = Auth::id();
@@ -506,7 +544,7 @@ class JadwalPelajaranController extends Controller
         $students = \App\Models\Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap')
-            ->select('id', 'nama_lengkap', 'nis')
+            ->select('id', 'nama_lengkap', 'nis', 'agama')
             ->get();
 
         return response()->json($students);
@@ -639,6 +677,48 @@ class JadwalPelajaranController extends Controller
     }
 
     /**
+     * Get filtered student IDs for religion subjects.
+     * Returns array of IDs if filtering is needed, or null if no filtering (all students).
+     */
+    private function getFilteredSiswaIds($kelasId, $mataPelajaranId)
+    {
+        $mapel = MataPelajaran::find($mataPelajaranId);
+        if (!$mapel) {
+            return null;
+        }
+
+        $namaMapel = strtolower($mapel->nama_mapel);
+
+        // Check for Religion keywords
+        $agamaFilter = null;
+        if (str_contains($namaMapel, 'agama kristen') || str_contains($namaMapel, 'religi kristen')) {
+            $agamaFilter = 'Kristen';
+        } elseif (str_contains($namaMapel, 'agama islam') || str_contains($namaMapel, 'religi islam')) {
+            $agamaFilter = 'Islam';
+        }
+
+        // If it's a religion subject that requires filtering
+        if ($agamaFilter) {
+            // Fetch students in the class with matching religion
+            // Case insensitive comparison for religion might be needed depending on DB collation, 
+            // but strict matching is usually safer for standardized inputs.
+            // Using 'like' for bit of flexibility if needed, or simple where.
+            $siswaIds = \App\Models\Siswa::where('kelas_id', $kelasId)
+                ->where('status', 'aktif')
+                ->where('agama', 'LIKE', "%{$agamaFilter}%") 
+                ->pluck('id')
+                ->toArray();
+            
+            return $siswaIds;
+        }
+
+        // Return null means "All Students" (no specific list stored, or handled as null in DB)
+        // If your DB requires explicit list for "All", fetch all IDs. 
+        // Based on previous code `siswa_ids` => 'nullable|array', if null it likely means all.
+        return null;
+    }
+
+    /**
      * Track changes untuk history.
      */
     private function trackChanges(JadwalPelajaran $jadwal, array $newData)
@@ -716,20 +796,19 @@ class JadwalPelajaranController extends Controller
             ->byKelas($kelasId)
             ->get();
 
-        // Group by hari
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function ($hari) use ($jadwalList) {
-            return [
-                $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
-            ];
-        });
+        // Get Breaks for this Jenjang
+        $istirahatList = PengaturanIstirahat::where('is_active', true)
+            ->where('jenjang', $kelas->jenjang)
+            ->get();
+
+        // Build Grid
+        $scheduleGrid = $this->buildScheduleGrid($jadwalList, $istirahatList);
 
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
         return view('admin.jadwal-pelajaran.print', compact(
             'kelas',
-            'jadwalByHari',
-            'hariList',
+            'scheduleGrid',
             'currentTahunAjaran'
         ))->with('preview', true);
     }
@@ -753,24 +832,72 @@ class JadwalPelajaranController extends Controller
             ->byKelas($kelasId)
             ->get();
 
-        // Group by hari
-        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $jadwalByHari = collect($hariList)->mapWithKeys(function ($hari) use ($jadwalList) {
-            return [
-                $hari => $jadwalList->where('hari', $hari)->sortBy('jam_mulai')->values()
-            ];
-        });
+        // Get Breaks for this Jenjang
+        $istirahatList = PengaturanIstirahat::where('is_active', true)
+            ->where('jenjang', $kelas->jenjang)
+            ->get();
+
+        // Build Grid
+        $scheduleGrid = $this->buildScheduleGrid($jadwalList, $istirahatList);
 
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
         return view('admin.jadwal-pelajaran.print', compact(
             'kelas',
-            'jadwalByHari',
-            'hariList',
+            'scheduleGrid',
             'currentTahunAjaran'
         ))->with('preview', false);
     }
 
+    /**
+     * Export jadwal to Excel (per kelas).
+     */
+    public function exportExcelClass(Request $request, $kelasId)
+    {
+        $tahunAjaranId = $request->tahun_ajaran_id;
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+
+        if (!$tahunAjaranId && $tahunAjaranAktif) {
+            $tahunAjaranId = $tahunAjaranAktif->id;
+        }
+
+        $kelas = Kelas::with('cabang', 'tahunAjaran', 'waliKelas')->findOrFail($kelasId);
+
+        $jadwalList = JadwalPelajaran::with(['mataPelajaran', 'guru'])
+            ->byTahunAjaran($tahunAjaranId)
+            ->byKelas($kelasId)
+            ->get();
+
+        // Get Breaks for this Jenjang
+        $istirahatList = PengaturanIstirahat::where('is_active', true)
+            ->where('jenjang', $kelas->jenjang)
+            ->get();
+
+        // Build Grid
+        $scheduleGrid = $this->buildScheduleGrid($jadwalList, $istirahatList);
+
+        $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
+        
+        // Generate filename with .xls extension
+        $filename = 'Jadwal_' . str_replace(' ', '_', $kelas->nama_kelas) . '_' . ($currentTahunAjaran ? str_replace(' ', '_', $currentTahunAjaran->nama_tahun_ajaran) : '') . '.xls';
+
+        return response()->view('admin.jadwal-pelajaran.export-excel-class', compact(
+            'kelas',
+            'scheduleGrid',
+            'currentTahunAjaran'
+        ))
+        ->header('Content-Type', 'application/vnd.ms-excel')
+        ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
+    }
+
+    /**
+     * Export jadwal to Excel.
+     */
+    /**
+     * Export jadwal to Excel.
+     */
     /**
      * Export jadwal to Excel.
      */
@@ -811,6 +938,7 @@ class JadwalPelajaranController extends Controller
             $query->byGuru($guruId);
         }
 
+        // Get sorted list
         $jadwalList = $query->get()->sortBy(function ($jadwal) {
             $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             return [
@@ -835,10 +963,9 @@ class JadwalPelajaranController extends Controller
             ->orderBy('jam_mulai')
             ->get();
 
-        // Generate filename with .xls extension (HTML-based Excel works better with xls)
+        // Generate filename with .xls extension
         $filename = 'Jadwal_Pelajaran_' . ($tahunAjaran ? str_replace(' ', '_', $tahunAjaran->nama_tahun_ajaran) : 'Export') . '.xls';
 
-        // Set proper headers for Excel download (.xls format for HTML-based export)
         return response()->view('admin.jadwal-pelajaran.export-excel', compact('jadwalList', 'tahunAjaran', 'filterInfo', 'pengaturanIstirahat'))
             ->header('Content-Type', 'application/vnd.ms-excel')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
@@ -846,6 +973,9 @@ class JadwalPelajaranController extends Controller
             ->header('Expires', '0');
     }
 
+    /**
+     * Export all jadwal to PDF.
+     */
     /**
      * Export all jadwal to PDF.
      */
@@ -887,6 +1017,7 @@ class JadwalPelajaranController extends Controller
             $query->byGuru($guruId);
         }
 
+        // Get sorted list
         $jadwalList = $query->get()->sortBy(function ($jadwal) {
             $hariOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             return [
@@ -912,6 +1043,169 @@ class JadwalPelajaranController extends Controller
             ->get();
 
         return view('admin.jadwal-pelajaran.export-pdf', compact('jadwalList', 'tahunAjaran', 'filterInfo', 'pengaturanIstirahat'));
+    }
+
+    /**
+     * Build grid structure for schedule PDF
+     */
+    private function buildScheduleGrid($jadwalList, $istirahatList)
+    {
+        // 1. Collect all unique Start Times to define Grid Rows
+        $startTimes = collect();
+        
+        foreach ($jadwalList as $jadwal) {
+            $startTimes->push($jadwal->jam_mulai->format('H:i'));
+        }
+        
+        foreach ($istirahatList as $ist) {
+            $startTimes->push(substr($ist->jam_mulai, 0, 5));
+        }
+
+        $gridRows = $startTimes->unique()->sort()->values(); // e.g. ['07:00', '07:40', '08:20', ...]
+
+        // 2. Build the Grid
+        // Structure: $grid[time_index]['time'] = '07:00'
+        //            $grid[time_index]['days'][Senin] = Item
+        
+        $grid = [];
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; // Sabtu usually not in PDF report matrix unless needed? User image shows until Jumat. I will include Sabtu if data exists.
+        
+        // Check if we have Sabtu data
+        if ($jadwalList->where('hari', 'Sabtu')->count() > 0) {
+            $hariList[] = 'Sabtu';
+        }
+
+        // Initialize Grid
+        foreach ($gridRows as $index => $time) {
+            $grid[$index] = [
+                'time_start' => $time,
+                'days' => []
+            ];
+            foreach ($hariList as $hari) {
+                $grid[$index]['days'][$hari] = ['type' => 'empty'];
+            }
+        }
+
+        // Helper to find grid index for a given time
+        $getGridIndex = function($time) use ($gridRows) {
+            return $gridRows->search($time);
+        };
+
+        // 3. Place Items into Grid
+        
+        // A. Place Lessons
+        foreach ($jadwalList as $jadwal) {
+            $startTime = $jadwal->jam_mulai->format('H:i');
+            $endTime = $jadwal->jam_selesai->format('H:i');
+            $day = $jadwal->hari;
+            
+            if (!in_array($day, $hariList)) continue;
+
+            $startIndex = $getGridIndex($startTime);
+            if ($startIndex === false) continue; // Should not happen
+
+            // Calculate Rowspan
+            // Count how many grid rows this item covers
+            // It covers from startIndex UP TO (but not including) the grid row that matches endTime
+            // OR if endTime is not a startTme, find the next one? 
+            // Simplification: Count how many startTimes are < endTime and >= startTime
+            
+            $span = 0;
+            for ($i = $startIndex; $i < count($gridRows); $i++) {
+                if ($gridRows[$i] < $endTime) {
+                    $span++;
+                } else {
+                    break;
+                }
+            }
+            if ($span < 1) $span = 1;
+
+            // Mark cells
+            if (isset($grid[$startIndex]['days'][$day]['type']) && $grid[$startIndex]['days'][$day]['type'] == 'taken') {
+                // Conflict or merge? Append text?
+                // For now, simplify: if 7A and 7B both have Math at same time, just combine text
+                // But here we are iterating items.
+                // We need to check if cell is already 'lesson'.
+                $existing = $grid[$startIndex]['days'][$day];
+                 if ($existing['type'] == 'lesson') {
+                     // Append content
+                     $grid[$startIndex]['days'][$day]['data'][] = $jadwal;
+                 } else {
+                     // Create new
+                     $grid[$startIndex]['days'][$day] = [
+                         'type' => 'lesson',
+                         'rowspan' => $span,
+                         'data' => [$jadwal]
+                     ];
+                     
+                     // Mark covered cells as 'taken'
+                     for ($r = 1; $r < $span; $r++) {
+                         if (isset($grid[$startIndex + $r])) {
+                            $grid[$startIndex + $r]['days'][$day] = ['type' => 'taken'];
+                         }
+                     }
+                 }
+            } else if ($grid[$startIndex]['days'][$day]['type'] == 'empty') {
+                 $grid[$startIndex]['days'][$day] = [
+                     'type' => 'lesson',
+                     'rowspan' => $span,
+                     'data' => [$jadwal]
+                 ];
+                 // Mark covered
+                 for ($r = 1; $r < $span; $r++) {
+                     if (isset($grid[$startIndex + $r])) {
+                        $grid[$startIndex + $r]['days'][$day] = ['type' => 'taken'];
+                     }
+                 }
+            }
+        }
+
+        // B. Place Breaks
+        foreach ($istirahatList as $ist) {
+            $startTime = substr($ist->jam_mulai, 0, 5);
+            $endTime = substr($ist->jam_selesai, 0, 5);
+            $targetDays = is_array($ist->hari_aktif) ? $ist->hari_aktif : json_decode($ist->hari_aktif, true);
+            
+            if (!$targetDays) $targetDays = $hariList;
+
+            $startIndex = $getGridIndex($startTime);
+            if ($startIndex === false) continue;
+
+             $span = 0;
+            for ($i = $startIndex; $i < count($gridRows); $i++) {
+                if ($gridRows[$i] < $endTime) {
+                    $span++;
+                } else {
+                    break;
+                }
+            }
+            if ($span < 1) $span = 1;
+
+            foreach ($targetDays as $day) {
+                if (!in_array($day, $hariList)) continue;
+                
+                // Check if cell is available (lesson takes precedence? or break?)
+                // Usually break is absolute.
+                
+                $grid[$startIndex]['days'][$day] = [
+                    'type' => 'break',
+                    'rowspan' => $span,
+                    'data' => $ist
+                ];
+
+                 // Mark covered
+                 for ($r = 1; $r < $span; $r++) {
+                     if (isset($grid[$startIndex + $r])) {
+                        $grid[$startIndex + $r]['days'][$day] = ['type' => 'taken'];
+                     }
+                 }
+            }
+        }
+        
+        return [
+            'rows' => $grid,
+            'days' => $hariList
+        ];
     }
 
     /**

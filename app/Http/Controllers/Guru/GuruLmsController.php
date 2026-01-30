@@ -48,6 +48,8 @@ class GuruLmsController extends Controller
 
         $totalSiswa = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran))
             ->count();
 
         // Tugas yang perlu dikoreksi (submitted tapi belum dinilai)

@@ -75,7 +75,9 @@ class LmsDashboardController extends Controller
             ->where('hari', $hariIni)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
-            ->get();
+            ->get()
+            ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
+            ->values();
 
         // Pengumuman Terbaru (Ambil 5)
         $pengumumanList = Pengumuman::where('status', 'aktif')
@@ -113,6 +115,7 @@ class LmsDashboardController extends Controller
         $mataPelajaranList = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
             ->with(['mataPelajaran', 'guru'])
             ->get()
+            ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
             ->unique('mata_pelajaran_id')
             ->take(8);
 
@@ -147,7 +150,10 @@ class LmsDashboardController extends Controller
             ->with('mataPelajaran')
             ->orderBy('tanggal_deadline')
             ->take(5)
-            ->get();
+            ->take(5)
+            ->get()
+            ->filter(fn($t) => $siswa->canAccessMapel($t->mataPelajaran))
+            ->values();
 
         return view('siswa.lms.dashboard', compact(
             'siswa',
@@ -357,7 +363,9 @@ class LmsDashboardController extends Controller
         $allJadwal = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
-            ->get();
+            ->get()
+            ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
+            ->values();
 
         // Group jadwal by hari
         $jadwalByHari = collect();

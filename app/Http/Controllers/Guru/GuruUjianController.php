@@ -118,7 +118,8 @@ class GuruUjianController extends Controller
         // Buat UjianSiswa untuk setiap siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
-            ->get();
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
 
         foreach ($siswaList as $siswa) {
             UjianSiswa::create([
@@ -252,7 +253,10 @@ class GuruUjianController extends Controller
 
         $results = UjianSiswa::with('siswa')
             ->where('ujian_id', $id)
-            ->get();
+            ->get()
+            ->filter(function($result) use ($mataPelajaran) {
+                 return $result->siswa && $result->siswa->canAccessMapel($mataPelajaran);
+            });
 
         // Statistik
         $stats = [

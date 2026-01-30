@@ -151,6 +151,9 @@
                     </div>
                 </div>
             </div>
+            
+             {{-- Siswa Section (For Religion/Specific Subjects) --}}
+
 
             {{-- Waktu Section --}}
             <div class="form-section">
@@ -366,7 +369,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Trigger filter on page load
     kelasSelect.dispatchEvent(new Event('change'));
+    
+
 });
+
+
 
 // Function to filter istirahat display based on jenjang and hari
 function filterIstirahatDisplay() {

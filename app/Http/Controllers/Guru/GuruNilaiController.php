@@ -34,7 +34,8 @@ class GuruNilaiController extends Controller
         $siswaList = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap')
-            ->get();
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
         
         // Buat atau ambil nilai untuk setiap siswa
         $nilaiList = [];

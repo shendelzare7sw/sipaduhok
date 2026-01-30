@@ -190,7 +190,7 @@
                                     $nilai = (isset($selectedMapelId) && $selectedMapelId) ? ($nilaiData[$siswa->id] ?? null) : null;
                                 @endphp
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
+                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
                                     <td class="text-center align-middle fw-bold text-gray-800">{{ $siswa->nis }}</td>
                                     <td class="align-middle col-siswa">
                                         <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>

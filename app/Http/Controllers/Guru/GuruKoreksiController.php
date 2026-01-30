@@ -30,7 +30,10 @@ class GuruKoreksiController extends Controller
 
         $submissions = TugasSiswa::with('siswa')
             ->where('tugas_id', $tugasId)
-            ->get();
+            ->get()
+            ->filter(function($submission) use ($mataPelajaran) {
+                 return $submission->siswa && $submission->siswa->canAccessMapel($mataPelajaran);
+            });
 
         // Statistik
         $stats = [

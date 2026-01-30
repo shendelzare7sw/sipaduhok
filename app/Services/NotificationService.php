@@ -284,12 +284,16 @@ class NotificationService
         // Notify all bendahara and admin
         $targetUsers = User::whereIn('role', ['bendahara', 'admin'])->get();
         foreach ($targetUsers as $user) {
+            $route = $user->role === 'admin' 
+                ? route('admin.keuangan.pembayaran.show', $pembayaran->id)
+                : route('bendahara.pembayaran.show', $pembayaran->id);
+
             $this->create(
                 $user->id,
                 Notification::TIPE_PEMBAYARAN,
                 'Pembayaran Baru: ' . $siswaName,
                 'Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' (' . ucfirst($pembayaran->metode_pembayaran) . ')',
-                route('bendahara.pembayaran.show', $pembayaran->id),
+                $route,
                 ['pembayaran_id' => $pembayaran->id, 'siswa_id' => $pembayaran->siswa_id]
             );
         }
@@ -517,12 +521,16 @@ class NotificationService
         $targets = User::whereIn('role', ['admin', 'bendahara'])->get();
         
         foreach ($targets as $target) {
+            $route = $target->role === 'admin'
+                ? route('admin.keuangan.pembayaran.index')
+                : route('bendahara.pembayaran.index');
+
             $this->create(
                 $target->id,
                 Notification::TIPE_PEMBAYARAN,
                 'Pembayaran Baru (' . $count . ' Item)',
                 $user->name . ' membayar Rp ' . number_format($amount, 0, ',', '.') . ' untuk ' . $siswaName,
-                route('bendahara.pembayaran.index'), // Link to index since it's bulk
+                $route, // Link to appropriate index based on role
                 ['siswa_id' => $pembayaran->siswa_id]
             );
         }

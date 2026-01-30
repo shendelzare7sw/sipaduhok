@@ -200,18 +200,40 @@
                         <td class="align-middle text-muted">{{ ucfirst($item->tanggal->locale('id')->dayName) }}</td>
                         <td class="text-center align-middle">
                             @php
-                                $map = [
-                                    'hadir' => 'success',
-                                    'sakit' => 'warning',
-                                    'izin'  => 'info',
-                                    'alpha' => 'danger',
-                                ];
+                                $statusLabel = strtoupper($item->status);
+                                $badgeClass = 'secondary';
+                                
+                                if ($item->status === 'hadir') {
+                                    $badgeClass = 'success';
+                                } elseif ($item->status === 'sakit' || $item->status === 'izin') {
+                                    if ($item->status_validasi === 'disetujui') {
+                                        $badgeClass = ($item->status === 'sakit') ? 'warning' : 'info';
+                                    } elseif ($item->status_validasi === 'ditolak') {
+                                        $statusLabel = 'DITOLAK';
+                                        $badgeClass = 'danger';
+                                    } else {
+                                        $statusLabel = 'MENUNGGU VALIDASI';
+                                        $badgeClass = 'warning';
+                                    }
+                                } elseif ($item->status === 'alpha') {
+                                    if ($item->status_validasi === 'ditolak') {
+                                        $statusLabel = 'DITOLAK';
+                                    }
+                                    $badgeClass = 'danger';
+                                }
                             @endphp
-                            <span class="badge rounded-pill px-3 py-2 fw-bold bg-{{ $map[$item->status] ?? 'secondary' }} shadow-sm">
-                                {{ strtoupper($item->status) }}
+                            <span class="badge rounded-pill px-3 py-2 fw-bold bg-{{ $badgeClass }} shadow-sm">
+                                {{ $statusLabel }}
                             </span>
                         </td>
-                        <td class="align-middle small text-muted">{{ $item->keterangan ?? 'Tidak ada catatan' }}</td>
+                        <td class="align-middle small text-muted">
+                            <div>{{ $item->keterangan ?? 'Tidak ada catatan' }}</div>
+                            @if($item->bukti_file)
+                                <a href="{{ asset('storage/' . $item->bukti_file) }}" target="_blank" class="text-primary fw-bold text-decoration-none mt-1 d-inline-block">
+                                    <i class="fas fa-paperclip me-1"></i>Lihat Bukti
+                                </a>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

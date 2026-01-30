@@ -27,6 +27,12 @@ class LmsMateriController extends Controller
         }
 
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        
+        // Cek akses agama
+        if (!$siswa->canAccessMapel($mataPelajaran)) {
+            return redirect()->route('siswa.lms.dashboard')
+                ->with('error', 'Akses ditolak: Mata pelajaran ini tidak sesuai dengan agama Anda.');
+        }
 
         // Ambil semua materi
         $materiList = Materi::where('kelas_id', $siswa->kelas_id)
@@ -71,6 +77,12 @@ class LmsMateriController extends Controller
             ->where('mata_pelajaran_id', $mapelId)
             ->with(['mataPelajaran', 'guru'])
             ->firstOrFail();
+
+        // Cek akses agama
+        if (!$siswa->canAccessMapel($materi->mataPelajaran)) {
+            return redirect()->route('siswa.lms.dashboard')
+                ->with('error', 'Akses ditolak: Mata pelajaran ini tidak sesuai dengan agama Anda.');
+        }
 
         return view('siswa.lms.mata-pelajaran.materi', compact('siswa', 'materi'));
     }

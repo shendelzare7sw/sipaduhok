@@ -88,17 +88,10 @@ class WaliKelasController extends Controller
             'alpha' => $presensiHariIni->where('status', 'alpha')->count(),
         ];
 
-        // Izin yang perlu divalidasi (dari orang tua)
+        // Izin yang perlu divalidasi (status_validasi = pending)
         $izinMenungguValidasi = Presensi::where('kelas_id', $kelas->id)
             ->whereIn('status', ['sakit', 'izin'])
-            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
-            ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
-            ->whereNotNull('diinput_oleh')
-            ->whereHas('inputBy', function($query) {
-                $query->whereHas('roleRelation', function($q) {
-                    $q->where('name', 'orang_tua');
-                });
-            })
+            ->where('status_validasi', 'pending')
             ->count();
 
         // Rapor yang perlu diselesaikan

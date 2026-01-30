@@ -657,31 +657,34 @@ class OrangTuaController extends Controller
             $buktiFoto = $request->file('bukti')->store('presensi/bukti', 'public');
         }
 
-        $keterangan = $validated['keterangan'];
-        if ($buktiFoto) {
-            $keterangan .= " (Bukti: $buktiFoto)";
-        }
-        $keterangan .= " - Diajukan oleh orang tua ({$user->name})";
-
         // Simpan atau update presensi
-        $presensi = null;
-        if ($existingPresensi) {
-            $existingPresensi->update([
-                'status' => $validated['jenis'],
-                'keterangan' => $keterangan,
-                'diinput_oleh' => $user->id, // FIX: Set diinput_oleh on update too
-            ]);
-            $presensi = $existingPresensi;
-        } else {
-            $presensi = Presensi::create([
-                'siswa_id' => $siswa->id,
-                'kelas_id' => $siswa->kelas_id,
-                'tanggal' => $validated['tanggal'],
-                'status' => $validated['jenis'],
-                'keterangan' => $keterangan,
-                'diinput_oleh' => $user->id,
-            ]);
+    $presensi = null;
+    if ($existingPresensi) {
+        $dataToUpdate = [
+            'status' => $validated['jenis'],
+            'keterangan' => $validated['keterangan'],
+            'status_validasi' => 'pending',
+            'diinput_oleh' => $user->id,
+        ];
+
+        if ($buktiFoto) {
+            $dataToUpdate['bukti_file'] = $buktiFoto;
         }
+
+        $existingPresensi->update($dataToUpdate);
+        $presensi = $existingPresensi;
+    } else {
+        $presensi = Presensi::create([
+            'siswa_id' => $siswa->id,
+            'kelas_id' => $siswa->kelas_id,
+            'tanggal' => $validated['tanggal'],
+            'status' => $validated['jenis'],
+            'keterangan' => $validated['keterangan'],
+            'bukti_file' => $buktiFoto,
+            'status_validasi' => 'pending',
+            'diinput_oleh' => $user->id,
+        ]);
+    }
 
         // Notify wali kelas about new izin request
         if ($presensi) {

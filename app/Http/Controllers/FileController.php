@@ -32,23 +32,12 @@ class FileController extends Controller
             abort(404);
         }
 
-        $fullPath = $disk->path($path);
-        
-        // Determine mime type manually for common types to ensure inline preview
-        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $mimeType = $disk->mimeType($path);
+        $fullPath = storage_path('app/public/' . $path);
 
-        if ($extension === 'pdf') {
-            $mimeType = 'application/pdf';
-        } elseif (in_array($extension, ['jpg', 'jpeg'])) {
-            $mimeType = 'image/jpeg';
-        } elseif ($extension === 'png') {
-            $mimeType = 'image/png';
+        if (!file_exists($fullPath)) {
+            abort(404);
         }
 
-        return response()->file($fullPath, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
-        ]);
+        return response()->file($fullPath);
     }
 }

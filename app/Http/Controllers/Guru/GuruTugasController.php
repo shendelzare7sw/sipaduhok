@@ -89,6 +89,8 @@ class GuruTugasController extends Controller
             $filePath = $request->file('file_tugas')->store('tugas', 'public');
         }
 
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+
         $tugas = Tugas::create([
             'kelas_id' => $kelasId,
             'mata_pelajaran_id' => $mapelId,
@@ -103,7 +105,8 @@ class GuruTugasController extends Controller
         // Buat TugasSiswa untuk setiap siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
-            ->get();
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
 
         foreach ($siswaList as $siswa) {
             TugasSiswa::create([

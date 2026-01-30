@@ -333,6 +333,9 @@
                     class="btn btn-success btn-sm">
                     <i class="fas fa-file-excel me-1"></i> Export Excel
                 </a>
+                <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
+                    <i class="fas fa-print me-1"></i> Cetak Jadwal Kelas
+                </button>
                 <a href="{{ route('admin.jadwal-pelajaran.import') }}" class="btn btn-outline-success btn-sm">
                     <i class="fas fa-file-import me-1"></i> Import Excel
                 </a>
@@ -1050,6 +1053,99 @@
 
             document.body.appendChild(form);
             form.submit();
+        }
+    </script>
+    {{-- Modal Cetak Per Kelas --}}
+    <div class="modal fade" id="cetakKelasModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-print me-2"></i>Cetak Jadwal Pelajaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2">
+                        <small>Pilih Cabang dan Kelas untuk mencetak jadwal spesifik.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cabang</label>
+                        <select id="printCabangId" class="form-select" onchange="filterPrintKelas()">
+                            <option value="">-- Pilih Cabang --</option>
+                            @foreach($cabangList as $cabang)
+                                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Kelas</label>
+                        <select id="printKelasId" class="form-select" disabled>
+                            <option value="">-- Pilih Kelas --</option>
+                            @foreach($allKelasList as $kelas)
+                                <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}" style="display: none;">
+                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCetakKelas('pdf')">
+                        <i class="fas fa-file-pdf me-1"></i> Cetak PDF
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="submitCetakKelas('excel')">
+                        <i class="fas fa-file-excel me-1"></i> Cetak Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterPrintKelas() {
+            const cabangId = document.getElementById('printCabangId').value;
+            const kelasSelect = document.getElementById('printKelasId');
+            const options = kelasSelect.querySelectorAll('option[data-cabang]');
+
+            kelasSelect.value = "";
+            kelasSelect.disabled = cabangId === "";
+
+            options.forEach(opt => {
+                if (cabangId === "" || opt.getAttribute('data-cabang') == cabangId) {
+                    opt.style.display = "";
+                } else {
+                    opt.style.display = "none";
+                    // If selected option is hidden, deselect
+                    if (opt.selected) kelasSelect.value = "";
+                }
+            });
+        }
+
+        function submitCetakKelas(type) {
+            const kelasId = document.getElementById('printKelasId').value;
+            if (!kelasId) {
+                alert('Silakan pilih kelas terlebih dahulu!');
+                return;
+            }
+
+            let url = "";
+            const tahunAjaranParam = "?tahun_ajaran_id={{ request('tahun_ajaran_id', $currentTahunAjaran->id) }}";
+
+            if (type === 'excel') {
+                // Endpoint Export Excel: /admin/jadwal-pelajaran/kelas/{id}/export-excel
+                url = "{{ url('admin/jadwal-pelajaran/kelas') }}/" + kelasId + "/export-excel" + tahunAjaranParam;
+            } else {
+                // Endpoint Export PDF: /admin/jadwal-pelajaran/kelas/{id}/print
+                url = "{{ url('admin/jadwal-pelajaran/kelas') }}/" + kelasId + "/print" + tahunAjaranParam;
+            }
+            
+            window.open(url, '_blank');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('cetakKelasModal'));
+            modal.hide();
         }
     </script>
 @endsection

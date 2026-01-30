@@ -195,22 +195,10 @@ class PresensiController extends Controller
             return $this->redirectToPilihKelas();
         }
 
-        // Get pengajuan izin yang belum divalidasi
-        // Query sederhana: cari presensi dengan keterangan "Diajukan oleh orang tua" yang belum divalidasi
+        // Get pengajuan izin yang status validasinya pending
         $pengajuanIzin = Presensi::where('kelas_id', $kelas->id)
             ->whereIn('status', ['sakit', 'izin'])
-            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
-            ->where('keterangan', 'NOT LIKE', '%Divalidasi%')
-            ->whereNotNull('diinput_oleh')
-            ->whereHas('inputBy', function ($query) {
-                // Check via role field (string) atau roleRelation
-                $query->where(function ($q) {
-                    $q->where('role', 'orang_tua')
-                        ->orWhereHas('roleRelation', function ($rq) {
-                            $rq->where('name', 'orang_tua');
-                        });
-                });
-            })
+            ->where('status_validasi', 'pending')
             ->with(['siswa', 'inputBy'])
             ->orderBy('tanggal', 'desc')
             ->get();
@@ -302,6 +290,100 @@ class PresensiController extends Controller
     }
 
     /**
+     * Display riwayat presensi for editing
+     */
+    public function riwayat(Request $request): View|RedirectResponse
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+
+        if (!$tenagaPendidik) {
+            abort(403, 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+        }
+
+        // Get siswa list for filter
+        $siswaList = Siswa::where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get();
+
+        // Query Presensi
+    // Exclude 'pending' validation items (they should be handled in Validation page first)
+    $query = Presensi::with('siswa')
+        ->where('kelas_id', $kelas->id)
+        ->where(function($q) {
+            $q->whereNull('status_validasi')
+              ->orWhere('status_validasi', '!=', 'pending');
+        });
+
+        // Filter Siswa
+        if ($request->filled('siswa_id')) {
+            $query->where('siswa_id', $request->siswa_id);
+        }
+
+        // Filter Tanggal
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('tanggal', '>=', $request->tanggal_mulai);
+        }
+        if ($request->filled('tanggal_akhir')) {
+            $query->whereDate('tanggal', '<=', $request->tanggal_akhir);
+        }
+        
+        // Filter Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $riwayat = $query->orderBy('tanggal', 'desc')->paginate(20)->withQueryString();
+
+        return view('wali-kelas.presensi.riwayat', [
+            'kelas' => $kelas,
+            'siswaList' => $siswaList,
+            'riwayat' => $riwayat,
+        ]);
+    }
+
+    /**
+     * Update specific presensi record from history
+     */
+    public function updateRiwayat(Request $request, $id): RedirectResponse
+    {
+        $presensi = Presensi::findOrFail($id);
+        
+        // Security check: ensure presensi belongs to wali kelas's current class
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        
+        if ($presensi->kelas_id != $kelas->id) {
+            abort(403, 'Anda tidak memiliki akses ke data ini.');
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:hadir,sakit,izin,alpha',
+            'keterangan' => 'nullable|string|max:500',
+            'status_validasi' => 'nullable|in:pending,disetujui,ditolak',
+        ]);
+
+        $presensi->update([
+            'status' => $validated['status'],
+            'keterangan' => $validated['keterangan'],
+            'status_validasi' => $validated['status_validasi'] ?? null,
+            'diinput_oleh' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Data presensi berhasil diperbarui.');
+    }
+
+    /**
      * Print rekap presensi
      */
     public function printRekap(Request $request)
@@ -364,5 +446,24 @@ class PresensiController extends Controller
             'bulan' => $bulan,
             'tahun' => $tahun,
         ]);
+    }
+    /**
+     * Preview bukti file with inline disposition
+     */
+    public function previewBukti($id)
+    {
+        $presensi = Presensi::findOrFail($id);
+        
+        if (!$presensi->bukti_file) {
+            abort(404);
+        }
+
+        $path = storage_path('app/public/' . $presensi->bukti_file);
+
+        if (!file_exists($path)) {
+            abort(404, 'File not found');
+        }
+
+        return response()->file($path);
     }
 }

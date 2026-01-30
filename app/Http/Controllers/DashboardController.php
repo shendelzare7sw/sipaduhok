@@ -160,6 +160,45 @@ class DashboardController extends Controller
                 ->where('hari', $hariIni)
                 ->orderBy('jam_mulai')
                 ->get();
+
+            // Mapping mapel yang valid (assigned) untuk lookup cepat
+            $assignedMapels = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+                ->get()
+                ->map(function($gpk) {
+                    return $gpk->kelas_id . '-' . $gpk->mata_pelajaran_id;
+                })
+                ->flip();
+            
+            // Mapping by name untuk handle kasus ID mapel di jadwal beda dengan di assignment (e.g. duplikat mapel)
+            $assignedMapelsByName = GuruPengajarKelas::with('mataPelajaran')
+                ->where('tenaga_pendidik_id', $tenagaPendidik->id)
+                ->get()
+                ->mapWithKeys(function($gpk) {
+                    if ($gpk->mataPelajaran) {
+                        return [$gpk->kelas_id . '-' . $gpk->mataPelajaran->nama_mapel => $gpk->mata_pelajaran_id];
+                    }
+                    return [];
+                });
+
+            foreach ($jadwalHariIni as $jadwal) {
+                 $key = $jadwal->kelas_id . '-' . $jadwal->mata_pelajaran_id;
+                 
+                 if ($assignedMapels->has($key)) {
+                     $jadwal->link_mapel_id = $jadwal->mata_pelajaran_id;
+                 } else {
+                     // Coba cari berdasarkan nama mapel jika ID tidak cocok
+                     if ($jadwal->mataPelajaran) {
+                         $nameKey = $jadwal->kelas_id . '-' . $jadwal->mataPelajaran->nama_mapel;
+                         if (isset($assignedMapelsByName[$nameKey])) {
+                             $jadwal->link_mapel_id = $assignedMapelsByName[$nameKey];
+                         } else {
+                             $jadwal->link_mapel_id = $jadwal->mata_pelajaran_id;
+                         }
+                     } else {
+                         $jadwal->link_mapel_id = $jadwal->mata_pelajaran_id;
+                     }
+                 }
+            }
         }
         
         $data = [

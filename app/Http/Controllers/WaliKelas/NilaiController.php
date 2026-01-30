@@ -85,6 +85,11 @@ class NilaiController extends Controller
             $selectedMapel = MataPelajaran::find($selectedMapelId);
             
             if ($selectedMapel) {
+                // Filter siswa that can access this mapel
+                $siswaList = $siswaList->filter(function($siswa) use ($selectedMapel) {
+                    return $siswa->canAccessMapel($selectedMapel);
+                });
+
                 $nilaiQuery = Nilai::where('kelas_id', $kelas->id)
                     ->where('mata_pelajaran_id', $selectedMapelId)
                     ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
@@ -158,7 +163,8 @@ class NilaiController extends Controller
         $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
             ->where('is_active', true)
             ->orderBy('nama_mapel', 'asc')
-            ->get();
+            ->get()
+            ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
         
         $nilaiData = Nilai::where('siswa_id', $siswaId)
             ->where('kelas_id', $kelas->id)
@@ -301,7 +307,8 @@ class NilaiController extends Controller
         $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
             ->where('is_active', true)
             ->orderBy('nama_mapel', 'asc')
-            ->get();
+            ->get()
+            ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
         
         $nilaiData = Nilai::where('siswa_id', $siswaId)
             ->where('kelas_id', $kelas->id)
