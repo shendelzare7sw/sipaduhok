@@ -1084,7 +1084,7 @@
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($allKelasList as $kelas)
                                 <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}" style="display: none;">
-                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
+                                    {{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }} ({{ $kelas->jenjang }})
                                 </option>
                             @endforeach
                         </select>

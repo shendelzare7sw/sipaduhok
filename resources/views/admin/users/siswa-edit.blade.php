@@ -1038,11 +1038,7 @@
         </script>
 
         {{-- Hidden Fields for Other Data --}}
-        <input type="hidden" name="jenis_kelamin" value="{{ $siswa->jenis_kelamin }}">
-        <input type="hidden" name="tempat_lahir" value="{{ $siswa->tempat_lahir }}">
-        <input type="hidden" name="tanggal_lahir" value="{{ $siswa->tanggal_lahir }}">
-        <input type="hidden" name="alamat" value="{{ $siswa->alamat }}">
-        <input type="hidden" name="tanggal_masuk" value="{{ $siswa->tanggal_masuk }}">
+
 
         {{-- Form Actions --}}
         <div class="form-actions">
