@@ -371,17 +371,6 @@ section {
     <!-- ==================== PROGRAM SECTION ==================== -->
     <section id="program" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                    Program Kami
-                </span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                    Program PKBM<br>House Of Knowledge
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Alasan kenapa harus memilih untuk bergabung dengan PKBM House Of Knowledge?
-                </p>
-            </div>
 
             @php
                 $program = $page->getSection('program');
@@ -523,11 +512,13 @@ section {
                 <div id="carouselTrack" class="relative w-full h-full">
                     @foreach($beritaList as $index => $berita)
                     <div class="carousel-item" data-index="{{ $index }}">
-                        <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                            <span class="inline-block px-3 py-1 {{ $berita->kategori_badge_class }} text-xs rounded-full mb-2">{{ $berita->kategori_label }}</span>
-                            <h3 class="text-white font-bold">{{ Str::limit($berita->judul, 50) }}</h3>
-                        </div>
+                        <a href="{{ $berita->url_berita }}" target="_blank" class="block w-full h-full">
+                            <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                                <span class="inline-block px-3 py-1 {{ $berita->kategori_badge_class }} text-xs rounded-full mb-2">{{ $berita->kategori_label }}</span>
+                                <h3 class="text-white font-bold">{{ Str::limit($berita->judul, 50) }}</h3>
+                            </div>
+                        </a>
                     </div>
                     @endforeach
                 </div>

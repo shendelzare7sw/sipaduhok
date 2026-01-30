@@ -263,7 +263,7 @@
                         ];
                     @endphp
 
-                    @foreach($contactItems as $item)
+                    @foreach(($contactItems ?? $contactContent['items'] ?? []) as $item)
                         @php
                             $config = $contactConfig[$item['type'] ?? 'whatsapp'] ?? $contactConfig['whatsapp'];
                         @endphp
@@ -280,7 +280,7 @@
                             </div>
                             <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $item['title'] ?? 'Contact' }}</h3>
                             <div
-                                class="inline-flex items-center gap-2 {{ $config['text_color'] }} font-semibold group-hover:gap-3 transition-all mb-3">
+                                class="inline-flex items-center gap-2 {{ $config['text_color'] }} font-semibold group-hover:gap-3 transition-all mb-3 text-sm md:text-base">
                                 <span>{{ $item['value'] ?? '' }}</span>
                             </div>
                             <p class="text-gray-500 text-sm">{{ $item['note'] ?? '' }}</p>
