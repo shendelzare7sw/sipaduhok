@@ -27,7 +27,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                     <i class="fas fa-user-graduate"></i>
                 @endif
             </div>
-            <h3 style="margin: 0; color: #166534; font-size: 24px;">{{ $siswa->nama_lengkap }}</h3>
+            <h3 style="margin: 0; color: #166534; font-size: 24px;">{{ $siswa->user->name ?? $siswa->nama_lengkap }}</h3>
             <div style="margin-top: 5px; font-weight: 500; color: #15803d;">
                 {{ $siswa->nis }} / {{ $siswa->nisn }}
             </div>
@@ -59,7 +59,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; color: #64748b;">Tanggal Masuk</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($siswa->tanggal_masuk)->format('d F Y') }}</td>
+                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($siswa->tanggal_masuk)->locale('id')->translatedFormat('d F Y') }}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; color: #64748b;">Cabang</td>
@@ -79,7 +79,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; color: #64748b;">Tanggal Lahir</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($siswa->tanggal_lahir)->format('d F Y') }}</td>
+                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($siswa->tanggal_lahir)->locale('id')->translatedFormat('d F Y') }}</td>
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; color: #64748b;">Alamat</td>

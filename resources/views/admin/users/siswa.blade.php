@@ -552,6 +552,21 @@
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
         {{-- Success Message --}}
 
+        {{-- Import Warnings --}}
+        @if(session('import_warnings'))
+            <div class="alert alert-warning" style="background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; display: block;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Beberapa data dilewati saat import:
+                </div>
+                <ul style="margin: 0; padding-left: 24px; font-size: 13px;">
+                    @foreach(session('import_warnings') as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         {{-- Search/Filter Info --}}
         @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
             <div class="search-info">
@@ -675,7 +690,7 @@
                                 <td style="text-align: center; font-weight: 600; color: #64748b;">
                                     {{ $siswa->firstItem() + $index }}</td>
                                 <td>
-                                    <div style="font-weight: 600; color: #111827;">{{ $s->nama_lengkap }}</div>
+                                    <div style="font-weight: 600; color: #111827;">{{ $s->user->name ?? $s->nama_lengkap }}</div>
                                     <small style="color: #64748b;">
                                         <i class="fas fa-{{ $s->jenis_kelamin == 'L' ? 'mars' : 'venus' }}"
                                             style="font-size: 10px;"></i>

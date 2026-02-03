@@ -64,6 +64,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
 
             if ($exists) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Siswa dilewati karena NIS '{$row['nis']}' atau NISN '{$row['nisn']}' sudah ada di sistem.";
                 continue;
             }
 
@@ -128,6 +129,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     'nama_ibu' => $row['nama_ibu'] ?? null,
                     'telepon_orangtua' => $row['telepon_orangtua'] ?? null,
                     'status' => strtolower($row['status'] ?? 'aktif') === 'nonaktif' ? 'nonaktif' : 'aktif',
+                    'tanggal_masuk' => $this->parseDate($row['tanggal_masuk'] ?? now()), // Default to now if missing
                 ]);
 
                 DB::commit();

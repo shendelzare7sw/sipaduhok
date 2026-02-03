@@ -459,6 +459,21 @@
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
         {{-- Success Message --}}
 
+        {{-- Import Warnings --}}
+        @if(session('import_warnings'))
+            <div class="alert alert-warning" style="background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; display: block;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Beberapa data dilewati saat import:
+                </div>
+                <ul style="margin: 0; padding-left: 24px; font-size: 13px;">
+                    @foreach(session('import_warnings') as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         {{-- Search/Filter Info --}}
         @if(request('search') || request('role'))
             <div class="search-info">
@@ -549,22 +564,22 @@
                                 <td style="text-align: center; font-weight: 600; color: #64748b;">
                                     {{ $tenagaPendidik->firstItem() + $index }}</td>
                                 <td>
-                                    <div style="font-weight: 600; color: #111827;">{{ $tp->nama_lengkap }}</div>
+                                    <div style="font-weight: 600; color: #111827;">{{ $tp->name }}</div>
                                     <small style="color: #64748b;">
                                         <i class="fas fa-phone" style="font-size: 10px;"></i>
-                                        {{ $tp->telepon ?? '-' }}
+                                        {{ $tp->tenagaPendidik->telepon ?? $tp->phone ?? '-' }}
                                     </small>
                                 </td>
                                 <td>
                                     <span
-                                        style="font-family: 'Courier New', monospace; color: #475569;">{{ $tp->nip ?? '-' }}</span>
+                                        style="font-family: 'Courier New', monospace; color: #475569;">{{ $tp->tenagaPendidik->nip ?? '-' }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-role">{{ ucwords(str_replace('_', ' ', $tp->user->role)) }}</span>
+                                    <span class="badge badge-role">{{ ucwords(str_replace('_', ' ', $tp->role)) }}</span>
                                 </td>
                                 <td style="color: #475569;">{{ $tp->email }}</td>
                                 <td>
-                                    @if($tp->user->is_active)
+                                    @if($tp->is_active)
                                         <span class="badge badge-active">
                                             <i class="fas fa-check-circle" style="font-size: 10px;"></i>
                                             Aktif
@@ -631,6 +646,7 @@
     </div>
 
     {{-- Delete Modals for Tenaga Pendidik --}}
+    {{-- Delete Modals for Tenaga Pendidik --}}
     @foreach($tenagaPendidik as $tp)
         <div class="modal fade" id="deleteTenagaPendidikModal{{ $tp->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -649,10 +665,10 @@
                             style="background: #f9fafb; padding: 12px; border-radius: 8px; margin: 12px 0; border: 1px solid #e5e7eb;">
                             <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">
                                 <i class="fas fa-chalkboard-teacher" style="color: #3b82f6;"></i>
-                                {{ $tp->nama_lengkap }}
+                                {{ $tp->tenagaPendidik->nama_lengkap ?? $tp->name }}
                             </div>
                             <small
-                                style="color: #64748b;">{{ $tp->user->role ? ucwords(str_replace('_', ' ', $tp->user->role)) : '-' }}
+                                style="color: #64748b;">{{ $tp->role ? ucwords(str_replace('_', ' ', $tp->role)) : '-' }}
                                 • {{ $tp->email }}</small>
                         </div>
                         <p style="margin-top: 12px;">

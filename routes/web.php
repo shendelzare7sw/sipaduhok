@@ -385,6 +385,7 @@ Route::middleware(['auth'])->group(function () {
             Route::prefix('promotion')->name('promotion.')->group(function () {
                 Route::get('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'index'])->name('validation.index');
                 Route::post('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'store'])->name('validation.store');
+                Route::get('/validation/history', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'history'])->name('validation.history');
             });
         });
 
@@ -546,6 +547,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('promotion')->name('promotion.')->group(function() {
             Route::get('/approval', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'index'])->name('approval.index');
             Route::put('/approval/{id}', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'update'])->name('approval.update');
+            Route::get('/approval/history', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'history'])->name('approval.history');
         });
     });
 
@@ -821,6 +823,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('promotion')->name('promotion.')->group(function() {
             Route::get('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'index'])->name('validation.index');
             Route::post('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'store'])->name('validation.store');
+            Route::get('/validation/history', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'history'])->name('validation.history');
         });
     });
 

@@ -34,7 +34,7 @@
                     <li class="breadcrumb-item active">Profil Saya</li>
                 </ol>
             </nav>
-            <h4 class="fw-bold"><span class="text-muted fw-light">User /</span> Profil Saya</h4>
+            <h4 class="fw-bold">Profil Saya</h4>
         </div>
 
         <div class="row">
@@ -115,7 +115,7 @@
                             <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Status Akademik</h6>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Tahun Ajaran</span>
-                                <span class="fw-bold">{{ $profileData->kelas->tahunAjaran->nama ?? '-' }}</span>
+                                <span class="fw-bold">{{ $profileData->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span>Status</span>
@@ -132,7 +132,12 @@
             <div class="col-xl-8 col-lg-7 col-md-7">
                 @if($profileData)
                     <div class="card mb-4 border-0 shadow-sm">
-                        <h5 class="card-header"><i class="bx bx-user me-2"></i>Informasi Detail</h5>
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0"><i class="bx bx-user me-2"></i>Informasi Detail</h5>
+                            <a href="{{ route('account.settings') }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bx bx-cog me-1"></i> Pengaturan Akun
+                            </a>
+                        </div>
                         <div class="card-body">
                             <form action="{{ route('profile.update') }}" method="POST">
                                 @csrf
@@ -184,7 +189,7 @@
 
                                 <div class="mt-2">
                                     <button type="submit" class="btn btn-primary me-2">Simpan Perubahan</button>
-                                    <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">Batal</a>
+                                    <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary">Kembali ke Dashboard</a>
                                 </div>
                             </form>
                         </div>

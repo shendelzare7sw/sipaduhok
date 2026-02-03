@@ -306,8 +306,11 @@
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Username <span style="color: #ef4444;">*</span></label>
-                        <input type="text" name="username" class="form-control" value="{{ old('username') }}"
+                        <input type="text" name="username" class="form-control @error('username') is-invalid @enderror" value="{{ old('username') }}"
                             placeholder="Masukkan username" required>
+                        @error('username')
+                            <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
                 <div class="col">

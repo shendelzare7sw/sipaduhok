@@ -39,27 +39,6 @@ class UserController extends Controller
 
     public function tenagaPendidik(Request $request)
     {
-        $query = TenagaPendidik::with('user');
-
-        // Handle search parameter
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        // Handle role filter
-        if ($request->has('role') && $request->role != '') {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('role', $request->role);
-            });
-        }
-
-        $tenagaPendidik = $query->paginate(15);
-
         // Available roles for filter
         $roles = [
             'ketua_pkbm' => 'Ketua PKBM',
@@ -69,6 +48,32 @@ class UserController extends Controller
             'wali_kelas' => 'Wali Kelas',
             'guru_pengajar' => 'Guru Pengajar',
         ];
+
+        // Query Users directly instead of TenagaPendidik to ensure we get all users with these roles
+        // even if they haven't set up their TenagaPendidik profile yet.
+        $query = User::whereIn('role', array_keys($roles))->with('tenagaPendidik');
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('tenagaPendidik', function($q2) use ($search) {
+                        $q2->where('nip', 'like', "%{$search}%")
+                           ->orWhere('nama_lengkap', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Handle role filter
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Order by name
+        $tenagaPendidik = $query->orderBy('name')->paginate(15);
 
         return view('admin.users.tenaga-pendidik', compact('tenagaPendidik', 'roles'));
     }
@@ -106,6 +111,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'cabang_id' => $validated['cabang_id'],
+            'phone' => $validated['telepon'], // Added phone to user table
             'is_active' => true,
         ]);
 
@@ -127,7 +133,30 @@ class UserController extends Controller
 
     public function editTenagaPendidik($id)
     {
-        $tenagaPendidik = TenagaPendidik::with('user')->findOrFail($id);
+        // Prioritize finding by user_id first to avoid ID collisions
+        $tenagaPendidik = TenagaPendidik::with('user')->where('user_id', $id)->first();
+        
+        if (!$tenagaPendidik) {
+            // Fallback: Check if it's a direct ID, or if it's a User ID without a profile yet
+            $tenagaPendidik = TenagaPendidik::with('user')->find($id);
+            
+            if (!$tenagaPendidik) {
+                // Check if User exists but profile is missing
+                $user = User::find($id);
+                if ($user && in_array($user->role, ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'])) {
+                    // Initialize an empty TenagaPendidik object with the user relationship for the view
+                    $tenagaPendidik = new TenagaPendidik();
+                    $tenagaPendidik->user_id = $user->id;
+                    $tenagaPendidik->nama_lengkap = $user->name;
+                    $tenagaPendidik->email = $user->email;
+                    $tenagaPendidik->telepon = $user->phone; // Try to use user phone as default
+                    $tenagaPendidik->setRelation('user', $user);
+                } else {
+                    abort(404);
+                }
+            }
+        }
+
         $cabangList = Cabang::where('is_active', true)->get();
         $roles = ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'];
 
@@ -136,12 +165,30 @@ class UserController extends Controller
 
     public function updateTenagaPendidik(Request $request, $id)
     {
-        $tenagaPendidik = TenagaPendidik::findOrFail($id);
+        // Prioritize finding by user_id first
+        $tenagaPendidik = TenagaPendidik::where('user_id', $id)->first();
+        
+        if (!$tenagaPendidik) {
+            $tenagaPendidik = TenagaPendidik::where('id', $id)->first();
+            
+            // If still not found, check if it's a User ID we are trying to update (create profile for)
+            if (!$tenagaPendidik) {
+                $user = User::find($id);
+                if (!$user) {
+                    abort(404);
+                }
+                // Create new instance but don't save yet
+                $tenagaPendidik = new TenagaPendidik();
+                $tenagaPendidik->user_id = $user->id;
+            }
+        }
+
+        $userId = $tenagaPendidik->user_id;
 
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($tenagaPendidik->user_id)],
-            'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($tenagaPendidik->user_id)],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($userId)],
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:ketua_pkbm,wakil_kepala_sekolah,sekretaris,bendahara,wali_kelas,guru_pengajar',
             'cabang_id' => 'required|exists:cabang,id',
@@ -162,15 +209,21 @@ class UserController extends Controller
             'role' => $validated['role'],
             'cabang_id' => $validated['cabang_id'],
             'is_active' => $validated['is_active'],
+            'phone' => $validated['telepon'], // Update phone in User table too
         ];
 
         if (!empty($validated['password'])) {
             $userData['password'] = Hash::make($validated['password']);
         }
 
-        $tenagaPendidik->user->update($userData);
+        // Update User
+        // If we only have a fresh TenagaPendidik model, getting ->user might be tricky if not set
+        $user = User::findOrFail($userId);
+        $user->update($userData);
 
-        $tenagaPendidik->update([
+        // Update or Create TenagaPendidik
+        $tenagaPendidikData = [
+            'user_id' => $user->id,
             'nip' => $validated['nip'],
             'nama_lengkap' => $validated['nama_lengkap'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
@@ -178,9 +231,15 @@ class UserController extends Controller
             'tanggal_lahir' => $validated['tanggal_lahir'],
             'alamat' => $validated['alamat'],
             'telepon' => $validated['telepon'],
-            'email' => $validated['email'],
+            'email' => $validated['email'], // redundant but keeping if schema has it
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
-        ]);
+        ];
+
+        if ($tenagaPendidik->exists) {
+            $tenagaPendidik->update($tenagaPendidikData);
+        } else {
+            TenagaPendidik::create($tenagaPendidikData);
+        }
 
         return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil diupdate!');
     }
@@ -201,10 +260,22 @@ class UserController extends Controller
 
     public function deleteTenagaPendidik($id)
     {
-        $tenagaPendidik = TenagaPendidik::findOrFail($id);
-        $user = $tenagaPendidik->user;
-        $tenagaPendidik->delete();
-        $user->delete();
+        // Try to find the profile
+        $tenagaPendidik = TenagaPendidik::where('id', $id)->orWhere('user_id', $id)->first();
+        
+        if ($tenagaPendidik) {
+            $user = $tenagaPendidik->user;
+            $tenagaPendidik->delete();
+            if ($user) $user->delete();
+        } else {
+            // If profile not found, maybe we are trying to delete a User by ID directly
+            $user = User::find($id);
+            if ($user && in_array($user->role, ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'])) {
+                $user->delete();
+            } else {
+                abort(404);
+            }
+        }
 
         return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil dihapus!');
     }
@@ -807,8 +878,11 @@ class UserController extends Controller
             if ($skipped > 0) {
                 $message .= " {$skipped} data dilewati (sudah ada).";
             }
+            
+            // Collect warnings
+            $warnings = $import->getWarnings();
 
-            return redirect()->route('admin.users.siswa')->with('success', $message);
+            return redirect()->route('admin.users.siswa')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }
@@ -838,13 +912,14 @@ class UserController extends Controller
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
 
             $message = "Berhasil mengimport {$imported} tenaga pendidik.";
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada).";
+                $message .= " {$skipped} data dilewati.";
             }
 
-            return redirect()->route('admin.users.tenaga-pendidik')->with('success', $message);
+            return redirect()->route('admin.users.tenaga-pendidik')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }
@@ -874,13 +949,14 @@ class UserController extends Controller
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
 
             $message = "Berhasil mengimport {$imported} orang tua.";
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada).";
+                $message .= " {$skipped} data dilewati.";
             }
 
-            return redirect()->route('admin.users.orang-tua')->with('success', $message);
+            return redirect()->route('admin.users.orang-tua')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }

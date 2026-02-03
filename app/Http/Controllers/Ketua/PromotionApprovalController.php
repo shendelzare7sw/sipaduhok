@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use App\Models\TahunAjaran;
 
 class PromotionApprovalController extends Controller
 {
@@ -52,5 +53,63 @@ class PromotionApprovalController extends Controller
         return redirect()
             ->route('ketua.promotion.approval.index')
             ->with('success', 'Status pengajuan berhasil diperbarui: ' . $status);
+    }
+
+    public function history(Request $request): View
+    {
+        $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
+        
+        // Filter Options
+        $cabangs = \App\Models\Cabang::all();
+        $kelasList = \App\Models\Kelas::where('tahun_ajaran_id', $activeYear->id)->get();
+
+        $query = DB::table('izin_naik_kelas_khusus')
+            ->join('siswa', 'izin_naik_kelas_khusus.siswa_id', '=', 'siswa.id')
+            ->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->leftJoin('cabang', 'siswa.cabang_id', '=', 'cabang.id')
+            ->join('users', 'izin_naik_kelas_khusus.diajukan_oleh', '=', 'users.id')
+            ->leftJoin('users as approver', 'izin_naik_kelas_khusus.disetujui_oleh', '=', 'approver.id')
+            ->where('izin_naik_kelas_khusus.tahun_ajaran_id', $activeYear->id)
+            ->where('izin_naik_kelas_khusus.status', '!=', 'MENUNGGU')
+            ->select(
+                'izin_naik_kelas_khusus.*',
+                'siswa.nama_lengkap as nama_siswa',
+                'siswa.nis',
+                'kelas.nama_kelas',
+                'cabang.nama_cabang',
+                'users.name as pengaju',
+                'approver.name as penyetuju'
+            );
+
+        // Apply Filters
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function($q) use ($search) {
+                $q->where('siswa.nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('siswa.nis', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('cabang')) {
+            $query->where('siswa.cabang_id', $request->cabang);
+        }
+
+        if ($request->filled('kelas')) {
+            $query->where('siswa.kelas_id', $request->kelas);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('izin_naik_kelas_khusus.status', $request->status);
+        }
+
+        $history = $query->orderBy('izin_naik_kelas_khusus.updated_at', 'desc')->get();
+
+        return view('ketua.promotion.history', [
+            'history' => $history,
+            'tahun' => $activeYear,
+            'cabangs' => $cabangs,
+            'kelasList' => $kelasList,
+            'filters' => $request->all()
+        ]);
     }
 }

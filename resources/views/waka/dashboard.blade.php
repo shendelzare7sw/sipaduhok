@@ -89,9 +89,9 @@
                                 <i class="fas fa-calendar-alt me-2"></i>
                                 Tahun Ajaran:
                                 @if($tahunAjaranAktif)
-                                    <strong>{{ $tahunAjaranAktif->tahun_ajaran }} - {{ ucfirst($tahunAjaranAktif->semester) }}</strong>
+                                    <strong>{{ $tahunAjaranAktif->nama_tahun_ajaran }}</strong>
                                 @else
-                                    <span class="badge bg-warning">Tidak ada tahun ajaran aktif</span>
+                                    -
                                 @endif
                             </p>
                         </div>

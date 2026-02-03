@@ -564,9 +564,12 @@
                     <label for="username" class="form-label">
                         Username <span style="color: #ef4444;">*</span>
                     </label>
-                    <input type="text" class="form-control" id="username" name="username" value="{{ old('username') }}"
+                    <input type="text" class="form-control @error('username') is-invalid @enderror" id="username" name="username" value="{{ old('username') }}"
                         placeholder="Masukkan username untuk login" required>
                     <small class="text-muted">Username digunakan untuk login ke sistem</small>
+                    @error('username')
+                        <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="form-group">

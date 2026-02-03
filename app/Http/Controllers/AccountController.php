@@ -26,15 +26,59 @@ class AccountController extends Controller
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
+        // Base rules
+        $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-        ]);
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+        ];
 
-        $user->update([
+        // Conditional Email Rules
+        if ($user->isAdmin()) {
+            $rules['email'] = 'required|email|unique:users,email,' . $user->id;
+        } else {
+            // Non-admin validates valid string for local part
+            $rules['email_local'] = 'required|string|max:64|regex:/^[a-zA-Z0-9.]+$/';
+        }
+
+        $validated = $request->validate($rules);
+
+        // Prepare data
+        $updateData = [
             'name' => $validated['name'],
-            'email' => $validated['email'],
-        ]);
+            'username' => $validated['username'],
+        ];
+
+        // Process Email
+        if ($user->isAdmin()) {
+            $updateData['email'] = $validated['email'];
+        } else {
+            // Reconstruct Email
+            $currentEmailParts = explode('@', $user->email);
+            $domain = isset($currentEmailParts[1]) ? $currentEmailParts[1] : 'sipaduhok.com'; // Fallback
+            $newEmail = $validated['email_local'] . '@' . $domain;
+
+            // Check if new email is unique (manual check since we reconstructed it)
+            if (\App\Models\User::where('email', $newEmail)->where('id', '!=', $user->id)->exists()) {
+                return back()->withErrors(['email_local' => 'Email ini sudah digunakan oleh pengguna lain.'])->withInput();
+            }
+
+            $updateData['email'] = $newEmail;
+        }
+
+        $user->update($updateData);
+
+        // Sync Name to Biodata Tables
+        // Check for Siswa
+        $siswa = \App\Models\Siswa::where('user_id', $user->id)->first();
+        if ($siswa) {
+            $siswa->update(['nama_lengkap' => $validated['name']]);
+        }
+
+        // Check for Tenaga Pendidik
+        $tenagaPendidik = \App\Models\TenagaPendidik::where('user_id', $user->id)->first();
+        if ($tenagaPendidik) {
+            $tenagaPendidik->update(['nama_lengkap' => $validated['name']]);
+        }
 
         return back()->with('success', 'Pengaturan akun berhasil diperbarui!');
     }

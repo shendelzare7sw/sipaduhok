@@ -423,8 +423,7 @@
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Tanggal Lahir <span style="color: #ef4444;">*</span></label>
-                        <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ? $siswa->tanggal_lahir->format('Y-m-d') : '') }}"
-                            required>
+                        <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', \Carbon\Carbon::parse($siswa->tanggal_lahir)->format('Y-m-d')) }}" required>
                     </div>
                 </div>
             </div>

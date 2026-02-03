@@ -20,6 +20,8 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
     private $cabangList;
     private $roleList;
 
+    private $warnings = [];
+
     public function __construct()
     {
         $this->cabangList = Cabang::pluck('id', 'nama_cabang')->toArray();
@@ -28,7 +30,10 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
+        $rowNumber = 1;
+
         foreach ($rows as $row) {
+            $rowNumber++;
             $row = $row->toArray();
 
             // Skip empty rows - check nama_lengkap
@@ -47,6 +52,7 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
 
             if ($exists) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga Pendidik dilewati karena NIP '{$row['nip']}' atau Email '{$row['email']}' sudah ada.";
                 continue;
             }
 
@@ -110,7 +116,7 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
             } catch (\Exception $e) {
                 DB::rollBack();
                 $this->skippedCount++;
-                \Log::error('TenagaPendidik Import Error: ' . $e->getMessage() . ' | Row: ' . json_encode($row));
+                $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
             }
         }
     }
@@ -140,5 +146,9 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
     public function getImportedCount(): int
     {
         return $this->importedCount;
+    }
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 }
