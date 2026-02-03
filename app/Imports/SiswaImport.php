@@ -160,9 +160,28 @@ class SiswaImport implements ToCollection, WithHeadingRow
         $name = trim($name);
         if (isset($this->cabangList[$name]))
             return $this->cabangList[$name];
+
+        // Normalization for matching
+        $normalizedSearch = strtolower($name);
+        $normalizedSearch = str_replace(['pkbm hok', 'hok'], ['pkbm house of knowledge', 'house of knowledge'], $normalizedSearch);
+
         foreach ($this->cabangList as $n => $id) {
-            if (strtolower(trim($n)) === strtolower($name))
+            $normalizedDb = strtolower(trim($n));
+            
+            // Exact match
+            if ($normalizedDb === strtolower($name))
                 return $id;
+            
+            // Match with expanded abbreviations
+            if ($normalizedDb === $normalizedSearch)
+                return $id;
+
+            // Partial match (be careful) - only if "PKBM HOK" matches start of DB name
+            if (str_contains($normalizedDb, $normalizedSearch) || str_contains($normalizedSearch, $normalizedDb)) {
+                // Prefer specific matches, but if we have "PKBM House of Knowledge" and user typed "PKBM HOK" converted to "PKBM House of Knowledge", it matches above.
+                // If user typed "PKBM HOK" and db is "PKBM House Of Knowledge (Gedung Utama)", the expanded search is "pkbm house of knowledge" which is contained in db name.
+                return $id;
+            }
         }
         return null;
     }

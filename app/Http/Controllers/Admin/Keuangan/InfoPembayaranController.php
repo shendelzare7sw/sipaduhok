@@ -77,6 +77,7 @@ class InfoPembayaranController extends Controller
                 'midtrans_server_key' => Crypt::encryptString($request->midtrans_server_key),
                 'midtrans_client_key' => $request->midtrans_client_key, // Client key tidak perlu encrypt
                 'midtrans_is_production' => $isProduction,
+                'midtrans_enabled' => true, // Auto-enable saat update keys
                 'updated_by' => auth()->id(),
             ];
 

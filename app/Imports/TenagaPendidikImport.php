@@ -57,12 +57,35 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
             }
 
             // Lookup cabang
+            // Lookup cabang
             $cabangId = null;
             if (!empty($row['nama_cabang'])) {
-                $cabangId = $this->cabangList[$row['nama_cabang']] ?? null;
-                if (!$cabangId) {
-                    foreach ($this->cabangList as $name => $id) {
-                        if (strtolower(trim($name)) === strtolower(trim($row['nama_cabang']))) {
+                $searchName = trim($row['nama_cabang']);
+                
+                // Normalization for matching
+                $normalizedSearch = strtolower($searchName);
+                $normalizedSearch = str_replace(['pkbm hok', 'hok'], ['pkbm house of knowledge', 'house of knowledge'], $normalizedSearch);
+
+                if (isset($this->cabangList[$searchName])) {
+                    $cabangId = $this->cabangList[$searchName];
+                } else {
+                    foreach ($this->cabangList as $dbName => $id) {
+                        $normalizedDb = strtolower(trim($dbName));
+                        
+                        // Exact match
+                        if ($normalizedDb === strtolower($searchName)) {
+                            $cabangId = $id;
+                            break;
+                        }
+                        
+                        // Match with expanded abbreviations
+                        if ($normalizedDb === $normalizedSearch) {
+                           $cabangId = $id;
+                            break; 
+                        }
+
+                        // Containment match (e.g. "PKBM House of Knowledge" in "PKBM House of Knowledge (Gedung Utama)")
+                        if (str_contains($normalizedDb, $normalizedSearch)) {
                             $cabangId = $id;
                             break;
                         }

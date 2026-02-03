@@ -342,6 +342,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/siswa/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'store'])->name('store');
                 Route::post('/siswa/{siswa}/validasi-langsung', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'validasiLangsung'])->name('validasi-langsung');
                 Route::get('/riwayat/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'riwayatSiswa'])->name('riwayat-siswa');
+                Route::get('/{pembayaran}/cetak-kwitansi', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'cetakKwitansi'])->name('cetak-kwitansi');
             });
 
             // Laporan Keuangan
@@ -780,6 +781,9 @@ Route::middleware(['auth'])->group(function () {
 
             // Riwayat per siswa
             Route::get('/riwayat/{siswa}', [PembayaranController::class, 'riwayatSiswa'])->name('riwayat-siswa');
+
+            // Cetak kwitansi pembayaran
+            Route::get('/{pembayaran}/cetak-kwitansi', [PembayaranController::class, 'cetakKwitansi'])->name('cetak-kwitansi');
         });
 
         // Info Pembayaran
@@ -1183,6 +1187,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/snap-finish', [OrangTuaController::class, 'snapFinish'])->name('snap.finish');
             Route::get('/snap/{pembayaran}', [OrangTuaController::class, 'snapPayment'])->name('snap');
             Route::post('/continue/{pembayaran}', [OrangTuaController::class, 'continuePayment'])->name('continue');
+            Route::get('/{pembayaran}/invoice', [OrangTuaController::class, 'cetakInvoice'])->name('invoice');
         });
 
         // Monitoring Rapor Anak

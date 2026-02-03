@@ -139,6 +139,17 @@
                             </a>
                         </div>
                     @endif
+
+                    @if($pembayaran->status_validasi === 'disetujui')
+                        <div class="mt-4 pt-3 border-top">
+                            <h6 class="mb-3 fw-bold text-gray-800"><i class="fas fa-print me-2"></i>Cetak Kwitansi</h6>
+                            <a href="{{ route('bendahara.pembayaran.cetak-kwitansi', $pembayaran->id) }}" 
+                               target="_blank" 
+                               class="btn btn-success shadow-sm">
+                                <i class="fas fa-print me-1"></i> Cetak Kwitansi Pembayaran
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

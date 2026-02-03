@@ -151,3 +151,4 @@ class PromotionValidationController extends Controller
             'filters' => $request->all()
         ]);
     }
+}

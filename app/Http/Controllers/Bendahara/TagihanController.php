@@ -8,6 +8,7 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use App\Models\Pembayaran;
 use Illuminate\Support\Facades\DB;
 
 class TagihanController extends Controller
@@ -79,12 +80,19 @@ class TagihanController extends Controller
                 ->get();
 
             $totalTagihan = $tagihan->sum('jumlah');
+            
+            // Calculate Total Paid
+            $tagihanIds = $tagihan->pluck('id');
+            $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
+                ->whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
 
-            // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
-            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+            // Sisa tagihan = Total - Terbayar
+            $sisaTagihan = $totalTagihan - $totalTerbayar;
 
             $siswa->total_tagihan = $totalTagihan;
-            $siswa->tagihan_lunas = $totalTagihan - $sisaTagihan;
+            $siswa->tagihan_lunas = $totalTerbayar;
             $siswa->sisa_tagihan = $sisaTagihan;
             $siswa->tagihan_detail = $tagihan;
 
@@ -135,15 +143,28 @@ class TagihanController extends Controller
 
         $totalTagihan = $tagihan->sum('jumlah');
 
-        // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
-        $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-        $tagihanLunas = $totalTagihan - $sisaTagihan;
+        // Calculate Real Sisa Tagihan
+        $tagihanIds = $tagihan->pluck('id');
+        $tagihanLunas = Pembayaran::where('siswa_id', $siswaId)
+            ->whereIn('tagihan_id', $tagihanIds)
+            ->where('status_validasi', 'disetujui')
+            ->sum('jumlah_bayar');
+        
+        $sisaTagihan = $totalTagihan - $tagihanLunas;
+
+        // Inject sisa_tagihan to each item for view display if needed
+        foreach ($tagihan as $item) {
+            $paid = Pembayaran::where('tagihan_id', $item->id)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+            $item->sisa_tagihan = $item->jumlah - $paid;
+        }
 
         return view('bendahara.tagihan.show', [
             'siswa' => $siswa,
             'tagihan' => $tagihan,
             'totalTagihan' => $totalTagihan,
-            'tagihanLunas' => $tagihanLunas,
+            'tagihanLunas' => $tagihanLunas, // Representing Total Paid Amount
             'sisaTagihan' => $sisaTagihan,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $this->jenisTagihan,
@@ -208,6 +229,17 @@ class TagihanController extends Controller
 
         $siswa = Siswa::findOrFail($siswaId);
 
+        // Sanitize currency inputs BEFORE validation
+        // This handles formatted inputs like "200.000" or "1.500.000" 
+        // and converts them to pure numbers (200000, 1500000)
+        $tagihanInput = $request->input('tagihan', []);
+        $sanitizedTagihan = [];
+        foreach ($tagihanInput as $key => $value) {
+            // Remove all non-digit characters (dots, commas, spaces, Rp, etc.)
+            $sanitizedTagihan[$key] = preg_replace('/\D/', '', $value) ?: '0';
+        }
+        $request->merge(['tagihan' => $sanitizedTagihan]);
+
         $request->validate([
             'tagihan' => 'required|array',
             'tagihan.*' => 'nullable|numeric|min:0',
@@ -253,8 +285,6 @@ class TagihanController extends Controller
                     ]);
                 }
             }
-
-            DB::commit();
 
             DB::commit();
             return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
@@ -380,8 +410,6 @@ class TagihanController extends Controller
                 }
 
                 DB::commit();
-
-                DB::commit();
                 return redirect()->route($this->getRoutePrefix() . '.index')
                     ->with('success', "Tagihan berhasil dibuat untuk {$siswaList->count()} siswa.");
             } catch (\Exception $e) {
@@ -500,9 +528,6 @@ class TagihanController extends Controller
             if ($tagihan->status === 'sudah_bayar' || $tagihan->status === 'cicilan') {
                 return redirect()->back()->with('error', 'Tagihan yang sudah memiliki pembayaran tidak dapat dihapus.');
             }
-
-            $siswaId = $tagihan->siswa_id;
-            $tagihan->delete();
 
             $siswaId = $tagihan->siswa_id;
             $tagihan->delete();
@@ -640,8 +665,6 @@ class TagihanController extends Controller
             }
 
             DB::commit();
-
-            DB::commit();
             return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', "Berhasil generate $totalCreated tagihan SPP untuk {$siswaList->count()} siswa.");
         } catch (\Exception $e) {
@@ -757,8 +780,6 @@ class TagihanController extends Controller
                 }
             }
 
-            DB::commit();
-            $targetCount = count($request->target_siswa_ids);
             DB::commit();
             $targetCount = count($request->target_siswa_ids);
             return redirect()->route($this->getRoutePrefix() . '.index')

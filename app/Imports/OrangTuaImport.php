@@ -14,6 +14,8 @@ use Illuminate\Support\Collection;
 
 class OrangTuaImport implements ToCollection, WithHeadingRow
 {
+    private $skippedCount = 0;
+    private $importedCount = 0;
     private $warnings = [];
 
     public function collection(Collection $rows)

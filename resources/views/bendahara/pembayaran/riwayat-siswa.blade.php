@@ -176,6 +176,13 @@
                                         <tr>
                                             <td class="align-middle">
                                                 <code class="small">{{ $bayar->kode_pembayaran }}</code>
+                                                @if($bayar->order_id && $bayar->group_transactions_count > 1)
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-info" style="font-size: 10px;" title="Pembayaran ini adalah bagian dari transaksi gabungan ({{ $bayar->group_transactions_count }} item)">
+                                                            <i class="fas fa-layer-group me-1"></i> Gabungan ({{ $bayar->group_transactions_count }})
+                                                        </span>
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td class="align-middle">{{ $bayar->tanggal_bayar->format('d/m/Y') }}</td>
                                             <td class="align-middle">
@@ -231,6 +238,12 @@
                                                     class="btn btn-sm btn-info shadow-sm" title="Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                @if($bayar->status_validasi === 'disetujui')
+                                                    <a href="{{ route('bendahara.pembayaran.cetak-kwitansi', $bayar->id) }}"
+                                                        class="btn btn-sm btn-success shadow-sm" title="Cetak Kwitansi" target="_blank">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

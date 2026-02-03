@@ -102,17 +102,23 @@ class PembayaranController extends Controller
         $tagihanIds = $tagihan->pluck('id');
 
         $pembayaranList = Pembayaran::with(['tagihan', 'validator'])
+            ->withCount('groupTransactions')
             ->where('siswa_id', $siswaId)
             ->whereIn('tagihan_id', $tagihanIds)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        // Hitung total tagihan
+        // Hitung total tagihan (Total Nominal Awal)
         $totalTagihan = $tagihan->sum('jumlah');
 
-        // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
-        $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-        $totalTerbayar = $totalTagihan - $sisaTagihan;
+        // Hitung total yang SUDAH dibayar (Disetujui)
+        $totalTerbayar = Pembayaran::where('siswa_id', $siswaId)
+            ->whereIn('tagihan_id', $tagihanIds)
+            ->where('status_validasi', 'disetujui')
+            ->sum('jumlah_bayar');
+
+        // Sisa tagihan = Total - Terbayar
+        $sisaTagihan = $totalTagihan - $totalTerbayar;
 
         $totalPending = Pembayaran::where('siswa_id', $siswaId)
             ->whereIn('tagihan_id', $tagihanIds)
@@ -277,7 +283,8 @@ class PembayaranController extends Controller
 
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
 
-        // Ambil tagihan yang belum lunas untuk tahun ajaran aktif
+        // Ambil tagihan yang belum lunas (status != sudah_bayar)
+        // Note: Cicilan masuk di sini
         $tagihanBelumLunas = Tagihan::where('siswa_id', $siswaId)
             ->where('status', '!=', 'sudah_bayar')
             ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
@@ -285,9 +292,16 @@ class PembayaranController extends Controller
             })
             ->get();
 
-        // Sisa tagihan = total dari tagihan yang belum lunas
-        // Ini lebih akurat karena langsung dari status tagihan
-        $sisaTagihan = $tagihanBelumLunas->sum('jumlah');
+        // Hitung sisa tagihan per item dan total sisa secara akurat
+        // (Mengurangi pembayaran yang sudah masuk untuk tagihan cicilan)
+        $sisaTagihan = 0;
+        foreach ($tagihanBelumLunas as $tagihan) {
+             $terbayar = Pembayaran::where('tagihan_id', $tagihan->id)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+             $tagihan->sisa_per_item = $tagihan->jumlah - $terbayar;
+             $sisaTagihan += $tagihan->sisa_per_item;
+        }
 
         // Total tagihan untuk tahun ajaran aktif (untuk info)
         $totalTagihan = Tagihan::where('siswa_id', $siswaId)
@@ -338,10 +352,48 @@ class PembayaranController extends Controller
         DB::beginTransaction();
         try {
             $validasiLangsung = $request->has('validasi_langsung');
+            
+            // Generate a shared Order ID for this transaction batch
+            // This links all payments made in this single request together
+            $orderId = 'ORD-' . strtoupper(Str::random(10)) . '-' . date('YmdHis');
+
+            // Ambil input nominal bayar (cleanup format currency)
+            $inputNominals = $request->input('nominal_bayar', []);
 
             // Proses setiap tagihan yang dipilih
             foreach ($request->tagihan_ids as $tagihanId) {
                 $tagihan = Tagihan::findOrFail($tagihanId);
+
+                // Hitung sisa tagihan aktual
+                $totalSudahBayar = Pembayaran::where('tagihan_id', $tagihanId)
+                    ->where('status_validasi', 'disetujui')
+                    ->sum('jumlah_bayar');
+                $sisaTagihan = $tagihan->jumlah - $totalSudahBayar;
+                
+                // Tentukan jumlah bayar berdasarkan input dan jenis tagihan
+                $jumlahBayar = $sisaTagihan; // Default ke sisa tagihan
+
+                // Jika bukan SPP, gunakan input user (jika ada)
+                if ($tagihan->jenis_tagihan !== 'spp' && isset($inputNominals[$tagihanId])) {
+                     $cleanNominal = preg_replace('/\D/', '', $inputNominals[$tagihanId]);
+                     if (is_numeric($cleanNominal) && $cleanNominal > 0) {
+                         $jumlahBayar = (int) $cleanNominal;
+                     }
+                }
+
+                // Safety: Jangan biarkan bayar lebih dari sisa
+                // VALIDASI KETAT: Cek jika input melebihi sisa tagihan
+                if ($jumlahBayar > $sisaTagihan) {
+                    $namaTagihan = $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan));
+                    $formattedInput = number_format($jumlahBayar, 0, ',', '.');
+                    $formattedSisa = number_format($sisaTagihan, 0, ',', '.');
+                    
+                    // Rollback transaksi dan lempar error
+                    DB::rollBack();
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', "Pembayaran untuk tagihan '{$namaTagihan}' melebihi sisa tagihan! (Input: Rp {$formattedInput}, Sisa: Rp {$formattedSisa})");
+                }
 
                 // Generate kode pembayaran unik per tagihan
                 $kodePembayaran = 'PAY-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
@@ -350,7 +402,8 @@ class PembayaranController extends Controller
                     'tagihan_id' => $tagihanId,
                     'siswa_id' => $siswaId,
                     'kode_pembayaran' => $kodePembayaran,
-                    'jumlah_bayar' => $tagihan->jumlah,
+                    'order_id' => $orderId, // Link grouping for receipt
+                    'jumlah_bayar' => $jumlahBayar,
                     'tanggal_bayar' => $request->tanggal_bayar,
                     'metode_pembayaran' => 'tunai',
                     'status_validasi' => $validasiLangsung ? 'disetujui' : 'pending',
@@ -496,5 +549,75 @@ class PembayaranController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Cetak kwitansi pembayaran
+     */
+    public function cetakKwitansi($id)
+    {
+        $pembayaran = Pembayaran::with(['siswa', 'siswa.kelas', 'siswa.cabang', 'tagihan', 'validator'])
+            ->findOrFail($id);
+
+        // Only allow printing for approved payments
+        if ($pembayaran->status_validasi !== 'disetujui') {
+            return redirect()->back()->with('error', 'Hanya pembayaran yang sudah divalidasi yang dapat dicetak.');
+        }
+
+        // Get all related payments if they share the same order_id (bulk payment)
+        $relatedPayments = collect([$pembayaran]);
+        if ($pembayaran->order_id) {
+            $relatedPayments = Pembayaran::with(['tagihan'])
+                ->where('order_id', $pembayaran->order_id)
+                ->where('status_validasi', 'disetujui')
+                ->get();
+        }
+
+        // Calculate total from all related payments
+        $totalBayar = $relatedPayments->sum('jumlah_bayar');
+
+        // Calculate Sisa Tagihan Current for each item in receipt
+        foreach ($relatedPayments as $item) {
+            if ($item->tagihan) {
+                // Total yang SUDAH dibayar (termasuk pembayaran ini dan lainnya yg disetujui)
+                $totalDibayar = Pembayaran::where('tagihan_id', $item->tagihan_id)
+                    ->where('status_validasi', 'disetujui')
+                    ->sum('jumlah_bayar');
+                
+                // Sisa saat ini
+                $item->sisa_current = max(0, $item->tagihan->jumlah - $totalDibayar);
+                // Flag lunas
+                $item->is_lunas = $item->sisa_current <= 0;
+            } else {
+                $item->sisa_current = 0;
+                $item->is_lunas = true;
+            }
+        }
+
+        // Get school info from settings
+        $schoolInfo = [
+            'nama' => config('app.name', 'PKBM INKLUSI SIPADUHOK'),
+            'alamat' => 'Jl. Pendidikan No. 123, Jakarta',
+            'telepon' => '021-12345678',
+            'email' => 'info@sipaduhok.sch.id',
+        ];
+
+        // Get jenis tagihan mapping
+        $jenisTagihan = config('sipaduhok.jenis_tagihan', [
+            'spp' => 'SPP',
+            'daftar_ulang' => 'Daftar Ulang',
+            'seragam' => 'Seragam',
+            'buku' => 'Buku',
+            'kegiatan' => 'Kegiatan',
+            'lainnya' => 'Lainnya',
+        ]);
+
+        return view('bendahara.pembayaran.cetak-kwitansi', [
+            'pembayaran' => $pembayaran,
+            'relatedPayments' => $relatedPayments,
+            'totalBayar' => $totalBayar,
+            'schoolInfo' => $schoolInfo,
+            'jenisTagihan' => $jenisTagihan,
+        ]);
     }
 }
