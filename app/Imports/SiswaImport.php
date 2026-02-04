@@ -92,6 +92,15 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 $cabangId = $kelas ? $kelas->cabang_id : null;
             }
 
+            // Validation: Cabang is required
+            if (!$cabangId) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Siswa dilewati karena Cabang tidak ditemukan (isi kolom nama_cabang atau pastikan nama_kelas valid).";
+                continue;
+            }
+
+            \Log::info("Importing Row {$rowNumber}: CabangID = " . ($cabangId ?? 'NULL'));
+
             // Prepare User data
             $username = !empty($row['nis']) ? $row['nis'] : Str::slug($row['nama_lengkap']) . '-' . rand(100, 999);
             $email = !empty($row['email']) ? $row['email'] : $username . '@siswa.sipaduhok.com';
@@ -130,6 +139,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     'telepon_orangtua' => $row['telepon_orangtua'] ?? null,
                     'status' => strtolower($row['status'] ?? 'aktif') === 'nonaktif' ? 'nonaktif' : 'aktif',
                     'tanggal_masuk' => $this->parseDate($row['tanggal_masuk'] ?? now()), // Default to now if missing
+                    'agama' => $row['agama'] ?? null,
                 ]);
 
                 DB::commit();
