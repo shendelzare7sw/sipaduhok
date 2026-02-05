@@ -175,9 +175,9 @@
                                     <i class="fas fa-sync-alt me-1"></i> Hitung Ulang
                                 </button>
                             </form>
-                            <button class="btn btn-sm btn-success" disabled title="Segera Hadir">
+                            <a href="{{ route('guru.lms.nilai.export-excel', [$kelas->id, $mapel->id, 'semester' => $semester]) }}" class="btn btn-sm btn-success" target="_blank">
                                 <i class="fas fa-file-excel me-1"></i> Export Excel
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

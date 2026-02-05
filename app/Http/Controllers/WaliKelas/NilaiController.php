@@ -295,7 +295,7 @@ class NilaiController extends Controller
                 'wali'
             ));
             
-            return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
+            return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf', ['Attachment' => false]);
             
         } else {
             $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
@@ -333,7 +333,7 @@ class NilaiController extends Controller
                 'wali'
             ));
             
-            return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
+            return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf', ['Attachment' => false]);
         }
     }
     

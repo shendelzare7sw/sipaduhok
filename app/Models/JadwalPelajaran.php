@@ -23,6 +23,7 @@ class JadwalPelajaran extends Model
         'created_by',
         'updated_by',
         'siswa_ids',
+        'tahun_ajaran_id',
     ];
 
     protected $casts = [

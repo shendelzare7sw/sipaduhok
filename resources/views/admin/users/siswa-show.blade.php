@@ -128,6 +128,12 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                                 </span>
                             </td>
                         </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #64748b;">Tanggal Didaftarkan (Akun)</td>
+                            <td style="padding: 10px 0; font-weight: 500;">
+                                {{ $siswa->user->created_at ? \Carbon\Carbon::parse($siswa->user->created_at)->locale('id')->translatedFormat('d F Y H:i') : '-' }}
+                            </td>
+                        </tr>
                     </table>
 
                     <h5 style="margin-bottom: 20px; color: #f59e0b; border-bottom: 2px solid #f59e0b; display: inline-block; padding-bottom: 5px;">Akun Orang Tua Terdaftar</h5>

@@ -391,7 +391,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('home') }}">
+                                <a class="dropdown-item" href="{{ route('guru.dashboard') }}">
                                     <i class="fas fa-arrow-left me-2"></i> Kembali ke Dashboard
                                 </a>
                             </li>

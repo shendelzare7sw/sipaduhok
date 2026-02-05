@@ -16,23 +16,23 @@ class SiswaTemplate implements FromArray, WithHeadings, WithStyles, WithColumnWi
     public function array(): array
     {
         return [
-            ['12345', '1234567890', 'Ahmad Fajar Maulana', 'L', 'Surabaya', '2010-05-15', 'Jl. Contoh No. 123', 'Budi Santoso', 'Siti Aminah', '081234567890', '1A', 'PKBM HOK', 'aktif', 'Islam'],
-            ['12346', '1234567891', 'Putri Rahayu Dewi', 'P', 'Jakarta', '2011-08-20', 'Jl. Sample No. 456', 'Joko Widodo', 'Sri Mulyani', '089876543210', '7A', 'HOK Cimanggis', 'aktif', 'Kristen'],
+            ['12345', '1234567890', 'Ahmad Fajar Maulana', 'ahmad.fajar', 'ahmad@example.com', 'L', 'Surabaya', '2010-05-15', '2023-07-15', 'Jl. Contoh No. 123', 'Budi Santoso', 'Siti Aminah', '081234567890', '1A', 'PKBM HOK', 'aktif', 'Islam'],
+            ['12346', '1234567891', 'Putri Rahayu Dewi', 'putri.rahayu', 'putri@example.com', 'P', 'Jakarta', '2011-08-20', '2023-07-15', 'Jl. Sample No. 456', 'Joko Widodo', 'Sri Mulyani', '089876543210', '7A', 'HOK Cimanggis', 'aktif', 'Kristen'],
         ];
     }
 
     public function headings(): array
     {
-        return ['nis', 'nisn', 'nama_lengkap', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'alamat', 'nama_ayah', 'nama_ibu', 'telepon_orangtua', 'nama_kelas', 'nama_cabang', 'status', 'agama'];
+        return ['nis', 'nisn', 'nama_lengkap', 'username', 'email', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'tanggal_masuk', 'alamat', 'nama_ayah', 'nama_ibu', 'telepon_orangtua', 'nama_kelas', 'nama_cabang', 'status', 'agama'];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:N1')->applyFromArray([
+        $sheet->getStyle('A1:Q1')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563EB']],
         ]);
-        $sheet->getStyle('A2:N3')->applyFromArray([
+        $sheet->getStyle('A2:Q3')->applyFromArray([
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F3F4F6']],
             'font' => ['italic' => true, 'color' => ['rgb' => '6B7280']],
         ]);
@@ -41,10 +41,10 @@ class SiswaTemplate implements FromArray, WithHeadings, WithStyles, WithColumnWi
         $sheet->setCellValue('A6', '1. Hapus baris contoh (baris 2-3) sebelum mengisi data');
         $sheet->setCellValue('A7', '2. WAJIB: nama_lengkap harus diisi');
         $sheet->setCellValue('A8', '3. jenis_kelamin: L (Laki-laki) atau P (Perempuan)');
-        $sheet->setCellValue('A9', '4. tanggal_lahir format: YYYY-MM-DD (contoh: 2010-05-15)');
+        $sheet->setCellValue('A9', '4. tanggal_lahir & tanggal_masuk format: YYYY-MM-DD (contoh: 2010-05-15)');
         $sheet->setCellValue('A10', '5. status: aktif atau nonaktif');
         $sheet->setCellValue('A11', '6. agama: Islam, Kristen, Katolik, Hindu, Buddha, atau Konghucu');
-        $sheet->setCellValue('A12', '7. User account dibuat otomatis dengan password: password');
+        $sheet->setCellValue('A12', '7. User account dibuat otomatis dengan password: password. Username/email opsional (auto-generate jika kosong)');
         $sheet->setCellValue('A13', '8. NIS/NISN yang sudah ada akan DILEWATI (tidak duplikat)');
 
         $sheet->setCellValue('A15', 'DAFTAR CABANG (Pilih salah satu di kolom nama_cabang):');
@@ -74,6 +74,11 @@ class SiswaTemplate implements FromArray, WithHeadings, WithStyles, WithColumnWi
 
     public function columnWidths(): array
     {
-        return ['A' => 12, 'B' => 15, 'C' => 25, 'D' => 12, 'E' => 15, 'F' => 14, 'G' => 30, 'H' => 20, 'I' => 20, 'J' => 18, 'K' => 15, 'L' => 15, 'M' => 10, 'N' => 15];
+        return [
+            'A' => 12, 'B' => 15, 'C' => 25, 'D' => 20, 'E' => 25, 
+            'F' => 12, 'G' => 15, 'H' => 15, 'I' => 15, 'J' => 30, 
+            'K' => 20, 'L' => 20, 'M' => 18, 'N' => 15, 'O' => 15, 
+            'P' => 10, 'Q' => 15
+        ];
     }
 }

@@ -950,6 +950,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelas', [GuruKelasController::class, 'index'])->name('kelas.index');
         Route::get('/kelas/{kelas}/mapel', [GuruKelasController::class, 'showMapel'])->name('kelas.mapel');
 
+        // Jadwal Pelajaran
+        Route::get('/jadwal', [\App\Http\Controllers\Guru\GuruJadwalController::class, 'index'])->name('jadwal.index');
+
         /*
         |--------------------------------------------------------------------------
         | LMS GURU - Per Kelas & Mata Pelajaran
@@ -1044,6 +1047,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/nilai/update', [GuruNilaiController::class, 'update'])->name('nilai.update');
             Route::post('/nilai/update-batch', [GuruNilaiController::class, 'updateBatch'])->name('nilai.updateBatch');
             Route::post('/nilai/recalculate', [GuruNilaiController::class, 'recalculate'])->name('nilai.recalculate');
+            Route::get('/nilai/export-excel', [GuruNilaiController::class, 'exportExcel'])->name('nilai.export-excel');
 
             // Forum Diskusi
             Route::prefix('forum')->name('forum.')->group(function () {

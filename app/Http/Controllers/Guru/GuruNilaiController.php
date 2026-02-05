@@ -212,12 +212,58 @@ class GuruNilaiController extends Controller
     /**
      * Export nilai ke Excel (placeholder)
      */
-    public function export($kelasId, $mapelId)
+    /**
+     * Export nilai ke Excel
+     */
+    public function exportExcel(Request $request, $kelasId, $mapelId)
     {
-        // TODO: Implement Excel export using Laravel Excel
-        return redirect()
-            ->route('guru.lms.nilai.index', [$kelasId, $mapelId])
-            ->with('info', 'Fitur export Excel akan segera tersedia');
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        
+        $kelas = Kelas::findOrFail($kelasId);
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+        
+        // Ambil semua siswa di kelas
+        $siswaList = Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
+        
+        // Buat atau ambil nilai untuk setiap siswa (per semester)
+        $nilaiCollection = [];
+        foreach ($siswaList as $siswa) {
+            $nilai = Nilai::firstOrCreate([
+                'siswa_id' => $siswa->id,
+                'mata_pelajaran_id' => $mapelId,
+                'kelas_id' => $kelasId,
+                'tahun_ajaran_id' => $tahunAjaran->id,
+                'semester' => $semester,
+                'guru_id' => $tenagaPendidik->id,
+            ]);
+            
+            // Calculate nilai if empty
+            if (!$nilai->nilai_akhir) {
+                $this->calculateNilai($nilai);
+            }
+            
+            // Load siswa relation on nilai
+            $nilai->siswa = $siswa;
+            $nilaiCollection[] = $nilai;
+        }
+        
+        $nilaiCollection = collect($nilaiCollection);
+        $fileName = 'Nilai_Siswa_' . \Str::slug($kelas->nama_kelas) . '_' . \Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\Guru\NilaiSiswaExport($nilaiCollection, $kelas, $mataPelajaran, $semester),
+            $fileName
+        );
     }
     
     /**

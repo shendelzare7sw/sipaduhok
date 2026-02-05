@@ -102,7 +102,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
             \Log::info("Importing Row {$rowNumber}: CabangID = " . ($cabangId ?? 'NULL'));
 
             // Prepare User data
-            $username = !empty($row['nis']) ? $row['nis'] : Str::slug($row['nama_lengkap']) . '-' . rand(100, 999);
+            $username = !empty($row['username']) ? $row['username'] : (!empty($row['nis']) ? $row['nis'] : Str::slug($row['nama_lengkap']) . '-' . rand(100, 999));
             $email = !empty($row['email']) ? $row['email'] : $username . '@siswa.sipaduhok.com';
 
             DB::beginTransaction();

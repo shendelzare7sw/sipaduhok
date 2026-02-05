@@ -182,7 +182,7 @@
                             </a>
                         </div>
                         <div class="col-md-6 mb-2">
-                            <a href="#" class="btn btn-outline-secondary w-100">
+                            <a href="{{ route('guru.jadwal.index') }}" target="_blank" class="btn btn-outline-secondary w-100">
                                 <i class="fas fa-calendar me-2"></i>Jadwal Lengkap
                             </a>
                         </div>

@@ -42,9 +42,8 @@
                 <th colspan="2">UH</th>
                 <th rowspan="2" style="width: 30px;">PTS</th>
                 <th rowspan="2" style="width: 30px;">PAS</th>
-                <th rowspan="2" class="nilai-akhir" style="width: 40px;">N. Akhir</th>
-                <th rowspan="2" style="width: 35px;">Pred</th>
-                <th rowspan="2" style="width: 45px;">Status</th>
+                <th rowspan="2" class="nilai-akhir" style="width: 50px;">N. Akhir</th>
+                <th rowspan="2" style="width: 55px;">Status</th>
             </tr>
             <tr>
                 <th style="width: 25px;">Jml</th>
@@ -95,14 +94,6 @@
                     $kkm = 70;
                     $isTuntas = $avgNilaiAkhir !== null && $avgNilaiAkhir >= $kkm;
                     
-                    // Predikat berdasarkan rata-rata nilai akhir
-                    $predikat = '-';
-                    if ($avgNilaiAkhir !== null) {
-                        if ($avgNilaiAkhir >= 90) $predikat = 'A';
-                        elseif ($avgNilaiAkhir >= 80) $predikat = 'B';
-                        elseif ($avgNilaiAkhir >= 70) $predikat = 'C';
-                        else $predikat = 'D';
-                    }
                     
                     $mapelCount = count($mataPelajaranList ?? []);
                     $maxCount = $mapelCount * 5;
@@ -120,7 +111,7 @@
                     <td style="text-align: center;">{{ $avgPts !== null ? number_format($avgPts, 0) : '-' }}</td>
                     <td style="text-align: center;">{{ $avgPas !== null ? number_format($avgPas, 0) : '-' }}</td>
                     <td class="nilai-akhir" style="text-align: center;">{{ $avgNilaiAkhir !== null ? number_format($avgNilaiAkhir, 2) : '-' }}</td>
-                    <td style="text-align: center;">{{ $predikat }}</td>
+
                     <td style="text-align: center;">{{ $avgNilaiAkhir !== null ? ($isTuntas ? 'Tuntas' : 'Blm Tuntas') : '-' }}</td>
                 </tr>
             @endforeach

@@ -22,5 +22,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Force Laravel pagination to use Bootstrap 5
         Paginator::useBootstrapFive();
+
+        // View Composer for Guru Sidebar
+        \Illuminate\Support\Facades\View::composer(
+            'guru.partials.sneat-sidebar-menu', 
+            \App\Http\View\Composers\GuruSidebarComposer::class
+        );
     }
 }
