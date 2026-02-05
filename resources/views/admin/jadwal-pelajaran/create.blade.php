@@ -152,21 +152,7 @@
                     </div>
                 </div>
 
-                {{-- Siswa Khusus Section (Hidden by default) --}}
-                <div class="form-section d-none" id="siswaSection">
-                    <div class="form-section-title">Pilih Siswa (Khusus Kelas Gabungan / Agama)</div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Silakan pilih siswa yang mengikuti mata pelajaran ini. Kosongkan untuk memilih <strong>SEMUA SISWA</strong> dari kelas yang dipilih.
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Daftar Siswa</label>
-                        <select name="siswa_ids[]" id="siswaSelect" class="form-select" multiple style="height: 200px;">
-                            <!-- Populated via AJAX -->
-                        </select>
-                        <div class="form-text">Tahan Ctrl / Command untuk memilih beberapa siswa.</div>
-                    </div>
-                </div>
+
                 <div class="form-section">
                     <div class="form-section-title">Jadwal Waktu</div>
 
@@ -301,8 +287,7 @@
             const kelasSelect = document.getElementById('kelasSelect');
             const mapelSelect = document.getElementById('mapelSelect');
             const hariSelect = document.getElementById('hariSelect');
-            const siswaSection = document.getElementById('siswaSection');
-            const siswaSelect = document.getElementById('siswaSelect');
+
             const istirahatDesc = document.getElementById('istirahatDesc');
             const istirahatCollapse = document.getElementById('istirahatCollapse');
 
@@ -346,58 +331,11 @@
                 // Update istirahat info
                 filterIstirahatDisplay();
 
-                // Load Students from All Selected Classes
-                if (selectedOptions.length > 0) {
-                    const classIds = selectedOptions.map(opt => opt.value).join(',');
-                    loadStudents(classIds);
-                } else {
-                    siswaSelect.innerHTML = '';
-                    siswaSection.classList.add('d-none');
-                }
-
                 // Filter Guru by Branch
                 filterGuruByCabang();
             });
             
-            // Check Mapel for Agama to show Student Section
-            mapelSelect.addEventListener('change', function() {
-                checkAgamaSubject();
-            });
 
-            function checkAgamaSubject() {
-                const selectedText = mapelSelect.options[mapelSelect.selectedIndex]?.text.toLowerCase() || '';
-                const isAgama = selectedText.includes('agama') || selectedText.includes('religi');
-                
-                // Show Siswa Section ONLY if it is Agama, OR if user wants to customize (let's restrict to Agama for now based on req)
-                // Actually, for Multi-Class, maybe we ALWAYS want the option? 
-                // Req said: "kecuali pelajaran agama (karena kelas digabung lalu di pecah lagi sesuai agama)".
-                // So enabling it for Agama is key.
-                
-                if (isAgama) {
-                    siswaSection.classList.remove('d-none');
-                } else {
-                    siswaSection.classList.add('d-none');
-                    // Deselect options if hidden? No, keep logic simple.
-                }
-            }
-            
-            function loadStudents(classIds) {
-                // Fetch students
-                fetch(`{{ route('admin.jadwal-pelajaran.index') }}/get-students/${classIds}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        siswaSelect.innerHTML = '';
-                        if (data.length > 0) {
-                            data.forEach(siswa => {
-                                const option = document.createElement('option');
-                                option.value = siswa.id;
-                                option.textContent = `${siswa.nama_lengkap} (${siswa.agama || '-'}) - NIS: ${siswa.nis}`;
-                                siswaSelect.appendChild(option);
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error loading students:', error));
-            }
 
 
             // Filter Guru Logic

@@ -13,7 +13,7 @@ class JadwalPelajaran extends Model
 
     protected $fillable = [
         'guru_id',
-        // 'kelas_id', // Deprecated, use pivot
+        'kelas_id', // Deprecated, use pivot but kept for DB compatibility
         'mata_pelajaran_id',
         'hari',
         'jam_mulai',

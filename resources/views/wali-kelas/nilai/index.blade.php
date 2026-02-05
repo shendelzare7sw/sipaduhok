@@ -60,7 +60,7 @@
                         <h5 class="m-0 fw-bold text-primary">Rekapitulasi Nilai Akademik</h5>
                     </div>
                     <div class="col-auto">
-                        <a href="{{ route('wali.nilai.print', ['mata_pelajaran_id' => $selectedMapelId ?? '']) }}" target="_blank" class="btn btn-secondary btn-sm shadow-sm">
+                        <a href="{{ route('wali.nilai.print', ['mata_pelajaran_id' => $selectedMapelId ?? '', 'semester' => $semester ?? '']) }}" target="_blank" class="btn btn-secondary btn-sm shadow-sm">
                             <i class="fas fa-print me-1"></i> Cetak Rekap Nilai
                         </a>
                     </div>
@@ -260,4 +260,6 @@
     @endif
 </div>
 </div>
+</div>
+
 @endsection

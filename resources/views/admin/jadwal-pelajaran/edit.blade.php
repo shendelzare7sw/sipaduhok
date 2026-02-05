@@ -169,21 +169,7 @@
                 </div>
             </div>
             
-                {{-- Siswa Khusus Section (Hidden by default) --}}
-                <div class="form-section d-none" id="siswaSection">
-                    <div class="form-section-title">Pilih Siswa (Khusus Kelas Gabungan / Agama)</div>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Silakan pilih siswa yang mengikuti mata pelajaran ini. Kosongkan untuk memilih <strong>SEMUA SISWA</strong> dari kelas yang dipilih.
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Daftar Siswa</label>
-                        <select name="siswa_ids[]" id="siswaSelect" class="form-select" multiple style="height: 200px;">
-                            <!-- Populated via AJAX -->
-                        </select>
-                        <div class="form-text">Tahan Ctrl / Command untuk memilih beberapa siswa.</div>
-                    </div>
-                </div>
+
             <div class="form-section">
                 <div class="form-section-title">Jadwal Waktu</div>
 
@@ -349,13 +335,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const kelasSelect = document.getElementById('kelasSelect');
     const mapelSelect = document.getElementById('mapelSelect');
     const hariSelect = document.getElementById('hariSelect');
-    const siswaSection = document.getElementById('siswaSection');
-    const siswaSelect = document.getElementById('siswaSelect');
+
     const istirahatDesc = document.getElementById('istirahatDesc');
     const istirahatCollapse = document.getElementById('istirahatCollapse');
     
-    // Data from server
-    const existingSiswaIds = @json($jadwalPelajaran->siswa_ids ?? []);
+
 
     // Animate chevron when collapse is toggled
     if (istirahatCollapse) {
@@ -398,69 +382,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update istirahat info
         filterIstirahatDisplay();
         
-        // Load Students
-        if (selectedOptions.length > 0) {
-            const classIds = selectedOptions.map(opt => opt.value).join(',');
-            // If explicit change, we might reset preselection? But for Edit load, we want to keep.
-            // Check if this event is triggered by user or script load.
-            // Simply pass existingSiswaIds. If class changed, they might not match, but logic handles mismatch (won't be returned by API or filtered out? No API returns students for CLASS).
-            // Actually, if class changes, existing IDs might not be in the new class list.
-            // We should only use existingSiswaIds on INITIAL load. 
-            // How to distinguish? Pass a collection?
-            // Actually simple: pass it.
-            loadStudents(classIds, existingSiswaIds);
-        } else {
-            siswaSelect.innerHTML = '';
-            siswaSection.classList.add('d-none');
-        }
-        
         // Filter Guru
         filterGuruByCabang();
-        
-        // Check Agama
-        checkAgamaSubject();
     });
     
-    // Check Mapel for Agama to show Student Section
-    mapelSelect.addEventListener('change', function() {
-        checkAgamaSubject();
-    });
 
-    function checkAgamaSubject() {
-        const selectedText = mapelSelect.options[mapelSelect.selectedIndex]?.text.toLowerCase() || '';
-        const isAgama = selectedText.includes('agama') || selectedText.includes('religi');
-        
-        if (isAgama || (existingSiswaIds && existingSiswaIds.length > 0)) {
-            // Also show if students are ALREADY selected (e.g. non-agama specialized class)
-            siswaSection.classList.remove('d-none');
-        } else {
-            siswaSection.classList.add('d-none');
-        }
-    }
-    
-    function loadStudents(classIds, preselectedIds = []) {
-        fetch(`{{ route('admin.jadwal-pelajaran.index') }}/get-students/${classIds}`)
-            .then(response => response.json())
-            .then(data => {
-                siswaSelect.innerHTML = '';
-                if (data.length > 0) {
-                    data.forEach(siswa => {
-                        const option = document.createElement('option');
-                        option.value = siswa.id;
-                        option.textContent = `${siswa.nama_lengkap} (${siswa.agama || '-'}) - NIS: ${siswa.nis}`;
-                        
-                        // Check if selected
-                        // Need to handle type mismatch (string vs int)
-                        if (preselectedIds.some(id => String(id) === String(siswa.id))) {
-                            option.selected = true;
-                        }
-                        
-                        siswaSelect.appendChild(option);
-                    });
-                }
-            })
-            .catch(error => console.error('Error loading students:', error));
-    }
     
     function filterGuruByCabang() {
                 const kelasSelect = document.getElementById('kelasSelect');

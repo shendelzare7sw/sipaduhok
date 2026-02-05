@@ -287,6 +287,7 @@ class NilaiController extends Controller
                 ->get()
                 ->keyBy('siswa_id');
             
+            /*
             $pdf = Pdf::loadView('wali-kelas.nilai.print-detail', compact(
                 'kelas',
                 'siswaList',
@@ -295,7 +296,16 @@ class NilaiController extends Controller
                 'wali'
             ));
             
-            return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf', ['Attachment' => false]);
+            return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
+            */
+            
+            return view('wali-kelas.nilai.print-detail', compact(
+                'kelas',
+                'siswaList',
+                'selectedMapel',
+                'nilaiData',
+                'wali'
+            ));
             
         } else {
             $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
@@ -325,6 +335,7 @@ class NilaiController extends Controller
             
             $allNilaiData = $allNilai;
             
+            /*
             $pdf = Pdf::loadView('wali-kelas.nilai.print-all', compact(
                 'kelas',
                 'siswaList',
@@ -333,7 +344,16 @@ class NilaiController extends Controller
                 'wali'
             ));
             
-            return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf', ['Attachment' => false]);
+            return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
+            */
+            
+            return view('wali-kelas.nilai.print-all', compact(
+                'kelas',
+                'siswaList',
+                'mataPelajaranList',
+                'allNilaiData',
+                'wali'
+            ));
         }
     }
     

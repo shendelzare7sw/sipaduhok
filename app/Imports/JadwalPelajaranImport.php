@@ -146,7 +146,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                 // Create Jadwal (without single kelas_id)
                 $jadwal = JadwalPelajaran::create([
                     'tahun_ajaran_id' => $this->tahunAjaranId,
-                    'kelas_id' => null, // Pivot used instead
+                    'kelas_id' => $kelasIds[0] ?? null, // Backward compatibility
                     'mata_pelajaran_id' => $mapelId,
                     'guru_id' => $guruId,
                     'hari' => $hari,

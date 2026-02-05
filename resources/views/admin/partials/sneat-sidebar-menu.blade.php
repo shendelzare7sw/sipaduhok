@@ -196,29 +196,28 @@ Compatible dengan Sneat Bootstrap 5 Template
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
 
-<!-- Kenaikan Kelas (New Group) -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.promotion') ? 'active open' : '' }}">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon fas fa-level-up-alt"></i>
-        <div>Kenaikan Kelas</div>
+<!-- Pengaturan KKM -->
+<li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.kkm.index' ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.promotion.kkm.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-ruler-combined"></i>
+        <div>Pengaturan KKM</div>
     </a>
-    <ul class="menu-sub">
-        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.kkm.index' ? 'active' : '' }}">
-            <a href="{{ route('admin.akademik.promotion.kkm.index') }}" class="menu-link">
-                <div>Pengaturan KKM</div>
-            </a>
-        </li>
-        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.settings.index' ? 'active' : '' }}">
-            <a href="{{ route('admin.akademik.promotion.settings.index') }}" class="menu-link">
-                <div>Pengaturan Kenaikan</div>
-            </a>
-        </li>
-        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.report' ? 'active' : '' }}">
-            <a href="{{ route('admin.akademik.promotion.report') }}" class="menu-link">
-                <div>Proses & Rekap</div>
-            </a>
-        </li>
-    </ul>
+</li>
+
+<!-- Pengaturan Kenaikan -->
+<li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.settings.index' ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.promotion.settings.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-cogs"></i>
+        <div>Pengaturan Kenaikan</div>
+    </a>
+</li>
+
+<!-- Proses & Rekap -->
+<li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.report' ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.promotion.report') }}" class="menu-link">
+        <i class="menu-icon fas fa-tasks"></i>
+        <div>Proses & Rekap</div>
+    </a>
 </li>
 
 <!-- Menu Header - Akademik -->

@@ -410,7 +410,7 @@
                                             <td>
                                                 <span
                                                     class="d-block fw-bold text-dark">{{ $jadwal->mataPelajaran->nama_mapel }}</span>
-                                                <span class="text-muted small">{{ $jadwal->mataPelajaran->kode_mapel }}</span>
+                                                {{-- <span class="text-muted small">{{ $jadwal->mataPelajaran->kode_mapel }}</span> --}}
                                             </td>
                                             <td>{{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '-' }}</td>
                                             <td class="text-center">

@@ -4,31 +4,110 @@
     <meta charset="utf-8">
     <title>Rekap Nilai Kelas - {{ $kelas->nama_kelas }}</title>
     <style>
+        /* CSS Reset & Basics */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; font-size: 8pt; padding: 8mm; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { font-size: 12pt; margin-bottom: 3px; }
-        .header h2 { font-size: 10pt; font-weight: normal; margin-bottom: 5px; }
-        .info { margin-bottom: 10px; font-size: 9pt; }
-        table.data { width: 100%; border-collapse: collapse; font-size: 8pt; }
-        table.data th, table.data td { border: 1px solid #333; padding: 3px 2px; }
-        table.data th { background: #e9ecef; text-align: center; font-weight: bold; }
-        table.data .rata { background: #d4edda; }
-        table.data .nilai-akhir { background: #c3e6cb; font-weight: bold; }
-        .footer { margin-top: 15px; font-size: 7pt; }
-        @page { size: landscape; margin: 8mm; }
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 8pt; 
+            padding: 20px;
+            background: #fff;
+            color: #000;
+        }
+
+        /* Screen Only (Preview Mode) */
+        @media screen {
+            body {
+                background: #f0f2f5;
+                padding: 40px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                min-height: 100vh;
+            }
+            .page-container {
+                background: white;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                padding: 10mm;
+                max-width: 297mm; /* A4 Landscape Width */
+                width: 100%;
+                margin-top: 20px;
+            }
+            .print-button {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-weight: bold;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .print-button:hover { background: #bb2d3b; }
+        }
+
+        /* Print Only */
+        @media print {
+            @page { size: landscape; margin: 10mm; }
+            body { padding: 0; background: white; }
+            .page-container { box-shadow: none; padding: 0; margin: 0; max-width: none; width: 100%; }
+            .print-button { display: none; }
+            .no-print { display: none; }
+        }
+
+        /* Report Styles */
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .header h1 { font-size: 14pt; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        .header h2 { font-size: 11pt; font-weight: normal; margin-bottom: 5px; color: #333; }
+        
+        .info { margin-bottom: 15px; font-size: 9pt; display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+        .info-item { margin-right: 20px; }
+        
+        table.data { width: 100%; border-collapse: collapse; font-size: 8pt; margin-top: 10px; }
+        table.data th, table.data td { border: 1px solid #333; padding: 6px 4px; vertical-align: middle; }
+        table.data th { background: #e9ecef; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 7.5pt; }
+        table.data tr:hover { background-color: #f8f9fa; }
+        
+        .text-center { text-align: center; }
+        .rata { background: #e8f5e9; }
+        .nilai-akhir { background: #e3f2fd; font-weight: bold; }
+        
+        .footer { margin-top: 20px; text-align: right; font-size: 8pt; font-style: italic; color: #666; }
+        .signature-area { margin-top: 40px; text-align: right; margin-right: 20px; display: inline-block; text-align: center; }
+        .signature-line { border-top: 1px solid #000; margin-top: 60px; width: 200px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>REKAP NILAI SELURUH SISWA</h1>
-        <h2>{{ config('app.name', 'SIPADUHOK') }}</h2>
-    </div>
+    <!-- Font Awesome for Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Print Button -->
+    <button class="print-button" onclick="window.print()">
+        <i class="fas fa-print"></i> Cetak / Simpan PDF
+    </button>
+
+    <div class="page-container">
+        <div class="header">
+            <h1>REKAPITULASI NILAI AKADEMIK</h1>
+            <h2>{{ config('app.name', 'SIPADUHOK') }}</h2>
+        </div>
+
 
     <div class="info">
-        <strong>Kelas:</strong> {{ $kelas->nama_kelas }} | 
-        <strong>Tahun Ajaran:</strong> {{ $kelas->tahunAjaran->nama_tahun_ajaran }} |
-        <strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap ?? '-' }}
+        <div>
+            <span class="info-item"><strong>Kelas:</strong> {{ $kelas->nama_kelas }}</span>
+            <span class="info-item"><strong>Tahun Ajaran:</strong> {{ $kelas->tahunAjaran->nama_tahun_ajaran }}</span>
+        </div>
+        <div>
+            <span class="info-item"><strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap ?? '-' }}</span>
+        </div>
     </div>
 
     <table class="data">
@@ -119,7 +198,15 @@
     </table>
 
     <div class="footer">
-        <small>Dicetak pada: {{ now()->locale('id')->isoFormat('dddd, D MMMM Y HH:mm') }}</small>
+        <div>Dicetak pada: {{ now()->locale('id')->isoFormat('dddd, D MMMM Y HH:mm') }} WIB</div>
+        
+        <div class="signature-area">
+            <p>Mengetahui,</p>
+            <p>Wali Kelas</p>
+            <div class="signature-line">{{ $kelas->waliKelas->nama_lengkap ?? '...................................' }}</div>
+        </div>
     </div>
+    
+    </div> <!-- End Page Container -->
 </body>
 </html>

@@ -225,6 +225,9 @@ class JadwalPelajaranController extends Controller
         
         $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
         $validated['updated_by'] = Auth::id();
+        
+        // Backward compatibility for kelas_id (take first one)
+        $validated['kelas_id'] = $validated['kelas_ids'][0] ?? null;
 
         $jadwal = JadwalPelajaran::create(\Illuminate\Support\Arr::except($validated, ['kelas_ids']));
         $jadwal->kelas()->attach($validated['kelas_ids']);
@@ -355,6 +358,9 @@ class JadwalPelajaranController extends Controller
 
         $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
         $validated['updated_by'] = Auth::id();
+        
+        // Backward compatibility for kelas_id
+        $validated['kelas_id'] = $validated['kelas_ids'][0] ?? $jadwalPelajaran->kelas_id;
 
         $jadwalPelajaran->update(\Illuminate\Support\Arr::except($validated, ['kelas_ids']));
         $jadwalPelajaran->kelas()->sync($validated['kelas_ids']);
