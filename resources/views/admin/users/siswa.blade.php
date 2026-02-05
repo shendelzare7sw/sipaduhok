@@ -568,7 +568,7 @@
         @endif
 
         {{-- Search/Filter Info --}}
-        @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
+        @if(request('search') || request('jenjang') || request('cabang_id') || request('status') || request('kelas_id'))
             <div class="search-info">
                 <div>
                     <i class="fas fa-filter"></i>
@@ -578,6 +578,9 @@
                     @endif
                     @if(request('jenjang'))
                         <span class="search-term">Jenjang: {{ request('jenjang') }}</span>
+                    @endif
+                    @if(request('kelas_id'))
+                        <span class="search-term">Kelas: {{ $kelasList->find(request('kelas_id'))->nama_kelas ?? '-' }}</span>
                     @endif
                     @if(request('cabang_id'))
                         <span class="search-term">Cabang: {{ $cabangList->find(request('cabang_id'))->nama_cabang ?? '-' }}</span>
@@ -608,11 +611,30 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <a href="{{ route('admin.users.import-siswa') }}" class="btn-secondary"
-                            style="background: #dcfce7; border-color: #86efac; color: #166534;">
-                            <i class="fas fa-file-import"></i>
-                            Import Excel
-                        </a>
+                        <!-- Dropdown Menu Aksi -->
+                        <div class="btn-group" style="position: relative; display: inline-block;">
+                            <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cog"></i> Menu Aksi
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="{{ route('admin.users.siswa.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
+                                        <i class="fas fa-print me-2"></i> Cetak Data (PDF)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.import-siswa') }}" class="dropdown-item">
+                                        <i class="fas fa-file-import me-2"></i> Import Excel
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.siswa-template') }}" class="dropdown-item">
+                                        <i class="fas fa-download me-2"></i> Download Template
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
                         <a href="{{ route('admin.users.create-siswa') }}" class="btn-primary">
                             <i class="fas fa-plus"></i>
                             Tambah Siswa
@@ -644,7 +666,7 @@
                         </select>
 
                         {{-- Filter Cabang --}}
-                        <select name="cabang_id" class="search-input" style="width: 180px;">
+                        <select name="cabang_id" id="cabangSelect" class="search-input" style="width: 180px;">
                             <option value="">Semua Cabang</option>
                             @foreach($cabangList as $cabang)
                                 <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
@@ -652,6 +674,20 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        {{-- Filter Kelas --}}
+                        <span id="kelasFilterContainer" style="display: {{ request('cabang_id') ? 'inline-block' : 'none' }};">
+                            <select name="kelas_id" id="kelasSelect" class="search-input" style="width: 150px;">
+                                <option value="">Semua Kelas</option>
+                                @foreach($kelasList as $kelas)
+                                    <option value="{{ $kelas->id }}" 
+                                            data-cabang="{{ $kelas->cabang_id }}"
+                                            {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                        {{ $kelas->nama_kelas }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </span>
 
                         {{-- Filter Status --}}
                         <select name="status" class="search-input" style="width: 150px;">
@@ -668,6 +704,53 @@
                         </button>
                     </div>
                 </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cabangSelect = document.getElementById('cabangSelect');
+            const kelasSelect = document.getElementById('kelasSelect');
+            const kelasContainer = document.getElementById('kelasFilterContainer');
+            const kelasOptions = Array.from(kelasSelect.options);
+
+            function updateKelasOptions() {
+                const selectedCabangId = cabangSelect.value;
+                
+                // Show/Hide container
+                if (selectedCabangId) {
+                    kelasContainer.style.display = 'inline-block';
+                    
+                    // Filter options
+                    let hashVisibleOptions = false;
+                    kelasOptions.forEach(option => {
+                        if (option.value === "") {
+                            option.style.display = 'block'; // Always show default option
+                        } else {
+                            const optionCabangId = option.getAttribute('data-cabang');
+                            if (optionCabangId == selectedCabangId) {
+                                option.style.display = 'block';
+                                hashVisibleOptions = true;
+                            } else {
+                                option.style.display = 'none';
+                                // If the hidden option was selected, deselect it
+                                if (option.selected) {
+                                    kelasSelect.value = "";
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    kelasContainer.style.display = 'none';
+                    kelasSelect.value = ""; // Reset selection
+                }
+            }
+
+            // Initial run (in case of page reload with filter active)
+            updateKelasOptions();
+
+            // Listen for changes
+            cabangSelect.addEventListener('change', updateKelasOptions);
+        });
+    </script>
             </div>
 
             <div style="overflow-x: auto;">

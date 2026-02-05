@@ -71,7 +71,9 @@ class LmsDashboardController extends Controller
         $hariIni = Carbon::now()->locale('id')->dayName;
         $hariIni = ucfirst($hariIni); // Senin, Selasa, etc.
 
-        $jadwalHariIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $jadwalHariIni = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->where('hari', $hariIni)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
@@ -112,7 +114,9 @@ class LmsDashboardController extends Controller
             ->get();
 
         // Daftar Mata Pelajaran untuk Kelas Ini
-        $mataPelajaranList = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $mataPelajaranList = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->with(['mataPelajaran', 'guru'])
             ->get()
             ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
@@ -330,7 +334,9 @@ class LmsDashboardController extends Controller
         $hariIndo = Carbon::parse($tanggal)->locale('id')->dayName;
         $hariIndo = ucfirst($hariIndo);
 
-        $jadwalHariIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $jadwalHariIni = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->where('hari', $hariIndo)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
@@ -359,7 +365,9 @@ class LmsDashboardController extends Controller
         $kelas = $siswa->kelas;
         
         // Get all jadwal for this class
-        $allJadwal = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $allJadwal = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
             ->get()
@@ -587,7 +595,9 @@ class LmsDashboardController extends Controller
 
         foreach ($hariList as $hari) {
             // Get jadwal pelajaran
-            $jadwalPelajaran = JadwalPelajaran::where('kelas_id', $kelas->id)
+            $jadwalPelajaran = JadwalPelajaran::whereHas('kelas', function($q) use ($kelas) {
+                    $q->where('kelas.id', $kelas->id);
+                })
                 ->where('hari', $hari)
                 ->with(['mataPelajaran', 'guru'])
                 ->orderBy('jam_mulai')

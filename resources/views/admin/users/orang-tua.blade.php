@@ -606,16 +606,35 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <a href="{{ route('admin.users.import-orang-tua') }}" class="btn-secondary"
-                            style="background: #fff7ed; border-color: #fed7aa; color: #9a3412;">
-                            <i class="fas fa-file-import"></i>
-                            Import Excel
-                        </a>
+                        <!-- Dropdown Menu Aksi -->
+                        <div class="btn-group" style="position: relative; display: inline-block;">
+                            <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cog"></i> Menu Aksi
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="{{ route('admin.users.orang-tua.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
+                                        <i class="fas fa-print me-2"></i> Cetak Data (PDF)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.import-orang-tua') }}" class="dropdown-item">
+                                        <i class="fas fa-file-import me-2"></i> Import Excel
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.orang-tua-template') }}" class="dropdown-item">
+                                        <i class="fas fa-download me-2"></i> Download Template
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                         <a href="{{ route('admin.users.orang-tua.create') }}" class="btn-primary">
                             <i class="fas fa-plus"></i>
                             Tambah Orang Tua
                         </a>
                     </div>
+                </div>
 
                     {{-- Filter Form --}}
                     <form action="{{ route('admin.users.orang-tua') }}" method="GET" id="filterForm">

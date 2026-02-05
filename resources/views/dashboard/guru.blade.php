@@ -109,14 +109,14 @@
                                         class="p-3 mb-3 border rounded jadwal-item d-flex justify-content-between align-items-center">
                                         <div>
                                             <div class="fw-bold text-primary fs-5">
-                                                {{ date('H:i', strtotime($jadwal->jam_mulai)) }} -
-                                                {{ date('H:i', strtotime($jadwal->jam_selesai)) }}
+                                                {{ $jadwal->jam_mulai->format('H:i') }} -
+                                                {{ $jadwal->jam_selesai->format('H:i') }}
                                             </div>
                                             <div class="fw-bold text-gray-800 fs-6">
                                                 {{ $jadwal->kelas->nama_kelas }} • {{ $jadwal->mataPelajaran->nama_mapel }}
                                             </div>
                                         </div>
-                                        <a href="{{ route('guru.lms.dashboard', [$jadwal->kelas_id, $jadwal->link_mapel_id]) }}"
+                                        <a href="{{ route('guru.lms.dashboard', [$jadwal->kelas->id, $jadwal->link_mapel_id]) }}"
                                             class="btn btn-primary btn-sm shadow-sm">
                                             <i class="fas fa-door-open me-1"></i>Masuk
                                         </a>

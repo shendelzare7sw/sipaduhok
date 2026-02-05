@@ -199,6 +199,7 @@ class PromotionService
             [
                 'kelas_asal' => $kelasAsalNama,
                 'kelas_tujuan' => $kelasTujuanNama,
+                'original_kelas_id' => $kelasAsalId, // Store for rollback
                 'status_pembayaran' => $finalStatusPembayaran,
                 'persentase_nilai_tuntas' => $eligibility['academic']['percentage'],
                 'jumlah_mapel_tuntas' => $eligibility['academic']['tuntas_count'],
@@ -206,6 +207,9 @@ class PromotionService
                 'status_kelulusan' => $statusKelulusan,
                 'izin_khusus_ketua' => $eligibility['financial']['is_dispensasi'],
                 'tanggal_eksekusi' => $executionDate,
+                'is_processed' => true, // Mark as processed
+                'rolled_back_at' => null, // Clear any previous rollback
+                'rolled_back_by' => null,
                 'updated_at' => now(),
                 'created_at' => now() // Only on insert
             ]
@@ -257,4 +261,100 @@ class PromotionService
         
         return null;
     }
+
+    /**
+     * Rollback a student's promotion.
+     * Restores the student to their original class.
+     * 
+     * @param int $statusId - ID from status_naik_kelas_siswa table
+     * @param int $userId - User performing the rollback
+     * @return array - Result with success flag and message
+     */
+    public function rollbackStudent($statusId, $userId)
+    {
+        $status = DB::table('status_naik_kelas_siswa')->where('id', $statusId)->first();
+        
+        if (!$status) {
+            return ['success' => false, 'message' => 'Data status tidak ditemukan.'];
+        }
+        
+        if ($status->rolled_back_at) {
+            return ['success' => false, 'message' => 'Siswa ini sudah pernah di-rollback.'];
+        }
+        
+        if (!$status->original_kelas_id) {
+            return ['success' => false, 'message' => 'Tidak ada data kelas asal untuk rollback.'];
+        }
+        
+        DB::beginTransaction();
+        try {
+            $siswa = Siswa::find($status->siswa_id);
+            if (!$siswa) {
+                throw new \Exception('Siswa tidak ditemukan.');
+            }
+            
+            // Restore original class
+            $siswa->kelas_id = $status->original_kelas_id;
+            
+            // If status was LULUS, restore to aktif
+            if ($status->status_kelulusan === 'LULUS') {
+                $siswa->status = 'aktif';
+            }
+            $siswa->save();
+            
+            // Mark as rolled back
+            DB::table('status_naik_kelas_siswa')
+                ->where('id', $statusId)
+                ->update([
+                    'is_processed' => false,
+                    'rolled_back_at' => now(),
+                    'rolled_back_by' => $userId,
+                    'updated_at' => now(),
+                ]);
+            
+            DB::commit();
+            return ['success' => true, 'message' => 'Rollback berhasil untuk siswa ' . $siswa->nama_lengkap];
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ['success' => false, 'message' => 'Gagal rollback: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Promote selected students individually (for those who failed initial batch).
+     * 
+     * @param array $siswaIds - Array of siswa IDs to promote
+     * @param int $tahunAjaranId - Current academic year
+     * @return array - Results with count and any errors
+     */
+    public function promoteSelectedStudents(array $siswaIds, $tahunAjaranId)
+    {
+        $results = ['success' => 0, 'failed' => 0, 'errors' => []];
+        
+        foreach ($siswaIds as $siswaId) {
+            $siswa = Siswa::find($siswaId);
+            if (!$siswa) {
+                $results['failed']++;
+                $results['errors'][] = "Siswa ID {$siswaId} tidak ditemukan.";
+                continue;
+            }
+            
+            // Re-check eligibility
+            $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
+            
+            if (!$eligibility['eligible']) {
+                $results['failed']++;
+                $results['errors'][] = "{$siswa->nama_lengkap}: Belum memenuhi syarat (Keuangan: {$eligibility['financial']['status']}, Akademik: {$eligibility['academic']['percentage']}%).";
+                continue;
+            }
+            
+            // Execute promotion
+            $this->executeStudentPromotion($siswa, $tahunAjaranId, now());
+            $results['success']++;
+        }
+        
+        return $results;
+    }
 }
+

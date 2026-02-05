@@ -10,6 +10,7 @@ use App\Models\Siswa;
 use App\Models\MataPelajaran;
 use App\Models\Nilai;
 use App\Models\TenagaPendidik;
+use App\Models\TahunAjaran;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class NilaiController extends Controller
@@ -30,6 +31,10 @@ class NilaiController extends Controller
 
         $kelasList = $this->getKelasWali($wali);
         
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+        
         if ($kelasList->isEmpty()) {
             return view('wali-kelas.nilai.index', [
                 'error' => 'Anda belum ditugaskan sebagai wali kelas.',
@@ -44,6 +49,8 @@ class NilaiController extends Controller
                 'nilaiTertinggi' => 0,
                 'nilaiTerendah' => 0,
                 'jumlahTuntas' => 0,
+                'semester' => $semester,
+                'currentSemester' => $currentSemester,
             ]);
         }
 
@@ -66,7 +73,22 @@ class NilaiController extends Controller
             ->get();
         
         // Get mata pelajaran untuk filter
-        $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
+        // Use active tahun ajaran to match Guru's input
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        
+        // Get mapel IDs that actually have grades for this student/class in this active year and semester
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $semester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+
+        // Get mata pelajaran untuk filter
+        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
+                $q->where('jenjang', $kelas->jenjang)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
             ->where('is_active', true)
             ->orderBy('nama_mapel', 'asc')
             ->get();
@@ -90,9 +112,11 @@ class NilaiController extends Controller
                     return $siswa->canAccessMapel($selectedMapel);
                 });
 
+                // $tahunAjaranAktif already defined above
                 $nilaiQuery = Nilai::where('kelas_id', $kelas->id)
                     ->where('mata_pelajaran_id', $selectedMapelId)
-                    ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
+                    ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+                    ->where('semester', $semester)
                     ->with('siswa')
                     ->get();
                 
@@ -125,14 +149,16 @@ class NilaiController extends Controller
             'rataRataKelas',
             'nilaiTertinggi',
             'nilaiTerendah',
-            'jumlahTuntas'
+            'jumlahTuntas',
+            'semester',
+            'currentSemester'
         ));
     }
     
     /**
      * Show detail nilai siswa
      */
-    public function show($siswaId)
+    public function show(Request $request, $siswaId)
     {
         $wali = $this->getTenagaPendidik();
         
@@ -152,6 +178,10 @@ class NilaiController extends Controller
                 ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+
         $kelasList = $this->getKelasWali($wali);
         $kelas->load(['siswa', 'tahunAjaran']);
         
@@ -160,15 +190,29 @@ class NilaiController extends Controller
             ->where('status', 'aktif')
             ->firstOrFail();
         
-        $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
+        // Use active tahun ajaran to match Guru's input
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        
+        // Get mapel IDs that actually have grades for this student/class in this active year and semester
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $semester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+
+        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
+                $q->where('jenjang', $kelas->jenjang)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
             ->where('is_active', true)
             ->orderBy('nama_mapel', 'asc')
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
-        
         $nilaiData = Nilai::where('siswa_id', $siswaId)
             ->where('kelas_id', $kelas->id)
-            ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $semester)
             ->with('mataPelajaran', 'guru')
             ->get()
             ->keyBy('mata_pelajaran_id');
@@ -189,7 +233,9 @@ class NilaiController extends Controller
             'rataRataSiswa',
             'jumlahTuntas',
             'persentaseTuntas',
-            'totalNilai'
+            'totalNilai',
+            'semester',
+            'currentSemester'
         ));
     }
     
@@ -231,9 +277,13 @@ class NilaiController extends Controller
                 abort(404, 'Mata pelajaran tidak ditemukan');
             }
             
+            $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+            $semester = $request->get('semester', Nilai::getCurrentSemester());
+            
             $nilaiData = Nilai::where('kelas_id', $kelas->id)
                 ->where('mata_pelajaran_id', $selectedMapelId)
-                ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
+                ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+                ->where('semester', $semester)
                 ->get()
                 ->keyBy('siswa_id');
             
@@ -245,33 +295,45 @@ class NilaiController extends Controller
                 'wali'
             ));
             
-            return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf');
+            return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
             
         } else {
-            $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
+            $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+            $semester = $request->get('semester', Nilai::getCurrentSemester());
+            
+            // Get mapel IDs that actually have grades for this student/class in this active year
+            $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+                ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+                ->where('semester', $semester)
+                ->pluck('mata_pelajaran_id')
+                ->unique()
+                ->toArray();
+
+            $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
+                    $q->where('jenjang', $kelas->jenjang)
+                      ->orWhereIn('id', $existingNilaiMapelIds);
+                })
                 ->where('is_active', true)
                 ->orderBy('nama_mapel', 'asc')
                 ->get();
             
             $allNilai = Nilai::where('kelas_id', $kelas->id)
-                ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
+                ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+                ->where('semester', $semester)
                 ->with('mataPelajaran')
                 ->get();
             
-            $nilaiData = [];
-            foreach ($allNilai as $nilai) {
-                $nilaiData[$nilai->siswa_id][$nilai->mata_pelajaran_id] = $nilai;
-            }
+            $allNilaiData = $allNilai;
             
             $pdf = Pdf::loadView('wali-kelas.nilai.print-all', compact(
                 'kelas',
                 'siswaList',
                 'mataPelajaranList',
-                'nilaiData',
+                'allNilaiData',
                 'wali'
             ));
             
-            return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf');
+            return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
         }
     }
     
@@ -304,15 +366,30 @@ class NilaiController extends Controller
             ->where('kelas_id', $kelas->id)
             ->firstOrFail();
         
-        $mataPelajaranList = MataPelajaran::where('jenjang', $kelas->jenjang)
+        // Use active tahun ajaran to match Guru's input
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $currentSemester = Nilai::getCurrentSemester();
+        
+        // Get mapel IDs that actually have grades for this student/class in this active year
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $currentSemester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+
+        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
+                $q->where('jenjang', $kelas->jenjang)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
             ->where('is_active', true)
             ->orderBy('nama_mapel', 'asc')
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
-        
         $nilaiData = Nilai::where('siswa_id', $siswaId)
             ->where('kelas_id', $kelas->id)
-            ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $currentSemester)
             ->get()
             ->keyBy('mata_pelajaran_id');
         
@@ -330,13 +407,27 @@ class NilaiController extends Controller
      */
     public function update(Request $request, $siswaId)
     {
-        $validated = $request->validate([
+        $rules = [
             'nilai' => 'required|array',
             'nilai.*.mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
-            'nilai.*.nilai_tugas' => 'nullable|numeric|min:0|max:100',
-            'nilai.*.nilai_uts' => 'nullable|numeric|min:0|max:100',
-            'nilai.*.nilai_uas' => 'nullable|numeric|min:0|max:100',
-        ]);
+            'nilai.*.pts' => 'nullable|numeric|min:0|max:100',
+            'nilai.*.pas' => 'nullable|numeric|min:0|max:100',
+            // Tingkat Akhir fields
+            'nilai.*.to_1' => 'nullable|numeric|min:0|max:100',
+            'nilai.*.to_2' => 'nullable|numeric|min:0|max:100',
+            'nilai.*.to_3' => 'nullable|numeric|min:0|max:100',
+            'nilai.*.upk' => 'nullable|numeric|min:0|max:100',
+            'nilai.*.ujian_praktek' => 'nullable|numeric|min:0|max:100',
+        ];
+
+        // Add validation for tugas, latihan, uh (1-5)
+        foreach (range(1, 5) as $i) {
+            $rules["nilai.*.tugas_$i"] = 'nullable|numeric|min:0|max:100';
+            $rules["nilai.*.latihan_$i"] = 'nullable|numeric|min:0|max:100';
+            $rules["nilai.*.uh_$i"] = 'nullable|numeric|min:0|max:100';
+        }
+
+        $validated = $request->validate($rules);
         
         $wali = $this->getTenagaPendidik();
 
@@ -351,25 +442,96 @@ class NilaiController extends Controller
             ->firstOrFail();
         
         foreach ($request->nilai as $nilaiInput) {
+            $dataToUpdate = [
+                'guru_id' => $wali->id,
+                'pts' => $nilaiInput['pts'] ?? null,
+                'pas' => $nilaiInput['pas'] ?? null,
+            ];
+
+            // Add tugas, latihan, uh (1-5)
+            foreach (range(1, 5) as $i) {
+                $dataToUpdate["tugas_$i"] = $nilaiInput["tugas_$i"] ?? null;
+                $dataToUpdate["latihan_$i"] = $nilaiInput["latihan_$i"] ?? null;
+                $dataToUpdate["uh_$i"] = $nilaiInput["uh_$i"] ?? null;
+            }
+
+            // Add tingkat akhir fields
+            $dataToUpdate['to_1'] = $nilaiInput['to_1'] ?? null;
+            $dataToUpdate['to_2'] = $nilaiInput['to_2'] ?? null;
+            $dataToUpdate['to_3'] = $nilaiInput['to_3'] ?? null;
+            $dataToUpdate['upk'] = $nilaiInput['upk'] ?? null;
+            $dataToUpdate['ujian_praktek'] = $nilaiInput['ujian_praktek'] ?? null;
+
+            $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+            $currentSemester = Nilai::getCurrentSemester();
+            
             $nilai = Nilai::updateOrCreate(
                 [
                     'siswa_id' => $siswa->id,
                     'mata_pelajaran_id' => $nilaiInput['mata_pelajaran_id'],
                     'kelas_id' => $kelas->id,
-                    'tahun_ajaran_id' => $kelas->tahun_ajaran_id,
+                    'tahun_ajaran_id' => $tahunAjaranAktif?->id,
+                    'semester' => $currentSemester,
                 ],
-                [
-                    'guru_id' => $wali->id,
-                    'nilai_tugas' => $nilaiInput['nilai_tugas'] ?? null,
-                    'nilai_uts' => $nilaiInput['nilai_uts'] ?? null,
-                    'nilai_uas' => $nilaiInput['nilai_uas'] ?? null,
-                ]
+                $dataToUpdate
             );
             
+            // Recalculate averages and final score
             $nilai->hitungNilaiAkhir();
         }
         
         return redirect()->route('wali.nilai.index')
             ->with('success', 'Nilai siswa berhasil diperbarui.');
+    }
+
+    /**
+     * Clear specific nilai field(s)
+     */
+    public function clearNilai(Request $request, $nilaiId)
+    {
+        $wali = $this->getTenagaPendidik();
+        
+        if (!$wali) {
+            return response()->json(['error' => 'Data tenaga pendidik tidak ditemukan.'], 403);
+        }
+
+        $nilai = Nilai::findOrFail($nilaiId);
+        
+        // Verify wali has access to this class
+        $kelas = $this->getSelectedKelas($wali);
+        if (!$kelas || $nilai->kelas_id !== $kelas->id) {
+            return response()->json(['error' => 'Akses ditolak.'], 403);
+        }
+
+        $field = $request->input('field');
+        
+        // Validate field name
+        $allowedFields = [
+            'tugas_1', 'tugas_2', 'tugas_3', 'tugas_4', 'tugas_5',
+            'latihan_1', 'latihan_2', 'latihan_3', 'latihan_4', 'latihan_5',
+            'uh_1', 'uh_2', 'uh_3', 'uh_4', 'uh_5',
+            'pts', 'pas',
+            'to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'
+        ];
+
+        if (!in_array($field, $allowedFields)) {
+            return response()->json(['error' => 'Field tidak valid.'], 400);
+        }
+
+        // Set to null
+        $nilai->$field = null;
+        $nilai->save();
+
+        // Recalculate averages and final score
+        $nilai->hitungNilaiAkhir();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Nilai berhasil dihapus.',
+            'rata_tugas' => $nilai->rata_tugas,
+            'rata_latihan' => $nilai->rata_latihan,
+            'rata_uh' => $nilai->rata_uh,
+            'nilai_akhir' => $nilai->nilai_akhir,
+        ]);
     }
 }

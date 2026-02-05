@@ -38,6 +38,7 @@ class Siswa extends Model
         'validasi_rapor_oleh',
         // New Religion Fields
         'agama',
+        'pelajaran_agama',
     ];
 
     protected $casts = [

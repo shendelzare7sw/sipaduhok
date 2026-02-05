@@ -116,7 +116,9 @@ class SiswaDashboardController extends Controller
             ->get();
 
         // Jadwal Pelajaran Minggu Ini
-        $jadwalMingguIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $jadwalMingguIni = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->with(['mataPelajaran', 'guru'])
             ->orderByRaw("FIELD(hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat')")
             ->orderBy('jam_mulai')
@@ -401,7 +403,9 @@ class SiswaDashboardController extends Controller
         $hariIndo = $date->locale('id')->dayName;
         $hariIndo = ucfirst($hariIndo);
 
-        $jadwalPelajaran = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $jadwalPelajaran = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->where('hari', $hariIndo)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')

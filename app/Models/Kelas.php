@@ -37,15 +37,17 @@ class Kelas extends Model
         return $this->belongsTo(TenagaPendidik::class, 'wali_kelas_id');
     }
 
+    public function jadwalPelajaran()
+    {
+        return $this->belongsToMany(JadwalPelajaran::class, 'jadwal_kelas');
+    }
+
     public function siswa()
     {
         return $this->hasMany(Siswa::class);
     }
 
-    public function jadwalPelajaran()
-    {
-        return $this->hasMany(JadwalPelajaran::class);
-    }
+
 
     public function materi()
     {

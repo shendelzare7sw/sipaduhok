@@ -54,7 +54,9 @@ class SiaDashboardController extends Controller
         $hariIni = Carbon::now()->locale('id')->dayName;
         $hariIni = ucfirst($hariIni); // Senin, Selasa, etc.
 
-        $jadwalHariIni = JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $jadwalHariIni = JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->where('hari', $hariIni)
             ->with(['mataPelajaran', 'guru'])
             ->orderBy('jam_mulai')
@@ -124,7 +126,7 @@ class SiaDashboardController extends Controller
     /**
      * Data Penilaian Harian
      */
-    public function penilaian()
+    public function penilaian(Request $request)
     {
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->with('kelas')->first();
@@ -134,13 +136,18 @@ class SiaDashboardController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan');
         }
 
+        // Determine Semester
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+
         // Ambil nilai siswa
         $nilaiList = Nilai::where('siswa_id', $siswa->id)
             ->where('kelas_id', $siswa->kelas_id)
+            ->where('semester', $semester)
             ->with(['mataPelajaran', 'guru'])
             ->get();
 
-        return view('siswa.sia.penilaian.index', compact('siswa', 'nilaiList'));
+        return view('siswa.sia.penilaian.index', compact('siswa', 'nilaiList', 'semester'));
     }
 
     /**

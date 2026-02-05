@@ -101,7 +101,9 @@ class WaliKelasController extends Controller
 
         // Jadwal pelajaran hari ini
         $hari = now()->locale('id')->dayName;
-        $jadwalHariIni = JadwalPelajaran::where('kelas_id', $kelas->id)
+        $jadwalHariIni = JadwalPelajaran::whereHas('kelas', function($q) use ($kelas) {
+                $q->where('kelas.id', $kelas->id);
+            })
             ->where('hari', $hari)
             ->with('mataPelajaran', 'guru')
             ->orderBy('jam_mulai')

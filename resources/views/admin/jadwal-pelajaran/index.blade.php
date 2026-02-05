@@ -453,14 +453,14 @@
                                         </td>
                                         <td>
                                             <span class="jam-badge">
-                                                {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                                                {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                                                {{ $jadwal->jam_mulai->format('H:i') }} -
+                                                {{ $jadwal->jam_selesai->format('H:i') }}
                                             </span>
                                         </td>
                                         <td>
                                             <div class="kelas-chip">
                                                 <i class="fas fa-school"></i>
-                                                <span>{{ $jadwal->kelas->nama_kelas }}</span>
+                                                <span>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</span>
                                             </div>
                                         </td>
                                         <td>
@@ -544,15 +544,15 @@
                             </div>
                             <div style="font-size: 13px; color: #6c757d; display: flex; flex-direction: column; gap: 4px;">
                                 <div>
-                                    <i class="fas fa-school me-1"></i> Kelas: <strong>{{ $jadwal->kelas->nama_kelas }}</strong>
+                                    <i class="fas fa-school me-1"></i> Kelas: <strong>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</strong>
                                 </div>
                                 <div>
                                     <i class="fas fa-calendar-day me-1"></i> Hari: <strong>{{ $jadwal->hari }}</strong>
                                 </div>
                                 <div>
                                     <i class="fas fa-clock me-1"></i> Jam:
-                                    <strong>{{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}</strong>
+                                    <strong>{{ $jadwal->jam_mulai->format('H:i') }} -
+                                        {{ $jadwal->jam_selesai->format('H:i') }}</strong>
                                 </div>
                                 @if($jadwal->guru)
                                     <div>
@@ -605,11 +605,11 @@
                                 <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 13px;">
                                     <div><i
                                             class="fas fa-calendar-day me-2 text-primary"></i><strong>{{ $jadwal->hari }}</strong>,
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                                        {{ $jadwal->jam_mulai->format('H:i') }} -
+                                        {{ $jadwal->jam_selesai->format('H:i') }}
                                     </div>
                                     <div class="mt-1"><i
-                                            class="fas fa-school me-2 text-success"></i>{{ $jadwal->kelas->nama_kelas }}</div>
+                                            class="fas fa-school me-2 text-success"></i>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</div>
                                 </div>
                             </div>
                             <div class="mb-3">

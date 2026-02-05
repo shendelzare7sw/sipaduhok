@@ -132,7 +132,7 @@
                 <i class="fas fa-external-link-alt"></i> Buka Link
             </a>
         @else
-            <x-file-preview :path="$materi->file_materi" label="Download Materi" />
+            <x-file-preview :path="$materi->file_materi" label="Lihat Materi" />
         @endif
     </div>
     @else

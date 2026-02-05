@@ -533,15 +533,35 @@
                             Cari
                         </button>
                     </form>
-                    <a href="{{ route('admin.users.import-tenaga-pendidik') }}" class="btn-secondary"
-                        style="background: #ede9fe; border-color: #c4b5fd; color: #6d28d9;">
-                        <i class="fas fa-file-import"></i>
-                        Import Excel
-                    </a>
-                    <a href="{{ route('admin.users.create-tenaga-pendidik') }}" class="btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Tambah Baru
-                    </a>
+                    <div style="display: flex; gap: 8px;">
+                        <!-- Dropdown Menu Aksi -->
+                        <div class="btn-group" style="position: relative; display: inline-block;">
+                            <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-cog"></i> Menu Aksi
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a href="{{ route('admin.users.tenaga-pendidik.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
+                                        <i class="fas fa-print me-2"></i> Cetak Data (PDF)
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.import-tenaga-pendidik') }}" class="dropdown-item">
+                                        <i class="fas fa-file-import me-2"></i> Import Excel
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('admin.users.tenaga-pendidik-template') }}" class="dropdown-item">
+                                        <i class="fas fa-download me-2"></i> Download Template
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <a href="{{ route('admin.users.create-tenaga-pendidik') }}" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Tambah Baru
+                        </a>
+                    </div>
                 </div>
             </div>
 

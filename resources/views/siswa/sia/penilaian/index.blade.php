@@ -72,17 +72,26 @@
 <div class="container-fluid px-0" style="max-width: 1000px; margin: 0 auto;">
 
     <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px; background: #fff;">
-        <div class="card-body p-4 d-flex align-items-center">
-            <div class="rounded-circle bg-primary-soft p-3 me-3" style="background: rgba(78, 115, 223, 0.1);">
-                <i class="fas fa-chart-line fa-2x text-primary"></i>
+        <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-primary-soft p-3 me-3" style="background: rgba(78, 115, 223, 0.1);">
+                    <i class="fas fa-chart-line fa-2x text-primary"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">Statistik Belajar Siswa</h5>
+                    <p class="text-muted small mb-0">
+                        Kelas: <strong>{{ $siswa->kelas->nama_kelas }}</strong> |
+                        Tahun Ajaran: <strong>{{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong>
+                    </p>
+                </div>
             </div>
-            <div>
-                <h5 class="fw-bold text-dark mb-0">Statistik Belajar Siswa</h5>
-                <p class="text-muted small mb-0">
-                    Kelas: <strong>{{ $siswa->kelas->nama_kelas }}</strong> |
-                    Tahun Ajaran: <strong>{{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong>
-                </p>
-            </div>
+
+            <form method="GET" action="">
+                <select name="semester" class="form-select border-0 shadow-sm bg-light fw-bold text-primary" style="min-width: 160px;" onchange="this.form.submit()">
+                    <option value="ganjil" {{ $semester == 'ganjil' ? 'selected' : '' }}>Semester Ganjil</option>
+                    <option value="genap" {{ $semester == 'genap' ? 'selected' : '' }}>Semester Genap</option>
+                </select>
+            </form>
         </div>
     </div>
 
@@ -114,13 +123,13 @@
             <div class="row">
                 <div class="col-md-2 mb-3">
                     <div class="mini-stat-card border-start-tugas shadow-sm">
-                        <div class="mini-stat-label">Rata Tugas (15%)</div>
+                        <div class="mini-stat-label">Rata Tugas (10%)</div>
                         <div class="mini-stat-val text-primary">{{ $nilai->rata_tugas ? number_format($nilai->rata_tugas, 1) : '-' }}</div>
                     </div>
                 </div>
                 <div class="col-md-2 mb-3">
                     <div class="mini-stat-card border-start-tugas shadow-sm" style="border-left-color: #4e73df !important;">
-                        <div class="mini-stat-label">Rata Latihan (15%)</div>
+                        <div class="mini-stat-label">Rata Latihan (10%)</div>
                         <div class="mini-stat-val text-info">{{ $nilai->rata_latihan ? number_format($nilai->rata_latihan, 1) : '-' }}</div>
                     </div>
                 </div>
@@ -132,7 +141,7 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <div class="mini-stat-card border-start-uts shadow-sm">
-                        <div class="mini-stat-label">Nilai PTS (20%)</div>
+                        <div class="mini-stat-label">Nilai PTS (30%)</div>
                         <div class="mini-stat-val text-warning">{{ $nilai->pts ? number_format($nilai->pts, 1) : '-' }}</div>
                     </div>
                 </div>

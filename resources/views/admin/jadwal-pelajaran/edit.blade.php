@@ -96,16 +96,33 @@
                         <small class="text-muted">Tahun ajaran tidak dapat diubah</small>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Kelas <span class="text-danger">*</span></label>
-                        <select name="kelas_id" id="kelasSelect" class="form-select" required>
+                        <label class="form-label">Kelas (Bisa Pilih Lebih dari Satu) <span class="text-danger">*</span></label>
+                        
+                        {{-- Hidden Select for Form Submission & Logic Compatibility --}}
+                        <select name="kelas_ids[]" id="kelasSelect" class="d-none" multiple required>
+                            @php
+                                $selectedKelasIds = old('kelas_ids', $jadwalPelajaran->kelas->pluck('id')->toArray());
+                            @endphp
                             @foreach($kelasList as $kls)
-                                <option value="{{ $kls->id }}" data-jenjang="{{ $kls->jenjang }}"
-                                        {{ old('kelas_id', $jadwalPelajaran->kelas_id) == $kls->id ? 'selected' : '' }}>
-                                    {{ $kls->nama_kelas }} - {{ $kls->cabang->nama_cabang }} ({{ $kls->jenjang }})
+                                <option value="{{ $kls->id }}" 
+                                        data-jenjang="{{ $kls->jenjang }}" 
+                                        data-cabang-id="{{ $kls->cabang_id }}"
+                                        {{ in_array($kls->id, $selectedKelasIds) ? 'selected' : '' }}>
+                                    {{ $kls->nama_kelas }}
                                 </option>
                             @endforeach
                         </select>
+
+                        {{-- Trigger Box --}}
+                        <div class="kelas-display" onclick="openKelasModal()"
+                             style="cursor: pointer; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: white; min-height: 50px;">
+                            <div id="selectedKelasText" class="text-muted" style="font-style: italic;">
+                                <i class="fas fa-school me-2"></i> Klik untuk memilih kelas...
+                            </div>
+                            <div id="selectedKelasChips" class="d-flex flex-wrap gap-2 mt-1" style="display: none !important;">
+                                {{-- Chips will appear here --}}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -152,10 +169,21 @@
                 </div>
             </div>
             
-             {{-- Siswa Section (For Religion/Specific Subjects) --}}
-
-
-            {{-- Waktu Section --}}
+                {{-- Siswa Khusus Section (Hidden by default) --}}
+                <div class="form-section d-none" id="siswaSection">
+                    <div class="form-section-title">Pilih Siswa (Khusus Kelas Gabungan / Agama)</div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Silakan pilih siswa yang mengikuti mata pelajaran ini. Kosongkan untuk memilih <strong>SEMUA SISWA</strong> dari kelas yang dipilih.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Daftar Siswa</label>
+                        <select name="siswa_ids[]" id="siswaSelect" class="form-select" multiple style="height: 200px;">
+                            <!-- Populated via AJAX -->
+                        </select>
+                        <div class="form-text">Tahan Ctrl / Command untuk memilih beberapa siswa.</div>
+                    </div>
+                </div>
             <div class="form-section">
                 <div class="form-section-title">Jadwal Waktu</div>
 
@@ -321,8 +349,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const kelasSelect = document.getElementById('kelasSelect');
     const mapelSelect = document.getElementById('mapelSelect');
     const hariSelect = document.getElementById('hariSelect');
+    const siswaSection = document.getElementById('siswaSection');
+    const siswaSelect = document.getElementById('siswaSelect');
     const istirahatDesc = document.getElementById('istirahatDesc');
     const istirahatCollapse = document.getElementById('istirahatCollapse');
+    
+    // Data from server
+    const existingSiswaIds = @json($jadwalPelajaran->siswa_ids ?? []);
 
     // Animate chevron when collapse is toggled
     if (istirahatCollapse) {
@@ -340,8 +373,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Filter mata pelajaran berdasarkan jenjang kelas
     kelasSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const jenjang = selectedOption.getAttribute('data-jenjang');
+        const selectedOptions = Array.from(this.selectedOptions);
+        const jenjang = selectedOptions.length > 0 ? selectedOptions[0].getAttribute('data-jenjang') : null;
+
+        // Reset mapel selection if user manually changes (but on edit we might want to keep if valid)
+        // mapelSelect.value = ''; // Don't reset on edit initially, only if needed. But consistent behavior is better.
+        // Actually, for Edit, we only filter visibility.
 
         // Filter options
         Array.from(mapelSelect.options).forEach(option => {
@@ -360,7 +397,95 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update istirahat info
         filterIstirahatDisplay();
+        
+        // Load Students
+        if (selectedOptions.length > 0) {
+            const classIds = selectedOptions.map(opt => opt.value).join(',');
+            // If explicit change, we might reset preselection? But for Edit load, we want to keep.
+            // Check if this event is triggered by user or script load.
+            // Simply pass existingSiswaIds. If class changed, they might not match, but logic handles mismatch (won't be returned by API or filtered out? No API returns students for CLASS).
+            // Actually, if class changes, existing IDs might not be in the new class list.
+            // We should only use existingSiswaIds on INITIAL load. 
+            // How to distinguish? Pass a collection?
+            // Actually simple: pass it.
+            loadStudents(classIds, existingSiswaIds);
+        } else {
+            siswaSelect.innerHTML = '';
+            siswaSection.classList.add('d-none');
+        }
+        
+        // Filter Guru
+        filterGuruByCabang();
+        
+        // Check Agama
+        checkAgamaSubject();
     });
+    
+    // Check Mapel for Agama to show Student Section
+    mapelSelect.addEventListener('change', function() {
+        checkAgamaSubject();
+    });
+
+    function checkAgamaSubject() {
+        const selectedText = mapelSelect.options[mapelSelect.selectedIndex]?.text.toLowerCase() || '';
+        const isAgama = selectedText.includes('agama') || selectedText.includes('religi');
+        
+        if (isAgama || (existingSiswaIds && existingSiswaIds.length > 0)) {
+            // Also show if students are ALREADY selected (e.g. non-agama specialized class)
+            siswaSection.classList.remove('d-none');
+        } else {
+            siswaSection.classList.add('d-none');
+        }
+    }
+    
+    function loadStudents(classIds, preselectedIds = []) {
+        fetch(`{{ route('admin.jadwal-pelajaran.index') }}/get-students/${classIds}`)
+            .then(response => response.json())
+            .then(data => {
+                siswaSelect.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(siswa => {
+                        const option = document.createElement('option');
+                        option.value = siswa.id;
+                        option.textContent = `${siswa.nama_lengkap} (${siswa.agama || '-'}) - NIS: ${siswa.nis}`;
+                        
+                        // Check if selected
+                        // Need to handle type mismatch (string vs int)
+                        if (preselectedIds.some(id => String(id) === String(siswa.id))) {
+                            option.selected = true;
+                        }
+                        
+                        siswaSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading students:', error));
+    }
+    
+    function filterGuruByCabang() {
+                const kelasSelect = document.getElementById('kelasSelect');
+                const selectedOptions = Array.from(kelasSelect.selectedOptions);
+                const branchIds = selectedOptions.map(opt => opt.getAttribute('data-cabang-id'));
+                const uniqueBranches = [...new Set(branchIds)];
+
+                const guruOptions = document.querySelectorAll('.guru-option-item');
+                
+                if (uniqueBranches.length === 0) {
+                    guruOptions.forEach(el => el.setAttribute('data-visible-branch', 'true'));
+                    return;
+                }
+
+                guruOptions.forEach(el => {
+                    const guruCabang = el.getAttribute('data-cabang-id');
+                    if (!guruCabang || uniqueBranches.includes(guruCabang)) {
+                         el.setAttribute('data-visible-branch', 'true');
+                         el.style.display = 'flex';
+                    } else {
+                         el.setAttribute('data-visible-branch', 'false');
+                         el.style.display = 'none';
+                    }
+                });
+    }
 
     // Update istirahat info when hari changes
     hariSelect.addEventListener('change', function() {
@@ -368,9 +493,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Trigger filter on page load
-    kelasSelect.dispatchEvent(new Event('change'));
-    
+    if (kelasSelect.selectedOptions.length > 0) {
+        // Initialize UI Chips on Load
+         const selectedData = Array.from(kelasSelect.selectedOptions).map(opt => ({
+             id: opt.value,
+             name: opt.text.trim(),
+             jenjang: opt.getAttribute('data-jenjang')
+         }));
+         updateSelectedKelasUI(selectedData);
 
+        kelasSelect.dispatchEvent(new Event('change'));
+    }
 });
 
 
@@ -490,6 +623,104 @@ function selectGuru(id, name, cabang) {
     if (modal) modal.hide();
 }
 
+/* --- KELAS MODAL LOGIC --- */
+function openKelasModal() {
+    // Sync checkboxes with current select values
+    const select = document.getElementById('kelasSelect');
+    const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
+    
+    document.querySelectorAll('.kelas-checkbox').forEach(cb => {
+        cb.checked = selectedValues.includes(cb.value);
+    });
+    
+    updateTempSelection(); // Update counter
+    
+    const modal = new bootstrap.Modal(document.getElementById('kelasModal'));
+    modal.show();
+}
+
+function filterKelasList() {
+    const cabangFilter = document.getElementById('filterCabang').value;
+    const jenjangFilter = document.getElementById('filterJenjang').value;
+    const searchText = document.getElementById('searchKelas').value.toLowerCase();
+    
+    document.querySelectorAll('.kelas-item').forEach(item => {
+        const itemCabang = item.getAttribute('data-cabang-id');
+        const itemJenjang = item.getAttribute('data-jenjang');
+        const itemName = item.getAttribute('data-name');
+        
+        let visible = true;
+        
+        if (cabangFilter && itemCabang !== cabangFilter) visible = false;
+        if (jenjangFilter && itemJenjang !== jenjangFilter) visible = false;
+        if (searchText && !itemName.includes(searchText)) visible = false;
+        
+        item.style.display = visible ? 'block' : 'none';
+    });
+}
+
+function updateTempSelection() {
+    const count = document.querySelectorAll('.kelas-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = count;
+}
+
+function confirmKelasSelection() {
+    const select = document.getElementById('kelasSelect');
+    const checkboxes = document.querySelectorAll('.kelas-checkbox:checked');
+    
+    // Update Select Options
+    Array.from(select.options).forEach(opt => opt.selected = false);
+    
+    const selectedData = [];
+    checkboxes.forEach(cb => {
+        const opt = select.querySelector(`option[value="${cb.value}"]`);
+        if (opt) opt.selected = true;
+        
+        selectedData.push({
+            id: cb.value,
+            name: cb.getAttribute('data-name'),
+            jenjang: cb.getAttribute('data-jenjang')
+        });
+    });
+    
+    // Update UI Display
+    updateSelectedKelasUI(selectedData);
+    
+    // Trigger Change Event for Listeners (Student loading, etc)
+    select.dispatchEvent(new Event('change'));
+    
+    // Close Modal
+    bootstrap.Modal.getInstance(document.getElementById('kelasModal')).hide();
+}
+
+function updateSelectedKelasUI(data) {
+    const container = document.querySelector('.kelas-display');
+    const textPlaceholder = document.getElementById('selectedKelasText');
+    const chipsContainer = document.getElementById('selectedKelasChips');
+    
+    if (data.length === 0) {
+        textPlaceholder.style.display = 'block';
+        chipsContainer.style.display = 'none';
+        chipsContainer.innerHTML = '';
+    } else {
+        textPlaceholder.style.display = 'none';
+        chipsContainer.style.display = 'flex';
+        chipsContainer.innerHTML = '';
+        
+        data.forEach(item => {
+            const chip = document.createElement('div');
+            chip.className = 'badge bg-primary d-flex align-items-center p-2';
+            chip.style.fontSize = '12px';
+            chip.innerHTML = `
+                <i class="fas fa-school me-2"></i>
+                ${item.name}
+                <span class="ms-2 badge bg-white text-primary" style="font-size: 10px;">${item.jenjang}</span>
+            `;
+            chipsContainer.appendChild(chip);
+        });
+    }
+}
+
 function setGuru(id, name, cabang) {
     document.getElementById('guru_id').value = id;
 
@@ -600,6 +831,87 @@ function clearGuruSelection() {
                 </button>
                 <button type="button" class="btn" data-bs-dismiss="modal" style="background: #f3f4f6; color: #374151; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
                     Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Pilih Kelas --}}
+<div class="modal fade" id="kelasModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding: 20px 24px;">
+                <h5 class="modal-title" style="font-weight: 600; color: #111827;">
+                    <i class="fas fa-school" style="color: #3b82f6; margin-right: 10px;"></i>
+                    Pilih Kelas
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                {{-- Filters --}}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Filter Cabang</label>
+                        <select id="filterCabang" class="form-select form-select-sm" onchange="filterKelasList()">
+                            <option value="">Semua Cabang</option>
+                            @foreach($kelasList->pluck('cabang.nama_cabang', 'cabang_id')->unique() as $id => $nama)
+                                <option value="{{ $id }}">{{ $nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Filter Jenjang</label>
+                        <select id="filterJenjang" class="form-select form-select-sm" onchange="filterKelasList()">
+                            <option value="">Semua Jenjang</option>
+                            @php $jenjangs = ['KB','TKA','TKB','SD','SMP','SMA']; @endphp
+                            @foreach($jenjangs as $j)
+                                <option value="{{ $j }}">{{ $j }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Cari Kelas</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" id="searchKelas" class="form-control border-start-0" placeholder="Nama kelas..." oninput="filterKelasList()">
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Kelas List Grid --}}
+                <div class="row g-2" id="kelasListGrid" style="max-height: 400px; overflow-y: auto;">
+                    @foreach($kelasList as $kls)
+                        <div class="col-md-6 kelas-item" 
+                             data-cabang-id="{{ $kls->cabang_id }}" 
+                             data-jenjang="{{ $kls->jenjang }}" 
+                             data-name="{{ strtolower($kls->nama_kelas) }}">
+                            <label class="d-flex align-items-center p-3 border rounded cursor-pointer h-100 hover-bg-light" style="cursor: pointer; transition: all 0.2s;">
+                                <input type="checkbox" class="form-check-input me-3 kelas-checkbox" 
+                                       value="{{ $kls->id }}" 
+                                       data-name="{{ $kls->nama_kelas }}"
+                                       data-jenjang="{{ $kls->jenjang }}"
+                                       style="width: 1.2em; height: 1.2em;"
+                                       onclick="updateTempSelection()">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">{{ $kls->nama_kelas }}</div>
+                                    <div class="small text-muted">
+                                        <span class="badge bg-label-primary me-1">{{ $kls->jenjang }}</span>
+                                        {{ $kls->cabang->nama_cabang }}
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="modal-footer bg-light" style="border-top: 1px solid #e5e7eb; padding: 16px 24px;">
+                <div class="me-auto text-muted small">
+                    <span id="selectedCount">0</span> kelas dipilih
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="confirmKelasSelection()">
+                    <i class="fas fa-check me-1"></i> Terapkan
                 </button>
             </div>
         </div>

@@ -12,6 +12,7 @@ use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -76,6 +77,45 @@ class UserController extends Controller
         $tenagaPendidik = $query->orderBy('name')->paginate(15);
 
         return view('admin.users.tenaga-pendidik', compact('tenagaPendidik', 'roles'));
+    }
+
+    public function printTenagaPendidik(Request $request)
+    {
+        // Available roles for filter
+        $roles = [
+            'ketua_pkbm' => 'Ketua PKBM',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
+            'sekretaris' => 'Sekretaris',
+            'bendahara' => 'Bendahara',
+            'wali_kelas' => 'Wali Kelas',
+            'guru_pengajar' => 'Guru Pengajar',
+        ];
+
+        $query = User::whereIn('role', array_keys($roles))->with('tenagaPendidik');
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('tenagaPendidik', function($q2) use ($search) {
+                        $q2->where('nip', 'like', "%{$search}%")
+                           ->orWhere('nama_lengkap', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Handle role filter
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Get all data without pagination
+        $tenagaPendidik = $query->orderBy('name')->get();
+
+        return view('admin.users.print.tenaga-pendidik', compact('tenagaPendidik', 'roles', 'request'));
     }
 
     public function createTenagaPendidik()
@@ -318,6 +358,54 @@ class UserController extends Controller
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         return view('admin.users.siswa', compact('siswa', 'kelasList', 'cabangList', 'jenjangs'));
+    }
+
+    public function printSiswa(Request $request)
+    {
+        $query = Siswa::with('user', 'kelas.tahunAjaran', 'cabang');
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
+            });
+        }
+
+        // Handle other filters
+        if ($request->has('jenjang') && $request->jenjang != '') {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            });
+        }
+        if ($request->has('kelas_id') && $request->kelas_id != '') {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+        if ($request->has('cabang_id') && $request->cabang_id != '') {
+            $query->where('cabang_id', $request->cabang_id);
+        }
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        $siswa = $query->orderBy('nama_lengkap')->get();
+        
+        // Prepare filter info for display
+        $filterInfo = [];
+        if ($request->jenjang) $filterInfo[] = "Jenjang: " . $request->jenjang;
+        if ($request->kelas_id) {
+            $kelas = Kelas::find($request->kelas_id);
+            if($kelas) $filterInfo[] = "Kelas: " . $kelas->nama_kelas;
+        }
+        if ($request->cabang_id) {
+            $cabang = Cabang::find($request->cabang_id);
+            if($cabang) $filterInfo[] = "Cabang: " . $cabang->nama_cabang;
+        }
+        if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
+
+        return view('admin.users.print.siswa', compact('siswa', 'filterInfo'));
     }
 
     public function createSiswa()
@@ -681,6 +769,53 @@ class UserController extends Controller
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         return view('admin.users.orang-tua', compact('orangTua', 'cabangList', 'jenjangs'));
+    }
+
+    public function printOrangTua(Request $request)
+    {
+        $query = User::where('role', 'orang_tua')
+            ->with(['studentParents.siswa.kelas', 'studentParents.siswa.cabang']);
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Handle filters
+        if ($request->has('jenjang') && $request->jenjang != '') {
+            $query->whereHas('studentParents.siswa.kelas', function ($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            });
+        }
+
+        if ($request->has('cabang_id') && $request->cabang_id != '') {
+            $query->whereHas('studentParents.siswa', function ($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
+            });
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            $isActive = $request->status === 'aktif';
+            $query->where('is_active', $isActive);
+        }
+
+        $orangTua = $query->orderBy('name')->get();
+
+        // Prepare filter info
+        $filterInfo = [];
+        if ($request->jenjang) $filterInfo[] = "Jenjang Anak: " . $request->jenjang;
+        if ($request->cabang_id) {
+            $cabang = Cabang::find($request->cabang_id);
+            if($cabang) $filterInfo[] = "Cabang: " . $cabang->nama_cabang;
+        }
+        if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
+
+        return view('admin.users.print.orang-tua', compact('orangTua', 'filterInfo'));
     }
 
     public function createOrangTua()

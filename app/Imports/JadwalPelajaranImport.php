@@ -65,17 +65,35 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Lookup kelas
+            // Lookup kelas (Multi-class support)
             $namaCabang = isset($row['nama_cabang']) ? trim($row['nama_cabang']) : null;
-            $kelasId = $this->findKelas($row['nama_kelas'], $namaCabang);
-            
-            if (!$kelasId) {
-                $kelasName = trim($row['nama_kelas']);
-                $cabangInfo = $namaCabang ? " (Cabang: {$namaCabang})" : "";
-                if (!in_array($kelasName . $cabangInfo, $this->missingKelas)) {
-                    $this->missingKelas[] = $kelasName . $cabangInfo;
+            $kelasNames = array_map('trim', explode(',', $row['nama_kelas']));
+            $kelasIds = [];
+            $missingClassesInRow = [];
+
+            foreach ($kelasNames as $kName) {
+                $foundId = $this->findKelas($kName, $namaCabang);
+                if ($foundId) {
+                    $kelasIds[] = $foundId;
+                } else {
+                    $missingClassesInRow[] = $kName;
                 }
-                $this->warnings[] = "Baris {$rowNumber}: Kelas '{$kelasName}'{$cabangInfo} tidak ditemukan";
+            }
+            
+            if (!empty($missingClassesInRow)) {
+                $cabangInfo = $namaCabang ? " (Cabang: {$namaCabang})" : "";
+                foreach ($missingClassesInRow as $missing) {
+                     $fullName = $missing . $cabangInfo;
+                     if (!in_array($fullName, $this->missingKelas)) {
+                         $this->missingKelas[] = $fullName;
+                     }
+                }
+                $this->warnings[] = "Baris {$rowNumber}: Kelas tidak ditemukan: " . implode(', ', $missingClassesInRow) . $cabangInfo;
+                $this->skippedCount++;
+                continue;
+            }
+
+            if (empty($kelasIds)) {
                 $this->skippedCount++;
                 continue;
             }
@@ -106,22 +124,29 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Check duplicate: same kelas, hari, jam_mulai
+            // Check duplicate: check if ANY of the classes already has this schedule
+            // Logic: Find schedules with same TA, Hari, Jam Mulai, that share ANY class from $kelasIds
             $exists = JadwalPelajaran::where('tahun_ajaran_id', $this->tahunAjaranId)
-                ->where('kelas_id', $kelasId)
                 ->where('hari', $hari)
                 ->where('jam_mulai', $row['jam_mulai'])
+                ->whereHas('kelas', function($q) use ($kelasIds) {
+                    $q->whereIn('kelas.id', $kelasIds);
+                })
                 ->exists();
 
             if ($exists) {
+                // Determine which class caused duplicate for better warning?
+                // For now just skip as per original logic
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Jadwal duplikat untuk kelas/waktu tersebut.";
                 continue;
             }
 
             try {
-                JadwalPelajaran::create([
+                // Create Jadwal (without single kelas_id)
+                $jadwal = JadwalPelajaran::create([
                     'tahun_ajaran_id' => $this->tahunAjaranId,
-                    'kelas_id' => $kelasId,
+                    'kelas_id' => null, // Pivot used instead
                     'mata_pelajaran_id' => $mapelId,
                     'guru_id' => $guruId,
                     'hari' => $hari,
@@ -131,6 +156,9 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                     'keterangan' => $row['keterangan'] ?? null,
                     'updated_by' => Auth::id(),
                 ]);
+
+                // Attach to pivot table
+                $jadwal->kelas()->sync($kelasIds);
 
                 $this->importedCount++;
             } catch (\Exception $e) {

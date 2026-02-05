@@ -171,9 +171,54 @@
                     <td class="align-middle small text-muted">
                         <div class="mb-1">{{ $item->keterangan ?? 'Tidak ada catatan' }}</div>
                         @if($item->bukti_file)
-                            <a href="{{ asset('storage/' . $item->bukti_file) }}" target="_blank" class="text-primary text-decoration-none fw-bold">
-                                <i class="fas fa-paperclip me-1"></i>Lihat Bukti
-                            </a>
+                            @php
+                                $ext = strtolower(pathinfo($item->bukti_file, PATHINFO_EXTENSION));
+                                $isPdf = $ext === 'pdf';
+                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                $previewUrl = route('storage.preview', ['path' => $item->bukti_file]);
+                                $downloadUrl = asset('storage/' . $item->bukti_file);
+                            @endphp
+
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-primary py-1 px-2 mt-1" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modal-bukti-{{ $item->id }}"
+                                    @if($isPdf) onclick="document.getElementById('iframe-{{ $item->id }}').src = '{{ $previewUrl }}'" @endif>
+                                <i class="fas fa-eye me-1"></i>Lihat Bukti
+                            </button>
+
+                            <!-- Modal Preview -->
+                            <div class="modal fade" id="modal-bukti-{{ $item->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered {{ $isPdf ? 'modal-xl' : 'modal-lg' }}">
+                                    <div class="modal-content" @if($isPdf) style="height: 90vh;" @endif>
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <i class="fas {{ $isPdf ? 'fa-file-pdf' : 'fa-image' }} me-2"></i>Preview Bukti
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body {{ $isPdf ? 'p-0 h-100' : 'text-center bg-light' }}">
+                                            @if($isPdf)
+                                                <iframe id="iframe-{{ $item->id }}" src="" width="100%" height="100%" style="border:none;"></iframe>
+                                            @elseif($isImage)
+                                                <img src="{{ $downloadUrl }}" alt="Preview" class="img-fluid rounded shadow-sm" style="max-height: 70vh;">
+                                            @else
+                                                <div class="py-5 text-center">
+                                                    <i class="fas fa-file-download fa-3x text-muted mb-3"></i>
+                                                    <p>File tidak dapat dipreview.</p>
+                                                    <a href="{{ $downloadUrl }}" download class="btn btn-primary">Download File</a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a href="{{ $downloadUrl }}" download class="btn btn-primary">
+                                                <i class="fas fa-download me-1"></i>Download
+                                            </a>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         @endif
                     </td>
                 </tr>

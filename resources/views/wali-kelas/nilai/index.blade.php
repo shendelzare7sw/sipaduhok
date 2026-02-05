@@ -14,7 +14,7 @@
     .table-nilai thead th {
         background-color: #f8f9fc;
         text-align: center;
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         vertical-align: middle;
@@ -68,15 +68,31 @@
             </div>
         </div>
 
-        {{-- FILTER MATA PELAJARAN --}}
+        {{-- FILTER SEMESTER & MATA PELAJARAN --}}
         <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-white">
-                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Pilih Mata Pelajaran</h6>
+            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter Nilai</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-dark border"><i class="fas fa-calendar me-1"></i>Semester {{ ucfirst($semester ?? 'genap') }}</span>
+                    @if(($semester ?? 'genap') == ($currentSemester ?? 'genap'))
+                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Aktif</span>
+                    @endif
+                </div>
             </div>
             <div class="card-body">
                 <form action="{{ route('wali.nilai.index') }}" method="GET">
-                    <div class="row align-items-end">
-                        <div class="col-md-9 mb-2 mb-md-0">
+                    <div class="row align-items-end g-2">
+                        {{-- Semester Selector --}}
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold"><i class="fas fa-calendar-alt me-1"></i>Semester</label>
+                            <select name="semester" class="form-select border-start border-success border-4 shadow-sm" onchange="this.form.submit()">
+                                <option value="ganjil" {{ ($semester ?? 'genap') == 'ganjil' ? 'selected' : '' }}>Ganjil (Jul-Des)</option>
+                                <option value="genap" {{ ($semester ?? 'genap') == 'genap' ? 'selected' : '' }}>Genap (Jan-Jun)</option>
+                            </select>
+                        </div>
+                        {{-- Mata Pelajaran Selector --}}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold"><i class="fas fa-book me-1"></i>Mata Pelajaran</label>
                             <select name="mata_pelajaran_id" class="form-select border-start border-primary border-4 shadow-sm" onchange="this.form.submit()">
                                 <option value="">-- Lihat Semua (Ringkasan Siswa) --</option>
                                 @foreach($mataPelajaranList as $mapel)
@@ -86,6 +102,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        {{-- Reset Button --}}
                         <div class="col-md-3">
                             <a href="{{ route('wali.nilai.index') }}" class="btn btn-light border w-100 fw-bold">
                                 <i class="fas fa-sync-alt me-1"></i> Reset Filter

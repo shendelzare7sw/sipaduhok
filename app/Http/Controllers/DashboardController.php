@@ -180,25 +180,49 @@ class DashboardController extends Controller
                     return [];
                 });
 
+            $jadwalHariIniProcessed = collect();
+            
             foreach ($jadwalHariIni as $jadwal) {
-                 $key = $jadwal->kelas_id . '-' . $jadwal->mata_pelajaran_id;
-                 
-                 if ($assignedMapels->has($key)) {
-                     $jadwal->link_mapel_id = $jadwal->mata_pelajaran_id;
-                 } else {
-                     // Coba cari berdasarkan nama mapel jika ID tidak cocok
-                     if ($jadwal->mataPelajaran) {
-                         $nameKey = $jadwal->kelas_id . '-' . $jadwal->mataPelajaran->nama_mapel;
-                         if (isset($assignedMapelsByName[$nameKey])) {
-                             $jadwal->link_mapel_id = $assignedMapelsByName[$nameKey];
+                 // Check if jadwal has classes (multi-class support)
+                 if ($jadwal->kelas->count() > 0) {
+                     foreach ($jadwal->kelas as $kls) {
+                         // We create a "view object" or clone the jadwal for this specific class
+                         // to ensure the view can treat it as a single class entry
+                         $jadwalItem = clone $jadwal;
+                         $jadwalItem->kelas_via_pivot = $kls; // Store specific class
+                         
+                         $key = $kls->id . '-' . $jadwal->mata_pelajaran_id;
+                         
+                         if ($assignedMapels->has($key)) {
+                             $jadwalItem->link_mapel_id = $jadwal->mata_pelajaran_id;
                          } else {
-                             $jadwal->link_mapel_id = $jadwal->mata_pelajaran_id;
+                             // Coba cari berdasarkan nama mapel jika ID tidak cocok
+                             if ($jadwal->mataPelajaran) {
+                                 $nameKey = $kls->id . '-' . $jadwal->mataPelajaran->nama_mapel;
+                                 if (isset($assignedMapelsByName[$nameKey])) {
+                                     $jadwalItem->link_mapel_id = $assignedMapelsByName[$nameKey];
+                                 } else {
+                                     $jadwalItem->link_mapel_id = $jadwal->mata_pelajaran_id;
+                                 }
+                             } else {
+                                 $jadwalItem->link_mapel_id = $jadwal->mata_pelajaran_id;
+                             }
                          }
-                     } else {
-                         $jadwal->link_mapel_id = $jadwal->mata_pelajaran_id;
+                         
+                         // Fix the relationship for the view to use
+                         $jadwalItem->setRelation('kelas', $kls); 
+                         $jadwalItem->kel_id = $kls->id; // Helper for view
+
+                         $jadwalHariIniProcessed->push($jadwalItem);
                      }
                  }
             }
+            
+            // Re-sort if needed (e.g. by time then class name)
+            $jadwalHariIni = $jadwalHariIniProcessed->sortBy([
+                ['jam_mulai', 'asc'],
+                ['kelas.nama_kelas', 'asc'],
+            ]);
         }
         
         $data = [

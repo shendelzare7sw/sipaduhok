@@ -159,6 +159,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/tenaga-pendidik/import', [UserController::class, 'importTenagaPendidikForm'])->name('import-tenaga-pendidik');
             Route::post('/tenaga-pendidik/import', [UserController::class, 'importTenagaPendidik'])->name('import-tenaga-pendidik.store');
             Route::get('/tenaga-pendidik/template', [UserController::class, 'downloadTenagaPendidikTemplate'])->name('tenaga-pendidik-template');
+            Route::get('/tenaga-pendidik/print', [UserController::class, 'printTenagaPendidik'])->name('tenaga-pendidik.print');
             Route::get('/tenaga-pendidik', [UserController::class, 'tenagaPendidik'])->name('tenaga-pendidik');
             Route::get('/tenaga-pendidik/create', [UserController::class, 'createTenagaPendidik'])->name('create-tenaga-pendidik');
             Route::post('/tenaga-pendidik', [UserController::class, 'storeTenagaPendidik'])->name('store-tenaga-pendidik');
@@ -171,6 +172,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/siswa/import', [UserController::class, 'importSiswaForm'])->name('import-siswa');
             Route::post('/siswa/import', [UserController::class, 'importSiswa'])->name('import-siswa.store');
             Route::get('/siswa/template', [UserController::class, 'downloadSiswaTemplate'])->name('siswa-template');
+            Route::get('/siswa/print', [UserController::class, 'printSiswa'])->name('siswa.print');
             Route::get('/siswa', [UserController::class, 'siswa'])->name('siswa');
             Route::get('/siswa/create', [UserController::class, 'createSiswa'])->name('create-siswa');
             Route::post('/siswa', [UserController::class, 'storeSiswa'])->name('store-siswa');
@@ -183,6 +185,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/orang-tua/import', [UserController::class, 'importOrangTuaForm'])->name('import-orang-tua');
             Route::post('/orang-tua/import', [UserController::class, 'importOrangTua'])->name('import-orang-tua.store');
             Route::get('/orang-tua/template', [UserController::class, 'downloadOrangTuaTemplate'])->name('orang-tua-template');
+            Route::get('/orang-tua/print', [UserController::class, 'printOrangTua'])->name('orang-tua.print');
             Route::get('/orang-tua', [UserController::class, 'orangTua'])->name('orang-tua');
             Route::get('/orang-tua/create', [UserController::class, 'createOrangTua'])->name('orang-tua.create');
             Route::post('/orang-tua', [UserController::class, 'storeOrangTua'])->name('orang-tua.store');
@@ -448,6 +451,17 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
                 Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
                 
+                // Individual/Batch Rollback
+                Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
+                Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
+                
+                // Promote Selected (for failed students who now qualify)
+                Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
+                
+                // Scheduling
+                Route::post('/schedule', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'schedule'])->name('schedule');
+                Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
+
                 // KKM (New Admin Access)
                 Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
                 
@@ -672,6 +686,17 @@ Route::middleware(['auth'])->group(function () {
             // Report Access
             Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
             Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
+            
+            // Individual/Batch Rollback
+            Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
+            Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
+            
+            // Promote Selected
+            Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
+            
+            // Scheduling
+            Route::post('/schedule', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'schedule'])->name('schedule');
+            Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
         });
     });
 
@@ -831,6 +856,8 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+
+
     /*
     |--------------------------------------------------------------------------
     | WALI KELAS DASHBOARD & ROUTES
@@ -877,6 +904,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{siswa}', [WaliKelasNilaiController::class, 'show'])->name('show');
             Route::get('/{siswa}/edit', [WaliKelasNilaiController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [WaliKelasNilaiController::class, 'update'])->name('update');
+            Route::post('/{nilaiId}/clear', [WaliKelasNilaiController::class, 'clearNilai'])->name('clear');
         });
 
         // Rapor
@@ -1014,6 +1042,7 @@ Route::middleware(['auth'])->group(function () {
             // Nilai Siswa
             Route::get('/nilai', [GuruNilaiController::class, 'index'])->name('nilai.index');
             Route::post('/nilai/update', [GuruNilaiController::class, 'update'])->name('nilai.update');
+            Route::post('/nilai/update-batch', [GuruNilaiController::class, 'updateBatch'])->name('nilai.updateBatch');
             Route::post('/nilai/recalculate', [GuruNilaiController::class, 'recalculate'])->name('nilai.recalculate');
 
             // Forum Diskusi

@@ -206,8 +206,10 @@
         // Group jadwal by hari
         $jadwalByHari = $jadwalList->groupBy('hari');
 
-        // Get unique jenjang from filtered jadwal
-        $jenjangs = $jadwalList->pluck('kelas.jenjang')->unique()->values()->toArray();
+        // Get unique jenjang from filtered jadwal (handle many-to-many kelas)
+        $jenjangs = $jadwalList->flatMap(function ($jadwal) {
+            return $jadwal->kelas->pluck('jenjang');
+        })->unique()->values()->toArray();
 
         // Filter istirahat by relevant jenjang
         $relevanIstirahat = isset($pengaturanIstirahat) ? $pengaturanIstirahat->filter(function($ist) use ($jenjangs, $filterInfo) {
@@ -304,8 +306,8 @@
                                 @php $jadwal = $item['data']; @endphp
                                 <tr>
                                     <td class="text-center">{{ $rowNumber++ }}</td>
-                                    <td><strong>{{ $jadwal->kelas->nama_kelas }}</strong></td>
-                                    <td style="font-size: 9px;">{{ $jadwal->kelas->cabang->nama_cabang }}</td>
+                                    <td><strong>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</strong></td>
+                                    <td style="font-size: 9px;">{{ $jadwal->kelas->pluck('cabang.nama_cabang')->unique()->join(', ') }}</td>
                                     <td>
                                         <span class="badge {{ $hariClass }}">{{ $jadwal->hari }}</span>
                                     </td>

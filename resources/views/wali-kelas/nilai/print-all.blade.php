@@ -1,138 +1,134 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Nilai Semua Mata Pelajaran - {{ $kelas->nama_kelas }}</title>
+    <meta charset="utf-8">
+    <title>Rekap Nilai Kelas - {{ $kelas->nama_kelas }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 20px; font-size: 11px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #165fac; padding-bottom: 20px; }
-        .header h1 { color: #165fac; font-size: 22px; margin-bottom: 10px; }
-        .header h2 { color: #666; font-size: 14px; margin: 0; }
-        .info-box { margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 10px; }
-        .info-box div { margin-bottom: 4px; }
-        
-        .page-break { page-break-after: always; }
-        
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        table th { 
-            padding: 6px; 
-            background: #165fac; 
-            color: white; 
-            border: 1px solid #ccc; 
-            text-align: center; 
-            font-size: 10px;
-            font-weight: bold;
-        }
-        table td { 
-            padding: 5px; 
-            border: 1px solid #ccc; 
-            text-align: center; 
-            font-size: 9px;
-        }
-        table td.nama { text-align: left; }
-        
-        .grade-A { background: #dcfce7; color: #065f46; font-weight: bold; }
-        .grade-B { background: #dbeafe; color: #1e3a8a; font-weight: bold; }
-        .grade-C { background: #fef3c7; color: #92400e; font-weight: bold; }
-        .grade-D { background: #fee2e2; color: #991b1b; font-weight: bold; }
-        .grade-E { background: #fee2e2; color: #991b1b; font-weight: bold; }
-        
-        .mapel-header { 
-            background: #e0e7ff; 
-            padding: 8px; 
-            margin-top: 15px; 
-            font-weight: bold; 
-            color: #165fac;
-            border-radius: 4px;
-        }
-        
-        .footer { 
-            margin-top: 40px; 
-            text-align: right; 
-            font-size: 10px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-        }
-        .footer div { text-align: center; }
-        .signature-line { border-top: 1px solid #333; padding-top: 5px; min-height: 60px; }
-        
-        @media print { 
-            body { padding: 10px; } 
-            @page { margin: 15mm; }
-        }
+        body { font-family: Arial, sans-serif; font-size: 8pt; padding: 8mm; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .header h1 { font-size: 12pt; margin-bottom: 3px; }
+        .header h2 { font-size: 10pt; font-weight: normal; margin-bottom: 5px; }
+        .info { margin-bottom: 10px; font-size: 9pt; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 8pt; }
+        table.data th, table.data td { border: 1px solid #333; padding: 3px 2px; }
+        table.data th { background: #e9ecef; text-align: center; font-weight: bold; }
+        table.data .rata { background: #d4edda; }
+        table.data .nilai-akhir { background: #c3e6cb; font-weight: bold; }
+        .footer { margin-top: 15px; font-size: 7pt; }
+        @page { size: landscape; margin: 8mm; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>REKAP NILAI SEMUA MATA PELAJARAN</h1>
-        <h2>PKBM House of Knowledge</h2>
+        <h1>REKAP NILAI SELURUH SISWA</h1>
+        <h2>{{ config('app.name', 'SIPADUHOK') }}</h2>
     </div>
 
-    <div class="info-box">
-        <div><strong>Kelas:</strong> {{ $kelas->nama_kelas }}</div>
-        <div><strong>Tahun Ajaran:</strong> {{ $kelas->tahunAjaran->nama_tahun_ajaran }}</div>
-        <div><strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap }}</div>
-        <div><strong>Dicetak:</strong> {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY HH:mm') }}</div>
+    <div class="info">
+        <strong>Kelas:</strong> {{ $kelas->nama_kelas }} | 
+        <strong>Tahun Ajaran:</strong> {{ $kelas->tahunAjaran->nama_tahun_ajaran }} |
+        <strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap ?? '-' }}
     </div>
 
-    @foreach($mataPelajaranList as $mapel)
-        <div class="mapel-header">
-            {{ $mapel->nama_mapel }}
-        </div>
-        
-        <table>
-            <thead>
+    <table class="data">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 20px;">No</th>
+                <th rowspan="2" style="width: 30px;">NIS</th>
+                <th rowspan="2" style="width: 100px;">Nama Siswa</th>
+                <th colspan="2">Tugas</th>
+                <th colspan="2">Latihan</th>
+                <th colspan="2">UH</th>
+                <th rowspan="2" style="width: 30px;">PTS</th>
+                <th rowspan="2" style="width: 30px;">PAS</th>
+                <th rowspan="2" class="nilai-akhir" style="width: 40px;">N. Akhir</th>
+                <th rowspan="2" style="width: 35px;">Pred</th>
+                <th rowspan="2" style="width: 45px;">Status</th>
+            </tr>
+            <tr>
+                <th style="width: 25px;">Jml</th>
+                <th class="rata" style="width: 30px;">Rata</th>
+                <th style="width: 25px;">Jml</th>
+                <th class="rata" style="width: 30px;">Rata</th>
+                <th style="width: 25px;">Jml</th>
+                <th class="rata" style="width: 30px;">Rata</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($siswaList as $index => $siswa)
+                @php
+                    // Aggregate all nilai for this siswa across mapel
+                    $nilaiSiswa = $allNilaiData->where('siswa_id', $siswa->id);
+                    
+                    $totalTugasCount = 0;
+                    $totalLatihanCount = 0;
+                    $totalUhCount = 0;
+                    $totalRataTugas = [];
+                    $totalRataLatihan = [];
+                    $totalRataUh = [];
+                    $totalPts = [];
+                    $totalPas = [];
+                    $totalNilaiAkhir = [];
+                    
+                    foreach ($nilaiSiswa as $n) {
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($n->{'tugas_'.$i} !== null) $totalTugasCount++;
+                            if ($n->{'latihan_'.$i} !== null) $totalLatihanCount++;
+                            if ($n->{'uh_'.$i} !== null) $totalUhCount++;
+                        }
+                        if ($n->rata_tugas !== null) $totalRataTugas[] = $n->rata_tugas;
+                        if ($n->rata_latihan !== null) $totalRataLatihan[] = $n->rata_latihan;
+                        if ($n->rata_uh !== null) $totalRataUh[] = $n->rata_uh;
+                        if ($n->pts !== null) $totalPts[] = $n->pts;
+                        if ($n->pas !== null) $totalPas[] = $n->pas;
+                        if ($n->nilai_akhir !== null) $totalNilaiAkhir[] = $n->nilai_akhir;
+                    }
+                    
+                    $avgRataTugas = count($totalRataTugas) > 0 ? array_sum($totalRataTugas) / count($totalRataTugas) : null;
+                    $avgRataLatihan = count($totalRataLatihan) > 0 ? array_sum($totalRataLatihan) / count($totalRataLatihan) : null;
+                    $avgRataUh = count($totalRataUh) > 0 ? array_sum($totalRataUh) / count($totalRataUh) : null;
+                    $avgPts = count($totalPts) > 0 ? array_sum($totalPts) / count($totalPts) : null;
+                    $avgPas = count($totalPas) > 0 ? array_sum($totalPas) / count($totalPas) : null;
+                    $avgNilaiAkhir = count($totalNilaiAkhir) > 0 ? array_sum($totalNilaiAkhir) / count($totalNilaiAkhir) : null;
+                    
+                    $kkm = 70;
+                    $isTuntas = $avgNilaiAkhir !== null && $avgNilaiAkhir >= $kkm;
+                    
+                    // Predikat berdasarkan rata-rata nilai akhir
+                    $predikat = '-';
+                    if ($avgNilaiAkhir !== null) {
+                        if ($avgNilaiAkhir >= 90) $predikat = 'A';
+                        elseif ($avgNilaiAkhir >= 80) $predikat = 'B';
+                        elseif ($avgNilaiAkhir >= 70) $predikat = 'C';
+                        else $predikat = 'D';
+                    }
+                    
+                    $mapelCount = count($mataPelajaranList ?? []);
+                    $maxCount = $mapelCount * 5;
+                @endphp
                 <tr>
-                    <th style="width: 30px;">No</th>
-                    <th style="width: 70px;">NIS</th>
-                    <th>Nama Siswa</th>
-                    <th style="width: 50px;">Tugas</th>
-                    <th style="width: 50px;">UTS</th>
-                    <th style="width: 50px;">UAS</th>
-                    <th style="width: 60px;">Akhir</th>
-                    <th style="width: 40px;">Huruf</th>
-                    <th style="width: 70px;">Predikat</th>
+                    <td style="text-align: center;">{{ $index + 1 }}</td>
+                    <td style="text-align: center;">{{ $siswa->nis }}</td>
+                    <td>{{ $siswa->nama_lengkap }}</td>
+                    <td style="text-align: center;">{{ $totalTugasCount }}/{{ $maxCount }}</td>
+                    <td class="rata" style="text-align: center;">{{ $avgRataTugas !== null ? number_format($avgRataTugas, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ $totalLatihanCount }}/{{ $maxCount }}</td>
+                    <td class="rata" style="text-align: center;">{{ $avgRataLatihan !== null ? number_format($avgRataLatihan, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ $totalUhCount }}/{{ $maxCount }}</td>
+                    <td class="rata" style="text-align: center;">{{ $avgRataUh !== null ? number_format($avgRataUh, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ $avgPts !== null ? number_format($avgPts, 0) : '-' }}</td>
+                    <td style="text-align: center;">{{ $avgPas !== null ? number_format($avgPas, 0) : '-' }}</td>
+                    <td class="nilai-akhir" style="text-align: center;">{{ $avgNilaiAkhir !== null ? number_format($avgNilaiAkhir, 2) : '-' }}</td>
+                    <td style="text-align: center;">{{ $predikat }}</td>
+                    <td style="text-align: center;">{{ $avgNilaiAkhir !== null ? ($isTuntas ? 'Tuntas' : 'Blm Tuntas') : '-' }}</td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach($siswaList as $index => $siswa)
-                    @php
-                        $nilai = $nilaiData[$siswa->id][$mapel->id] ?? null;
-                        $predikat = $nilai ? $nilai->nilaiHuruf() : '-';
-                        $status = $nilai && $nilai->nilai_akhir >= 70 ? 'Tuntas' : 'Belum Tuntas';
-                    @endphp
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $siswa->nis }}</td>
-                        <td class="nama">{{ $siswa->nama_lengkap }}</td>
-                        <td>{{ $nilai && $nilai->nilai_tugas ? number_format($nilai->nilai_tugas, 1) : '-' }}</td>
-                        <td>{{ $nilai && $nilai->nilai_uts ? number_format($nilai->nilai_uts, 1) : '-' }}</td>
-                        <td>{{ $nilai && $nilai->nilai_uas ? number_format($nilai->nilai_uas, 1) : '-' }}</td>
-                        <td style="font-weight: bold;">
-                            {{ $nilai && $nilai->nilai_akhir ? number_format($nilai->nilai_akhir, 1) : '-' }}
-                        </td>
-                        <td class="grade-{{ $predikat }}">{{ $predikat }}</td>
-                        <td>{{ $status }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endforeach
+            @endforeach
+        </tbody>
+    </table>
 
     <div class="footer">
-        <div>
-            <div>Mengetahui,</div>
-            <div style="margin-top: 8px; font-weight: bold;">Kepala Sekolah</div>
-            <div class="signature-line"></div>
-        </div>
-        <div>
-            <div>Tangerang Selatan, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-            <div style="margin-top: 8px; font-weight: bold;">Wali Kelas</div>
-            <div class="signature-line">{{ $kelas->waliKelas->nama_lengkap }}</div>
-        </div>
+        <small>Dicetak pada: {{ now()->locale('id')->isoFormat('dddd, D MMMM Y HH:mm') }}</small>
     </div>
 </body>
 </html>
