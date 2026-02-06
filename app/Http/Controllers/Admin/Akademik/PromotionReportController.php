@@ -59,7 +59,12 @@ class PromotionReportController extends Controller
         $students = $query->paginate(20);
 
         // --- 2. Simulation Query ---
+        // FIX: Only show students who are currently in classes of the SELECTED YEAR.
+        // If selecting 2026/2027 (Future), and students are in 2025/2026, list should be empty.
         $simQuery = Siswa::where('status', 'aktif')
+            ->whereHas('kelas', function($q) use ($selectedYear) {
+                $q->where('tahun_ajaran_id', $selectedYear->id);
+            })
             ->with(['kelas', 'tagihan']);
 
         if ($search) $simQuery->where('nama_lengkap', 'like', "%{$search}%");
@@ -123,30 +128,57 @@ class PromotionReportController extends Controller
 
     public function execute(Request $request)
     {
-        // ... (keep existing logic if manual execution is still desired, 
-        // OR redirect to schedule if we want to enforce scheduling)
-        // For now, keep manual as is.
-        $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
+        // Require context year to be passed
+        $tahunAjaranId = $request->input('tahun_ajaran_id');
+        
+        // If not provided, fallback to active but strictly warns/logs?
+        // Better: strict fallback or fail.
+        $contextYear = $tahunAjaranId 
+            ? TahunAjaran::find($tahunAjaranId) 
+            : TahunAjaran::where('is_active', true)->firstOrFail();
+            
         $promotionService = app(\App\Services\PromotionService::class);
         
-        // ... (existing code)
-        $students = Siswa::where('status', 'aktif')->get();
+        // Scope students to those enrolled in the CONTEXT YEAR
+        // Logic: Get students who have a class belonging to this year?
+        // OR: Just iterate all 'aktif' students, and checkEligibility logic handles the rest?
+        // checkEligibility(siswa, $contextYear->id) checks grades in that year.
+        // executeStudentPromotion(siswa, $contextYear->id) moves them to Next Year relative to Context.
+        
+        // Issue: Siswa::where('status', 'aktif')->get() gets EVERYONE.
+        // If we run this for 2024/2025 context, but student is already in 2025/2026 class?
+        // executeStudentPromotion will move them to 2026/2027 class?
+        // We need to filter students who are in classes OF THE CONTEXT YEAR.
+        
+        $students = Siswa::whereHas('kelas', function($q) use ($contextYear) {
+                $q->where('tahun_ajaran_id', $contextYear->id);
+            })
+            ->where('status', 'aktif')
+            ->get();
+            
+        // Safety check: if 0 students, maybe they are unassigned?
+        if ($students->isEmpty()) {
+             // Fallback: check historical Data? No, Simulation is for current active state.
+             // If manual execute is run, it implies we want to process students CURRENTLY in that year.
+        }
+
         $count = 0;
         
         DB::beginTransaction();
         try {
             foreach ($students as $siswa) {
                 // Execute promotion logic
-                $promotionService->executeStudentPromotion($siswa, $activeYear->id, now());
+                // This checks grades in $contextYear->id
+                // And moves them to Next Year (relative to $contextYear)
+                $promotionService->executeStudentPromotion($siswa, $contextYear->id, now());
                 $count++;
             }
             DB::commit();
             
-            // Redirect based on role helper or loose determination
             $route = str_contains($request->route()->getName(), 'waka') ? 'waka.promotion.report' : 'admin.akademik.promotion.report';
             
-            return redirect()->route($route)
-                ->with('success', "Proses kenaikan kelas berhasil dijalankan untuk {$count} siswa.");
+            return redirect()->route($route, ['tahun_ajaran_id' => $contextYear->id]) // Redirect back to same context
+                ->with('success', "Proses kenaikan kelas berhasil dijalankan untuk {$count} siswa (Tahun: {$contextYear->nama_tahun_ajaran}).");
                 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -155,29 +187,8 @@ class PromotionReportController extends Controller
     }
 
     /**
-     * Create a new scheduled promotion execution.
+     * Cancel a pending schedule.
      */
-    public function schedule(Request $request)
-    {
-        $request->validate([
-            'scheduled_at' => 'required|date|after:now',
-            'notify_email' => 'nullable|email',
-        ]);
-        
-        $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
-        
-        \App\Models\PromotionSchedule::create([
-            'tahun_ajaran_id' => $activeYear->id,
-            'scheduled_at' => $request->scheduled_at,
-            'status' => 'PENDING',
-            'created_by' => auth()->id(),
-            'notify_on_complete' => true,
-            'notification_email' => $request->notify_email ?? auth()->user()->email,
-        ]);
-        
-        return back()->with('success', 'Jadwal kenaikan kelas berhasil dibuat.');
-    }
-
     /**
      * Cancel a pending schedule.
      */
@@ -185,8 +196,21 @@ class PromotionReportController extends Controller
     {
         $schedule = \App\Models\PromotionSchedule::findOrFail($id);
         
-        if ($schedule->cancel()) {
-            return back()->with('success', 'Jadwal berhasil dibatalkan.');
+        // Wrap in transaction to ensure consistent state
+        DB::transaction(function () use ($schedule) {
+            if ($schedule->cancel()) {
+                // Also clear the setting to reflect that no schedule is active
+                DB::table('pengaturan_naik_kelas')
+                    ->where('tahun_ajaran_id', $schedule->tahun_ajaran_id)
+                    ->update(['tanggal_eksekusi' => null]);
+            }
+        });
+        
+        // Reload to check status
+        $schedule->refresh();
+
+        if ($schedule->status === 'CANCELLED') {
+            return back()->with('success', 'Jadwal berhasil dibatalkan dan pengaturan tanggal eksekusi dikosongkan.');
         }
         
         return back()->with('error', 'Gagal membatalkan jadwal. Status saat ini: ' . $schedule->status);
@@ -244,20 +268,23 @@ class PromotionReportController extends Controller
     }
 
     /**
-     * Promote selected students (for those who initially failed).
+     * Promote selected students individually (for those who initially failed).
      */
     public function promoteSelected(Request $request)
     {
         $siswaIds = $request->input('siswa_ids', []);
+        $tahunAjaranId = $request->input('tahun_ajaran_id'); // Get context year from form
         
         if (empty($siswaIds)) {
             return back()->with('error', 'Tidak ada siswa yang dipilih untuk dinaikkan.');
         }
+
+        // Use provided year or fallback to active (though form should always provide it)
+        $contextYearId = $tahunAjaranId ?? TahunAjaran::where('is_active', true)->value('id');
         
-        $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
         $promotionService = app(\App\Services\PromotionService::class);
         
-        $result = $promotionService->promoteSelectedStudents($siswaIds, $activeYear->id);
+        $result = $promotionService->promoteSelectedStudents($siswaIds, $contextYearId);
         
         if ($result['success'] > 0) {
             $message = "Berhasil menaikkan {$result['success']} siswa.";

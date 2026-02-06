@@ -170,7 +170,7 @@ class PromotionService
         $kelasTujuanNama = null;
 
         if (in_array($statusKelulusan, ['NAIK_KELAS', 'NAIK_KELAS_TUNGGAKAN'])) {
-            // Find next class in the TARGET academic year ($tahunAjaranId is the target)
+            // Find next class in the TARGET academic year
             $nextClass = $this->findNextClass($siswa->kelas, $tahunAjaranId);
             if ($nextClass) {
                 $kelasTujuanId = $nextClass->id;
@@ -179,13 +179,31 @@ class PromotionService
                 // Update Student
                 $siswa->kelas_id = $kelasTujuanId;
                 $siswa->save();
+            }
+        } elseif ($statusKelulusan === 'TIDAK_NAIK_KELAS') {
+            // RETENTION LOGIC:
+            // Find class with SAME grade/name in the TARGET academic year
+            // e.g. "7A" (2025) -> "7A" (2026)
+            $sameClass = $this->findSameClass($siswa->kelas, $tahunAjaranId);
+            
+            if ($sameClass) {
+                $kelasTujuanId = $sameClass->id;
+                $kelasTujuanNama = $sameClass->nama_kelas;
+                
+                // Update Student to new year's class (Retention)
+                $siswa->kelas_id = $kelasTujuanId;
+                $siswa->save();
             } else {
-                // Warning: Promoted but no class found
-                // Don't update siswa kelas_id, wait for admin
+                // If same class not found in new year, 
+                // Set to NULL so they appear in "Unassigned" list for Admin to fix
+                // rather than staying hidden in old year class.
+                $siswa->kelas_id = null;
+                $siswa->save();
+                $kelasTujuanNama = 'BELUM DITENTUKAN';
             }
         } elseif ($statusKelulusan === 'LULUS') {
             $siswa->status = 'lulus';
-            // Optional: $siswa->kelas_id = null; // Or keep for history
+            $siswa->kelas_id = null; // Detach from class for alumni
             $siswa->save();
             $kelasTujuanNama = 'ALUMNI';
         }
@@ -227,39 +245,78 @@ class PromotionService
         // Note: Better regex or logic if needed, but this covers standard defaults
     }
 
-    private function findNextClass($currentKelas, $targetTahunAjaranId)
+    private function findNextClass($currentKelas, $currentYearId)
     {
         if (!$currentKelas) return null;
         
-        // Simple logic: Increment integer in name. Keep suffix.
-        // ex: "7A" -> "8A", "VII-A" -> "VIII-A", "Kelas 10" -> "Kelas 11"
+        // Find the TARGET academic year based on current year ID
+        // Note: The $currentYearId passed here is actually the "Context Year" (Source).
+        // BUT logic assumes checkEligibility passes the Active/Target year...
+        // WAIT: The executeStudentPromotion passes $tahunAjaranId.
+        // If $tahunAjaranId is 2025/2026 (Source/Active), we need to find class in 2026/2027 (Next).
+        
+        // Let's refine logic based on implementation:
+        // executeStudentPromotion is called with $activeYear->id.
+        // So we are looking for Next Class relative to Current Class, BUT inside the NEXT Year?
+        // OR is it simply looking for a class named "8A" inside the SAME $tahunAjaranId?
+        
+        // CORRECTION: 
+        // Logic should be: 
+        // 1. Get Target Year (Next Year after $tahunAjaranId)
+        // 2. Find Class in Target Year.
+        
+        // Current implementation of 'findNextClass' did:
+        // $nextClass = Kelas::where...->where('tahun_ajaran_id', $targetTahunAjaranId)...
+        // This implies $tahunAjaranId passed to execute is the TARGET year? NO.
+        // checkEligibility uses $activeYear->id (Current).
+        
+        // FIX: We need to find the NEXT TA first.
+        $targetTA = TahunAjaran::where('is_active', false)
+            ->where('id', '!=', $currentYearId) 
+            ->where('tanggal_mulai', '>', function($q) use ($currentYearId) {
+                $q->select('tanggal_mulai')->from('tahun_ajaran')->where('id', $currentYearId);
+            })
+            ->orderBy('tanggal_mulai', 'asc')
+            ->first();
+            
+        if (!$targetTA) return null; // No new year created yet
+
         $name = $currentKelas->nama_kelas;
         
-        // Helper to convert Roman to Int and back could be complex. 
-        // Let's assume standard Arabic numerals first id: 36
-        
-        // Try Arabic (e.g., 7A, 8B, Kelas 10)
+        // Try Arabic (e.g., 7A -> 8A)
         if (preg_match('/(\d+)/', $name, $matches)) {
             $level = intval($matches[1]);
             $nextLevel = $level + 1;
-            
-            // Reconstruct name with new level
-            // We need to be careful to only replace the level number
-            // "Kelas 10 IPA 1" -> "Kelas 11 IPA 1"
-            // "7A" -> "8A"
             $nextNamePattern = preg_replace('/'.$level.'/', $nextLevel, $name, 1);
             
-            // Search in TARGET Year
-            $nextClass = Kelas::where('nama_kelas', $nextNamePattern)
-                ->where('tahun_ajaran_id', $targetTahunAjaranId)
+            return Kelas::where('nama_kelas', $nextNamePattern)
+                ->where('tahun_ajaran_id', $targetTA->id)
                 ->first();
-                
-            return $nextClass;
         }
         
-        // TODO: Handle Roman Numerals if necessary (VII -> VIII)
-        
         return null;
+    }
+
+    private function findSameClass($currentKelas, $currentYearId)
+    {
+        if (!$currentKelas) return null;
+
+        // Find the TARGET academic year (Same as above)
+        $targetTA = TahunAjaran::where('is_active', false)
+            ->where('id', '!=', $currentYearId) 
+            ->where('tanggal_mulai', '>', function($q) use ($currentYearId) {
+                $q->select('tanggal_mulai')->from('tahun_ajaran')->where('id', $currentYearId);
+            })
+            ->orderBy('tanggal_mulai', 'asc')
+            ->first();
+
+        if (!$targetTA) return null;
+
+        // Search for class with SAME NAME in Target Year
+        // "7A" -> "7A"
+        return Kelas::where('nama_kelas', $currentKelas->nama_kelas)
+            ->where('tahun_ajaran_id', $targetTA->id)
+            ->first();
     }
 
     /**

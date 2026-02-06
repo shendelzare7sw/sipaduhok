@@ -480,5 +480,78 @@ class KelasController extends Controller
     {
         return Excel::download(new KelasTemplate(), 'template_kelas.xlsx');
     }
+
+    /**
+     * Copy classes from one academic year to another.
+     */
+    public function copyClasses(Request $request)
+    {
+        $request->validate([
+            'source_tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+            'target_tahun_ajaran_id' => 'required|exists:tahun_ajaran,id|different:source_tahun_ajaran_id',
+        ]);
+
+        $sourceTA = TahunAjaran::findOrFail($request->source_tahun_ajaran_id);
+        $targetTA = TahunAjaran::findOrFail($request->target_tahun_ajaran_id);
+        
+        // Get classes from source TA
+        $sourceClasses = Kelas::where('tahun_ajaran_id', $sourceTA->id)->get();
+
+        if ($sourceClasses->isEmpty()) {
+            return back()->with('error', 'Tidak ada kelas ditemukan di Tahun Ajaran ' . $sourceTA->nama_tahun_ajaran);
+        }
+
+        $targetYear = date('Y', strtotime($targetTA->tanggal_mulai));
+        $count = 0;
+        $skipped = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($sourceClasses as $sourceClass) {
+                // Generate new kode_kelas for target year
+                $cabang = $sourceClass->cabang; // Assuming relationship exists
+                $newKodeKelas = $cabang->kode_cabang . '-' . $sourceClass->jenjang . '-' .
+                    strtoupper(str_replace(' ', '', $sourceClass->nama_kelas)) . '-' . $targetYear;
+
+                // Check if class already exists in target TA
+                $exists = Kelas::where('tahun_ajaran_id', $targetTA->id)
+                    ->where('kode_kelas', $newKodeKelas)
+                    ->exists();
+
+                if ($exists) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Create new class
+                Kelas::create([
+                    'cabang_id' => $sourceClass->cabang_id,
+                    'tahun_ajaran_id' => $targetTA->id,
+                    'wali_kelas_id' => null, // Reset wali kelas as requested
+                    'nama_kelas' => $sourceClass->nama_kelas,
+                    'jenjang' => $sourceClass->jenjang,
+                    'kode_kelas' => $newKodeKelas,
+                    'kuota_siswa' => $sourceClass->kuota_siswa,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $count++;
+            }
+
+            DB::commit();
+
+            $message = "Berhasil menyalin {$count} kelas ke TA {$targetTA->nama_tahun_ajaran}.";
+            if ($skipped > 0) {
+                $message .= " ({$skipped} kelas dilewati karena sudah ada).";
+            }
+
+            return back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menyalin kelas: ' . $e->getMessage());
+        }
+    }
 }
 

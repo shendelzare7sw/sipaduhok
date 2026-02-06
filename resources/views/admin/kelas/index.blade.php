@@ -577,6 +577,9 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                 <small style="color: #6b7280;">Kelola data kelas per tahun ajaran</small>
             </div>
             <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#copyClassModal" style="background: #e0f2fe; border-color: #7dd3fc; color: #0284c7;">
+                    <i class="fas fa-copy"></i> Salin Data Kelas
+                </button>
                 <a href="{{ route('admin.kelas.print', request()->query()) }}" class="btn btn-print" target="_blank">
                     <i class="fas fa-print"></i> Cetak
                 </a>
@@ -795,4 +798,46 @@ function confirmDelete(id, name) {
     modal.show();
 }
 </script>
+
+{{-- Copy Class Modal --}}
+<div class="modal fade" id="copyClassModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold text-white"><i class="fas fa-copy me-2"></i>Salin Data Kelas</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.kelas.copy') }}" method="POST">
+                @csrf
+                <div class="modal-body text-start">
+                    <div class="alert alert-info mb-3">
+                        <small><i class="fas fa-info-circle me-1"></i> Fitur ini akan menyalin semua struktur kelas (Nama, Jenjang, Kuota) ke Tahun Ajaran baru. Data siswa tidak akan ikut disalin.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Dari Tahun Ajaran (Sumber)</label>
+                        <select name="source_tahun_ajaran_id" class="form-select" required>
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}">{{ $ta->nama_tahun_ajaran }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Ke Tahun Ajaran (Target)</label>
+                        <select name="target_tahun_ajaran_id" class="form-select" required>
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}">{{ $ta->nama_tahun_ajaran }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Proses Salin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection

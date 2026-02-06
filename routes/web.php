@@ -209,6 +209,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import.store');
         Route::get('kelas/template', [KelasController::class, 'downloadTemplate'])->name('kelas.template');
         Route::get('kelas/print', [KelasController::class, 'printDaftarKelas'])->name('kelas.print');
+        Route::post('kelas/copy', [KelasController::class, 'copyClasses'])->name('kelas.copy'); // Route Salin Kelas
         Route::get('kelas/{kelas}/manage-siswa', [KelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
         Route::post('kelas/{kelas}/add-siswa', [KelasController::class, 'addSiswa'])->name('kelas.add-siswa');
         Route::post('kelas/{kelas}/remove-siswa', [KelasController::class, 'removeSiswa'])->name('kelas.remove-siswa');
@@ -459,7 +460,6 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
                 
                 // Scheduling
-                Route::post('/schedule', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'schedule'])->name('schedule');
                 Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
 
                 // KKM (New Admin Access)
@@ -695,7 +695,6 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
             
             // Scheduling
-            Route::post('/schedule', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'schedule'])->name('schedule');
             Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
         });
     });

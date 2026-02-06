@@ -1,8 +1,7 @@
 @extends('layouts.sneat')
 
-@section('title', 'Rekapitulasi Kenaikan Kelas')
+@section('page-title', 'Rekap Kenaikan Kelas')
 
-@section('sidebar-menu')
 @section('sidebar-menu')
     @if(auth()->user()->isWakilKepalaSekolah())
         @include('waka.partials.sneat-sidebar-menu')
@@ -10,11 +9,10 @@
         @include('admin.partials.sneat-sidebar-menu')
     @endif
 @endsection
-@endsection
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Akademik /</span> Rekap Kenaikan Kelas</h4>
+    <!-- Header removed, using layout title -->
 
     <!-- Statistics -->
     <div class="row mb-4">
@@ -225,10 +223,19 @@
                          <input type="hidden" name="tab" value="simulation">
 
                         <!-- Search -->
-                        <div class="input-group" style="width: 250px;">
+                        <div class="input-group me-2" style="width: 250px;">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                             <input type="text" name="search" class="form-control" placeholder="Cari Nama Siswa..." value="{{ $search }}">
                         </div>
+
+                        <!-- Context Year Filter (Crucial for Manual Promotion) -->
+                        <select name="tahun_ajaran_id" class="form-select me-2" style="width: 140px;" onchange="this.form.submit()" data-bs-toggle="tooltip" title="Pilih Tahun Konteks Data">
+                            @foreach($allTahunAjaran as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
+                                    {{ $ta->nama_tahun_ajaran }}
+                                </option>
+                            @endforeach
+                        </select>
 
                         <!-- Filter Cabang -->
                         <select name="cabang_id" class="form-select" style="width: 150px;">
@@ -347,11 +354,12 @@
                         @endphp
                         <form id="promoteSelectedForm" action="{{ route($routePrefix . '.promotion.promote-selected') }}" method="POST" class="d-none">
                             @csrf
+                            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
                         </form>
                         
                         <div class="p-3 d-flex justify-content-between align-items-center">
                             <div>
-                                <button type="submit" form="promoteSelectedForm" class="btn btn-sm btn-success" onclick="return confirm('Yakin ingin menaikkan siswa yang dipilih?')">
+                                <button type="button" id="promoteSelectedTrigger" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#promoteSelectedModal" disabled>
                                     <i class="fas fa-arrow-up me-1"></i> Naikkan Terpilih
                                 </button>
                             </div>
@@ -367,11 +375,15 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Penjadwalan Eksekusi Kenaikan Kelas</h5>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
-                        <i class="fas fa-plus me-1"></i> Buat Jadwal Baru
-                    </button>
+                    {{-- Button Removed: Schedule is now managed in Settings --}}
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        Jadwal eksekusi otomatis diatur melalui menu 
+                        <a href="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.settings.index' : 'waka.promotion.settings.index') }}" class="fw-bold">Pengaturan Kenaikan Kelas</a>.
+                    </div>
+                    
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped">
                             <thead>
@@ -417,10 +429,13 @@
                                     <td><small class="text-muted">{{ Str::limit($schedule->execution_log, 50) }}</small></td>
                                     <td>
                                         @if($schedule->status == 'PENDING')
-                                            <form action="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.cancel-schedule' : 'waka.promotion.cancel-schedule', $schedule->id) }}" method="POST" onsubmit="return confirm('Batalkan jadwal ini?')">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-danger">Batal</button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#cancelScheduleModal"
+                                                data-url="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.cancel-schedule' : 'waka.promotion.cancel-schedule', $schedule->id) }}"
+                                                data-date="{{ $schedule->scheduled_at->format('d M Y H:i') }}">
+                                                Batal
+                                            </button>
                                         @endif
                                     </td>
                                 </tr>
@@ -437,7 +452,7 @@
         </div>
     </div>
 
-    <!-- Modal Execution Confirmation -->
+    <!-- Modal Execution Confirmation (Existing) -->
     <div class="modal fade" id="executeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -486,48 +501,79 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <form action="{{ route(str_replace('.report', '.execute', Route::currentRouteName())) }}" method="POST">
                         @csrf
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
                         <button type="submit" class="btn btn-danger"><i class="fas fa-play me-1"></i> Ya, Proses Sekarang</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
-    <!-- Modal Create Schedule -->
-    <div class="modal fade" id="createScheduleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form action="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.schedule' : 'waka.promotion.schedule') }}" method="POST">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Jadwalkan Eksekusi Otomatis</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+    <!-- Modal Cancel Schedule (New) -->
+    <div class="modal fade" id="cancelScheduleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Pembatalan Jadwal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-calendar-times fa-3x text-danger mb-3"></i>
+                        <h4>Batalkan Eksekusi?</h4>
                     </div>
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-1"></i> Eksekusi akan berjalan otomatis di latar belakang pada waktu yang ditentukan.
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Waktu Eksekusi</label>
-                            <input type="datetime-local" name="scheduled_at" class="form-control" required min="{{ now()->format('Y-m-d\TH:i') }}">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email Notifikasi (Opsional)</label>
-                            <input type="email" name="notify_email" class="form-control" value="{{ auth()->user()->email }}" placeholder="Email untuk laporan hasil">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Jadwal</button>
+                    <p>Apakah Anda yakin ingin membatalkan jadwal eksekusi otomatis pada:</p>
+                    <h5 class="text-center text-primary" id="scheduleDateText"></h5>
+                    <div class="alert alert-info mt-3">
+                        <small><i class="fas fa-info-circle"></i> Tindakan ini juga akan mereset pengaturan tanggal eksekusi di menu Pengaturan.</small>
                     </div>
                 </div>
-            </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <form id="cancelScheduleForm" action="" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Ya, Batalkan Jadwal</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+    <!-- Promote Selected Modal -->
+    <div class="modal fade" id="promoteSelectedModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title text-white"><i class="fas fa-arrow-up me-2"></i>Konfirmasi Kenaikan Kelas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-graduate fa-3x text-success mb-3"></i>
+                        <h4>Konfirmasi Proses Manual</h4>
+                    </div>
+                    
+                    <p>Anda akan menaikkan <strong id="selectedCount" class="text-success fs-4">0</strong> siswa terpilih.</p>
+                    
+                    <div class="alert alert-info">
+                        <small><i class="fas fa-info-circle me-1"></i> <strong>Konteks Tahun: {{ $tahun->nama_tahun_ajaran }}</strong><br>
+                        Sistem akan mencari kelas lanjutan di tahun ajaran berikutnya secara otomatis.</small>
+                    </div>
 
+                    <p class="mb-0">Pastikan data siswa benar sebelum melanjutkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-success" onclick="document.getElementById('promoteSelectedForm').submit()">
+                        <i class="fas fa-check me-1"></i> Ya, Naikkan Siswa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function toggleAllCheckboxes(source, className) {
     const checkboxes = document.querySelectorAll('.' + className);
@@ -535,5 +581,52 @@ function toggleAllCheckboxes(source, className) {
         checkbox.checked = source.checked;
     });
 }
+
+// Update Modal Count
+document.addEventListener('DOMContentLoaded', function() {
+    var promoteBtn = document.querySelector('[data-bs-target="#promoteSelectedModal"]');
+    if (promoteBtn) {
+        promoteBtn.addEventListener('click', function() {
+            var checkedBoxes = document.querySelectorAll('.simCheck:checked');
+            document.getElementById('selectedCount').textContent = checkedBoxes.length;
+            
+            if (checkedBoxes.length === 0) {
+                alert('Pilih siswa terlebih dahulu!');
+                // Prevent modal show? Bootstrap handles click first, so maybe simple alert is cleaner, 
+                // but let's rely on backend or just disable button if 0?
+                // Better UX: Disable button if 0 checked.
+            }
+        });
+    }
+    
+    // Optional: Real-time disable/enable button
+    var checkboxes = document.querySelectorAll('.simCheck');
+    var triggerBtn = document.querySelector('#promoteSelectedTrigger');
+    
+    function updateButtonState() {
+        var count = document.querySelectorAll('.simCheck:checked').length;
+        if(triggerBtn) triggerBtn.disabled = count === 0;
+    }
+    
+    checkboxes.forEach(cb => cb.addEventListener('change', updateButtonState));
+    // Initial State
+    updateButtonState();
+
+    // Existing Cancel Modal Script
+    var cancelModal = document.getElementById('cancelScheduleModal');
+    if (cancelModal) {
+        cancelModal.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var url = button.getAttribute('data-url');
+            var date = button.getAttribute('data-date');
+            
+            var form = cancelModal.querySelector('#cancelScheduleForm');
+            var dateText = cancelModal.querySelector('#scheduleDateText');
+            
+            form.action = url;
+            dateText.textContent = date;
+        });
+    }
+});
 </script>
-@endpush
+@endsection
