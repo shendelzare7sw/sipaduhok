@@ -167,6 +167,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/tenaga-pendidik/{id}', [UserController::class, 'updateTenagaPendidik'])->name('update-tenaga-pendidik');
             Route::delete('/tenaga-pendidik/{id}', [UserController::class, 'deleteTenagaPendidik'])->name('delete-tenaga-pendidik');
             Route::get('/tenaga-pendidik/{id}', [UserController::class, 'showTenagaPendidik'])->name('show-tenaga-pendidik');
+            Route::post('/tenaga-pendidik/bulk-delete', [UserController::class, 'bulkDeleteTenagaPendidik'])->name('bulk-delete-tenaga-pendidik');
 
             // Siswa
             Route::get('/siswa/import', [UserController::class, 'importSiswaForm'])->name('import-siswa');
@@ -180,6 +181,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/siswa/{id}', [UserController::class, 'updateSiswa'])->name('update-siswa');
             Route::delete('/siswa/{id}', [UserController::class, 'deleteSiswa'])->name('delete-siswa');
             Route::get('/siswa/{id}', [UserController::class, 'showSiswa'])->name('show-siswa');
+            Route::post('/siswa/bulk-delete', [UserController::class, 'bulkDeleteSiswa'])->name('bulk-delete-siswa');
 
             // Orang Tua
             Route::get('/orang-tua/import', [UserController::class, 'importOrangTuaForm'])->name('import-orang-tua');
@@ -194,6 +196,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/orang-tua/{id}', [UserController::class, 'updateOrangTua'])->name('update-orang-tua');
             Route::post('/orang-tua/{id}/toggle-status', [UserController::class, 'toggleOrangTuaStatus'])->name('toggle-orang-tua-status');
             Route::delete('/orang-tua/{id}', [UserController::class, 'deleteOrangTua'])->name('delete-orang-tua');
+            Route::post('/orang-tua/bulk-delete', [UserController::class, 'bulkDeleteOrangTua'])->name('bulk-delete-orang-tua');
         });
 
         // Tahun Ajaran
@@ -223,15 +226,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('wali-kelas/{kelas}/assign', [AdminWaliKelasController::class, 'assign'])->name('wali-kelas.assign');
         Route::post('wali-kelas/bulk-assign', [AdminWaliKelasController::class, 'bulkAssign'])->name('wali-kelas.bulk-assign');
 
-        // Guru Pengajar
+        // Guru Pengajar (Read-Only Dashboard - derived from Jadwal Pelajaran)
         Route::get('guru-pengajar', [GuruPengajarController::class, 'index'])->name('guru-pengajar.index');
         Route::get('guru-pengajar/print', [GuruPengajarController::class, 'print'])->name('guru-pengajar.print');
+        Route::post('guru-pengajar/rebuild', [GuruPengajarController::class, 'rebuildFromJadwal'])->name('guru-pengajar.rebuild');
         Route::get('guru-pengajar/kelas/{kelas}', [GuruPengajarController::class, 'manageKelas'])->name('guru-pengajar.manage-kelas');
-        Route::post('guru-pengajar/kelas/{kelas}/assign', [GuruPengajarController::class, 'assignToKelas'])->name('guru-pengajar.assign-to-kelas');
-        Route::post('guru-pengajar/kelas/{kelas}/remove', [GuruPengajarController::class, 'removeFromKelas'])->name('guru-pengajar.remove-from-kelas');
         Route::get('guru-pengajar/{guruPengajar}', [GuruPengajarController::class, 'show'])->name('guru-pengajar.show');
-        Route::post('guru-pengajar/{guruPengajar}/assign', [GuruPengajarController::class, 'assign'])->name('guru-pengajar.assign');
-        Route::post('guru-pengajar/{guruPengajar}/remove-assignment', [GuruPengajarController::class, 'removeAssignment'])->name('guru-pengajar.remove-assignment');
 
         // Mata Pelajaran
         Route::get('mata-pelajaran/import', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'importForm'])->name('mata-pelajaran.import');
@@ -1012,10 +1012,15 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
                 Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
                 Route::post('/{ujian}/toggle-status', [GuruUjianController::class, 'toggleStatus'])->name('toggleStatus');
+                Route::post('/{ujian}/toggle-result', [GuruUjianController::class, 'toggleResultVisibility'])->name('toggleResult');
+
+                // Import/Export Soal
+                Route::get('/{ujian}/soal-template', [GuruUjianController::class, 'downloadSoalTemplate'])->name('soal.template');
+                Route::post('/{ujian}/import-soal', [GuruUjianController::class, 'importSoal'])->name('soal.import');
             });
 
-            // Kuis
-            Route::prefix('kuis')->name('kuis.')->group(function () {
+            // Latihan (renamed from Kuis)
+            Route::prefix('latihan')->name('latihan.')->group(function () {
                 Route::get('/', [GuruUjianController::class, 'index'])->name('index');
                 Route::get('/create', [GuruUjianController::class, 'create'])->name('create');
                 Route::post('/', [GuruUjianController::class, 'store'])->name('store');
@@ -1023,11 +1028,11 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{ujian}', [GuruUjianController::class, 'update'])->name('update');
                 Route::delete('/{ujian}', [GuruUjianController::class, 'destroy'])->name('destroy');
 
-                // Hasil & Koreksi Kuis
+                // Hasil & Koreksi Latihan
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
                 Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksi'])->name('koreksi');
 
-                // Manajemen Soal Kuis
+                // Manajemen Soal Latihan
                 Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
                 Route::get('/{ujian}/soal/create', [GuruUjianController::class, 'createSoal'])->name('soal.create');
                 Route::post('/{ujian}/soal', [GuruUjianController::class, 'storeSoal'])->name('soal.store');
@@ -1035,10 +1040,15 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
 
-                // Manajemen Soal Kuis (Bulk)
+                // Manajemen Soal Latihan (Bulk)
                 Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
                 Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
                 Route::post('/{ujian}/toggle-status', [GuruUjianController::class, 'toggleStatus'])->name('toggleStatus');
+                Route::post('/{ujian}/toggle-result', [GuruUjianController::class, 'toggleResultVisibility'])->name('toggleResult');
+
+                // Import/Export Soal Latihan
+                Route::get('/{ujian}/soal-template', [GuruUjianController::class, 'downloadSoalTemplate'])->name('soal.template');
+                Route::post('/{ujian}/import-soal', [GuruUjianController::class, 'importSoal'])->name('soal.import');
             });
 
             // Nilai Siswa
@@ -1057,8 +1067,8 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/{forum}/reply', [GuruForumController::class, 'reply'])->name('reply');
                 Route::put('/{forum}/reply/{reply}', [GuruForumController::class, 'updateReply'])->name('reply.update');
                 Route::delete('/{forum}/reply/{reply}', [GuruForumController::class, 'destroyReply'])->name('reply.destroy');
-                Route::patch('/{forum}/pin', [GuruForumController::class, 'togglePin'])->name('pin');
-                Route::patch('/{forum}/close', [GuruForumController::class, 'toggleClose'])->name('close');
+                Route::patch('/{forum}/pin', [GuruForumController::class, 'togglePin'])->name('togglePin');
+                Route::patch('/{forum}/close', [GuruForumController::class, 'toggleClose'])->name('toggleClose');
                 Route::delete('/{forum}', [GuruForumController::class, 'destroy'])->name('destroy');
             });
 
@@ -1079,7 +1089,7 @@ Route::middleware(['auth'])->group(function () {
     | SISWA DASHBOARD & ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
+    Route::middleware(['role:siswa', 'student.active'])->prefix('siswa')->name('siswa.')->group(function () {
 
         // Main Dashboard Router
         Route::get('/dashboard', [SiswaDashboardController::class, 'index'])->name('dashboard');
@@ -1153,7 +1163,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/guru', [LmsDashboardController::class, 'guru'])->name('guru');
 
             // Mata Pelajaran
-            Route::prefix('mata-pelajaran')->name('mapel.')->group(function () {
+            Route::prefix('mata-pelajaran')->name('mapel.')->middleware('siswa.mapel.access')->group(function () {
 
                 // Detail Mata Pelajaran
                 Route::get('/{mapelId}', [LmsMateriController::class, 'show'])->name('show');

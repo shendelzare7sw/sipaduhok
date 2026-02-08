@@ -42,13 +42,13 @@ class PromotionReportController extends Controller
         // --- 1. History Query ---
         $query = DB::table('status_naik_kelas_siswa')
             ->join('siswa', 'status_naik_kelas_siswa.siswa_id', '=', 'siswa.id')
-            ->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
             ->where('status_naik_kelas_siswa.tahun_ajaran_id', $selectedYear->id)
             ->select(
                 'status_naik_kelas_siswa.*',
                 'siswa.nama_lengkap',
-                'siswa.cabang_id', // Select for filter
-                'kelas.nama_kelas as kelas_current' 
+                'siswa.cabang_id',
+                DB::raw("COALESCE(kelas.nama_kelas, status_naik_kelas_siswa.kelas_asal) as kelas_current")
             );
 
         if ($filterStatus) $query->where('status_kelulusan', $filterStatus);
@@ -79,7 +79,7 @@ class PromotionReportController extends Controller
         foreach ($activeStudents as $siswa) {
             $simulationData[] = [
                 'siswa' => $siswa,
-                'result' => $promotionService->checkEligibility($siswa, $activeYear->id)
+                'result' => $promotionService->checkEligibility($siswa, $selectedYear->id)
             ];
         }
 

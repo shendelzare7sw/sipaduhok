@@ -262,13 +262,15 @@
         }
 
         /* Desktop Collapse State */
-        body.sidebar-collapsed .sidebar-lms {
-            transform: translateX(-100%);
-        }
+        @media (min-width: 769px) {
+            body.sidebar-collapsed .sidebar-lms {
+                transform: translateX(-100%);
+            }
 
-        body.sidebar-collapsed .main-content-lms {
-            margin-left: 0;
-            width: 100%;
+            body.sidebar-collapsed .main-content-lms {
+                margin-left: 0;
+                width: 100%;
+            }
         }
 
         /* Mobile specific adjustments */
@@ -285,7 +287,7 @@
 
             /* On mobile, standard active class is used (transform 0) */
             .sidebar-lms.active {
-                transform: translateX(0);
+                transform: translateX(0) !important;
             }
 
             /* collapsed state shouldn't affect mobile logic heavily, 
@@ -323,8 +325,10 @@
             z-index: 999;
         }
 
-        .sidebar-overlay.active {
-            display: block;
+        @media (max-width: 768px) {
+            .sidebar-overlay.active {
+                display: block;
+            }
         }
     </style>
 
@@ -457,6 +461,16 @@
             if (overlay) {
                 overlay.addEventListener('click', toggleSidebar);
             }
+
+            // Clean up state on resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    // If resizing to desktop, remove active class from sidebar and overlay
+                    // to prevent them from getting stuck in "mobile open" state
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
+            });
         });
     </script>
 

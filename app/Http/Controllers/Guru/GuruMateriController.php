@@ -29,7 +29,14 @@ class GuruMateriController extends Controller
         $materiList = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id)
+            ->when(request('tanggal'), function ($q) {
+                return $q->whereDate('tanggal_upload', request('tanggal'));
+            })
+            ->when(request('search'), function ($q) {
+                return $q->where('judul_materi', 'like', '%' . request('search') . '%');
+            })
             ->orderBy('tanggal_upload', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('guru.lms.materi.index', [
@@ -55,11 +62,19 @@ class GuruMateriController extends Controller
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $kategori = $request->get('kategori', 'materi');
 
+        // Kelas lain yang guru ini ajar mapel yang sama
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', '!=', $kelasId)
+            ->with('kelas')
+            ->get();
+
         return view('guru.lms.materi.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
             'kategori' => $kategori,
+            'kelasLain' => $kelasLain,
         ]);
     }
 
@@ -84,8 +99,7 @@ class GuruMateriController extends Controller
             $filePath = $request->file('file_materi')->store('materi', 'public');
         }
 
-        Materi::create([
-            'kelas_id' => $kelasId,
+        $materiData = [
             'mata_pelajaran_id' => $mapelId,
             'guru_id' => $tenagaPendidik->id,
             'judul_materi' => $validated['judul_materi'],
@@ -94,11 +108,29 @@ class GuruMateriController extends Controller
             'file_materi' => $filePath,
             'tipe_file' => $validated['tipe_file'],
             'tanggal_upload' => now(),
-        ]);
+        ];
+
+        // Buat untuk kelas utama
+        Materi::create(array_merge($materiData, ['kelas_id' => $kelasId]));
+
+        // Duplikasi ke kelas tambahan
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        foreach ($kelasTambahan as $kelasLainId) {
+            if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
+                Materi::create(array_merge($materiData, ['kelas_id' => $kelasLainId]));
+                $jumlahDuplikasi++;
+            }
+        }
+
+        $msg = 'Materi berhasil ditambahkan';
+        if ($jumlahDuplikasi > 0) {
+            $msg .= " dan diduplikasi ke {$jumlahDuplikasi} kelas lain";
+        }
 
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
-            ->with('success', 'Materi berhasil ditambahkan');
+            ->with('success', $msg);
     }
 
     /**
@@ -117,12 +149,26 @@ class GuruMateriController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+    
+        // Kelas lain yang guru ini ajar mapel yang sama
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', '!=', $kelasId)
+            ->with('kelas')
+            ->get();
 
         return view('guru.lms.materi.edit', [
             'materi' => $materi,
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
+            'kelasLain' => $kelasLain,
+            'relatedClassIds' => Materi::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul_materi', $materi->judul_materi)
+                ->where('id', '!=', $materi->id)
+                ->pluck('kelas_id')
+                ->toArray(),
         ]);
     }
 
@@ -140,34 +186,102 @@ class GuruMateriController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
+        // Capture original state for matching in other classes
+        $originalFile = $materi->file_materi;
+        $originalTitle = $materi->judul_materi;
+
         $validated = $request->validate([
             'judul_materi' => 'required|string|max:255',
             'kategori' => 'required|in:materi,modul_ajar',
             'deskripsi' => 'nullable|string',
             'file_materi' => 'nullable|file|max:51200',
             'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+            'tanggal_upload' => 'required|date',
         ]);
 
         if ($request->hasFile('file_materi')) {
-            // Hapus file lama
+            // SAFE FILE DELETE LOGIC
+            // Cek apakah file lama digunakan oleh materi lain?
             if ($materi->file_materi) {
-                Storage::disk('public')->delete($materi->file_materi);
+                $isFileUsedElsewhere = Materi::where('file_materi', $materi->file_materi)
+                    ->where('id', '!=', $materi->id)
+                    ->exists();
+
+                if (!$isFileUsedElsewhere) {
+                    Storage::disk('public')->delete($materi->file_materi);
+                }
             }
 
             $validated['file_materi'] = $request->file('file_materi')->store('materi', 'public');
         }
 
         $materi->update($validated);
+        
+        // DUPLICATE / SYNC LOGIC (Add/Update to linked classes)
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        $jumlahUpdate = 0;
+        
+        if (!empty($kelasTambahan)) {
+            // Data untuk duplikasi/sync
+            $syncData = [
+                'mata_pelajaran_id' => $mapelId,
+                'guru_id' => $tenagaPendidik->id,
+                'judul_materi' => $materi->judul_materi, // New Title
+                'kategori' => $materi->kategori,
+                'deskripsi' => $materi->deskripsi,
+                'file_materi' => $materi->file_materi, // New/Current File Path
+                'tipe_file' => $materi->tipe_file,
+                'tanggal_upload' => $materi->tanggal_upload,
+            ];
+
+            foreach ($kelasTambahan as $kelasLainId) {
+                if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
+                    // Try to find existing material in target class to update
+                    // Match priorities: 1. By Original File Path (strong link), 2. By Original Title
+                    $query = Materi::where('kelas_id', $kelasLainId)
+                        ->where('guru_id', $tenagaPendidik->id)
+                        ->where('mata_pelajaran_id', $mapelId);
+                    
+                    $existing = null;
+                    
+                    if ($originalFile) {
+                        // First try finding by file path
+                        $existing = (clone $query)->where('file_materi', $originalFile)->first();
+                    }
+                    
+                    if (!$existing) {
+                        // If not found by file (or no file), try by Title
+                        $existing = (clone $query)->where('judul_materi', $originalTitle)->first();
+                    }
+
+                    if ($existing) {
+                        // Update existing match
+                        $existing->update($syncData);
+                        $jumlahUpdate++;
+                    } else {
+                        // Create new if no match found
+                        Materi::create(array_merge($syncData, ['kelas_id' => $kelasLainId]));
+                        $jumlahDuplikasi++;
+                    }
+                }
+            }
+        }
+
+        $msg = 'Materi berhasil diperbarui';
+        if ($jumlahDuplikasi > 0 || $jumlahUpdate > 0) {
+            $msg .= " (Disinkronisasi ke " . ($jumlahDuplikasi + $jumlahUpdate) . " kelas lain)";
+        }
 
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
-            ->with('success', 'Materi berhasil diperbarui');
+            ->with('success', $msg);
     }
 
     /**
      * Hapus materi
      */
-    public function destroy($kelasId, $mapelId, $id): RedirectResponse
+    public function destroy(Request $request, $kelasId, $mapelId, $id): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -178,16 +292,56 @@ class GuruMateriController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        // Hapus file
-        if ($materi->file_materi) {
-            Storage::disk('public')->delete($materi->file_materi);
+        $filesToDelete = []; // Collect files to delete safely
+        $idsToDelete = [$materi->id];
+
+        // BULK DELETE LOGIC
+        if ($request->has('hapus_terkait')) {
+            // Cari materi lain dengan Judul, Tipe, dan Guru yang sama di mapel ini (beda kelas)
+            $relatedMateris = Materi::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul_materi', $materi->judul_materi)
+                ->where('tipe_file', $materi->tipe_file)
+                ->where('id', '!=', $materi->id) // Exclude current
+                ->get();
+            
+            foreach($relatedMateris as $rel) {
+                $idsToDelete[] = $rel->id;
+            }
         }
 
-        $materi->delete();
+        // Process Deletion
+        $materisToDelete = Materi::whereIn('id', $idsToDelete)->get();
+        
+        foreach ($materisToDelete as $m) {
+            if ($m->file_materi) {
+                // SAFE DELETE: Cek apakah file digunakan oleh materi yang TIDAK akan dihapus
+                $usageCount = Materi::where('file_materi', $m->file_materi)
+                    ->whereNotIn('id', $idsToDelete) // Check usage outside of the deletionlist
+                    ->count();
+                
+                if ($usageCount === 0) {
+                    $filesToDelete[] = $m->file_materi;
+                }
+            }
+            $m->delete();
+        }
+
+        // Delete physical files (unique paths only)
+        $filesToDelete = array_unique($filesToDelete);
+        foreach ($filesToDelete as $file) {
+            Storage::disk('public')->delete($file);
+        }
+
+        $msg = 'Materi berhasil dihapus';
+        if (count($idsToDelete) > 1) {
+            $countLain = count($idsToDelete) - 1;
+            $msg .= " (termasuk {$countLain} materi terkait di kelas lain)";
+        }
 
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
-            ->with('success', 'Materi berhasil dihapus');
+            ->with('success', $msg);
     }
 
     /**
@@ -195,13 +349,16 @@ class GuruMateriController extends Controller
      */
     private function verifyAccess($guruId, $kelasId, $mapelId)
     {
-        $access = GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+        if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
+            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
+        }
+    }
+
+    private function hasAccess($guruId, $kelasId, $mapelId): bool
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-
-        if (!$access) {
-            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
-        }
     }
 }

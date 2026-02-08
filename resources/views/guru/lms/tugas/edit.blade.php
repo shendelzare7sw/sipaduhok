@@ -53,18 +53,21 @@
                 <div class="mb-3">
                     <label class="form-label">File Tugas (Kosongkan jika tidak ingin mengubah)</label>
                     @if($tugas->file_tugas)
-                        <div class="alert alert-info mb-2">
-                            File saat ini: <strong>{{ basename($tugas->file_tugas) }}</strong>
+                        <div class="mb-2">
+                            <strong>File saat ini:</strong>
+                            <x-file-preview :path="$tugas->file_tugas" label="Lihat File Saat Ini" />
                         </div>
                     @endif
                     <input type="file" name="file_tugas" class="form-control">
                 </div>
 
+                @include('guru.partials.multi-kelas-selector')
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Update Tugas
                     </button>
-                    <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" 
+                    <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
                        class="btn btn-secondary">Batal</a>
                 </div>
             </form>

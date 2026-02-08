@@ -13,6 +13,7 @@ class SoalUjian extends Model
 
     protected $fillable = [
         'ujian_id',
+        'narasi',
         'urutan',
         'pertanyaan',
         'tipe_soal',

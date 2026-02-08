@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Persetujuan Dispensasi Naik Kelas')
+@section('page-title', 'Persetujuan Dispensasi')
 
 @section('sidebar-menu')
     @include('ketua.partials.sneat-sidebar-menu')

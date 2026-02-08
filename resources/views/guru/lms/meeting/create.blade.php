@@ -80,6 +80,8 @@
                             @error('deskripsi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        @include('guru.partials.multi-kelas-selector')
+
                         <div class="d-flex justify-content-end gap-2">
                             <a href="{{ route('guru.lms.meeting.index', [$kelas->id, $mapel->id]) }}"
                                 class="btn btn-light">Batal</a>

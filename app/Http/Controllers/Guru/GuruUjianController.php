@@ -28,23 +28,24 @@ class GuruUjianController extends Controller
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
-        // Determine if this is kuis or ujian based on route
-        $isKuis = request()->routeIs('guru.lms.kuis.*');
-        $tipeUjian = $isKuis ? 'kuis' : 'ujian';
+        // Determine if this is latihan or ujian based on route
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $tipeUjian = $isLatihan ? 'latihan' : 'ujian';
 
         $query = Ujian::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('guru_id', $tenagaPendidik->id);
 
         // Filter by type
-        if ($isKuis) {
-            $query->where('tipe_ujian', 'kuis');
+        if ($isLatihan) {
+            $query->where('tipe_ujian', 'latihan');
         } else {
-            // Ujian includes: ulangan_harian, pts_ganjil, pas_ganjil, pts_genap, pas_genap
-            $query->where('tipe_ujian', '!=', 'kuis');
+            // Ujian includes: ulangan_harian, pts_ganjil, pas_ganjil, pts_genap, pas_genap, to_1, to_2, to_3, upk, ujian_praktek
+            $query->where('tipe_ujian', '!=', 'latihan');
         }
 
         $ujianList = $query->orderBy('tanggal_mulai', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('guru.lms.ujian.index', [
@@ -69,13 +70,23 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $tipeUjian = request()->routeIs('guru.lms.kuis.*') ? 'kuis' : 'ujian';
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $tipeUjian = $isLatihan ? 'latihan' : 'ujian';
+        $isTingkatAkhir = Ujian::isTingkatAkhir($kelas);
+
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', '!=', $kelasId)
+            ->with('kelas')
+            ->get();
 
         return view('guru.lms.ujian.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
             'tipeUjian' => $tipeUjian,
+            'isTingkatAkhir' => $isTingkatAkhir,
+            'kelasLain' => $kelasLain,
         ]);
     }
 
@@ -86,25 +97,26 @@ class GuruUjianController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
-        $isKuis = request()->routeIs('guru.lms.kuis.*');
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
 
         $validated = $request->validate([
             'judul_ujian' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'tipe_ujian' => 'required|in:ulangan_harian,kuis,uts,uas,pts_ganjil,pas_ganjil,pts_genap,pas_genap',
+            'tipe_ujian' => 'required|in:ulangan_harian,latihan,uts,uas,pts_ganjil,pas_ganjil,pts_genap,pas_genap,to_1,to_2,to_3,upk,ujian_praktek',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'durasi_menit' => 'nullable|integer|min:0',
         ]);
 
-        // Jika dari kuis route, pastikan tipe_ujian adalah kuis
-        if ($isKuis) {
-            $validated['tipe_ujian'] = 'kuis';
+        // Jika dari latihan route, pastikan tipe_ujian adalah latihan
+        if ($isLatihan) {
+            $validated['tipe_ujian'] = 'latihan';
         }
 
-        $ujian = Ujian::create([
-            'kelas_id' => $kelasId,
+        $ujianData = [
             'mata_pelajaran_id' => $mapelId,
             'guru_id' => $tenagaPendidik->id,
             'judul_ujian' => $validated['judul_ujian'],
@@ -113,26 +125,34 @@ class GuruUjianController extends Controller
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'],
             'durasi_menit' => $validated['durasi_menit'],
-        ]);
+            'is_active' => false,
+        ];
 
-        // Buat UjianSiswa untuk setiap siswa di kelas
-        $siswaList = Siswa::where('kelas_id', $kelasId)
-            ->where('status', 'aktif')
-            ->get()
-            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
+        // Buat untuk kelas utama
+        $ujian = Ujian::create(array_merge($ujianData, ['kelas_id' => $kelasId]));
+        $this->createUjianSiswaForKelas($ujian, $kelasId, $mataPelajaran);
 
-        foreach ($siswaList as $siswa) {
-            UjianSiswa::create([
-                'ujian_id' => $ujian->id,
-                'siswa_id' => $siswa->id,
-                'status' => 'belum_mulai',
-            ]);
+        // Duplikasi ke kelas tambahan
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        foreach ($kelasTambahan as $kelasLainId) {
+            if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
+                $ujianDuplikat = Ujian::create(array_merge($ujianData, ['kelas_id' => $kelasLainId]));
+                $this->createUjianSiswaForKelas($ujianDuplikat, $kelasLainId, $mataPelajaran);
+                $jumlahDuplikasi++;
+            }
         }
 
-        $routeName = $isKuis ? 'guru.lms.kuis.index' : 'guru.lms.ujian.index';
+        $label = $isLatihan ? 'Latihan' : 'Ujian';
+        $msg = "{$label} berhasil ditambahkan";
+        if ($jumlahDuplikasi > 0) {
+            $msg .= " dan diduplikasi ke {$jumlahDuplikasi} kelas lain";
+        }
+
+        $routeName = $isLatihan ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index';
         return redirect()
             ->route($routeName, [$kelasId, $mapelId])
-            ->with('success', $isKuis ? 'Kuis berhasil ditambahkan' : 'Ujian berhasil ditambahkan');
+            ->with('success', $msg);
     }
 
     /**
@@ -149,19 +169,26 @@ class GuruUjianController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        $isKuis = request()->routeIs('guru.lms.kuis.*');
-        $tipeUjian = $isKuis ? 'kuis' : 'ujian';
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $tipeUjian = $isLatihan ? 'latihan' : 'ujian';
 
         // Verify tipe_ujian matches route
-        if ($isKuis && $ujian->tipe_ujian !== 'kuis') {
-            abort(404, 'Kuis tidak ditemukan');
+        if ($isLatihan && $ujian->tipe_ujian !== 'latihan') {
+            abort(404, 'Latihan tidak ditemukan');
         }
-        if (!$isKuis && $ujian->tipe_ujian === 'kuis') {
+        if (!$isLatihan && $ujian->tipe_ujian === 'latihan') {
             abort(404, 'Ujian tidak ditemukan');
         }
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $isTingkatAkhir = Ujian::isTingkatAkhir($kelas);
+
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', '!=', $kelasId)
+            ->with('kelas')
+            ->get();
 
         return view('guru.lms.ujian.edit', [
             'ujian' => $ujian,
@@ -169,6 +196,8 @@ class GuruUjianController extends Controller
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
             'tipeUjian' => $tipeUjian,
+            'isTingkatAkhir' => $isTingkatAkhir,
+            'kelasLain' => $kelasLain,
         ]);
     }
 
@@ -186,42 +215,91 @@ class GuruUjianController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        $isKuis = request()->routeIs('guru.lms.kuis.*');
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
 
         // Verify tipe_ujian matches route
-        if ($isKuis && $ujian->tipe_ujian !== 'kuis') {
-            abort(404, 'Kuis tidak ditemukan');
+        if ($isLatihan && $ujian->tipe_ujian !== 'latihan') {
+            abort(404, 'Latihan tidak ditemukan');
         }
-        if (!$isKuis && $ujian->tipe_ujian === 'kuis') {
+        if (!$isLatihan && $ujian->tipe_ujian === 'latihan') {
             abort(404, 'Ujian tidak ditemukan');
         }
+
+        // Capture original state for matching in other classes
+        $originalTitle = $ujian->judul_ujian;
 
         $validated = $request->validate([
             'judul_ujian' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
-            'tipe_ujian' => 'required|in:ulangan_harian,kuis,uts,uas,pts_ganjil,pas_ganjil,pts_genap,pas_genap',
+            'tipe_ujian' => 'required|in:ulangan_harian,latihan,uts,uas,pts_ganjil,pas_ganjil,pts_genap,pas_genap,to_1,to_2,to_3,upk,ujian_praktek',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'durasi_menit' => 'nullable|integer|min:0',
         ]);
 
-        // Prevent changing tipe_ujian when updating from kuis route
-        if ($isKuis) {
-            $validated['tipe_ujian'] = 'kuis';
+        // Prevent changing tipe_ujian when updating from latihan route
+        if ($isLatihan) {
+            $validated['tipe_ujian'] = 'latihan';
         }
 
         $ujian->update($validated);
 
-        $routeName = $isKuis ? 'guru.lms.kuis.index' : 'guru.lms.ujian.index';
+        // SYNC LOGIC (Update or Create to linked classes)
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        $jumlahUpdate = 0;
+
+        if (!empty($kelasTambahan)) {
+            $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+
+            $syncData = [
+                'mata_pelajaran_id' => $mapelId,
+                'guru_id' => $tenagaPendidik->id,
+                'judul_ujian' => $ujian->judul_ujian,
+                'deskripsi' => $ujian->deskripsi,
+                'tipe_ujian' => $ujian->tipe_ujian,
+                'tanggal_mulai' => $ujian->tanggal_mulai,
+                'tanggal_selesai' => $ujian->tanggal_selesai,
+                'durasi_menit' => $ujian->durasi_menit,
+                'is_active' => $ujian->is_active,
+            ];
+
+            foreach ($kelasTambahan as $kelasLainId) {
+                if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
+                    $existing = Ujian::where('kelas_id', $kelasLainId)
+                        ->where('guru_id', $tenagaPendidik->id)
+                        ->where('mata_pelajaran_id', $mapelId)
+                        ->where('judul_ujian', $originalTitle)
+                        ->first();
+
+                    if ($existing) {
+                        $existing->update($syncData);
+                        $jumlahUpdate++;
+                    } else {
+                        $ujianBaru = Ujian::create(array_merge($syncData, ['kelas_id' => $kelasLainId]));
+                        $this->createUjianSiswaForKelas($ujianBaru, $kelasLainId, $mataPelajaran);
+                        $jumlahDuplikasi++;
+                    }
+                }
+            }
+        }
+
+        $label = $isLatihan ? 'Latihan' : 'Ujian';
+        $msg = "{$label} berhasil diperbarui";
+        if ($jumlahDuplikasi > 0 || $jumlahUpdate > 0) {
+            $msg .= " (Disinkronisasi ke " . ($jumlahDuplikasi + $jumlahUpdate) . " kelas lain)";
+        }
+
+        $routeName = $isLatihan ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index';
         return redirect()
             ->route($routeName, [$kelasId, $mapelId])
-            ->with('success', $isKuis ? 'Kuis berhasil diperbarui' : 'Ujian berhasil diperbarui');
+            ->with('success', $msg);
     }
 
     /**
      * Hapus ujian
      */
-    public function destroy($kelasId, $mapelId, $id): RedirectResponse
+    public function destroy(Request $request, $kelasId, $mapelId, $id): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -232,11 +310,36 @@ class GuruUjianController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        $ujian->delete();
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $idsToDelete = [$ujian->id];
 
+        // BULK DELETE LOGIC
+        if ($request->has('hapus_terkait')) {
+            $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul_ujian', $ujian->judul_ujian)
+                ->where('tipe_ujian', $ujian->tipe_ujian)
+                ->where('id', '!=', $ujian->id)
+                ->get();
+
+            foreach ($relatedUjian as $rel) {
+                $idsToDelete[] = $rel->id;
+            }
+        }
+
+        Ujian::whereIn('id', $idsToDelete)->delete();
+
+        $label = $isLatihan ? 'Latihan' : 'Ujian';
+        $msg = "{$label} berhasil dihapus";
+        if (count($idsToDelete) > 1) {
+            $countLain = count($idsToDelete) - 1;
+            $msg .= " (termasuk {$countLain} {$label} terkait di kelas lain)";
+        }
+
+        $routeName = $isLatihan ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index';
         return redirect()
-            ->route('guru.lms.ujian.index', [$kelasId, $mapelId])
-            ->with('success', 'Ujian berhasil dihapus');
+            ->route($routeName, [$kelasId, $mapelId])
+            ->with('success', $msg);
     }
 
     /**
@@ -500,12 +603,22 @@ class GuruUjianController extends Controller
 
         $soalList = SoalUjian::where('ujian_id', $ujianId)->orderBy('urutan', 'asc')->get();
 
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $tipeUjian = $isLatihan ? 'latihan' : 'ujian';
+
         return view('guru.lms.ujian.manage_soal', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'ujian' => $ujian,
             'soalList' => $soalList,
             'guru' => $tenagaPendidik,
+            'tipeUjian' => $tipeUjian,
+            'relatedUjianCount' => Ujian::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mataPelajaran->id)
+                ->where('judul_ujian', $ujian->judul_ujian)
+                ->where('tipe_ujian', $ujian->tipe_ujian)
+                ->where('id', '!=', $ujian->id)
+                ->count(),
         ]);
     }
 
@@ -516,6 +629,8 @@ class GuruUjianController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $ujian = Ujian::findOrFail($ujianId);
 
         // Validasi dasar
         $request->validate([
@@ -601,6 +716,7 @@ class GuruUjianController extends Controller
             // Prepare Update/Create Data
             $saveData = [
                 'ujian_id' => $ujianId,
+                'narasi' => $data['narasi'] ?? null,
                 'urutan' => $index + 1, // Auto number by loop index
                 'tipe_soal' => $data['tipe_soal'],
                 'pertanyaan' => $data['pertanyaan'],
@@ -617,9 +733,44 @@ class GuruUjianController extends Controller
             }
         }
 
+        // ... existing logic ...
+
+        // SYNC LOGIC HERE
+        // Periksa apakah user mencentang 'sync_kelas'
+        if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
+            $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul_ujian', $request->input('original_judul', $ujian->judul_ujian)) // Fallback if not passed
+                ->where('tipe_ujian', $ujian->tipe_ujian)
+                ->where('id', '!=', $ujian->id)
+                ->get();
+
+            $syncedCount = 0;
+            foreach ($relatedUjian as $rel) {
+                // 1. Hapus semua soal lama di ujian terkait
+                SoalUjian::where('ujian_id', $rel->id)->delete();
+
+                // 2. Clone soal baru ke ujian terkait
+                $newSoals = SoalUjian::where('ujian_id', $ujianId)->orderBy('urutan', 'asc')->get();
+                foreach ($newSoals as $soalSource) {
+                    $newSoal = $soalSource->replicate();
+                    $newSoal->ujian_id = $rel->id;
+                    $newSoal->save();
+                }
+                $syncedCount++;
+            }
+            
+            if ($syncedCount > 0) {
+                 $request->session()->flash('info', "Soal juga berhasil disinkronisasi ke $syncedCount kelas lain.");
+            }
+        }
+
+        $label = ($ujian->tipe_ujian === 'latihan') ? 'Latihan' : 'Ujian';
+        $routeName = ($ujian->tipe_ujian === 'latihan') ? 'guru.lms.latihan.soal.manage' : 'guru.lms.ujian.soal.manage';
+        
         return redirect()
-            ->route('guru.lms.ujian.soal.manage', [$kelasId, $mapelId, $ujianId])
-            ->with('success', 'Semua soal berhasil disimpan!');
+            ->route($routeName, [$kelasId, $mapelId, $ujianId])
+            ->with('success', "Semua soal $label berhasil disimpan!");
     }
 
     /**
@@ -635,18 +786,148 @@ class GuruUjianController extends Controller
         $ujian->is_active = !$ujian->is_active;
         $ujian->save();
 
+        $syncedCount = 0;
+        if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
+             $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul_ujian', $ujian->judul_ujian)
+                ->where('tipe_ujian', $ujian->tipe_ujian)
+                ->where('id', '!=', $ujian->id)
+                ->get();
+            
+            foreach($relatedUjian as $rel) {
+                $rel->is_active = $ujian->is_active;
+                $rel->save();
+                $syncedCount++;
+            }
+        }
+
+        $label = ($ujian->tipe_ujian === 'latihan') ? 'Latihan' : 'Ujian';
         $status = $ujian->is_active ? 'dirilis' : 'ditarik kembali';
-        return back()->with('success', "Ujian berhasil $status.");
+        $msg = "$label berhasil $status.";
+        if ($syncedCount > 0) {
+            $msg .= " (Status disinkronisasi ke $syncedCount kelas lain)";
+        }
+
+        return back()->with('success', $msg);
     }
+
+    /**
+     * Toggle Result Visibility
+     */
+    public function toggleResultVisibility(Request $request, $kelasId, $mapelId, $ujianId): RedirectResponse
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $ujian = Ujian::findOrFail($ujianId);
+        $ujian->tampilkan_nilai = !$ujian->tampilkan_nilai;
+        $ujian->save();
+
+        $syncedCount = 0;
+        if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
+            $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul_ujian', $ujian->judul_ujian)
+                ->where('tipe_ujian', $ujian->tipe_ujian)
+                ->where('id', '!=', $ujian->id)
+                ->get();
+
+            foreach($relatedUjian as $rel) {
+                $rel->tampilkan_nilai = $ujian->tampilkan_nilai;
+                $rel->save();
+                $syncedCount++;
+            }
+        }
+
+        $label = ($ujian->tipe_ujian === 'latihan') ? 'Latihan' : 'Ujian';
+        $status = $ujian->tampilkan_nilai ? 'ditampilkan' : 'disembunyikan';
+        $msg = "Nilai $label berhasil $status ke siswa.";
+        if ($syncedCount > 0) {
+            $msg .= " (Pengaturan disinkronisasi ke $syncedCount kelas lain)";
+        }
+
+        return back()->with('success', $msg);
+    }
+
+    /**
+     * Download template Excel soal
+     */
+    public function downloadSoalTemplate($kelasId, $mapelId, $ujianId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\SoalUjianTemplateExport(),
+            'template_soal_ujian.xlsx'
+        );
+    }
+
+    /**
+     * Import soal dari Excel
+     */
+    public function importSoal(Request $request, $kelasId, $mapelId, $ujianId): RedirectResponse
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $request->validate([
+            'file_soal' => 'required|file|mimes:xlsx,xls|max:5120',
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(
+                new \App\Imports\SoalUjianImport($ujianId),
+                $request->file('file_soal')
+            );
+
+            $isLatihan = request()->routeIs('guru.lms.latihan.*');
+            $routeName = $isLatihan ? 'guru.lms.latihan.soal.manage' : 'guru.lms.ujian.soal.manage';
+
+            return redirect()
+                ->route($routeName, [$kelasId, $mapelId, $ujianId])
+                ->with('success', 'Soal berhasil diimport dari Excel!');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                $errors[] = "Baris {$failure->row()}: " . implode(', ', $failure->errors());
+            }
+            return back()->with('error', 'Import gagal: ' . implode(' | ', array_slice($errors, 0, 5)));
+        } catch (\Exception $e) {
+            return back()->with('error', 'Import gagal: ' . $e->getMessage());
+        }
+    }
+
+    private function createUjianSiswaForKelas($ujian, $kelasId, $mataPelajaran)
+    {
+        $siswaList = Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
+
+        foreach ($siswaList as $siswa) {
+            UjianSiswa::create([
+                'ujian_id' => $ujian->id,
+                'siswa_id' => $siswa->id,
+                'status' => 'belum_mulai',
+            ]);
+        }
+    }
+
     private function verifyAccess($guruId, $kelasId, $mapelId)
     {
-        $access = GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+        if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
+            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
+        }
+    }
+
+    private function hasAccess($guruId, $kelasId, $mapelId): bool
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-
-        if (!$access) {
-            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
-        }
     }
 }

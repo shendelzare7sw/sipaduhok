@@ -46,8 +46,17 @@ class UjianSiswa extends Model
     public function remainingTime()
     {
         if ($this->waktu_mulai && $this->ujian) {
+            // Jika durasi 0, waktu tak terbatas (return angka besar)
+            if ($this->ujian->durasi_menit == 0) {
+                return 999999; 
+            }
+            
             $deadline = $this->waktu_mulai->addMinutes($this->ujian->durasi_menit);
-            $remaining = now()->diffInMinutes($deadline, false);
+            // Tambah toleransi waktu (buffer) misal 1 menit untuk latency jaringan
+            $deadlineWithTolerance = $deadline->addMinutes(1);
+            
+            // Hitung selisih dalam menit
+            $remaining = now()->diffInMinutes($deadlineWithTolerance, false);
             return max(0, $remaining);
         }
         return 0;
@@ -56,6 +65,9 @@ class UjianSiswa extends Model
     // Helper: Cek apakah waktu ujian habis
     public function isTimeUp()
     {
+        if ($this->ujian && $this->ujian->durasi_menit == 0) {
+            return false; // Unlimited time
+        }
         return $this->remainingTime() <= 0;
     }
 }

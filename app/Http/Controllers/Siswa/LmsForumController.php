@@ -84,6 +84,7 @@ class LmsForumController extends Controller
 
         $diskusi = ForumDiskusi::where('id', $diskusiId)
             ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', $siswa->kelas_id)
             ->with(['user', 'replies.user', 'replies.children.user'])
             ->firstOrFail();
 
@@ -120,7 +121,10 @@ class LmsForumController extends Controller
             return redirect()->route('siswa.lms.dashboard');
         }
 
-        $diskusi = ForumDiskusi::findOrFail($diskusiId);
+        $diskusi = ForumDiskusi::where('id', $diskusiId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->firstOrFail();
 
         if ($diskusi->is_closed) {
             return back()->with('error', 'Diskusi ini sudah ditutup.');

@@ -64,8 +64,10 @@ class ExecuteScheduledPromotion extends Command
         
         DB::beginTransaction();
         try {
-            // Get all active students
-            $students = Siswa::where('status', 'aktif')->get();
+            // Get active students enrolled in classes of the scheduled academic year
+            $students = Siswa::where('status', 'aktif')
+                ->whereHas('kelas', fn($q) => $q->where('tahun_ajaran_id', $schedule->tahun_ajaran_id))
+                ->get();
             $logMessages = [];
             
             foreach ($students as $siswa) {

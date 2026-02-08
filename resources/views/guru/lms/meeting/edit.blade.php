@@ -83,6 +83,8 @@
                             <label class="form-check-label" for="isActive">Status Aktif (Tampilkan ke Siswa)</label>
                         </div>
 
+                        @include('guru.partials.multi-kelas-selector')
+
                         <div class="d-flex justify-content-end gap-2">
                             <a href="{{ route('guru.lms.meeting.index', [$kelas->id, $mapel->id]) }}"
                                 class="btn btn-light">Batal</a>

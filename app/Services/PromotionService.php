@@ -47,6 +47,7 @@ class PromotionService
     {
         // Check unpaid bills
         $unpaid = Tagihan::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
             ->whereIn('status', ['belum_bayar', 'terlambat'])
             ->sum('jumlah');
 
@@ -73,13 +74,14 @@ class PromotionService
     {
         $batasTuntas = $this->getPassingThreshold($tahunAjaranId); // e.g. 70%
 
-        // Get all grades
-        $grades = Nilai::where('siswa_id', $siswa->id)
+        // Get all grades and group by mata pelajaran (handles ganjil+genap semesters)
+        $gradesByMapel = Nilai::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->where('kelas_id', $siswa->kelas_id)
-            ->get();
+            ->get()
+            ->groupBy('mata_pelajaran_id');
 
-        if ($grades->isEmpty()) {
+        if ($gradesByMapel->isEmpty()) {
             return [
                 'is_tuntas' => false,
                 'percentage' => 0,
@@ -88,12 +90,15 @@ class PromotionService
             ];
         }
 
-        $totalMapel = $grades->count();
+        $totalMapel = $gradesByMapel->count(); // Jumlah mapel unik
         $tuntasCount = 0;
+        $jenjang = $siswa->kelas->jenjang ?? 'SMP';
 
-        foreach ($grades as $grade) {
-            $kkm = $this->getKKM($grade->mata_pelajaran_id, $tahunAjaranId, $siswa->kelas->jenjang ?? 'SMP');
-            if ($grade->nilai_akhir >= $kkm) {
+        foreach ($gradesByMapel as $mapelId => $semesterGrades) {
+            // Rata-rata nilai_akhir dari semester ganjil + genap
+            $avgNilaiAkhir = $semesterGrades->avg('nilai_akhir');
+            $kkm = $this->getKKM($mapelId, $tahunAjaranId, $jenjang);
+            if ($avgNilaiAkhir >= $kkm) {
                 $tuntasCount++;
             }
         }
@@ -158,7 +163,7 @@ class PromotionService
             }
             
             // Mark if promoted via dispensation
-            if (!$eligibility['financial']['status'] === 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
+            if ($eligibility['financial']['status'] !== 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
                  $statusKelulusan = 'NAIK_KELAS_TUNGGAKAN';
             }
         }
@@ -241,8 +246,7 @@ class PromotionService
         if (!$siswa->kelas) return false;
         $nama = strtoupper($siswa->kelas->nama_kelas);
         // Check for 9/IX or 12/XII
-        return preg_match('/(9|IX|12|XII)/', $nama);
-        // Note: Better regex or logic if needed, but this covers standard defaults
+        return preg_match('/\b(9|IX|12|XII)\b/', $nama);
     }
 
     private function findNextClass($currentKelas, $currentYearId)
@@ -388,29 +392,36 @@ class PromotionService
     public function promoteSelectedStudents(array $siswaIds, $tahunAjaranId)
     {
         $results = ['success' => 0, 'failed' => 0, 'errors' => []];
-        
-        foreach ($siswaIds as $siswaId) {
-            $siswa = Siswa::find($siswaId);
-            if (!$siswa) {
-                $results['failed']++;
-                $results['errors'][] = "Siswa ID {$siswaId} tidak ditemukan.";
-                continue;
+
+        DB::beginTransaction();
+        try {
+            foreach ($siswaIds as $siswaId) {
+                $siswa = Siswa::find($siswaId);
+                if (!$siswa) {
+                    $results['failed']++;
+                    $results['errors'][] = "Siswa ID {$siswaId} tidak ditemukan.";
+                    continue;
+                }
+
+                // Re-check eligibility
+                $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
+
+                if (!$eligibility['eligible']) {
+                    $results['failed']++;
+                    $results['errors'][] = "{$siswa->nama_lengkap}: Belum memenuhi syarat (Keuangan: {$eligibility['financial']['status']}, Akademik: {$eligibility['academic']['percentage']}%).";
+                    continue;
+                }
+
+                // Execute promotion
+                $this->executeStudentPromotion($siswa, $tahunAjaranId, now());
+                $results['success']++;
             }
-            
-            // Re-check eligibility
-            $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
-            
-            if (!$eligibility['eligible']) {
-                $results['failed']++;
-                $results['errors'][] = "{$siswa->nama_lengkap}: Belum memenuhi syarat (Keuangan: {$eligibility['financial']['status']}, Akademik: {$eligibility['academic']['percentage']}%).";
-                continue;
-            }
-            
-            // Execute promotion
-            $this->executeStudentPromotion($siswa, $tahunAjaranId, now());
-            $results['success']++;
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $results['errors'][] = 'Gagal memproses: ' . $e->getMessage();
         }
-        
+
         return $results;
     }
 }

@@ -16,6 +16,8 @@ use App\Models\Nilai;
 use App\Models\JadwalPelajaran;
 use Carbon\Carbon;
 
+use App\Models\Rapor; // Added Rapor model import
+
 class SiaDashboardController extends Controller
 {
     /**
@@ -31,6 +33,11 @@ class SiaDashboardController extends Controller
 
         if (!$siswa) {
             return redirect()->route('siswa.dashboard')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        // Check if Alumni (Lulus)
+        if ($siswa->status === 'lulus') {
+            return $this->dashboardAlumni($siswa);
         }
 
         // Pengumuman Aktif Hari Ini & Mendatang
@@ -332,5 +339,19 @@ class SiaDashboardController extends Controller
             ->count();
 
         return compact('hadir', 'sakit', 'izin', 'alpha');
+    }
+
+    /**
+     * Dashboard khusus Alumni (Status Lulus)
+     */
+    private function dashboardAlumni($siswa)
+    {
+        // Ambil riwayat rapor terakhir
+        $raporTerakhir = Rapor::where('siswa_id', $siswa->id)
+            ->with('tahunAjaran')
+            ->orderBy('semester', 'desc')
+            ->first();
+        
+        return view('siswa.alumni.dashboard', compact('siswa', 'raporTerakhir'));
     }
 }

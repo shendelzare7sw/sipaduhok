@@ -23,31 +23,61 @@ class SoalUjianImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
     {
         $this->rowNumber++;
 
-        // Parse pilihan jawaban untuk PG
         $pilihanJawaban = null;
-        if (in_array($row['tipe_soal'], ['pilihan_ganda', 'pilihan_ganda_kompleks'])) {
-            $pilihanJawaban = json_encode([
-                'A' => $row['pilihan_a'] ?? '',
-                'B' => $row['pilihan_b'] ?? '',
-                'C' => $row['pilihan_c'] ?? '',
-                'D' => $row['pilihan_d'] ?? '',
-                'E' => $row['pilihan_e'] ?? '',
-            ]);
-        }
-
-        // Parse kunci jawaban
         $kunciJawaban = $row['jawaban_benar'] ?? null;
-        if ($row['tipe_soal'] === 'pilihan_ganda_kompleks') {
-            // Multiple answers: A,C,D -> ["A","C","D"]
-            $kunciJawaban = json_encode(array_map('trim', explode(',', $row['jawaban_benar'])));
+        $jawabanBenar = null;
+
+        switch ($row['tipe_soal']) {
+            case 'pilihan_ganda':
+                $pilihanJawaban = [
+                    'A' => $row['pilihan_a'] ?? '',
+                    'B' => $row['pilihan_b'] ?? '',
+                    'C' => $row['pilihan_c'] ?? '',
+                    'D' => $row['pilihan_d'] ?? '',
+                    'E' => $row['pilihan_e'] ?? '',
+                ];
+                $kunciJawaban = strtoupper(trim($row['jawaban_benar'] ?? ''));
+                $jawabanBenar = $kunciJawaban;
+                break;
+
+            case 'pilihan_ganda_kompleks':
+                $pilihanJawaban = [
+                    'A' => $row['pilihan_a'] ?? '',
+                    'B' => $row['pilihan_b'] ?? '',
+                    'C' => $row['pilihan_c'] ?? '',
+                    'D' => $row['pilihan_d'] ?? '',
+                    'E' => $row['pilihan_e'] ?? '',
+                ];
+                $kunciJawaban = array_map('trim', explode(',', $row['jawaban_benar'] ?? ''));
+                break;
+
+            case 'benar_salah':
+                // Format: pertanyaan = pernyataan, jawaban_benar = "benar" atau "salah"
+                $isBenar = strtolower(trim($row['jawaban_benar'] ?? '')) === 'benar';
+                $pilihanJawaban = [
+                    'pernyataan' => [
+                        ['text' => $row['pertanyaan'], 'benar' => $isBenar]
+                    ]
+                ];
+                break;
+
+            case 'isian_singkat':
+                $kunciJawaban = trim($row['jawaban_benar'] ?? '');
+                $jawabanBenar = $kunciJawaban;
+                break;
+
+            case 'uraian':
+                break;
         }
 
         return new SoalUjian([
             'ujian_id' => $this->ujianId,
+            'narasi' => $row['narasi'] ?? null,
             'tipe_soal' => $row['tipe_soal'],
             'pertanyaan' => $row['pertanyaan'],
             'pilihan_jawaban' => $pilihanJawaban,
-            'kunci_jawaban' => $kunciJawaban,
+            'kunci_jawaban' => is_array($kunciJawaban) ? json_encode($kunciJawaban) : $kunciJawaban,
+            'jawaban_benar' => $jawabanBenar,
             'bobot_nilai' => $row['poin'] ?? 1,
             'urutan' => $row['no'] ?? $this->rowNumber,
         ]);
@@ -62,6 +92,7 @@ class SoalUjianImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
                 Rule::in(['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah', 'isian_singkat', 'uraian']),
             ],
             'pertanyaan' => 'required|string|min:5',
+            'narasi' => 'nullable|string',
             'pilihan_a' => 'required_if:tipe_soal,pilihan_ganda,pilihan_ganda_kompleks',
             'pilihan_b' => 'required_if:tipe_soal,pilihan_ganda,pilihan_ganda_kompleks',
             'pilihan_c' => 'nullable|string',

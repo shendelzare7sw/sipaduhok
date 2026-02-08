@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
-use App\Models\Cabang;
 use App\Models\MataPelajaran;
 use App\Models\GuruPengajarKelas;
+use App\Models\JadwalPelajaran;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GuruPengajarController extends Controller
 {
@@ -21,7 +22,7 @@ class GuruPengajarController extends Controller
         // Get current or selected tahun ajaran
         $tahunAjaranId = $request->tahun_ajaran_id;
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         if (!$tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
@@ -90,13 +91,13 @@ class GuruPengajarController extends Controller
     }
 
     /**
-     * Show detail of guru pengajar.
+     * Show detail of guru pengajar (read-only dashboard).
      */
     public function show(Request $request, TenagaPendidik $guruPengajar)
     {
         $tahunAjaranId = $request->tahun_ajaran_id;
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         if (!$tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
@@ -108,19 +109,15 @@ class GuruPengajarController extends Controller
             $q->with(['kelas.cabang', 'kelas.tahunAjaran', 'mataPelajaran']);
         }]);
 
-        // Data untuk form assign
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
-        $kelasList = Kelas::with('cabang')
+        // Get jadwal terkait guru ini untuk info tambahan
+        $jadwalList = JadwalPelajaran::where('guru_id', $guruPengajar->id)
             ->when($tahunAjaranId, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
-            ->orderBy('jenjang')
-            ->orderBy('nama_kelas')
-            ->get();
-
-        $mataPelajaranList = MataPelajaran::where('is_active', true)
-            ->orderBy('jenjang')
-            ->orderBy('nama_mapel')
+            ->with(['kelas', 'mataPelajaran'])
+            ->orderBy('hari')
+            ->orderBy('jam_mulai')
             ->get();
 
         // Statistics
@@ -131,134 +128,82 @@ class GuruPengajarController extends Controller
         ];
 
         return view('admin.guru-pengajar.show', compact(
-            'guruPengajar', 'tahunAjarans', 'currentTahunAjaran', 
-            'kelasList', 'mataPelajaranList', 'stats'
+            'guruPengajar', 'tahunAjarans', 'currentTahunAjaran',
+            'jadwalList', 'stats'
         ));
     }
 
     /**
-     * Assign guru ke kelas dan mata pelajaran.
-     */
-    public function assign(Request $request, TenagaPendidik $guruPengajar)
-    {
-        $validated = $request->validate([
-            'kelas_id' => 'required|exists:kelas,id',
-            'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
-        ]);
-
-        // Check if already assigned (to ANY teacher)
-        $existing = GuruPengajarKelas::where('kelas_id', $validated['kelas_id'])
-            ->where('mata_pelajaran_id', $validated['mata_pelajaran_id'])
-            ->with('tenagaPendidik') // Eager load to show who has it
-            ->first();
-
-        if ($existing) {
-            $currentGuru = $existing->tenagaPendidik ? $existing->tenagaPendidik->nama_lengkap : 'Guru lain';
-            return back()->with('error', "Gagal! Mata pelajaran ini sudah diajar oleh {$currentGuru} di kelas tersebut.");
-        }
-
-        GuruPengajarKelas::create([
-            'tenaga_pendidik_id' => $guruPengajar->id,
-            'kelas_id' => $validated['kelas_id'],
-            'mata_pelajaran_id' => $validated['mata_pelajaran_id'],
-        ]);
-
-        $kelas = Kelas::find($validated['kelas_id']);
-        $mapel = MataPelajaran::find($validated['mata_pelajaran_id']);
-
-        return back()->with('success', "Berhasil menugaskan {$guruPengajar->nama_lengkap} mengajar {$mapel->nama_mapel} di kelas {$kelas->nama_kelas}!");
-    }
-
-    /**
-     * Remove guru assignment.
-     */
-    public function removeAssignment(Request $request, TenagaPendidik $guruPengajar)
-    {
-        $validated = $request->validate([
-            'assignment_id' => 'required|exists:guru_pengajar_kelas,id',
-        ]);
-
-        $assignment = GuruPengajarKelas::find($validated['assignment_id']);
-        
-        if ($assignment && $assignment->tenaga_pendidik_id == $guruPengajar->id) {
-            $assignment->delete();
-            return back()->with('success', 'Penugasan berhasil dihapus!');
-        }
-
-        return back()->with('error', 'Penugasan tidak ditemukan!');
-    }
-
-    /**
-     * Manage assignments for a specific class.
+     * Manage assignments for a specific class (read-only dashboard).
      */
     public function manageKelas(Request $request, Kelas $kelas)
     {
         $kelas->load(['cabang', 'tahunAjaran', 'guruPengajar.tenagaPendidik', 'guruPengajar.mataPelajaran']);
 
-        // Get available guru (hanya guru_pengajar, tidak termasuk wali_kelas)
-        $guruList = TenagaPendidik::whereHas('user', function($q) {
-            $q->where('is_active', true)->where('role', 'guru_pengajar');
-        })->orderBy('nama_lengkap')->get();
-
-        // Get mata pelajaran sesuai jenjang kelas
-        $mataPelajaranList = MataPelajaran::where('is_active', true)
-            ->where('jenjang', $kelas->jenjang)
-            ->orderBy('nama_mapel')
+        // Get jadwal terkait kelas ini
+        $jadwalList = JadwalPelajaran::whereHas('kelas', fn($q) => $q->where('kelas.id', $kelas->id))
+            ->with(['guru', 'mataPelajaran'])
+            ->orderBy('hari')
+            ->orderBy('jam_mulai')
             ->get();
 
-        return view('admin.guru-pengajar.manage-kelas', compact('kelas', 'guruList', 'mataPelajaranList'));
+        return view('admin.guru-pengajar.manage-kelas', compact('kelas', 'jadwalList'));
     }
 
     /**
-     * Assign guru to kelas from kelas view.
+     * Rebuild guru_pengajar_kelas from jadwal_pelajaran.
+     * Ensures the derived table is in sync with the source of truth (jadwal).
      */
-    public function assignToKelas(Request $request, Kelas $kelas)
+    public function rebuildFromJadwal(Request $request)
     {
-        $validated = $request->validate([
-            'tenaga_pendidik_id' => 'required|exists:tenaga_pendidik,id',
-            'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
-        ]);
-
-        // Check if already assigned (to ANY teacher)
-        $existing = GuruPengajarKelas::where('kelas_id', $kelas->id)
-            ->where('mata_pelajaran_id', $validated['mata_pelajaran_id'])
-            ->with('tenagaPendidik')
-            ->first();
-
-        if ($existing) {
-             $currentGuru = $existing->tenagaPendidik ? $existing->tenagaPendidik->nama_lengkap : 'Guru lain';
-            return back()->with('error', "Gagal! Mata pelajaran ini sudah diajar oleh {$currentGuru} di kelas ini.");
+        $tahunAjaranId = $request->tahun_ajaran_id;
+        if (!$tahunAjaranId) {
+            $tahunAjaranId = TahunAjaran::where('is_active', true)->first()?->id;
         }
 
-        GuruPengajarKelas::create([
-            'tenaga_pendidik_id' => $validated['tenaga_pendidik_id'],
-            'kelas_id' => $kelas->id,
-            'mata_pelajaran_id' => $validated['mata_pelajaran_id'],
-        ]);
-
-        $guru = TenagaPendidik::find($validated['tenaga_pendidik_id']);
-        $mapel = MataPelajaran::find($validated['mata_pelajaran_id']);
-
-        return back()->with('success', "Berhasil menugaskan {$guru->nama_lengkap} mengajar {$mapel->nama_mapel}!");
-    }
-
-    /**
-     * Remove assignment from kelas view.
-     */
-    public function removeFromKelas(Request $request, Kelas $kelas)
-    {
-        $validated = $request->validate([
-            'assignment_id' => 'required|exists:guru_pengajar_kelas,id',
-        ]);
-
-        $assignment = GuruPengajarKelas::find($validated['assignment_id']);
-        
-        if ($assignment && $assignment->kelas_id == $kelas->id) {
-            $assignment->delete();
-            return back()->with('success', 'Penugasan berhasil dihapus!');
+        if (!$tahunAjaranId) {
+            return back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
-        return back()->with('error', 'Penugasan tidak ditemukan!');
+        // Get all jadwal with guru for this tahun ajaran
+        $jadwalList = JadwalPelajaran::where('tahun_ajaran_id', $tahunAjaranId)
+            ->whereNotNull('guru_id')
+            ->with('kelas')
+            ->get();
+
+        // Collect unique guru-kelas-mapel combinations
+        $fromJadwal = collect();
+        foreach ($jadwalList as $jadwal) {
+            foreach ($jadwal->kelas as $kelas) {
+                $key = $jadwal->guru_id . '-' . $kelas->id . '-' . $jadwal->mata_pelajaran_id;
+                if (!$fromJadwal->has($key)) {
+                    $fromJadwal->put($key, [
+                        'tenaga_pendidik_id' => $jadwal->guru_id,
+                        'kelas_id' => $kelas->id,
+                        'mata_pelajaran_id' => $jadwal->mata_pelajaran_id,
+                    ]);
+                }
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            // Delete all existing entries for classes in this tahun ajaran
+            $kelasIds = Kelas::where('tahun_ajaran_id', $tahunAjaranId)->pluck('id');
+            GuruPengajarKelas::whereIn('kelas_id', $kelasIds)->delete();
+
+            // Re-create from jadwal
+            foreach ($fromJadwal as $entry) {
+                GuruPengajarKelas::create($entry);
+            }
+
+            DB::commit();
+
+            return back()->with('success', "Berhasil menyinkronkan {$fromJadwal->count()} penugasan dari jadwal pelajaran.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menyinkronkan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -268,7 +213,7 @@ class GuruPengajarController extends Controller
     {
         $tahunAjaranId = $request->tahun_ajaran_id;
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        
+
         if (!$tahunAjaranId && $tahunAjaranAktif) {
             $tahunAjaranId = $tahunAjaranAktif->id;
         }

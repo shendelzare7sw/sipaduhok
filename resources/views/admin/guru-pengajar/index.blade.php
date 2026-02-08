@@ -257,9 +257,19 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
             <h5 class="mb-1">
                 <i class="fas fa-chalkboard-teacher text-primary me-2"></i>Daftar Guru Pengajar
             </h5>
-            <small class="text-muted">Kelola penugasan guru ke kelas dan mata pelajaran</small>
+            <small class="text-muted">Penugasan guru otomatis dari Jadwal Pelajaran</small>
         </div>
-        <div>
+        <div class="d-flex gap-2">
+            <form action="{{ route('admin.guru-pengajar.rebuild') }}" method="POST" style="display: inline;"
+                onsubmit="return confirm('Sinkronkan ulang semua penugasan dari jadwal pelajaran?')">
+                @csrf
+                @if(request('tahun_ajaran_id'))
+                    <input type="hidden" name="tahun_ajaran_id" value="{{ request('tahun_ajaran_id') }}">
+                @endif
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari Jadwal
+                </button>
+            </form>
             <a href="{{ route('admin.guru-pengajar.print', request()->query()) }}"
                class="btn btn-primary"
                target="_blank">

@@ -167,13 +167,13 @@
                                 @endif
                             </form>
                             
-                            <form action="{{ route('guru.lms.nilai.recalculate', [$kelas->id, $mapel->id]) }}" method="POST"
-                                onsubmit="return confirm('Hitung ulang semua nilai berdasarkan Tugas dan Ujian yang ada?')">
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                onclick="confirmRecalculate()">
+                                <i class="fas fa-sync-alt me-1"></i> Hitung Ulang
+                            </button>
+                            <form id="recalculateForm" action="{{ route('guru.lms.nilai.recalculate', [$kelas->id, $mapel->id]) }}" method="POST" class="d-none">
                                 @csrf
                                 <input type="hidden" name="semester" value="{{ $semester }}">
-                                <button type="submit" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-sync-alt me-1"></i> Hitung Ulang
-                                </button>
                             </form>
                             <a href="{{ route('guru.lms.nilai.export-excel', [$kelas->id, $mapel->id, 'semester' => $semester]) }}" class="btn btn-sm btn-success" target="_blank">
                                 <i class="fas fa-file-excel me-1"></i> Export Excel
@@ -434,6 +434,24 @@
             </div>
         </div>
     </div>
+    <!-- Recalculate Confirmation Modal -->
+    <div class="modal fade" id="recalculateModal" tabindex="-1" aria-labelledby="recalculateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recalculateModalLabel">Konfirmasi Hitung Ulang</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Hitung ulang semua nilai berdasarkan Tugas dan Ujian yang ada?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('recalculateForm').submit()">Hitung Ulang</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -512,5 +530,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+    function confirmRecalculate() {
+        var modal = new bootstrap.Modal(document.getElementById('recalculateModal'));
+        modal.show();
+    }
 </script>
 @endpush

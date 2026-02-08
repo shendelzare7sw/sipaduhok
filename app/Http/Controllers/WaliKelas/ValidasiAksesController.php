@@ -29,10 +29,10 @@ class ValidasiAksesController extends Controller
                 'kelasList' => collect(),
                 'siswaList' => collect(),
                 'stats' => [
-                    'ujian_pending' => 0,
-                    'ujian_selesai' => 0,
-                    'rapor_pending' => 0,
-                    'rapor_selesai' => 0,
+                    'ujianPending' => 0,
+                    'ujianValid' => 0,
+                    'raporPending' => 0,
+                    'raporValid' => 0,
                 ],
                 'filterStatus' => null,
             ]);
@@ -47,10 +47,10 @@ class ValidasiAksesController extends Controller
                 'kelasList' => collect(),
                 'siswaList' => collect(),
                 'stats' => [
-                    'ujian_pending' => 0,
-                    'ujian_selesai' => 0,
-                    'rapor_pending' => 0,
-                    'rapor_selesai' => 0,
+                    'ujianPending' => 0,
+                    'ujianValid' => 0,
+                    'raporPending' => 0,
+                    'raporValid' => 0,
                 ],
                 'filterStatus' => null,
             ]);
@@ -72,6 +72,15 @@ class ValidasiAksesController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
+        // Search
+        $search = $request->get('search');
+        if ($search) {
+            $siswaList = $siswaList->filter(function ($item) use ($search) {
+                return false !== stristr($item->nama_lengkap, $search) || 
+                       false !== stristr($item->nis, $search);
+            });
+        }
+
         // Filter
         $filterStatus = $request->get('filter');
 
@@ -87,23 +96,23 @@ class ValidasiAksesController extends Controller
             $siswaList = $siswaList->where('validasi_rapor_wali', true);
         }
 
-        // Count statistik
+        // Count statistik (keys harus match dengan view: ujianValid, raporValid, ujianPending, raporPending)
         $stats = [
-            'ujian_pending' => Siswa::where('kelas_id', $kelas->id)
+            'ujianPending' => Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->where('validasi_ujian_bendahara', true)
                 ->where('validasi_ujian_wali', false)
                 ->count(),
-            'ujian_selesai' => Siswa::where('kelas_id', $kelas->id)
+            'ujianValid' => Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->where('validasi_ujian_wali', true)
                 ->count(),
-            'rapor_pending' => Siswa::where('kelas_id', $kelas->id)
+            'raporPending' => Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->where('validasi_rapor_bendahara', true)
                 ->where('validasi_rapor_wali', false)
                 ->count(),
-            'rapor_selesai' => Siswa::where('kelas_id', $kelas->id)
+            'raporValid' => Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->where('validasi_rapor_wali', true)
                 ->count(),
@@ -115,6 +124,7 @@ class ValidasiAksesController extends Controller
             'siswaList' => $siswaList,
             'stats' => $stats,
             'filterStatus' => $filterStatus,
+            'search' => $search,
         ]);
     }
 

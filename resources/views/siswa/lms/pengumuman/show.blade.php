@@ -38,15 +38,15 @@
                     @if($pengumuman->file_lampiran)
                         <div class="attachment-box bg-light p-3 rounded-3 border d-flex align-items-center">
                             <div class="icon-box bg-white p-3 rounded-3 shadow-sm me-3 text-danger">
-                                <i class="fas fa-file-pdf fa-2x"></i>
+                                <i class="fas fa-file-alt fa-2x"></i>
                             </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1 fw-bold">Lampiran Dokumen</h6>
-                                <p class="mb-0 text-muted small">Klik tombol untuk mengunduh</p>
+                                <p class="mb-0 text-muted small">Klik tombol untuk melihat atau mengunduh</p>
                             </div>
-                            <a href="{{ asset('storage/' . $pengumuman->file_lampiran) }}" target="_blank" class="btn btn-primary px-4 rounded-pill">
-                                <i class="fas fa-download me-2"></i>Unduh
-                            </a>
+                            <div>
+                                <x-file-preview :path="$pengumuman->file_lampiran" label="Lihat Lampiran" />
+                            </div>
                         </div>
                     @endif
                 </div>

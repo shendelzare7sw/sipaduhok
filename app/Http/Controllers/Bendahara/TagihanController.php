@@ -42,9 +42,15 @@ class TagihanController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $allTahunAjaran = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+
+        // Allow year selection via dropdown (default = active year)
+        $selectedYearId = $request->get('tahun_ajaran_id', $tahunAjaranAktif->id ?? null);
+        $selectedYear = TahunAjaran::find($selectedYearId) ?? $tahunAjaranAktif;
+
         $kelasList = Kelas::with('cabang')
-            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+            ->when($selectedYear, function ($q) use ($selectedYear) {
+                return $q->where('tahun_ajaran_id', $selectedYear->id);
             })
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
@@ -71,16 +77,16 @@ class TagihanController extends Controller
             ->paginate(15)
             ->appends($request->query());
 
-        // Hitung total tagihan per siswa
-        $siswaList->getCollection()->transform(function ($siswa) use ($tahunAjaranAktif) {
+        // Hitung total tagihan per siswa berdasarkan tahun yang dipilih
+        $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear) {
             $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                    return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+                ->when($selectedYear, function ($q) use ($selectedYear) {
+                    return $q->where('tahun_ajaran_id', $selectedYear->id);
                 })
                 ->get();
 
             $totalTagihan = $tagihan->sum('jumlah');
-            
+
             // Calculate Total Paid
             $tagihanIds = $tagihan->pluck('id');
             $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
@@ -99,12 +105,41 @@ class TagihanController extends Controller
             return $siswa;
         });
 
+        // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif)
+        $tunggakanSummary = null;
+        if ($tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
+            $tunggakanData = Tagihan::where('tahun_ajaran_id', '!=', $tahunAjaranAktif->id)
+                ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
+                ->select('tahun_ajaran_id', DB::raw('COUNT(DISTINCT siswa_id) as jumlah_siswa'), DB::raw('SUM(jumlah) as total_tunggakan'))
+                ->groupBy('tahun_ajaran_id')
+                ->get();
+
+            if ($tunggakanData->isNotEmpty()) {
+                $tunggakanSummary = [
+                    'jumlah_siswa' => $tunggakanData->sum('jumlah_siswa'),
+                    'total_tunggakan' => $tunggakanData->sum('total_tunggakan'),
+                    'per_tahun' => $tunggakanData->map(function ($item) {
+                        $ta = TahunAjaran::find($item->tahun_ajaran_id);
+                        return [
+                            'tahun_ajaran_id' => $item->tahun_ajaran_id,
+                            'nama_tahun' => $ta->nama_tahun_ajaran ?? '-',
+                            'jumlah_siswa' => $item->jumlah_siswa,
+                            'total' => $item->total_tunggakan,
+                        ];
+                    }),
+                ];
+            }
+        }
+
         return view('bendahara.tagihan.index', [
             'siswaList' => $siswaList,
             'kelasList' => $kelasList,
             'tahunAjaran' => $tahunAjaranAktif,
+            'selectedYear' => $selectedYear,
+            'allTahunAjaran' => $allTahunAjaran,
+            'tunggakanSummary' => $tunggakanSummary,
             'jenisTagihan' => $this->jenisTagihan,
-            'filters' => $request->only(['kelas_id', 'search']),
+            'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id']),
         ]);
     }
 

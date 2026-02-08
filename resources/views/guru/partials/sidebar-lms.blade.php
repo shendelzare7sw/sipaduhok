@@ -22,16 +22,16 @@
 <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
     class="nav-link {{ request()->routeIs('guru.lms.tugas.*') ? 'active' : '' }}">
     <i class="fas fa-tasks"></i>
-    <span>Tugas & Latihan</span>
+    <span>Tugas</span>
     @if(isset($tugasBelumDikoreksi) && $tugasBelumDikoreksi > 0)
         <span class="badge-notif">{{ $tugasBelumDikoreksi }}</span>
     @endif
 </a>
 
-<a href="{{ route('guru.lms.kuis.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.kuis.*') ? 'active' : '' }}">
-    <i class="fas fa-question-circle"></i>
-    <span>Kuis</span>
+<a href="{{ route('guru.lms.latihan.index', [$kelas->id, $mapel->id]) }}"
+    class="nav-link {{ request()->routeIs('guru.lms.latihan.*') ? 'active' : '' }}">
+    <i class="fas fa-pencil-ruler"></i>
+    <span>Latihan</span>
 </a>
 
 <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"

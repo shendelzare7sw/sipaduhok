@@ -567,196 +567,157 @@
             </div>
         @endif
 
-        {{-- Search/Filter Info --}}
-        @if(request('search') || request('jenjang') || request('cabang_id') || request('status') || request('kelas_id'))
-            <div class="search-info">
-                <div>
-                    <i class="fas fa-filter"></i>
-                    Filter aktif:
-                    @if(request('search'))
-                        <span class="search-term">Pencarian: "{{ request('search') }}"</span>
-                    @endif
-                    @if(request('jenjang'))
-                        <span class="search-term">Jenjang: {{ request('jenjang') }}</span>
-                    @endif
-                    @if(request('kelas_id'))
-                        <span class="search-term">Kelas: {{ $kelasList->find(request('kelas_id'))->nama_kelas ?? '-' }}</span>
-                    @endif
-                    @if(request('cabang_id'))
-                        <span class="search-term">Cabang: {{ $cabangList->find(request('cabang_id'))->nama_cabang ?? '-' }}</span>
-                    @endif
-                    @if(request('status'))
-                        <span class="search-term">Status: {{ ucfirst(request('status')) }}</span>
-                    @endif
-                    <small style="color: #64748b; margin-left: 8px;">({{ $siswa->total() }} data ditemukan)</small>
-                </div>
-                <a href="{{ route('admin.users.siswa') }}" class="btn-clear-all">
-                    <i class="fas fa-times"></i>
-                    Hapus Semua Filter
-                </a>
-            </div>
-        @endif
+
 
         <div class="card">
-            <div class="card-header" style="flex-direction: column; align-items: stretch;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="display: flex; gap: 10px; align-items: center;">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                {{-- Left Group: Title & Filter --}}
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    {{-- Title Group --}}
+                    <div class="d-flex gap-2 align-items-center">
                         <a href="{{ route('admin.users.index') }}" class="btn-secondary">
                             <i class="fas fa-arrow-left"></i>
-                            Daftar Pengguna
                         </a>
                         <div>
-                            <h5 style="margin: 0; font-weight: 700; color: #111827;">Daftar Siswa</h5>
-                            <small style="color: #64748b;">Total: {{ $siswa->total() }} siswa</small>
+                            <h5 class="mb-0 fw-bold text-dark">Daftar Siswa</h5>
+                            <small class="text-muted">Total: {{ $siswa->total() }} siswa</small>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <!-- Dropdown Menu Aksi -->
-                        <div class="btn-group" style="position: relative; display: inline-block;">
-                            <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-cog"></i> Menu Aksi
+
+                    {{-- Filter Form (Moved to header line) --}}
+                    <form action="{{ route('admin.users.siswa') }}" method="GET" id="filterForm" class="d-flex gap-2 align-items-center">
+                        {{-- Filter Dropdown --}}
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" 
+                                data-bs-toggle="dropdown" aria-expanded="false" 
+                                data-bs-auto-close="outside" data-bs-display="static">
+                                <i class="fas fa-filter me-1"></i> Filter
                             </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="{{ route('admin.users.siswa.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
-                                        <i class="fas fa-print me-2"></i> Cetak Data (PDF)
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('admin.users.import-siswa') }}" class="dropdown-item">
-                                        <i class="fas fa-file-import me-2"></i> Import Excel
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('admin.users.siswa-template') }}" class="dropdown-item">
-                                        <i class="fas fa-download me-2"></i> Download Template
-                                    </a>
-                                </li>
-                            </ul>
+                            <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="min-width: 300px; z-index: 9999;">
+                                <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+
+                                {{-- Filter Cabang (First Priority) --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Cabang</label>
+                                    <select name="cabang_id" id="cabangSelect" class="form-select form-select-sm">
+                                        <option value="">Semua Cabang</option>
+                                        @foreach($cabangList as $cabang)
+                                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
+                                                {{ $cabang->nama_cabang }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Filter Jenjang (Dependent on Cabang) --}}
+                                <div class="mb-2" id="jenjangFilterContainer" style="display: {{ request('cabang_id') ? 'block' : 'none' }};">
+                                    <label class="form-label small fw-bold">Jenjang</label>
+                                    <select name="jenjang" id="jenjangSelect" class="form-select form-select-sm">
+                                        <option value="">Semua Jenjang</option>
+                                        @foreach($jenjangs as $j)
+                                            <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Filter Kelas (Dependent on Jenjang) --}}
+                                <div class="mb-2" id="kelasFilterContainer" style="display: {{ request('jenjang') ? 'block' : 'none' }};">
+                                    <label class="form-label small fw-bold">Kelas</label>
+                                    <select name="kelas_id" id="kelasSelect" class="form-select form-select-sm">
+                                        <option value="">Semua Kelas</option>
+                                        @foreach($kelasList as $kelas)
+                                            <option value="{{ $kelas->id }}" 
+                                                    data-cabang="{{ $kelas->cabang_id }}"
+                                                    data-jenjang="{{ $kelas->jenjang }}"
+                                                    {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                                {{ $kelas->nama_kelas }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Filter Status --}}
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Status Siswa</label>
+                                    <select name="status" class="form-select form-select-sm">
+                                        <option value="">Semua Status</option>
+                                        <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                                        <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus</option>
+                                        <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah</option>
+                                        <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+                                </div>
+                            </div>
                         </div>
 
-                        <a href="{{ route('admin.users.create-siswa') }}" class="btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Tambah Siswa
-                        </a>
-                    </div>
-                </div>
-
-                {{-- Filter Form --}}
-                <form action="{{ route('admin.users.siswa') }}" method="GET" id="filterForm">
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        {{-- Search --}}
+                        {{-- Search Input (Next to Filter) --}}
                         <div class="search-input-wrapper">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" name="search" id="searchInput" class="search-input"
-                                placeholder="Cari nama, NIS, atau NISN..." value="{{ request('search') }}"
-                                autocomplete="off" style="width: 250px;">
+                                placeholder="Cari..." value="{{ request('search') }}"
+                                autocomplete="off" style="width: 200px;">
                             <button type="button" class="clear-search {{ request('search') ? 'show' : '' }}"
                                 id="clearSearch" title="Hapus pencarian">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
+                    </form>
+                </div>
 
-                        {{-- Filter Jenjang --}}
-                        <select name="jenjang" class="search-input" style="width: 150px;">
-                            <option value="">Semua Jenjang</option>
-                            @foreach($jenjangs as $j)
-                                <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                            @endforeach
-                        </select>
-
-                        {{-- Filter Cabang --}}
-                        <select name="cabang_id" id="cabangSelect" class="search-input" style="width: 180px;">
-                            <option value="">Semua Cabang</option>
-                            @foreach($cabangList as $cabang)
-                                <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
-                                    {{ $cabang->nama_cabang }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        {{-- Filter Kelas --}}
-                        <span id="kelasFilterContainer" style="display: {{ request('cabang_id') ? 'inline-block' : 'none' }};">
-                            <select name="kelas_id" id="kelasSelect" class="search-input" style="width: 150px;">
-                                <option value="">Semua Kelas</option>
-                                @foreach($kelasList as $kelas)
-                                    <option value="{{ $kelas->id }}" 
-                                            data-cabang="{{ $kelas->cabang_id }}"
-                                            {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                                        {{ $kelas->nama_kelas }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </span>
-
-                        {{-- Filter Status --}}
-                        <select name="status" class="search-input" style="width: 150px;">
-                            <option value="">Semua Status</option>
-                            <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus</option>
-                            <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah</option>
-                            <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
-                        </select>
-
-                        <button type="submit" class="btn-search">
-                            <i class="fas fa-filter"></i>
-                            Filter
+                {{-- Right Group: Actions --}}
+                <div class="d-flex gap-2">
+                    <form action="{{ route('admin.users.bulk-delete-siswa') }}" method="POST" id="bulkDeleteForm" style="display: none;">
+                        @csrf
+                        <input type="hidden" name="ids" id="bulkDeleteIds">
+                        <button type="button" class="btn btn-danger" onclick="showBulkDeleteModal()">
+                            <i class="fas fa-trash"></i>
                         </button>
-                    </div>
-                </form>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cabangSelect = document.getElementById('cabangSelect');
-            const kelasSelect = document.getElementById('kelasSelect');
-            const kelasContainer = document.getElementById('kelasFilterContainer');
-            const kelasOptions = Array.from(kelasSelect.options);
-
-            function updateKelasOptions() {
-                const selectedCabangId = cabangSelect.value;
-                
-                // Show/Hide container
-                if (selectedCabangId) {
-                    kelasContainer.style.display = 'inline-block';
+                    </form>
                     
-                    // Filter options
-                    let hashVisibleOptions = false;
-                    kelasOptions.forEach(option => {
-                        if (option.value === "") {
-                            option.style.display = 'block'; // Always show default option
-                        } else {
-                            const optionCabangId = option.getAttribute('data-cabang');
-                            if (optionCabangId == selectedCabangId) {
-                                option.style.display = 'block';
-                                hashVisibleOptions = true;
-                            } else {
-                                option.style.display = 'none';
-                                // If the hidden option was selected, deselect it
-                                if (option.selected) {
-                                    kelasSelect.value = "";
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    kelasContainer.style.display = 'none';
-                    kelasSelect.value = ""; // Reset selection
-                }
-            }
+                    <!-- Dropdown Menu Aksi -->
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i> Menu Aksi
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a href="{{ route('admin.users.siswa.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
+                                    <i class="fas fa-print me-2"></i> Cetak Data (PDF)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.import-siswa') }}" class="dropdown-item">
+                                    <i class="fas fa-file-import me-2"></i> Import Excel
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.siswa-template') }}" class="dropdown-item">
+                                    <i class="fas fa-download me-2"></i> Download Template
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-            // Initial run (in case of page reload with filter active)
-            updateKelasOptions();
-
-            // Listen for changes
-            cabangSelect.addEventListener('change', updateKelasOptions);
-        });
-    </script>
+                    <a href="{{ route('admin.users.create-siswa') }}" class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Tambah Siswa
+                    </a>
+                </div>
             </div>
+
+
 
             <div style="overflow-x: auto;">
                 <table class="table" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr>
+                            <th style="width: 40px;" class="text-center">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                            </th>
                             <th style="width: 60px;">No</th>
                             <th>Nama Siswa</th>
                             <th>NIS / NISN</th>
@@ -770,6 +731,9 @@
                     <tbody>
                         @forelse($siswa as $index => $s)
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="ids[]" class="form-check-input select-item" value="{{ $s->id }}">
+                                </td>
                                 <td style="text-align: center; font-weight: 600; color: #64748b;">
                                     {{ $siswa->firstItem() + $index }}</td>
                                 <td>
@@ -972,6 +936,181 @@
                 clearSearch.classList.remove('show');
                 searchInput.focus();
             });
+        }
+    </script>
+
+    <!-- Modal Konfirmasi Bulk Delete -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus <span id="selectedCount" style="font-weight: bold;"></span> data terpilih? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">Ya, Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cabangSelect = document.getElementById('cabangSelect');
+            const JenjangSelect = document.getElementById('jenjangSelect');
+            const JenjangContainer = document.getElementById('jenjangFilterContainer');
+            const jenjangSelect = document.getElementById('jenjangSelect');
+            const jenjangContainer = document.getElementById('jenjangFilterContainer');
+            const kelasSelect = document.getElementById('kelasSelect');
+            const kelasContainer = document.getElementById('kelasFilterContainer');
+            
+            // Store original options
+            const originalJenjangOptions = Array.from(jenjangSelect.options);
+            const originalKelasOptions = Array.from(kelasSelect.options);
+
+            function updateFilters() {
+                const selectedCabangId = cabangSelect.value;
+                const selectedJenjang = jenjangSelect.value;
+                
+                // 1. Handle Jenjang Visibility & Options based on Cabang
+                if (selectedCabangId) {
+                    jenjangContainer.style.display = 'block';
+                    
+                    // Filter Jenjangs based on available classes in this branch
+                    // Note: We use the kelasOptions to determine which jenjangs are valid for this branch
+                    const availableJenjangs = new Set();
+                    originalKelasOptions.forEach(opt => {
+                        if (opt.getAttribute('data-cabang') == selectedCabangId) {
+                            availableJenjangs.add(opt.getAttribute('data-jenjang'));
+                        }
+                    });
+
+                    // Update Jenjang Dropdown
+                    originalJenjangOptions.forEach(opt => {
+                        if (opt.value === "") {
+                            opt.style.display = 'block';
+                        } else {
+                            if (availableJenjangs.has(opt.value)) {
+                                opt.style.display = 'block';
+                            } else {
+                                opt.style.display = 'none';
+                                if (jenjangSelect.value === opt.value) jenjangSelect.value = "";
+                            }
+                        }
+                    });
+
+                } else {
+                    jenjangContainer.style.display = 'none';
+                    jenjangSelect.value = "";
+                }
+
+                // 2. Handle Kelas Visibility & Options based on Cabang AND Jenjang
+                if (selectedCabangId && selectedJenjang) {
+                    kelasContainer.style.display = 'block';
+
+                    originalKelasOptions.forEach(opt => {
+                        if (opt.value === "") {
+                            opt.style.display = 'block';
+                        } else {
+                            const branchMatch = opt.getAttribute('data-cabang') == selectedCabangId;
+                            const jenjangMatch = opt.getAttribute('data-jenjang') == selectedJenjang;
+                            
+                            if (branchMatch && jenjangMatch) {
+                                opt.style.display = 'block';
+                            } else {
+                                opt.style.display = 'none';
+                                if (kelasSelect.value === opt.value) kelasSelect.value = "";
+                            }
+                        }
+                    });
+                } else {
+                    kelasContainer.style.display = 'none';
+                    kelasSelect.value = "";
+                }
+            }
+
+            cabangSelect.addEventListener('change', function() {
+                // Reset child filters when parent changes
+                jenjangSelect.value = "";
+                kelasSelect.value = "";
+                updateFilters();
+            });
+
+            jenjangSelect.addEventListener('change', function() {
+                // Reset child filter
+                kelasSelect.value = "";
+                updateFilters();
+            });
+
+            // Initial run
+            updateFilters();
+        });
+
+        // Bulk Selection Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('selectAll');
+            const selectItems = document.querySelectorAll('.select-item');
+            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+            const bulkDeleteIds = document.getElementById('bulkDeleteIds');
+
+            function updateBulkDeleteButton() {
+                const selectedCount = document.querySelectorAll('.select-item:checked').length;
+                if (selectedCount > 0) {
+                    bulkDeleteForm.style.display = 'block';
+                } else {
+                    bulkDeleteForm.style.display = 'none';
+                }
+            }
+
+            if(selectAll) {
+                selectAll.addEventListener('change', function() {
+                    selectItems.forEach(item => {
+                        item.checked = this.checked;
+                    });
+                    updateBulkDeleteButton();
+                });
+            }
+
+            selectItems.forEach(item => {
+                item.addEventListener('change', function() {
+                    const allChecked = document.querySelectorAll('.select-item:checked').length === selectItems.length;
+                    if(selectAll) selectAll.checked = allChecked;
+                    updateBulkDeleteButton();
+                });
+            });
+        });
+
+        function showBulkDeleteModal() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            if (selectedItems.length === 0) return;
+
+            const modal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
+            document.getElementById('selectedCount').textContent = selectedItems.length;
+            modal.show();
+        }
+
+        function submitBulkDelete() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            const ids = Array.from(selectedItems).map(item => item.value);
+            
+            const form = document.getElementById('bulkDeleteForm');
+            // Clear existing hidden inputs for ids
+            const existingInputs = form.querySelectorAll('input[name="ids[]"]');
+            existingInputs.forEach(input => input.remove());
+
+            ids.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            form.submit();
         }
     </script>
 @endsection

@@ -29,7 +29,7 @@
                     @if($tugas->file_tugas)
                         <div class="mt-3">
                             <strong>File Soal:</strong>
-                            <x-file-preview :path="$tugas->file_tugas" label="Download Soal" />
+                            <x-file-preview :path="$tugas->file_tugas" label="Lihat Soal" />
                         </div>
                     @endif
                 </div>
@@ -51,7 +51,7 @@
                     @if($tugasSiswa->file_jawaban)
                         <div class="mt-3">
                             <strong>File Jawaban:</strong>
-                            <x-file-preview :path="$tugasSiswa->file_jawaban" label="Download Jawaban Siswa" />
+                            <x-file-preview :path="$tugasSiswa->file_jawaban" label="Lihat Jawaban Siswa" />
                         </div>
                     @endif
 

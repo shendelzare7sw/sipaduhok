@@ -38,14 +38,14 @@
 
 @section('content')
     <div class="manage-soal-container">
-    <form action="{{ route('guru.lms.ujian.soal.storeAll', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
+    <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.storeAll' : 'guru.lms.ujian.soal.storeAll', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
         id="mainForm">
         @csrf
 
         <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 border-bottom shadow-sm"
             style="z-index: 10;">
             <div>
-                <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
+                <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
                     class="btn btn-outline-secondary mb-2 btn-sm">
                     <i class="fas fa-arrow-left me-1"></i>Kembali
                 </a>
@@ -58,16 +58,42 @@
             <div class="d-flex gap-2">
                 {{-- Rilis / Tarik Toggle --}}
                 <button type="button" class="btn {{ $ujian->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}"
-                    onclick="document.getElementById('toggleStatusForm').submit()"
-                    title="{{ $ujian->is_active ? 'Klik untuk menyembunyikan ujian dari siswa' : 'Klik untuk menampilkan ujian ke siswa' }}">
+                    onclick="confirmSyncAction('toggleStatusForm', '{{ $ujian->is_active ? 'Tarik Kembali ' . (ucfirst($tipeUjian ?? 'ujian')) : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}', 'Mengubah status...')"
+                    title="{{ $ujian->is_active ? 'Klik untuk menyembunyikan dari siswa' : 'Klik untuk menampilkan ke siswa' }}">
                     <i class="fas {{ $ujian->is_active ? 'fa-eye-slash' : 'fa-eye' }} me-1"></i>
-                    {{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis Ujian' }}
+                    {{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}
                 </button>
 
-                <button type="submit" class="btn btn-primary" title="Simpan semua perubahan soal">
+                {{-- Tampilkan Nilai Toggle --}}
+                <button type="button" class="btn {{ $ujian->tampilkan_nilai ? 'btn-outline-danger' : 'btn-outline-info' }}"
+                    onclick="confirmSyncAction('toggleResultForm', '{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}', 'Mengubah visibilitas nilai...')"
+                    title="{{ $ujian->tampilkan_nilai ? 'Klik untuk menyembunyikan nilai dari siswa' : 'Klik untuk menampilkan nilai ke siswa' }}">
+                    <i class="fas {{ $ujian->tampilkan_nilai ? 'fa-eye-slash' : 'fa-poll' }} me-1"></i>
+                    {{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}
+                </button>
+
+                {{-- SIMPAN SEMUA --}}
+                <button type="button" class="btn btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')" 
+                    title="Simpan semua perubahan soal">
                     <i class="fas fa-save me-1"></i> Simpan Semua
                 </button>
             </div>
+        </div>
+
+        {{-- Hidden Input for Sync Logic --}}
+        <input type="hidden" name="sync_kelas" id="sync_kelas_main" value="0">
+        {{-- Pass title for safe lookup --}}
+        <input type="hidden" name="original_judul" value="{{ $ujian->judul_ujian }}">
+
+        {{-- Import/Export Tools --}}
+        <div class="d-flex justify-content-end gap-2 mb-3">
+            <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.template' : 'guru.lms.ujian.soal.template', [$kelas->id, $mapel->id, $ujian->id]) }}"
+                class="btn btn-outline-success btn-sm">
+                <i class="fas fa-download me-1"></i> Download Template
+            </a>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importSoalModal">
+                <i class="fas fa-file-import me-1"></i> Import dari Excel
+            </button>
         </div>
 
         {{-- Accordion Container --}}
@@ -86,10 +112,101 @@
     </form>
 
     {{-- Hidden Form for Toggle --}}
-    <form action="{{ route('guru.lms.ujian.toggleStatus', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
+    <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.toggleStatus' : 'guru.lms.ujian.toggleStatus', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
         id="toggleStatusForm" class="d-none">
         @csrf
+        <input type="hidden" name="sync_kelas" id="sync_kelas_status" value="0">
     </form>
+
+    <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.toggleResult' : 'guru.lms.ujian.toggleResult', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
+        id="toggleResultForm" class="d-none">
+        @csrf
+        <input type="hidden" name="sync_kelas" id="sync_kelas_result" value="0">
+    </form>
+
+    <!-- Sync Confirmation Modal -->
+    <div class="modal fade" id="syncConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="syncModalTitle">Konfirmasi Aksi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="syncModalMessage">Apakah Anda yakin?</p>
+                    
+                    @if(isset($relatedUjianCount) && $relatedUjianCount > 0)
+                        <div class="alert alert-info py-2 mb-0">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" id="syncConfirmCheckbox" checked>
+                                <label class="form-check-label fw-bold" for="syncConfirmCheckbox">
+                                    Terapkan juga ke {{ $relatedUjianCount }} kelas lain?
+                                </label>
+                            </div>
+                            <small class="d-block mt-1 text-muted">
+                                Jika dicentang, aksi ini (dan soal-soal) akan diduplikasi ke semua ujian terkait di kelas lain.
+                            </small>
+                        </div>
+                    @else
+                        <input type="hidden" id="syncConfirmCheckbox" value="0">
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmSync">Ya, Lanjutkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteQuestionModal" tabindex="-1" aria-labelledby="deleteQuestionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteQuestionModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus soal ini?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmRemoveVal()">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Soal Modal -->
+    <div class="modal fade" id="importSoalModal" tabindex="-1" aria-labelledby="importSoalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.import' : 'guru.lms.ujian.soal.import', [$kelas->id, $mapel->id, $ujian->id]) }}"
+                    method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importSoalModalLabel">Import Soal dari Excel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">File Excel (.xlsx)</label>
+                            <input type="file" name="file_soal" class="form-control" accept=".xlsx,.xls" required>
+                        </div>
+                        <div class="alert alert-warning small mb-0">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Soal yang diimport akan <strong>ditambahkan</strong> ke daftar soal yang sudah ada. Download template terlebih dahulu untuk format yang benar.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-upload me-1"></i> Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     </div> {{-- End manage-soal-container --}}
 
@@ -146,6 +263,13 @@
                             <input type="number" name="soal[{INDEX}][bobot_nilai]" class="form-control form-control-sm"
                                 value="10" min="1">
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Narasi / Teks Bacaan <span class="text-muted fw-normal">(Opsional)</span></label>
+                        <textarea name="soal[{INDEX}][narasi]" class="form-control narasi-input" rows="2"
+                            placeholder="Masukkan narasi/teks bacaan jika soal berbasis narasi..."></textarea>
+                        <small class="text-muted">Soal dengan narasi yang sama akan dikelompokkan saat ujian.</small>
                     </div>
 
                     <div class="mb-3">
@@ -279,6 +403,11 @@
                 // Set Pertanyaan safely
                 el.querySelector('.question-input').value = contentRaw;
 
+                // Set Narasi if exists
+                if (data && data.narasi) {
+                    el.querySelector('.narasi-input').value = data.narasi;
+                }
+
                 if (data) {
                     // Set fields
                     el.querySelector('.type-select').value = data.tipe_soal;
@@ -298,15 +427,25 @@
                 updatePreview(el.querySelector('.question-input'));
             };
 
+            let itemToDelete = null;
+
             window.removeQuestion = function (e, btn) {
                 e.stopPropagation(); // Prevent accordion toggle
-                if (!confirm('Hapus soal ini?')) return;
+                itemToDelete = btn.closest('.soal-item');
+                var deleteModal = new bootstrap.Modal(document.getElementById('deleteQuestionModal'));
+                deleteModal.show();
+            };
 
-                let item = btn.closest('.soal-item');
-                item.remove();
-
-                renumberQuestions();
-                updateTotalBadge();
+            window.confirmRemoveVal = function() {
+                if (itemToDelete) {
+                    itemToDelete.remove();
+                    renumberQuestions();
+                    updateTotalBadge();
+                    itemToDelete = null;
+                }
+                var modalEl = document.getElementById('deleteQuestionModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
             };
 
             window.renumberQuestions = function () {
@@ -427,6 +566,56 @@
             } else {
                 window.addQuestion();
             }
+
+            // --- SYNC ACTIONS LOGIC ---
+            let targetFormId = null;
+            let relatedCount = {{ $relatedUjianCount ?? 0 }};
+
+            window.confirmSyncAction = function(formId, title, message) {
+                targetFormId = formId;
+                
+                // If no related classes, just submit directly
+                if (relatedCount === 0) {
+                    document.getElementById(formId).submit();
+                    return;
+                }
+
+                // Show Modal
+                document.getElementById('syncModalTitle').textContent = title;
+                document.getElementById('syncModalMessage').textContent = message || "Lanjutkan aksi ini?";
+                
+                // Reset checkbox default to true
+                let cb = document.getElementById('syncConfirmCheckbox');
+                if(cb) cb.checked = true;
+
+                var syncModal = new bootstrap.Modal(document.getElementById('syncConfirmModal'));
+                syncModal.show();
+            };
+
+            document.getElementById('btnConfirmSync').addEventListener('click', function() {
+                if (!targetFormId) return;
+
+                let form = document.getElementById(targetFormId);
+                let cb = document.getElementById('syncConfirmCheckbox');
+                let shouldSync = cb && cb.checked ? 1 : 0;
+
+                // Find the specific hidden input for this form
+                let inputName = '';
+                if (targetFormId === 'mainForm') inputName = 'sync_kelas_main';
+                else if (targetFormId === 'toggleStatusForm') inputName = 'sync_kelas_status';
+                else if (targetFormId === 'toggleResultForm') inputName = 'sync_kelas_result';
+                
+                let input = document.getElementById(inputName);
+                if (input) input.value = shouldSync;
+
+                // Submit
+                form.submit();
+                
+                // Close modal
+                var modalEl = document.getElementById('syncConfirmModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+            });
         });
     </script>
     <style>

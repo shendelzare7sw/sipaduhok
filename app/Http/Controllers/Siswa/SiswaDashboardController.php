@@ -42,11 +42,6 @@ class SiswaDashboardController extends Controller
             return redirect()->route('dashboard')->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Check if Alumni (Lulus)
-        if ($siswa->status === 'lulus') {
-            return $this->dashboardAlumni($siswa);
-        }
-
         // Pengumuman Aktif Hari Ini & Mendatang
         $pengumuman = Pengumuman::aktif()
             ->where('tanggal_pengumuman', '>=', now()->toDateString())

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
@@ -24,7 +25,7 @@ class PromotionController extends Controller
         $this->promotionService = $promotionService;
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
         

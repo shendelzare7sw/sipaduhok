@@ -337,96 +337,92 @@
             </div>
         </div>
 
-        <div class="grid-2">
-            {{-- Form Tambah Guru --}}
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-plus-circle"></i> Tambah Guru Pengajar</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.guru-pengajar.assign-to-kelas', $kelas) }}" method="POST">
-                        @csrf
-
-                        <div class="form-group">
-                            <label for="tenaga_pendidik_id">Pilih Guru</label>
-                            <select name="tenaga_pendidik_id" id="tenaga_pendidik_id" required>
-                                <option value="">-- Pilih Guru --</option>
-                                @foreach($guruList as $guru)
-                                    <option value="{{ $guru->id }}">{{ $guru->nama_lengkap }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="mata_pelajaran_id">Pilih Mata Pelajaran</label>
-                            <select name="mata_pelajaran_id" id="mata_pelajaran_id" required>
-                                <option value="">-- Pilih Mata Pelajaran --</option>
-                                @foreach($mataPelajaranList as $mapel)
-                                    <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-plus"></i> Tambah Guru
-                        </button>
-                    </form>
+        {{-- Info Box --}}
+        <div class="card" style="border: 1px solid #bfdbfe; background: #eff6ff; margin-bottom: 20px;">
+            <div class="card-body" style="padding: 16px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fas fa-info-circle" style="color: #3b82f6; font-size: 20px; margin-top: 2px;"></i>
+                    <div>
+                        <strong style="color: #1e40af;">Penugasan Otomatis dari Jadwal Pelajaran</strong>
+                        <p style="margin: 4px 0 8px; color: #1e3a5f; font-size: 13px;">
+                            Penugasan guru dikelola otomatis dari Jadwal Pelajaran. Untuk menambah atau mengubah, buat/edit jadwal.
+                        </p>
+                        <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-calendar-alt me-1"></i> Buka Jadwal Pelajaran
+                        </a>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Daftar Guru di Kelas Ini --}}
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-users"></i> Guru di Kelas Ini</h5>
-                </div>
-                <div class="card-body">
-                    @if($kelas->guruPengajar->count() > 0)
+        {{-- Daftar Guru di Kelas Ini --}}
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Guru di Kelas Ini</h5>
+            </div>
+            <div class="card-body">
+                @if($kelas->guruPengajar->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Guru</th>
+                                    <th>Mata Pelajaran</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($kelas->guruPengajar as $assignment)
+                                    <tr>
+                                        <td>
+                                            <div class="guru-info">
+                                                <div class="guru-avatar">
+                                                    {{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}
+                                                </div>
+                                                <span>{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-teal">{{ $assignment->mataPelajaran->nama_mapel }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {{-- Jadwal Terkait --}}
+                    @if($jadwalList->count() > 0)
+                        <h6 class="mt-4 mb-2"><i class="fas fa-calendar-alt"></i> Jadwal di Kelas Ini</h6>
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Guru</th>
+                                        <th>Hari</th>
+                                        <th>Jam</th>
                                         <th>Mata Pelajaran</th>
-                                        <th style="width: 60px;"></th>
+                                        <th>Guru</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($kelas->guruPengajar as $assignment)
+                                    @foreach($jadwalList as $jadwal)
                                         <tr>
-                                            <td>
-                                                <div class="guru-info">
-                                                    <div class="guru-avatar">
-                                                        {{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}
-                                                    </div>
-                                                    <span>{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge badge-teal">{{ $assignment->mataPelajaran->nama_mapel }}</span>
-                                            </td>
-                                            <td>
-                                                <form action="{{ route('admin.guru-pengajar.remove-from-kelas', $kelas) }}"
-                                                    method="POST" id="deleteForm{{ $assignment->id }}">
-                                                    @csrf
-                                                    <input type="hidden" name="assignment_id" value="{{ $assignment->id }}">
-                                                    <button type="button" class="btn btn-danger btn-sm"
-                                                        onclick="confirmDeleteGuru('{{ $assignment->id }}', '{{ $assignment->tenagaPendidik->nama_lengkap }}', '{{ $assignment->mataPelajaran->nama_mapel }}')">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
-                                            </td>
+                                            <td>{{ $jadwal->hari }}</td>
+                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                            <td>{{ $jadwal->mataPelajaran->nama_mapel ?? '-' }}</td>
+                                            <td>{{ $jadwal->guru->nama_lengkap ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
-                    @else
-                        <div class="empty-state">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                            <p>Belum ada guru ditugaskan di kelas ini</p>
-                        </div>
                     @endif
-                </div>
+                @else
+                    <div class="empty-state">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <p>Belum ada guru ditugaskan di kelas ini</p>
+                        <small class="text-muted">Buat jadwal pelajaran untuk kelas ini untuk menambahkan penugasan.</small>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -436,61 +432,4 @@
             </a>
         </div>
     </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
-                <div class="modal-header"
-                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 20px 24px;">
-                    <h5 class="modal-title" id="deleteModalLabel"
-                        style="display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 600;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Konfirmasi Hapus
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="padding: 24px;">
-                    <p style="margin-bottom: 16px; color: #374151; font-size: 15px;">Apakah Anda yakin ingin mengeluarkan
-                        guru berikut dari kelas ini?</p>
-                    <div
-                        style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                        <div style="font-weight: 600; color: #111827; margin-bottom: 4px;" id="guruName"></div>
-                        <div style="font-size: 14px; color: #6b7280;" id="mapelName"></div>
-                    </div>
-                    <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                        <i class="fas fa-info-circle"></i> Tindakan ini akan menghapus penugasan guru pada kelas.
-                    </p>
-                </div>
-                <div class="modal-footer" style="border: none; padding: 16px 24px; background: #f9fafb; gap: 10px;">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal" style="flex: 1;">
-                        <i class="fas fa-times"></i> Batal
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" style="flex: 1;">
-                        <i class="fas fa-trash"></i> Ya, Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let deleteFormId = null;
-
-        function confirmDeleteGuru(assignmentId, guruName, mapelName) {
-            deleteFormId = assignmentId;
-            document.getElementById('guruName').textContent = guruName;
-            document.getElementById('mapelName').textContent = 'Mata Pelajaran: ' + mapelName;
-
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
-        }
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-            if (deleteFormId) {
-                document.getElementById('deleteForm' + deleteFormId).submit();
-            }
-        });
-    </script>
 @endsection

@@ -75,15 +75,23 @@
                             <strong>{{ $ujianSiswa->waktu_selesai->format('d F Y, H:i') }} WIB</strong>
                         </div>
 
-                        @if($ujianSiswa->nilai !== null)
-                            <div class="my-4">
-                                <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai, 1) }}</h1>
-                                <span class="text-muted">Nilai Akhir</span>
-                            </div>
+                        @if($ujian->tampilkan_nilai)
+                            @if($ujianSiswa->nilai !== null)
+                                <div class="my-4">
+                                    <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai, 1) }}</h1>
+                                    <span class="text-muted">Nilai Akhir</span>
+                                </div>
+                            @else
+                                <div class="my-4">
+                                    <i class="fas fa-hourglass-half fa-3x text-warning mb-2"></i>
+                                    <h5 class="text-secondary">Menunggu Penilaian Guru</h5>
+                                </div>
+                            @endif
                         @else
                             <div class="my-4">
-                                <i class="fas fa-hourglass-half fa-3x text-warning mb-2"></i>
-                                <h5 class="text-secondary">Menunggu Penilaian Guru</h5>
+                                <i class="fas fa-lock fa-3x text-secondary mb-2"></i>
+                                <h5 class="text-secondary">Nilai Tidak Ditampilkan</h5>
+
                             </div>
                         @endif
 
@@ -103,7 +111,7 @@
                             <div class="col-md-4">
                                 <div class="info-box">
                                     <i class="fas fa-clock text-warning"></i>
-                                    <h5>{{ $ujian->durasi_menit }} Menit</h5>
+                                    <h5>{{ $ujian->durasi_menit == 0 ? 'Tanpa Batas' : $ujian->durasi_menit . ' Menit' }}</h5>
                                     <small class="text-muted">Durasi</small>
                                 </div>
                             </div>
@@ -345,6 +353,15 @@
                         @if($soalList->count() > 0)
                             @foreach($soalList as $index => $soal)
                                 <div class="question-item" id="q-item-{{ $index }}" style="display: {{ $index === 0 ? 'block' : 'none' }};">
+                                    @if($soal->narasi)
+                                        <div class="narasi-box mb-3" style="background: #f0f7ff; border-left: 4px solid #165fac; border-radius: 4px; padding: 15px;">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="fas fa-book-open me-1"></i> Bacaan</small>
+                                            <div style="font-size: 0.95rem; line-height: 1.7; color: #333;">
+                                                {!! nl2br(e($soal->narasi)) !!}
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     <!-- Question Text -->
                                     <div class="question-text">
                                         {!! nl2br(e($soal->pertanyaan)) !!}
@@ -487,9 +504,20 @@
         const doubtState = new Array(totalQuestions).fill(false);
 
         // Timer
-        const endTime = new Date("{{ $ujianSiswa->waktu_mulai }}").getTime() + ({{ $ujian->durasi_menit }} * 60 * 1000);
+        const durasiMenit = {{ $ujian->durasi_menit ?? 0 }};
+        const startTime = new Date("{{ $ujianSiswa->waktu_mulai }}").getTime();
+        
+        // Jika durasi 0, berarti tanpa batas waktu
+        const isUnlimited = (durasiMenit === 0);
+        const endTime = isUnlimited ? null : startTime + (durasiMenit * 60 * 1000);
 
         function updateTimer() {
+            if (isUnlimited) {
+                document.getElementById("timer-display-main").innerHTML = "NO LIMIT";
+                 document.querySelectorAll(".mobile-timer").forEach(el => el.innerHTML = "NO LIMIT");
+                return;
+            }
+
             const now = new Date().getTime();
             const distance = endTime - now;
 

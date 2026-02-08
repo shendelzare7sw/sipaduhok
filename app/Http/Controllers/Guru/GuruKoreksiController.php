@@ -84,7 +84,10 @@ class GuruKoreksiController extends Controller
     /**
      * Simpan nilai
      */
-    public function grade(Request $request, $kelasId, $mapelId, $tugasId, $submissionId): RedirectResponse
+    /**
+     * Simpan nilai
+     */
+    public function store(Request $request, $kelasId, $mapelId, $tugasId, $submissionId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -102,7 +105,7 @@ class GuruKoreksiController extends Controller
         ]);
 
         return redirect()
-            ->route('guru.lms.koreksi.index', [$kelasId, $mapelId, $tugasId])
+            ->route('guru.lms.tugas.koreksi', [$kelasId, $mapelId, $tugasId])
             ->with('success', 'Nilai berhasil disimpan');
     }
 
@@ -129,7 +132,7 @@ class GuruKoreksiController extends Controller
             ]);
 
         return redirect()
-            ->route('guru.lms.koreksi.index', [$kelasId, $mapelId, $tugasId])
+            ->route('guru.lms.tugas.koreksi', [$kelasId, $mapelId, $tugasId])
             ->with('success', count($validated['siswa_ids']) . ' siswa berhasil dinilai');
     }
 

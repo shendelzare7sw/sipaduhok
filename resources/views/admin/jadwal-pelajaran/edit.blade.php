@@ -77,6 +77,7 @@
         <form action="{{ route('admin.jadwal-pelajaran.update', $jadwalPelajaran) }}" method="POST">
             @csrf
             @method('PUT')
+            <input type="hidden" name="is_multi_jenjang" id="isMultiJenjang" value="0">
 
             {{-- Tahun Ajaran & Kelas Section --}}
             <div class="form-section">
@@ -96,6 +97,7 @@
                         <small class="text-muted">Tahun ajaran tidak dapat diubah</small>
                     </div>
 
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">Kelas (Bisa Pilih Lebih dari Satu) <span class="text-danger">*</span></label>
                         
                         {{-- Hidden Select for Form Submission & Logic Compatibility --}}
@@ -132,9 +134,10 @@
                 <div class="form-section-title">Penugasan Mengajar</div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    {{-- Single Mapel Section (shown when all classes are same jenjang) --}}
+                    <div class="col-md-6 mb-3" id="singleMapelSection">
                         <label class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
-                        <select name="mata_pelajaran_id" id="mapelSelect" class="form-select" required>
+                        <select name="mata_pelajaran_id" id="mapelSelect" class="form-select">
                             @foreach($mataPelajaranList as $mapel)
                                 <option value="{{ $mapel->id }}" data-jenjang="{{ $mapel->jenjang }}"
                                         {{ old('mata_pelajaran_id', $jadwalPelajaran->mata_pelajaran_id) == $mapel->id ? 'selected' : '' }}>
@@ -142,6 +145,13 @@
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+
+                    {{-- Multi Mapel Section (shown when classes span multiple jenjang) --}}
+                    <div class="col-md-6 mb-3" id="multiMapelContainer" style="display: none;">
+                        <label class="form-label">Mata Pelajaran Per Jenjang <span class="text-danger">*</span></label>
+                        <div id="multiMapelSections"></div>
+                        <small class="text-muted">Kelas dari jenjang berbeda terdeteksi. Pilih mapel untuk setiap jenjang.</small>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -357,31 +367,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Filter mata pelajaran berdasarkan jenjang kelas
     kelasSelect.addEventListener('change', function() {
-        const selectedOptions = Array.from(this.selectedOptions);
-        const jenjang = selectedOptions.length > 0 ? selectedOptions[0].getAttribute('data-jenjang') : null;
-
-        // Reset mapel selection if user manually changes (but on edit we might want to keep if valid)
-        // mapelSelect.value = ''; // Don't reset on edit initially, only if needed. But consistent behavior is better.
-        // Actually, for Edit, we only filter visibility.
-
-        // Filter options
-        Array.from(mapelSelect.options).forEach(option => {
-            if (option.value === '') {
-                option.style.display = 'block';
-                return;
-            }
-
-            const mapelJenjang = option.getAttribute('data-jenjang');
-            if (jenjang && mapelJenjang !== jenjang) {
-                option.style.display = 'none';
-            } else {
-                option.style.display = 'block';
-            }
-        });
+        renderMapelSections();
 
         // Update istirahat info
         filterIstirahatDisplay();
-        
+
         // Filter Guru
         filterGuruByCabang();
     });
@@ -623,7 +613,7 @@ function updateSelectedKelasUI(data) {
     const container = document.querySelector('.kelas-display');
     const textPlaceholder = document.getElementById('selectedKelasText');
     const chipsContainer = document.getElementById('selectedKelasChips');
-    
+
     if (data.length === 0) {
         textPlaceholder.style.display = 'block';
         chipsContainer.style.display = 'none';
@@ -632,7 +622,7 @@ function updateSelectedKelasUI(data) {
         textPlaceholder.style.display = 'none';
         chipsContainer.style.display = 'flex';
         chipsContainer.innerHTML = '';
-        
+
         data.forEach(item => {
             const chip = document.createElement('div');
             chip.className = 'badge bg-primary d-flex align-items-center p-2';
@@ -643,6 +633,98 @@ function updateSelectedKelasUI(data) {
                 <span class="ms-2 badge bg-white text-primary" style="font-size: 10px;">${item.jenjang}</span>
             `;
             chipsContainer.appendChild(chip);
+        });
+    }
+}
+
+// All mapel data for multi-jenjang rendering
+const _allMapelData = @json($mataPelajaranList->map(fn($m) => ['id' => $m->id, 'nama' => $m->nama_mapel, 'jenjang' => $m->jenjang]));
+
+function renderMapelSections() {
+    const kelasSelect = document.getElementById('kelasSelect');
+    const mapelSelect = document.getElementById('mapelSelect');
+    const singleSection = document.getElementById('singleMapelSection');
+    const multiContainer = document.getElementById('multiMapelContainer');
+    const multiSections = document.getElementById('multiMapelSections');
+    const isMultiJenjang = document.getElementById('isMultiJenjang');
+
+    const selectedOptions = Array.from(kelasSelect.selectedOptions);
+
+    if (selectedOptions.length === 0) {
+        singleSection.style.display = '';
+        multiContainer.style.display = 'none';
+        isMultiJenjang.value = '0';
+        mapelSelect.setAttribute('required', 'required');
+        mapelSelect.setAttribute('name', 'mata_pelajaran_id');
+        Array.from(mapelSelect.options).forEach(opt => { opt.style.display = ''; });
+        multiSections.innerHTML = '';
+        return;
+    }
+
+    // Group selected classes by jenjang
+    const jenjangMap = {};
+    selectedOptions.forEach(opt => {
+        const j = opt.getAttribute('data-jenjang');
+        if (!jenjangMap[j]) jenjangMap[j] = [];
+        jenjangMap[j].push(opt.text.trim());
+    });
+
+    const jenjangKeys = Object.keys(jenjangMap);
+
+    if (jenjangKeys.length <= 1) {
+        // Single jenjang
+        singleSection.style.display = '';
+        multiContainer.style.display = 'none';
+        isMultiJenjang.value = '0';
+        mapelSelect.setAttribute('required', 'required');
+        mapelSelect.setAttribute('name', 'mata_pelajaran_id');
+        multiSections.innerHTML = '';
+
+        const jenjang = jenjangKeys[0] || null;
+        Array.from(mapelSelect.options).forEach(option => {
+            if (option.value === '') { option.style.display = 'block'; return; }
+            const mapelJenjang = option.getAttribute('data-jenjang');
+            option.style.display = (jenjang && mapelJenjang !== jenjang) ? 'none' : 'block';
+        });
+    } else {
+        // Multi jenjang
+        singleSection.style.display = 'none';
+        multiContainer.style.display = '';
+        isMultiJenjang.value = '1';
+        mapelSelect.removeAttribute('required');
+        mapelSelect.removeAttribute('name');
+        multiSections.innerHTML = '';
+
+        // Get current mapel id for pre-selection on edit
+        const currentMapelId = '{{ $jadwalPelajaran->mata_pelajaran_id }}';
+        const currentMapelJenjang = '{{ $jadwalPelajaran->mataPelajaran->jenjang ?? '' }}';
+
+        jenjangKeys.forEach(jenjang => {
+            const kelasNames = jenjangMap[jenjang].join(', ');
+            const filteredMapel = _allMapelData.filter(m => m.jenjang === jenjang);
+
+            const section = document.createElement('div');
+            section.className = 'mb-3 p-3 border rounded bg-white';
+
+            let preSelectedValue = '';
+            let selectHtml = `<select class="form-select" required onchange="this.previousElementSibling.value=this.value">`;
+            selectHtml += `<option value="">-- Pilih Mapel ${jenjang} --</option>`;
+            filteredMapel.forEach(m => {
+                const selected = (jenjang === currentMapelJenjang && m.id == currentMapelId) ? 'selected' : '';
+                if (selected) preSelectedValue = m.id;
+                selectHtml += `<option value="${m.id}" ${selected}>${m.nama} (${m.jenjang})</option>`;
+            });
+            selectHtml += `</select>`;
+
+            section.innerHTML = `
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-info">${jenjang}</span>
+                    <small class="text-muted">Kelas: ${kelasNames}</small>
+                </div>
+                <input type="hidden" name="mapel_per_jenjang[${jenjang}]" value="${preSelectedValue}">
+                ${selectHtml}
+            `;
+            multiSections.appendChild(section);
         });
     }
 }

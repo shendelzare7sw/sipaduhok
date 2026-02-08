@@ -10,12 +10,14 @@ use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\TenagaPendidik;
 use App\Models\PengaturanIstirahat;
+use App\Traits\JadwalPelajaranTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class JadwalPelajaranController extends Controller
 {
+    use JadwalPelajaranTrait;
     /**
      * Display a listing of jadwal pelajaran.
      */
@@ -193,6 +195,11 @@ class JadwalPelajaranController extends Controller
      */
     public function store(Request $request)
     {
+        // Multi-jenjang mode: delegate to trait
+        if ($request->input('is_multi_jenjang')) {
+            return $this->storeMultiJenjang($request, 'admin');
+        }
+
         $validated = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'kelas_ids' => 'required|array',
@@ -206,6 +213,12 @@ class JadwalPelajaranController extends Controller
             'siswa_ids' => 'nullable|array',
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
+
+        // Validasi Jenjang Compatibility
+        $genreCheck = $this->validateJenjangCompatibility($validated['kelas_ids'], $validated['mata_pelajaran_id']);
+        if (!$genreCheck['valid']) {
+             return back()->withInput()->with('error', $genreCheck['message']);
+        }
 
         // Validasi bentrok
         $conflicts = $this->checkConflicts(
@@ -222,23 +235,20 @@ class JadwalPelajaranController extends Controller
             return back()->withInput()->with('error', $conflicts['message']);
         }
 
-        // Auto-filter students for Religion subjects
-        // Note: For multi-class, we might need to filter from ALL selected classes.
-        // Current getFilteredSiswaIds implementation might need update to handle array of classes.
-        // For now, let's assume it handles singular or we skip it for multi-class temporarily or update it later.
-        // If critical: we loop through kelas_ids. 
-        // Let's defer strict student filtering update to next step if complex.
-        // Actually, let's do a simple check.
         $validated['siswa_ids'] = $validated['siswa_ids'] ?? null;
-        
         $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
         $validated['updated_by'] = Auth::id();
-        
+
         // Backward compatibility for kelas_id (take first one)
         $validated['kelas_id'] = $validated['kelas_ids'][0] ?? null;
 
         $jadwal = JadwalPelajaran::create(\Illuminate\Support\Arr::except($validated, ['kelas_ids']));
         $jadwal->kelas()->attach($validated['kelas_ids']);
+
+        // Auto-sync guru pengajar
+        if ($validated['guru_id']) {
+            $this->syncGuruPengajar($validated['guru_id'], $validated['kelas_ids'], $validated['mata_pelajaran_id']);
+        }
 
         return redirect()
             ->route('admin.jadwal-pelajaran.index', ['tahun_ajaran_id' => $validated['tahun_ajaran_id']])
@@ -331,6 +341,11 @@ class JadwalPelajaranController extends Controller
      */
     public function update(Request $request, JadwalPelajaran $jadwalPelajaran)
     {
+        // Multi-jenjang mode: delegate to trait
+        if ($request->input('is_multi_jenjang')) {
+            return $this->updateMultiJenjang($request, $jadwalPelajaran, 'admin');
+        }
+
         $validated = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'kelas_ids' => 'required|array',
@@ -344,6 +359,12 @@ class JadwalPelajaranController extends Controller
             'siswa_ids' => 'nullable|array',
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
+
+        // Validasi Jenjang Compatibility
+        $genreCheck = $this->validateJenjangCompatibility($validated['kelas_ids'], $validated['mata_pelajaran_id']);
+        if (!$genreCheck['valid']) {
+             return back()->withInput()->with('error', $genreCheck['message']);
+        }
 
         // Validasi bentrok (exclude current jadwal)
         $conflicts = $this->checkConflicts(
@@ -361,17 +382,19 @@ class JadwalPelajaranController extends Controller
             return back()->withInput()->with('error', $conflicts['message']);
         }
 
-        // Track changes untuk history
-        // $this->trackChanges($jadwalPelajaran, $validated); // Disable temporarity/update later
-
         $validated['status'] = $validated['guru_id'] ? 'aktif' : 'kosong';
         $validated['updated_by'] = Auth::id();
-        
+
         // Backward compatibility for kelas_id
         $validated['kelas_id'] = $validated['kelas_ids'][0] ?? $jadwalPelajaran->kelas_id;
 
         $jadwalPelajaran->update(\Illuminate\Support\Arr::except($validated, ['kelas_ids']));
         $jadwalPelajaran->kelas()->sync($validated['kelas_ids']);
+
+        // Auto-sync guru pengajar
+        if ($validated['guru_id']) {
+            $this->syncGuruPengajar($validated['guru_id'], $validated['kelas_ids'], $validated['mata_pelajaran_id']);
+        }
 
         return redirect()
             ->route('admin.jadwal-pelajaran.index', ['tahun_ajaran_id' => $validated['tahun_ajaran_id']])
@@ -384,7 +407,17 @@ class JadwalPelajaranController extends Controller
     public function destroy(JadwalPelajaran $jadwalPelajaran)
     {
         $tahunAjaranId = $jadwalPelajaran->tahun_ajaran_id;
+        $guruId = $jadwalPelajaran->guru_id;
+        $kelasIds = $jadwalPelajaran->kelas->pluck('id')->toArray();
+        $mapelId = $jadwalPelajaran->mata_pelajaran_id;
+
+        $jadwalPelajaran->kelas()->detach();
         $jadwalPelajaran->delete();
+
+        // Cleanup guru_pengajar_kelas if no other jadwal references this combo
+        if ($guruId) {
+            $this->cleanupGuruPengajar($guruId, $kelasIds, $mapelId);
+        }
 
         return redirect()
             ->route('admin.jadwal-pelajaran.index', ['tahun_ajaran_id' => $tahunAjaranId])
@@ -402,6 +435,7 @@ class JadwalPelajaranController extends Controller
         ]);
 
         $guruLama = $jadwalPelajaran->guru;
+        $oldGuruId = $jadwalPelajaran->guru_id;
         $guruBaru = $validated['guru_id_baru'] ? TenagaPendidik::find($validated['guru_id_baru']) : null;
 
         // Check conflict untuk guru baru
@@ -439,6 +473,24 @@ class JadwalPelajaranController extends Controller
             'keterangan' => $validated['alasan'],
             'updated_by' => Auth::id(),
         ]);
+
+        // Cleanup old guru assignment if no other jadwal references it
+        if ($oldGuruId) {
+            $this->cleanupGuruPengajar(
+                $oldGuruId,
+                $jadwalPelajaran->kelas->pluck('id')->toArray(),
+                $jadwalPelajaran->mata_pelajaran_id
+            );
+        }
+
+        // Auto-sync guru pengajar baru
+        if ($validated['guru_id_baru']) {
+            $this->syncGuruPengajar(
+                $validated['guru_id_baru'],
+                $jadwalPelajaran->kelas->pluck('id')->toArray(),
+                $jadwalPelajaran->mata_pelajaran_id
+            );
+        }
 
         $message = $guruBaru
             ? "Guru berhasil diganti dari {$guruLama->nama_lengkap} ke {$guruBaru->nama_lengkap}"
@@ -574,186 +626,8 @@ class JadwalPelajaranController extends Controller
         return response()->json($jadwalList);
     }
 
-    /**
-     * Check for schedule conflicts.
-     */
-    private function checkConflicts($tahunAjaranId, $kelasIds, $guruId, $hari, $jamMulai, $jamSelesai, $mataPelajaranId = null, $excludeId = null)
-    {
-        $result = ['hasConflict' => false, 'message' => ''];
-        
-        // Convert to array if single value
-        if (!is_array($kelasIds)) {
-            $kelasIds = [$kelasIds];
-        }
-
-        // 1. Conflict Check: Classes
-        foreach ($kelasIds as $kelasId) {
-            $kelas = Kelas::find($kelasId);
-            if (!$kelas) continue;
-
-            // Istirahat Conflict Check
-            $istirahatConflict = PengaturanIstirahat::jenjang($kelas->jenjang)
-                ->aktif()
-                ->untukHari($hari)
-                ->get()
-                ->first(function ($istirahat) use ($jamMulai, $jamSelesai) {
-                    return !($jamSelesai <= $istirahat->jam_mulai || $jamMulai >= $istirahat->jam_selesai);
-                });
-
-            if ($istirahatConflict) {
-                return [
-                    'hasConflict' => true, 
-                    'message' => "Kelas {$kelas->nama_kelas} bentrok dengan istirahat '{$istirahatConflict->nama_istirahat}' ({$istirahatConflict->jam_mulai}-{$istirahatConflict->jam_selesai})"
-                ];
-            }
-
-            // Other Jadwal Check
-            $isAgama = false;
-            if ($mataPelajaranId) {
-                $mapel = MataPelajaran::find($mataPelajaranId);
-                // Check keywords
-                if ($mapel && (stripos($mapel->nama_mapel, 'Agama') !== false || stripos($mapel->nama_mapel, 'Religi') !== false)) {
-                    $isAgama = true;
-                }
-            }
-
-            $kelasConflictQuery = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
-                ->byKelas($kelasId) // This uses whereHas scope now
-                ->byHari($hari)
-                ->where(function ($q) use ($jamMulai, $jamSelesai) {
-                    $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                        ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                        ->orWhere(function ($q2) use ($jamMulai, $jamSelesai) {
-                            $q2->where('jam_mulai', '<=', $jamMulai)
-                                ->where('jam_selesai', '>=', $jamSelesai);
-                        });
-                })
-                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId));
-            
-            // Agama Exception Logic
-            if ($isAgama) {
-                // Allow overlap if the EXISTING schedule is ALSO Agama...
-                // AND implies different teachers (handled by Teacher Check)
-                // So here we only flag conflict if it overlaps with NON-Agama Subject.
-                $kelasConflictQuery->whereHas('mataPelajaran', function($q) {
-                     $q->where('nama_mapel', 'not like', '%Agama%')
-                       ->where('nama_mapel', 'not like', '%Religi%');
-                });
-            }
-
-            $kelasConflict = $kelasConflictQuery->first();
-
-            if ($kelasConflict) {
-                // If Agama Exception logic allowed overlap, we still need to ensure we don't double book same teacher or exact same subject if strict
-                // But generally, if we filtered to only find Non-Agama conflicts, finding one means REAL conflict.
-                return [
-                    'hasConflict' => true,
-                    'message' => "Kelas {$kelas->nama_kelas} sudah ada jadwal ({$kelasConflict->mataPelajaran->nama_mapel}) pada jam tersebut"
-                ];
-            }
-        }
-        
-        // 2. Conflict Check: Teacher
-        if ($guruId) {
-            $guruConflict = JadwalPelajaran::byTahunAjaran($tahunAjaranId)
-                ->byGuru($guruId)
-                ->byHari($hari)
-                ->where(function ($q) use ($jamMulai, $jamSelesai) {
-                    $q->whereBetween('jam_mulai', [$jamMulai, $jamSelesai])
-                        ->orWhereBetween('jam_selesai', [$jamMulai, $jamSelesai])
-                        ->orWhere(function ($q2) use ($jamMulai, $jamSelesai) {
-                            $q2->where('jam_mulai', '<=', $jamMulai)
-                                ->where('jam_selesai', '>=', $jamSelesai);
-                        });
-                })
-                ->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))
-                ->with(['kelas.cabang', 'mataPelajaran'])
-                ->first();
-
-            if ($guruConflict) {
-                // Merge Exception:
-                // Same Subject AND Same Branch
-                
-                $sameSubject = $mataPelajaranId && $guruConflict->mata_pelajaran_id == $mataPelajaranId;
-                
-                // For combined classes, guruConflict->kelas is a Collection.
-                // Check if ALL conflicting classes are in the same branch as the requested classes?
-                // Simplified: Check if the 'schedule' belongs to the same branch.
-                // We need to check if ANY of the new classes belongs to a DIFFERENT branch than the existing schedule's classes.
-                
-                // Get branch IDs of new classes
-                $newBranchIds = Kelas::whereIn('id', $kelasIds)->pluck('cabang_id')->unique();
-                
-                // Get branch IDs of existing conflicting schedule
-                 $existingBranchIds = $guruConflict->kelas->pluck('cabang_id')->unique();
-                 
-                 // If any branch is different, or multiple branches involved, flag conflict?
-                 // Requirement: "Cabang Sama".
-                 // So if New Branch == Existing Branch (single branch context), allow.
-                 
-                 $sameBranch = false;
-                 if ($newBranchIds->count() == 1 && $existingBranchIds->count() == 1) {
-                     if ($newBranchIds->first() == $existingBranchIds->first()) {
-                         $sameBranch = true;
-                     }
-                 }
-
-                 if ($sameSubject && $sameBranch) {
-                     // Allowed (Merge / Combined Class)
-                 } else {
-                     $conflictClasses = $guruConflict->kelas->pluck('nama_kelas')->join(', ');
-                     return [
-                         'hasConflict' => true,
-                         'message' => "Guru sedang mengajar di kelas {$conflictClasses} pada jam tersebut"
-                     ];
-                 }
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get filtered student IDs for religion subjects.
-     * Returns array of IDs if filtering is needed, or null if no filtering (all students).
-     */
-    private function getFilteredSiswaIds($kelasId, $mataPelajaranId)
-    {
-        $mapel = MataPelajaran::find($mataPelajaranId);
-        if (!$mapel) {
-            return null;
-        }
-
-        $namaMapel = strtolower($mapel->nama_mapel);
-
-        // Check for Religion keywords
-        $agamaFilter = null;
-        if (str_contains($namaMapel, 'agama kristen') || str_contains($namaMapel, 'religi kristen')) {
-            $agamaFilter = 'Kristen';
-        } elseif (str_contains($namaMapel, 'agama islam') || str_contains($namaMapel, 'religi islam')) {
-            $agamaFilter = 'Islam';
-        }
-
-        // If it's a religion subject that requires filtering
-        if ($agamaFilter) {
-            // Fetch students in the class with matching religion
-            // Case insensitive comparison for religion might be needed depending on DB collation, 
-            // but strict matching is usually safer for standardized inputs.
-            // Using 'like' for bit of flexibility if needed, or simple where.
-            $siswaIds = \App\Models\Siswa::where('kelas_id', $kelasId)
-                ->where('status', 'aktif')
-                ->where('agama', 'LIKE', "%{$agamaFilter}%") 
-                ->pluck('id')
-                ->toArray();
-            
-            return $siswaIds;
-        }
-
-        // Return null means "All Students" (no specific list stored, or handled as null in DB)
-        // If your DB requires explicit list for "All", fetch all IDs. 
-        // Based on previous code `siswa_ids` => 'nullable|array', if null it likely means all.
-        return null;
-    }
+    // checkConflicts, validateJenjangCompatibility, getFilteredSiswaIds, syncGuruPengajar
+    // are provided by JadwalPelajaranTrait
 
     /**
      * Track changes untuk history.
@@ -1161,8 +1035,6 @@ class JadwalPelajaranController extends Controller
             if (isset($grid[$startIndex]['days'][$day]['type']) && $grid[$startIndex]['days'][$day]['type'] == 'taken') {
                 // Conflict or merge? Append text?
                 // For now, simplify: if 7A and 7B both have Math at same time, just combine text
-                // But here we are iterating items.
-                // We need to check if cell is already 'lesson'.
                 $existing = $grid[$startIndex]['days'][$day];
                  if ($existing['type'] == 'lesson') {
                      // Append content

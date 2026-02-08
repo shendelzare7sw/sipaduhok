@@ -72,7 +72,18 @@
                 <div class="card-body">
                     <form action="{{ route('admin.keuangan.tagihan.index') }}" method="GET">
                         <div class="row align-items-end">
-                            <div class="col-md-4 mb-2">
+                            <div class="col-md-3 mb-2">
+                                <label class="small fw-bold">TAHUN AJARAN</label>
+                                <select name="tahun_ajaran_id"
+                                    class="form-control form-control-sm border-start border-info border-3 shadow-sm" onchange="this.form.submit()">
+                                    @foreach($allTahunAjaran as $ta)
+                                        <option value="{{ $ta->id }}" {{ ($selectedYear->id ?? '') == $ta->id ? 'selected' : '' }}>
+                                            {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
                                 <label class="small fw-bold">BERDASARKAN KELAS</label>
                                 <select name="kelas_id"
                                     class="form-control form-control-sm border-start border-primary border-3 shadow-sm">
@@ -84,7 +95,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-2">
+                            <div class="col-md-3 mb-2">
                                 <label class="small fw-bold">CARI NAMA SISWA / NISN</label>
                                 <div class="input-group input-group-sm">
                                     <input type="text" name="search"
@@ -92,9 +103,9 @@
                                         placeholder="Ketik nama atau NISN..." value="{{ $filters['search'] ?? '' }}">
                                 </div>
                             </div>
-                            <div class="col-md-4 mb-2">
+                            <div class="col-md-3 mb-2">
                                 <button type="submit" class="btn btn-primary btn-sm px-4 shadow-sm fw-bold">
-                                    <i class="fas fa-search me-1"></i> Cari Data
+                                    <i class="fas fa-search me-1"></i> Cari
                                 </button>
                                 <a href="{{ route('admin.keuangan.tagihan.index') }}"
                                     class="btn btn-light btn-sm border px-3 ms-1 fw-bold text-gray-700">
@@ -140,6 +151,32 @@
                     </a>
                 </div>
             </div>
+
+            {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
+            @if(!empty($tunggakanSummary))
+            <div class="alert alert-danger border-start border-danger border-4 shadow-sm mb-4">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-exclamation-triangle fa-lg me-3 mt-1 text-danger"></i>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold text-danger mb-1">Tunggakan Tahun Sebelumnya</h6>
+                        <p class="mb-2 small">
+                            Terdapat <strong>{{ $tunggakanSummary['jumlah_siswa'] }} siswa</strong> dengan total tunggakan
+                            <strong class="text-danger">Rp {{ number_format($tunggakanSummary['total_tunggakan'], 0, ',', '.') }}</strong>
+                            dari tahun ajaran sebelumnya.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach($tunggakanSummary['per_tahun'] as $item)
+                                <a href="{{ route('admin.keuangan.tagihan.index', ['tahun_ajaran_id' => $item['tahun_ajaran_id']]) }}"
+                                   class="btn btn-outline-danger btn-sm fw-bold">
+                                    <i class="fas fa-eye me-1"></i> {{ $item['nama_tahun'] }}
+                                    ({{ $item['jumlah_siswa'] }} siswa - Rp {{ number_format($item['total'], 0, ',', '.') }})
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             {{-- TABEL UTAMA --}}
             <div class="card shadow mb-4">

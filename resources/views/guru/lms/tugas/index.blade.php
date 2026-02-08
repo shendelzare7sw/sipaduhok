@@ -66,14 +66,10 @@
                                    class="btn btn-warning" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('guru.lms.tugas.destroy', [$kelas->id, $mapel->id, $tugas->id]) }}" 
-                                      method="POST" style="display: inline;"
-                                      onsubmit="return confirm('Yakin hapus tugas ini?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-danger btn-sm" title="Hapus"
+                                    onclick="confirmDelete('{{ route('guru.lms.tugas.destroy', [$kelas->id, $mapel->id, $tugas->id]) }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -91,4 +87,44 @@
             <p class="text-muted mt-3">Belum ada tugas. Klik "Buat Tugas Baru" untuk memulai.</p>
         </div>
     @endif
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus tugas ini?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <div class="form-check mb-3 text-start">
+                            <input class="form-check-input" type="checkbox" name="hapus_terkait" value="1" id="hapusTerkaitCheck">
+                            <label class="form-check-label small text-danger" for="hapusTerkaitCheck">
+                                Hapus juga tugas ini dari kelas lain? (Jika ada duplikat)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        function confirmDelete(url) {
+            document.getElementById('deleteForm').action = url;
+            document.getElementById('hapusTerkaitCheck').checked = false;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+    @endpush
 @endsection

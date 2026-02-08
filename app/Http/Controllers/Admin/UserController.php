@@ -585,6 +585,30 @@ class UserController extends Controller
             'add_new_relationship_lainnya' => 'nullable|string|max:100',
         ]);
 
+        // Logic Sync Advanced (Bi-directional):
+
+        // 1. Deteksi Perubahan Status Siswa
+        if ($validated['status'] !== $siswa->status) {
+            // Case A: Status berubah jadi Non-Aktif (Pindah/Keluar) -> Otomatis Matikan Akun
+            // 'Lulus' diizinkan tetap aktif (untuk akses Rapor/Alumni Dashboard)
+            if (in_array($validated['status'], ['pindah', 'keluar'])) {
+                $validated['is_active'] = 0;
+            }
+            // Case B: Status berubah jadi Aktif (Re-admission) -> Otomatis Hidupkan Akun
+            elseif ($validated['status'] === 'aktif') {
+                $validated['is_active'] = 1;
+            }
+        }
+        // 2. Deteksi Perubahan Status Akun (Tanpa Perubahan Status Siswa)
+        else {
+            // Case C: Status bukan Aktif DAN bukan Lulus, tapi Admin memaksakan Akun AKTIF
+            // -> Otomatis kembalikan Status Siswa jadi 'aktif' (Re-admission via Account Status)
+            // 'Lulus' boleh aktif, jadi dikecualikan dari auto-revert ini.
+            if ($validated['status'] !== 'aktif' && $validated['status'] !== 'lulus' && $validated['is_active'] == '1') {
+                $validated['status'] = 'aktif';
+            }
+        }
+
         $userData = [
             'name' => $validated['nama_lengkap'],
             'email' => $validated['email'] ?? $siswa->user->email,
@@ -1100,5 +1124,54 @@ class UserController extends Controller
     public function downloadOrangTuaTemplate()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\OrangTuaTemplate(), 'template_orang_tua.xlsx');
+    }
+
+    public function bulkDeleteTenagaPendidik(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
+        }
+
+        $users = User::whereIn('id', function($query) use ($ids) {
+            $query->select('user_id')->from('tenaga_pendidik')->whereIn('id', $ids);
+        })->get();
+
+        TenagaPendidik::whereIn('id', $ids)->delete();
+        
+        // Also delete associated users
+        foreach($users as $user) {
+            $user->delete();
+        }
+
+        return redirect()->back()->with('success', count($ids) . ' data tenaga pendidik berhasil dihapus');
+    }
+
+    public function bulkDeleteSiswa(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
+        }
+
+        $siswas = Siswa::whereIn('id', $ids)->get();
+        $userIds = $siswas->pluck('user_id')->filter()->toArray();
+
+        Siswa::whereIn('id', $ids)->delete();
+        User::whereIn('id', $userIds)->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' data siswa berhasil dihapus');
+    }
+
+    public function bulkDeleteOrangTua(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
+        }
+
+        User::whereIn('id', $ids)->where('role', 'orang_tua')->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' data orang tua berhasil dihapus');
     }
 }

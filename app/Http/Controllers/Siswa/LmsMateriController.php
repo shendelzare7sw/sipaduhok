@@ -38,6 +38,7 @@ class LmsMateriController extends Controller
         $materiList = Materi::where('kelas_id', $siswa->kelas_id)
             ->where('mata_pelajaran_id', $mapelId)
             ->orderBy('tanggal_upload', 'desc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         $tugasList = Tugas::where('kelas_id', $siswa->kelas_id)
@@ -47,6 +48,7 @@ class LmsMateriController extends Controller
 
         $ujianList = Ujian::where('kelas_id', $siswa->kelas_id)
             ->where('mata_pelajaran_id', $mapelId)
+            ->where('tipe_ujian', '!=', 'latihan')
             ->orderBy('tanggal_mulai', 'desc')
             ->get();
 

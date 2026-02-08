@@ -71,6 +71,8 @@
                     <small class="text-muted">Upload soal dalam bentuk file jika diperlukan (Max 10MB)</small>
                 </div>
 
+                @include('guru.partials.multi-kelas-selector')
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Buat Tugas

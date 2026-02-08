@@ -1,5 +1,8 @@
 @extends('layouts.sneat')
 
+@section('title', 'Bendahara - Riwayat Dispensasi')
+@section('page-title', 'Riwayat Dispensasi')
+
 @section('sidebar-menu')
     @include('bendahara.partials.sneat-sidebar-menu')
 @endsection

@@ -509,16 +509,36 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="search-form">
-                        <select name="role" id="roleFilter" class="search-input" style="width: 200px; padding-right: 12px;"
-                            onchange="this.form.submit()">
-                            <option value="">Semua Role</option>
-                            @foreach($roles as $roleKey => $roleLabel)
-                                <option value="{{ $roleKey }}" {{ request('role') == $roleKey ? 'selected' : '' }}>
-                                    {{ $roleLabel }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="d-flex gap-2">
+                        {{-- Filter Dropdown --}}
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" 
+                                data-bs-toggle="dropdown" aria-expanded="false" 
+                                data-bs-auto-close="outside" data-bs-display="static">
+                                <i class="fas fa-filter me-1"></i> Filter Data
+                            </button>
+                            <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="min-width: 250px; z-index: 9999;">
+                                <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Role / Jabatan</label>
+                                    <select name="role" id="roleFilter" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option value="">Semua Role</option>
+                                        @foreach($roles as $roleKey => $roleLabel)
+                                            <option value="{{ $roleKey }}" {{ request('role') == $roleKey ? 'selected' : '' }}>
+                                                {{ $roleLabel }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Search Input --}}
                         <div class="search-input-wrapper">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" name="search" id="searchInput" class="search-input"
@@ -530,10 +550,16 @@
                         </div>
                         <button type="submit" class="btn-search">
                             <i class="fas fa-search"></i>
-                            Cari
                         </button>
                     </form>
                     <div style="display: flex; gap: 8px;">
+                        <form action="{{ route('admin.users.bulk-delete-tenaga-pendidik') }}" method="POST" id="bulkDeleteForm" style="display: none;">
+                            @csrf
+                            <input type="hidden" name="ids" id="bulkDeleteIds">
+                            <button type="button" class="btn btn-danger" onclick="showBulkDeleteModal()">
+                                <i class="fas fa-trash"></i> Hapus Terpilih
+                            </button>
+                        </form>
                         <!-- Dropdown Menu Aksi -->
                         <div class="btn-group" style="position: relative; display: inline-block;">
                             <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -569,6 +595,9 @@
                 <table class="table" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr>
+                            <th style="width: 40px;" class="text-center">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                            </th>
                             <th style="width: 60px;">No</th>
                             <th>Nama Lengkap</th>
                             <th>NIP</th>
@@ -581,6 +610,9 @@
                     <tbody>
                         @forelse($tenagaPendidik as $index => $tp)
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="ids[]" class="form-check-input select-item" value="{{ $tp->id }}">
+                                </td>
                                 <td style="text-align: center; font-weight: 600; color: #64748b;">
                                     {{ $tenagaPendidik->firstItem() + $index }}</td>
                                 <td>
@@ -741,5 +773,87 @@
                 searchInput.focus();
             });
         }
+
+        // Bulk Selection Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('selectAll');
+            const selectItems = document.querySelectorAll('.select-item');
+            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+            const bulkDeleteIds = document.getElementById('bulkDeleteIds');
+
+            function updateBulkDeleteButton() {
+                const selectedCount = document.querySelectorAll('.select-item:checked').length;
+                if (selectedCount > 0) {
+                    bulkDeleteForm.style.display = 'block';
+                } else {
+                    bulkDeleteForm.style.display = 'none';
+                }
+            }
+
+            if(selectAll) {
+                selectAll.addEventListener('change', function() {
+                    selectItems.forEach(item => {
+                        item.checked = this.checked;
+                    });
+                    updateBulkDeleteButton();
+                });
+            }
+
+            selectItems.forEach(item => {
+                item.addEventListener('change', function() {
+                    const allChecked = document.querySelectorAll('.select-item:checked').length === selectItems.length;
+                    if(selectAll) selectAll.checked = allChecked;
+                    updateBulkDeleteButton();
+                });
+            });
+        });
+
+        function showBulkDeleteModal() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            if (selectedItems.length === 0) return;
+
+            const modal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
+            document.getElementById('selectedCount').textContent = selectedItems.length;
+            modal.show();
+        }
+
+        function submitBulkDelete() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            const ids = Array.from(selectedItems).map(item => item.value);
+            
+            const form = document.getElementById('bulkDeleteForm');
+            // Clear existing hidden inputs for ids
+            const existingInputs = form.querySelectorAll('input[name="ids[]"]');
+            existingInputs.forEach(input => input.remove());
+
+            ids.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            form.submit();
+        }
     </script>
+
+    <!-- Modal Konfirmasi Bulk Delete -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus <span id="selectedCount" style="font-weight: bold;"></span> data terpilih? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">Ya, Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

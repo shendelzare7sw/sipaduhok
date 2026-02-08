@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Validasi Dispensasi Naik Kelas')
+@section('page-title', 'Validasi Dispensasi')
 
 @section('sidebar-menu')
     @include('bendahara.partials.sneat-sidebar-menu')

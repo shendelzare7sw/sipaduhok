@@ -1,5 +1,8 @@
 @extends('layouts.sneat')
 
+@section('title', 'Admin - Riwayat Dispensasi')
+@section('page-title', 'Riwayat Dispensasi')
+
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
