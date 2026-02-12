@@ -173,11 +173,12 @@
                                             @foreach($tagihans as $item)
                                                 @php
                                                     $isSpp = str_contains($item->jenis_tagihan, 'spp');
+                                                    $isPartial = $item->sisa_tagihan < $item->jumlah;
                                                 @endphp
                                                 <tr>
                                                     <td class="text-center">
                                                         <input type="checkbox" class="form-check-input item-checkbox group-arrears-{{ $tahunId }}"
-                                                            value="{{ $item->id }}" data-amount="{{ $item->jumlah }}"
+                                                            value="{{ $item->id }}" data-amount="{{ $item->sisa_tagihan }}"
                                                             data-label="{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }} ({{ $tahunLabel }})"
                                                             data-is-spp="{{ $isSpp ? 'true' : 'false' }}">
                                                     </td>
@@ -191,7 +192,10 @@
                                                         <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
                                                     </td>
                                                     <td class="text-end">
-                                                        <span class="fw-bold text-danger">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</span>
+                                                        <span class="fw-bold text-danger">Rp {{ number_format($item->sisa_tagihan, 0, ',', '.') }}</span>
+                                                        @if($isPartial)
+                                                            <div class="small text-muted text-decoration-line-through">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</div>
+                                                        @endif
                                                     </td>
                                                     <td class="text-center">
                                                         <span class="badge bg-danger">Tunggakan</span>
@@ -233,12 +237,13 @@
                                             @php
                                                 $isSpp = str_contains($item->jenis_tagihan, 'spp');
                                                 $isPaid = $item->status == 'sudah_bayar';
+                                                $isPartial = (!$isPaid && $item->sisa_tagihan < $item->jumlah);
                                             @endphp
                                             <tr class="{{ $isPaid ? 'table-light text-muted' : '' }}">
                                                 <td class="text-center">
                                                     @if(!$isPaid)
                                                         <input type="checkbox" class="form-check-input item-checkbox group-{{ $jenis }}"
-                                                            value="{{ $item->id }}" data-amount="{{ $item->jumlah }}"
+                                                            value="{{ $item->id }}" data-amount="{{ $item->sisa_tagihan }}"
                                                             data-label="{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}"
                                                             data-is-spp="{{ $isSpp ? 'true' : 'false' }}">
                                                     @else
@@ -258,7 +263,14 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-end">
-                                                    <span class="fw-bold">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</span>
+                                                    @if($isPaid)
+                                                        <span class="fw-bold text-success">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</span>
+                                                    @else
+                                                        <span class="fw-bold text-danger">Rp {{ number_format($item->sisa_tagihan, 0, ',', '.') }}</span>
+                                                        @if($isPartial)
+                                                            <div class="small text-muted text-decoration-line-through">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</div>
+                                                        @endif
+                                                    @endif
                                                 </td>
                                                 <td class="text-center">
                                                     @if($isPaid)
@@ -560,17 +572,26 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            @if($canContinue)
-                                                <form action="{{ route('orang-tua.pembayaran.continue', $bayar->id) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-primary" title="Lanjutkan">
-                                                        <i class="fas fa-credit-card"></i>
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <span class="text-muted">-</span>
-                                            @endif
+                                            <div class="d-flex justify-content-center gap-2">
+                                                @if($canContinue)
+                                                    <form action="{{ route('orang-tua.pembayaran.continue', $bayar->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-primary" title="Lanjutkan Pembayaran">
+                                                            <i class="fas fa-credit-card"></i> Pay
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                {{-- Tombol Invoice untuk Non-Tunai (Transfer/Midtrans) --}}
+                                                @if($bayar->metode_pembayaran != 'tunai')
+                                                    <a href="{{ route('orang-tua.pembayaran.invoice', $bayar->id) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-outline-secondary" 
+                                                       title="Lihat Invoice">
+                                                        <i class="fas fa-file-invoice"></i> Invoice
+                                                    </a>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

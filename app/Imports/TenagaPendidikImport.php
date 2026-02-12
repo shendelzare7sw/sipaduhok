@@ -20,6 +20,8 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
     private $cabangList;
     private $roleList;
 
+    private $warnings = [];
+
     public function __construct()
     {
         $this->cabangList = Cabang::pluck('id', 'nama_cabang')->toArray();
@@ -28,7 +30,10 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
 
     public function collection(Collection $rows)
     {
+        $rowNumber = 1;
+
         foreach ($rows as $row) {
+            $rowNumber++;
             $row = $row->toArray();
 
             // Skip empty rows - check nama_lengkap
@@ -47,16 +52,40 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
 
             if ($exists) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Tenaga Pendidik dilewati karena NIP '{$row['nip']}' atau Email '{$row['email']}' sudah ada.";
                 continue;
             }
 
             // Lookup cabang
+            // Lookup cabang
             $cabangId = null;
             if (!empty($row['nama_cabang'])) {
-                $cabangId = $this->cabangList[$row['nama_cabang']] ?? null;
-                if (!$cabangId) {
-                    foreach ($this->cabangList as $name => $id) {
-                        if (strtolower(trim($name)) === strtolower(trim($row['nama_cabang']))) {
+                $searchName = trim($row['nama_cabang']);
+                
+                // Normalization for matching
+                $normalizedSearch = strtolower($searchName);
+                $normalizedSearch = str_replace(['pkbm hok', 'hok'], ['pkbm house of knowledge', 'house of knowledge'], $normalizedSearch);
+
+                if (isset($this->cabangList[$searchName])) {
+                    $cabangId = $this->cabangList[$searchName];
+                } else {
+                    foreach ($this->cabangList as $dbName => $id) {
+                        $normalizedDb = strtolower(trim($dbName));
+                        
+                        // Exact match
+                        if ($normalizedDb === strtolower($searchName)) {
+                            $cabangId = $id;
+                            break;
+                        }
+                        
+                        // Match with expanded abbreviations
+                        if ($normalizedDb === $normalizedSearch) {
+                           $cabangId = $id;
+                            break; 
+                        }
+
+                        // Containment match (e.g. "PKBM House of Knowledge" in "PKBM House of Knowledge (Gedung Utama)")
+                        if (str_contains($normalizedDb, $normalizedSearch)) {
                             $cabangId = $id;
                             break;
                         }
@@ -110,7 +139,7 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
             } catch (\Exception $e) {
                 DB::rollBack();
                 $this->skippedCount++;
-                \Log::error('TenagaPendidik Import Error: ' . $e->getMessage() . ' | Row: ' . json_encode($row));
+                $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
             }
         }
     }
@@ -140,5 +169,9 @@ class TenagaPendidikImport implements ToCollection, WithHeadingRow
     public function getImportedCount(): int
     {
         return $this->importedCount;
+    }
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 }

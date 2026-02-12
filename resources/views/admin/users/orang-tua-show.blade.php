@@ -79,7 +79,7 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
                         </tr>
                         <tr>
                             <td style="padding: 10px 0; color: #64748b;">Terdaftar Sejak</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($orangTua->created_at)->format('d F Y') }}</td>
+                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($orangTua->created_at)->locale('id')->translatedFormat('d F Y') }}</td>
                         </tr>
                     </table>
 

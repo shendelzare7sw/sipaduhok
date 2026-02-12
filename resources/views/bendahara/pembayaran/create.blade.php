@@ -77,24 +77,51 @@
                         @if($tagihanBelumLunas->count() > 0)
                             <div class="border rounded shadow-sm" style="max-height: 400px; overflow-y: auto;">
                                 @foreach($tagihanBelumLunas as $tagihan)
-                                    <label class="d-flex align-items-center p-3 border-bottom tagihan-item" style="cursor: pointer; transition: background 0.2s;">
-                                        <input type="checkbox" name="tagihan_ids[]" value="{{ $tagihan->id }}"
-                                               data-jumlah="{{ $tagihan->jumlah }}"
-                                               class="form-check-input me-3"
-                                               style="width: 20px; height: 20px;"
-                                               onchange="hitungTotal()">
-                                        <div class="flex-fill">
+                                    <div class="d-flex align-items-start p-3 border-bottom tagihan-item" style="transition: background 0.2s;">
+                                        <div class="d-flex align-items-center pt-2">
+                                            <input type="checkbox" name="tagihan_ids[]" value="{{ $tagihan->id }}"
+                                                   data-id="{{ $tagihan->id }}"
+                                                   class="form-check-input tagihan-checkbox"
+                                                   style="width: 20px; height: 20px;"
+                                                   onchange="hitungTotal()">
+                                        </div>
+                                        <div class="flex-fill ms-3">
                                             <div class="fw-bold">
                                                 {{ $jenisTagihan[$tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan)) }}
                                             </div>
-                                            <small class="text-muted">
+                                            <small class="text-muted d-block mb-2">
                                                 Jatuh tempo: {{ $tagihan->tanggal_jatuh_tempo ? $tagihan->tanggal_jatuh_tempo->format('d/m/Y') : '-' }}
                                             </small>
+                                            
+                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                <div>
+                                                    <small class="text-muted">Sisa Tagihan:</small>
+                                                    <div class="fw-bold text-danger">
+                                                        Rp {{ number_format($tagihan->sisa_per_item, 0, ',', '.') }}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div style="width: 160px;">
+                                                    <small class="text-muted d-block mb-1">Bayar Sejumlah:</small>
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-white border-end-0">Rp</span>
+                                                        <input type="text" 
+                                                               name="nominal_bayar[{{ $tagihan->id }}]" 
+                                                               id="nominal-{{ $tagihan->id }}"
+                                                               class="form-control form-control-sm text-end currency-input nominal-input"
+                                                               value="{{ number_format($tagihan->sisa_per_item, 0, ',', '.') }}"
+                                                               data-id="{{ $tagihan->id }}"
+                                                               data-max="{{ $tagihan->sisa_per_item }}"
+                                                               {{ $tagihan->jenis_tagihan === 'spp' ? 'readonly style=background-color:#f3f4f6;' : '' }}
+                                                               onkeyup="formatAndCalculate(this)">
+                                                    </div>
+                                                    @if($tagihan->jenis_tagihan === 'spp')
+                                                        <small class="text-muted fst-italic" style="font-size: 10px;">SPP tidak dapat dicicil</small>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="fw-bold text-danger">
-                                            Rp {{ number_format($tagihan->jumlah, 0, ',', '.') }}
-                                        </div>
-                                    </label>
+                                    </div>
                                 @endforeach
                             </div>
                             @error('tagihan_ids')
@@ -202,33 +229,96 @@
 
 @section('scripts')
 <script>
-function hitungTotal() {
-    let total = 0;
-    let count = 0;
-    const checkboxes = document.querySelectorAll('input[name="tagihan_ids[]"]:checked');
+    function parseCurrency(str) {
+        return parseInt(str.replace(/\D/g, '')) || 0;
+    }
 
-    checkboxes.forEach(function(checkbox) {
-        total += parseInt(checkbox.dataset.jumlah);
-        count++;
-    });
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
 
-    document.getElementById('jumlah_bayar').value = total;
-    document.getElementById('jumlah_bayar_display').value = 'Rp ' + total.toLocaleString('id-ID');
-    document.getElementById('count-selected').textContent = count + ' item';
-    document.getElementById('total-display').textContent = 'Rp ' + total.toLocaleString('id-ID');
-}
+    function formatAndCalculate(input) {
+        // Format input value
+        let value = parseCurrency(input.value);
+        input.value = formatNumber(value);
+        
+        // Validation: Check against Max Sisa Tagihan
+        let max = parseInt(input.dataset.max);
+        
+        if (value > max) {
+            input.classList.add('is-invalid', 'text-danger');
+        } else {
+            input.classList.remove('is-invalid', 'text-danger');
+        }
+        
+        // Auto check checkbox if user types > 0
+        const id = input.dataset.id;
+        const checkbox = document.querySelector(`input[name="tagihan_ids[]"][value="${id}"]`);
+        
+        if (value > 0 && !checkbox.checked) {
+            checkbox.checked = true;
+        }
 
-// Hover effect for tagihan items
-document.addEventListener('DOMContentLoaded', function() {
-    const items = document.querySelectorAll('.tagihan-item');
-    items.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.background = '#f3f4f6';
+        hitungTotal();
+    }
+
+    function hitungTotal() {
+        let total = 0;
+        let count = 0;
+        let hasError = false;
+        
+        const checkboxes = document.querySelectorAll('.tagihan-checkbox:checked');
+        
+        // Check for any validation errors in inputs
+        const inputs = document.querySelectorAll('.nominal-input');
+        inputs.forEach(inp => {
+            if (inp.classList.contains('is-invalid')) {
+                const id = inp.dataset.id;
+                const cb = document.querySelector(`input[name="tagihan_ids[]"][value="${id}"]`);
+                if(cb && cb.checked) {
+                    hasError = true;
+                }
+            }
         });
-        item.addEventListener('mouseleave', function() {
-            this.style.background = 'transparent';
+
+        checkboxes.forEach(function(checkbox) {
+            const id = checkbox.dataset.id;
+            const inputNominal = document.getElementById(`nominal-${id}`);
+            
+            if (inputNominal) {
+                total += parseCurrency(inputNominal.value);
+                count++;
+            }
         });
+
+        document.getElementById('jumlah_bayar').value = total;
+        document.getElementById('jumlah_bayar_display').value = 'Rp ' + formatNumber(total);
+        document.getElementById('count-selected').textContent = count + ' item';
+        document.getElementById('total-display').textContent = 'Rp ' + formatNumber(total);
+        
+        // Update button state
+        const btn = document.querySelector('button[type="submit"]');
+        if (count > 0 && total > 0 && !hasError) {
+            btn.removeAttribute('disabled');
+        } else {
+            btn.setAttribute('disabled', 'disabled');
+        }
+    }
+
+    // Hover effect for tagihan items
+    document.addEventListener('DOMContentLoaded', function() {
+        const items = document.querySelectorAll('.tagihan-item');
+        items.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.background = '#f3f4f6';
+            });
+            item.addEventListener('mouseleave', function() {
+                this.style.background = 'transparent';
+            });
+        });
+        
+        // Initial Calculation
+        hitungTotal();
     });
-});
 </script>
 @endsection

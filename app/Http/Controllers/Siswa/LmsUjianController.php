@@ -32,11 +32,11 @@ class LmsUjianController extends Controller
             ->with(['mataPelajaran', 'guru', 'soalUjian'])
             ->firstOrFail();
 
-        // Cek validasi akses ujian untuk semester (bukan ulangan harian)
-        if (in_array($ujian->tipe_ujian, ['uts', 'uas'])) {
+        // Cek validasi akses ujian untuk semester (PTS/PAS/UTS/UAS)
+        if ($ujian->requiresValidation()) {
             if (!$siswa->validasi_ujian_bendahara || !$siswa->validasi_ujian_wali) {
                 return redirect()->route('siswa.lms.mapel.show', $mapelId)
-                    ->with('error', 'Belum Memiliki Akses Ujian. Silakan Periksa Tagihan Anda.');
+                    ->with('error', 'Belum Memiliki Akses Ujian.');
             }
         }
 
@@ -83,6 +83,18 @@ class LmsUjianController extends Controller
 
         $mataPelajaran = $ujian->mataPelajaran;
 
+        // Use different view for Latihan (Worksheet Style)
+        if ($ujian->tipe_ujian === 'latihan') {
+            return view('siswa.lms.mata-pelajaran.ujian.show_latihan', compact(
+                'siswa',
+                'ujian',
+                'ujianSiswa',
+                'isOngoing',
+                'soalList',
+                'mataPelajaran'
+            ));
+        }
+
         return view('siswa.lms.mata-pelajaran.ujian.show', compact(
             'siswa',
             'ujian',
@@ -105,7 +117,17 @@ class LmsUjianController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = Ujian::where('id', $ujianId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
+
+        // Cek validasi akses untuk ujian semester (PTS/PAS/UTS/UAS)
+        if ($ujian->requiresValidation()) {
+            if (!$siswa->validasi_ujian_bendahara || !$siswa->validasi_ujian_wali) {
+                return back()->with('error', 'Belum Memiliki Akses Ujian.');
+            }
+        }
 
         // Cek apakah ujian sudah ditarik guru (tidak aktif)
         if (!$ujian->is_active) {
@@ -142,8 +164,9 @@ class LmsUjianController extends Controller
         // Force refresh dari database
         $ujianSiswa = $ujianSiswa->fresh();
 
+        $durasiMsg = ($ujian->durasi_menit == 0) ? 'Tanpa Batas' : $ujian->durasi_menit . ' menit';
         return redirect()->route('siswa.lms.mapel.ujian.show', [$mapelId, $ujianId])
-            ->with('success', 'Ujian dimulai. Waktu: ' . $ujian->durasi_menit . ' menit');
+            ->with('success', 'Ujian dimulai. Waktu: ' . $durasiMsg);
     }
 
     /**
@@ -163,7 +186,10 @@ class LmsUjianController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = Ujian::where('id', $ujianId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
 
         $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
             ->where('siswa_id', $siswa->id)
@@ -180,6 +206,7 @@ class LmsUjianController extends Controller
 
         // Simpan jawaban
         $totalNilai = 0;
+        $perluKoreksiManual = false;
         $soalList = SoalUjian::where('ujian_id', $ujianId)->get();
 
         foreach ($request->jawaban as $soalId => $jawaban) {
@@ -196,10 +223,17 @@ class LmsUjianController extends Controller
                     ]
                 );
 
-                // Auto-grade untuk pilihan ganda
-                if ($soal->tipe_soal === 'pilihan_ganda') {
-                    $jawabanSiswa->autoGrade();
-                    $totalNilai += $jawabanSiswa->nilai_soal ?? 0;
+                // Auto-grade untuk semua tipe yang bisa di-auto-grade
+                $result = $soal->checkAnswer($jawaban);
+
+                if ($result !== null) {
+                    // Tipe auto-gradable: pilgan, pilgan_kompleks, benar_salah, isian
+                    $score = $soal->calculatePartialScore($jawaban);
+                    $jawabanSiswa->update(['nilai_soal' => $score]);
+                    $totalNilai += $score;
+                } else {
+                    // Tipe uraian/essay → perlu koreksi manual oleh guru
+                    $perluKoreksiManual = true;
                 }
             }
         }
@@ -215,7 +249,14 @@ class LmsUjianController extends Controller
         $ujianSiswa->load(['ujian', 'siswa']);
         app(\App\Services\NotificationService::class)->notifyUjianSelesai($ujianSiswa);
 
+        $msg = 'Ujian berhasil dikumpulkan!';
+        if ($perluKoreksiManual) {
+            $msg .= ' Nilai sementara: ' . number_format($totalNilai, 1) . ' (beberapa soal menunggu koreksi guru)';
+        } else {
+            $msg .= ' Nilai: ' . number_format($totalNilai, 1);
+        }
+
         return redirect()->route('siswa.lms.mapel.show', $mapelId)
-            ->with('success', 'Ujian berhasil dikumpulkan! Nilai: ' . $totalNilai);
+            ->with('success', $msg);
     }
 }

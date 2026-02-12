@@ -121,9 +121,12 @@
                         <td class="align-middle">
                             <div class="small text-muted mb-1">{{ $item->keterangan ?? '-' }}</div>
                             @if($item->bukti_file)
-                                <a href="{{ asset('storage/' . $item->bukti_file) }}" target="_blank" class="btn btn-xs btn-outline-primary">
-                                    <i class="bx bx-show me-1"></i>Lihat Bukti
-                                </a>
+                                <x-file-preview 
+                                    :path="$item->bukti_file" 
+                                    label="Lihat Bukti"
+                                    class="btn btn-xs btn-outline-primary"
+                                    icon="bx bx-show"
+                                />
                             @endif
                         </td>
                         <td class="text-center align-middle">

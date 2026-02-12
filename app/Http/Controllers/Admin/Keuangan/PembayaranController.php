@@ -116,4 +116,18 @@ class PembayaranController extends BendaharaPembayaranController
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Override cetakKwitansi to use admin view
+     */
+    public function cetakKwitansi($id)
+    {
+        $response = parent::cetakKwitansi($id);
+
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.pembayaran.cetak-kwitansi', $response->getData());
+        }
+
+        return $response;
+    }
 }

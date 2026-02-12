@@ -19,12 +19,40 @@ class ValidasiAksesController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-        $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
-            return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-        })->orderBy('jenjang')->orderBy('nama_kelas')->get();
+        
+        // Data untuk filter dropdown
+        $cabangList = \App\Models\Cabang::all();
+        $jenjangList = Kelas::select('jenjang')->distinct()->orderBy('jenjang')->pluck('jenjang');
 
-        $query = Siswa::with(['kelas', 'cabang'])
+        // Filter daftar kelas untuk dropdown
+        $kelasList = Kelas::with('cabang')
+            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+            })
+            ->when($request->filled('cabang_id'), function($q) use ($request) {
+                return $q->where('cabang_id', $request->cabang_id);
+            })
+            ->when($request->filled('jenjang'), function($q) use ($request) {
+                return $q->where('jenjang', $request->jenjang);
+            })
+            ->orderBy('jenjang')->orderBy('nama_kelas')->get();
+
+        $query = Siswa::with(['kelas.cabang', 'cabang'])
             ->where('status', 'aktif');
+
+        // Filter Cabang (via kelas atau langsung siswa jika ada)
+        if ($request->filled('cabang_id')) {
+            $query->whereHas('kelas', function($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
+            });
+        }
+
+        // Filter Jenjang
+        if ($request->filled('jenjang')) {
+            $query->whereHas('kelas', function($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            });
+        }
 
         // Filter kelas
         if ($request->filled('kelas_id')) {
@@ -51,7 +79,10 @@ class ValidasiAksesController extends Controller
 
         // Pencarian
         if ($request->filled('search')) {
-            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+            $query->where(function($q) use ($request) {
+                $q->where('nama_lengkap', 'like', '%' . $request->search . '%')
+                  ->orWhere('nisn', 'like', '%' . $request->search . '%');
+            });
         }
 
         $siswaList = $query->orderBy(
@@ -89,14 +120,16 @@ class ValidasiAksesController extends Controller
         ];
 
         return view('bendahara.validasi-akses.index', [
-            'siswa' => $siswaList,           // ← ubah ke 'siswa' sesuai view
+            'siswa' => $siswaList,
             'kelasList' => $kelasList,
+            'cabangList' => $cabangList, // Pass data cabang
+            'jenjangList' => $jenjangList, // Pass data jenjang
             'tahunAjaran' => $tahunAjaranAktif,
-            'totalSiswa' => $stats['total_siswa'],     // ← tambahkan
-            'validasiUjian' => $stats['ujian_valid'],  // ← tambahkan
-            'validasiRapor' => $stats['rapor_valid'],  // ← tambahkan
-            'belumValidasi' => $stats['total_siswa'] - $stats['ujian_valid'] - $stats['rapor_valid'], // ← hitung
-            'filters' => $request->only(['kelas_id', 'status_ujian', 'status_rapor', 'search']),
+            'totalSiswa' => $stats['total_siswa'],
+            'validasiUjian' => $stats['ujian_valid'],
+            'validasiRapor' => $stats['rapor_valid'],
+            'belumValidasi' => $stats['total_siswa'] - $stats['ujian_valid'] - $stats['rapor_valid'],
+            'filters' => $request->only(['kelas_id', 'status_ujian', 'status_rapor', 'search', 'cabang_id', 'jenjang']),
         ]);
     }
 
@@ -174,6 +207,7 @@ class ValidasiAksesController extends Controller
 
     /**
      * Batalkan validasi akses rapor
+     * CASCADE: Reset Wali Kelas + Ketua PKBM validation
      */
     public function batalkanRapor(Request $request, $siswaId)
     {
@@ -185,9 +219,13 @@ class ValidasiAksesController extends Controller
                 'validasi_rapor_bendahara' => false,
                 'tanggal_validasi_rapor_bendahara' => null,
                 'validasi_rapor_oleh' => null,
-                // Reset juga validasi wali kelas
+                // CASCADE: Reset juga validasi wali kelas
                 'validasi_rapor_wali' => false,
                 'tanggal_validasi_rapor_wali' => null,
+                // CASCADE: Reset juga validasi ketua PKBM
+                'validasi_rapor_ketua' => false,
+                'tanggal_validasi_rapor_ketua' => null,
+                'validasi_rapor_ketua_oleh' => null,
             ]);
 
             DB::commit();

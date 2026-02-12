@@ -15,6 +15,7 @@ class MataPelajaran extends Model
         'kode_mapel',
         'nama_mapel',
         'jenjang',
+        'kelompok',
         'deskripsi',
     ];
 

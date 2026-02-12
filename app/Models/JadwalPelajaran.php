@@ -12,22 +12,24 @@ class JadwalPelajaran extends Model
     protected $table = 'jadwal_pelajaran';
 
     protected $fillable = [
-        'tahun_ajaran_id',
-        'kelas_id',
-        'mata_pelajaran_id',
         'guru_id',
+        'kelas_id', // Deprecated, use pivot but kept for DB compatibility
+        'mata_pelajaran_id',
         'hari',
         'jam_mulai',
         'jam_selesai',
-        'status',
         'keterangan',
+        'status',
+        'created_by',
         'updated_by',
         'siswa_ids',
+        'tahun_ajaran_id',
     ];
 
     protected $casts = [
-        'jam_mulai' => 'datetime:H:i',
-        'jam_selesai' => 'datetime:H:i',
+        'hari' => 'string',
+        'jam_mulai' => 'datetime',
+        'jam_selesai' => 'datetime',
         'siswa_ids' => 'array',
     ];
 
@@ -39,7 +41,7 @@ class JadwalPelajaran extends Model
 
     public function kelas()
     {
-        return $this->belongsTo(Kelas::class);
+        return $this->belongsToMany(Kelas::class, 'jadwal_kelas');
     }
 
     public function mataPelajaran()
@@ -75,7 +77,9 @@ class JadwalPelajaran extends Model
 
     public function scopeByKelas($query, $kelasId)
     {
-        return $query->where('kelas_id', $kelasId);
+        return $query->whereHas('kelas', function ($q) use ($kelasId) {
+            $q->where('kelas.id', $kelasId);
+        });
     }
 
     public function scopeByGuru($query, $guruId)

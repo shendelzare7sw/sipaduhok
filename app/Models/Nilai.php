@@ -16,6 +16,7 @@ class Nilai extends Model
         'mata_pelajaran_id',
         'kelas_id',
         'tahun_ajaran_id',
+        'semester',
         'guru_id',
         // 5 Tugas
         'tugas_1',
@@ -177,17 +178,9 @@ class Nilai extends Model
     }
 
     // Helper: Hitung nilai akhir dengan bobot
-    // Bobot default: Tugas 15%, Latihan 15%, UH 20%, PTS 20%, PAS 30%
-    public function hitungNilaiAkhir($bobot = null)
+    // Formula: ((rata_tugas × 1) + (rata_latihan × 1) + (rata_uh × 2) + (pts × 3) + (pas × 3)) / 10
+    public function hitungNilaiAkhir()
     {
-        $bobot = $bobot ?? [
-            'tugas' => 15,
-            'latihan' => 15,
-            'uh' => 20,
-            'pts' => 20,
-            'pas' => 30,
-        ];
-
         // Hitung rata-rata dulu
         $this->hitungSemuaRata();
 
@@ -197,14 +190,10 @@ class Nilai extends Model
         $pts = $this->pts ?? 0;
         $pas = $this->pas ?? 0;
 
-        $total =
-            ($rataTugas * $bobot['tugas']) +
-            ($rataLatihan * $bobot['latihan']) +
-            ($rataUH * $bobot['uh']) +
-            ($pts * $bobot['pts']) +
-            ($pas * $bobot['pas']);
+        // Formula baru: (rata_tugas×1 + rata_latihan×1 + rata_uh×2 + pts×3 + pas×3) / 10
+        $total = ($rataTugas * 1) + ($rataLatihan * 1) + ($rataUH * 2) + ($pts * 3) + ($pas * 3);
 
-        $this->nilai_akhir = $total / 100;
+        $this->nilai_akhir = $total / 10;
         $this->save();
 
         return $this->nilai_akhir;
@@ -297,5 +286,23 @@ class Nilai extends Model
             'upk' => $this->upk,
             'ujian_praktek' => $this->ujian_praktek,
         ];
+    }
+
+    /**
+     * Get current semester based on current month
+     * July-December = Ganjil, January-June = Genap
+     */
+    public static function getCurrentSemester(): string
+    {
+        $month = now()->month;
+        return ($month >= 7 && $month <= 12) ? 'ganjil' : 'genap';
+    }
+
+    /**
+     * Scope to filter by semester
+     */
+    public function scopeForSemester($query, string $semester)
+    {
+        return $query->where('semester', $semester);
     }
 }

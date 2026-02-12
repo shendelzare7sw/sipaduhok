@@ -27,7 +27,7 @@ Detail Tenaga Pendidik - {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                     <i class="fas fa-user"></i>
                 @endif
             </div>
-            <h3 style="margin: 0; color: #1e293b; font-size: 24px;">{{ $tenagaPendidik->nama_lengkap }}</h3>
+            <h3 style="margin: 0; color: #1e293b; font-size: 24px;">{{ $tenagaPendidik->user->name ?? $tenagaPendidik->nama_lengkap }}</h3>
             <div style="margin-top: 8px;">
                 <span style="background: #e0f2fe; color: #0284c7; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 600;">
                     {{ ucwords(str_replace('_', ' ', $tenagaPendidik->user->role)) }}
@@ -54,7 +54,7 @@ Detail Tenaga Pendidik - {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                 </tr>
                 <tr>
                     <td style="padding: 12px 0; color: #64748b; border-bottom: 1px solid #f1f5f9;">Tempat, Tanggal Lahir</td>
-                    <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9;">{{ $tenagaPendidik->tempat_lahir }}, {{ \Carbon\Carbon::parse($tenagaPendidik->tanggal_lahir)->format('d F Y') }}</td>
+                    <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9;">{{ $tenagaPendidik->tempat_lahir }}, {{ \Carbon\Carbon::parse($tenagaPendidik->tanggal_lahir)->locale('id')->translatedFormat('d F Y') }}</td>
                 </tr>
                 <tr>
                     <td style="padding: 12px 0; color: #64748b; border-bottom: 1px solid #f1f5f9;">Pendidikan Terakhir</td>
@@ -70,7 +70,7 @@ Detail Tenaga Pendidik - {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                     <td style="padding: 12px 0; color: #64748b; width: 30%; border-bottom: 1px solid #f1f5f9;">Email</td>
-                    <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9;">{{ $tenagaPendidik->email }}</td>
+                    <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9;">{{ $tenagaPendidik->user->email }}</td>
                 </tr>
                 <tr>
                     <td style="padding: 12px 0; color: #64748b; border-bottom: 1px solid #f1f5f9;">No. Telepon</td>
@@ -91,7 +91,7 @@ Detail Tenaga Pendidik - {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
             <a href="{{ route('admin.users.tenaga-pendidik') }}" style="background: #6b7280; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
-            <a href="{{ route('admin.users.edit-tenaga-pendidik', $tenagaPendidik->id) }}" style="background: #f59e0b; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;">
+            <a href="{{ route('admin.users.edit-tenaga-pendidik', $tenagaPendidik->user_id) }}" style="background: #f59e0b; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;">
                 <i class="fas fa-edit"></i> Edit Data
             </a>
         </div>

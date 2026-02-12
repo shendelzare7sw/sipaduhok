@@ -8,6 +8,7 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use App\Models\Pembayaran;
 use Illuminate\Support\Facades\DB;
 
 class TagihanController extends Controller
@@ -41,17 +42,24 @@ class TagihanController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $allTahunAjaran = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+
+        // Allow year selection via dropdown (default = active year)
+        $selectedYearId = $request->get('tahun_ajaran_id', $tahunAjaranAktif->id ?? null);
+        $selectedYear = TahunAjaran::find($selectedYearId) ?? $tahunAjaranAktif;
+
         $kelasList = Kelas::with('cabang')
-            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+            ->when($selectedYear, function ($q) use ($selectedYear) {
+                return $q->where('tahun_ajaran_id', $selectedYear->id);
             })
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
 
         // Query siswa dengan filter
+        // IMPORTANT: Include alumni (status='lulus') so their outstanding bills remain accessible
         $query = Siswa::with(['kelas', 'cabang'])
-            ->where('status', 'aktif');
+            ->whereIn('status', ['aktif', 'lulus']);
 
         // Filter berdasarkan kelas
         if ($request->filled('kelas_id')) {
@@ -70,33 +78,69 @@ class TagihanController extends Controller
             ->paginate(15)
             ->appends($request->query());
 
-        // Hitung total tagihan per siswa
-        $siswaList->getCollection()->transform(function ($siswa) use ($tahunAjaranAktif) {
+        // Hitung total tagihan per siswa berdasarkan tahun yang dipilih
+        $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear) {
             $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                    return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+                ->when($selectedYear, function ($q) use ($selectedYear) {
+                    return $q->where('tahun_ajaran_id', $selectedYear->id);
                 })
                 ->get();
 
             $totalTagihan = $tagihan->sum('jumlah');
 
-            // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
-            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+            // Calculate Total Paid
+            $tagihanIds = $tagihan->pluck('id');
+            $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
+                ->whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            // Sisa tagihan = Total - Terbayar
+            $sisaTagihan = $totalTagihan - $totalTerbayar;
 
             $siswa->total_tagihan = $totalTagihan;
-            $siswa->tagihan_lunas = $totalTagihan - $sisaTagihan;
+            $siswa->tagihan_lunas = $totalTerbayar;
             $siswa->sisa_tagihan = $sisaTagihan;
             $siswa->tagihan_detail = $tagihan;
 
             return $siswa;
         });
 
+        // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif)
+        $tunggakanSummary = null;
+        if ($tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
+            $tunggakanData = Tagihan::where('tahun_ajaran_id', '!=', $tahunAjaranAktif->id)
+                ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
+                ->select('tahun_ajaran_id', DB::raw('COUNT(DISTINCT siswa_id) as jumlah_siswa'), DB::raw('SUM(jumlah) as total_tunggakan'))
+                ->groupBy('tahun_ajaran_id')
+                ->get();
+
+            if ($tunggakanData->isNotEmpty()) {
+                $tunggakanSummary = [
+                    'jumlah_siswa' => $tunggakanData->sum('jumlah_siswa'),
+                    'total_tunggakan' => $tunggakanData->sum('total_tunggakan'),
+                    'per_tahun' => $tunggakanData->map(function ($item) {
+                        $ta = TahunAjaran::find($item->tahun_ajaran_id);
+                        return [
+                            'tahun_ajaran_id' => $item->tahun_ajaran_id,
+                            'nama_tahun' => $ta->nama_tahun_ajaran ?? '-',
+                            'jumlah_siswa' => $item->jumlah_siswa,
+                            'total' => $item->total_tunggakan,
+                        ];
+                    }),
+                ];
+            }
+        }
+
         return view('bendahara.tagihan.index', [
             'siswaList' => $siswaList,
             'kelasList' => $kelasList,
             'tahunAjaran' => $tahunAjaranAktif,
+            'selectedYear' => $selectedYear,
+            'allTahunAjaran' => $allTahunAjaran,
+            'tunggakanSummary' => $tunggakanSummary,
             'jenisTagihan' => $this->jenisTagihan,
-            'filters' => $request->only(['kelas_id', 'search']),
+            'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id']),
         ]);
     }
 
@@ -135,15 +179,28 @@ class TagihanController extends Controller
 
         $totalTagihan = $tagihan->sum('jumlah');
 
-        // Sisa tagihan = total tagihan yang belum lunas (berdasarkan status)
-        $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-        $tagihanLunas = $totalTagihan - $sisaTagihan;
+        // Calculate Real Sisa Tagihan
+        $tagihanIds = $tagihan->pluck('id');
+        $tagihanLunas = Pembayaran::where('siswa_id', $siswaId)
+            ->whereIn('tagihan_id', $tagihanIds)
+            ->where('status_validasi', 'disetujui')
+            ->sum('jumlah_bayar');
+        
+        $sisaTagihan = $totalTagihan - $tagihanLunas;
+
+        // Inject sisa_tagihan to each item for view display if needed
+        foreach ($tagihan as $item) {
+            $paid = Pembayaran::where('tagihan_id', $item->id)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+            $item->sisa_tagihan = $item->jumlah - $paid;
+        }
 
         return view('bendahara.tagihan.show', [
             'siswa' => $siswa,
             'tagihan' => $tagihan,
             'totalTagihan' => $totalTagihan,
-            'tagihanLunas' => $tagihanLunas,
+            'tagihanLunas' => $tagihanLunas, // Representing Total Paid Amount
             'sisaTagihan' => $sisaTagihan,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $this->jenisTagihan,
@@ -208,6 +265,17 @@ class TagihanController extends Controller
 
         $siswa = Siswa::findOrFail($siswaId);
 
+        // Sanitize currency inputs BEFORE validation
+        // This handles formatted inputs like "200.000" or "1.500.000" 
+        // and converts them to pure numbers (200000, 1500000)
+        $tagihanInput = $request->input('tagihan', []);
+        $sanitizedTagihan = [];
+        foreach ($tagihanInput as $key => $value) {
+            // Remove all non-digit characters (dots, commas, spaces, Rp, etc.)
+            $sanitizedTagihan[$key] = preg_replace('/\D/', '', $value) ?: '0';
+        }
+        $request->merge(['tagihan' => $sanitizedTagihan]);
+
         $request->validate([
             'tagihan' => 'required|array',
             'tagihan.*' => 'nullable|numeric|min:0',
@@ -253,8 +321,6 @@ class TagihanController extends Controller
                     ]);
                 }
             }
-
-            DB::commit();
 
             DB::commit();
             return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
@@ -380,8 +446,6 @@ class TagihanController extends Controller
                 }
 
                 DB::commit();
-
-                DB::commit();
                 return redirect()->route($this->getRoutePrefix() . '.index')
                     ->with('success', "Tagihan berhasil dibuat untuk {$siswaList->count()} siswa.");
             } catch (\Exception $e) {
@@ -500,9 +564,6 @@ class TagihanController extends Controller
             if ($tagihan->status === 'sudah_bayar' || $tagihan->status === 'cicilan') {
                 return redirect()->back()->with('error', 'Tagihan yang sudah memiliki pembayaran tidak dapat dihapus.');
             }
-
-            $siswaId = $tagihan->siswa_id;
-            $tagihan->delete();
 
             $siswaId = $tagihan->siswa_id;
             $tagihan->delete();
@@ -640,8 +701,6 @@ class TagihanController extends Controller
             }
 
             DB::commit();
-
-            DB::commit();
             return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', "Berhasil generate $totalCreated tagihan SPP untuk {$siswaList->count()} siswa.");
         } catch (\Exception $e) {
@@ -757,8 +816,6 @@ class TagihanController extends Controller
                 }
             }
 
-            DB::commit();
-            $targetCount = count($request->target_siswa_ids);
             DB::commit();
             $targetCount = count($request->target_siswa_ids);
             return redirect()->route($this->getRoutePrefix() . '.index')

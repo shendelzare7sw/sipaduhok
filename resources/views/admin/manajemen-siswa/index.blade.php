@@ -428,18 +428,74 @@
                         @endforeach
                     </select>
 
-                    <select name="kelas_id" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Kelas</option>
-                        @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
-                            <optgroup label="{{ $jenjang }}">
+                    <div class="dropdown" style="display: inline-block;">
+                        <button class="filter-select d-flex align-items-center justify-content-between" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="min-width: 200px; text-align: left; background: white;">
+                            <span id="selectedKelasText">Pilih Kelas</span>
+                            <i class="fas fa-chevron-down ms-2" style="font-size: 0.8em; color: #6b7280;"></i>
+                        </button>
+                        <ul class="dropdown-menu p-2" aria-labelledby="dropdownKelas" style="max-height: 300px; overflow-y: auto; width: 100%; min-width: 250px;">
+                            <li>
+                                <div class="form-check p-2 border-bottom mb-1">
+                                    <input class="form-check-input" type="checkbox" id="checkAllKelas">
+                                    <label class="form-check-label fw-bold" for="checkAllKelas">Pilih Semua</label>
+                                </div>
+                            </li>
+                            @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
+                                <li><h6 class="dropdown-header text-uppercase font-weight-bold p-2 mt-1">{{ $jenjang }}</h6></li>
                                 @foreach($kelasGroup as $k)
-                                    <option value="{{ $k->id }}" {{ request('kelas_id') == $k->id ? 'selected' : '' }}>
-                                        {{ $k->nama_kelas }}
-                                    </option>
+                                    <li>
+                                        <div class="form-check px-3 py-1 hover-bg-light">
+                                            <input class="form-check-input class-checkbox" type="checkbox" name="kelas_id[]" value="{{ $k->id }}" id="kelas_{{ $k->id }}"
+                                                {{ (is_array(request('kelas_id')) && in_array($k->id, request('kelas_id'))) || request('kelas_id') == $k->id ? 'checked' : '' }}>
+                                            <label class="form-check-label w-100 cursor-pointer" for="kelas_{{ $k->id }}">
+                                                {{ $k->nama_kelas }}
+                                            </label>
+                                        </div>
+                                    </li>
                                 @endforeach
-                            </optgroup>
-                        @endforeach
-                    </select>
+                            @endforeach
+                        </ul>
+                    </div>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const checkboxes = document.querySelectorAll('.class-checkbox');
+                            const checkAll = document.getElementById('checkAllKelas');
+                            const buttonText = document.getElementById('selectedKelasText');
+                            
+                            function updateButtonText() {
+                                const checked = Array.from(checkboxes).filter(cb => cb.checked);
+                                if (checked.length === 0) {
+                                    buttonText.textContent = 'Pilih Kelas';
+                                    buttonText.style.color = '#6b7280';
+                                } else if (checked.length === checkboxes.length) {
+                                    buttonText.textContent = 'Semua Kelas (' + checked.length + ')';
+                                    buttonText.style.color = '#111827';
+                                } else {
+                                    buttonText.textContent = checked.length + ' Kelas Dipilih';
+                                    buttonText.style.color = '#111827';
+                                }
+                            }
+
+                            // Check all functionality
+                            checkAll.addEventListener('change', function() {
+                                checkboxes.forEach(cb => cb.checked = this.checked);
+                                updateButtonText();
+                            });
+
+                            // Individual checkbox change
+                            checkboxes.forEach(cb => {
+                                cb.addEventListener('change', function() {
+                                    updateButtonText();
+                                    checkAll.checked = Array.from(checkboxes).every(c => c.checked);
+                                });
+                            });
+
+                            // Initial update
+                            updateButtonText();
+                            checkAll.checked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(c => c.checked);
+                        });
+                    </script>
                     
                     <select name="status" class="filter-select" onchange="this.form.submit()">
                         <option value="aktif" {{ request('status', 'aktif') == 'aktif' ? 'selected' : '' }}>Status: Aktif</option>

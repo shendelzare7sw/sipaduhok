@@ -126,12 +126,17 @@ class OrangTuaController extends Controller
             ->orderBy('tanggal_jatuh_tempo', 'desc')
             ->get();
 
+        // Calculate sisa_tagihan for each item
+        foreach ($tagihanAll as $item) {
+            $terbayar = Pembayaran::where('tagihan_id', $item->id)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+            $item->sisa_tagihan = $item->jumlah - $terbayar;
+        }
+
         // Pisahkan tagihan berdasarkan tahun ajaran
         $tagihanCurrent = $tagihanAll->where('tahun_ajaran_id', $activeYear->id ?? 0);
         $tagihanArrears = $tagihanAll->where('tahun_ajaran_id', '!=', $activeYear->id ?? 0)->where('status', '!=', 'sudah_bayar');
-        
-        // Gabungkan untuk tampilan default (tapi kita punya collection terpisah untuk section khusus)
-        // Kita gunakan $tagihanAll untuk hitungan total agar akurat
         
         // Group tagihan CURRENT berdasarkan jenis
         $tagihanGroup = $tagihanCurrent->groupBy('jenis_tagihan');
@@ -142,15 +147,18 @@ class OrangTuaController extends Controller
 
         // Calculate Totals Separately
         $totalTagihanCurrent = $tagihanCurrent->sum('jumlah');
-        $totalTunggakan = $tagihanArrears->sum('jumlah'); // Unpaid from previous years
         
-        // Sisa tagihan CURRENT (untuk card status tahun ini)
-        $sisaTagihanCurrent = $tagihanCurrent->where('status', '!=', 'sudah_bayar')->sum('jumlah');
+        // Total Tunggakan (Use calculated sisa_tagihan)
+        $totalTunggakan = $tagihanArrears->sum('sisa_tagihan'); 
+        
+        // Sisa tagihan CURRENT (Use calculated sisa_tagihan)
+        $sisaTagihanCurrent = $tagihanCurrent->where('status', '!=', 'sudah_bayar')->sum('sisa_tagihan');
 
         // Total Yang Harus Dibayar (Current Sisa + Tunggakan)
         $grandTotalUnpaid = $sisaTagihanCurrent + $totalTunggakan;
         
         // Total sudah dibayar (Current only)
+        // Kalkulasi: Total Awal - Sisa Sekarang
         $totalBayarCurrent = $totalTagihanCurrent - $sisaTagihanCurrent;
 
         // Riwayat pembayaran
@@ -380,7 +388,7 @@ class OrangTuaController extends Controller
             'bukti_bayar' => 'required_if:metode_pembayaran,transfer|image|mimes:jpeg,png,jpg|max:10240',
         ]);
 
-        $orderId = $this->generateKodePembayaran(); // One Order ID for the batch
+        $orderId = 'ORD-' . strtoupper(\Illuminate\Support\Str::random(10)) . '-' . date('YmdHis'); // Distinct Order ID
         $buktiPath = null;
 
         if ($request->hasFile('bukti_bayar')) {
@@ -392,6 +400,9 @@ class OrangTuaController extends Controller
             $pembayaranIds = [];
             $itemDetails = [];
 
+            // Generate base payment code once to ensure sequence
+            $basePaymentCode = $this->generateKodePembayaran();
+
             foreach ($validated['items'] as $index => $item) {
                 $tagihan = Tagihan::findOrFail($item['tagihan_id']);
 
@@ -399,8 +410,9 @@ class OrangTuaController extends Controller
                 if ($tagihan->siswa_id != $siswa->id)
                     continue;
 
-                // Generate unique code for this specific record
-                $uniqueKode = $this->generateKodePembayaran() . '-' . ($index + 1);
+                // Generate unique code using base + suffix
+                // This prevents DB hit inside loop and ensures consistent naming
+                $uniqueKode = $basePaymentCode . '-' . ($index + 1);
 
                 $pembayaran = Pembayaran::create([
                     'kode_pembayaran' => $uniqueKode, // Unique per record
@@ -468,8 +480,13 @@ class OrangTuaController extends Controller
                 \Log::error('Gagal mengirim notifikasi pembayaran: ' . $e->getMessage());
             }
 
+            $count = count($pembayaranIds);
+            $message = $count > 1 
+                ? "Pembayaran massal ($count tagihan) berhasil diajukan. Menunggu validasi."
+                : "Pembayaran berhasil diajukan. Menunggu validasi.";
+
             return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
-                ->with('success', 'Pembayaran massal berhasil diajukan. Menunggu validasi.');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -492,18 +509,21 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        // Ambil semua rapor siswa
+        // Ambil semua rapor siswa yang sudah diterbitkan
         $rapor = Rapor::where('siswa_id', $siswa->id)
+            ->where('status', 'diterbitkan')
             ->with('tahunAjaran')
+            ->orderBy('tahun_ajaran_id', 'desc')
             ->orderBy('semester', 'desc')
             ->get();
 
-        // Cek Validasi Akses Rapor
-        if (!$siswa->validasi_rapor_wali) {
+        // Cek Validasi Akses Rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
+        if (!$siswa->hasFullRaporAccess()) {
              return view('orang-tua.rapor.index', [
-                'siswa' => $siswa, 
+                'siswa' => $siswa,
                 'rapor' => collect(),
-                'locked' => true // Pass locked status to view
+                'locked' => true, // Pass locked status to view
+                'message' => 'Akses rapor belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.'
              ]);
         }
 
@@ -518,7 +538,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Ambil rapor dan pastikan itu milik anak dari orang tua yang login
-        $rapor = Rapor::with(['siswa.kelas', 'tahunAjaran', 'nilai.mataPelajaran'])
+        $rapor = Rapor::with(['siswa.kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])
             ->findOrFail($raporId);
 
         // Cek apakah siswa ini adalah anak dari orang tua yang login
@@ -529,11 +549,11 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke rapor ini.');
         }
 
-        // Cek Validasi Akses Rapor
+        // Cek Validasi Akses Rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
         $siswa = $rapor->siswa;
-        if (!$siswa->validasi_rapor_wali) {
+        if (!$siswa->hasFullRaporAccess()) {
             return redirect()->route('orang-tua.rapor.anak', $siswa->id)
-                ->with('error', 'Akses rapor untuk siswa ini belum dibuka oleh Wali Kelas.');
+                ->with('error', 'Akses rapor untuk siswa ini belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         return view('orang-tua.rapor.detail', compact('rapor'));
@@ -1138,9 +1158,11 @@ class OrangTuaController extends Controller
     {
         $prefix = 'PAY';
         $date = now()->format('Ymd');
+        $searchPrefix = "{$prefix}-{$date}";
 
-        // Get last payment code for today
-        $lastPayment = \App\Models\Pembayaran::whereDate('created_at', now())
+        // Cari kode terakhir hari ini berdasarkan format string, bukan created_at
+        // Ini menangani kasus suffix (-1) dan timestamp offset
+        $lastPayment = \App\Models\Pembayaran::where('kode_pembayaran', 'LIKE', "{$searchPrefix}%")
             ->orderBy('id', 'desc')
             ->first();
 
@@ -1154,5 +1176,42 @@ class OrangTuaController extends Controller
         $sequence = str_pad($newNumber, 5, '0', STR_PAD_LEFT);
 
         return "{$prefix}-{$date}-{$sequence}";
+    }
+    /**
+     * Cetak Invoice Pembayaran Digital
+     */
+    public function cetakInvoice($id)
+    {
+        $user = Auth::user();
+
+        // Cari pembayaran UTAMA berdasarkan ID
+        $mainPayment = Pembayaran::with(['tagihan.tahunAjaran', 'siswa.kelas', 'siswa.cabang'])
+            ->find($id);
+
+        if (!$mainPayment) {
+            abort(404);
+        }
+
+        // Pastikan akses
+        $siswa = $user->children()->find($mainPayment->siswa_id);
+        if (!$siswa) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        // Ambil SEMUA pembayaran dalam satu Order ID yang sama (jika ada)
+        // Jika order_id null/kosong, maka hanya ambil diri sendiri
+        $items = collect([$mainPayment]);
+
+        if (!empty($mainPayment->order_id)) {
+            $items = Pembayaran::with(['tagihan.tahunAjaran'])
+                ->where('order_id', $mainPayment->order_id)
+                ->get();
+        }
+
+        return view('orang-tua.tagihan.invoice', [
+            'pembayaran' => $mainPayment, // Menggunakan payment pertama sebagai header info
+            'items' => $items,            // Mengirim collection items untuk tabel
+            'siswa' => $siswa
+        ]);
     }
 }

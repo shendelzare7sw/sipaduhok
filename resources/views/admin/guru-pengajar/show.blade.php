@@ -488,49 +488,22 @@
                 </div>
             </div>
 
-            {{-- Form Tambah Penugasan --}}
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-plus-circle"></i> Tambah Penugasan</h5>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.guru-pengajar.assign', $guruPengajar) }}" method="POST">
-                        @csrf
-
-                        <div class="form-group">
-                            <label for="kelas_id">Pilih Kelas</label>
-                            <select name="kelas_id" id="kelas_id" required>
-                                <option value="">-- Pilih Kelas --</option>
-                                @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
-                                    <optgroup label="{{ $jenjang }}">
-                                        @foreach($kelasGroup as $kelas)
-                                            <option value="{{ $kelas->id }}">
-                                                {{ $kelas->nama_kelas }} ({{ $kelas->cabang->nama_cabang ?? '-' }})
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
+            {{-- Info Box: Penugasan Otomatis dari Jadwal --}}
+            <div class="card" style="border: 1px solid #bfdbfe; background: #eff6ff;">
+                <div class="card-body" style="padding: 16px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                        <i class="fas fa-info-circle" style="color: #3b82f6; font-size: 20px; margin-top: 2px;"></i>
+                        <div>
+                            <strong style="color: #1e40af;">Penugasan Otomatis dari Jadwal Pelajaran</strong>
+                            <p style="margin: 4px 0 8px; color: #1e3a5f; font-size: 13px;">
+                                Penugasan guru ke kelas dan mata pelajaran dikelola otomatis dari Jadwal Pelajaran.
+                                Untuk menambah atau mengubah penugasan, buat atau edit jadwal di menu Jadwal Pelajaran.
+                            </p>
+                            <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-calendar-alt me-1"></i> Buka Jadwal Pelajaran
+                            </a>
                         </div>
-
-                        <div class="form-group">
-                            <label for="mata_pelajaran_id">Pilih Mata Pelajaran</label>
-                            <select name="mata_pelajaran_id" id="mata_pelajaran_id" required>
-                                <option value="">-- Pilih Mata Pelajaran --</option>
-                                @foreach($mataPelajaranList->groupBy('jenjang') as $jenjang => $mapelGroup)
-                                    <optgroup label="{{ $jenjang ?? 'Semua Jenjang' }}">
-                                        @foreach($mapelGroup as $mapel)
-                                            <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            <i class="fas fa-plus"></i> Tambah Penugasan
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -563,7 +536,6 @@
                                     <th>Mata Pelajaran</th>
                                     <th>Cabang</th>
                                     <th>Tahun Ajaran</th>
-                                    <th style="text-align: center; width: 80px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -575,87 +547,47 @@
                                         <td><span class="badge badge-teal">{{ $assignment->mataPelajaran->nama_mapel }}</span></td>
                                         <td>{{ $assignment->kelas->cabang->nama_cabang ?? '-' }}</td>
                                         <td>{{ $assignment->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</td>
-                                        <td style="text-align: center;">
-                                            <form action="{{ route('admin.guru-pengajar.remove-assignment', $guruPengajar) }}"
-                                                method="POST" style="display: inline;" id="deleteForm{{ $assignment->id }}">
-                                                @csrf
-                                                <input type="hidden" name="assignment_id" value="{{ $assignment->id }}">
-                                                <button type="button" class="btn btn-danger btn-sm" title="Hapus"
-                                                    onclick="confirmDeletePenugasan('{{ $assignment->id }}', '{{ $assignment->kelas->nama_kelas }}', '{{ $assignment->mataPelajaran->nama_mapel }}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- Jadwal Terkait --}}
+                    @if($jadwalList->count() > 0)
+                        <h6 class="mt-4 mb-2"><i class="fas fa-calendar-alt"></i> Jadwal Mengajar</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Hari</th>
+                                        <th>Jam</th>
+                                        <th>Mata Pelajaran</th>
+                                        <th>Kelas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($jadwalList as $jadwal)
+                                        <tr>
+                                            <td>{{ $jadwal->hari }}</td>
+                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                            <td>{{ $jadwal->mataPelajaran->nama_mapel ?? '-' }}</td>
+                                            <td>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 @else
                     <div class="empty-state">
                         <i class="fas fa-clipboard-list"></i>
                         <p>Belum ada penugasan untuk guru ini</p>
+                        <small class="text-muted">Buat jadwal pelajaran dengan guru ini untuk menambahkan penugasan secara otomatis.</small>
                     </div>
                 @endif
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
-                <div class="modal-header"
-                    style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 20px 24px;">
-                    <h5 class="modal-title" id="deleteModalLabel"
-                        style="display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 600;">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Konfirmasi Hapus Penugasan
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="padding: 24px;">
-                    <p style="margin-bottom: 16px; color: #374151; font-size: 15px;">Apakah Anda yakin ingin menghapus
-                        penugasan berikut?</p>
-                    <div
-                        style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                        <div style="font-weight: 600; color: #111827; margin-bottom: 4px;" id="kelasName"></div>
-                        <div style="font-size: 14px; color: #6b7280;" id="mapelName"></div>
-                    </div>
-                    <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                        <i class="fas fa-info-circle"></i> Guru tidak akan lagi mengajar mata pelajaran ini di kelas
-                        tersebut.
-                    </p>
-                </div>
-                <div class="modal-footer" style="border: none; padding: 16px 24px; background: #f9fafb; gap: 10px;">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal" style="flex: 1;">
-                        <i class="fas fa-times"></i> Batal
-                    </button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" style="flex: 1;">
-                        <i class="fas fa-trash"></i> Ya, Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let deleteFormId = null;
-
-        function confirmDeletePenugasan(assignmentId, kelasName, mapelName) {
-            deleteFormId = assignmentId;
-            document.getElementById('kelasName').textContent = 'Kelas: ' + kelasName;
-            document.getElementById('mapelName').textContent = 'Mata Pelajaran: ' + mapelName;
-
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            modal.show();
-        }
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-            if (deleteFormId) {
-                document.getElementById('deleteForm' + deleteFormId).submit();
-            }
-        });
-    </script>
 @endsection

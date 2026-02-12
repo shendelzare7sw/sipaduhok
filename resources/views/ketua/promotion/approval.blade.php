@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Persetujuan Dispensasi Naik Kelas')
+@section('page-title', 'Persetujuan Dispensasi')
 
 @section('sidebar-menu')
     @include('ketua.partials.sneat-sidebar-menu')
@@ -13,7 +14,12 @@
 
 
     <div class="card">
-        <h5 class="card-header">Permintaan Izin Khusus (Dispensasi)</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Permintaan Izin Khusus (Dispensasi)</h5>
+            <a href="{{ route('ketua.promotion.approval.history') }}" class="btn btn-primary btn-sm">
+                <i class='bx bx-history'></i> Riwayat
+            </a>
+        </div>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>

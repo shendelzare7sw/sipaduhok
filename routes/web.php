@@ -9,6 +9,7 @@ use App\Http\Controllers\MidtransWebhookController;
 // Admin Controllers
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AiSettingController; // Added
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\CabangController;
 use App\Http\Controllers\Admin\KelasController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Admin\CetakLaporanController;
 
 // Ketua PKBM Controllers
 use App\Http\Controllers\Ketua\KetuaController;
+use App\Http\Controllers\Ketua\ValidasiRaporController as KetuaValidasiRaporController;
 
 // Wakil Kepala Sekolah Controllers
 use App\Http\Controllers\WakilKepalaSekolah\WakilKepalaSekolahController;
@@ -65,7 +67,7 @@ use App\Http\Controllers\Siswa\SiswaDashboardController;
 use App\Http\Controllers\Siswa\SiaDashboardController;
 use App\Http\Controllers\Siswa\SiaPresensiController;
 use App\Http\Controllers\Siswa\SiaPembayaranController;
-use App\Http\Controllers\Siswa\SiaRaporController;
+// use App\Http\Controllers\Siswa\SiaRaporController; // Disabled - Siswa tidak berhak akses rapor
 use App\Http\Controllers\Siswa\LmsDashboardController;
 
 // Orang Tua Controllers
@@ -159,6 +161,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/tenaga-pendidik/import', [UserController::class, 'importTenagaPendidikForm'])->name('import-tenaga-pendidik');
             Route::post('/tenaga-pendidik/import', [UserController::class, 'importTenagaPendidik'])->name('import-tenaga-pendidik.store');
             Route::get('/tenaga-pendidik/template', [UserController::class, 'downloadTenagaPendidikTemplate'])->name('tenaga-pendidik-template');
+            Route::get('/tenaga-pendidik/print', [UserController::class, 'printTenagaPendidik'])->name('tenaga-pendidik.print');
             Route::get('/tenaga-pendidik', [UserController::class, 'tenagaPendidik'])->name('tenaga-pendidik');
             Route::get('/tenaga-pendidik/create', [UserController::class, 'createTenagaPendidik'])->name('create-tenaga-pendidik');
             Route::post('/tenaga-pendidik', [UserController::class, 'storeTenagaPendidik'])->name('store-tenaga-pendidik');
@@ -166,11 +169,13 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/tenaga-pendidik/{id}', [UserController::class, 'updateTenagaPendidik'])->name('update-tenaga-pendidik');
             Route::delete('/tenaga-pendidik/{id}', [UserController::class, 'deleteTenagaPendidik'])->name('delete-tenaga-pendidik');
             Route::get('/tenaga-pendidik/{id}', [UserController::class, 'showTenagaPendidik'])->name('show-tenaga-pendidik');
+            Route::post('/tenaga-pendidik/bulk-delete', [UserController::class, 'bulkDeleteTenagaPendidik'])->name('bulk-delete-tenaga-pendidik');
 
             // Siswa
             Route::get('/siswa/import', [UserController::class, 'importSiswaForm'])->name('import-siswa');
             Route::post('/siswa/import', [UserController::class, 'importSiswa'])->name('import-siswa.store');
             Route::get('/siswa/template', [UserController::class, 'downloadSiswaTemplate'])->name('siswa-template');
+            Route::get('/siswa/print', [UserController::class, 'printSiswa'])->name('siswa.print');
             Route::get('/siswa', [UserController::class, 'siswa'])->name('siswa');
             Route::get('/siswa/create', [UserController::class, 'createSiswa'])->name('create-siswa');
             Route::post('/siswa', [UserController::class, 'storeSiswa'])->name('store-siswa');
@@ -178,11 +183,13 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/siswa/{id}', [UserController::class, 'updateSiswa'])->name('update-siswa');
             Route::delete('/siswa/{id}', [UserController::class, 'deleteSiswa'])->name('delete-siswa');
             Route::get('/siswa/{id}', [UserController::class, 'showSiswa'])->name('show-siswa');
+            Route::post('/siswa/bulk-delete', [UserController::class, 'bulkDeleteSiswa'])->name('bulk-delete-siswa');
 
             // Orang Tua
             Route::get('/orang-tua/import', [UserController::class, 'importOrangTuaForm'])->name('import-orang-tua');
             Route::post('/orang-tua/import', [UserController::class, 'importOrangTua'])->name('import-orang-tua.store');
             Route::get('/orang-tua/template', [UserController::class, 'downloadOrangTuaTemplate'])->name('orang-tua-template');
+            Route::get('/orang-tua/print', [UserController::class, 'printOrangTua'])->name('orang-tua.print');
             Route::get('/orang-tua', [UserController::class, 'orangTua'])->name('orang-tua');
             Route::get('/orang-tua/create', [UserController::class, 'createOrangTua'])->name('orang-tua.create');
             Route::post('/orang-tua', [UserController::class, 'storeOrangTua'])->name('orang-tua.store');
@@ -191,6 +198,14 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/orang-tua/{id}', [UserController::class, 'updateOrangTua'])->name('update-orang-tua');
             Route::post('/orang-tua/{id}/toggle-status', [UserController::class, 'toggleOrangTuaStatus'])->name('toggle-orang-tua-status');
             Route::delete('/orang-tua/{id}', [UserController::class, 'deleteOrangTua'])->name('delete-orang-tua');
+            Route::post('/orang-tua/bulk-delete', [UserController::class, 'bulkDeleteOrangTua'])->name('bulk-delete-orang-tua');
+        });
+
+        // Pengaturan AI Assistant
+        Route::prefix('ai-settings')->name('ai-settings.')->group(function () {
+            Route::get('/', [AiSettingController::class, 'index'])->name('index');
+            Route::put('/', [AiSettingController::class, 'update'])->name('update');
+            Route::post('/test', [AiSettingController::class, 'testConnection'])->name('test');
         });
 
         // Tahun Ajaran
@@ -206,6 +221,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('kelas/import', [KelasController::class, 'import'])->name('kelas.import.store');
         Route::get('kelas/template', [KelasController::class, 'downloadTemplate'])->name('kelas.template');
         Route::get('kelas/print', [KelasController::class, 'printDaftarKelas'])->name('kelas.print');
+        Route::post('kelas/copy', [KelasController::class, 'copyClasses'])->name('kelas.copy'); // Route Salin Kelas
         Route::get('kelas/{kelas}/manage-siswa', [KelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
         Route::post('kelas/{kelas}/add-siswa', [KelasController::class, 'addSiswa'])->name('kelas.add-siswa');
         Route::post('kelas/{kelas}/remove-siswa', [KelasController::class, 'removeSiswa'])->name('kelas.remove-siswa');
@@ -219,20 +235,18 @@ Route::middleware(['auth'])->group(function () {
         Route::post('wali-kelas/{kelas}/assign', [AdminWaliKelasController::class, 'assign'])->name('wali-kelas.assign');
         Route::post('wali-kelas/bulk-assign', [AdminWaliKelasController::class, 'bulkAssign'])->name('wali-kelas.bulk-assign');
 
-        // Guru Pengajar
+        // Guru Pengajar (Read-Only Dashboard - derived from Jadwal Pelajaran)
         Route::get('guru-pengajar', [GuruPengajarController::class, 'index'])->name('guru-pengajar.index');
         Route::get('guru-pengajar/print', [GuruPengajarController::class, 'print'])->name('guru-pengajar.print');
+        Route::post('guru-pengajar/rebuild', [GuruPengajarController::class, 'rebuildFromJadwal'])->name('guru-pengajar.rebuild');
         Route::get('guru-pengajar/kelas/{kelas}', [GuruPengajarController::class, 'manageKelas'])->name('guru-pengajar.manage-kelas');
-        Route::post('guru-pengajar/kelas/{kelas}/assign', [GuruPengajarController::class, 'assignToKelas'])->name('guru-pengajar.assign-to-kelas');
-        Route::post('guru-pengajar/kelas/{kelas}/remove', [GuruPengajarController::class, 'removeFromKelas'])->name('guru-pengajar.remove-from-kelas');
         Route::get('guru-pengajar/{guruPengajar}', [GuruPengajarController::class, 'show'])->name('guru-pengajar.show');
-        Route::post('guru-pengajar/{guruPengajar}/assign', [GuruPengajarController::class, 'assign'])->name('guru-pengajar.assign');
-        Route::post('guru-pengajar/{guruPengajar}/remove-assignment', [GuruPengajarController::class, 'removeAssignment'])->name('guru-pengajar.remove-assignment');
 
         // Mata Pelajaran
         Route::get('mata-pelajaran/import', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'importForm'])->name('mata-pelajaran.import');
         Route::post('mata-pelajaran/import', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'import'])->name('mata-pelajaran.import.store');
         Route::get('mata-pelajaran/template', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
+        Route::get('mata-pelajaran/suggest-kode', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'suggestKodeMapel'])->name('mata-pelajaran.suggest-kode');
         Route::resource('mata-pelajaran', \App\Http\Controllers\Admin\MataPelajaranController::class);
 
         // Pengaturan Istirahat
@@ -342,6 +356,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/siswa/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'store'])->name('store');
                 Route::post('/siswa/{siswa}/validasi-langsung', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'validasiLangsung'])->name('validasi-langsung');
                 Route::get('/riwayat/{siswa}', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'riwayatSiswa'])->name('riwayat-siswa');
+                Route::get('/{pembayaran}/cetak-kwitansi', [\App\Http\Controllers\Admin\Keuangan\PembayaranController::class, 'cetakKwitansi'])->name('cetak-kwitansi');
             });
 
             // Laporan Keuangan
@@ -385,6 +400,7 @@ Route::middleware(['auth'])->group(function () {
             Route::prefix('promotion')->name('promotion.')->group(function () {
                 Route::get('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'index'])->name('validation.index');
                 Route::post('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'store'])->name('validation.store');
+                Route::get('/validation/history', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'history'])->name('validation.history');
             });
         });
 
@@ -446,6 +462,16 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
                 Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
                 
+                // Individual/Batch Rollback
+                Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
+                Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
+                
+                // Promote Selected (for failed students who now qualify)
+                Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
+                
+                // Scheduling
+                Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
+
                 // KKM (New Admin Access)
                 Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
                 
@@ -546,6 +572,16 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('promotion')->name('promotion.')->group(function() {
             Route::get('/approval', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'index'])->name('approval.index');
             Route::put('/approval/{id}', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'update'])->name('approval.update');
+            Route::get('/approval/history', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'history'])->name('approval.history');
+        });
+
+        // Validasi Rapor (NEW - 3rd level validation)
+        Route::prefix('validasi-rapor')->name('validasi-rapor.')->group(function() {
+            Route::get('/', [KetuaValidasiRaporController::class, 'index'])->name('index');
+            Route::post('/{siswa}/validasi', [KetuaValidasiRaporController::class, 'validasiRapor'])->name('validasi');
+            Route::post('/{siswa}/batalkan', [KetuaValidasiRaporController::class, 'batalkanRapor'])->name('batalkan');
+            Route::post('/bulk-validasi', [KetuaValidasiRaporController::class, 'bulkValidasi'])->name('bulk-validasi');
+            Route::post('/validasi-semua', [KetuaValidasiRaporController::class, 'validasiSemuaRapor'])->name('validasi-semua');
         });
     });
 
@@ -573,6 +609,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('mata-pelajaran/import', [WakaMataPelajaranController::class, 'import'])->name('mata-pelajaran.import');
         Route::post('mata-pelajaran/import', [WakaMataPelajaranController::class, 'importStore'])->name('mata-pelajaran.import.store');
         Route::get('mata-pelajaran/template', [WakaMataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
+        Route::get('mata-pelajaran/suggest-kode', [WakaMataPelajaranController::class, 'suggestKodeMapel'])->name('mata-pelajaran.suggest-kode');
         Route::resource('mata-pelajaran', WakaMataPelajaranController::class);
 
         // Kelas
@@ -663,12 +700,26 @@ Route::middleware(['auth'])->group(function () {
 
         // Promotion System Settings
         Route::prefix('promotion')->name('promotion.')->group(function() {
-            Route::resource('kkm', \App\Http\Controllers\WakilKepalaSekolah\PengaturanKKMController::class)->only(['index', 'store']);
-            Route::resource('settings', \App\Http\Controllers\WakilKepalaSekolah\PengaturanNaikKelasController::class)->only(['index', 'store']);
+            // Note: We use Admin controllers for shared functionality to ensure consistency
+            // Settings and KKM are defined at the end of this group
             
             // Report Access
             Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
             Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
+            
+            // Individual/Batch Rollback
+            Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
+            Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
+            
+            // Promote Selected
+            Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
+            
+            // Scheduling
+            Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
+            
+            // Settings and KKM
+            Route::resource('settings', \App\Http\Controllers\Admin\Akademik\PromotionSettingsController::class)->only(['index', 'store']);
+            Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
         });
     });
 
@@ -778,6 +829,9 @@ Route::middleware(['auth'])->group(function () {
 
             // Riwayat per siswa
             Route::get('/riwayat/{siswa}', [PembayaranController::class, 'riwayatSiswa'])->name('riwayat-siswa');
+
+            // Cetak kwitansi pembayaran
+            Route::get('/{pembayaran}/cetak-kwitansi', [PembayaranController::class, 'cetakKwitansi'])->name('cetak-kwitansi');
         });
 
         // Info Pembayaran
@@ -821,8 +875,11 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('promotion')->name('promotion.')->group(function() {
             Route::get('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'index'])->name('validation.index');
             Route::post('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'store'])->name('validation.store');
+            Route::get('/validation/history', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'history'])->name('validation.history');
         });
     });
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -870,17 +927,26 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{siswa}', [WaliKelasNilaiController::class, 'show'])->name('show');
             Route::get('/{siswa}/edit', [WaliKelasNilaiController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [WaliKelasNilaiController::class, 'update'])->name('update');
+            Route::post('/{nilaiId}/clear', [WaliKelasNilaiController::class, 'clearNilai'])->name('clear');
         });
 
         // Rapor
         Route::prefix('rapor')->name('rapor.')->group(function () {
             Route::get('/', [RaporController::class, 'index'])->name('index');
             Route::post('/generate-all', [RaporController::class, 'generateAll'])->name('generate-all');
+            Route::post('/generate-single/{siswa}', [RaporController::class, 'generateSingle'])->name('generate-single'); // NEW - Per student
+            Route::post('/create-with-mode', [RaporController::class, 'createWithMode'])->name('create-with-mode'); // NEW
             Route::get('/{rapor}/edit', [RaporController::class, 'edit'])->name('edit');
             Route::put('/{rapor}', [RaporController::class, 'update'])->name('update');
             Route::post('/{rapor}/terbitkan', [RaporController::class, 'terbitkan'])->name('terbitkan');
+            Route::post('/{rapor}/tarik-kembali', [RaporController::class, 'tarikKembali'])->name('tarik-kembali');
+            Route::delete('/{rapor}', [RaporController::class, 'destroy'])->name('destroy'); // NEW - Delete draft rapor
             Route::get('/{rapor}/preview', [RaporController::class, 'preview'])->name('preview');
             Route::get('/{rapor}/print', [RaporController::class, 'print'])->name('print');
+            Route::post('/{rapor}/kehadiran-auto', [RaporController::class, 'autoFillKehadiran'])->name('kehadiran-auto'); // NEW
+            Route::get('/{rapor}/export-excel', [RaporController::class, 'exportExcel'])->name('export-excel'); // NEW
+            Route::post('/apply-template', [RaporController::class, 'applyTemplate'])->name('apply-template'); // NEW
+            Route::post('/apply-template-all', [RaporController::class, 'applyTemplateToAll'])->name('apply-template-all'); // NEW
         });
 
         // Validasi Akses
@@ -899,6 +965,14 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/bulk-validasi-rapor', [WaliKelasValidasiAksesController::class, 'bulkValidasiRapor'])->name('bulk-validasi-rapor');
             Route::post('/validasi-semua-rapor', [WaliKelasValidasiAksesController::class, 'validasiSemuaRapor'])->name('validasi-semua-rapor');
         });
+
+        // Template Capaian (NEW)
+        Route::prefix('template-capaian')->name('template-capaian.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\WaliKelas\TemplateCapaianController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\WaliKelas\TemplateCapaianController::class, 'store'])->name('store');
+            Route::put('/{id}', [\App\Http\Controllers\WaliKelas\TemplateCapaianController::class, 'update'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\WaliKelas\TemplateCapaianController::class, 'destroy'])->name('destroy');
+        });
     });
 
     /*
@@ -914,6 +988,9 @@ Route::middleware(['auth'])->group(function () {
         // Daftar Kelas & Mata Pelajaran yang Diajar
         Route::get('/kelas', [GuruKelasController::class, 'index'])->name('kelas.index');
         Route::get('/kelas/{kelas}/mapel', [GuruKelasController::class, 'showMapel'])->name('kelas.mapel');
+
+        // Jadwal Pelajaran
+        Route::get('/jadwal', [\App\Http\Controllers\Guru\GuruJadwalController::class, 'index'])->name('jadwal.index');
 
         /*
         |--------------------------------------------------------------------------
@@ -947,7 +1024,8 @@ Route::middleware(['auth'])->group(function () {
                 // Koreksi Tugas
                 Route::get('/{tugas}/koreksi', [GuruKoreksiController::class, 'index'])->name('koreksi');
                 Route::get('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'show'])->name('koreksi.show');
-                Route::post('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'store'])->name('koreksi.store');
+                Route::post('/{tugas}/koreksi/bulk', [GuruKoreksiController::class, 'bulkGrade'])->name('koreksi.bulk');
+                Route::post('/{tugas}/koreksi/{submission}/ai-suggest', [GuruKoreksiController::class, 'getAiAssignmentSuggestion'])->name('koreksi.ai-suggest');
             });
 
             // Ujian
@@ -961,7 +1039,9 @@ Route::middleware(['auth'])->group(function () {
 
                 // Hasil & Koreksi Ujian
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
-                Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksi'])->name('koreksi');
+                Route::get('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiShow'])->name('koreksi.show');
+                Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiStore'])->name('koreksi.store');
+                Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest'); // Added
 
                 // Manajemen Soal
                 Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
@@ -975,10 +1055,15 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
                 Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
                 Route::post('/{ujian}/toggle-status', [GuruUjianController::class, 'toggleStatus'])->name('toggleStatus');
+                Route::post('/{ujian}/toggle-result', [GuruUjianController::class, 'toggleResultVisibility'])->name('toggleResult');
+
+                // Import/Export Soal
+                Route::get('/{ujian}/soal-template', [GuruUjianController::class, 'downloadSoalTemplate'])->name('soal.template');
+                Route::post('/{ujian}/import-soal', [GuruUjianController::class, 'importSoal'])->name('soal.import');
             });
 
-            // Kuis
-            Route::prefix('kuis')->name('kuis.')->group(function () {
+            // Latihan (renamed from Kuis)
+            Route::prefix('latihan')->name('latihan.')->group(function () {
                 Route::get('/', [GuruUjianController::class, 'index'])->name('index');
                 Route::get('/create', [GuruUjianController::class, 'create'])->name('create');
                 Route::post('/', [GuruUjianController::class, 'store'])->name('store');
@@ -986,11 +1071,13 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{ujian}', [GuruUjianController::class, 'update'])->name('update');
                 Route::delete('/{ujian}', [GuruUjianController::class, 'destroy'])->name('destroy');
 
-                // Hasil & Koreksi Kuis
+                // Hasil & Koreksi Latihan
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
-                Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksi'])->name('koreksi');
+                Route::get('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiShow'])->name('koreksi.show');
+                Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiStore'])->name('koreksi.store');
+                Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest'); // Added
 
-                // Manajemen Soal Kuis
+                // Manajemen Soal Latihan
                 Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
                 Route::get('/{ujian}/soal/create', [GuruUjianController::class, 'createSoal'])->name('soal.create');
                 Route::post('/{ujian}/soal', [GuruUjianController::class, 'storeSoal'])->name('soal.store');
@@ -998,16 +1085,23 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
 
-                // Manajemen Soal Kuis (Bulk)
+                // Manajemen Soal Latihan (Bulk)
                 Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
                 Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
                 Route::post('/{ujian}/toggle-status', [GuruUjianController::class, 'toggleStatus'])->name('toggleStatus');
+                Route::post('/{ujian}/toggle-result', [GuruUjianController::class, 'toggleResultVisibility'])->name('toggleResult');
+
+                // Import/Export Soal Latihan
+                Route::get('/{ujian}/soal-template', [GuruUjianController::class, 'downloadSoalTemplate'])->name('soal.template');
+                Route::post('/{ujian}/import-soal', [GuruUjianController::class, 'importSoal'])->name('soal.import');
             });
 
             // Nilai Siswa
             Route::get('/nilai', [GuruNilaiController::class, 'index'])->name('nilai.index');
             Route::post('/nilai/update', [GuruNilaiController::class, 'update'])->name('nilai.update');
+            Route::post('/nilai/update-batch', [GuruNilaiController::class, 'updateBatch'])->name('nilai.updateBatch');
             Route::post('/nilai/recalculate', [GuruNilaiController::class, 'recalculate'])->name('nilai.recalculate');
+            Route::get('/nilai/export-excel', [GuruNilaiController::class, 'exportExcel'])->name('nilai.export-excel');
 
             // Forum Diskusi
             Route::prefix('forum')->name('forum.')->group(function () {
@@ -1018,8 +1112,8 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/{forum}/reply', [GuruForumController::class, 'reply'])->name('reply');
                 Route::put('/{forum}/reply/{reply}', [GuruForumController::class, 'updateReply'])->name('reply.update');
                 Route::delete('/{forum}/reply/{reply}', [GuruForumController::class, 'destroyReply'])->name('reply.destroy');
-                Route::patch('/{forum}/pin', [GuruForumController::class, 'togglePin'])->name('pin');
-                Route::patch('/{forum}/close', [GuruForumController::class, 'toggleClose'])->name('close');
+                Route::patch('/{forum}/pin', [GuruForumController::class, 'togglePin'])->name('togglePin');
+                Route::patch('/{forum}/close', [GuruForumController::class, 'toggleClose'])->name('toggleClose');
                 Route::delete('/{forum}', [GuruForumController::class, 'destroy'])->name('destroy');
             });
 
@@ -1040,7 +1134,7 @@ Route::middleware(['auth'])->group(function () {
     | SISWA DASHBOARD & ROUTES
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
+    Route::middleware(['role:siswa', 'student.active'])->prefix('siswa')->name('siswa.')->group(function () {
 
         // Main Dashboard Router
         Route::get('/dashboard', [SiswaDashboardController::class, 'index'])->name('dashboard');
@@ -1080,13 +1174,13 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/midtrans/finish', [SiaPembayaranController::class, 'midtransFinish'])->name('midtrans-finish');
             });
 
-            // Rapor
-            Route::prefix('rapor')->name('rapor.')->group(function () {
-                Route::get('/', [SiaRaporController::class, 'index'])->name('index');
-                Route::get('/tengah-semester/{rapor}', [SiaRaporController::class, 'tengahSemester'])->name('tengah-semester');
-                Route::get('/akhir-semester/{rapor}', [SiaRaporController::class, 'akhirSemester'])->name('akhir-semester');
-                Route::get('/download/{rapor}', [SiaRaporController::class, 'download'])->name('download');
-            });
+            // Rapor - DISABLED: Siswa tidak berhak mengelola rapor, hanya orang tua
+            // Route::prefix('rapor')->name('rapor.')->group(function () {
+            //     Route::get('/', [SiaRaporController::class, 'index'])->name('index');
+            //     Route::get('/tengah-semester/{rapor}', [SiaRaporController::class, 'tengahSemester'])->name('tengah-semester');
+            //     Route::get('/akhir-semester/{rapor}', [SiaRaporController::class, 'akhirSemester'])->name('akhir-semester');
+            //     Route::get('/download/{rapor}', [SiaRaporController::class, 'download'])->name('download');
+            // });
         });
 
         /*
@@ -1104,6 +1198,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/kalender/{tanggal}', [SiswaDashboardController::class, 'kalenderDetail'])->name('kalender.detail');
 
             // Pengumuman
+            Route::get('/pengumuman', [LmsDashboardController::class, 'pengumumanIndex'])->name('pengumuman.index');
             Route::get('/pengumuman/{id}', [LmsDashboardController::class, 'pengumumanDetail'])->name('pengumuman.show');
 
             // Jadwal Pelajaran
@@ -1114,7 +1209,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/guru', [LmsDashboardController::class, 'guru'])->name('guru');
 
             // Mata Pelajaran
-            Route::prefix('mata-pelajaran')->name('mapel.')->group(function () {
+            Route::prefix('mata-pelajaran')->name('mapel.')->middleware('siswa.mapel.access')->group(function () {
 
                 // Detail Mata Pelajaran
                 Route::get('/{mapelId}', [LmsMateriController::class, 'show'])->name('show');
@@ -1180,6 +1275,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/snap-finish', [OrangTuaController::class, 'snapFinish'])->name('snap.finish');
             Route::get('/snap/{pembayaran}', [OrangTuaController::class, 'snapPayment'])->name('snap');
             Route::post('/continue/{pembayaran}', [OrangTuaController::class, 'continuePayment'])->name('continue');
+            Route::get('/{pembayaran}/invoice', [OrangTuaController::class, 'cetakInvoice'])->name('invoice');
         });
 
         // Monitoring Rapor Anak

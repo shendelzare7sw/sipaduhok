@@ -52,11 +52,10 @@
                 <button class="action-icon text-primary" onclick="toggleReplyForm('edit-form-{{ $uniqueId }}')" title="Edit">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
-                <form action="{{ route('guru.lms.forum.reply.destroy', [$kelas->id, $mapel->id, $forum->id, $reply->id]) }}"
-                    method="POST" onsubmit="return confirm('Hapus balasan ini?')" style="margin: 0;">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="action-icon text-danger" title="Hapus"><i class="fas fa-trash"></i></button>
-                </form>
+                <button type="button" class="action-icon text-danger" title="Hapus" 
+                    onclick="confirmDeleteReply('{{ route('guru.lms.forum.reply.destroy', [$kelas->id, $mapel->id, $forum->id, $reply->id]) }}')">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         @endif
     </div>

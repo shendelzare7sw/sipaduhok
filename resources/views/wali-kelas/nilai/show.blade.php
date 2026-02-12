@@ -1,8 +1,8 @@
 @extends('layouts.sneat')
 
-@section('title', 'Detail Nilai Siswa')
+@section('title', 'Detail Nilai - ' . $siswa->nama_lengkap)
 @section('page-title', 'Detail Nilai Siswa')
-@section('page-subtitle', 'Rincian pencapaian akademik per mata pelajaran')
+@section('page-subtitle', $siswa->nama_lengkap . ' - ' . $kelas->nama_kelas)
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
@@ -10,274 +10,282 @@
 
 @section('styles')
 <style>
-    /* === 1. VIBRANT STAT CARDS === */
-    .stat-card-vibrant {
-        padding: 20px;
-        border-radius: 12px;
-        position: relative;
-        overflow: hidden;
-        color: white !important;
-        border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-        height: 100%;
+    @media print {
+        .no-print { display: none !important; }
+        .student-card { border: none !important; box-shadow: none !important; }
+        body { font-size: 10pt; }
+        .table { font-size: 9pt; }
     }
-    .stat-card-vibrant:hover { transform: translateY(-5px); }
-    .stat-card-vibrant .stat-number { font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 5px; }
-    .stat-card-vibrant .stat-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
-    .stat-card-vibrant .stat-icon-bg { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 50px; opacity: 0.2; }
-
-    .bg-grad-blue   { background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important; }
-    .bg-grad-green  { background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%) !important; }
-    .bg-grad-orange { background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%) !important; }
-    .bg-grad-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important; }
-
-    /* === 2. STUDENT PROFILE HEADER === */
-    .student-header-card {
+    .student-card {
         background: white;
-        border-radius: 15px;
-        border-left: 5px solid #4e73df;
+        border-radius: 20px;
+        border-left: 6px solid #4e73df;
     }
-    .info-label { font-size: 11px; font-weight: 800; color: #b7b9cc; text-transform: uppercase; }
-    .info-value { font-weight: 700; color: #4e73df; margin-bottom: 10px; }
-
-    /* === 3. TABLE STYLING === */
     .table thead th {
         background: #f8f9fc;
         color: #4e73df;
         font-weight: 700;
-        font-size: 11px;
+        font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         border-bottom: 2px solid #e3e6f0;
+        vertical-align: middle;
     }
-    .score-cell { font-weight: 700; font-family: 'Nunito', sans-serif; }
-    
-    @media print {
-        .sidebar, .header, .btn, .no-print, .sticky-footer { display: none !important; }
-        .card { border: 1px solid #ddd !important; box-shadow: none !important; }
-        body { background: white !important; padding: 0; }
+    .predikat-badge {
+        font-size: 13px;
+        font-weight: 700;
+        padding: 4px 10px;
     }
+    .rata-cell {
+        background: #e9ecef !important;
+        font-weight: 700;
+        color: #165fac;
+    }
+    .nilai-akhir-cell {
+        background: #d4edda !important;
+        font-weight: 800;
+        color: #155724;
+    }
+    .th-tugas { background: #e3f2fd !important; }
+    .th-latihan { background: #fff3e0 !important; }
+    .th-uh { background: #fce4ec !important; }
 </style>
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+@php
+    $isKelasAkhir = str_contains(strtolower($kelas->nama_kelas), '9') || 
+                    str_contains(strtolower($kelas->nama_kelas), '12') ||
+                    str_contains(strtolower($kelas->nama_kelas), 'ix') ||
+                    str_contains(strtolower($kelas->nama_kelas), 'xii');
+@endphp
+<div style="max-width: 1600px; margin: 0 auto; padding: 0 1rem;">
 <div class="container-fluid px-0">
-
-    {{-- HEADER & NAVIGATION --}}
+    
+    {{-- Buttons --}}
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <a href="{{ route('wali.nilai.index') }}" class="btn btn-light btn-sm fw-bold shadow-sm border text-gray-700">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar Nilai
+            <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
-        <div class="btn-group shadow-sm">
-            <button onclick="window.print()" class="btn btn-secondary btn-sm fw-bold">
-                <i class="fas fa-print me-1"></i> Cetak Laporan
-            </button>
-            <a href="{{ route('wali.nilai.edit', $siswa->id) }}" class="btn btn-primary btn-sm fw-bold">
-                <i class="fas fa-edit me-1"></i> Edit Semua Nilai
+        <div class="d-flex gap-2">
+            <a href="{{ route('wali.nilai.edit', $siswa->id) }}" class="btn btn-primary btn-sm fw-bold shadow-sm">
+                <i class="fas fa-edit me-1"></i> Edit Nilai
             </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm fw-bold">
+                <i class="fas fa-print me-1"></i> Cetak
+            </button>
         </div>
     </div>
 
-    {{-- STUDENT INFO CARD --}}
-    <div class="card student-header-card shadow-sm mb-4">
+    {{-- Student Info Card --}}
+    <div class="card student-card shadow-sm mb-4">
         <div class="card-body p-4">
-            <div class="row align-items-center">
-                <div class="col-md-auto mb-3 mb-md-0">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 70px; height: 70px; font-size: 30px;">
-                        {{ substr($siswa->nama_lengkap, 0, 1) }}
-                    </div>
+            <h4 class="fw-bold text-gray-900 mb-3">
+                <i class="fas fa-user-graduate text-primary me-2"></i>{{ $siswa->nama_lengkap }}
+            </h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="small text-muted fw-bold text-uppercase">NIS</div>
+                    <div class="fw-bold text-dark">{{ $siswa->nis }}</div>
                 </div>
-                <div class="col">
-                    <h4 class="fw-bold text-gray-900 mb-1">{{ $siswa->nama_lengkap }}</h4>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="info-label">NIS / NISN</div>
-                            <div class="info-value text-dark small">{{ $siswa->nis }} / {{ $siswa->nisn }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="info-label">Kelas Aktif</div>
-                            <div class="info-value text-dark small">{{ $kelas->nama_kelas }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="info-label">Tahun Ajaran</div>
-                            <div class="info-value text-dark small">{{ $kelas->tahunAjaran->nama_tahun_ajaran }}</div>
-                        </div>
-                    </div>
+                <div class="col-md-3">
+                    <div class="small text-muted fw-bold text-uppercase">NISN</div>
+                    <div class="fw-bold text-dark">{{ $siswa->nisn }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small text-muted fw-bold text-uppercase">Kelas</div>
+                    <div class="fw-bold text-dark">{{ $kelas->nama_kelas }}</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="small text-muted fw-bold text-uppercase">Tahun Ajaran</div>
+                    <div class="fw-bold text-dark">{{ $kelas->tahunAjaran->nama_tahun_ajaran }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- STATISTICS GRID --}}
-    <div class="row mb-4 no-print">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stat-card-vibrant bg-grad-blue">
-                <div class="stat-content">
-                    <div class="stat-title">Rata-rata Nilai</div>
-                    <div class="stat-number">{{ number_format($rataRataSiswa, 2) }}</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-chart-line"></i></div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stat-card-vibrant bg-grad-green">
-                <div class="stat-content">
-                    <div class="stat-title">Mapel Tuntas</div>
-                    <div class="stat-number">{{ $jumlahTuntas }}</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-check-double"></i></div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stat-card-vibrant bg-grad-orange">
-                <div class="stat-content">
-                    <div class="stat-title">Persentase Tuntas</div>
-                    <div class="stat-number">{{ number_format($persentaseTuntas, 1) }}%</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-percentage"></i></div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="stat-card-vibrant bg-grad-purple">
-                <div class="stat-content">
-                    <div class="stat-title">Total Mapel</div>
-                    <div class="stat-number">{{ $mataPelajaranList->count() }}</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-book"></i></div>
-            </div>
-        </div>
-    </div>
-
-    {{-- TABLE NILAI --}}
-    <div class="card shadow mb-5">
-        <div class="card-header py-3 bg-white border-bottom">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-table me-2"></i>Rincian Nilai Harian & Ujian</h6>
+    {{-- Nilai Table --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3 border-0">
+            <h6 class="m-0 fw-bold text-primary">
+                <i class="fas fa-chart-line me-2"></i>Rekap Nilai Per Mata Pelajaran
+            </h6>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-bordered table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th class="text-center" width="50">NO</th>
-                            <th>MATA PELAJARAN</th>
-                            <th class="text-center">TUGAS</th>
-                            <th class="text-center">LATIHAN</th>
-                            <th class="text-center">UH</th>
-                            <th class="text-center">PTS</th>
-                            <th class="text-center">PAS</th>
-                            <th class="text-center">AKHIR</th>
-                            <th class="text-center">PREDIKAT</th>
-                            <th class="text-center">STATUS</th>
+                            <th rowspan="2" class="text-center" style="width: 40px;">No</th>
+                            <th rowspan="2" style="min-width: 180px;">Mata Pelajaran</th>
+                            <th colspan="2" class="text-center th-tugas">Tugas</th>
+                            <th colspan="2" class="text-center th-latihan">Latihan</th>
+                            <th colspan="2" class="text-center th-uh">UH</th>
+                            <th rowspan="2" class="text-center" style="width: 55px;">PTS</th>
+                            <th rowspan="2" class="text-center" style="width: 55px;">PAS</th>
+                            <th rowspan="2" class="text-center nilai-akhir-cell" style="width: 65px;">N. Akhir</th>
+                            <th rowspan="2" class="text-center" style="width: 70px;">Predikat</th>
+                            <th rowspan="2" class="text-center" style="width: 80px;">Status</th>
+                        </tr>
+                        <tr>
+                            <th class="text-center th-tugas" style="width: 50px;">Jml</th>
+                            <th class="text-center th-tugas rata-cell" style="width: 50px;">Rata</th>
+                            <th class="text-center th-latihan" style="width: 50px;">Jml</th>
+                            <th class="text-center th-latihan rata-cell" style="width: 50px;">Rata</th>
+                            <th class="text-center th-uh" style="width: 50px;">Jml</th>
+                            <th class="text-center th-uh rata-cell" style="width: 50px;">Rata</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($mataPelajaranList as $index => $mapel)
+                        @php $no = 1; @endphp
+                        @foreach($mataPelajaranList as $mapel)
                             @php
                                 $nilai = $nilaiData[$mapel->id] ?? null;
-
-                                // DETEKSI DATA KOSONG/INISIALISASI
-                                // Jika nilai akhir 0.00 TAPI semua komponen (tugas, uh, dll) masih NULL/Kosong,
-                                // maka kita anggap data ini belum ada (bukan sekedar belum tuntas).
-                                $isDataKosong = $nilai &&
-                                                ($nilai->nilai_akhir == 0) &&
-                                                is_null($nilai->rata_tugas) &&
-                                                is_null($nilai->rata_latihan) &&
-                                                is_null($nilai->rata_uh) &&
-                                                is_null($nilai->pts) &&
-                                                is_null($nilai->pas);
-
-                                if ($isDataKosong) {
-                                    $nilai = null; // Paksa jadi null agar tampilan konsisten menjadi 'BELUM ADA'
+                                
+                                // Count filled tugas
+                                $tugasCount = 0;
+                                $latihanCount = 0;
+                                $uhCount = 0;
+                                if ($nilai) {
+                                    for ($i = 1; $i <= 5; $i++) {
+                                        if ($nilai->{'tugas_'.$i} !== null) $tugasCount++;
+                                        if ($nilai->{'latihan_'.$i} !== null) $latihanCount++;
+                                        if ($nilai->{'uh_'.$i} !== null) $uhCount++;
+                                    }
                                 }
-
-                                $nilaiAkhir = $nilai ? $nilai->nilai_akhir : null;
-                                $predikat = $nilai ? $nilai->nilaiHuruf() : '-';
-                                $status = ($nilaiAkhir && $nilaiAkhir >= 70) ? 'TUNTAS' : 'BELUM TUNTAS';
-                                $statusClass = ($nilaiAkhir && $nilaiAkhir >= 70) ? 'bg-success' : 'bg-danger';
-
-                                // Mapping warna predikat
-                                $predikatBg = match($predikat) {
-                                    'A', 'B' => 'background: #ebfbee; color: #2ecc71; border: 1px solid #b7ebc6;',
-                                    'C' => 'background: #fff4e5; color: #e67e22; border: 1px solid #ffcc80;',
-                                    default => 'background: #ffe5e5; color: #d63031; border: 1px solid #fab1a0;',
-                                };
+                                
+                                // Determine status based on nilai_akhir and KKM (default 70)
+                                $kkm = 70;
+                                $isTuntas = $nilai && $nilai->nilai_akhir >= $kkm;
                             @endphp
                             <tr>
-                                <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
-                                <td class="align-middle">
-                                    <div class="fw-bold text-gray-900">{{ $mapel->nama_mapel }}</div>
-                                    <div class="small text-muted text-uppercase">Wajib / Kelompok A</div>
+                                <td class="text-center fw-bold">{{ $no++ }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
+                                    <small class="text-muted">{{ $mapel->kode_mapel }}</small>
                                 </td>
-                                <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->rata_tugas ? number_format($nilai->rata_tugas, 1) : '-' }}
+                                <td class="text-center">{{ $tugasCount }}/5</td>
+                                <td class="text-center rata-cell">
+                                    {{ $nilai && $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}
                                 </td>
-                                <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->rata_latihan ? number_format($nilai->rata_latihan, 1) : '-' }}
+                                <td class="text-center">{{ $latihanCount }}/5</td>
+                                <td class="text-center rata-cell">
+                                    {{ $nilai && $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}
                                 </td>
-                                <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->rata_uh ? number_format($nilai->rata_uh, 1) : '-' }}
+                                <td class="text-center">{{ $uhCount }}/5</td>
+                                <td class="text-center rata-cell">
+                                    {{ $nilai && $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}
                                 </td>
-                                <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->pts ? number_format($nilai->pts, 1) : '-' }}
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->pts !== null ? number_format($nilai->pts, 0) : '-' }}
                                 </td>
-                                <td class="text-center align-middle score-cell">
-                                    {{ $nilai && $nilai->pas ? number_format($nilai->pas, 1) : '-' }}
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->pas !== null ? number_format($nilai->pas, 0) : '-' }}
                                 </td>
-                                <td class="text-center align-middle">
-                                    @if($nilaiAkhir)
-                                        <div class="h6 mb-0 fw-bold text-primary">{{ number_format($nilaiAkhir, 1) }}</div>
-                                    @else
-                                        <span class="text-gray-400">-</span>
-                                    @endif
+                                <td class="text-center nilai-akhir-cell">
+                                    {{ $nilai && $nilai->nilai_akhir !== null ? number_format($nilai->nilai_akhir, 2) : '-' }}
                                 </td>
-                                <td class="text-center align-middle">
-                                    @if($nilai)
-                                        <span class="badge px-3 py-1 fw-bold" style="{{ $predikatBg }}">
-                                            {{ $predikat }}
+                                <td class="text-center">
+                                    @if($nilai && $nilai->nilai_akhir !== null)
+                                        <span class="badge predikat-badge {{ $nilai->predikat() == 'A' ? 'bg-success' : ($nilai->predikat() == 'B' ? 'bg-primary' : ($nilai->predikat() == 'C' ? 'bg-warning text-dark' : 'bg-danger')) }}">
+                                            {{ $nilai->predikat() }}
                                         </span>
                                     @else
-                                        <span class="text-gray-400">-</span>
+                                        -
                                     @endif
                                 </td>
-                                <td class="text-center align-middle">
-                                    @if($nilaiAkhir)
-                                        <span class="badge {{ $statusClass }} shadow-sm px-3 py-1 fw-bold" style="font-size: 10px;">
-                                            {{ $status }}
-                                        </span>
+                                <td class="text-center">
+                                    @if($nilai && $nilai->nilai_akhir !== null)
+                                        @if($isTuntas)
+                                            <span class="badge bg-success">Tuntas</span>
+                                        @else
+                                            <span class="badge bg-danger">Belum Tuntas</span>
+                                        @endif
                                     @else
-                                        <span class="badge bg-light border text-muted">BELUM ADA</span>
+                                        <span class="badge bg-secondary">Belum Ada</span>
                                     @endif
                                 </td>
                             </tr>
-                        @empty
-                            <tr><td colspan="8" class="text-center py-5 text-muted fst-italic">Belum ada data mata pelajaran</td></tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-        
-        {{-- INFORMATION BOX --}}
-        @if($nilaiData->count() > 0)
-            <div class="card-footer bg-light border-top py-3">
-                <div class="row align-items-center">
-                    <div class="col-md-1 text-center d-none d-md-block">
-                        <i class="fas fa-info-circle fa-2x text-info opacity-50"></i>
-                    </div>
-                    <div class="col-md-11">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Metode Perhitungan Nilai Akhir</div>
-                        <p class="mb-0 small text-gray-700">
-                            Sistem menghitung Nilai Akhir secara otomatis berdasarkan komposisi bobot: 
-                            <strong>Tugas (15%)</strong>, <strong>Latihan (15%)</strong>, <strong>UH (20%)</strong>, <strong>PTS (20%)</strong>, dan <strong>PAS (30%)</strong>. 
-                            Ambang batas ketuntasan minimal (KKM) ditetapkan sebesar <strong>70.00</strong>.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        @endif
     </div>
+
+    {{-- Tingkat Akhir Section --}}
+    @if($isKelasAkhir)
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3 border-0">
+            <h6 class="m-0 fw-bold text-success">
+                <i class="fas fa-graduation-cap me-2"></i>Penilaian Tingkat Akhir (TO, UPK, Ujian Praktek)
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 40px;">No</th>
+                            <th style="min-width: 180px;">Mata Pelajaran</th>
+                            <th class="text-center" style="width: 70px;">TO 1</th>
+                            <th class="text-center" style="width: 70px;">TO 2</th>
+                            <th class="text-center" style="width: 70px;">TO 3</th>
+                            <th class="text-center" style="width: 70px;">UPK</th>
+                            <th class="text-center" style="width: 100px;">Ujian Praktek</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php $no = 1; @endphp
+                        @foreach($mataPelajaranList as $mapel)
+                            @php
+                                $nilai = $nilaiData[$mapel->id] ?? null;
+                            @endphp
+                            <tr>
+                                <td class="text-center fw-bold">{{ $no++ }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
+                                </td>
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->to_1 !== null ? number_format($nilai->to_1, 0) : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->to_2 !== null ? number_format($nilai->to_2, 0) : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->to_3 !== null ? number_format($nilai->to_3, 0) : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->upk !== null ? number_format($nilai->upk, 0) : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $nilai && $nilai->ujian_praktek !== null ? number_format($nilai->ujian_praktek, 0) : '-' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Info Box --}}
+    <div class="alert alert-info border-0 mb-4">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-info-circle fa-2x text-info opacity-50 me-3"></i>
+            <div>
+                <div class="fw-bold text-info text-uppercase small mb-1">Keterangan</div>
+                <ul class="mb-0 small text-gray-700">
+                    <li><strong>Jml</strong>: Jumlah nilai yang sudah terisi dari maksimal 5 nilai</li>
+                    <li><strong>Rata</strong>: Rata-rata dihitung hanya dari nilai yang terisi (kolom kosong tidak dihitung sebagai 0)</li>
+                    <li><strong>N. Akhir</strong>: Formula = ((Rata Tugas × 1) + (Rata Latihan × 1) + (Rata UH × 2) + (PTS × 3) + (PAS × 3)) / 10</li>
+                    <li><strong>KKM</strong>: 70 (nilai minimal untuk dinyatakan Tuntas)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>
 </div>
 @endsection

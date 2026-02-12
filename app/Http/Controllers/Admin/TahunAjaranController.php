@@ -43,6 +43,7 @@ class TahunAjaranController extends Controller
             'nama_tahun_ajaran' => 'required|string|max:255|unique:tahun_ajaran,nama_tahun_ajaran',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'tanggal_mulai_genap' => 'nullable|date|after:tanggal_mulai|before:tanggal_selesai',
             'is_active' => 'boolean'
         ], [
             'nama_tahun_ajaran.required' => 'Nama tahun ajaran harus diisi',
@@ -51,7 +52,10 @@ class TahunAjaranController extends Controller
             'tanggal_mulai.date' => 'Tanggal mulai harus berupa tanggal yang valid',
             'tanggal_selesai.required' => 'Tanggal selesai harus diisi',
             'tanggal_selesai.date' => 'Tanggal selesai harus berupa tanggal yang valid',
-            'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai'
+            'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai',
+            'tanggal_mulai_genap.date' => 'Tanggal mulai semester genap harus berupa tanggal yang valid',
+            'tanggal_mulai_genap.after' => 'Tanggal mulai semester genap harus setelah tanggal mulai tahun ajaran',
+            'tanggal_mulai_genap.before' => 'Tanggal mulai semester genap harus sebelum tanggal selesai tahun ajaran'
         ]);
 
         // If is_active is checked, deactivate all other tahun ajaran
@@ -94,6 +98,7 @@ class TahunAjaranController extends Controller
             'nama_tahun_ajaran' => 'required|string|max:255|unique:tahun_ajaran,nama_tahun_ajaran,' . $tahunAjaran->id,
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'tanggal_mulai_genap' => 'nullable|date|after:tanggal_mulai|before:tanggal_selesai',
             'is_active' => 'boolean'
         ], [
             'nama_tahun_ajaran.required' => 'Nama tahun ajaran harus diisi',
@@ -102,7 +107,10 @@ class TahunAjaranController extends Controller
             'tanggal_mulai.date' => 'Tanggal mulai harus berupa tanggal yang valid',
             'tanggal_selesai.required' => 'Tanggal selesai harus diisi',
             'tanggal_selesai.date' => 'Tanggal selesai harus berupa tanggal yang valid',
-            'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai'
+            'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai',
+            'tanggal_mulai_genap.date' => 'Tanggal mulai semester genap harus berupa tanggal yang valid',
+            'tanggal_mulai_genap.after' => 'Tanggal mulai semester genap harus setelah tanggal mulai tahun ajaran',
+            'tanggal_mulai_genap.before' => 'Tanggal mulai semester genap harus sebelum tanggal selesai tahun ajaran'
         ]);
 
         // If is_active is checked, deactivate all other tahun ajaran

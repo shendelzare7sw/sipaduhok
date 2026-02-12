@@ -145,4 +145,46 @@ class MataPelajaranController extends Controller
             return back()->with('error', 'Gagal import: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Get suggested kode mapel based on jenjang.
+     */
+    public function suggestKodeMapel(Request $request)
+    {
+        $jenjang = $request->input('jenjang');
+        
+        if (!$jenjang) {
+            return response()->json(['suggestions' => []]);
+        }
+
+        // Get all existing codes for this jenjang
+        $existingCodes = MataPelajaran::where('jenjang', $jenjang)
+            ->whereNotNull('kode_mapel')
+            ->pluck('kode_mapel')
+            ->toArray();
+
+        // Extract numbers from existing codes (e.g., "SMA-002" -> 2)
+        $usedNumbers = [];
+        foreach ($existingCodes as $code) {
+            // Match pattern: JENJANG-XXX
+            if (preg_match('/^' . preg_quote($jenjang, '/') . '-(\d+)$/', $code, $matches)) {
+                $usedNumbers[] = (int)$matches[1];
+            }
+        }
+
+        // Find next available numbers (suggest 5 options)
+        $suggestions = [];
+        $nextNumber = empty($usedNumbers) ? 1 : max($usedNumbers) + 1;
+        
+        for ($i = 0; $i < 5; $i++) {
+            $number = $nextNumber + $i;
+            $code = $jenjang . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            $suggestions[] = $code;
+        }
+
+        return response()->json([
+            'suggestions' => $suggestions,
+            'jenjang' => $jenjang
+        ]);
+    }
 }

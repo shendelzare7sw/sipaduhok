@@ -26,6 +26,7 @@ class GuruLmsMeetingController extends Controller
             ->where('mata_pelajaran_id', $mapel)
             ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('waktu_mulai', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('guru.lms.meeting.index', [
@@ -44,10 +45,17 @@ class GuruLmsMeetingController extends Controller
         $kelasModel = Kelas::findOrFail($kelas);
         $mataPelajaran = MataPelajaran::findOrFail($mapel);
 
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapel)
+            ->where('kelas_id', '!=', $kelas)
+            ->with('kelas')
+            ->get();
+
         return view('guru.lms.meeting.create', [
             'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
+            'kelasLain' => $kelasLain,
         ]);
     }
 
@@ -65,8 +73,7 @@ class GuruLmsMeetingController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        LmsMeeting::create([
-            'kelas_id' => $kelas,
+        $meetingData = [
             'mata_pelajaran_id' => $mapel,
             'guru_id' => $tenagaPendidik->id,
             'judul' => $validated['judul'],
@@ -75,11 +82,29 @@ class GuruLmsMeetingController extends Controller
             'waktu_mulai' => $validated['waktu_mulai'],
             'waktu_selesai' => $validated['waktu_selesai'],
             'deskripsi' => $validated['deskripsi'],
-        ]);
+        ];
+
+        // Buat untuk kelas utama
+        LmsMeeting::create(array_merge($meetingData, ['kelas_id' => $kelas]));
+
+        // Duplikasi ke kelas tambahan
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        foreach ($kelasTambahan as $kelasLainId) {
+            if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapel)) {
+                LmsMeeting::create(array_merge($meetingData, ['kelas_id' => $kelasLainId]));
+                $jumlahDuplikasi++;
+            }
+        }
+
+        $msg = 'Meeting berhasil dijadwalkan';
+        if ($jumlahDuplikasi > 0) {
+            $msg .= " dan diduplikasi ke {$jumlahDuplikasi} kelas lain";
+        }
 
         return redirect()
             ->route('guru.lms.meeting.index', [$kelas, $mapel])
-            ->with('success', 'Meeting berhasil dijadwalkan');
+            ->with('success', $msg);
     }
 
     public function edit($kelas, $mapel, $meeting): View
@@ -94,11 +119,24 @@ class GuruLmsMeetingController extends Controller
         $kelasModel = Kelas::findOrFail($kelas);
         $mataPelajaran = MataPelajaran::findOrFail($mapel);
 
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapel)
+            ->where('kelas_id', '!=', $kelas)
+            ->with('kelas')
+            ->get();
+
         return view('guru.lms.meeting.edit', [
             'kelas' => $kelasModel,
             'mapel' => $mataPelajaran,
             'meeting' => $meetingModel,
             'guru' => $tenagaPendidik,
+            'kelasLain' => $kelasLain,
+            'relatedClassIds' => LmsMeeting::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapel)
+                ->where('judul', $meetingModel->judul)
+                ->where('id', '!=', $meetingModel->id)
+                ->pluck('kelas_id')
+                ->toArray(),
         ]);
     }
 
@@ -110,6 +148,9 @@ class GuruLmsMeetingController extends Controller
         $meetingModel = LmsMeeting::where('id', $meeting)
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
+
+        // Capture original state for matching in other classes
+        $originalTitle = $meetingModel->judul;
 
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
@@ -123,12 +164,53 @@ class GuruLmsMeetingController extends Controller
 
         $meetingModel->update($validated);
 
+        // SYNC LOGIC (Update or Create to linked classes)
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        $jumlahUpdate = 0;
+
+        if (!empty($kelasTambahan)) {
+            $syncData = [
+                'mata_pelajaran_id' => $mapel,
+                'guru_id' => $tenagaPendidik->id,
+                'judul' => $meetingModel->judul,
+                'platform' => $meetingModel->platform,
+                'link_meeting' => $meetingModel->link_meeting,
+                'waktu_mulai' => $meetingModel->waktu_mulai,
+                'waktu_selesai' => $meetingModel->waktu_selesai,
+                'deskripsi' => $meetingModel->deskripsi,
+            ];
+
+            foreach ($kelasTambahan as $kelasLainId) {
+                if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapel)) {
+                    $existing = LmsMeeting::where('kelas_id', $kelasLainId)
+                        ->where('guru_id', $tenagaPendidik->id)
+                        ->where('mata_pelajaran_id', $mapel)
+                        ->where('judul', $originalTitle)
+                        ->first();
+
+                    if ($existing) {
+                        $existing->update($syncData);
+                        $jumlahUpdate++;
+                    } else {
+                        LmsMeeting::create(array_merge($syncData, ['kelas_id' => $kelasLainId]));
+                        $jumlahDuplikasi++;
+                    }
+                }
+            }
+        }
+
+        $msg = 'Meeting berhasil diperbarui';
+        if ($jumlahDuplikasi > 0 || $jumlahUpdate > 0) {
+            $msg .= " (Disinkronisasi ke " . ($jumlahDuplikasi + $jumlahUpdate) . " kelas lain)";
+        }
+
         return redirect()
             ->route('guru.lms.meeting.index', [$kelas, $mapel])
-            ->with('success', 'Meeting berhasil diperbarui');
+            ->with('success', $msg);
     }
 
-    public function destroy($kelas, $mapel, $meeting): RedirectResponse
+    public function destroy(Request $request, $kelas, $mapel, $meeting): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelas, $mapel);
@@ -137,22 +219,46 @@ class GuruLmsMeetingController extends Controller
             ->where('guru_id', $tenagaPendidik->id)
             ->firstOrFail();
 
-        $meetingModel->delete();
+        $idsToDelete = [$meetingModel->id];
+
+        // BULK DELETE LOGIC
+        if ($request->has('hapus_terkait')) {
+            $relatedMeetings = LmsMeeting::where('guru_id', $tenagaPendidik->id)
+                ->where('mata_pelajaran_id', $mapel)
+                ->where('judul', $meetingModel->judul)
+                ->where('id', '!=', $meetingModel->id)
+                ->get();
+
+            foreach ($relatedMeetings as $rel) {
+                $idsToDelete[] = $rel->id;
+            }
+        }
+
+        LmsMeeting::whereIn('id', $idsToDelete)->delete();
+
+        $msg = 'Meeting berhasil dihapus';
+        if (count($idsToDelete) > 1) {
+            $countLain = count($idsToDelete) - 1;
+            $msg .= " (termasuk {$countLain} meeting terkait di kelas lain)";
+        }
 
         return redirect()
             ->route('guru.lms.meeting.index', [$kelas, $mapel])
-            ->with('success', 'Meeting berhasil dihapus');
+            ->with('success', $msg);
     }
 
     private function verifyAccess($guruId, $kelasId, $mapelId)
     {
-        $access = GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+        if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
+            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
+        }
+    }
+
+    private function hasAccess($guruId, $kelasId, $mapelId): bool
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-
-        if (!$access) {
-            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
-        }
     }
 }

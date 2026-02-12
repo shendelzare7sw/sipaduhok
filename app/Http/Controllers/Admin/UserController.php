@@ -12,6 +12,7 @@ use App\Models\Kelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -39,27 +40,6 @@ class UserController extends Controller
 
     public function tenagaPendidik(Request $request)
     {
-        $query = TenagaPendidik::with('user');
-
-        // Handle search parameter
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                    ->orWhere('nip', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        // Handle role filter
-        if ($request->has('role') && $request->role != '') {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('role', $request->role);
-            });
-        }
-
-        $tenagaPendidik = $query->paginate(15);
-
         // Available roles for filter
         $roles = [
             'ketua_pkbm' => 'Ketua PKBM',
@@ -70,7 +50,72 @@ class UserController extends Controller
             'guru_pengajar' => 'Guru Pengajar',
         ];
 
+        // Query Users directly instead of TenagaPendidik to ensure we get all users with these roles
+        // even if they haven't set up their TenagaPendidik profile yet.
+        $query = User::whereIn('role', array_keys($roles))->with('tenagaPendidik');
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('tenagaPendidik', function($q2) use ($search) {
+                        $q2->where('nip', 'like', "%{$search}%")
+                           ->orWhere('nama_lengkap', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Handle role filter
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Order by name
+        $tenagaPendidik = $query->orderBy('name')->paginate(15);
+
         return view('admin.users.tenaga-pendidik', compact('tenagaPendidik', 'roles'));
+    }
+
+    public function printTenagaPendidik(Request $request)
+    {
+        // Available roles for filter
+        $roles = [
+            'ketua_pkbm' => 'Ketua PKBM',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
+            'sekretaris' => 'Sekretaris',
+            'bendahara' => 'Bendahara',
+            'wali_kelas' => 'Wali Kelas',
+            'guru_pengajar' => 'Guru Pengajar',
+        ];
+
+        $query = User::whereIn('role', array_keys($roles))->with('tenagaPendidik');
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('tenagaPendidik', function($q2) use ($search) {
+                        $q2->where('nip', 'like', "%{$search}%")
+                           ->orWhere('nama_lengkap', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Handle role filter
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Get all data without pagination
+        $tenagaPendidik = $query->orderBy('name')->get();
+
+        return view('admin.users.print.tenaga-pendidik', compact('tenagaPendidik', 'roles', 'request'));
     }
 
     public function createTenagaPendidik()
@@ -106,6 +151,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'cabang_id' => $validated['cabang_id'],
+            'phone' => $validated['telepon'], // Added phone to user table
             'is_active' => true,
         ]);
 
@@ -127,7 +173,30 @@ class UserController extends Controller
 
     public function editTenagaPendidik($id)
     {
-        $tenagaPendidik = TenagaPendidik::with('user')->findOrFail($id);
+        // Prioritize finding by user_id first to avoid ID collisions
+        $tenagaPendidik = TenagaPendidik::with('user')->where('user_id', $id)->first();
+        
+        if (!$tenagaPendidik) {
+            // Fallback: Check if it's a direct ID, or if it's a User ID without a profile yet
+            $tenagaPendidik = TenagaPendidik::with('user')->find($id);
+            
+            if (!$tenagaPendidik) {
+                // Check if User exists but profile is missing
+                $user = User::find($id);
+                if ($user && in_array($user->role, ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'])) {
+                    // Initialize an empty TenagaPendidik object with the user relationship for the view
+                    $tenagaPendidik = new TenagaPendidik();
+                    $tenagaPendidik->user_id = $user->id;
+                    $tenagaPendidik->nama_lengkap = $user->name;
+                    $tenagaPendidik->email = $user->email;
+                    $tenagaPendidik->telepon = $user->phone; // Try to use user phone as default
+                    $tenagaPendidik->setRelation('user', $user);
+                } else {
+                    abort(404);
+                }
+            }
+        }
+
         $cabangList = Cabang::where('is_active', true)->get();
         $roles = ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'];
 
@@ -136,12 +205,30 @@ class UserController extends Controller
 
     public function updateTenagaPendidik(Request $request, $id)
     {
-        $tenagaPendidik = TenagaPendidik::findOrFail($id);
+        // Prioritize finding by user_id first
+        $tenagaPendidik = TenagaPendidik::where('user_id', $id)->first();
+        
+        if (!$tenagaPendidik) {
+            $tenagaPendidik = TenagaPendidik::where('id', $id)->first();
+            
+            // If still not found, check if it's a User ID we are trying to update (create profile for)
+            if (!$tenagaPendidik) {
+                $user = User::find($id);
+                if (!$user) {
+                    abort(404);
+                }
+                // Create new instance but don't save yet
+                $tenagaPendidik = new TenagaPendidik();
+                $tenagaPendidik->user_id = $user->id;
+            }
+        }
+
+        $userId = $tenagaPendidik->user_id;
 
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($tenagaPendidik->user_id)],
-            'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($tenagaPendidik->user_id)],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($userId)],
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:ketua_pkbm,wakil_kepala_sekolah,sekretaris,bendahara,wali_kelas,guru_pengajar',
             'cabang_id' => 'required|exists:cabang,id',
@@ -162,15 +249,21 @@ class UserController extends Controller
             'role' => $validated['role'],
             'cabang_id' => $validated['cabang_id'],
             'is_active' => $validated['is_active'],
+            'phone' => $validated['telepon'], // Update phone in User table too
         ];
 
         if (!empty($validated['password'])) {
             $userData['password'] = Hash::make($validated['password']);
         }
 
-        $tenagaPendidik->user->update($userData);
+        // Update User
+        // If we only have a fresh TenagaPendidik model, getting ->user might be tricky if not set
+        $user = User::findOrFail($userId);
+        $user->update($userData);
 
-        $tenagaPendidik->update([
+        // Update or Create TenagaPendidik
+        $tenagaPendidikData = [
+            'user_id' => $user->id,
             'nip' => $validated['nip'],
             'nama_lengkap' => $validated['nama_lengkap'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
@@ -178,9 +271,15 @@ class UserController extends Controller
             'tanggal_lahir' => $validated['tanggal_lahir'],
             'alamat' => $validated['alamat'],
             'telepon' => $validated['telepon'],
-            'email' => $validated['email'],
+            'email' => $validated['email'], // redundant but keeping if schema has it
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
-        ]);
+        ];
+
+        if ($tenagaPendidik->exists) {
+            $tenagaPendidik->update($tenagaPendidikData);
+        } else {
+            TenagaPendidik::create($tenagaPendidikData);
+        }
 
         return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil diupdate!');
     }
@@ -201,10 +300,22 @@ class UserController extends Controller
 
     public function deleteTenagaPendidik($id)
     {
-        $tenagaPendidik = TenagaPendidik::findOrFail($id);
-        $user = $tenagaPendidik->user;
-        $tenagaPendidik->delete();
-        $user->delete();
+        // Try to find the profile
+        $tenagaPendidik = TenagaPendidik::where('id', $id)->orWhere('user_id', $id)->first();
+        
+        if ($tenagaPendidik) {
+            $user = $tenagaPendidik->user;
+            $tenagaPendidik->delete();
+            if ($user) $user->delete();
+        } else {
+            // If profile not found, maybe we are trying to delete a User by ID directly
+            $user = User::find($id);
+            if ($user && in_array($user->role, ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'])) {
+                $user->delete();
+            } else {
+                abort(404);
+            }
+        }
 
         return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil dihapus!');
     }
@@ -247,6 +358,54 @@ class UserController extends Controller
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         return view('admin.users.siswa', compact('siswa', 'kelasList', 'cabangList', 'jenjangs'));
+    }
+
+    public function printSiswa(Request $request)
+    {
+        $query = Siswa::with('user', 'kelas.tahunAjaran', 'cabang');
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('nis', 'like', "%{$search}%")
+                    ->orWhere('nisn', 'like', "%{$search}%");
+            });
+        }
+
+        // Handle other filters
+        if ($request->has('jenjang') && $request->jenjang != '') {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            });
+        }
+        if ($request->has('kelas_id') && $request->kelas_id != '') {
+            $query->where('kelas_id', $request->kelas_id);
+        }
+        if ($request->has('cabang_id') && $request->cabang_id != '') {
+            $query->where('cabang_id', $request->cabang_id);
+        }
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        $siswa = $query->orderBy('nama_lengkap')->get();
+        
+        // Prepare filter info for display
+        $filterInfo = [];
+        if ($request->jenjang) $filterInfo[] = "Jenjang: " . $request->jenjang;
+        if ($request->kelas_id) {
+            $kelas = Kelas::find($request->kelas_id);
+            if($kelas) $filterInfo[] = "Kelas: " . $kelas->nama_kelas;
+        }
+        if ($request->cabang_id) {
+            $cabang = Cabang::find($request->cabang_id);
+            if($cabang) $filterInfo[] = "Cabang: " . $cabang->nama_cabang;
+        }
+        if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
+
+        return view('admin.users.print.siswa', compact('siswa', 'filterInfo'));
     }
 
     public function createSiswa()
@@ -425,6 +584,30 @@ class UserController extends Controller
             'add_new_relationship' => 'nullable|string',
             'add_new_relationship_lainnya' => 'nullable|string|max:100',
         ]);
+
+        // Logic Sync Advanced (Bi-directional):
+
+        // 1. Deteksi Perubahan Status Siswa
+        if ($validated['status'] !== $siswa->status) {
+            // Case A: Status berubah jadi Non-Aktif (Pindah/Keluar) -> Otomatis Matikan Akun
+            // 'Lulus' diizinkan tetap aktif (untuk akses Rapor/Alumni Dashboard)
+            if (in_array($validated['status'], ['pindah', 'keluar'])) {
+                $validated['is_active'] = 0;
+            }
+            // Case B: Status berubah jadi Aktif (Re-admission) -> Otomatis Hidupkan Akun
+            elseif ($validated['status'] === 'aktif') {
+                $validated['is_active'] = 1;
+            }
+        }
+        // 2. Deteksi Perubahan Status Akun (Tanpa Perubahan Status Siswa)
+        else {
+            // Case C: Status bukan Aktif DAN bukan Lulus, tapi Admin memaksakan Akun AKTIF
+            // -> Otomatis kembalikan Status Siswa jadi 'aktif' (Re-admission via Account Status)
+            // 'Lulus' boleh aktif, jadi dikecualikan dari auto-revert ini.
+            if ($validated['status'] !== 'aktif' && $validated['status'] !== 'lulus' && $validated['is_active'] == '1') {
+                $validated['status'] = 'aktif';
+            }
+        }
 
         $userData = [
             'name' => $validated['nama_lengkap'],
@@ -610,6 +793,53 @@ class UserController extends Controller
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         return view('admin.users.orang-tua', compact('orangTua', 'cabangList', 'jenjangs'));
+    }
+
+    public function printOrangTua(Request $request)
+    {
+        $query = User::where('role', 'orang_tua')
+            ->with(['studentParents.siswa.kelas', 'studentParents.siswa.cabang']);
+
+        // Handle search parameter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Handle filters
+        if ($request->has('jenjang') && $request->jenjang != '') {
+            $query->whereHas('studentParents.siswa.kelas', function ($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            });
+        }
+
+        if ($request->has('cabang_id') && $request->cabang_id != '') {
+            $query->whereHas('studentParents.siswa', function ($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
+            });
+        }
+
+        if ($request->has('status') && $request->status != '') {
+            $isActive = $request->status === 'aktif';
+            $query->where('is_active', $isActive);
+        }
+
+        $orangTua = $query->orderBy('name')->get();
+
+        // Prepare filter info
+        $filterInfo = [];
+        if ($request->jenjang) $filterInfo[] = "Jenjang Anak: " . $request->jenjang;
+        if ($request->cabang_id) {
+            $cabang = Cabang::find($request->cabang_id);
+            if($cabang) $filterInfo[] = "Cabang: " . $cabang->nama_cabang;
+        }
+        if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
+
+        return view('admin.users.print.orang-tua', compact('orangTua', 'filterInfo'));
     }
 
     public function createOrangTua()
@@ -807,8 +1037,11 @@ class UserController extends Controller
             if ($skipped > 0) {
                 $message .= " {$skipped} data dilewati (sudah ada).";
             }
+            
+            // Collect warnings
+            $warnings = $import->getWarnings();
 
-            return redirect()->route('admin.users.siswa')->with('success', $message);
+            return redirect()->route('admin.users.siswa')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }
@@ -838,13 +1071,14 @@ class UserController extends Controller
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
 
             $message = "Berhasil mengimport {$imported} tenaga pendidik.";
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada).";
+                $message .= " {$skipped} data dilewati.";
             }
 
-            return redirect()->route('admin.users.tenaga-pendidik')->with('success', $message);
+            return redirect()->route('admin.users.tenaga-pendidik')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }
@@ -874,13 +1108,14 @@ class UserController extends Controller
 
             $imported = $import->getImportedCount();
             $skipped = $import->getSkippedCount();
+            $warnings = $import->getWarnings();
 
             $message = "Berhasil mengimport {$imported} orang tua.";
             if ($skipped > 0) {
-                $message .= " {$skipped} data dilewati (sudah ada).";
+                $message .= " {$skipped} data dilewati.";
             }
 
-            return redirect()->route('admin.users.orang-tua')->with('success', $message);
+            return redirect()->route('admin.users.orang-tua')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }
@@ -889,5 +1124,54 @@ class UserController extends Controller
     public function downloadOrangTuaTemplate()
     {
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\OrangTuaTemplate(), 'template_orang_tua.xlsx');
+    }
+
+    public function bulkDeleteTenagaPendidik(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
+        }
+
+        $users = User::whereIn('id', function($query) use ($ids) {
+            $query->select('user_id')->from('tenaga_pendidik')->whereIn('id', $ids);
+        })->get();
+
+        TenagaPendidik::whereIn('id', $ids)->delete();
+        
+        // Also delete associated users
+        foreach($users as $user) {
+            $user->delete();
+        }
+
+        return redirect()->back()->with('success', count($ids) . ' data tenaga pendidik berhasil dihapus');
+    }
+
+    public function bulkDeleteSiswa(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
+        }
+
+        $siswas = Siswa::whereIn('id', $ids)->get();
+        $userIds = $siswas->pluck('user_id')->filter()->toArray();
+
+        Siswa::whereIn('id', $ids)->delete();
+        User::whereIn('id', $userIds)->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' data siswa berhasil dihapus');
+    }
+
+    public function bulkDeleteOrangTua(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
+        }
+
+        User::whereIn('id', $ids)->where('role', 'orang_tua')->delete();
+
+        return redirect()->back()->with('success', count($ids) . ' data orang tua berhasil dihapus');
     }
 }

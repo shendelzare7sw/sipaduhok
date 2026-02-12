@@ -97,38 +97,94 @@
     </div>
 
     {{-- FILTER & MASS ACTIONS --}}
-    <div class="card shadow mb-4">
+    <div class="card shadow mb-4" style="position: relative; z-index: 99;">
         <div class="card-body">
-            <div class="row align-items-end">
+            <div class="row align-items-center">
                 <div class="col-lg-8">
-                    <form action="{{ route('bendahara.validasi-akses.index') }}" method="GET" class="row">
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label small fw-bold">KELAS</label>
-                            <select name="kelas_id" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                                <option value="">Semua Kelas</option>
-                                @foreach($kelasList as $kelas)
-                                    <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>{{ $kelas->nama_kelas }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label small fw-bold">STATUS</label>
-                            <select name="status" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                                <option value="">Semua Status</option>
-                                <option value="ujian_valid" {{ request('status') == 'ujian_valid' ? 'selected' : '' }}>Ujian Valid</option>
-                                <option value="ujian_belum" {{ request('status') == 'ujian_belum' ? 'selected' : '' }}>Ujian Belum</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label small fw-bold">PENCARIAN</label>
-                            <div class="input-group input-group-sm">
-                                <input type="text" name="search" class="form-control shadow-sm" placeholder="Nama/NISN..." value="{{ request('search') }}">
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                    <form action="{{ route('bendahara.validasi-akses.index') }}" method="GET" class="d-flex gap-2">
+                        {{-- Filter Dropdown --}}
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" 
+                                data-bs-toggle="dropdown" aria-expanded="false" 
+                                data-bs-auto-close="outside" data-bs-display="static">
+                                <i class="fas fa-filter me-1"></i> Filter Data
+                            </button>
+                            <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="min-width: 300px; z-index: 9999;">
+                                <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+                                
+                                {{-- Filter Cabang --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Cabang</label>
+                                    <select name="cabang_id" class="form-select form-select-sm">
+                                        <option value="">Semua Cabang</option>
+                                        @foreach($cabangList as $cabang)
+                                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
+                                                {{ $cabang->nama_cabang }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Filter Jenjang --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Jenjang</label>
+                                    <select name="jenjang" class="form-select form-select-sm">
+                                        <option value="">Semua Jenjang</option>
+                                        @foreach($jenjangList as $jenjang)
+                                            <option value="{{ $jenjang }}" {{ request('jenjang') == $jenjang ? 'selected' : '' }}>
+                                                {{ $jenjang }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Filter Kelas --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Kelas</label>
+                                    <select name="kelas_id" class="form-select form-select-sm">
+                                        <option value="">Semua Kelas</option>
+                                        @foreach($kelasList as $kelas)
+                                            <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                                {{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Filter Status Ujian --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold">Status Ujian</label>
+                                    <select name="status_ujian" class="form-select form-select-sm">
+                                        <option value="">Semua</option>
+                                        <option value="valid" {{ request('status_ujian') == 'valid' ? 'selected' : '' }}>Valid</option>
+                                        <option value="belum" {{ request('status_ujian') == 'belum' ? 'selected' : '' }}>Belum</option>
+                                    </select>
+                                </div>
+
+                                {{-- Filter Status Rapor --}}
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Status Rapor</label>
+                                    <select name="status_rapor" class="form-select form-select-sm">
+                                        <option value="">Semua</option>
+                                        <option value="valid" {{ request('status_rapor') == 'valid' ? 'selected' : '' }}>Valid</option>
+                                        <option value="belum" {{ request('status_rapor') == 'belum' ? 'selected' : '' }}>Belum</option>
+                                    </select>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+                                </div>
                             </div>
+                        </div>
+
+                        {{-- Pencarian (Tetap di luar) --}}
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" placeholder="Cari Nama/NISN..." value="{{ request('search') }}">
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
                         </div>
                     </form>
                 </div>
-                <div class="col-lg-4 mb-2 text-end">
+                <div class="col-lg-4 text-end">
                     <button type="button" class="btn btn-success btn-sm shadow-sm fw-bold" onclick="bulkValidasiUjian()">
                         <i class="fas fa-check-double me-1"></i> Validasi Ujian
                     </button>

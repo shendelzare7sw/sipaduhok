@@ -123,6 +123,41 @@
             </div>
         </div>
 
+        {{-- FILTER --}}
+        <div class="card shadow mb-4">
+            <div class="card-body py-3">
+                <form action="{{ route('wali.validasi-akses.index') }}" method="GET" class="row align-items-end">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label small fw-bold">CARI SISWA</label>
+                        <div class="input-group input-group-sm shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="search" class="form-control border-start-0" placeholder="Nama siswa atau NIS..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label small fw-bold">FILTER STATUS</label>
+                        <select name="filter" class="form-select form-select-sm border-start border-primary border-3 shadow-sm" onchange="this.form.submit()">
+                            <option value="">Semua Siswa</option>
+                            <option value="ujian_pending" {{ $filterStatus == 'ujian_pending' ? 'selected' : '' }}>Ujian: Pending Wali</option>
+                            <option value="ujian_selesai" {{ $filterStatus == 'ujian_selesai' ? 'selected' : '' }}>Ujian: Sudah Valid</option>
+                            <option value="rapor_pending" {{ $filterStatus == 'rapor_pending' ? 'selected' : '' }}>Rapor: Pending Wali</option>
+                            <option value="rapor_selesai" {{ $filterStatus == 'rapor_selesai' ? 'selected' : '' }}>Rapor: Sudah Valid</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold shadow-sm">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2 text-end">
+                        <a href="{{ route('wali.validasi-akses.index') }}" class="btn btn-light btn-sm border px-3 fw-bold text-gray-700">
+                            <i class="fas fa-redo me-1"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- TABLE LIST --}}
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -130,19 +165,46 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-validasi mb-0">
-                        <thead>
-                            <tr>
-                                <th width="50">NO</th>
-                                <th width="120">NIS</th>
-                                <th class="text-start">NAMA SISWA</th>
-                                <th>STATUS VALIDASI</th>
-                                <th width="220">AKSI WALI KELAS</th>
-                            </tr>
-                        </thead>
+                    <form id="bulkForm" method="POST">
+                        @csrf
+                        <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="small fw-bold text-muted text-uppercase">Aksi Terpilih:</span>
+                                <button type="submit" formaction="{{ route('wali.validasi-akses.bulk-validasi-ujian') }}" class="btn btn-success btn-sm shadow-sm" onclick="return confirm('Validasi akses UJIAN untuk siswa terpilih?')">
+                                    <i class="fas fa-check-double me-1"></i> Validasi Ujian
+                                </button>
+                                <button type="submit" formaction="{{ route('wali.validasi-akses.bulk-validasi-rapor') }}" class="btn btn-info btn-sm shadow-sm text-white" onclick="return confirm('Validasi akses RAPOR untuk siswa terpilih?')">
+                                    <i class="fas fa-file-contract me-1"></i> Validasi Rapor
+                                </button>
+                            </div>
+                            <div class="small text-muted fst-italic">
+                                <i class="fas fa-info-circle me-1"></i> Centang siswa di bawah ini
+                            </div>
+                        </div>
+
+                        <table class="table table-hover table-validasi mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="40" class="text-center">
+                                        <div class="form-check d-flex justify-content-center">
+                                            <input class="form-check-input" type="checkbox" id="selectAll">
+                                        </div>
+                                    </th>
+                                    <th width="50">NO</th>
+                                    <th width="120">NIS</th>
+                                    <th class="text-start">NAMA SISWA</th>
+                                    <th>STATUS VALIDASI</th>
+                                    <th width="220">AKSI WALI KELAS</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             @forelse($siswaList ?? [] as $index => $siswa)
                                 <tr>
+                                    <td class="text-center align-middle">
+                                        <div class="form-check d-flex justify-content-center">
+                                            <input class="form-check-input student-checkbox" type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}">
+                                        </div>
+                                    </td>
                                     <td class="text-center align-middle fw-bold">{{ $index + 1 }}</td>
                                     <td class="text-center align-middle">{{ $siswa->nis }}</td>
                                     <td class="align-middle">
@@ -175,36 +237,37 @@
                                     <td class="text-center align-middle py-3">
                                         {{-- UJIAN --}}
                                         @if($siswa->validasi_ujian_bendahara)
-                                            <form action="{{ route($siswa->validasi_ujian_wali ? 'wali.validasi-akses.batalkan-ujian' : 'wali.validasi-akses.validasi-ujian', $siswa->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm {{ $siswa->validasi_ujian_wali ? 'btn-outline-warning' : 'btn-success' }} mb-1" style="width: 90px">
-                                                    <i class="fas {{ $siswa->validasi_ujian_wali ? 'fa-undo' : 'fa-check' }} me-1"></i> Ujian
-                                                </button>
-                                            </form>
+                                            <button type="submit" 
+                                                formaction="{{ route($siswa->validasi_ujian_wali ? 'wali.validasi-akses.batalkan-ujian' : 'wali.validasi-akses.validasi-ujian', $siswa->id) }}"
+                                                class="btn btn-sm {{ $siswa->validasi_ujian_wali ? 'btn-outline-warning' : 'btn-success' }} mb-1" 
+                                                style="width: 90px">
+                                                <i class="fas {{ $siswa->validasi_ujian_wali ? 'fa-undo' : 'fa-check' }} me-1"></i> Ujian
+                                            </button>
                                         @else
-                                            <button class="btn btn-sm btn-light border text-muted mb-1" disabled style="width: 90px"><i class="fas fa-lock"></i> Ujian</button>
+                                            <button type="button" class="btn btn-sm btn-light border text-muted mb-1" disabled style="width: 90px"><i class="fas fa-lock"></i> Ujian</button>
                                         @endif
 
                                         {{-- RAPOR --}}
                                         @if($siswa->validasi_rapor_bendahara)
-                                            <form action="{{ route($siswa->validasi_rapor_wali ? 'wali.validasi-akses.batalkan-rapor' : 'wali.validasi-akses.validasi-rapor', $siswa->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm {{ $siswa->validasi_rapor_wali ? 'btn-outline-warning' : 'btn-info' }} mb-1" style="width: 90px">
-                                                    <i class="fas {{ $siswa->validasi_rapor_wali ? 'fa-undo' : 'fa-check' }} me-1"></i> Rapor
-                                                </button>
-                                            </form>
+                                            <button type="submit" 
+                                                formaction="{{ route($siswa->validasi_rapor_wali ? 'wali.validasi-akses.batalkan-rapor' : 'wali.validasi-akses.validasi-rapor', $siswa->id) }}"
+                                                class="btn btn-sm {{ $siswa->validasi_rapor_wali ? 'btn-outline-warning' : 'btn-info' }} mb-1" 
+                                                style="width: 90px">
+                                                <i class="fas {{ $siswa->validasi_rapor_wali ? 'fa-undo' : 'fa-check' }} me-1"></i> Rapor
+                                            </button>
                                         @else
-                                            <button class="btn btn-sm btn-light border text-muted mb-1" disabled style="width: 90px"><i class="fas fa-lock"></i> Rapor</button>
+                                            <button type="button" class="btn btn-sm btn-light border text-muted mb-1" disabled style="width: 90px"><i class="fas fa-lock"></i> Rapor</button>
                                         @endif
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-5 text-gray-500 fst-italic">Tidak ada data siswa ditemukan</td>
+                                    <td colspan="6" class="text-center py-5 text-gray-500 fst-italic">Tidak ada data siswa ditemukan</td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
+                    </form>
                 </div>
             </div>
         </div>
@@ -298,4 +361,21 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.student-checkbox');
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+            });
+        }
+    });
+</script>
 @endsection

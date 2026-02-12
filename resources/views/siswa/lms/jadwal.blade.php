@@ -238,90 +238,84 @@
                     <thead>
                         <tr>
                             <th style="width: 100px;">Jam</th>
-                            @foreach($hariList as $hari)
-                                <th>{{ $hari }}</th>
+                            @foreach($scheduleGrid['days'] as $day)
+                                <th>{{ $day }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            // Merge time slots with break times for complete timeline
-                            $allSlots = collect();
-                            
-                            // Add regular time slots
-                            foreach ($timeSlots as $slot) {
-                                $allSlots->push([
-                                    'mulai' => $slot['mulai'],
-                                    'selesai' => $slot['selesai'],
-                                    'sort' => $slot['sort'],
-                                ]);
-                            }
-                            
-                            // Add break times as time slots (avoid duplicates)
-                            foreach ($istirahatList as $ist) {
-                                $mulai = \Carbon\Carbon::parse($ist->jam_mulai)->format('H:i');
-                                $selesai = \Carbon\Carbon::parse($ist->jam_selesai)->format('H:i');
-                                
-                                $exists = $allSlots->first(function($s) use ($mulai, $selesai) {
-                                    return $s['mulai'] === $mulai && $s['selesai'] === $selesai;
-                                });
-                                
-                                if (!$exists) {
-                                    $allSlots->push([
-                                        'mulai' => $mulai,
-                                        'selesai' => $selesai,
-                                        'sort' => $ist->jam_mulai,
-                                    ]);
-                                }
-                            }
-                            
-                            // Sort by time
-                            $allSlots = $allSlots->sortBy('sort')->values();
-                        @endphp
-                        
-                        @forelse($allSlots as $slot)
+                        @foreach($scheduleGrid['rows'] as $row)
                             <tr>
-                                <td class="time-cell">{{ $slot['mulai'] }} - {{ $slot['selesai'] }}</td>
-                                @foreach($hariList as $hari)
-                                    @php
-                                        // Check if there's a break for this specific day and time
-                                        $istirahat = $istirahatList->first(function($ist) use ($hari, $slot) {
-                                            $istMulai = \Carbon\Carbon::parse($ist->jam_mulai)->format('H:i');
-                                            $hariAktif = $ist->hari_aktif ?? [];
-                                            return $istMulai === $slot['mulai'] && in_array($hari, $hariAktif);
-                                        });
-                                        
-                                        // Check if there's a regular jadwal for this day and time
-                                        $jadwal = $jadwalByHari[$hari]->first(function ($j) use ($slot) {
-                                            return \Carbon\Carbon::parse($j->jam_mulai)->format('H:i') === $slot['mulai'];
-                                        });
+                                <td class="time-cell">{{ $row['time_start'] }}</td>
+                                @for($i = 0; $i < count($scheduleGrid['days']); $i++)
+                                    @php 
+                                        $day = $scheduleGrid['days'][$i];
+                                        $cell = $row['days'][$day]; 
                                     @endphp
-                                    
-                                    @if($istirahat)
-                                        <td class="subject-cell" style="background: #fef9c3; color: #854d0e; font-weight: 600; font-style: italic;">
-                                            <i class="fas fa-coffee me-1"></i> {{ $istirahat->nama_istirahat ?? 'Istirahat' }}
-                                        </td>
-                                    @elseif($jadwal)
-                                        <td class="subject-cell">
-                                            <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}"
-                                                class="text-decoration-none text-dark">
-                                                <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
-                                            </a>
-                                        </td>
+
+                                    @if($cell['type'] == 'taken')
+                                        <!-- Spanned -->
+                                    @elseif($cell['type'] == 'empty')
+                                        <td></td>
                                     @else
-                                        <td class="subject-cell">
-                                            <span class="text-muted">-</span>
+                                        @php
+                                            // Check horizontal merge (colspan) for Breaks
+                                            $colspan = 1;
+                                            if ($cell['type'] == 'break') {
+                                                $breakName = $cell['data']->nama_istirahat ?? 'Istirahat';
+                                                for ($j = $i + 1; $j < count($scheduleGrid['days']); $j++) {
+                                                    $nextDay = $scheduleGrid['days'][$j];
+                                                    $nextCell = $row['days'][$nextDay];
+                                                    if ($nextCell['type'] == 'break' && ($nextCell['data']->nama_istirahat ?? '') == $breakName && $nextCell['data']->jam_mulai == $cell['data']->jam_mulai) {
+                                                        $colspan++;
+                                                    } else {
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            $i += ($colspan - 1);
+                                            
+                                            $rowspan = $cell['rowspan'] ?? 1;
+                                            $isBreak = $cell['type'] == 'break';
+                                            $cellClass = $isBreak ? 'break-row' : 'subject-cell';
+                                            $style = $isBreak ? 'background: #fef9c3; color: #854d0e; font-weight: 600; font-style: italic;' : '';
+                                        @endphp
+
+                                        <td rowspan="{{ $rowspan }}" colspan="{{ $colspan }}" class="{{ $cellClass }}" style="{{ $style }}">
+                                            @if($isBreak)
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-coffee me-2"></i> {{ $cell['data']->nama_istirahat ?? 'Istirahat' }}
+                                                </div>
+                                            @else
+                                                @foreach($cell['data'] as $jadwal)
+                                                    <div class="mb-2 last:mb-0">
+                                                        <a href="{{ route('siswa.lms.mapel.show', $jadwal->mata_pelajaran_id) }}" class="text-decoration-none text-dark d-block">
+                                                            <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
+                                                        </a>
+                                                        <div class="small text-muted">
+                                                            {{ $jadwal->guru ? $jadwal->guru->nama_lengkap : '(-)' }}
+                                                        </div>
+                                                        <div class="badge bg-light text-dark border mt-1">
+                                                            {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} - 
+                                                            {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
+                                                        </div>
+
+                                                    </div>
+                                                @endforeach
+                                            @endif
                                         </td>
                                     @endif
-                                @endforeach
+                                @endfor
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="{{ count($hariList) + 1 }}" class="empty-state">
+                        @endforeach
+                        
+                        @if(empty($scheduleGrid['rows']))
+                             <tr>
+                                <td colspan="{{ count($scheduleGrid['days']) + 1 }}" class="empty-state">
                                     Belum ada jadwal pelajaran
                                 </td>
                             </tr>
-                        @endforelse
+                        @endif
                     </tbody>
                 </table>
             </div>

@@ -30,19 +30,33 @@ class Siswa extends Model
         'status',
         // Validasi Akses fields
         'validasi_ujian_bendahara',
+        'tanggal_validasi_ujian_bendahara',
         'validasi_ujian_wali',
         'tanggal_validasi_ujian_wali',
         'validasi_ujian_oleh',
+        
+        'validasi_rapor_bendahara',
+        'tanggal_validasi_rapor_bendahara',
         'validasi_rapor_wali',
         'tanggal_validasi_rapor_wali',
         'validasi_rapor_oleh',
+        // NEW: Ketua PKBM validation (3rd level)
+        'validasi_rapor_ketua',
+        'tanggal_validasi_rapor_ketua',
+        'validasi_rapor_ketua_oleh',
         // New Religion Fields
         'agama',
+        'pelajaran_agama',
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
         'tanggal_masuk' => 'date',
+        'tanggal_validasi_ujian_bendahara' => 'datetime',
+        'tanggal_validasi_ujian_wali' => 'datetime',
+        'tanggal_validasi_rapor_bendahara' => 'datetime',
+        'tanggal_validasi_rapor_wali' => 'datetime',
+        'tanggal_validasi_rapor_ketua' => 'datetime',
     ];
 
     // Relationships
@@ -179,5 +193,16 @@ class Siswa extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Check if student has full rapor access (all 3 validators approved).
+     * Returns true only if Bendahara, Wali Kelas, and Ketua PKBM all validated.
+     */
+    public function hasFullRaporAccess(): bool
+    {
+        return $this->validasi_rapor_bendahara
+            && $this->validasi_rapor_wali
+            && $this->validasi_rapor_ketua;
     }
 }

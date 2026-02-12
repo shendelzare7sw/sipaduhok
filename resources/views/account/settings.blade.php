@@ -31,7 +31,7 @@
                 <li class="breadcrumb-item active">Pengaturan Akun</li>
             </ol>
         </nav>
-        <h4 class="fw-bold"><span class="text-muted fw-light">User /</span> Pengaturan Akun</h4>
+        <h4 class="fw-bold">Pengaturan Akun</h4>
     </div>
 
     <div class="row">
@@ -48,9 +48,31 @@
                             @error('name') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control @error('username') is-invalid @enderror" value="{{ old('username', $user->username) }}">
+                            @error('username') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}">
-                            @error('email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            
+                            @if(auth()->user()->isAdmin())
+                                {{-- Admin can edit full email --}}
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}">
+                                @error('email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            @else
+                                {{-- Non-admin can only edit local part --}}
+                                @php
+                                    $emailParts = explode('@', $user->email);
+                                    $localPart = $emailParts[0] ?? '';
+                                    $domainPart = $emailParts[1] ?? '';
+                                @endphp
+                                <div class="input-group">
+                                    <input type="text" name="email_local" class="form-control @error('email_local') is-invalid @enderror" value="{{ old('email_local', $localPart) }}">
+                                    <span class="input-group-text">@ {{ $domainPart }}</span>
+                                </div>
+                                <small class="text-muted">Domain email tidak dapat diubah.</small>
+                                @error('email_local') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                            @endif
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Role</label>

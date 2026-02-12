@@ -25,13 +25,26 @@
                 @csrf
                 @method('PUT')
 
-                <div class="mb-3">
-                    <label class="form-label">Judul Materi <span class="text-danger">*</span></label>
-                    <input type="text" name="judul_materi" class="form-control @error('judul_materi') is-invalid @enderror" 
-                           value="{{ old('judul_materi', $materi->judul_materi) }}" required>
-                    @error('judul_materi')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Judul Materi <span class="text-danger">*</span></label>
+                        <input type="text" name="judul_materi" class="form-control @error('judul_materi') is-invalid @enderror" 
+                               value="{{ old('judul_materi', $materi->judul_materi) }}" required>
+                        @error('judul_materi')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Kategori <span class="text-danger">*</span></label>
+                        <select name="kategori" class="form-control @error('kategori') is-invalid @enderror" required>
+                            <option value="materi" {{ (old('kategori', $materi->kategori) == 'materi') ? 'selected' : '' }}>
+                                Materi Pendukung</option>
+                            <option value="modul_ajar" {{ (old('kategori', $materi->kategori) == 'modul_ajar') ? 'selected' : '' }}>Modul Ajar (Utama)</option>
+                        </select>
+                        @error('kategori')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -67,6 +80,8 @@
                     @endif
                     <input type="file" name="file_materi" class="form-control">
                 </div>
+
+                @include('guru.partials.multi-kelas-selector')
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">

@@ -59,6 +59,8 @@
                     </div>
                 </div>
 
+                @include('guru.partials.multi-kelas-selector')
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-paper-plane me-1"></i>Mulai Diskusi

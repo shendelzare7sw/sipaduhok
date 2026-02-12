@@ -134,62 +134,7 @@
         </div>
     </div>
 
-    <!-- MEETING / KELAS VIRTUAL -->
-    <div class="section-card" style="border-left: 5px solid #10b981;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 style="color: #10b981; margin: 0;">
-                <i class="fas fa-video"></i> Kelas Virtual (Meeting)
-            </h3>
-            <a href="{{ route('siswa.lms.mapel.meeting.index', $mataPelajaran->id) }}"
-                class="btn btn-outline-success btn-sm">
-                Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-        </div>
-
-        @php
-            $meetingList = \App\Models\LmsMeeting::where('kelas_id', $siswa->kelas_id)
-                ->where('mata_pelajaran_id', $mataPelajaran->id)
-                ->where('is_active', true)
-                ->orderBy('waktu_mulai', 'asc')
-                ->take(5)
-                ->get();
-        @endphp
-
-        @forelse($meetingList as $meeting)
-            <div class="item-list">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div>
-                        <span class="badge bg-info text-dark me-2">
-                            {{ ucfirst(str_replace('_', ' ', $meeting->platform)) }}
-                        </span>
-                        @if($meeting->waktu_mulai->isFuture())
-                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Akan Datang</span>
-                        @else
-                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Live</span>
-                        @endif
-
-                        <h5 class="mt-2 mb-1 fw-bold" style="color: #1a1a1a;">{{ $meeting->judul }}</h5>
-                        <small class="text-muted">
-                            <i class="far fa-calendar-alt me-1"></i> {{ $meeting->waktu_mulai->translatedFormat('d M Y') }}
-                            <i class="far fa-clock ms-2 me-1"></i> {{ $meeting->waktu_mulai->format('H:i') }}
-                        </small>
-                    </div>
-                    <div>
-                        <a href="{{ $meeting->link_meeting }}" target="_blank" class="btn btn-success btn-sm">
-                            <i class="fas fa-video me-1"></i> Gabung
-                        </a>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <div style="text-align: center; padding: 24px;">
-                <i class="fas fa-video fa-2x mb-2" style="color: #ccc;"></i>
-                <p style="margin: 0; color: #666;">Belum ada jadwal meeting aktif saat ini</p>
-            </div>
-        @endforelse
-    </div>
-
-    <!-- MATERI -->
+    <!-- 1. MATERI -->
     <div class="section-card">
         <h3 style="color: #165fac; margin-bottom: 20px;">
             <i class="fas fa-file-alt"></i> Materi Pembelajaran
@@ -239,7 +184,9 @@
                                         {{ Str::limit($materi->deskripsi, 150) }}
                                     </p>
                                     <small style="color: #999;">
-                                        <i class="fas fa-file"></i> {{ strtoupper($materi->tipe_file ?? 'File') }}
+                                        <i class="fas fa-file me-1"></i> {{ strtoupper($materi->tipe_file ?? 'File') }}
+                                        <span class="mx-2">•</span>
+                                        <i class="far fa-clock me-1"></i> {{ $materi->created_at->format('H:i') }}
                                     </small>
                                 </div>
                                 <div>
@@ -261,10 +208,10 @@
         @endif
     </div>
 
-    <!-- TUGAS & LATIHAN -->
+    <!-- 2. TUGAS -->
     <div class="section-card">
         <h3 style="color: #165fac; margin-bottom: 20px;">
-            <i class="fas fa-tasks"></i> Tugas & Latihan
+            <i class="fas fa-tasks"></i> Tugas
         </h3>
 
         @php
@@ -341,7 +288,108 @@
         @endif
     </div>
 
-    <!-- UJIAN -->
+    <!-- 3. LATIHAN -->
+    <div class="section-card">
+        <h3 style="color: #165fac; margin-bottom: 20px;">
+            <i class="fas fa-pencil-ruler"></i> Latihan
+        </h3>
+
+        @php
+            $latihanList = \App\Models\Ujian::where('tipe_ujian', 'latihan')
+                ->where('mata_pelajaran_id', $mataPelajaran->id)
+                ->where('kelas_id', $siswa->kelas_id)
+                ->orderBy('tanggal_mulai', 'desc')
+                ->get();
+
+            $latihanByDate = [];
+            foreach($latihanList as $latihan) {
+                $dateKey = $latihan->tanggal_mulai->format('Y-m-d');
+                $today = now()->format('Y-m-d');
+                $yesterday = now()->subDay()->format('Y-m-d');
+
+                if($dateKey === $today) {
+                    $label = 'Hari Ini (' . $latihan->tanggal_mulai->translatedFormat('d M Y') . ')';
+                } elseif($dateKey === $yesterday) {
+                    $label = 'Kemarin (' . $latihan->tanggal_mulai->translatedFormat('d M Y') . ')';
+                } else {
+                    $label = $latihan->tanggal_mulai->translatedFormat('d M Y');
+                }
+
+                if(!isset($latihanByDate[$dateKey])) {
+                    $latihanByDate[$dateKey] = ['label' => $label, 'items' => []];
+                }
+                $latihanByDate[$dateKey]['items'][] = $latihan;
+            }
+        @endphp
+
+        @if(count($latihanByDate) > 0)
+            @foreach($latihanByDate as $dateKey => $data)
+                @php $isToday = strpos($data['label'], 'Hari Ini') === 0; @endphp
+                <div class="date-group-header" onclick="toggleGroup(this)">
+                    <span>{{ $data['label'] }} ({{ count($data['items']) }})</span>
+                    <i class="fas fa-chevron-down date-group-icon {{ $isToday ? 'open' : '' }}"></i>
+                </div>
+                <div class="date-group-content {{ $isToday ? 'show' : '' }}">
+                    @foreach($data['items'] as $latihan)
+                        <div class="item-list">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div style="flex: 1;">
+                                    <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
+                                        {{ $latihan->judul_ujian }}
+                                        <span class="badge" style="background: #06b6d4; color: white;">
+                                            Latihan
+                                        </span>
+                                    </h5>
+                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
+                                        {{ $latihan->deskripsi ?? 'Latihan pembelajaran interaktif' }}
+                                    </p>
+                                    <small style="color: #999;">
+                                        <i class="fas fa-stopwatch"></i> Durasi:
+                                        {{ $latihan->durasi_menit > 0 ? $latihan->durasi_menit . ' menit' : 'Tidak terbatas' }}
+                                        | <i class="fas fa-clock"></i> {{ $latihan->tanggal_mulai->format('H:i') }} - {{ $latihan->tanggal_selesai->format('H:i') }}
+                                    </small>
+                                </div>
+                                <div>
+                                    @if(!$latihan->is_active)
+                                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                            <i class="fas fa-lock me-1"></i> Belum Dirilis
+                                        </button>
+                                    @elseif($latihan->isOngoing())
+                                        <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $latihan->id]) }}"
+                                            class="btn btn-warning btn-sm">
+                                            <i class="fas fa-play"></i> Mulai Latihan
+                                        </a>
+                                    @elseif($latihan->tanggal_mulai->isFuture())
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-lock"></i> Belum Dimulai
+                                        </button>
+                                    @else
+                                        @if($latihan->tampilkan_nilai)
+                                            <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $latihan->id]) }}"
+                                                class="btn btn-info btn-sm">
+                                                <i class="fas fa-poll"></i> Lihat Hasil
+                                            </a>
+                                        @else
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <i class="fas fa-check"></i> Selesai
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endforeach
+        @else
+            <div class="no-items-date">
+                <i class="fas fa-pencil-ruler fa-2x mb-2"></i>
+                <p style="margin: 0;">Belum ada latihan yang tersedia</p>
+            </div>
+        @endif
+    </div>
+
+    <!-- 4. UJIAN -->
     <div class="section-card">
         <h3 style="color: #165fac; margin-bottom: 20px;">
             <i class="fas fa-file-signature"></i> Ujian
@@ -384,11 +432,11 @@
                                     <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
                                         {{ $ujian->judul_ujian }}
                                         <span class="badge" style="background: #8b5cf6; color: white;">
-                                            {{ strtoupper(str_replace('_', ' ', $ujian->tipe_ujian)) }}
+                                            {{ $ujian->tipe_label }}
                                         </span>
                                     </h5>
                                     <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
-                                        {{ $ujian->deskripsi ?? 'Ujian ' . $ujian->tipe_ujian }}
+                                        {{ $ujian->deskripsi ?? 'Ujian ' . $ujian->tipe_label }}
                                     </p>
                                     <small style="color: #999;">
                                         <i class="fas fa-stopwatch"></i> Durasi:
@@ -402,18 +450,31 @@
                                             <i class="fas fa-lock me-1"></i> Belum Dirilis
                                         </button>
                                     @elseif($ujian->isOngoing())
-                                        <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $ujian->id]) }}"
-                                            class="btn btn-danger btn-sm">
-                                            <i class="fas fa-play"></i> Mulai Ujian
-                                        </a>
+                                        @if($ujian->requiresValidation() && (!$siswa->validasi_ujian_bendahara || !$siswa->validasi_ujian_wali))
+                                            <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                                <i class="fas fa-lock me-1"></i> Belum Memiliki Akses
+                                            </button>
+                                        @else
+                                            <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $ujian->id]) }}"
+                                                class="btn btn-danger btn-sm">
+                                                <i class="fas fa-play"></i> Mulai Ujian
+                                            </a>
+                                        @endif
                                     @elseif($ujian->tanggal_mulai->isFuture())
                                         <button class="btn btn-secondary btn-sm" disabled>
                                             <i class="fas fa-lock"></i> Belum Dimulai
                                         </button>
                                     @else
-                                        <button class="btn btn-secondary btn-sm" disabled>
-                                            <i class="fas fa-check"></i> Selesai
-                                        </button>
+                                        @if($ujian->tampilkan_nilai)
+                                            <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $ujian->id]) }}"
+                                                class="btn btn-info btn-sm">
+                                                <i class="fas fa-poll"></i> Lihat Hasil
+                                            </a>
+                                        @else
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <i class="fas fa-check"></i> Selesai
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </div>
@@ -429,101 +490,7 @@
         @endif
     </div>
 
-    <!-- KUIS -->
-    <div class="section-card">
-        <h3 style="color: #165fac; margin-bottom: 20px;">
-            <i class="fas fa-question-circle"></i> Kuis
-        </h3>
-
-        @php
-            $kuisList = \App\Models\Ujian::where('tipe_ujian', 'kuis')
-                ->where('mata_pelajaran_id', $mataPelajaran->id)
-                ->where('kelas_id', $siswa->kelas_id)
-                ->orderBy('tanggal_mulai', 'desc')
-                ->get();
-
-            $kuisByDate = [];
-            foreach($kuisList as $kuis) {
-                $dateKey = $kuis->tanggal_mulai->format('Y-m-d');
-                $today = now()->format('Y-m-d');
-                $yesterday = now()->subDay()->format('Y-m-d');
-
-                if($dateKey === $today) {
-                    $label = 'Hari Ini (' . $kuis->tanggal_mulai->translatedFormat('d M Y') . ')';
-                } elseif($dateKey === $yesterday) {
-                    $label = 'Kemarin (' . $kuis->tanggal_mulai->translatedFormat('d M Y') . ')';
-                } else {
-                    $label = $kuis->tanggal_mulai->translatedFormat('d M Y');
-                }
-
-                if(!isset($kuisByDate[$dateKey])) {
-                    $kuisByDate[$dateKey] = ['label' => $label, 'items' => []];
-                }
-                $kuisByDate[$dateKey]['items'][] = $kuis;
-            }
-        @endphp
-
-        @if(count($kuisByDate) > 0)
-            @foreach($kuisByDate as $dateKey => $data)
-                @php $isToday = strpos($data['label'], 'Hari Ini') === 0; @endphp
-                <div class="date-group-header" onclick="toggleGroup(this)">
-                    <span>{{ $data['label'] }} ({{ count($data['items']) }})</span>
-                    <i class="fas fa-chevron-down date-group-icon {{ $isToday ? 'open' : '' }}"></i>
-                </div>
-                <div class="date-group-content {{ $isToday ? 'show' : '' }}">
-                    @foreach($data['items'] as $kuis)
-                        <div class="item-list">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div style="flex: 1;">
-                                    <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
-                                        {{ $kuis->judul_ujian }}
-                                        <span class="badge" style="background: #06b6d4; color: white;">
-                                            Kuis
-                                        </span>
-                                    </h5>
-                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
-                                        {{ $kuis->deskripsi ?? 'Kuis pembelajaran interaktif' }}
-                                    </p>
-                                    <small style="color: #999;">
-                                        <i class="fas fa-stopwatch"></i> Durasi:
-                                        {{ $kuis->durasi_menit > 0 ? $kuis->durasi_menit . ' menit' : 'Tidak terbatas' }}
-                                        | <i class="fas fa-clock"></i> {{ $kuis->tanggal_mulai->format('H:i') }} - {{ $kuis->tanggal_selesai->format('H:i') }}
-                                    </small>
-                                </div>
-                                <div>
-                                    @if(!$kuis->is_active)
-                                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
-                                            <i class="fas fa-lock me-1"></i> Belum Dirilis
-                                        </button>
-                                    @elseif($kuis->isOngoing())
-                                        <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $kuis->id]) }}"
-                                            class="btn btn-warning btn-sm">
-                                            <i class="fas fa-play"></i> Mulai Kuis
-                                        </a>
-                                    @elseif($kuis->tanggal_mulai->isFuture())
-                                        <button class="btn btn-secondary btn-sm" disabled>
-                                            <i class="fas fa-lock"></i> Belum Dimulai
-                                        </button>
-                                    @else
-                                        <button class="btn btn-secondary btn-sm" disabled>
-                                            <i class="fas fa-check"></i> Selesai
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @endforeach
-        @else
-            <div class="no-items-date">
-                <i class="fas fa-question-circle fa-2x mb-2"></i>
-                <p style="margin: 0;">Belum ada kuis yang tersedia</p>
-            </div>
-        @endif
-    </div>
-
-    <!-- Forum Diskusi -->
+    <!-- 5. Forum Diskusi -->
     <div class="section-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 style="color: #165fac; margin: 0;">
@@ -567,6 +534,61 @@
             <div style="text-align: center; padding: 24px; background: #f9fafb; border-radius: 8px;">
                 <i class="fas fa-comments fa-2x mb-2" style="color: #ccc;"></i>
                 <p style="margin: 0; color: #666;">Belum ada diskusi untuk mata pelajaran ini</p>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- 6. KELAS VIRTUAL (Meeting) -->
+    <div class="section-card" style="border-left: 5px solid #10b981;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 style="color: #10b981; margin: 0;">
+                <i class="fas fa-video"></i> Kelas Virtual (Meeting)
+            </h3>
+            <a href="{{ route('siswa.lms.mapel.meeting.index', $mataPelajaran->id) }}"
+                class="btn btn-outline-success btn-sm">
+                Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        @php
+            $meetingList = \App\Models\LmsMeeting::where('kelas_id', $siswa->kelas_id)
+                ->where('mata_pelajaran_id', $mataPelajaran->id)
+                ->where('is_active', true)
+                ->orderBy('waktu_mulai', 'asc')
+                ->take(5)
+                ->get();
+        @endphp
+
+        @forelse($meetingList as $meeting)
+            <div class="item-list">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <span class="badge bg-info text-dark me-2">
+                            {{ ucfirst(str_replace('_', ' ', $meeting->platform)) }}
+                        </span>
+                        @if($meeting->waktu_mulai->isFuture())
+                            <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Akan Datang</span>
+                        @else
+                            <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Live</span>
+                        @endif
+
+                        <h5 class="mt-2 mb-1 fw-bold" style="color: #1a1a1a;">{{ $meeting->judul }}</h5>
+                        <small class="text-muted">
+                            <i class="far fa-calendar-alt me-1"></i> {{ $meeting->waktu_mulai->translatedFormat('d M Y') }}
+                            <i class="far fa-clock ms-2 me-1"></i> {{ $meeting->waktu_mulai->format('H:i') }}
+                        </small>
+                    </div>
+                    <div>
+                        <a href="{{ $meeting->link_meeting }}" target="_blank" class="btn btn-success btn-sm">
+                            <i class="fas fa-video me-1"></i> Gabung
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div style="text-align: center; padding: 24px;">
+                <i class="fas fa-video fa-2x mb-2" style="color: #ccc;"></i>
+                <p style="margin: 0; color: #666;">Belum ada jadwal meeting aktif saat ini</p>
             </div>
         @endforelse
     </div>

@@ -46,22 +46,24 @@
                 <div class="col-12 col-lg-6">
                     <div class="card h-100 border-0 shadow-sm">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar flex-shrink-0 me-3">
+                            <div class="d-flex align-items-start justify-content-between mb-3">
+                                <div class="d-flex align-items-center flex-wrap">
+                                    <div class="avatar flex-shrink-0 me-3 mb-2">
                                         <div class="avatar-initial rounded-circle bg-label-primary">
                                             <i class="fas fa-user-graduate"></i>
                                         </div>
                                     </div>
-                                    <div class="d-flex align-items-center mb-1">
-                                        <h5 class="mb-0 me-2">{{ $child->nama_lengkap }}</h5>
-                                        @if($child->status === 'lulus')
-                                            <span class="badge bg-dark">ALUMNI</span>
-                                        @endif
+                                    <div class="mb-2">
+                                        <div class="d-flex align-items-center flex-wrap">
+                                            <h5 class="mb-0 me-2 text-break">{{ $child->nama_lengkap }}</h5>
+                                            @if($child->status === 'lulus')
+                                                <span class="badge bg-dark my-1">ALUMNI</span>
+                                            @endif
+                                        </div>
+                                        <small class="text-muted d-none d-sm-inline-block">
+                                            <i class="fas fa-school me-1"></i>{{ $child->kelas->nama_kelas ?? 'Belum ada kelas' }}
+                                        </small>
                                     </div>
-                                    <small class="text-muted d-none d-sm-inline-block ms-2">
-                                        ({{ $child->kelas->nama_kelas ?? 'Belum ada kelas' }})
-                                    </small>
                                 </div>
                             </div>
                             <!-- Mobile-only Class info -->

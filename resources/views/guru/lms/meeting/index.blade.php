@@ -78,14 +78,10 @@
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li>
-                                        <form
-                                            action="{{ route('guru.lms.meeting.destroy', [$kelas->id, $mapel->id, $meeting->id]) }}"
-                                            method="POST" onsubmit="return confirm('Hapus meeting ini?')">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="fas fa-trash-alt me-2"></i> Hapus
-                                            </button>
-                                        </form>
+                                        <button class="dropdown-item text-danger" type="button"
+                                            onclick="confirmDelete('{{ route('guru.lms.meeting.destroy', [$kelas->id, $mapel->id, $meeting->id]) }}')">
+                                            <i class="fas fa-trash-alt me-2"></i> Hapus
+                                        </button>
                                     </li>
                                 </ul>
                             </div>
@@ -118,6 +114,42 @@
                 alert('Link meeting berhasil disalin!');
             });
         }
+
+        function confirmDelete(url) {
+            document.getElementById('deleteForm').action = url;
+            document.getElementById('hapusTerkaitCheck').checked = false;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
     </script>
     @endpush
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus meeting ini?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <div class="form-check mb-3 text-start">
+                            <input class="form-check-input" type="checkbox" name="hapus_terkait" value="1" id="hapusTerkaitCheck">
+                            <label class="form-check-label small text-danger" for="hapusTerkaitCheck">
+                                Hapus juga meeting ini dari kelas lain? (Jika ada duplikat)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

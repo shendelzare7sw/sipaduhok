@@ -37,12 +37,17 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        // Detect if login is email or username
-        $loginType = filter_var($this->input('login'), FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $login = $this->input('login');
+        
+        // Cari user berdasarkan email ATAU username
+        $user = \App\Models\User::where('email', $login)
+            ->orWhere('username', $login)
+            ->first();
 
+        // Jika user tidak ditemukan, set default credentials (ini akan gagal di Auth::attempt)
         $credentials = [
-            $loginType => $this->input('login'),
-            'password' => $this->input('password'),
+            'email' => $user ? $user->email : $login, 
+            'password' => $this->input('password')
         ];
 
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {

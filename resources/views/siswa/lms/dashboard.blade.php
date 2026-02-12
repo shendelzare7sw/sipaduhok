@@ -193,8 +193,11 @@
         <div class="dashboard-sidebar">
             {{-- Pengumuman --}}
             <div class="sidebar-widget widget-announcement">
-                <div class="widget-header">
-                    <i class="fas fa-bullhorn"></i> Pengumuman
+                <div class="widget-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-bullhorn"></i> Pengumuman</span>
+                    <a href="{{ route('siswa.lms.pengumuman.index') }}" class="text-white-50 small text-decoration-none" style="font-size: 0.8rem;">
+                        Lihat Semua <i class="fas fa-chevron-right"></i>
+                    </a>
                 </div>
                 <div class="widget-body p-0">
                     @forelse($pengumumanList as $ann)
@@ -205,7 +208,7 @@
                             <h5 class="ann-title mb-2 text-white" style="font-size: 0.95rem;">{{ $ann->judul }}</h5>
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <span class="text-white-50 small" style="font-size: 0.75rem;">
-                                    {{ \Carbon\Carbon::parse($ann->tanggal_pengumuman)->diffForHumans() }}
+                                    {{ $ann->created_at->diffForHumans() }}
                                 </span>
                                 <a href="{{ route('siswa.lms.pengumuman.show', $ann->id) }}" class="btn btn-sm btn-light py-1 px-3" style="font-size: 0.75rem;">
                                     Lihat
@@ -237,7 +240,7 @@
                             <div class="event-info">
                                 <h6 class="event-name">{{ $event->nama_kegiatan }}</h6>
                                 <span class="event-tag {{ $event->jenis_kegiatan === 'libur' ? 'tag-red' : 'tag-blue' }}">
-                                    {{ ucfirst($event->jenis_kegiatan) }}
+                                    {{ format_jenis_kegiatan($event->jenis_kegiatan) }}
                                 </span>
                             </div>
                         </div>

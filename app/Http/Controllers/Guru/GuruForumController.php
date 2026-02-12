@@ -13,6 +13,7 @@ use App\Models\MataPelajaran;
 use App\Models\ForumDiskusi;
 use App\Models\ForumReply;
 use App\Models\Siswa;
+use Illuminate\Support\Facades\Storage;
 // use App\Services\NotificationService;
 
 class GuruForumController extends Controller
@@ -61,10 +62,17 @@ class GuruForumController extends Controller
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
+        $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('kelas_id', '!=', $kelasId)
+            ->with('kelas')
+            ->get();
+
         return view('guru.lms.forum.create', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
             'guru' => $tenagaPendidik,
+            'kelasLain' => $kelasLain,
         ]);
     }
 
@@ -91,20 +99,37 @@ class GuruForumController extends Controller
             }
         }
 
-        $forum = ForumDiskusi::create([
-            'kelas_id' => $kelasId,
+        $forumData = [
             'mata_pelajaran_id' => $mapelId,
-            'user_id' => auth()->id(), // Guru as the creator
+            'user_id' => auth()->id(),
             'judul' => $validated['judul'],
             'isi' => $validated['isi'],
             'is_pinned' => $request->has('is_pinned'),
             'is_closed' => false,
             'lampiran' => !empty($lampiranPaths) ? $lampiranPaths : null,
-        ]);
+        ];
+
+        // Buat untuk kelas utama
+        ForumDiskusi::create(array_merge($forumData, ['kelas_id' => $kelasId]));
+
+        // Duplikasi ke kelas tambahan
+        $kelasTambahan = $request->input('kelas_tambahan', []);
+        $jumlahDuplikasi = 0;
+        foreach ($kelasTambahan as $kelasLainId) {
+            if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
+                ForumDiskusi::create(array_merge($forumData, ['kelas_id' => $kelasLainId]));
+                $jumlahDuplikasi++;
+            }
+        }
+
+        $msg = 'Diskusi baru berhasil dibuat';
+        if ($jumlahDuplikasi > 0) {
+            $msg .= " dan diduplikasi ke {$jumlahDuplikasi} kelas lain";
+        }
 
         return redirect()
             ->route('guru.lms.forum.index', [$kelasId, $mapelId])
-            ->with('success', 'Diskusi baru berhasil dibuat');
+            ->with('success', $msg);
     }
 
     /**
@@ -232,45 +257,138 @@ class GuruForumController extends Controller
     /**
      * Toggle status pinned
      */
-    public function togglePin($kelasId, $mapelId, $forumId): RedirectResponse
+    public function togglePin(Request $request, $kelasId, $mapelId, $forumId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
         $forum = ForumDiskusi::findOrFail($forumId);
-        $forum->update(['is_pinned' => !$forum->is_pinned]);
+        $newState = !$forum->is_pinned;
+        $forum->update(['is_pinned' => $newState]);
 
-        return back()->with('success', 'Status pin berhasil diubah');
+        $syncedCount = 0;
+        if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
+            $relatedForums = ForumDiskusi::where('user_id', auth()->id())
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul', $forum->judul)
+                ->where('id', '!=', $forum->id)
+                ->get();
+
+            foreach ($relatedForums as $rel) {
+                // Ensure the teacher has access to the related class (safety check)
+                if ($this->hasAccess($tenagaPendidik->id, $rel->kelas_id, $mapelId)) {
+                    $rel->update(['is_pinned' => $newState]);
+                    $syncedCount++;
+                }
+            }
+        }
+
+        $msg = 'Status pin berhasil diubah';
+        if ($syncedCount > 0) {
+            $msg .= " (Disinkronisasi ke $syncedCount kelas lain)";
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**
      * Toggle status closed
      */
-    public function toggleClose($kelasId, $mapelId, $forumId): RedirectResponse
+    public function toggleClose(Request $request, $kelasId, $mapelId, $forumId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
         $forum = ForumDiskusi::findOrFail($forumId);
-        $forum->update(['is_closed' => !$forum->is_closed]);
+        $newState = !$forum->is_closed;
+        $forum->update(['is_closed' => $newState]);
 
-        return back()->with('success', 'Status diskusi berhasil diubah');
+        $syncedCount = 0;
+        if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
+             $relatedForums = ForumDiskusi::where('user_id', auth()->id())
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul', $forum->judul)
+                ->where('id', '!=', $forum->id)
+                ->get();
+
+            foreach ($relatedForums as $rel) {
+                 if ($this->hasAccess($tenagaPendidik->id, $rel->kelas_id, $mapelId)) {
+                    $rel->update(['is_closed' => $newState]);
+                    $syncedCount++;
+                 }
+            }
+        }
+
+        $msg = 'Status diskusi berhasil diubah';
+        if ($syncedCount > 0) {
+            $msg .= " (Disinkronisasi ke $syncedCount kelas lain)";
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**
      * Hapus diskusi
      */
-    public function destroy($kelasId, $mapelId, $forumId): RedirectResponse
+    public function destroy(Request $request, $kelasId, $mapelId, $forumId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $forum = ForumDiskusi::findOrFail($forumId);
-        $forum->delete();
+        $forum = ForumDiskusi::where('id', $forumId)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $idsToDelete = [$forum->id];
+
+        // BULK DELETE LOGIC
+        if ($request->has('hapus_terkait')) {
+            $relatedForums = ForumDiskusi::where('user_id', auth()->id())
+                ->where('mata_pelajaran_id', $mapelId)
+                ->where('judul', $forum->judul)
+                ->where('id', '!=', $forum->id)
+                ->get();
+
+            foreach ($relatedForums as $rel) {
+                $idsToDelete[] = $rel->id;
+            }
+        }
+
+        // Process Deletion with safe lampiran delete
+        $filesToDelete = [];
+        $forumsToDelete = ForumDiskusi::whereIn('id', $idsToDelete)->get();
+
+        foreach ($forumsToDelete as $f) {
+            if ($f->lampiran && is_array($f->lampiran)) {
+                foreach ($f->lampiran as $file) {
+                    // Check if lampiran used by forum NOT being deleted
+                    $usedElsewhere = ForumDiskusi::whereNotIn('id', $idsToDelete)
+                        ->whereJsonContains('lampiran', $file)
+                        ->exists();
+
+                    if (!$usedElsewhere) {
+                        $filesToDelete[] = $file;
+                    }
+                }
+            }
+            $f->delete();
+        }
+
+        // Delete physical files
+        $filesToDelete = array_unique($filesToDelete);
+        foreach ($filesToDelete as $file) {
+            Storage::disk('public')->delete($file);
+        }
+
+        $msg = 'Diskusi berhasil dihapus';
+        if (count($idsToDelete) > 1) {
+            $countLain = count($idsToDelete) - 1;
+            $msg .= " (termasuk {$countLain} diskusi terkait di kelas lain)";
+        }
 
         return redirect()
             ->route('guru.lms.forum.index', [$kelasId, $mapelId])
-            ->with('success', 'Diskusi berhasil dihapus');
+            ->with('success', $msg);
     }
 
     /**
@@ -278,13 +396,16 @@ class GuruForumController extends Controller
      */
     private function verifyAccess($guruId, $kelasId, $mapelId)
     {
-        $access = GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+        if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
+            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
+        }
+    }
+
+    private function hasAccess($guruId, $kelasId, $mapelId): bool
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-
-        if (!$access) {
-            abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
-        }
     }
 }

@@ -78,6 +78,8 @@
                     <small class="text-muted">Kosongkan jika tipe Link URL</small>
                 </div>
 
+                @include('guru.partials.multi-kelas-selector')
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Simpan Materi

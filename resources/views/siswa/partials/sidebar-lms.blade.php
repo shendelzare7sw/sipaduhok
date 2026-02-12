@@ -12,7 +12,10 @@
 <div class="nav-section-title">MATA PELAJARAN</div>
 @php
     $siswa = auth()->user()->siswa;
-    $mataPelajaran = \App\Models\JadwalPelajaran::where('kelas_id', $siswa->kelas_id ?? 0)
+    $siswa = auth()->user()->siswa;
+    $mataPelajaran = \App\Models\JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+            $q->where('kelas.id', $siswa->kelas_id ?? 0);
+        })
         ->with('mataPelajaran')
         ->get()
         ->pluck('mataPelajaran')

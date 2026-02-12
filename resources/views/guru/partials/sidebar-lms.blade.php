@@ -5,13 +5,14 @@
     <div style="font-size: 12px; opacity: 0.9;">Kelas {{ $kelas->nama_kelas ?? 'N/A' }}</div>
 </div>
 
-<div class="nav-section-title">MENU LMS</div>
+<div class="nav-section-title">UTAMA</div>
 <a href="{{ route('guru.lms.dashboard', [$kelas->id, $mapel->id]) }}"
     class="nav-link {{ request()->routeIs('guru.lms.dashboard') ? 'active' : '' }}">
     <i class="fas fa-home"></i>
     <span>Beranda</span>
 </a>
 
+<div class="nav-section-title">PEMBELAJARAN</div>
 <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}"
     class="nav-link {{ request()->routeIs('guru.lms.materi.*') ? 'active' : '' }}">
     <i class="fas fa-book"></i>
@@ -21,28 +22,22 @@
 <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}"
     class="nav-link {{ request()->routeIs('guru.lms.tugas.*') ? 'active' : '' }}">
     <i class="fas fa-tasks"></i>
-    <span>Tugas & Latihan</span>
+    <span>Tugas</span>
     @if(isset($tugasBelumDikoreksi) && $tugasBelumDikoreksi > 0)
         <span class="badge-notif">{{ $tugasBelumDikoreksi }}</span>
     @endif
+</a>
+
+<a href="{{ route('guru.lms.latihan.index', [$kelas->id, $mapel->id]) }}"
+    class="nav-link {{ request()->routeIs('guru.lms.latihan.*') ? 'active' : '' }}">
+    <i class="fas fa-pencil-ruler"></i>
+    <span>Latihan</span>
 </a>
 
 <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
     class="nav-link {{ request()->routeIs('guru.lms.ujian.*') ? 'active' : '' }}">
     <i class="fas fa-file-alt"></i>
     <span>Ujian</span>
-</a>
-
-<a href="{{ route('guru.lms.kuis.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.kuis.*') ? 'active' : '' }}">
-    <i class="fas fa-question-circle"></i>
-    <span>Kuis</span>
-</a>
-
-<a href="{{ route('guru.lms.nilai.index', [$kelas->id, $mapel->id]) }}"
-    class="nav-link {{ request()->routeIs('guru.lms.nilai.*') ? 'active' : '' }}">
-    <i class="fas fa-chart-line"></i>
-    <span>Nilai Siswa</span>
 </a>
 
 <a href="{{ route('guru.lms.forum.index', [$kelas->id, $mapel->id]) }}"
@@ -55,6 +50,13 @@
     class="nav-link {{ request()->routeIs('guru.lms.meeting.*') ? 'active' : '' }}">
     <i class="fas fa-video"></i>
     <span>Kelas Virtual</span>
+</a>
+
+<div class="nav-section-title">PENILAIAN</div>
+<a href="{{ route('guru.lms.nilai.index', [$kelas->id, $mapel->id]) }}"
+    class="nav-link {{ request()->routeIs('guru.lms.nilai.*') ? 'active' : '' }}">
+    <i class="fas fa-chart-line"></i>
+    <span>Nilai Siswa</span>
 </a>
 
 <div class="nav-section-title">NAVIGASI</div>

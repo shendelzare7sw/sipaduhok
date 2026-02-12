@@ -423,8 +423,7 @@
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Tanggal Lahir <span style="color: #ef4444;">*</span></label>
-                        <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', $siswa->tanggal_lahir ? $siswa->tanggal_lahir->format('Y-m-d') : '') }}"
-                            required>
+                        <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', \Carbon\Carbon::parse($siswa->tanggal_lahir)->format('Y-m-d')) }}" required>
                     </div>
                 </div>
             </div>
@@ -491,8 +490,7 @@
                 <label class="form-label">Status Siswa <span style="color: #ef4444;">*</span></label>
                 <select name="status" class="form-control">
                     <option value="aktif" {{ $siswa->status == 'aktif' ? 'selected' : '' }}>✓ Aktif - Sedang Belajar</option>
-                    <option value="lulus" {{ $siswa->status == 'lulus' ? 'selected' : '' }}><i
-                            class="fas fa-graduation-cap"></i> Lulus</option>
+                    <option value="lulus" {{ $siswa->status == 'lulus' ? 'selected' : '' }}>🎓 Lulus</option>
                     <option value="pindah" {{ $siswa->status == 'pindah' ? 'selected' : '' }}>🔄 Pindah Sekolah</option>
                     <option value="keluar" {{ $siswa->status == 'keluar' ? 'selected' : '' }}>✗ Keluar</option>
                 </select>

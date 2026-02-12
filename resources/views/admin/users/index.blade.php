@@ -527,7 +527,7 @@
                                             <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $tp->created_at->diffForHumans() }}</small>
                                         </td>
                                         <td style="font-size: 14px;">{{ $tp->nip ?? '-' }}</td>
-                                        <td style="font-size: 14px;">{{ $tp->email }}</td>
+                                        <td style="font-size: 14px;">{{ $tp->user->email }}</td>
                                         <td>
                                             <span class="badge badge-info">{{ ucwords(str_replace('_', ' ', $tp->user->role)) }}</span>
                                         </td>
@@ -549,7 +549,7 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 {{-- Tombol Delete --}}
-                                                <button type="button" class="btn btn-icon btn-light-danger" title="Hapus Data" onclick="confirmDeleteTenagaPendidik({{ $tp->id }}, '{{ addslashes($tp->nama_lengkap) }}', '{{ addslashes($tp->email) }}', '{{ addslashes(ucwords(str_replace('_', ' ', $tp->user->role))) }}')">
+                                                <button type="button" class="btn btn-icon btn-light-danger" title="Hapus Data" onclick="confirmDeleteTenagaPendidik({{ $tp->id }}, '{{ addslashes($tp->nama_lengkap) }}', '{{ addslashes($tp->user->email) }}', '{{ addslashes(ucwords(str_replace('_', ' ', $tp->user->role))) }}')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </div>
@@ -608,7 +608,7 @@
                                     <tr>
                                         <td>
                                             <div style="font-weight: 600; font-size: 15px;">{{ $s->nama_lengkap }}</div>
-                                            <small style="color: #6b7280; font-size: 12px;">{{ $s->email ?? 'No Email' }}</small>
+                                            <small style="color: #6b7280; font-size: 12px;">{{ $s->user->email ?? 'No Email' }}</small>
                                         </td>
                                         <td><span style="font-weight: 500; font-size: 14px;">{{ $s->nis }}</span></td>
                                         <td><span style="color: #6b7280; font-size: 14px;">{{ $s->nisn }}</span></td>

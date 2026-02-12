@@ -142,12 +142,12 @@
 
                             <div class="d-flex flex-wrap gap-2">
                                 @if($item->lampiran_surat)
-                                    <a href="{{ asset('storage/' . $item->lampiran_surat) }}"
-                                    target="_blank"
-                                    class="badge bg-light text-primary border border-primary"
-                                    style="text-decoration: none; padding: 4px 10px;">
-                                        <i class="fas fa-paperclip me-1"></i> Lihat Lampiran
-                                    </a>
+                                    <x-file-preview 
+                                        :path="$item->lampiran_surat" 
+                                        label="Lihat Lampiran" 
+                                        class="badge bg-light text-primary border border-primary" 
+                                        icon="fas fa-paperclip"
+                                    />
                                 @endif
 
                                 @if($item->kalenderAkademik)

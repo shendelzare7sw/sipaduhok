@@ -16,10 +16,13 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
 {
     private $skippedCount = 0;
     private $importedCount = 0;
+    private $warnings = [];
 
     public function collection(Collection $rows)
     {
+        $rowNumber = 1;
         foreach ($rows as $row) {
+            $rowNumber++;
             $row = $row->toArray();
 
             // Skip empty rows
@@ -45,6 +48,7 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
 
             if ($exists) {
                 $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: Orang tua dilewati karena Email '{$email}' atau Username '{$username}' sudah ada.";
                 continue;
             }
 
@@ -76,6 +80,8 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
                                 'is_financial_responsible' => true,
                                 'can_access_academic' => true,
                             ]);
+                        } else {
+                             $this->warnings[] = "Baris {$rowNumber}: Hubungan ke siswa dengan NIS '{$nis}' gagal karena siswa tidak ditemukan.";
                         }
                     }
                 }
@@ -86,7 +92,7 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
             } catch (\Exception $e) {
                 DB::rollBack();
                 $this->skippedCount++;
-                \Log::error('OrangTua Import Error: ' . $e->getMessage() . ' | Row: ' . json_encode($row));
+                $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
             }
         }
     }
@@ -98,5 +104,9 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
     public function getImportedCount(): int
     {
         return $this->importedCount;
+    }
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 }

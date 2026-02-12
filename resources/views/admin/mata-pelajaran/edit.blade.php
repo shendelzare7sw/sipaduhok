@@ -65,6 +65,29 @@
                         @enderror
                     </div>
 
+                    {{-- Kelompok --}}
+                    <div class="mb-3">
+                        <label for="kelompok" class="form-label">
+                            Kelompok <span class="text-muted">(Opsional)</span>
+                        </label>
+                        <select name="kelompok" id="kelompok" class="form-select @error('kelompok') is-invalid @enderror">
+                            <option value="">-- Pilih Kelompok --</option>
+                            <option value="A" {{ old('kelompok', $mataPelajaran->kelompok) === 'A' ? 'selected' : '' }}>
+                                A (Mata Pelajaran Umum)
+                            </option>
+                            <option value="B" {{ old('kelompok', $mataPelajaran->kelompok) === 'B' ? 'selected' : '' }}>
+                                B (Mata Pelajaran Pilihan/Muatan Lokal)
+                            </option>
+                        </select>
+                        @error('kelompok')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">
+                            Kelompok A: Pendidikan Agama, PKN, B.Indonesia, Matematika, IPA, IPS, B.Inggris, dll.<br>
+                            Kelompok B: Prakarya, Seni Budaya, Muatan Lokal, dll.
+                        </small>
+                    </div>
+
                     {{-- Kode Mata Pelajaran --}}
                     <div class="mb-3">
                         <label for="kode_mapel" class="form-label">

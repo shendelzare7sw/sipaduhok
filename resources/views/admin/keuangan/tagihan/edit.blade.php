@@ -114,10 +114,13 @@
                                     <td class="align-middle">
                                         <div class="input-group input-group-sm" style="max-width: 250px;">
                                             <span class="input-group-text bg-white">Rp</span>
+                                            @php
+                                                $rawValue = intval($tagihanExist[$key] ?? 0);
+                                            @endphp
                                             <input type="text"
                                                    name="tagihan[{{ $key }}]"
                                                    class="form-control currency-input"
-                                                   value="{{ old('tagihan.'.$key, number_format($tagihanExist[$key] ?? 0, 0, ',', '.')) }}"
+                                                   value="{{ number_format(old('tagihan.'.$key, $rawValue), 0, ',', '.') }}"
                                                    placeholder="0">
                                         </div>
                                         @error('tagihan.'.$key)
@@ -178,17 +181,39 @@
 
 @section('scripts')
 <script>
-    // Handle form submission - parse currency values before submit
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('form');
+        const currencyInputs = document.querySelectorAll('.currency-input');
 
-        form.addEventListener('submit', function(e) {
-            // Parse all currency inputs before submission
-            const currencyInputs = form.querySelectorAll('.currency-input');
-            currencyInputs.forEach(input => {
-                // Remove dots (thousand separators) before submit
-                const rawValue = input.value.replace(/\./g, '');
-                input.value = rawValue || '0';
+        // Format number with thousand separator (Indonesian format: dot)
+        function formatCurrency(value) {
+            // Remove all non-digit characters
+            let numericValue = String(value).replace(/\D/g, '');
+            // Remove leading zeros
+            numericValue = numericValue.replace(/^0+/, '') || '0';
+            // Format with dots as thousand separator
+            return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        // Apply formatting to each currency input
+        currencyInputs.forEach(input => {
+            // Real-time formatting as user types
+            input.addEventListener('input', function(e) {
+                const cursorPos = this.selectionStart;
+                const oldLength = this.value.length;
+                
+                this.value = formatCurrency(this.value);
+                
+                // Adjust cursor position after formatting
+                const newLength = this.value.length;
+                const diff = newLength - oldLength;
+                this.setSelectionRange(cursorPos + diff, cursorPos + diff);
+            });
+
+            // Handle paste event
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                this.value = formatCurrency(pastedText);
             });
         });
     });

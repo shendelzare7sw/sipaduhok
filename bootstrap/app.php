@@ -11,12 +11,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureUserIsActive::class,
+        ]);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'superadmin' => \App\Http\Middleware\EnsureSuperAdmin::class,
             'role.level' => \App\Http\Middleware\EnsureRoleLevel::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'lms.access' => \App\Http\Middleware\CheckLmsAccess::class,
+            'siswa.mapel.access' => \App\Http\Middleware\CheckSiswaMapelAccess::class,
+            'student.active' => \App\Http\Middleware\CheckStudentActive::class,
         ]);
 
         // Exclude Midtrans webhook from CSRF verification

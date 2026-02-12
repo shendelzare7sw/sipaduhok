@@ -13,3 +13,10 @@ Schedule::command('notifications:schedule')
     ->dailyAt('06:00')
     ->timezone('Asia/Jakarta')
     ->description('Send scheduled notifications for deadlines and announcements');
+
+// Check for scheduled promotions every minute
+Schedule::command('promotion:execute-scheduled')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->timezone('Asia/Jakarta')
+    ->description('Execute scheduled academic promotions');

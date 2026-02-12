@@ -1,150 +1,160 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Nilai - {{ $kelas->nama_kelas }}</title>
+    <meta charset="utf-8">
+    <title>Rekap Nilai - {{ $siswa->nama_lengkap }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #165fac; padding-bottom: 20px; }
-        .header h1 { color: #165fac; font-size: 24px; margin-bottom: 10px; }
-        .info-box { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table th { padding: 10px; background: #165fac; color: white; border: 1px solid #ccc; text-align: center; font-size: 12px; }
-        table td { padding: 8px; border: 1px solid #ccc; text-align: center; }
-        .grade-A { background: #dcfce7; color: #065f46; font-weight: bold; }
-        .grade-B { background: #dbeafe; color: #1e3a8a; font-weight: bold; }
-        .grade-C { background: #fef3c7; color: #92400e; font-weight: bold; }
-        .grade-D { background: #fee2e2; color: #991b1b; font-weight: bold; }
-        .grade-E { background: #fee2e2; color: #991b1b; font-weight: bold; }
-        @media print { body { padding: 10px; } @page { margin: 15mm; } }
+        body { font-family: Arial, sans-serif; font-size: 9pt; padding: 10mm; }
+        .header { text-align: center; margin-bottom: 15px; }
+        .header h1 { font-size: 12pt; margin-bottom: 3px; }
+        .header h2 { font-size: 10pt; font-weight: normal; margin-bottom: 5px; }
+        .info-table { margin-bottom: 15px; font-size: 8pt; }
+        .info-table td { padding: 2px 5px; }
+        .info-table .label { font-weight: bold; width: 100px; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 9pt; }
+        table.data th, table.data td { border: 1px solid #333; padding: 4px 3px; }
+        table.data th { background: #e9ecef; text-align: center; font-weight: bold; }
+        table.data .rata { background: #d4edda; }
+        table.data .nilai-akhir { background: #c3e6cb; font-weight: bold; }
+        .footer { margin-top: 20px; font-size: 8pt; }
+        .ttd { margin-top: 40px; display: flex; justify-content: space-between; }
+        .ttd-item { text-align: center; width: 30%; }
+        .ttd-line { border-bottom: 1px solid #333; height: 40px; }
+        @page { size: landscape; margin: 10mm; }
     </style>
 </head>
 <body>
+    @php
+        $isKelasAkhir = str_contains(strtolower($kelas->nama_kelas), '9') || 
+                        str_contains(strtolower($kelas->nama_kelas), '12') ||
+                        str_contains(strtolower($kelas->nama_kelas), 'ix') ||
+                        str_contains(strtolower($kelas->nama_kelas), 'xii');
+    @endphp
+
     <div class="header">
         <h1>REKAP NILAI SISWA</h1>
-        <h2>PKBM House of Knowledge</h2>
+        <h2>{{ config('app.name', 'SIPADUHOK') }}</h2>
     </div>
 
-    <div class="info-box">
-        <div><strong>Kelas:</strong> {{ $kelas->nama_kelas }}</div>
-        @if($selectedMapel)
-            <div><strong>Mata Pelajaran:</strong> {{ $selectedMapel->nama_mapel }}</div>
-        @else
-            <div><strong>Mata Pelajaran:</strong> Semua Mata Pelajaran</div>
-        @endif
-        <div><strong>Tahun Ajaran:</strong> {{ $kelas->tahunAjaran->nama_tahun_ajaran }}</div>
-        <div><strong>Wali Kelas:</strong> {{ $kelas->waliKelas->nama_lengkap }}</div>
-        <div><strong>Dicetak:</strong> {{ now()->locale('id')->isoFormat('dddd, D MMMM YYYY HH:mm') }}</div>
-    </div>
+    <table class="info-table">
+        <tr>
+            <td class="label">Nama Siswa</td><td>: {{ $siswa->nama_lengkap }}</td>
+            <td class="label">Kelas</td><td>: {{ $kelas->nama_kelas }}</td>
+        </tr>
+        <tr>
+            <td class="label">NIS / NISN</td><td>: {{ $siswa->nis }} / {{ $siswa->nisn }}</td>
+            <td class="label">Tahun Ajaran</td><td>: {{ $kelas->tahunAjaran->nama_tahun_ajaran }}</td>
+        </tr>
+    </table>
 
-    @if($selectedMapel)
-        {{-- Nilai untuk 1 Mata Pelajaran --}}
-        <table>
-            <thead>
-                <tr>
-                    <th rowspan="2" style="width: 40px;">No</th>
-                    <th rowspan="2" style="width: 100px;">NIS</th>
-                    <th rowspan="2">Nama Siswa</th>
-                    <th colspan="3">Komponen Nilai</th>
-                    <th rowspan="2" style="width: 100px;">Nilai Akhir</th>
-                    <th rowspan="2" style="width: 60px;">Huruf</th>
-                    <th rowspan="2">Predikat</th>
-                </tr>
-                <tr>
-                    <th style="width: 80px;">Tugas</th>
-                    <th style="width: 80px;">UTS</th>
-                    <th style="width: 80px;">UAS</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($siswaList as $index => $siswa)
-                    @php
-                        $nilai = $nilaiData[$siswa->id] ?? null;
-                        $predikat = $nilai ? $nilai->nilaiHuruf() : '-';
-                    @endphp
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $siswa->nis }}</td>
-                        <td style="text-align: left;">{{ $siswa->nama_lengkap }}</td>
-                        <td>{{ $nilai ? number_format($nilai->nilai_tugas, 2) : '-' }}</td>
-                        <td>{{ $nilai ? number_format($nilai->nilai_uts, 2) : '-' }}</td>
-                        <td>{{ $nilai ? number_format($nilai->nilai_uas, 2) : '-' }}</td>
-                        <td style="font-weight: bold; font-size: 14px;">
-                            {{ $nilai ? number_format($nilai->nilai_akhir, 2) : '-' }}
-                        </td>
-                        <td class="grade-{{ $predikat }}">{{ $predikat }}</td>
-                        <td>{{ $nilai ? $nilai->predikat() : '-' }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        {{-- Statistik --}}
-        <div style="margin-top: 30px; padding: 15px; background: #f0f9ff; border-radius: 8px;">
-            <h3 style="margin-bottom: 15px; color: #165fac;">Statistik Kelas</h3>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                <div style="text-align: center;">
-                    <strong style="display: block; font-size: 24px; color: #165fac;">{{ number_format($rataRataKelas, 2) }}</strong>
-                    <div>Rata-rata Kelas</div>
-                </div>
-                <div style="text-align: center;">
-                    <strong style="display: block; font-size: 24px; color: #10b981;">{{ number_format($nilaiTertinggi, 2) }}</strong>
-                    <div>Nilai Tertinggi</div>
-                </div>
-                <div style="text-align: center;">
-                    <strong style="display: block; font-size: 24px; color: #ef4444;">{{ number_format($nilaiTerendah, 2) }}</strong>
-                    <div>Nilai Terendah</div>
-                </div>
-            </div>
-        </div>
-    @else
-        {{-- Ringkasan Semua Mata Pelajaran --}}
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 40px;">No</th>
-                    <th style="width: 100px;">NIS</th>
-                    <th>Nama Siswa</th>
-                    <th style="width: 120px;">Rata-rata Nilai</th>
-                    <th style="width: 100px;">Peringkat</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($siswaList as $index => $siswa)
-                    @php
-                        $nilaiSiswa = $nilaiData[$siswa->id] ?? [];
-                        $total = 0;
-                        $count = 0;
-                        foreach($nilaiSiswa as $n) {
-                            $total += $n->nilai_akhir;
-                            $count++;
+    <table class="data">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 25px;">No</th>
+                <th rowspan="2" style="width: 120px;">Mata Pelajaran</th>
+                <th colspan="2">Tugas</th>
+                <th colspan="2">Latihan</th>
+                <th colspan="2">UH</th>
+                <th rowspan="2" style="width: 35px;">PTS</th>
+                <th rowspan="2" style="width: 35px;">PAS</th>
+                <th rowspan="2" class="nilai-akhir" style="width: 45px;">N. Akhir</th>
+                <th rowspan="2" style="width: 45px;">Predikat</th>
+                <th rowspan="2" style="width: 55px;">Status</th>
+            </tr>
+            <tr>
+                <th style="width: 30px;">Jml</th>
+                <th class="rata" style="width: 35px;">Rata</th>
+                <th style="width: 30px;">Jml</th>
+                <th class="rata" style="width: 35px;">Rata</th>
+                <th style="width: 30px;">Jml</th>
+                <th class="rata" style="width: 35px;">Rata</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $no = 1; @endphp
+            @foreach($mataPelajaranList as $mapel)
+                @php
+                    $nilai = $nilaiData[$mapel->id] ?? null;
+                    
+                    $tugasCount = 0; $latihanCount = 0; $uhCount = 0;
+                    if ($nilai) {
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($nilai->{'tugas_'.$i} !== null) $tugasCount++;
+                            if ($nilai->{'latihan_'.$i} !== null) $latihanCount++;
+                            if ($nilai->{'uh_'.$i} !== null) $uhCount++;
                         }
-                        $rataRata = $count > 0 ? $total / $count : 0;
-                    @endphp
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $siswa->nis }}</td>
-                        <td style="text-align: left;">{{ $siswa->nama_lengkap }}</td>
-                        <td style="font-weight: bold;">{{ number_format($rataRata, 2) }}</td>
-                        <td>{{ $index + 1 }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    }
+                    $kkm = 70;
+                    $isTuntas = $nilai && $nilai->nilai_akhir >= $kkm;
+                @endphp
+                <tr>
+                    <td style="text-align: center;">{{ $no++ }}</td>
+                    <td>{{ $mapel->nama_mapel }}</td>
+                    <td style="text-align: center;">{{ $tugasCount }}/5</td>
+                    <td class="rata" style="text-align: center;">{{ $nilai && $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ $latihanCount }}/5</td>
+                    <td class="rata" style="text-align: center;">{{ $nilai && $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ $uhCount }}/5</td>
+                    <td class="rata" style="text-align: center;">{{ $nilai && $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->pts !== null ? number_format($nilai->pts, 0) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->pas !== null ? number_format($nilai->pas, 0) : '-' }}</td>
+                    <td class="nilai-akhir" style="text-align: center;">{{ $nilai && $nilai->nilai_akhir !== null ? number_format($nilai->nilai_akhir, 2) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai ? $nilai->predikat() : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->nilai_akhir !== null ? ($isTuntas ? 'Tuntas' : 'Blm Tuntas') : '-' }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    @if($isKelasAkhir)
+    <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 10pt;">Penilaian Tingkat Akhir</h3>
+    <table class="data">
+        <thead>
+            <tr>
+                <th style="width: 25px;">No</th>
+                <th style="width: 150px;">Mata Pelajaran</th>
+                <th style="width: 50px;">TO 1</th>
+                <th style="width: 50px;">TO 2</th>
+                <th style="width: 50px;">TO 3</th>
+                <th style="width: 50px;">UPK</th>
+                <th style="width: 70px;">Ujian Praktek</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $no = 1; @endphp
+            @foreach($mataPelajaranList as $mapel)
+                @php $nilai = $nilaiData[$mapel->id] ?? null; @endphp
+                <tr>
+                    <td style="text-align: center;">{{ $no++ }}</td>
+                    <td>{{ $mapel->nama_mapel }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->to_1 !== null ? number_format($nilai->to_1, 0) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->to_2 !== null ? number_format($nilai->to_2, 0) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->to_3 !== null ? number_format($nilai->to_3, 0) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->upk !== null ? number_format($nilai->upk, 0) : '-' }}</td>
+                    <td style="text-align: center;">{{ $nilai && $nilai->ujian_praktek !== null ? number_format($nilai->ujian_praktek, 0) : '-' }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
     @endif
 
-    <div style="margin-top: 40px; text-align: right;">
-        <div style="display: inline-block; text-align: center; min-width: 200px;">
-            <div>Tangerang Selatan, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-            <div>Wali Kelas</div>
-            <div style="margin-top: 60px; border-top: 1px solid #333; padding-top: 5px;">
-                {{ $kelas->waliKelas->nama_lengkap }}
-            </div>
-        </div>
+    <div class="footer">
+        <small>Dicetak pada: {{ now()->locale('id')->isoFormat('dddd, D MMMM Y HH:mm') }}</small>
     </div>
 
-    <script>window.print();</script>
+    <div class="ttd">
+        <div class="ttd-item">
+            <p>Mengetahui,</p>
+            <p>Wali Kelas</p>
+            <div class="ttd-line"></div>
+            <p>(_____________________)</p>
+        </div>
+        <div class="ttd-item">
+            <p>Orang Tua / Wali</p>
+            <div class="ttd-line"></div>
+            <p>(_____________________)</p>
+        </div>
+    </div>
 </body>
 </html>

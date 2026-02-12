@@ -88,15 +88,15 @@
                     </div>
                 </div>
                 <div class="col-lg-4 text-lg-center">
-                    @if($rapor->nilai_rata_rata)
+                    @if($rapor->raporNilai->count() > 0)
                         <div class="p-4 bg-light rounded">
                             <small class="text-muted d-block mb-2">Nilai Rata-rata</small>
                             @php
-                                $avg = $rapor->nilai_rata_rata;
+                                $avg = $rapor->raporNilai->avg('nilai_angka');
                                 $colorClass = $avg >= 85 ? 'text-success' : ($avg >= 70 ? 'text-primary' : ($avg >= 60 ? 'text-warning' : 'text-danger'));
                                 $predikat = $avg >= 90 ? 'A' : ($avg >= 75 ? 'B' : ($avg >= 60 ? 'C' : 'D'));
                             @endphp
-                            <h1 class="mb-0 {{ $colorClass }} fw-bold">{{ number_format($rapor->nilai_rata_rata, 2) }}</h1>
+                            <h1 class="mb-0 {{ $colorClass }} fw-bold">{{ number_format($avg, 2) }}</h1>
                             <span class="badge bg-label-{{ $avg >= 85 ? 'success' : ($avg >= 70 ? 'primary' : ($avg >= 60 ? 'warning' : 'danger')) }} mt-2">
                                 Predikat {{ $predikat }}
                             </span>
@@ -116,7 +116,7 @@
             </h5>
         </div>
         <div class="card-body">
-            @if($rapor->nilai->isEmpty())
+            @if($rapor->raporNilai->isEmpty())
                 <div class="alert alert-info d-flex align-items-center mb-0">
                     <i class="fas fa-info-circle me-2"></i>
                     <div>Belum ada nilai yang diinput untuk rapor ini.</div>
@@ -128,17 +128,15 @@
                             <tr>
                                 <th width="40">No</th>
                                 <th>Mata Pelajaran</th>
-                                <th class="text-center">Pengetahuan</th>
-                                <th class="text-center">Keterampilan</th>
-                                <th class="text-center">Nilai Akhir</th>
+                                <th class="text-center">Nilai</th>
                                 <th class="text-center">Predikat</th>
-                                <th>Catatan</th>
+                                <th>Capaian Kompetensi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($rapor->nilai as $index => $nilai)
+                            @foreach($rapor->raporNilai as $index => $nilai)
                                 @php
-                                    $nilaiAkhir = ($nilai->nilai_pengetahuan + $nilai->nilai_keterampilan) / 2;
+                                    $nilaiAkhir = $nilai->nilai_angka;
                                     if ($nilaiAkhir >= 90) {
                                         $predikat = 'A';
                                         $badgeClass = 'bg-success';
@@ -156,13 +154,7 @@
                                 <tr>
                                     <td class="text-center">{{ $index + 1 }}</td>
                                     <td>
-                                        <strong>{{ $nilai->mataPelajaran->nama_mata_pelajaran ?? '-' }}</strong>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-primary">{{ $nilai->nilai_pengetahuan }}</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-info">{{ $nilai->nilai_keterampilan }}</span>
+                                        <strong>{{ $nilai->mataPelajaran->nama_mapel ?? '-' }}</strong>
                                     </td>
                                     <td class="text-center">
                                         <strong class="fs-5">{{ number_format($nilaiAkhir, 2) }}</strong>
@@ -171,8 +163,8 @@
                                         <span class="badge {{ $badgeClass }}">{{ $predikat }}</span>
                                     </td>
                                     <td>
-                                        @if($nilai->catatan)
-                                            <small class="text-muted">{{ $nilai->catatan }}</small>
+                                        @if($nilai->deskripsi)
+                                            <small class="text-muted">{{ $nilai->deskripsi }}</small>
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
@@ -182,9 +174,9 @@
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
-                                <td colspan="4" class="text-end fw-bold">Rata-rata:</td>
+                                <td colspan="2" class="text-end fw-bold">Rata-rata:</td>
                                 <td class="text-center">
-                                    <strong class="fs-5 text-primary">{{ number_format($rapor->nilai_rata_rata, 2) }}</strong>
+                                    <strong class="fs-5 text-primary">{{ number_format($rapor->raporNilai->avg('nilai_angka'), 2) }}</strong>
                                 </td>
                                 <td colspan="2"></td>
                             </tr>

@@ -1,7 +1,7 @@
 @extends('layouts.lms-guru')
 
-@section('title', $tipeUjian === 'kuis' ? 'Edit Kuis' : 'Edit Ujian')
-@section('page-title', $tipeUjian === 'kuis' ? 'Edit Kuis' : 'Edit Ujian')
+@section('title', $tipeUjian === 'latihan' ? 'Edit Latihan' : 'Edit Ujian')
+@section('page-title', $tipeUjian === 'latihan' ? 'Edit Latihan' : 'Edit Ujian')
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
 
 @section('sidebar-menu')
@@ -10,22 +10,22 @@
 
 @section('content')
     <div class="mb-3">
-        <a href="{{ $tipeUjian === 'kuis' ? route('guru.lms.kuis.index', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
+        <a href="{{ $tipeUjian === 'latihan' ? route('guru.lms.latihan.index', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
         </a>
     </div>
 
     <div class="card-custom">
         <div class="card-header-custom">
-            <i class="fas fa-edit me-2"></i>Edit {{ $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian' }}
+            <i class="fas fa-edit me-2"></i>Edit {{ $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian' }}
         </div>
         <div class="p-4">
-            <form action="{{ $tipeUjian === 'kuis' ? route('guru.lms.kuis.update', [$kelas->id, $mapel->id, $ujian->id]) : route('guru.lms.ujian.update', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST">
+            <form action="{{ $tipeUjian === 'latihan' ? route('guru.lms.latihan.update', [$kelas->id, $mapel->id, $ujian->id]) : route('guru.lms.ujian.update', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST">
                 @csrf
                 @method('PUT')
 
                 <div class="mb-3">
-                    <label class="form-label">Judul {{ $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian' }} <span class="text-danger">*</span></label>
+                    <label class="form-label">Judul {{ $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian' }} <span class="text-danger">*</span></label>
                     <input type="text" name="judul_ujian" class="form-control"
                         value="{{ old('judul_ujian', $ujian->judul_ujian) }}" required>
                 </div>
@@ -39,11 +39,11 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Tipe <span class="text-danger">*</span></label>
-                        <select name="tipe_ujian" class="form-control" @if($tipeUjian === 'kuis') disabled @endif required>
-                            @if($tipeUjian === 'kuis')
-                                <option value="kuis" selected>Kuis</option>
+                        <select name="tipe_ujian" class="form-control" @if($tipeUjian === 'latihan') disabled @endif required>
+                            @if($tipeUjian === 'latihan')
+                                <option value="latihan" selected>Latihan</option>
                             @else
-                                <optgroup label="Tugas & Latihan">
+                                <optgroup label="Ulangan">
                                     <option value="ulangan_harian" {{ $ujian->tipe_ujian == 'ulangan_harian' ? 'selected' : '' }}>
                                         Ulangan Harian</option>
                                 </optgroup>
@@ -59,10 +59,19 @@
                                     <option value="pas_genap" {{ $ujian->tipe_ujian == 'pas_genap' ? 'selected' : '' }}>PAS Genap
                                     </option>
                                 </optgroup>
+                                @if($isTingkatAkhir)
+                                <optgroup label="Ujian Kelulusan">
+                                    <option value="to_1" {{ $ujian->tipe_ujian == 'to_1' ? 'selected' : '' }}>Try Out 1</option>
+                                    <option value="to_2" {{ $ujian->tipe_ujian == 'to_2' ? 'selected' : '' }}>Try Out 2</option>
+                                    <option value="to_3" {{ $ujian->tipe_ujian == 'to_3' ? 'selected' : '' }}>Try Out 3</option>
+                                    <option value="upk" {{ $ujian->tipe_ujian == 'upk' ? 'selected' : '' }}>UPK</option>
+                                    <option value="ujian_praktek" {{ $ujian->tipe_ujian == 'ujian_praktek' ? 'selected' : '' }}>Ujian Praktek</option>
+                                </optgroup>
+                                @endif
                             @endif
                         </select>
-                        @if($tipeUjian === 'kuis')
-                            <input type="hidden" name="tipe_ujian" value="kuis">
+                        @if($tipeUjian === 'latihan')
+                            <input type="hidden" name="tipe_ujian" value="latihan">
                         @endif
                         <small class="text-muted">PTS/PAS wajib memiliki 4 tipe soal</small>
                     </div>
@@ -81,17 +90,19 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Durasi {{ $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian' }} (menit)</label>
+                    <label class="form-label">Durasi (Menit)</label>
                     <input type="number" name="durasi_menit" class="form-control"
                         value="{{ old('durasi_menit', $ujian->durasi_menit) }}" min="0">
-                    <small class="text-muted">Ketik 0 untuk durasi tanpa batas</small>
+                    <small class="text-muted">Isi 0 untuk waktu tidak terbatas.</small>
                 </div>
+
+                @include('guru.partials.multi-kelas-selector')
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>Update {{ $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian' }}
+                        <i class="fas fa-save me-1"></i>Update {{ $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian' }}
                     </button>
-                    <a href="{{ $tipeUjian === 'kuis' ? route('guru.lms.kuis.index', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
+                    <a href="{{ $tipeUjian === 'latihan' ? route('guru.lms.latihan.index', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
                         class="btn btn-secondary">Batal</a>
                 </div>
             </form>

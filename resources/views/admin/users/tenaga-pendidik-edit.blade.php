@@ -293,7 +293,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 {{-- Display Success Message --}}
 
 
-<form action="{{ route('admin.users.update-tenaga-pendidik', $tenagaPendidik->id) }}" method="POST">
+<form action="{{ route('admin.users.update-tenaga-pendidik', $tenagaPendidik->user_id) }}" method="POST">
     @csrf
     @method('PUT')
 
@@ -313,7 +313,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
             <div class="col">
                 <div class="form-group">
                     <label class="form-label">Email <span style="color: #ef4444;">*</span></label>
-                    <input type="email" name="email" class="form-control" value="{{ old('email', $tenagaPendidik->email) }}" required>
+                    <input type="email" name="email" class="form-control" value="{{ old('email', $tenagaPendidik->user->email) }}" required>
                 </div>
             </div>
         </div>
@@ -417,7 +417,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
             <div class="col">
                 <div class="form-group">
                     <label class="form-label">Tanggal Lahir <span style="color: #ef4444;">*</span></label>
-                    <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', $tenagaPendidik->tanggal_lahir) }}" required>
+                    <input type="date" name="tanggal_lahir" class="form-control" value="{{ old('tanggal_lahir', \Carbon\Carbon::parse($tenagaPendidik->tanggal_lahir)->format('Y-m-d')) }}" required>
                 </div>
             </div>
         </div>

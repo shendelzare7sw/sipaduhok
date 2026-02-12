@@ -1,3 +1,4 @@
+@props(['path', 'label' => null, 'class' => null, 'icon' => null])
 @php
     $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
     $isPdf = $extension === 'pdf';
@@ -12,23 +13,27 @@
     $modalId = 'modal-' . md5($path . uniqid()); 
     
     // Determine icon
-    $icon = 'fa-file';
-    if ($isPdf) $icon = 'fa-file-pdf';
-    elseif ($isImage) $icon = 'fa-file-image';
-    elseif (in_array($extension, ['doc', 'docx'])) $icon = 'fa-file-word';
-    elseif (in_array($extension, ['xls', 'xlsx'])) $icon = 'fa-file-excel';
-    elseif (in_array($extension, ['ppt', 'pptx'])) $icon = 'fa-file-powerpoint';
+    $defaultIcon = 'fa-file';
+    if ($isPdf) $defaultIcon = 'fa-file-pdf';
+    elseif ($isImage) $defaultIcon = 'fa-file-image';
+    elseif (in_array($extension, ['doc', 'docx'])) $defaultIcon = 'fa-file-word';
+    elseif (in_array($extension, ['xls', 'xlsx'])) $defaultIcon = 'fa-file-excel';
+    elseif (in_array($extension, ['ppt', 'pptx'])) $defaultIcon = 'fa-file-powerpoint';
+
+    $finalIcon = $icon ?? $defaultIcon;
+    // Handle icon class format (fasc/bx)
+    $iconClass = str_starts_with($finalIcon, 'bx ') ? $finalIcon : "fas $finalIcon";
 @endphp
 
 <div class="d-flex align-items-center gap-2 mb-2">
     @if($isPdf)
         <!-- PDF Preview Modal Trigger -->
         <button type="button" 
-                class="btn btn-sm btn-danger" 
+                class="{{ $class ?? 'btn btn-sm btn-danger' }}" 
                 data-bs-toggle="modal" 
                 data-bs-target="#{{ $modalId }}"
                 onclick="document.getElementById('iframe-{{ $modalId }}').src = '{{ $previewUrl }}'">
-            <i class="fas fa-file-pdf me-1"></i>Lihat PDF
+            <i class="{{ $iconClass }} me-1"></i>{{ $label ?? 'Lihat PDF' }}
         </button>
         
         <!-- Download Button -->
@@ -60,12 +65,12 @@
         </div>
 
     @elseif($isImage)
-        <!-- Image Preview Modal Trigger -->
+        <!-- Image Modal Trigger -->
         <button type="button" 
-                class="btn btn-sm btn-info text-white" 
+                class="{{ $class ?? 'btn btn-sm btn-info text-white' }}" 
                 data-bs-toggle="modal" 
                 data-bs-target="#{{ $modalId }}">
-            <i class="fas fa-image me-1"></i>Lihat Gambar
+            <i class="{{ $iconClass }} me-1"></i>{{ $label ?? 'Lihat Gambar' }}
         </button>
         
         <!-- Download Button -->
@@ -99,7 +104,7 @@
     @else
         <!-- Direct Download -->
         <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-primary">
-            <i class="fas {{ $icon }} me-1"></i>Download {{ strtoupper($extension) }}
+            <i class="fas {{ $defaultIcon }} me-1"></i>Download {{ strtoupper($extension) }}
         </a>
     @endif
 </div>

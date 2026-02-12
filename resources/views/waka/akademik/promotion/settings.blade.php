@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Pegaturan Naik Kelas')
+@section('page-title', 'Pengaturan Naik Kelas')
 
 @section('sidebar-menu')
     @include('waka.partials.sneat-sidebar-menu')
@@ -8,7 +9,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Akademik /</span> Pengaturan Naik Kelas</h4>
+    <!-- Header removed -->
 
     <div class="row">
         <div class="col-md-6">

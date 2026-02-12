@@ -150,7 +150,7 @@
                 <h5 style="color: #92400e; margin-bottom: 10px;">
                     <i class="fas fa-paperclip"></i> Lampiran dari Guru
                 </h5>
-                <x-file-preview :path="$tugas->file_tugas" label="Download File Tugas" />
+                <x-file-preview :path="$tugas->file_tugas" label="Lihat Tugas" />
             </div>
         @endif
 

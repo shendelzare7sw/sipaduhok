@@ -3,151 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preview Rapor - {{ $rapor->siswa->nama_lengkap }}</title>
+    <title>Rapor {{ $rapor->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }} - {{ $rapor->siswa->nama_lengkap }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 30px; background: #f5f5f5; }
-        .rapor-container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #165fac; padding-bottom: 20px; }
-        .header h1 { color: #165fac; font-size: 28px; margin-bottom: 10px; }
-        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; }
-        .info-item { margin-bottom: 10px; }
-        .info-item strong { display: block; color: #666; font-size: 12px; margin-bottom: 4px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        table th { padding: 12px; background: #165fac; color: white; border: 1px solid #ccc; text-align: left; font-size: 13px; }
-        table td { padding: 10px; border: 1px solid #ccc; }
-        .catatan-box { margin-top: 30px; padding: 20px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; }
-        .kehadiran-box { margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; }
-        .signature-section { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
-        .signature-box { text-align: center; }
-        .signature-line { margin-top: 60px; border-top: 1px solid #333; padding-top: 5px; }
-        .btn-print { position: fixed; top: 20px; right: 20px; padding: 12px 24px; background: #165fac; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-        .btn-print:hover { background: #0f4c8a; }
-        @media print { body { padding: 0; background: white; } .rapor-container { box-shadow: none; } .btn-print { display: none; } }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .rapor-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Watermark as background - More reliable for large images */
+        .rapor-wrapper.with-watermark::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('{{ asset('img/logo/hok-watermark.png') }}?v={{ filemtime(public_path('img/logo/hok-watermark.png')) }}');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 75%;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .rapor-wrapper > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section - Simple logo + address */
+        .header {
+            margin-bottom: 15px;
+        }
+
+        .header-logo {
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+
+        .header-address {
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #374151;
+            text-align: center;
+        }
+
+        .header-separator {
+            border-top: 3px solid #000;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Report Title */
+        .report-title {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        /* Student Info (2-column) */
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+
+        .student-info .info-item {
+            margin-bottom: 6px;
+        }
+
+        .student-info .info-label {
+            display: inline-block;
+            width: 110px;
+            font-weight: normal;
+        }
+
+        .student-info .info-value {
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        /* Tables - CRITICAL: border-collapse */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+
+        table th, table td {
+            border: 1px solid #000;
+            padding: 4px 6px;
+            text-align: left;
+            background-color: transparent;
+        }
+
+        table th {
+            background-color: rgba(229, 231, 235, 0.7);
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        /* Utilities */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-bold { font-weight: bold; }
+
+        /* Subscript for U1, U2 numbers */
+        sub {
+            font-size: 0.75em;
+            vertical-align: sub;
+        }
+
+        /* Grade Table Specific */
+        .grade-table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .grade-table .tidak-tuntas {
+            background-color: rgba(254, 226, 226, 0.7);
+        }
+
+        .grade-table tfoot td {
+            font-weight: bold;
+            background-color: rgba(243, 244, 246, 0.7);
+        }
+
+        /* Kegiatan Ekstra - Semi-transparent green */
+        .bg-ekstra {
+            background-color: rgba(212, 237, 218, 0.7);
+        }
+
+        /* Kehadiran - Semi-transparent blue */
+        .bg-kehadiran {
+            background-color: rgba(209, 236, 241, 0.7);
+        }
+
+        /* Print Button */
+        .btn-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .btn-print:hover {
+            background: #1e40af;
+        }
+
+        /* Print Styles */
+        @media print {
+            /* Remove browser headers and footers (date, URL, page numbers) */
+            @page {
+                margin: 0.5cm;
+            }
+
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            .rapor-wrapper {
+                box-shadow: none;
+                padding: 20px;
+            }
+
+            .btn-print {
+                display: none;
+            }
+
+            /* Force watermark to print */
+            .rapor-wrapper.with-watermark::before {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                opacity: 0.08 !important;
+                display: block !important;
+            }
+
+            /* REMOVE ALL COLORS - Force all table backgrounds to TRANSPARENT */
+            table th, table td {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                background-color: transparent !important;
+            }
+
+            /* Override specific colored backgrounds to transparent */
+            table th {
+                background-color: transparent !important;
+            }
+
+            .grade-table tfoot td {
+                background-color: transparent !important;
+            }
+
+            .grade-table .tidak-tuntas {
+                background-color: transparent !important;
+            }
+
+            .grade-table .tidak-tuntas td {
+                background-color: transparent !important;
+            }
+
+            .bg-ekstra {
+                background-color: transparent !important;
+            }
+
+            .bg-kehadiran {
+                background-color: transparent !important;
+            }
+
+            /* Remove any other potential backgrounds */
+            .text-center, .font-bold, .info-value {
+                background-color: transparent !important;
+            }
+
+            .watermark-container {
+                position: absolute;
+            }
+        }
     </style>
 </head>
 <body>
     <button class="btn-print" onclick="window.print()">
-        <i class="fas fa-print"></i> Cetak Rapor
+        🖨️ Cetak Rapor
     </button>
 
-    <div class="rapor-container">
+    <!-- Watermark implemented via CSS background -->
+
+    <div class="rapor-wrapper{{ $rapor->jenis_rapor === 'tengah_semester' ? ' with-watermark' : '' }}">
+        <!-- Header - Logo only (text already in PNG) -->
         <div class="header">
-            <h1>LAPORAN PENCAPAIAN KOMPETENSI PESERTA DIDIK</h1>
-            <h2>PKBM House of Knowledge</h2>
-            <p>Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan</p>
+            <img src="{{ asset('img/logo/hok-logo.png') }}?v={{ filemtime(public_path('img/logo/hok-logo.png')) }}" alt="HOK Logo" class="header-logo">
+            <div class="header-address">
+                Komplek Ruko Reni Jaya Baru Jl.Ketapang III Blok AF 5 No 22-23 Pamulang Barat – Tangerang Selatan<br>
+                Telp. 021 – 7427521 / 085811278144 - e-mail : hokhomeshool@gmail.com
+            </div>
+        </div>
+        <div class="header-separator"></div>
+
+        <!-- Report Title -->
+        <div class="report-title">
+            Laporan Penilaian {{ $rapor->jenis_rapor === 'tengah_semester' ? 'Tengah Semester' : 'Akhir Semester' }}
         </div>
 
-        <div class="info-grid">
+        <!-- Student Info -->
+        <div class="student-info">
             <div>
                 <div class="info-item">
-                    <strong>Nama Peserta Didik</strong>
-                    <div style="font-size: 18px; font-weight: bold;">{{ $rapor->siswa->nama_lengkap }}</div>
+                    <span class="info-label">Nama Siswa</span>
+                    <span>: <span class="info-value">{{ $rapor->siswa->nama_lengkap }}</span></span>
                 </div>
                 <div class="info-item">
-                    <strong>NISN / NIS</strong>
-                    <div>{{ $rapor->siswa->nisn }} / {{ $rapor->siswa->nis }}</div>
-                </div>
-                <div class="info-item">
-                    <strong>Tempat, Tanggal Lahir</strong>
-                    <div>{{ $rapor->siswa->tempat_lahir }}, {{ \Carbon\Carbon::parse($rapor->siswa->tanggal_lahir)->locale('id')->isoFormat('D MMMM YYYY') }}</div>
+                    <span class="info-label">Nomor Induk</span>
+                    <span>: <span class="info-value">{{ $rapor->siswa->nis }}</span></span>
                 </div>
             </div>
             <div>
                 <div class="info-item">
-                    <strong>Kelas / Fase</strong>
-                    <div style="font-size: 16px; font-weight: bold;">{{ $rapor->kelas->nama_kelas }}</div>
+                    <span class="info-label">Tahun Ajaran</span>
+                    <span>: <span class="info-value">{{ $rapor->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span></span>
                 </div>
                 <div class="info-item">
-                    <strong>Semester</strong>
-                    <div>{{ ucfirst($rapor->semester) }}</div>
+                    <span class="info-label">Semester</span>
+                    <span>: <span class="info-value">{{ ucfirst($rapor->semester) }}</span></span>
                 </div>
                 <div class="info-item">
-                    <strong>Tahun Ajaran</strong>
-                    <div>{{ $rapor->tahunAjaran->nama_tahun_ajaran }}</div>
+                    <span class="info-label">Kelas</span>
+                    <span>: <span class="info-value">
+                        @php
+                            // Extract grade number from kelas name (e.g., "9A" -> 9)
+                            $kelasNama = $rapor->kelas->nama_kelas;
+                            preg_match('/^(\d+)/', $kelasNama, $matches);
+                            $gradeNumber = $matches[1] ?? 0;
+                            
+                            // Convert to Roman numerals
+                            $romanNumerals = [
+                                1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V',
+                                6 => 'VI', 7 => 'VII', 8 => 'VIII', 9 => 'IX',
+                                10 => 'X', 11 => 'XI', 12 => 'XII', 13 => 'XIII'
+                            ];
+                            $kelasRomawi = $romanNumerals[$gradeNumber] ?? $kelasNama;
+                            
+                            // Convert to Indonesian words
+                            $indonesianWords = [
+                                1 => 'Satu', 2 => 'Dua', 3 => 'Tiga', 4 => 'Empat', 5 => 'Lima',
+                                6 => 'Enam', 7 => 'Tujuh', 8 => 'Delapan', 9 => 'Sembilan',
+                                10 => 'Sepuluh', 11 => 'Sebelas', 12 => 'Dua Belas', 13 => 'Tiga Belas'
+                            ];
+                            $kelasIndonesia = $indonesianWords[$gradeNumber] ?? '';
+                            $kelasDisplay = $kelasIndonesia ? "$kelasRomawi ($kelasIndonesia)" : $kelasRomawi;
+                        @endphp
+                        {{ $kelasDisplay }}
+                    </span></span>
                 </div>
             </div>
         </div>
 
-        <h3 style="color: #165fac; margin: 30px 0 15px 0; border-bottom: 2px solid #165fac; padding-bottom: 8px;">
-            PENCAPAIAN KOMPETENSI
-        </h3>
-
-        <table>
+        <!-- Nilai Mata Pelajaran Table -->
+        <table class="grade-table">
             <thead>
                 <tr>
-                    <th style="width: 40px;">No</th>
-                    <th>Mata Pelajaran</th>
-                    <th style="width: 100px; text-align: center;">Nilai</th>
-                    <th style="width: 80px; text-align: center;">Predikat</th>
-                    <th>Capaian Kompetensi</th>
+                    <th rowspan="2" style="width: 40px;">No</th>
+                    <th rowspan="2">Mata Pelajaran</th>
+                    <th rowspan="2" style="width: 50px;">KKM</th>
+                    <th colspan="4">Nilai</th>
+                    <th rowspan="2" style="width: 100px;">Keterangan</th>
+                </tr>
+                <tr>
+                    <th style="width: 60px;">Tugas</th>
+                    <th style="width: 50px;">U<sub>1</sub></th>
+                    <th style="width: 50px;">U<sub>2</sub></th>
+                    <th style="width: 50px;">PTS</th>
                 </tr>
             </thead>
             <tbody>
-                @php $totalNilai = 0; $jumlahMapel = 0; @endphp
+                @php
+                    $totalPTS = 0;
+                    $jumlahMapel = 0;
+                @endphp
                 @foreach($rapor->raporNilai as $index => $raporNilai)
                     @php
-                        $totalNilai += $raporNilai->nilai_angka;
+                        $nilai = $raporNilai->nilai;
+                        $mapel = $raporNilai->mataPelajaran;
+                        $kkm = $mapel->kkm ?? 70;
+                        
+                        // Get grade components
+                        $tugas = $nilai->rata_tugas ?? 0;
+                        $u1 = $nilai->rata_latihan ?? 0;
+                        $u2 = $nilai->rata_uh ?? 0;
+                        $pts = $nilai->pts ?? 0;
+                        
+                        // Determine tuntas/tidak tuntas
+                        $tuntas = $pts >= $kkm;
+                        
+                        $totalPTS += $pts;
                         $jumlahMapel++;
                     @endphp
-                    <tr>
-                        <td style="text-align: center;">{{ $index + 1 }}</td>
-                        <td><strong>{{ $raporNilai->mataPelajaran->nama_mapel }}</strong></td>
-                        <td style="text-align: center; background: #f0f9ff;">
-                            <strong style="font-size: 16px;">{{ number_format($raporNilai->nilai_angka, 0) }}</strong>
-                        </td>
-                        <td style="text-align: center;">
-                            <strong>{{ $raporNilai->nilai_huruf }}</strong>
-                        </td>
-                        <td style="font-size: 12px;">{{ $raporNilai->deskripsi ?: '-' }}</td>
+                    <tr class="{{ !$tuntas ? 'tidak-tuntas' : '' }}">
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ $mapel->nama_mapel }}</td>
+                        <td class="text-center">{{ $kkm }}</td>
+                        <td class="text-center">{{ $tugas > 0 ? number_format($tugas, 0) : '-' }}</td>
+                        <td class="text-center">{{ $u1 > 0 ? number_format($u1, 0) : '-' }}</td>
+                        <td class="text-center">{{ $u2 > 0 ? number_format($u2, 0) : '-' }}</td>
+                        <td class="text-center"><strong>{{ $pts > 0 ? number_format($pts, 0) : '-' }}</strong></td>
+                        <td class="text-center">{{ $tuntas ? 'Tuntas' : 'Tidak Tuntas' }}</td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
-                <tr style="background: #f3f4f6;">
-                    <td colspan="2" style="text-align: right; font-weight: bold; padding: 16px;">RATA-RATA:</td>
-                    <td style="text-align: center; font-weight: bold; font-size: 18px; color: #165fac;">
-                        {{ $jumlahMapel > 0 ? number_format($totalNilai / $jumlahMapel, 0) : '0' }}
-                    </td>
-                    <td colspan="2"></td>
+                <tr>
+                    <td colspan="7" class="text-center font-bold" style="padding: 5px;">Jumlah</td>
+                    <td class="text-center font-bold">{{ number_format($totalPTS, 0) }}</td>
+                </tr>
+                <tr>
+                    <td colspan="7" class="text-center font-bold" style="padding: 5px;">Rata-rata</td>
+                    <td class="text-center font-bold">{{ $jumlahMapel > 0 ? number_format($totalPTS / $jumlahMapel, 2, ',', '.') : '0' }}</td>
                 </tr>
             </tfoot>
         </table>
 
-        <div class="kehadiran-box">
-            <h4 style="color: #165fac; margin-bottom: 15px;">KETIDAKHADIRAN</h4>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                <div>Sakit: <strong>{{ $rapor->jumlah_sakit }} hari</strong></div>
-                <div>Izin: <strong>{{ $rapor->jumlah_izin }} hari</strong></div>
-                <div>Tanpa Keterangan: <strong>{{ $rapor->jumlah_alpha }} hari</strong></div>
-            </div>
-        </div>
+        <!-- Kegiatan Ekstra Table -->
+        <table style="margin-top: 20px;">
+            @if($rapor->kegiatanEkstra->count() > 0)
+                @foreach($rapor->kegiatanEkstra as $index => $ekstra)
+                    <tr>
+                        @if($index === 0)
+                            <td rowspan="{{ $rapor->kegiatanEkstra->count() }}" class="bg-ekstra font-bold text-center" style="width: 150px; vertical-align: middle; padding: 10px;">
+                                Kegiatan Ekstra
+                            </td>
+                        @endif
+                        <td style="padding: 5px 10px;">{{ $ekstra->kegiatan_nama }}</td>
+                        <td class="text-center" style="width: 50px; padding: 5px;">{{ $ekstra->predikat ?? '-' }}</td>
+                    </tr>
+                @endforeach
+            @else
+                <!-- Fallback: show 4 empty rows if no data -->
+                @for($i = 0; $i < 4; $i++)
+                    <tr>
+                        @if($i === 0)
+                            <td rowspan="4" class="bg-ekstra font-bold text-center" style="width: 150px; vertical-align: middle; padding: 10px;">
+                                Kegiatan Ekstra
+                            </td>
+                        @endif
+                        <td style="padding: 5px 10px;">-</td>
+                        <td class="text-center" style="width: 50px; padding: 5px;">-</td>
+                    </tr>
+                @endfor
+            @endif
+        </table>
 
-        @if($rapor->catatan_wali_kelas)
-            <div class="catatan-box">
-                <h4 style="color: #f59e0b; margin-bottom: 10px;">CATATAN WALI KELAS</h4>
-                <p style="line-height: 1.8;">{{ $rapor->catatan_wali_kelas }}</p>
-            </div>
-        @endif
+        <!-- Kehadiran Table -->
+        <table style="margin-top: 15px;">
+            <tr>
+                <td rowspan="4" class="bg-kehadiran font-bold text-center" style="width: 150px; vertical-align: middle; padding: 10px;">
+                    Kehadiran
+                </td>
+                <td style="padding: 5px 10px;">Sakit</td>
+                <td class="text-center" style="width: 50px; padding: 5px;">{{ ($rapor->jumlah_sakit ?? 0) > 0 ? $rapor->jumlah_sakit : '-' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 5px 10px;">Ijin</td>
+                <td class="text-center" style="padding: 5px;">{{ ($rapor->jumlah_izin ?? 0) > 0 ? $rapor->jumlah_izin : '-' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 5px 10px;">Tanpa Keterangan</td>
+                <td class="text-center" style="padding: 5px;">{{ ($rapor->jumlah_alpha ?? 0) > 0 ? $rapor->jumlah_alpha : '-' }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold" style="padding: 5px 10px;">Jumlah</td>
+                <td class="text-center font-bold" style="padding: 5px;">
+                    @php
+                        $totalKehadiran = ($rapor->jumlah_sakit ?? 0) + ($rapor->jumlah_izin ?? 0) + ($rapor->jumlah_alpha ?? 0);
+                    @endphp
+                    {{ $totalKehadiran > 0 ? $totalKehadiran : '-' }}
+                </td>
+            </tr>
+        </table>
 
-        <div class="signature-section">
-            <div class="signature-box">
-                <div>Orang Tua / Wali</div>
-                <div class="signature-line">( ......................................................... )</div>
-            </div>
-            <div class="signature-box">
-                <div>Tangerang Selatan, {{ $rapor->tanggal_terbit ? \Carbon\Carbon::parse($rapor->tanggal_terbit)->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-                <div>Wali Kelas</div>
-                <div class="signature-line">{{ $rapor->kelas->waliKelas->nama_lengkap }}</div>
-            </div>
-        </div>
+        <!-- Tanda Tangan Table -->
+        <table style="margin-top: 15px; margin-bottom: 20px;">
+            <tr>
+                <th rowspan="2" class="font-bold text-center" style="width: 150px; vertical-align: middle; padding: 10px;">
+                    Tanda Tangan
+                </th>
+                <td class="text-center font-bold" style="padding: 8px;">
+                    Orang Tua
+                </td>
+                <td class="text-center font-bold" style="padding: 8px;">
+                    Wali Kelas
+                </td>
+            </tr>
+            <tr>
+                <td style="height: 120px; vertical-align: bottom; padding: 10px;">
+                    <!-- Empty space for parent signature -->
+                </td>
+                <td class="text-center" style="height: 120px; vertical-align: bottom; padding: 10px;">
+                    {{ $rapor->kelas->waliKelas->nama_lengkap ?? '-' }}
+                </td>
+            </tr>
+        </table>
 
-        <div style="margin-top: 40px; text-align: center;">
-            <div>Mengetahui,</div>
-            <div style="margin-top: 10px; font-weight: bold;">Ketua PKBM House of Knowledge</div>
-            <div style="margin-top: 70px; border-top: 1px solid #333; display: inline-block; padding-top: 5px; min-width: 250px;">
+        <!-- Footer - RIGHT aligned -->
+        <div style="margin-top: 30px; text-align: right; padding-right: 50px;">
+            <p style="margin: 0; line-height: 1.6;">
+                Pamulang, {{ $rapor->tanggal_terbit ? \Carbon\Carbon::parse($rapor->tanggal_terbit)->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}
+            </p>
+            <p style="margin: 5px 0; line-height: 1.6;">Ketua PKBM House of Knowledge</p>
+            
+            <!-- Space for signature -->
+            <div style="height: 80px;"></div>
+            
+            <p style="margin: 0; line-height: 1.6; border-bottom: 1px solid #000; display: inline-block; padding-bottom: 2px;">
                 Fransisda Tiodora Ferdiansyah, S.Psi., MM
-            </div>
+            </p>
         </div>
     </div>
 </body>

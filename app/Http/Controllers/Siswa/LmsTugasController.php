@@ -77,7 +77,10 @@ class LmsTugasController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $tugas = Tugas::findOrFail($tugasId);
+        $tugas = Tugas::where('id', $tugasId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
 
         // Cek deadline
         if (now()->gt($tugas->tanggal_deadline)) {
@@ -124,7 +127,9 @@ class LmsTugasController extends Controller
         }
 
         // Get mata pelajaran for filter (from Jadwal Pelajaran)
-        $mataPelajaranList = \App\Models\JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $mataPelajaranList = \App\Models\JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->with('mataPelajaran')
             ->get()
             ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))
@@ -196,7 +201,9 @@ class LmsTugasController extends Controller
         // Better approach: Filter $mataPelajaranList IDs first, then whereIn('mata_pelajaran_id', $allowedMapelIds).
         
         // Get Allowed Mapel IDs
-        $allowedMapelIds = \App\Models\JadwalPelajaran::where('kelas_id', $siswa->kelas_id)
+        $allowedMapelIds = \App\Models\JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
+                $q->where('kelas.id', $siswa->kelas_id);
+            })
             ->with('mataPelajaran')
             ->get()
             ->filter(fn($j) => $siswa->canAccessMapel($j->mataPelajaran))

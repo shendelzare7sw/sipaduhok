@@ -454,10 +454,107 @@
             border: 1px solid #bbf7d0;
             color: #166534;
         }
+    /* Responsive Styles */
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 16px !important;
+                padding: 16px;
+            }
+
+            .card-header > div {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            /* Title section on mobile */
+            .card-header > div:first-child {
+                margin-bottom: 8px;
+            }
+            
+            .w-100-mobile {
+                width: 100% !important;
+            }
+
+            /* Filter form on mobile */
+            .search-form {
+                flex-direction: column;
+                width: 100%;
+                align-items: stretch !important;
+                gap: 12px !important;
+            }
+
+            .filter-dropdown .dropdown-menu {
+                width: 100%;
+                max-width: none;
+            }
+            
+            .dropdown {
+                width: 100%;
+            }
+            
+            .dropdown-toggle {
+                width: 100%;
+                justify-content: space-between;
+                display: flex;
+                align-items: center;
+            }
+
+            .search-input-wrapper {
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100% !important;
+            }
+            
+            .btn-search {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Action buttons on mobile */
+            .card-header > div:last-child {
+                flex-direction: row;
+                gap: 8px !important;
+                justify-content: stretch;
+            }
+
+            .card-header > div:last-child .btn,
+            .card-header > div:last-child .btn-group {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .btn-group {
+                width: auto; 
+                flex: 0 0 auto !important;
+            }
+            
+            /* Make "Tambah" text shorter on mobile if needed or hide icon */
+            /* Removed CSS hack in favor of HTML classes */
+        }
     </style>
 
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
         {{-- Success Message --}}
+
+        {{-- Import Warnings --}}
+        @if(session('import_warnings'))
+            <div class="alert alert-warning" style="background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; display: block;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Beberapa data dilewati saat import:
+                </div>
+                <ul style="margin: 0; padding-left: 24px; font-size: 13px;">
+                    @foreach(session('import_warnings') as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         {{-- Search/Filter Info --}}
         @if(request('search') || request('role'))
@@ -482,50 +579,101 @@
         @endif
 
         <div class="card">
-            <div class="card-header">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <a href="{{ route('admin.users.index') }}" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        Daftar Pengguna
-                    </a>
-                    <div>
-                        <h5 style="margin: 0; font-weight: 700; color: #111827;">Daftar Tenaga Pendidik</h5>
-                        <small style="color: #64748b;">Total: {{ $tenagaPendidik->total() }} tenaga pendidik</small>
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                {{-- Left Group: Title & Filter --}}
+                <div class="d-flex flex-wrap align-items-center gap-3 w-100-mobile">
+                    {{-- Title Group --}}
+                    <div class="d-flex gap-2 align-items-center justify-content-between w-100-mobile">
+                        <div class="d-flex gap-2 align-items-center">
+                            <a href="{{ route('admin.users.index') }}" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark">Daftar Tenaga Pendidik</h5>
+                                <small class="text-muted">Total: {{ $tenagaPendidik->total() }} tenaga pendidik</small>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="search-form">
-                        <select name="role" id="roleFilter" class="search-input" style="width: 200px; padding-right: 12px;"
-                            onchange="this.form.submit()">
-                            <option value="">Semua Role</option>
-                            @foreach($roles as $roleKey => $roleLabel)
-                                <option value="{{ $roleKey }}" {{ request('role') == $roleKey ? 'selected' : '' }}>
-                                    {{ $roleLabel }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="search-input-wrapper">
+
+                    {{-- Filter Form --}}
+                    <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="search-form d-flex gap-2 align-items-center w-100-mobile">
+                        {{-- Filter Dropdown --}}
+                        <div class="dropdown filter-dropdown w-100-mobile">
+                            <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown" 
+                                data-bs-toggle="dropdown" aria-expanded="false" 
+                                data-bs-auto-close="outside" data-bs-display="static">
+                                <span><i class="fas fa-filter me-1"></i> Filter</span>
+                            </button>
+                            <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="min-width: 250px; z-index: 9999;">
+                                <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Role / Jabatan</label>
+                                    <select name="role" id="roleFilter" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option value="">Semua Role</option>
+                                        @foreach($roles as $roleKey => $roleLabel)
+                                            <option value="{{ $roleKey }}" {{ request('role') == $roleKey ? 'selected' : '' }}>
+                                                {{ $roleLabel }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Search Input --}}
+                        <div class="search-input-wrapper w-100-mobile">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" name="search" id="searchInput" class="search-input"
-                                placeholder="Cari nama atau NIP..." value="{{ request('search') }}" autocomplete="off">
+                                placeholder="Cari..." value="{{ request('search') }}" autocomplete="off" style="width: 200px;">
                             <button type="button" class="clear-search {{ request('search') ? 'show' : '' }}"
                                 id="clearSearch" title="Hapus pencarian">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                        <button type="submit" class="btn-search">
-                            <i class="fas fa-search"></i>
-                            Cari
+                    </form>
+                </div>
+
+                {{-- Right Group: Actions --}}
+                <div class="d-flex gap-2 action-group-mobile">
+                    <form action="{{ route('admin.users.bulk-delete-tenaga-pendidik') }}" method="POST" id="bulkDeleteForm" style="display: none;">
+                        @csrf
+                        <input type="hidden" name="ids" id="bulkDeleteIds">
+                        <button type="button" class="btn btn-danger" onclick="showBulkDeleteModal()">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </form>
-                    <a href="{{ route('admin.users.import-tenaga-pendidik') }}" class="btn-secondary"
-                        style="background: #ede9fe; border-color: #c4b5fd; color: #6d28d9;">
-                        <i class="fas fa-file-import"></i>
-                        Import Excel
-                    </a>
-                    <a href="{{ route('admin.users.create-tenaga-pendidik') }}" class="btn-primary">
+                    <!-- Dropdown Menu Aksi -->
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i> <span class="d-none d-md-inline">Menu Aksi</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a href="{{ route('admin.users.tenaga-pendidik.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
+                                    <i class="fas fa-print me-2"></i> Cetak Data (PDF)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.import-tenaga-pendidik') }}" class="dropdown-item">
+                                    <i class="fas fa-file-import me-2"></i> Import Excel
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.tenaga-pendidik-template') }}" class="dropdown-item">
+                                    <i class="fas fa-download me-2"></i> Download Template
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <a href="{{ route('admin.users.create-tenaga-pendidik') }}" class="btn-primary" style="white-space: nowrap;">
                         <i class="fas fa-plus"></i>
-                        Tambah Baru
+                        <span class="d-none d-md-inline">Tambah Tenaga Pendidik</span>
+                        <span class="d-md-none">Tambah</span>
                     </a>
                 </div>
             </div>
@@ -534,6 +682,9 @@
                 <table class="table" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr>
+                            <th style="width: 40px;" class="text-center">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                            </th>
                             <th style="width: 60px;">No</th>
                             <th>Nama Lengkap</th>
                             <th>NIP</th>
@@ -546,25 +697,28 @@
                     <tbody>
                         @forelse($tenagaPendidik as $index => $tp)
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="ids[]" class="form-check-input select-item" value="{{ $tp->id }}">
+                                </td>
                                 <td style="text-align: center; font-weight: 600; color: #64748b;">
                                     {{ $tenagaPendidik->firstItem() + $index }}</td>
                                 <td>
-                                    <div style="font-weight: 600; color: #111827;">{{ $tp->nama_lengkap }}</div>
+                                    <div style="font-weight: 600; color: #111827;">{{ $tp->name }}</div>
                                     <small style="color: #64748b;">
                                         <i class="fas fa-phone" style="font-size: 10px;"></i>
-                                        {{ $tp->telepon ?? '-' }}
+                                        {{ $tp->tenagaPendidik->telepon ?? $tp->phone ?? '-' }}
                                     </small>
                                 </td>
                                 <td>
                                     <span
-                                        style="font-family: 'Courier New', monospace; color: #475569;">{{ $tp->nip ?? '-' }}</span>
+                                        style="font-family: 'Courier New', monospace; color: #475569;">{{ $tp->tenagaPendidik->nip ?? '-' }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-role">{{ ucwords(str_replace('_', ' ', $tp->user->role)) }}</span>
+                                    <span class="badge badge-role">{{ ucwords(str_replace('_', ' ', $tp->role)) }}</span>
                                 </td>
                                 <td style="color: #475569;">{{ $tp->email }}</td>
                                 <td>
-                                    @if($tp->user->is_active)
+                                    @if($tp->is_active)
                                         <span class="badge badge-active">
                                             <i class="fas fa-check-circle" style="font-size: 10px;"></i>
                                             Aktif
@@ -631,6 +785,7 @@
     </div>
 
     {{-- Delete Modals for Tenaga Pendidik --}}
+    {{-- Delete Modals for Tenaga Pendidik --}}
     @foreach($tenagaPendidik as $tp)
         <div class="modal fade" id="deleteTenagaPendidikModal{{ $tp->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -649,10 +804,10 @@
                             style="background: #f9fafb; padding: 12px; border-radius: 8px; margin: 12px 0; border: 1px solid #e5e7eb;">
                             <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">
                                 <i class="fas fa-chalkboard-teacher" style="color: #3b82f6;"></i>
-                                {{ $tp->nama_lengkap }}
+                                {{ $tp->tenagaPendidik->nama_lengkap ?? $tp->name }}
                             </div>
                             <small
-                                style="color: #64748b;">{{ $tp->user->role ? ucwords(str_replace('_', ' ', $tp->user->role)) : '-' }}
+                                style="color: #64748b;">{{ $tp->role ? ucwords(str_replace('_', ' ', $tp->role)) : '-' }}
                                 • {{ $tp->email }}</small>
                         </div>
                         <p style="margin-top: 12px;">
@@ -705,5 +860,87 @@
                 searchInput.focus();
             });
         }
+
+        // Bulk Selection Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('selectAll');
+            const selectItems = document.querySelectorAll('.select-item');
+            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+            const bulkDeleteIds = document.getElementById('bulkDeleteIds');
+
+            function updateBulkDeleteButton() {
+                const selectedCount = document.querySelectorAll('.select-item:checked').length;
+                if (selectedCount > 0) {
+                    bulkDeleteForm.style.display = 'block';
+                } else {
+                    bulkDeleteForm.style.display = 'none';
+                }
+            }
+
+            if(selectAll) {
+                selectAll.addEventListener('change', function() {
+                    selectItems.forEach(item => {
+                        item.checked = this.checked;
+                    });
+                    updateBulkDeleteButton();
+                });
+            }
+
+            selectItems.forEach(item => {
+                item.addEventListener('change', function() {
+                    const allChecked = document.querySelectorAll('.select-item:checked').length === selectItems.length;
+                    if(selectAll) selectAll.checked = allChecked;
+                    updateBulkDeleteButton();
+                });
+            });
+        });
+
+        function showBulkDeleteModal() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            if (selectedItems.length === 0) return;
+
+            const modal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
+            document.getElementById('selectedCount').textContent = selectedItems.length;
+            modal.show();
+        }
+
+        function submitBulkDelete() {
+            const selectedItems = document.querySelectorAll('.select-item:checked');
+            const ids = Array.from(selectedItems).map(item => item.value);
+            
+            const form = document.getElementById('bulkDeleteForm');
+            // Clear existing hidden inputs for ids
+            const existingInputs = form.querySelectorAll('input[name="ids[]"]');
+            existingInputs.forEach(input => input.remove());
+
+            ids.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            form.submit();
+        }
     </script>
+
+    <!-- Modal Konfirmasi Bulk Delete -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus <span id="selectedCount" style="font-weight: bold;"></span> data terpilih? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">Ya, Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

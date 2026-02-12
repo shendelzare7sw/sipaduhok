@@ -1,7 +1,7 @@
 @extends('layouts.lms-guru')
 
-@section('title', $tipeUjian === 'kuis' ? 'Daftar Kuis' : 'Daftar Ujian')
-@section('page-title', $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian')
+@section('title', $tipeUjian === 'latihan' ? 'Daftar Latihan' : 'Daftar Ujian')
+@section('page-title', $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian')
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
 
 @section('sidebar-menu')
@@ -10,9 +10,9 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>Daftar {{ $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian' }}</h4>
-        <a href="{{ $tipeUjian === 'kuis' ? route('guru.lms.kuis.create', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary">
-            <i class="fas fa-plus-circle me-1"></i>Buat {{ $tipeUjian === 'kuis' ? 'Kuis' : 'Ujian' }}
+        <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>Daftar {{ $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian' }}</h4>
+        <a href="{{ $tipeUjian === 'latihan' ? route('guru.lms.latihan.create', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i>Buat {{ $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian' }}
         </a>
     </div>
 
@@ -44,9 +44,14 @@
                                 @php
                                     $tipeBadge = match ($ujian->tipe_ujian) {
                                         'ulangan_harian' => ['bg-info', 'UH'],
-                                        'kuis' => ['bg-success', 'Kuis'],
+                                        'latihan' => ['bg-success', 'Latihan'],
                                         'uts', 'pts_ganjil', 'pts_genap' => ['bg-warning', 'PTS'],
                                         'uas', 'pas_ganjil', 'pas_genap' => ['bg-danger', 'PAS'],
+                                        'to_1' => ['bg-purple', 'TO 1'],
+                                        'to_2' => ['bg-purple', 'TO 2'],
+                                        'to_3' => ['bg-purple', 'TO 3'],
+                                        'upk' => ['bg-dark', 'UPK'],
+                                        'ujian_praktek' => ['bg-dark', 'Praktek'],
                                         default => ['bg-secondary', strtoupper(str_replace('_', ' ', $ujian->tipe_ujian))]
                                     };
                                 @endphp
@@ -59,31 +64,29 @@
                                 {{ $ujian->tanggal_selesai->format('d/m/Y H:i') }}
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-secondary">{{ $ujian->durasi_menit }} menit</span>
+                                <div class="mt-2">
+                                    <span class="badge bg-secondary">{{ $ujian->durasi_menit == 0 ? 'Tanpa Batas' : $ujian->durasi_menit . ' menit' }}</span>
+                                    <span class="badge bg-info text-dark">{{ $ujian->soal_ujian_count }} Soal</span>
+                                </div>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('guru.lms.ujian.hasil', [$kelas->id, $mapel->id, $ujian->id]) }}"
+                                    <a href="{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil', [$kelas->id, $mapel->id, $ujian->id]) }}"
                                         class="btn btn-success btn-sm" title="Lihat Hasil">
                                         <i class="fas fa-chart-bar"></i>
                                     </a>
-                                    <a href="{{ route('guru.lms.ujian.soal.manage', [$kelas->id, $mapel->id, $ujian->id]) }}"
+                                    <a href="{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.soal.manage' : 'guru.lms.ujian.soal.manage', [$kelas->id, $mapel->id, $ujian->id]) }}"
                                         class="btn btn-info btn-sm" title="Kelola Soal">
                                         <i class="fas fa-list-ol"></i>
                                     </a>
-                                    <a href="{{ route('guru.lms.ujian.edit', [$kelas->id, $mapel->id, $ujian->id]) }}"
+                                    <a href="{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.edit' : 'guru.lms.ujian.edit', [$kelas->id, $mapel->id, $ujian->id]) }}"
                                         class="btn btn-warning btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('guru.lms.ujian.destroy', [$kelas->id, $mapel->id, $ujian->id]) }}"
-                                        method="POST" class="d-inline"
-                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus ujian ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-danger btn-sm" title="Hapus"
+                                        onclick="confirmDelete('{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.destroy' : 'guru.lms.ujian.destroy', [$kelas->id, $mapel->id, $ujian->id]) }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -101,9 +104,49 @@
     @else
         <div class="alert alert-info text-center" role="alert">
             <i class="fas fa-inbox me-2"></i>
-            <strong>{{ $tipeUjian === 'kuis' ? 'Tidak ada kuis' : 'Tidak ada ujian' }}</strong>
-            <p class="mb-0 mt-2">Belum ada {{ $tipeUjian === 'kuis' ? 'kuis' : 'ujian' }} yang dibuat. <a
-                    href="{{ $tipeUjian === 'kuis' ? route('guru.lms.kuis.create', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.create', [$kelas->id, $mapel->id]) }}">Buat {{ $tipeUjian === 'kuis' ? 'kuis' : 'ujian' }} sekarang</a></p>
+            <strong>{{ $tipeUjian === 'latihan' ? 'Tidak ada latihan' : 'Tidak ada ujian' }}</strong>
+            <p class="mb-0 mt-2">Belum ada {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} yang dibuat. <a
+                    href="{{ $tipeUjian === 'latihan' ? route('guru.lms.latihan.create', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.create', [$kelas->id, $mapel->id]) }}">Buat {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} sekarang</a></p>
         </div>
     @endif
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} ini?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <div class="form-check mb-3 text-start">
+                            <input class="form-check-input" type="checkbox" name="hapus_terkait" value="1" id="hapusTerkaitCheck">
+                            <label class="form-check-label small text-danger" for="hapusTerkaitCheck">
+                                Hapus juga {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} ini dari kelas lain? (Jika ada duplikat)
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        function confirmDelete(url) {
+            document.getElementById('deleteForm').action = url;
+            document.getElementById('hapusTerkaitCheck').checked = false;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+    @endpush
 @endsection

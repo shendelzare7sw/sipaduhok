@@ -17,7 +17,7 @@ class JadwalPelajaranTemplate implements FromArray, WithHeadings, WithStyles, Wi
     public function array(): array
     {
         return [
-            ['Utama', 'X IPA 1', 'Matematika Wajib', 'Budi Santoso', 'Senin', '07:00', '08:30', ''],
+            ['Utama', 'X IPA 1, X IPA 2', 'Matematika Wajib', 'Budi Santoso', 'Senin', '07:00', '08:30', 'Kelas Gabungan'],
             ['Utama', 'TK A1', 'Motorik Kasar', 'Siti Aminah', 'Senin', '08:00', '08:30', ''],
             ['Cabang B', 'VII A', 'Bahasa Indonesia', '', 'Selasa', '07:00', '08:20', 'Guru belum ditentukan'],
         ];
@@ -41,7 +41,7 @@ class JadwalPelajaranTemplate implements FromArray, WithHeadings, WithStyles, Wi
 
         $sheet->setCellValue('A6', 'PETUNJUK:');
         $sheet->setCellValue('A7', '1. Hapus baris contoh (baris 2-4) sebelum mengisi data Anda');
-        $sheet->setCellValue('A8', '2. nama_cabang dan nama_kelas WAJIB diisi dan harus PERSIS dengan yang ada di database. Support: KB, TK A, TK B, SD, SMP, SMA');
+        $sheet->setCellValue('A8', '2. nama_cabang dan nama_kelas WAJIB diisi. Support multi-kelas dipisah koma (contoh: 7A, 7B).');
         $sheet->setCellValue('A9', '3. hari: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu');
         $sheet->setCellValue('A10', '4. jam_mulai/jam_selesai format: HH:MM (contoh: 07:30)');
         $sheet->setCellValue('A11', '5. nama_guru harus PERSIS dengan nama_lengkap di data Tenaga Pendidik (lihat daftar di bawah)');

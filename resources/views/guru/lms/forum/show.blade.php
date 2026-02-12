@@ -474,6 +474,28 @@
             </div>
         </div>
     </div>
+    <!-- Delete Reply Modal -->
+    <div class="modal fade" id="deleteReplyModal" tabindex="-1" aria-labelledby="deleteReplyLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteReplyLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus balasan ini?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteReplyForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -603,6 +625,12 @@
             document.getElementById('filterRole').value = 'all';
             document.getElementById('filterAuthor').value = 'all';
             performSearch();
+        }
+
+        function confirmDeleteReply(url) {
+            document.getElementById('deleteReplyForm').action = url;
+            var modal = new bootstrap.Modal(document.getElementById('deleteReplyModal'));
+            modal.show();
         }
     </script>
 @endpush

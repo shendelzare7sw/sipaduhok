@@ -47,6 +47,7 @@ class PromotionService
     {
         // Check unpaid bills
         $unpaid = Tagihan::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahunAjaranId)
             ->whereIn('status', ['belum_bayar', 'terlambat'])
             ->sum('jumlah');
 
@@ -73,13 +74,14 @@ class PromotionService
     {
         $batasTuntas = $this->getPassingThreshold($tahunAjaranId); // e.g. 70%
 
-        // Get all grades
-        $grades = Nilai::where('siswa_id', $siswa->id)
+        // Get all grades and group by mata pelajaran (handles ganjil+genap semesters)
+        $gradesByMapel = Nilai::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->where('kelas_id', $siswa->kelas_id)
-            ->get();
+            ->get()
+            ->groupBy('mata_pelajaran_id');
 
-        if ($grades->isEmpty()) {
+        if ($gradesByMapel->isEmpty()) {
             return [
                 'is_tuntas' => false,
                 'percentage' => 0,
@@ -88,12 +90,15 @@ class PromotionService
             ];
         }
 
-        $totalMapel = $grades->count();
+        $totalMapel = $gradesByMapel->count(); // Jumlah mapel unik
         $tuntasCount = 0;
+        $jenjang = $siswa->kelas->jenjang ?? 'SMP';
 
-        foreach ($grades as $grade) {
-            $kkm = $this->getKKM($grade->mata_pelajaran_id, $tahunAjaranId, $siswa->kelas->jenjang ?? 'SMP');
-            if ($grade->nilai_akhir >= $kkm) {
+        foreach ($gradesByMapel as $mapelId => $semesterGrades) {
+            // Rata-rata nilai_akhir dari semester ganjil + genap
+            $avgNilaiAkhir = $semesterGrades->avg('nilai_akhir');
+            $kkm = $this->getKKM($mapelId, $tahunAjaranId, $jenjang);
+            if ($avgNilaiAkhir >= $kkm) {
                 $tuntasCount++;
             }
         }
@@ -151,15 +156,22 @@ class PromotionService
         $finalStatusPembayaran = $eligibility['financial']['status'];
         
         if ($eligibility['eligible']) {
+            // CRITICAL: Check final year FIRST before dispensation logic
+            // Final year students ALWAYS graduate regardless of financial status
             if ($this->isFinalYear($siswa)) {
-                $statusKelulusan = 'LULUS';
+                // Check if they have financial dispensation
+                if ($eligibility['financial']['status'] !== 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
+                    $statusKelulusan = 'LULUS_TUNGGAKAN'; // Graduated with outstanding bills
+                } else {
+                    $statusKelulusan = 'LULUS'; // Normal graduation
+                }
             } else {
-                $statusKelulusan = 'NAIK_KELAS';
-            }
-            
-            // Mark if promoted via dispensation
-            if (!$eligibility['financial']['status'] === 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
-                 $statusKelulusan = 'NAIK_KELAS_TUNGGAKAN';
+                // For non-final year students, check dispensation
+                if ($eligibility['financial']['status'] !== 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
+                    $statusKelulusan = 'NAIK_KELAS_TUNGGAKAN';
+                } else {
+                    $statusKelulusan = 'NAIK_KELAS';
+                }
             }
         }
 
@@ -170,7 +182,7 @@ class PromotionService
         $kelasTujuanNama = null;
 
         if (in_array($statusKelulusan, ['NAIK_KELAS', 'NAIK_KELAS_TUNGGAKAN'])) {
-            // Find next class in the TARGET academic year ($tahunAjaranId is the target)
+            // Find next class in the TARGET academic year
             $nextClass = $this->findNextClass($siswa->kelas, $tahunAjaranId);
             if ($nextClass) {
                 $kelasTujuanId = $nextClass->id;
@@ -179,14 +191,42 @@ class PromotionService
                 // Update Student
                 $siswa->kelas_id = $kelasTujuanId;
                 $siswa->save();
-            } else {
-                // Warning: Promoted but no class found
-                // Don't update siswa kelas_id, wait for admin
             }
-        } elseif ($statusKelulusan === 'LULUS') {
+        } elseif ($statusKelulusan === 'TIDAK_NAIK_KELAS') {
+            // RETENTION LOGIC:
+            // Find class with SAME grade/name in the TARGET academic year
+            // e.g. "7A" (2025) -> "7A" (2026)
+            $sameClass = $this->findSameClass($siswa->kelas, $tahunAjaranId);
+            
+            if ($sameClass) {
+                $kelasTujuanId = $sameClass->id;
+                $kelasTujuanNama = $sameClass->nama_kelas;
+                
+                // Update Student to new year's class (Retention)
+                $siswa->kelas_id = $kelasTujuanId;
+                $siswa->save();
+            } else {
+                // If same class not found in new year, 
+                // Set to NULL so they appear in "Unassigned" list for Admin to fix
+                // rather than staying hidden in old year class.
+                $siswa->kelas_id = null;
+                $siswa->save();
+                $kelasTujuanNama = 'BELUM DITENTUKAN';
+            }
+        } elseif ($statusKelulusan === 'LULUS' || $statusKelulusan === 'LULUS_TUNGGAKAN') {
             $siswa->status = 'lulus';
-            // Optional: $siswa->kelas_id = null; // Or keep for history
+            $siswa->kelas_id = null; // Detach from class for alumni
             $siswa->save();
+            
+            // Update user account status
+            // User requested that alumni MUST be able to login (e.g. to check bills)
+            // So we ensure is_active is TRUE, not false.
+            $user = \App\Models\User::where('siswa_id', $siswa->id)->first();
+            if ($user) {
+                $user->is_active = true;
+                $user->save();
+            }
+            
             $kelasTujuanNama = 'ALUMNI';
         }
 
@@ -199,6 +239,7 @@ class PromotionService
             [
                 'kelas_asal' => $kelasAsalNama,
                 'kelas_tujuan' => $kelasTujuanNama,
+                'original_kelas_id' => $kelasAsalId, // Store for rollback
                 'status_pembayaran' => $finalStatusPembayaran,
                 'persentase_nilai_tuntas' => $eligibility['academic']['percentage'],
                 'jumlah_mapel_tuntas' => $eligibility['academic']['tuntas_count'],
@@ -206,6 +247,9 @@ class PromotionService
                 'status_kelulusan' => $statusKelulusan,
                 'izin_khusus_ketua' => $eligibility['financial']['is_dispensasi'],
                 'tanggal_eksekusi' => $executionDate,
+                'is_processed' => true, // Mark as processed
+                'rolled_back_at' => null, // Clear any previous rollback
+                'rolled_back_by' => null,
                 'updated_at' => now(),
                 'created_at' => now() // Only on insert
             ]
@@ -218,43 +262,192 @@ class PromotionService
     {
         if (!$siswa->kelas) return false;
         $nama = strtoupper($siswa->kelas->nama_kelas);
-        // Check for 9/IX or 12/XII
-        return preg_match('/(9|IX|12|XII)/', $nama);
-        // Note: Better regex or logic if needed, but this covers standard defaults
+        // Check for final year classes: 6 (SD), 9/IX (SMP), 12/XII (SMA)
+        // Also support variations like "Kelas 6", "VI", etc.
+        return preg_match('/\b(6|VI|9|IX|12|XII)\b/', $nama);
     }
 
-    private function findNextClass($currentKelas, $targetTahunAjaranId)
+    private function findNextClass($currentKelas, $currentYearId)
     {
         if (!$currentKelas) return null;
         
-        // Simple logic: Increment integer in name. Keep suffix.
-        // ex: "7A" -> "8A", "VII-A" -> "VIII-A", "Kelas 10" -> "Kelas 11"
+        // Find the TARGET academic year based on current year ID
+        // Note: The $currentYearId passed here is actually the "Context Year" (Source).
+        // BUT logic assumes checkEligibility passes the Active/Target year...
+        // WAIT: The executeStudentPromotion passes $tahunAjaranId.
+        // If $tahunAjaranId is 2025/2026 (Source/Active), we need to find class in 2026/2027 (Next).
+        
+        // Let's refine logic based on implementation:
+        // executeStudentPromotion is called with $activeYear->id.
+        // So we are looking for Next Class relative to Current Class, BUT inside the NEXT Year?
+        // OR is it simply looking for a class named "8A" inside the SAME $tahunAjaranId?
+        
+        // CORRECTION: 
+        // Logic should be: 
+        // 1. Get Target Year (Next Year after $tahunAjaranId)
+        // 2. Find Class in Target Year.
+        
+        // Current implementation of 'findNextClass' did:
+        // $nextClass = Kelas::where...->where('tahun_ajaran_id', $targetTahunAjaranId)...
+        // This implies $tahunAjaranId passed to execute is the TARGET year? NO.
+        // checkEligibility uses $activeYear->id (Current).
+        
+        // FIX: We need to find the NEXT TA first.
+        $targetTA = TahunAjaran::where('is_active', false)
+            ->where('id', '!=', $currentYearId) 
+            ->where('tanggal_mulai', '>', function($q) use ($currentYearId) {
+                $q->select('tanggal_mulai')->from('tahun_ajaran')->where('id', $currentYearId);
+            })
+            ->orderBy('tanggal_mulai', 'asc')
+            ->first();
+            
+        if (!$targetTA) return null; // No new year created yet
+
         $name = $currentKelas->nama_kelas;
         
-        // Helper to convert Roman to Int and back could be complex. 
-        // Let's assume standard Arabic numerals first id: 36
-        
-        // Try Arabic (e.g., 7A, 8B, Kelas 10)
+        // Try Arabic (e.g., 7A -> 8A)
         if (preg_match('/(\d+)/', $name, $matches)) {
             $level = intval($matches[1]);
             $nextLevel = $level + 1;
-            
-            // Reconstruct name with new level
-            // We need to be careful to only replace the level number
-            // "Kelas 10 IPA 1" -> "Kelas 11 IPA 1"
-            // "7A" -> "8A"
             $nextNamePattern = preg_replace('/'.$level.'/', $nextLevel, $name, 1);
             
-            // Search in TARGET Year
-            $nextClass = Kelas::where('nama_kelas', $nextNamePattern)
-                ->where('tahun_ajaran_id', $targetTahunAjaranId)
+            return Kelas::where('nama_kelas', $nextNamePattern)
+                ->where('tahun_ajaran_id', $targetTA->id)
                 ->first();
-                
-            return $nextClass;
         }
-        
-        // TODO: Handle Roman Numerals if necessary (VII -> VIII)
         
         return null;
     }
+
+    private function findSameClass($currentKelas, $currentYearId)
+    {
+        if (!$currentKelas) return null;
+
+        // Find the TARGET academic year (Same as above)
+        $targetTA = TahunAjaran::where('is_active', false)
+            ->where('id', '!=', $currentYearId) 
+            ->where('tanggal_mulai', '>', function($q) use ($currentYearId) {
+                $q->select('tanggal_mulai')->from('tahun_ajaran')->where('id', $currentYearId);
+            })
+            ->orderBy('tanggal_mulai', 'asc')
+            ->first();
+
+        if (!$targetTA) return null;
+
+        // Search for class with SAME NAME in Target Year
+        // "7A" -> "7A"
+        return Kelas::where('nama_kelas', $currentKelas->nama_kelas)
+            ->where('tahun_ajaran_id', $targetTA->id)
+            ->first();
+    }
+
+    /**
+     * Rollback a student's promotion.
+     * Restores the student to their original class.
+     * 
+     * @param int $statusId - ID from status_naik_kelas_siswa table
+     * @param int $userId - User performing the rollback
+     * @return array - Result with success flag and message
+     */
+    public function rollbackStudent($statusId, $userId)
+    {
+        $status = DB::table('status_naik_kelas_siswa')->where('id', $statusId)->first();
+        
+        if (!$status) {
+            return ['success' => false, 'message' => 'Data status tidak ditemukan.'];
+        }
+        
+        if ($status->rolled_back_at) {
+            return ['success' => false, 'message' => 'Siswa ini sudah pernah di-rollback.'];
+        }
+        
+        if (!$status->original_kelas_id) {
+            return ['success' => false, 'message' => 'Tidak ada data kelas asal untuk rollback.'];
+        }
+        
+        DB::beginTransaction();
+        try {
+            $siswa = Siswa::find($status->siswa_id);
+            if (!$siswa) {
+                throw new \Exception('Siswa tidak ditemukan.');
+            }
+            
+            // Restore original class
+            $siswa->kelas_id = $status->original_kelas_id;
+            
+            // If status was LULUS or LULUS_TUNGGAKAN, restore to aktif and reactivate user account
+            if ($status->status_kelulusan === 'LULUS' || $status->status_kelulusan === 'LULUS_TUNGGAKAN') {
+                $siswa->status = 'aktif';
+                
+                // Restore user account access
+                $user = \App\Models\User::where('siswa_id', $siswa->id)->first();
+                if ($user) {
+                    $user->is_active = true;
+                    $user->save();
+                }
+            }
+            $siswa->save();
+            
+            // Mark as rolled back
+            DB::table('status_naik_kelas_siswa')
+                ->where('id', $statusId)
+                ->update([
+                    'is_processed' => false,
+                    'rolled_back_at' => now(),
+                    'rolled_back_by' => $userId,
+                    'updated_at' => now(),
+                ]);
+            
+            DB::commit();
+            return ['success' => true, 'message' => 'Rollback berhasil untuk siswa ' . $siswa->nama_lengkap];
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ['success' => false, 'message' => 'Gagal rollback: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Promote selected students individually (for those who failed initial batch).
+     * 
+     * @param array $siswaIds - Array of siswa IDs to promote
+     * @param int $tahunAjaranId - Current academic year
+     * @return array - Results with count and any errors
+     */
+    public function promoteSelectedStudents(array $siswaIds, $tahunAjaranId)
+    {
+        $results = ['success' => 0, 'failed' => 0, 'errors' => []];
+
+        DB::beginTransaction();
+        try {
+            foreach ($siswaIds as $siswaId) {
+                $siswa = Siswa::find($siswaId);
+                if (!$siswa) {
+                    $results['failed']++;
+                    $results['errors'][] = "Siswa ID {$siswaId} tidak ditemukan.";
+                    continue;
+                }
+
+                // Re-check eligibility
+                $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
+
+                if (!$eligibility['eligible']) {
+                    $results['failed']++;
+                    $results['errors'][] = "{$siswa->nama_lengkap}: Belum memenuhi syarat (Keuangan: {$eligibility['financial']['status']}, Akademik: {$eligibility['academic']['percentage']}%).";
+                    continue;
+                }
+
+                // Execute promotion
+                $this->executeStudentPromotion($siswa, $tahunAjaranId, now());
+                $results['success']++;
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $results['errors'][] = 'Gagal memproses: ' . $e->getMessage();
+        }
+
+        return $results;
+    }
 }
+

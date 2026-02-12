@@ -30,7 +30,12 @@ class ManajemenSiswaController extends Controller
 
         // Filter by kelas
         if ($request->filled('kelas_id')) {
-            $query->where('kelas_id', $request->kelas_id);
+            $kelasId = $request->kelas_id;
+            if (is_array($kelasId)) {
+                $query->whereIn('kelas_id', $kelasId);
+            } else {
+                $query->where('kelas_id', $kelasId);
+            }
         }
 
         // Filter by jenjang (via kelas)

@@ -21,7 +21,7 @@ class GuruNilaiController extends Controller
     /**
      * Tampilkan tabel nilai siswa
      */
-    public function index($kelasId, $mapelId): View
+    public function index(Request $request, $kelasId, $mapelId): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -30,6 +30,10 @@ class GuruNilaiController extends Controller
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $tahunAjaran = TahunAjaran::where('is_active', true)->first();
         
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+        
         // Ambil semua siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
@@ -37,7 +41,7 @@ class GuruNilaiController extends Controller
             ->get()
             ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
         
-        // Buat atau ambil nilai untuk setiap siswa
+        // Buat atau ambil nilai untuk setiap siswa (per semester)
         $nilaiList = [];
         foreach ($siswaList as $siswa) {
             $nilai = Nilai::firstOrCreate([
@@ -45,6 +49,7 @@ class GuruNilaiController extends Controller
                 'mata_pelajaran_id' => $mapelId,
                 'kelas_id' => $kelasId,
                 'tahun_ajaran_id' => $tahunAjaran->id,
+                'semester' => $semester,
                 'guru_id' => $tenagaPendidik->id,
             ]);
             
@@ -66,6 +71,8 @@ class GuruNilaiController extends Controller
             'mapel' => $mataPelajaran,
             'nilaiList' => $nilaiList,
             'guru' => $tenagaPendidik,
+            'semester' => $semester,
+            'currentSemester' => $currentSemester,
         ]);
     }
     
@@ -116,6 +123,65 @@ class GuruNilaiController extends Controller
             ->route('guru.lms.nilai.index', [$kelasId, $mapelId])
             ->with('success', 'Nilai berhasil diperbarui');
     }
+
+    /**
+     * Update batch - save all students' nilai at once
+     */
+    public function updateBatch(Request $request, $kelasId, $mapelId): RedirectResponse
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $nilaiData = $request->input('nilai', []);
+        $updatedCount = 0;
+
+        foreach ($nilaiData as $nilaiId => $data) {
+            $nilai = Nilai::find($nilaiId);
+            if (!$nilai) continue;
+
+            // Prepare data to update
+            $dataToUpdate = [];
+            
+            // Handle tugas, latihan, uh 1-5
+            foreach (range(1, 5) as $i) {
+                if (isset($data["tugas_$i"])) {
+                    $dataToUpdate["tugas_$i"] = $data["tugas_$i"] !== '' ? floatval($data["tugas_$i"]) : null;
+                }
+                if (isset($data["latihan_$i"])) {
+                    $dataToUpdate["latihan_$i"] = $data["latihan_$i"] !== '' ? floatval($data["latihan_$i"]) : null;
+                }
+                if (isset($data["uh_$i"])) {
+                    $dataToUpdate["uh_$i"] = $data["uh_$i"] !== '' ? floatval($data["uh_$i"]) : null;
+                }
+            }
+
+            // Handle PTS, PAS
+            if (isset($data['pts'])) {
+                $dataToUpdate['pts'] = $data['pts'] !== '' ? floatval($data['pts']) : null;
+            }
+            if (isset($data['pas'])) {
+                $dataToUpdate['pas'] = $data['pas'] !== '' ? floatval($data['pas']) : null;
+            }
+
+            // Handle tingkat akhir fields
+            foreach (['to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'] as $field) {
+                if (isset($data[$field])) {
+                    $dataToUpdate[$field] = $data[$field] !== '' ? floatval($data[$field]) : null;
+                }
+            }
+
+            if (!empty($dataToUpdate)) {
+                $nilai->update($dataToUpdate);
+                $nilai->hitungSemuaRata();
+                $nilai->hitungNilaiAkhir();
+                $updatedCount++;
+            }
+        }
+        
+        return redirect()
+            ->route('guru.lms.nilai.index', [$kelasId, $mapelId])
+            ->with('success', "Berhasil menyimpan nilai {$updatedCount} siswa.");
+    }
     
     /**
      * Hitung ulang semua nilai dari tugas dan ujian
@@ -130,6 +196,7 @@ class GuruNilaiController extends Controller
         $nilaiList = Nilai::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->where('tahun_ajaran_id', $tahunAjaran->id)
+            ->where('semester', Nilai::getCurrentSemester())
             ->where('guru_id', $tenagaPendidik->id)
             ->get();
         
@@ -145,12 +212,58 @@ class GuruNilaiController extends Controller
     /**
      * Export nilai ke Excel (placeholder)
      */
-    public function export($kelasId, $mapelId)
+    /**
+     * Export nilai ke Excel
+     */
+    public function exportExcel(Request $request, $kelasId, $mapelId)
     {
-        // TODO: Implement Excel export using Laravel Excel
-        return redirect()
-            ->route('guru.lms.nilai.index', [$kelasId, $mapelId])
-            ->with('info', 'Fitur export Excel akan segera tersedia');
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+        
+        $kelas = Kelas::findOrFail($kelasId);
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+        
+        // Ambil semua siswa di kelas
+        $siswaList = Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
+        
+        // Buat atau ambil nilai untuk setiap siswa (per semester)
+        $nilaiCollection = [];
+        foreach ($siswaList as $siswa) {
+            $nilai = Nilai::firstOrCreate([
+                'siswa_id' => $siswa->id,
+                'mata_pelajaran_id' => $mapelId,
+                'kelas_id' => $kelasId,
+                'tahun_ajaran_id' => $tahunAjaran->id,
+                'semester' => $semester,
+                'guru_id' => $tenagaPendidik->id,
+            ]);
+            
+            // Calculate nilai if empty
+            if (!$nilai->nilai_akhir) {
+                $this->calculateNilai($nilai);
+            }
+            
+            // Load siswa relation on nilai
+            $nilai->siswa = $siswa;
+            $nilaiCollection[] = $nilai;
+        }
+        
+        $nilaiCollection = collect($nilaiCollection);
+        $fileName = 'Nilai_Siswa_' . \Str::slug($kelas->nama_kelas) . '_' . \Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\Guru\NilaiSiswaExport($nilaiCollection, $kelas, $mataPelajaran, $semester),
+            $fileName
+        );
     }
     
     /**

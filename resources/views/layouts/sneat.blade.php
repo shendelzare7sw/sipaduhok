@@ -50,7 +50,7 @@
             --primary-dark: #0d3a6b;
             --primary-light: #4a8fd4;
         }
-
+        
         /* Override Sneat primary color dengan brand SIPADUHOK */
         .bg-menu-theme {
             background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
@@ -365,7 +365,7 @@
                 width: 260px;
                 z-index: 1100;
                 transform: translate3d(-100%, 0, 0);
-                transition: transform 0.3s ease-in-out;
+                transition: transform 0.3s ease;
                 box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             }
 
@@ -551,7 +551,7 @@
                     @yield('sidebar-menu')
                 </ul>
             </aside>
-
+            
             <!-- Layout container -->
             <div class="layout-page">
 
@@ -797,6 +797,10 @@
                 if (layoutWrapper) layoutWrapper.classList.remove('menu-open');
                 document.body.style.overflow = ''; // Restore body scroll
             }
+            
+            // ==========================================
+            // REST OF JAVASCRIPT
+            // ==========================================
 
             // Function to toggle menu
             function toggleMenu() {
@@ -933,6 +937,7 @@
     <!-- Currency Format Script -->
     <script src="{{ asset('js/currency-format.js') }}"></script>
 
+    @stack('scripts')
     @yield('scripts')
 </body>
 

@@ -16,12 +16,29 @@
 
     @isset($kelas)
     <div class="card">
-        <h5 class="card-header">Kelas: {{ $kelas->nama_kelas }} ({{ $tahun->tahun_ajaran }})</h5>
+        <h5 class="card-header">Kelas: {{ $kelas->nama_kelas }} ({{ $tahun->nama_tahun_ajaran }})</h5>
         <div class="card-body">
-            <div class="alert alert-info">
                 <i class="fas fa-info-circle me-1"></i>
                 Halaman ini adalah <strong>SIMULASI</strong> berdasarkan data saat ini. Status akhir ditentukan saat tanggal eksekusi sistem.
             </div>
+
+            <hr class="my-4">
+
+            <form method="GET" action="{{ route('wali.promotion.prediction') }}" class="row g-3 mb-4">
+                <div class="col-md-6 col-lg-8">
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..." value="{{ request('search') }}">
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <select name="status_filter" class="form-select" onchange="this.form.submit()">
+                        <option value="">-- Semua Status --</option>
+                        <option value="aman" {{ request('status_filter') == 'aman' ? 'selected' : '' }}>Aman / Naik Kelas</option>
+                        <option value="rawan" {{ request('status_filter') == 'rawan' ? 'selected' : '' }}>Rawan / Tertunda</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-lg-1">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
             
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
@@ -41,9 +58,9 @@
                                 @if($p['result']['financial']['status'] == 'LUNAS')
                                     <span class="badge bg-success">Lunas</span>
                                 @else
-                                    <span class="badge bg-danger">Tunggakan: Rp {{ number_format($p['result']['financial']['unpaid_amount'], 0, ',', '.') }}</span>
+                                    <span class="badge bg-danger">Belum Lunas</span>
                                     @if($p['result']['financial']['is_dispensasi'])
-                                        <span class="badge bg-warning">Dispensasi OK</span>
+                                        <br><span class="badge bg-warning mt-1">Dispensasi OK</span>
                                     @endif
                                 @endif
                             </td>

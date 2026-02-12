@@ -62,7 +62,9 @@ class JadwalPelajaranController extends Controller
         $jadwalPerHari = [];
 
         foreach ($hariList as $hari) {
-            $jadwalPerHari[$hari] = JadwalPelajaran::where('kelas_id', $kelas->id)
+            $jadwalPerHari[$hari] = JadwalPelajaran::whereHas('kelas', function($q) use ($kelas) {
+                    $q->where('kelas.id', $kelas->id);
+                })
                 ->where('hari', $hari)
                 ->with(['mataPelajaran', 'guru'])
                 ->orderBy('jam_mulai')
@@ -103,7 +105,9 @@ class JadwalPelajaranController extends Controller
 
         foreach ($hariList as $hari) {
             // Get jadwal pelajaran
-            $jadwalPelajaran = JadwalPelajaran::where('kelas_id', $kelas->id)
+            $jadwalPelajaran = JadwalPelajaran::whereHas('kelas', function($q) use ($kelas) {
+                    $q->where('kelas.id', $kelas->id);
+                })
                 ->where('hari', $hari)
                 ->with(['mataPelajaran', 'guru'])
                 ->orderBy('jam_mulai')

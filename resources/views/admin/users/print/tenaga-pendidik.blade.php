@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Tenaga Pendidik</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; color: #000; background: #fff; }
+        .container { max-width: 297mm; /* Landscape A4 */ margin: 0 auto; padding: 10mm; }
+        
+        /* Header */
+        .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { font-size: 16pt; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        .header h2 { font-size: 14pt; font-weight: bold; margin-bottom: 10px; }
+        .header p { font-size: 10pt; color: #333; }
+        
+        /* Title */
+        .title { text-align: center; margin: 20px 0; }
+        .title h3 { font-size: 14pt; font-weight: bold; text-decoration: underline; margin-bottom: 5px; }
+        .title p { font-size: 11pt; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        table th, table td { border: 1px solid #000; padding: 5px 8px; text-align: left; vertical-align: middle; font-size: 10pt; }
+        table th { background: #f0f0f0; font-weight: bold; text-align: center; }
+        .text-center { text-align: center; }
+        
+        /* Footer */
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 10pt; }
+        .signature-line { margin-top: 50px; border-bottom: 1px solid #000; width: 200px; display: inline-block; }
+        
+        /* Print Button */
+        @media print {
+            .no-print { display: none !important; }
+            @page { size: landscape; margin: 10mm; }
+            body { -webkit-print-color-adjust: exact; }
+        }
+        
+        .print-controls { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border-radius: 5px; text-decoration: none; color: #fff; font-family: sans-serif; font-size: 14px; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-print { background: #3b82f6; }
+        .btn-print:hover { background: #2563eb; }
+        .btn-back { background: #6b7280; }
+        .btn-back:hover { background: #4b5563; }
+    </style>
+</head>
+<body>
+    <div class="print-controls no-print">
+        <a href="{{ route('admin.users.tenaga-pendidik') }}" class="btn btn-back">← Kembali</a>
+        <button onclick="window.print()" class="btn btn-print">🖨️ Cetak</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>PKBM HOUSE OF KNOWLEDGE</h1>
+            <h2>PUSAT KEGIATAN BELAJAR MASYARAKAT</h2>
+            <p>Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan</p>
+            <p>Telp: 021-7412345 | Email: info@hok.sch.id</p>
+        </div>
+
+        <div class="title">
+            <h3>LAPORAN TENAGA PENDIDIK</h3>
+            @if($request->has('role') && $request->role)
+                <p>Role: {{ $roles[$request->role] ?? $request->role }}</p>
+            @endif
+            <p>Total Data: {{ count($tenagaPendidik) }} Tenaga Pendidik</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th width="5%">No</th>
+                    <th width="20%">Nama Lengkap</th>
+                    <th width="15%">NIP</th>
+                    <th width="15%">Role / Jabatan</th>
+                    <th width="20%">Email</th>
+                    <th width="15%">Telepon</th>
+                    <th width="10%">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($tenagaPendidik as $index => $tp)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ $tp->name }}</td>
+                        <td>{{ $tp->tenagaPendidik->nip ?? '-' }}</td>
+                        <td>{{ ucwords(str_replace('_', ' ', $tp->role)) }}</td>
+                        <td>{{ $tp->email }}</td>
+                        <td>{{ $tp->tenagaPendidik->telepon ?? $tp->phone ?? '-' }}</td>
+                        <td class="text-center">{{ $tp->is_active ? 'Aktif' : 'Non-Aktif' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <div>
+                <p>Dicetak pada: {{ now()->format('d F Y, H:i') }}</p>
+                <p>Oleh: {{ auth()->user()->name }}</p>
+            </div>
+            <div style="text-align: center;">
+                <p>Tangerang Selatan, {{ now()->format('d F Y') }}</p>
+                <p>Mengetahui,</p>
+                <div class="signature-line"></div>
+                <p>Kepala PKBM House of Knowledge</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

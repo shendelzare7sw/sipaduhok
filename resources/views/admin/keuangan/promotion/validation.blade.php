@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Admin - Validasi Dispensasi')
+@section('page-title', 'Validasi Dispensasi')
 
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
@@ -13,7 +14,12 @@
 
 
     <div class="card">
-        <h5 class="card-header">Kandidat Dispensasi (Akademik Tuntas, Keuangan Belum Lunas)</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Kandidat Dispensasi (Akademik Tuntas, Keuangan Belum Lunas)</h5>
+            <a href="{{ route('admin.keuangan.promotion.validation.history') }}" class="btn btn-primary btn-sm">
+                <i class='bx bx-history'></i> Riwayat
+            </a>
+        </div>
         <div class="table-responsive text-nowrap">
             <table class="table">
                 <thead>
