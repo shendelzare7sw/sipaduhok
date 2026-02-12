@@ -59,6 +59,13 @@ class LandingPageController extends Controller
                     // Fortunately $section->section_key is available.
                     if ($section->section_key === 'stats') {
                         $isDirectArray = true;
+                    } elseif (
+                        Str::contains($section->section_key, 'ruang_') || 
+                        Str::contains($section->section_key, 'area_') || 
+                        Str::contains($section->section_key, 'perpustakaan') || 
+                        Str::contains($section->section_key, 'gallery')
+                    ) {
+                        $isDirectArray = false;
                     }
                 }
 
@@ -115,6 +122,22 @@ class LandingPageController extends Controller
                         // Handle Header fields if any
                         if (isset($sectionInput['header'])) {
                             $content['header'] = array_merge($content['header'] ?? [], $sectionInput['header']);
+                        }
+
+                        // Handle Header File Uploads (Icon/Image in Header)
+                        $sectionIdStr = (string) $section->id;
+                        $allFiles = $request->allFiles();
+                        if (isset($allFiles['sections'][$sectionIdStr]['header'])) {
+                            foreach ($allFiles['sections'][$sectionIdStr]['header'] as $key => $file) {
+                                if ($file instanceof \Illuminate\Http\UploadedFile) {
+                                    $path = $file->store('landing-pages', 'public');
+                                    // Ensure header array exists
+                                    if (!isset($content['header'])) {
+                                        $content['header'] = [];
+                                    }
+                                    $content['header'][$key] = 'storage/' . $path;
+                                }
+                            }
                         }
 
                         $section->content = $content;

@@ -44,95 +44,56 @@
 <section class="py-20 bg-white">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Pilihan Jurusan</h2>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900">{{ $jurusan['header']['title'] ?? 'Pilihan Jurusan' }}</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="rounded-3xl p-8 text-white bg-gradient-to-br from-[#1e5f8a] to-[#2e8b57] shadow-lg">
-                <div class="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
+            @php $jurusanItems = $jurusan['items'] ?? []; @endphp
+            @foreach($jurusanItems as $item)
+                @php
+                    $startColor = $item['card_gradient_start'] ?? '#1e5f8a';
+                    $endColor = $item['card_gradient_end'] ?? '#2e8b57';
+                    $features = isset($item['features']) ? explode('|', $item['features']) : [];
+                @endphp
+                <div class="rounded-3xl p-8 text-white shadow-lg"
+                     style="background: linear-gradient(to bottom right, {{ $startColor }}, {{ $endColor }});">
+                    <div class="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
+                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                            <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-10 h-10 object-contain">
+                         @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
+                            <i class="{{ $item['icon'] }} text-white text-3xl"></i>
+                         @else
+                            @php $title = strtolower($item['title'] ?? ''); @endphp
+                            @if(str_contains($title, 'ipa') || str_contains($title, 'sains') || str_contains($title, 'mipa'))
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 3v6.5L5.5 15c-1.3 2-.2 4.5 2 4.5h9c2.2 0 3.3-2.5 2-4.5L15 9.5V3h1a1 1 0 100-2H8a1 1 0 100 2h1zm2 0h2v7l3.5 5.5c.4.6.1 1.5-.7 1.5h-7.6c-.8 0-1.1-.9-.7-1.5L11 10V3z"/>
+                                </svg>
+                            @elseif(str_contains($title, 'ips') || str_contains($title, 'sosial'))
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="white">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                                </svg>
+                            @else
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="white">
+                                    <path d="M12 4.5C9.24 4.5 6.5 5.5 4 7.08V19.5c2.5-1.42 5.24-2.5 8-2.5s5.5 1.08 8 2.5V7.08C17.5 5.5 14.76 4.5 12 4.5zm0 12c-2.03 0-4.04.37-5.96 1.12V8.13C8.04 7.37 10.03 7 12 7s3.96.37 5.96 1.13v9.49C16.04 16.87 14.03 16.5 12 16.5z"/>
+                                </svg>
+                            @endif
+                         @endif
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">{{ $item['title'] }}</h3>
+                    <p class="mb-8 text-white/90 leading-relaxed">
+                        {{ $item['description'] }}
+                    </p>
+                    <ul class="space-y-3">
+                        @foreach($features as $feature)
+                            <li class="flex items-center gap-3">
+                                <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span class="font-medium">{{ $feature }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
-                <h3 class="text-2xl font-bold mb-3">Jurusan IPA</h3>
-                <p class="mb-8 text-blue-50/90 leading-relaxed">
-                    Fokus pada mata pelajaran sains seperti Matematika, Fisika, Kimia, dan Biologi.
-                </p>
-                <ul class="space-y-3">
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Matematika</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Fisika</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Kimia</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Biologi</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="rounded-3xl p-8 text-white bg-gradient-to-br from-[#ea8c38] to-[#facc15] shadow-lg">
-                <div class="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-bold mb-3">Jurusan IPS</h3>
-                <p class="mb-8 text-orange-50/90 leading-relaxed">
-                    Fokus pada ilmu sosial seperti Ekonomi, Geografi, Sosiologi, dan Sejarah.
-                </p>
-                <ul class="space-y-3">
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Ekonomi</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Geografi</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Sosiologi</span>
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        <span class="font-medium">Sejarah</span>
-                    </li>
-                </ul>
-            </div>
+            @endforeach
         </div>
     </div>
 </section>
@@ -141,58 +102,57 @@
 <section class="py-20 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Prospek Setelah Lulus</h2>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800">{{ $prospek['header']['title'] ?? 'Prospek Setelah Lulus' }}</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div
-                class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg transition-shadow duration-300 hover:shadow-xl">
-                <div class="mb-6 flex justify-center text-slate-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M11.7 2.805a.75.75 0 01.6 0A60.65 60.65 0 0122.83 8.72a.75.75 0 01-.231 1.337 49.949 49.949 0 00-9.902 3.912l-.003.002-.34.18a.75.75 0 01-.707 0A50.009 50.009 0 002.83 8.72a.75.75 0 01-.231-1.337A60.653 60.653 0 0111.7 2.805z" />
-                        <path
-                            d="M13.06 15.473a48.45 48.45 0 017.666-3.282c.134 1.414.22 2.843.255 4.285a.75.75 0 01-.46.71 47.878 47.878 0 00-5.828 4.37v-3.669c0-.257.04-.51.117-.751a49.543 49.543 0 00-1.75-1.663z" />
-                    </svg>
+            @php $prospekItems = $prospek['items'] ?? []; @endphp
+            @foreach($prospekItems as $item)
+                @php
+                    $iconColor = $item['icon_color'] ?? 'slate';
+                    $colorMap = [
+                        'slate' => 'text-slate-800',
+                        'amber' => 'text-amber-900',
+                        'blue' => 'text-blue-600',
+                        'orange' => 'text-orange-700',
+                    ];
+                    $textColor = $colorMap[$iconColor] ?? 'text-gray-800';
+                @endphp
+                <div
+                    class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg transition-shadow duration-300 hover:shadow-xl">
+                    <div class="mb-6 flex justify-center {{ $textColor }}">
+                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                            <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-16 h-16 object-contain">
+                         @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
+                            <i class="{{ $item['icon'] }} text-5xl"></i>
+                         @else
+                            @php $title = strtolower($item['title'] ?? ''); @endphp
+                            @if(str_contains($title, 'kuliah') || str_contains($title, 'universitas') || str_contains($title, 'perguruan'))
+                                <svg class="w-16 h-16" viewBox="0 0 24 24" fill="#1e293b">
+                                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                                </svg>
+                            @elseif(str_contains($title, 'kerja') || str_contains($title, 'karir') || str_contains($title, 'profesi'))
+                                <svg class="w-16 h-16" viewBox="0 0 24 24" fill="#1e293b">
+                                    <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
+                                </svg>
+                            @elseif(str_contains($title, 'wirausaha') || str_contains($title, 'usaha') || str_contains($title, 'bisnis'))
+                                <svg class="w-16 h-16" viewBox="0 0 24 24" fill="#1e293b">
+                                    <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+                                </svg>
+                            @elseif(str_contains($title, 'pelatihan') || str_contains($title, 'kursus') || str_contains($title, 'skill'))
+                                <svg class="w-16 h-16" viewBox="0 0 24 24" fill="#1e293b">
+                                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                                </svg>
+                            @else
+                                <svg class="w-16 h-16" viewBox="0 0 24 24" fill="#1e293b">
+                                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                                </svg>
+                            @endif
+                         @endif
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-xl">{{ $item['title'] }}</h3>
+                    <p class="text-gray-600 text-sm mt-3">{{ $item['subtitle'] ?? '' }}</p>
                 </div>
-                <h3 class="font-bold text-gray-800 text-xl">Kuliah</h3>
-                <p class="text-gray-600 text-sm mt-3">Lanjut ke Perguruan Tinggi Negeri/Swasta</p>
-            </div>
-            <div
-                class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg transition-shadow duration-300 hover:shadow-xl">
-                <div class="mb-6 flex justify-center text-amber-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M7.5 3.75A1.5 1.5 0 006 5.25v1.5h12V5.25a1.5 1.5 0 00-1.5-1.5h-9zM3.75 8.25a.75.75 0 01.75-.75h15a.75.75 0 01.75.75v9.75a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.25zM9 12a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5A.75.75 0 019 12z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <h3 class="font-bold text-gray-800 text-xl">Kerja</h3>
-                <p class="text-gray-600 text-sm mt-3">Melamar pekerjaan dengan ijazah SMA</p>
-            </div>
-            <div
-                class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg transition-shadow duration-300 hover:shadow-xl">
-                <div class="mb-6 flex justify-center text-blue-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M3 2.25a.75.75 0 01.75.75v.54l1.838-.46a9.75 9.75 0 016.725.738l.108.054a8.25 8.25 0 005.58.528l3.107-1.553a.75.75 0 011.142.67V12h-3v9.75a.75.75 0 01-.75.75h-15a.75.75 0 01-.75-.75V3a.75.75 0 01.75-.75z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <h3 class="font-bold text-gray-800 text-xl">Wirausaha</h3>
-                <p class="text-gray-600 text-sm mt-3">Memulai usaha sendiri</p>
-            </div>
-            <div
-                class="card-hover bg-white rounded-2xl p-6 text-center shadow-lg transition-shadow duration-300 hover:shadow-xl">
-                <div class="mb-6 flex justify-center text-orange-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M5.625 1.5H9a.375.375 0 01.375.375v1.875c0 1.036.84 1.875 1.875 1.875H13.125a.375.375 0 01.375.375v13.5a3 3 0 01-3 3h-9a3 3 0 01-3-3V4.5a3 3 0 013-3z"
-                            clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <h3 class="font-bold text-gray-800 text-xl">CPNS</h3>
-                <p class="text-gray-600 text-sm mt-3">Daftar seleksi CPNS</p>
-            </div>
+            @endforeach
         </div>
     </div>
 </section>

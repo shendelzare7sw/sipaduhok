@@ -54,22 +54,26 @@ class LandingPageSeeder extends Seeder
                     [
                         'value' => '200+',
                         'label' => 'Siswa Aktif',
-                        'icon_color' => 'primary' // visual cue for frontend
+                        'icon_color' => 'primary',
+                        'icon' => null
                     ],
                     [
                         'value' => '50+',
                         'label' => 'Tenaga Pengajar',
-                        'icon_color' => 'secondary'
+                        'icon_color' => 'secondary',
+                        'icon' => null
                     ],
                     [
                         'value' => '14+',
                         'label' => 'Tahun Pengalaman',
-                        'icon_color' => 'accent-yellow'
+                        'icon_color' => 'accent-yellow',
+                        'icon' => null
                     ],
                     [
                         'value' => '98%',
                         'label' => 'Tingkat Kelulusan',
-                        'icon_color' => 'accent-orange'
+                        'icon_color' => 'accent-orange',
+                        'icon' => null
                     ]
                 ]
             ]
@@ -92,25 +96,29 @@ class LandingPageSeeder extends Seeder
                             'title' => 'Pendidikan Inklusi',
                             'description' => 'Program pendidikan untuk anak berkebutuhan khusus dengan pendekatan individual',
                             'link' => '/program-inklusi',
-                            'color' => 'accent-orange'
+                            'color' => 'accent-orange',
+                            'icon' => null
                         ],
                         [
                             'title' => 'Pendidikan Kesetaraan',
                             'description' => 'Program Paket A, B, dan C untuk kesetaraan pendidikan SD, SMP, dan SMA',
                             'link' => '/program-sd-sma',
-                            'color' => 'primary'
+                            'color' => 'primary',
+                            'icon' => null
                         ],
                         [
                             'title' => 'Konseling Anak Berkebutuhan Khusus',
                             'description' => 'Layanan konseling profesional untuk mendukung tumbuh kembang anak',
                             'link' => '/program-terapi',
-                            'color' => 'secondary'
+                            'color' => 'secondary',
+                            'icon' => null
                         ],
                         [
                             'title' => 'Pendidikan Anak Usia Dini',
                             'description' => 'Program PAUD dengan metode bermain sambil belajar yang menyenangkan',
                             'link' => '/program-paud-tk',
-                            'color' => 'accent-yellow'
+                            'color' => 'accent-yellow',
+                            'icon' => null
                         ]
                     ]
                 ]
@@ -136,6 +144,103 @@ class LandingPageSeeder extends Seeder
                     ],
                     'button_text' => 'Selengkapnya',
                     'button_link' => '/tentang-sekolah'
+                ]
+            ]
+        );
+
+        // News Header
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $home->id, 'section_key' => 'news_header'],
+            [
+                'type' => 'rich_text',
+                'order' => 5,
+                'content' => [
+                    'badge' => 'Berita Terbaru',
+                    'title' => 'News',
+                    'description' => 'Ikuti perkembangan terbaru dari kegiatan dan prestasi PKBM House Of Knowledge'
+                ]
+            ]
+        );
+
+        // Gallery Section
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $home->id, 'section_key' => 'gallery_section'],
+            [
+                'type' => 'list',
+                'order' => 6,
+                'content' => [
+                    'header' => [
+                        'badge' => 'Galeri Kami',
+                        'title' => 'Galeri',
+                        'description' => 'Berisi Kegiatan Siswa Dan Siswi'
+                    ],
+                    'items' => [
+                        ['image' => 'img/gallery-1.jpg'],
+                        ['image' => 'img/gallery-2.jpg'],
+                        ['image' => 'img/gallery-3.jpg'],
+                        ['image' => 'img/gallery-4.jpg'],
+                        ['image' => 'img/gallery-5.jpg'],
+                        ['image' => 'img/gallery-6.jpg']
+                    ]
+                ]
+            ]
+        );
+
+        // Contact Section
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $home->id, 'section_key' => 'contact_section'],
+            [
+                'type' => 'list',
+                'order' => 7,
+                'content' => [
+                    'header' => [
+                        'badge' => 'Lokasi Kami',
+                        'title' => 'Kunjungi Cabang Terdekat',
+                        'description' => 'PKBM House Of Knowledge hadir di 3 lokasi strategis untuk memudahkan akses pendidikan bagi putra-putri Anda.'
+                    ],
+                    'items' => [
+                        [
+                            'title' => 'Gedung Utama PKBM House Of Knowledge',
+                            'subtitle' => 'Pamulang Barat',
+                            'address' => 'Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan Banten 15417',
+                            'color' => 'accent-orange',
+                            'shade_color' => 'orange',
+                            'icon' => null
+                        ],
+                        [
+                            'title' => 'PAUD House Of Knowledge',
+                            'subtitle' => 'Pamulang',
+                            'address' => 'Jl. Bratasena I, Pondok Benda Pamulang, Tangerang Selatan Banten 15417',
+                            'color' => 'primary',
+                            'shade_color' => 'blue',
+                            'icon' => null
+                        ],
+                        [
+                            'title' => 'House Of Knowledge Cimanggis',
+                            'subtitle' => 'Ciputat',
+                            'address' => 'Jl. Otista Raya Blok A25 Ruko Prima Ciputat, Tangerang Selatan Banten 15417',
+                            'color' => 'secondary',
+                            'shade_color' => 'green',
+                            'icon' => null
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        // CTA Section
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $home->id, 'section_key' => 'cta_section'],
+            [
+                'type' => 'rich_text',
+                'order' => 8,
+                'content' => [
+                    'title' => 'Siap Bergabung Bersama Kami?',
+                    'description' => 'Daftarkan putra-putri Anda sekarang dan berikan mereka pendidikan terbaik untuk masa depan yang cerah.',
+                    'button_text_1' => 'Daftar Sekarang',
+                    'button_link_1' => '/ppdb',
+                    'button_text_2' => 'Hubungi Kami',
+                    'button_link_2' => '/kontak'
                 ]
             ]
         );
@@ -175,6 +280,109 @@ class LandingPageSeeder extends Seeder
 Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah membantu ribuan siswa mencapai potensi terbaik mereka melalui program pendidikan yang inovatif dan inklusif.',
                     'image' => 'img/about-school.jpg',
                     'stats_years' => '14+'
+                ]
+            ]
+        );
+
+        // History
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $about->id, 'section_key' => 'history'],
+            [
+                'type' => 'list',
+                'order' => 3,
+                'content' => [
+                    'header' => [
+                        'badge' => 'Perjalanan Kami',
+                        'title' => 'Sejarah PKBM House Of Knowledge',
+                        'description' => 'PKBM House Of Knowledge didirikan dengan semangat untuk memberikan pendidikan berkualitas yang dapat diakses oleh semua kalangan. Berikut adalah perjalanan kami dari awal hingga saat ini.'
+                    ],
+                    'items' => [
+                        [
+                            'year' => '2014',
+                            'title' => 'Awal Pendirian',
+                            'description' => 'PKBM House Of Knowledge didirikan dengan 5 orang guru dan 20 siswa pertama. Dimulai dari sebuah rumah sederhana dengan cita-cita besar.',
+                            'image' => 'img/sejarah-1.jpg',
+                            'color' => '#165fac'
+                        ],
+                        [
+                            'year' => '2016',
+                            'title' => 'Pengembangan Program',
+                            'description' => 'Membuka program pendidikan kesetaraan Paket A, B, dan C. Jumlah siswa meningkat menjadi 100 orang.',
+                            'image' => 'img/sejarah-2.jpg',
+                            'color' => '#287f3b'
+                        ],
+                        [
+                            'year' => '2018',
+                            'title' => 'Program Inklusi',
+                            'description' => 'Meluncurkan program pendidikan inklusi untuk anak berkebutuhan khusus dengan fasilitas terapi lengkap.',
+                            'image' => 'img/sejarah-3.jpg',
+                            'color' => '#d45930'
+                        ],
+                        [
+                            'year' => '2023',
+                            'title' => 'Gedung Baru',
+                            'description' => 'Pindah ke gedung baru yang lebih luas di Pamulang dengan fasilitas modern dan lengkap.',
+                            'image' => 'img/sejarah-4.jpg',
+                            'color' => '#fac030'
+                        ],
+                        [
+                            'year' => '2025',
+                            'title' => 'Saat Ini',
+                            'description' => 'Melayani lebih dari 200 siswa dengan 50+ tenaga pengajar profesional. Terus berkembang dan berinovasi.',
+                            'image' => 'img/sejarah-5.jpg',
+                            'color' => '#165fac'
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        // Why Choose Us
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $about->id, 'section_key' => 'why_choose_us'],
+            [
+                'type' => 'list',
+                'order' => 4,
+                'content' => [
+                    'header' => [
+                        'badge' => 'Keunggulan Kami',
+                        'title' => 'Mengapa Memilih Kami?'
+                    ],
+                    'items' => [
+                        [
+                            'title' => 'Pendidikan Berkualitas',
+                            'description' => 'Kurikulum yang dirancang untuk memaksimalkan potensi setiap siswa dengan metode pembelajaran modern.',
+                            'icon_color' => '#d45930',
+                            'icon' => null
+                        ],
+                        [
+                            'title' => 'Tenaga Pengajar Ahli',
+                            'description' => 'Guru-guru berpengalaman dan terlatih dalam menangani berbagai kebutuhan belajar siswa.',
+                            'icon_color' => '#165fac',
+                            'icon' => null
+                        ],
+                        [
+                            'title' => 'Pendidikan Inklusif',
+                            'description' => 'Menerima dan mendukung anak berkebutuhan khusus dengan program yang disesuaikan.',
+                            'icon_color' => '#287f3b',
+                            'icon' => null
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        // CTA
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $about->id, 'section_key' => 'cta'],
+            [
+                'type' => 'rich_text',
+                'order' => 5,
+                'content' => [
+                    'title' => 'Tertarik Bergabung?',
+                    'description' => 'Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa depan yang cerah',
+                    'button_text' => 'Daftar Sekarang',
+                    'button_link' => '/ppdb'
                 ]
             ]
         );
@@ -353,7 +561,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'description' => 'Prinsip yang menjadi landasan setiap aktivitas kami',
                     ],
                     'items' => [
-                        ['title' => 'Integritas', 'icon' => 'fas fa-bullseye', 'icon_color' => 'orange'],
+                        ['title' => 'Integritas', 'icon' => 'fas fa-bullseye', 'icon_color' => 'orange'], // 'icon' can be class string or file path
                         ['title' => 'Inovasi', 'icon' => 'fas fa-lightbulb', 'icon_color' => 'yellow'],
                         ['title' => 'Kolaborasi', 'icon' => 'fas fa-handshake', 'icon_color' => 'green'],
                         ['title' => 'Pengembangan Bakat', 'icon' => 'fas fa-heart', 'icon_color' => 'red'],
@@ -503,6 +711,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                             'description' => 'Pendidikan Anak Usia Dini dengan fokus bermain sambil belajar',
                             'color' => 'orange',
                             'features' => 'Rasio guru 1:5|Pengembangan motorik|Stimulasi sosial-emosional|Senin-Jumat, 07:30-11:00',
+                            'icon' => null,
                         ],
                         [
                             'name' => 'KB',
@@ -510,6 +719,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                             'description' => 'Kelompok Bermain dengan pengenalan literasi dasar',
                             'color' => 'blue',
                             'features' => 'Pengenalan huruf & angka|Pengembangan kreativitas|Kegiatan seni & musik|Senin-Jumat, 07:30-11:00',
+                            'icon' => null,
                         ],
                         [
                             'name' => 'TK',
@@ -517,6 +727,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                             'description' => 'Taman Kanak-kanak persiapan sekolah dasar',
                             'color' => 'green',
                             'features' => 'Membaca & menulis|Matematika dasar|Bahasa Inggris dasar|Senin-Jumat, 07:30-11:00',
+                            'icon' => null,
                         ],
                     ]
                 ]
@@ -536,12 +747,12 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'description' => 'Kurikulum komprehensif yang disesuaikan dengan tahap perkembangan anak',
                     ],
                     'items' => [
-                        ['title' => 'Nilai Agama & Moral', 'description' => 'Pengenalan nilai-nilai agama dan moral sejak dini melalui pembiasaan sehari-hari.', 'color' => 'orange'],
-                        ['title' => 'Kognitif', 'description' => 'Stimulasi kemampuan berpikir, mengenal angka, huruf, bentuk, dan warna.', 'color' => 'blue'],
-                        ['title' => 'Bahasa', 'description' => 'Pengembangan kemampuan berbahasa reseptif dan ekspresif melalui cerita dan lagu.', 'color' => 'green'],
-                        ['title' => 'Sosial Emosional', 'description' => 'Pengembangan kemampuan bersosialisasi dan mengelola emosi dengan baik.', 'color' => 'yellow'],
-                        ['title' => 'Motorik Halus', 'description' => 'Latihan koordinasi tangan-mata melalui kegiatan melipat, menggunting, dan mewarnai.', 'color' => 'blue'],
-                        ['title' => 'Motorik Kasar', 'description' => 'Aktivitas fisik untuk mengembangkan koordinasi tubuh dan keseimbangan.', 'color' => 'orange'],
+                        ['title' => 'Nilai Agama & Moral', 'description' => 'Pengenalan nilai-nilai agama dan moral sejak dini melalui pembiasaan sehari-hari.', 'color' => 'orange', 'icon' => null],
+                        ['title' => 'Kognitif', 'description' => 'Stimulasi kemampuan berpikir, mengenal angka, huruf, bentuk, dan warna.', 'color' => 'blue', 'icon' => null],
+                        ['title' => 'Bahasa', 'description' => 'Pengembangan kemampuan berbahasa reseptif dan ekspresif melalui cerita dan lagu.', 'color' => 'green', 'icon' => null],
+                        ['title' => 'Sosial Emosional', 'description' => 'Pengembangan kemampuan bersosialisasi dan mengelola emosi dengan baik.', 'color' => 'yellow', 'icon' => null],
+                        ['title' => 'Motorik Halus', 'description' => 'Latihan koordinasi tangan-mata melalui kegiatan melipat, menggunting, dan mewarnai.', 'color' => 'blue', 'icon' => null],
+                        ['title' => 'Motorik Kasar', 'description' => 'Aktivitas fisik untuk mengembangkan koordinasi tubuh dan keseimbangan.', 'color' => 'orange', 'icon' => null],
                     ]
                 ]
             ]
@@ -583,10 +794,10 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'title' => 'Fasilitas Lengkap',
                     ],
                     'items' => [
-                        ['title' => 'Ruang Kelas Nyaman', 'description' => 'AC, pencahayaan baik, furnitur ramah anak', 'color' => 'blue'],
-                        ['title' => 'Area Bermain Outdoor', 'description' => 'Aman, bersih, dan terawat', 'color' => 'green'],
-                        ['title' => 'Perpustakaan Mini', 'description' => 'Koleksi buku anak lengkap', 'color' => 'orange'],
-                        ['title' => 'Alat Permainan Edukatif', 'description' => 'APE berkualitas dan variatif', 'color' => 'yellow'],
+                        ['title' => 'Ruang Kelas Nyaman', 'description' => 'AC, pencahayaan baik, furnitur ramah anak', 'color' => 'blue', 'icon' => null],
+                        ['title' => 'Area Bermain Outdoor', 'description' => 'Aman, bersih, dan terawat', 'color' => 'green', 'icon' => null],
+                        ['title' => 'Perpustakaan Mini', 'description' => 'Koleksi buku anak lengkap', 'color' => 'orange', 'icon' => null],
+                        ['title' => 'Alat Permainan Edukatif', 'description' => 'APE berkualitas dan variatif', 'color' => 'yellow', 'icon' => null],
                     ]
                 ]
             ]
@@ -633,6 +844,27 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                 ]
             ]
         );
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $sdSma->id, 'section_key' => 'mata_pelajaran_a'],
+            [
+                'type' => 'list',
+                'order' => 5,
+                'content' => [
+                    'header' => [
+                        'badge' => 'Kurikulum',
+                        'title' => 'Mata Pelajaran',
+                    ],
+                    'items' => [
+                        ['title' => 'Bahasa Indonesia', 'icon' => 'fas fa-book', 'icon_color' => 'orange', 'card_color' => '#fef3c7'], 
+                        ['title' => 'Matematika', 'icon' => 'fas fa-calculator', 'icon_color' => 'blue', 'card_color' => '#dbeafe'],
+                        ['title' => 'IPA', 'icon' => 'fas fa-microscope', 'icon_color' => 'green', 'card_color' => '#d1fae5'],
+                        ['title' => 'IPS', 'icon' => 'fas fa-globe-asia', 'icon_color' => 'yellow', 'card_color' => '#fef3c7'],
+                        ['title' => 'Agama', 'icon' => 'fas fa-mosque', 'icon_color' => 'red', 'card_color' => '#ffe4e6'],
+                        ['title' => 'B. Inggris', 'icon' => 'fas fa-language', 'icon_color' => 'blue', 'card_color' => '#e0f2fe'],
+                    ]
+                ]
+            ]
+        );
 
         // Paket B (SMP) Section
         LandingPageSection::updateOrCreate(
@@ -652,6 +884,45 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                     'tag_2' => 'Setara SMP Formal',
                     'cta_title' => 'Raih Ijazah SMP Anda',
                     'cta_description' => 'Daftarkan diri Anda sekarang dan mulai perjalanan pendidikan baru.',
+                ]
+            ]
+        );
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $sdSma->id, 'section_key' => 'mata_pelajaran_b'],
+            [
+                'type' => 'list',
+                'order' => 6,
+                'content' => [
+                    'header' => [
+                        'title' => 'Mata Pelajaran',
+                    ],
+                    'items' => [
+                        ['title' => 'Bahasa Indonesia', 'icon' => 'fas fa-book', 'icon_color' => 'blue', 'card_color' => '#165fac'], 
+                        ['title' => 'Matematika', 'icon' => 'fas fa-calculator', 'icon_color' => 'green', 'card_color' => '#287f3b'],
+                        ['title' => 'IPA', 'icon' => 'fas fa-microscope', 'icon_color' => 'orange', 'card_color' => '#d45930'],
+                        ['title' => 'IPS', 'icon' => 'fas fa-globe-asia', 'icon_color' => 'yellow', 'card_color' => '#fac030'],
+                        ['title' => 'Bahasa Inggris', 'icon' => 'fas fa-language', 'icon_color' => 'green', 'card_color' => '#287f3b'],
+                        ['title' => 'Agama', 'icon' => 'fas fa-mosque', 'icon_color' => 'blue', 'card_color' => '#165fac'],
+                        ['title' => 'PKn', 'icon' => 'fas fa-flag', 'icon_color' => 'orange', 'card_color' => '#d45930'],
+                        ['title' => 'Bahasa Mandarin', 'icon' => 'fas fa-language', 'icon_color' => 'yellow', 'card_color' => '#fac030'],
+                    ]
+                ]
+            ]
+        );
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $sdSma->id, 'section_key' => 'keunggulan_b'],
+            [
+                'type' => 'list',
+                'order' => 7,
+                'content' => [
+                    'header' => [
+                        'title' => 'Keunggulan Program',
+                    ],
+                    'items' => [
+                        ['title' => 'Jadwal Fleksibel', 'description' => 'Waktu belajar yang dapat disesuaikan dengan aktivitas lain', 'icon' => 'fas fa-clock', 'icon_color' => 'blue'], // #165fac
+                        ['title' => 'Kelas Kecil', 'description' => 'Maksimal 15 siswa per kelas untuk pembelajaran optimal', 'icon' => 'fas fa-users', 'icon_color' => 'green'], // #287f3b
+                        ['title' => 'Ijazah Resmi', 'description' => 'Ijazah diakui setara dengan SMP formal oleh negara', 'icon' => 'fas fa-certificate', 'icon_color' => 'orange'], // #d45930
+                    ]
                 ]
             ]
         );
@@ -675,6 +946,54 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                     'tag_3' => 'Ijazah Resmi',
                     'cta_title' => 'Wujudkan Impian Anda',
                     'cta_description' => 'Dapatkan ijazah SMA dan buka pintu menuju masa depan yang lebih cerah.',
+                ]
+            ]
+        );
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $sdSma->id, 'section_key' => 'jurusan_c'],
+            [
+                'type' => 'list',
+                'order' => 8,
+                'content' => [
+                    'header' => [
+                        'title' => 'Pilihan Jurusan',
+                    ],
+                    'items' => [
+                        [
+                            'title' => 'Jurusan IPA', 
+                            'description' => 'Fokus pada mata pelajaran sains seperti Matematika, Fisika, Kimia, dan Biologi.', 
+                            'icon' => 'fas fa-atom', 
+                            'features' => 'Matematika|Fisika|Kimia|Biologi',
+                            'card_gradient_start' => '#1e5f8a',
+                            'card_gradient_end' => '#2e8b57'
+                        ],
+                        [
+                            'title' => 'Jurusan IPS', 
+                            'description' => 'Fokus pada ilmu sosial seperti Ekonomi, Geografi, Sosiologi, dan Sejarah.', 
+                            'icon' => 'fas fa-globe', 
+                            'features' => 'Ekonomi|Geografi|Sosiologi|Sejarah', 
+                            'card_gradient_start' => '#ea8c38',
+                            'card_gradient_end' => '#facc15'
+                        ],
+                    ]
+                ]
+            ]
+        );
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $sdSma->id, 'section_key' => 'prospek_c'],
+            [
+                'type' => 'list',
+                'order' => 9,
+                'content' => [
+                    'header' => [
+                        'title' => 'Prospek Setelah Lulus',
+                    ],
+                    'items' => [
+                        ['title' => 'Kuliah', 'subtitle' => 'Lanjut ke Perguruan Tinggi Negeri/Swasta', 'icon' => 'fas fa-graduation-cap', 'icon_color' => 'slate'],
+                        ['title' => 'Kerja', 'subtitle' => 'Melamar pekerjaan dengan ijazah SMA', 'icon' => 'fas fa-briefcase', 'icon_color' => 'amber'],
+                        ['title' => 'Wirausaha', 'subtitle' => 'Memulai usaha sendiri', 'icon' => 'fas fa-store', 'icon_color' => 'blue'],
+                        ['title' => 'CPNS', 'subtitle' => 'Daftar seleksi CPNS', 'icon' => 'fas fa-user-tie', 'icon_color' => 'orange'],
+                    ]
                 ]
             ]
         );
@@ -729,13 +1048,80 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'title' => 'Jenis Kebutuhan yang Kami Layani',
                     ],
                     'items' => [
-                        ['title' => 'Autisme (ASD)', 'description' => 'Program khusus untuk anak dengan gangguan spektrum autisme dengan pendekatan terstruktur.', 'color' => 'blue'],
-                        ['title' => 'ADHD', 'description' => 'Pendekatan pembelajaran khusus untuk anak dengan gangguan pemusatan perhatian dan hiperaktivitas.', 'color' => 'green'],
-                        ['title' => 'Disleksia', 'description' => 'Metode pembelajaran multisensori untuk anak dengan kesulitan membaca dan menulis.', 'color' => 'orange'],
-                        ['title' => 'Down Syndrome', 'description' => 'Program stimulasi dan pembelajaran yang disesuaikan untuk anak down syndrome.', 'color' => 'yellow'],
-                        ['title' => 'Speech Delay', 'description' => 'Terapi wicara dan program stimulasi bahasa untuk anak dengan keterlambatan bicara.', 'color' => 'blue'],
-                        ['title' => 'Slow Learner', 'description' => 'Pendekatan pembelajaran bertahap untuk anak dengan kecepatan belajar yang berbeda.', 'color' => 'green'],
+                        [
+                            'title' => 'Autisme (ASD)', 
+                            'description' => 'Program khusus untuk anak dengan gangguan spektrum autisme dengan pendekatan terstruktur.', 
+                            'color' => 'blue',
+                            'icon' => 'fas fa-puzzle-piece',
+                        ],
+                        [
+                            'title' => 'ADHD', 
+                            'description' => 'Pendekatan pembelajaran khusus untuk anak dengan gangguan pemusatan perhatian dan hiperaktivitas.', 
+                            'color' => 'green',
+                            'icon' => 'fas fa-bolt',
+                        ],
+                        [
+                            'title' => 'Disleksia', 
+                            'description' => 'Metode pembelajaran multisensori untuk anak dengan kesulitan membaca dan menulis.', 
+                            'color' => 'orange',
+                            'icon' => 'fas fa-book-open',
+                        ],
+                        [
+                            'title' => 'Down Syndrome', 
+                            'description' => 'Program stimulasi dan pembelajaran yang disesuaikan untuk anak down syndrome.', 
+                            'color' => 'yellow',
+                            'icon' => 'fas fa-child',
+                        ],
+                        [
+                            'title' => 'Speech Delay', 
+                            'description' => 'Terapi wicara dan program stimulasi bahasa untuk anak dengan keterlambatan bicara.', 
+                            'color' => 'blue',
+                            'icon' => 'fas fa-comments',
+                        ],
+                        [
+                            'title' => 'Slow Learner', 
+                            'description' => 'Pendekatan pembelajaran bertahap untuk anak dengan kecepatan belajar yang berbeda.', 
+                            'color' => 'green',
+                            'icon' => 'fas fa-hourglass-half',
+                        ],
                     ]
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $inklusi->id, 'section_key' => 'team'],
+            [
+                'type' => 'list',
+                'order' => 4,
+                'content' => [
+                    'header' => [
+                        'title' => 'Tim Profesional Kami',
+                    ],
+                    'items' => [
+                        ['title' => 'Psikolog Anak', 'description' => 'Asesmen dan konseling psikologis', 'icon' => 'fas fa-brain', 'color' => 'blue', 'link' => '/profil-guru'],
+                        ['title' => 'Terapis Okupasi', 'description' => 'Terapi motorik dan sensori', 'icon' => 'fas fa-hands-helping', 'color' => 'green', 'link' => '/profil-guru'],
+                        ['title' => 'Terapis Wicara', 'description' => 'Terapi bicara dan bahasa', 'icon' => 'fas fa-microphone', 'color' => 'orange', 'link' => '/profil-guru'],
+                        ['title' => 'Guru Pendamping', 'description' => 'Shadow teacher terlatih', 'icon' => 'fas fa-graduation-cap', 'color' => 'yellow', 'link' => '/profil-guru'],
+                    ]
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $inklusi->id, 'section_key' => 'cta'],
+            [
+                'type' => 'rich_text',
+                'order' => 5,
+                'content' => [
+                    'title' => 'Setiap Anak Berhak Mendapat Pendidikan',
+                    'description' => 'Konsultasikan kebutuhan anak Anda dengan tim ahli kami secara gratis.',
+                    'button_text_1' => 'Daftar Sekarang',
+                    'button_link_1' => '/ppdb',
+                    'button_text_2' => 'Konsultasi Gratis',
+                    'button_link_2' => '/kontak',
+                    'background_gradient_start' => '#d45930',
+                    'background_gradient_end' => '#fac030'
                 ]
             ]
         );
@@ -825,14 +1211,22 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                     'title_highlight' => 'Untuk Pembelajaran Optimal',
                     'subtitle' => 'PKBM House Of Knowledge menyediakan fasilitas lengkap dan modern untuk mendukung proses belajar mengajar yang efektif dan menyenangkan',
                     'background_image' => 'img/bg-fasilitas.jpg',
-                    'stat_1_value' => '20+',
-                    'stat_1_label' => 'Ruang Kelas',
-                    'stat_2_value' => '30+',
-                    'stat_2_label' => 'Alat Terapi',
-                    'stat_3_value' => '3+',
-                    'stat_3_label' => 'Area Bermain',
-                    'stat_4_value' => '1000+',
-                    'stat_4_label' => 'Koleksi Buku',
+                ]
+            ]
+        );
+
+        // Stats Section
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $fasilitas->id, 'section_key' => 'stats'],
+            [
+                'type' => 'list',
+                'order' => 1, // Order same as hero? No, let's keep it separate data-wise but rendered inside Hero view.
+                'content' => [
+                     // Using list items for dynamic stats with icons
+                     ['value' => '20+', 'label' => 'Ruang Kelas', 'icon' => 'chalkboard'],
+                     ['value' => '30+', 'label' => 'Alat Terapi', 'icon' => 'shapes'],
+                     ['value' => '3+', 'label' => 'Area Bermain', 'icon' => 'smile'],
+                     ['value' => '1000+', 'label' => 'Koleksi Buku', 'icon' => 'book'],
                 ]
             ]
         );
@@ -841,18 +1235,28 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
         LandingPageSection::updateOrCreate(
             ['landing_page_id' => $fasilitas->id, 'section_key' => 'ruang_belajar'],
             [
-                'type' => 'rich_text',
+                'type' => 'list',
                 'order' => 2,
                 'content' => [
-                    'badge' => 'Fasilitas Utama',
-                    'title' => 'Ruang Belajar',
-                    'description' => 'Ruang belajar kami dirancang dengan konsep modern dan nyaman untuk menciptakan suasana belajar yang kondusif. Dilengkapi dengan teknologi pembelajaran terkini dan tata ruang yang mendukung interaksi optimal antara guru dan siswa.',
-                    'feature_1_title' => 'Kapasitas 8-15 Siswa',
-                    'feature_1_desc' => 'Ukuran kelas ideal untuk pembelajaran personal',
-                    'feature_2_title' => 'Ruangan Ber AC',
-                    'feature_2_desc' => 'Setiap ruangan dilengkapi dengan AC untuk kenyamanan siswa.',
-                    'feature_3_title' => 'Furniture Ergonomis',
-                    'feature_3_desc' => 'Meja dan kursi yang nyaman untuk belajar',
+                    'header' => [
+                        'badge' => 'Fasilitas Utama',
+                        'title' => 'Ruang Belajar',
+                        'description' => 'Ruang belajar kami dirancang dengan konsep modern dan nyaman untuk menciptakan suasana belajar yang kondusif. Dilengkapi dengan teknologi pembelajaran terkini dan tata ruang yang mendukung interaksi optimal antara guru dan siswa.',
+                        'icon' => 'chalkboard-teacher', // Default Icon
+                        'icon_color' => 'primary',
+                        'feature_1_title' => 'Kapasitas 8-15 Siswa',
+                        'feature_1_desc' => 'Ukuran kelas ideal untuk pembelajaran personal',
+                        'feature_2_title' => 'Ruangan Ber AC',
+                        'feature_2_desc' => 'Setiap ruangan dilengkapi dengan AC untuk kenyamanan siswa.',
+                        'feature_3_title' => 'Furniture Ergonomis',
+                        'feature_3_desc' => 'Meja dan kursi yang nyaman untuk belajar',
+                    ],
+                    'items' => [
+                         ['image' => 'img/fasilitas-ruang-belajar-1.jpg', 'title' => 'Ruang Kelas Modern'],
+                         ['image' => 'img/fasilitas-ruang-belajar-2.jpg', 'title' => 'Suasana Belajar Kondusif'],
+                         ['image' => 'img/fasilitas-ruang-belajar-3.jpg', 'title' => 'Ruang Kelas Dilengkapi Ac'],
+                         ['image' => 'img/fasilitas-ruang-belajar-4.jpg', 'title' => 'Furniture Ergonomis dan Nyaman'],
+                    ]
                 ]
             ]
         );
@@ -861,18 +1265,28 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
         LandingPageSection::updateOrCreate(
             ['landing_page_id' => $fasilitas->id, 'section_key' => 'ruang_terapi'],
             [
-                'type' => 'rich_text',
+                'type' => 'list',
                 'order' => 3,
                 'content' => [
-                    'badge' => 'Program Terapi',
-                    'title' => 'Ruang Terapi',
-                    'description' => 'Menyediakan berbagai alat terapi yang digunakan khusus untuk mendukung perkembangan motorik dan sensorik pada anak-anak berkebutuhan khusus.',
-                    'feature_1_title' => 'Banyak Variasi',
-                    'feature_1_desc' => 'Disesuaikan Kebutuhan Siswa',
-                    'feature_2_title' => 'Warna dan Bentuk Menarik',
-                    'feature_2_desc' => 'Menarik perhatian siswa',
-                    'feature_3_title' => 'Aman Digunakan',
-                    'feature_3_desc' => 'Terjamin menggunakan alat terapi yang aman',
+                    'header' => [
+                        'badge' => 'Program Terapi',
+                        'title' => 'Ruang Terapi',
+                        'description' => 'Menyediakan berbagai alat terapi yang digunakan khusus untuk mendukung perkembangan motorik dan sensorik pada anak-anak berkebutuhan khusus.',
+                        'icon' => 'heartbeat', // Default Icon
+                        'icon_color' => 'accent-orange',
+                        'feature_1_title' => 'Banyak Variasi',
+                        'feature_1_desc' => 'Disesuaikan Kebutuhan Siswa',
+                        'feature_2_title' => 'Warna dan Bentuk Menarik',
+                        'feature_2_desc' => 'Menarik perhatian siswa',
+                        'feature_3_title' => 'Aman Digunakan',
+                        'feature_3_desc' => 'Terjamin menggunakan alat terapi yang aman',
+                    ],
+                    'items' => [
+                        ['image' => 'img/fasilitas-ruang-terapi-1.jpg', 'title' => 'Ruang Terapi Lengkap'],
+                        ['image' => 'img/fasilitas-ruang-terapi-2.jpg', 'title' => 'Alat Terapi Sensorik'],
+                        ['image' => 'img/fasilitas-ruang-terapi-3.jpg', 'title' => 'Ruang Terapi Anak Berkebutuhan Khusus'],
+                        ['image' => 'img/fasilitas-ruang-terapi-4.jpg', 'title' => 'Fasilitas Ruang Terapi'],
+                    ]
                 ]
             ]
         );
@@ -881,18 +1295,52 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
         LandingPageSection::updateOrCreate(
             ['landing_page_id' => $fasilitas->id, 'section_key' => 'area_bermain'],
             [
-                'type' => 'rich_text',
+                'type' => 'list',
                 'order' => 4,
                 'content' => [
-                    'badge' => 'Fasilitas Rekreasi',
-                    'title' => 'Area Bermain',
-                    'description' => 'Area bermain yang luas dan aman untuk mengembangkan motorik kasar anak. Dilengkapi dengan berbagai permainan edukatif yang mendukung perkembangan fisik dan sosial anak.',
-                    'feature_1_title' => 'Playground Aman',
-                    'feature_1_desc' => 'Fasilitas bermain dengan standar keamanan tinggi',
-                    'feature_2_title' => 'Indoor & Outdoor',
-                    'feature_2_desc' => 'Area bermain dalam dan luar ruangan',
-                    'feature_3_title' => 'Permainan Edukatif',
-                    'feature_3_desc' => 'Bermain sambil belajar',
+                    'header' => [
+                        'badge' => 'Fasilitas Rekreasi',
+                        'title' => 'Area Bermain',
+                        'description' => 'Area bermain yang luas dan aman untuk mengembangkan motorik kasar anak. Dilengkapi dengan berbagai permainan edukatif yang mendukung perkembangan fisik dan sosial anak.',
+                        'icon' => 'shapes', // Default Icon
+                        'icon_color' => 'accent-yellow',
+                        'feature_1_title' => 'Playground Aman',
+                        'feature_1_desc' => 'Fasilitas bermain dengan standar keamanan tinggi',
+                        'feature_2_title' => 'Indoor & Outdoor',
+                        'feature_2_desc' => 'Area bermain dalam dan luar ruangan',
+                        'feature_3_title' => 'Permainan Edukatif',
+                        'feature_3_desc' => 'Bermain sambil belajar',
+                    ],
+                    'items' => [
+                        ['image' => 'img/fasilitas-area-bermain-1.jpg', 'title' => 'Playground Outdoor'],
+                        ['image' => 'img/fasilitas-area-bermain-2.jpg', 'title' => 'Area Bermain Indoor'],
+                        ['image' => 'img/fasilitas-area-bermain-3.jpg', 'title' => 'Zona Bermain Aman'],
+                        ['image' => 'img/fasilitas-area-bermain-4.jpg', 'title' => 'Permainan Edukatif'],
+                    ]
+                ]
+            ]
+        );
+
+        // Gallery Section
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $fasilitas->id, 'section_key' => 'gallery'],
+            [
+                'type' => 'list',
+                'order' => 6, // Order after Perpustakaan (which is 5 in LibrarySeeder)
+                'content' => [
+                    'header' => [
+                        'badge' => 'Galeri Fasilitas',
+                        'title' => 'Fasilitas Lainnya',
+                        'description' => 'Lihat berbagai fasilitas pendukung lainnya yang kami sediakan untuk kenyamanan belajar siswa',
+                    ],
+                    'items' => [
+                        ['image' => 'img/gallery-fasilitas-1.jpg', 'title' => 'Aula'],
+                        ['image' => 'img/gallery-fasilitas-2.jpg', 'title' => 'Ruang Musik'],
+                        ['image' => 'img/gallery-fasilitas-3.jpg', 'title' => 'Laboratorium Komputer'],
+                        ['image' => 'img/gallery-fasilitas-4.jpg', 'title' => 'Kantin Sehat'],
+                        ['image' => 'img/gallery-fasilitas-5.jpg', 'title' => 'UKS'],
+                        ['image' => 'img/gallery-fasilitas-6.jpg', 'title' => 'Musholla'],
+                    ]
                 ]
             ]
         );
@@ -980,6 +1428,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'subtitle' => 'Pendidikan Anak Usia Dini',
                         'badge_text' => 'Mulai Rp 600rb/bln',
                         'color' => 'yellow',
+                        'icon' => 'fa-palette',
                     ],
                     'items' => [
                         ['name' => 'Pendaftaran', 'price' => 'Rp 200.000', 'type' => 'pokok'],
@@ -1006,6 +1455,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'subtitle' => 'Sekolah Dasar',
                         'badge_text' => 'Mulai Rp 1 Jt/bln',
                         'color' => 'blue',
+                        'icon' => 'fa-book',
                     ],
                     'items' => [
                         ['name' => 'Pendaftaran', 'price' => 'Rp 200.000', 'type' => 'pokok'],
@@ -1032,6 +1482,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'subtitle' => 'Sekolah Menengah Pertama',
                         'badge_text' => 'Mulai Rp 1.3 Jt/bln',
                         'color' => 'green',
+                        'icon' => 'fa-book-open',
                     ],
                     'items' => [
                         ['name' => 'Pendaftaran', 'price' => 'Rp 200.000', 'type' => 'pokok'],
@@ -1058,6 +1509,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
                         'subtitle' => 'Sekolah Menengah Atas',
                         'badge_text' => 'Mulai Rp 1.5 Jt/bln',
                         'color' => 'orange',
+                        'icon' => 'fa-graduation-cap',
                     ],
                     'items' => [
                         ['name' => 'Pendaftaran', 'price' => 'Rp 200.000', 'type' => 'pokok'],

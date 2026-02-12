@@ -246,6 +246,30 @@ section {
     @php 
         $hero = $page->getSection('hero');
         $heroContent = $hero->content ?? []; 
+        
+        $statsSection = $page->getSection('stats');
+        $statsItems = $statsSection->content ?? [];
+
+        $program = $page->getSection('program');
+        $programContent = $program->content ?? [];
+        $programHeader = $programContent['header'] ?? [];
+        $programItems = $programContent['items'] ?? [];
+
+        $newsHeaderSection = $page->getSection('news_header');
+        $newsHeader = $newsHeaderSection->content ?? [];
+
+        $gallerySection = $page->getSection('gallery_section');
+        $galleryContent = $gallerySection->content ?? [];
+        $galleryHeader = $galleryContent['header'] ?? [];
+        $galleryItems = $galleryContent['items'] ?? [];
+
+        $contactSection = $page->getSection('contact_section');
+        $contactContent = $contactSection->content ?? [];
+        $contactHeader = $contactContent['header'] ?? [];
+        $contactItems = $contactContent['items'] ?? [];
+
+        $ctaSection = $page->getSection('cta_section');
+        $ctaContent = $ctaSection->content ?? [];
     @endphp
     <section class="relative min-h-screen flex items-center" style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
         <div class="hero-overlay absolute inset-0"></div>
@@ -333,31 +357,45 @@ section {
     <section id="stats" class="relative -mt-16 z-20 pb-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-                @php
-                    $statsSection = $page->getSection('stats');
-                    $statsItems = $statsSection->content ?? [];
-                @endphp
+                {{-- Logic moved to top php block --}}
 
                 @foreach($statsItems as $index => $stat)
+                @php
+                    $isHex = isset($stat['icon_color']) && substr($stat['icon_color'], 0, 1) === '#';
+                    $themeColor = $stat['icon_color'] ?? 'primary';
+                    
+                    // Fallback for classes
+                    $bgClass = $isHex ? '' : 'bg-' . $themeColor . '/10';
+                    $textClass = $isHex ? '' : 'text-' . $themeColor;
+                    
+                    // Inline styles for Hex
+                    $bgStyle = $isHex ? "background-color: {$themeColor}1A;" : ""; // 10% opacity
+                    $textStyle = $isHex ? "color: $themeColor;" : "";
+                @endphp
                 <div class="text-center">
-                    <div class="w-16 h-16 mx-auto mb-4 bg-{{ $stat['icon_color'] ?? 'primary' }}/10 rounded-2xl flex items-center justify-center">
-                        {{-- Icon logic based on index or type --}}
-                        @if($index == 0)
-                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
-                        </svg>
-                        @elseif($index == 1)
-                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
-                             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                        </svg>
-                        @elseif($index == 2)
-                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
-                        </svg>
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center {{ $bgClass }}" style="{{ $bgStyle }}">
+                        {{-- Dynamic Icon or Fallback --}}
+                        @if(!empty($stat['icon']) && str_contains($stat['icon'], '/'))
+                             <img src="{{ asset($stat['icon']) }}" alt="{{ $stat['label'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
                         @else
-                        <svg class="w-8 h-8 text-{{ $stat['icon_color'] ?? 'primary' }}" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
+                            {{-- Fallback SVGs with color --}}
+                            @if($index == 0)
+                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                            </svg>
+                            @elseif($index == 1)
+                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                            </svg>
+                            @elseif($index == 2)
+                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                            </svg>
+                            @else
+                            <svg class="w-8 h-8 {{ $textClass }}" style="{{ $textStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            @endif
                         @endif
                     </div>
                     <p class="text-3xl font-bold text-gray-800">{{ $stat['value'] ?? '0' }}</p>
@@ -372,12 +410,7 @@ section {
     <section id="program" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            @php
-                $program = $page->getSection('program');
-                $programContent = $program->content ?? [];
-                $programHeader = $programContent['header'] ?? [];
-                $programItems = $programContent['items'] ?? [];
-            @endphp
+            {{-- Logic moved to top php block --}}
             
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
@@ -392,29 +425,39 @@ section {
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                @php
-                    $colorMap = [
-                        'primary' => 'blue',
-                        'secondary' => 'green',
-                        'accent-orange' => 'orange',
-                        'accent-yellow' => 'yellow'
-                    ];
-                @endphp
                 @foreach($programItems as $item)
                 @php
+                    $isHex = isset($item['color']) && substr($item['color'], 0, 1) === '#';
                     $themeColor = $item['color'] ?? 'primary';
-                    $shadeColor = $colorMap[$themeColor] ?? 'blue';
+                    $shadeMap = ['primary' => 'blue', 'secondary' => 'green', 'accent-orange' => 'orange', 'accent-yellow' => 'yellow'];
+                    $shadeColor = $shadeMap[$themeColor] ?? 'blue';
+
+                    // Fallback classes
+                    $borderClass = $isHex ? '' : 'border-' . $themeColor;
+                    $bgIconClass = $isHex ? '' : 'bg-' . $shadeColor . '-50';
+                    $groupHoverIconBgClass = $isHex ? '' : 'group-hover:bg-' . $themeColor;
+                    $iconColorClass = $isHex ? '' : 'text-' . $themeColor;
+                    
+                    // Inline styles
+                    $cardStyle = $isHex ? "border-top-color: $themeColor;" : "";
+                    $iconBgStyle = $isHex ? "background-color: {$themeColor}10;" : ""; // ~6% opacity
+                    $iconStyle = $isHex ? "color: $themeColor;" : "";
                 @endphp
-                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 border-{{ $themeColor }} group">
-                    <div class="w-20 h-20 mx-auto mb-6 bg-{{ $shadeColor }}-50 rounded-2xl flex items-center justify-center group-hover:bg-{{ $themeColor }} transition-colors duration-300">
+                <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 {{ $borderClass }} group" style="{{ $cardStyle }}">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center {{ $bgIconClass }} {{ $groupHoverIconBgClass }} transition-colors duration-300" 
+                         style="{{ $iconBgStyle }} {{ $isHex ? 'border: 1px solid '.$themeColor.'20;' : '' }}">
                         {{-- Icon placeholder --}}
-                        <svg class="w-10 h-10 text-{{ $themeColor }} group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
-                        </svg>
+                        @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Program' }}" class="w-10 h-10 object-contain">
+                        @else
+                            <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
+                            </svg>
+                        @endif
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] }}</h3>
                     <p class="text-gray-600 text-sm mb-4">{{ $item['description'] }}</p>
-                    <a href="{{ url($item['link'] ?? '#') }}" class="text-primary font-semibold hover:text-secondary transition inline-flex items-center">
+                    <a href="{{ url($item['link'] ?? '#') }}" class="font-semibold hover:opacity-80 transition inline-flex items-center {{ $isHex ? '' : 'text-primary hover:text-secondary' }}" style="{{ $isHex ? 'color: '.$themeColor : '' }}">
                         Selengkapnya
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
@@ -491,11 +534,11 @@ section {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <span class="inline-block px-4 py-2 bg-white/20 text-white text-sm font-medium rounded-full mb-4">
-                    Berita Terbaru
+                    {{ $newsHeader['badge'] ?? 'Berita Terbaru' }}
                 </span>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">News</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{{ $newsHeader['title'] ?? 'News' }}</h2>
                 <p class="text-white/80 max-w-2xl mx-auto">
-                    Ikuti perkembangan terbaru dari kegiatan dan prestasi PKBM House Of Knowledge
+                    {{ $newsHeader['description'] ?? 'Ikuti perkembangan terbaru dari kegiatan dan prestasi PKBM House Of Knowledge' }}
                 </p>
             </div>
 
@@ -554,31 +597,22 @@ section {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                    Galeri Kami
+                    {{ $galleryHeader['badge'] ?? 'Galeri Kami' }}
                 </span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Galeri</h2>
-                <p class="text-gray-600">Berisi Kegiatan Siswa Dan Siswi</p>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{{ $galleryHeader['title'] ?? 'Galeri' }}</h2>
+                <p class="text-gray-600">{{ $galleryHeader['description'] ?? 'Berisi Kegiatan Siswa Dan Siswi' }}</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="gallery-item rounded-2xl shadow-lg">
-                    <img src="{{ asset('img/gallery-1.jpg') }}" alt="Gallery 1" class="w-full h-64 object-cover rounded-2xl">
-                </div>
-                <div class="gallery-item rounded-2xl shadow-lg">
-                    <img src="{{ asset('img/gallery-2.jpg') }}" alt="Gallery 2" class="w-full h-64 object-cover rounded-2xl">
-                </div>
-                <div class="gallery-item rounded-2xl shadow-lg">
-                    <img src="{{ asset('img/gallery-3.jpg') }}" alt="Gallery 3" class="w-full h-64 object-cover rounded-2xl">
-                </div>
-                <div class="gallery-item rounded-2xl shadow-lg">
-                    <img src="{{ asset('img/gallery-4.jpg') }}" alt="Gallery 4" class="w-full h-64 object-cover rounded-2xl">
-                </div>
-                <div class="gallery-item rounded-2xl shadow-lg">
-                    <img src="{{ asset('img/gallery-5.jpg') }}" alt="Gallery 5" class="w-full h-64 object-cover rounded-2xl">
-                </div>
-                <div class="gallery-item rounded-2xl shadow-lg">
-                    <img src="{{ asset('img/gallery-6.jpg') }}" alt="Gallery 6" class="w-full h-64 object-cover rounded-2xl">
-                </div>
+                @if(!empty($galleryItems))
+                    @foreach($galleryItems as $item)
+                    <div class="gallery-item rounded-2xl shadow-lg">
+                        <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="Gallery Item" class="w-full h-64 object-cover rounded-2xl">
+                    </div>
+                    @endforeach
+                @else
+                    <div class="col-span-3 text-center py-4 text-gray-500">Belum ada galeri.</div>
+                @endif
             </div>
 
             <div class="text-center mt-12">
@@ -602,81 +636,64 @@ section {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                    Lokasi Kami
+                    {{ $contactHeader['badge'] ?? 'Lokasi Kami' }}
                 </span>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                    Kunjungi Cabang Terdekat
+                    {{ $contactHeader['title'] ?? 'Kunjungi Cabang Terdekat' }}
                 </h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">
-                    PKBM House Of Knowledge hadir di 3 lokasi strategis untuk memudahkan akses pendidikan bagi putra-putri Anda.
+                    {{ $contactHeader['description'] ?? 'PKBM House Of Knowledge hadir di 3 lokasi strategis untuk memudahkan akses pendidikan bagi putra-putri Anda.' }}
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 border-accent-orange group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-orange-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                @foreach($contactItems as $item)
+                @php
+                    $isHex = isset($item['color']) && substr($item['color'], 0, 1) === '#';
+                    $themeColor = $item['color'] ?? 'primary';
+                    // Fallback for classes
+                    $borderColorClass = $isHex ? '' : 'border-' . $themeColor;
+                    $bgShadeClass = $isHex ? '' : ($item['shade_color'] ?? 'blue') . '-50';
+                    $iconBgClass = $isHex ? '' : ($item['shade_color'] ?? 'blue') . '-100';
+                    $textColorClass = $isHex ? '' : 'text-' . $themeColor;
+                    
+                    // Inline styles for Hex
+                    $cardStyle = $isHex ? "border-bottom-color: $themeColor;" : "";
+                    $bgStyle = $isHex ? "background-color: {$themeColor}10;" : ""; // 10 = ~6% opacity
+                    $iconBgStyle = $isHex ? "background-color: {$themeColor}20; color: $themeColor;" : "";
+                    $textStyle = $isHex ? "color: $themeColor;" : "";
+                @endphp
+                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 {{ $borderColorClass }} group relative overflow-hidden" 
+                     style="{{ $cardStyle }}">
+                    
+                    {{-- Decorative Background Circle --}}
+                    <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 bg-{{ $isHex ? '' : ($item['shade_color'] ?? 'blue').'-50' }}"
+                         style="{{ $bgStyle }}"></div>
 
                     <div class="relative z-10">
-                        <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-6 text-accent-orange group-hover:bg-accent-orange group-hover:text-white transition-all duration-300">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
+                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 {{ $isHex ? '' : "bg-" . ($item['shade_color'] ?? 'blue') . "-100 text-$themeColor group-hover:bg-$themeColor group-hover:text-white" }}"
+                             style="{{ $iconBgStyle }}">
+                             @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                                 <img src="{{ asset($item['icon']) }}" alt="Icon" class="w-8 h-8 object-contain">
+                            @else
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                            @endif
                         </div>
 
-                        <h3 class="text-xl font-bold text-gray-800 mb-1">Gedung Utama PKBM House Of Knowledge </h3>
-                        <p class="text-sm text-accent-orange font-medium uppercase tracking-wider mb-4">Pamulang Barat</p>
+                        <h3 class="text-xl font-bold text-gray-800 mb-1">{{ $item['title'] ?? '' }}</h3>
+                        <p class="text-sm font-medium uppercase tracking-wider mb-4 {{ $textColorClass }}" style="{{ $textStyle }}">
+                            {{ $item['subtitle'] ?? '' }}
+                        </p>
 
                         <p class="text-gray-600 text-sm leading-relaxed mb-4">
-                            Jl. Ruko Reni Jaya Blok AF No. 22-23<br>
-                            Pamulang Barat, Tangerang Selatan<br>
-                            Banten 15417
+                            {!! nl2br(e($item['address'] ?? '')) !!}
                         </p>
                     </div>
                 </div>
-
-                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 border-primary group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-
-                    <div class="relative z-10">
-                        <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
-                            </svg>
-                        </div>
-
-                        <h3 class="text-xl font-bold text-gray-800 mb-1">PAUD House Of Knowledge</h3>
-                        <p class="text-sm text-primary font-medium uppercase tracking-wider mb-4">Pamulang</p>
-
-                        <p class="text-gray-600 text-sm leading-relaxed mb-4">
-                            Jl. Bratasena I, Pondok Benda<br>
-                            Pamulang, Tangerang Selatan<br>
-                            Banten 15417
-                        </p>
-                    </div>
-                </div>
-
-                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 border-secondary group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-
-                    <div class="relative z-10">
-                        <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6 text-secondary group-hover:bg-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
-                        </div>
-
-                        <h3 class="text-xl font-bold text-gray-800 mb-1">House Of Knowledge Cimanggis</h3>
-                        <p class="text-sm text-secondary font-medium uppercase tracking-wider mb-4">Ciputat</p>
-
-                        <p class="text-gray-600 text-sm leading-relaxed mb-4">
-                            Jl. Otista Raya Blok A25<br>
-                            Ruko Prima Ciputat, Tangerang Selatan<br>
-                            Banten 15417
-                        </p>
-                    </div>
-                </div>
-
+                @endforeach
             </div>
 
             <div class="text-center mt-12">
@@ -692,7 +709,30 @@ section {
         </div>
     </section>
 
-    <x-cta></x-cta>
+    <!-- Dynamic CTA -->
+    <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                {{ $ctaContent['title'] ?? 'Siap Bergabung Bersama Kami?' }}
+            </h2>
+            <p class="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+                {{ $ctaContent['description'] ?? 'Daftarkan putra-putri Anda sekarang dan berikan mereka pendidikan terbaik untuk masa depan yang cerah.' }}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ url($ctaContent['button_link_1'] ?? '/ppdb') }}"
+                    class="inline-flex items-center justify-center px-8 py-4 bg-white text-primary hover:bg-cream font-semibold rounded-full transition-all duration-300 hover:-translate-y-1 shadow-lg">
+                    {{ $ctaContent['button_text_1'] ?? 'Daftar Sekarang' }}
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="{{ url($ctaContent['button_link_2'] ?? '/kontak') }}"
+                    class="inline-flex items-center justify-center px-8 py-4 bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary font-semibold rounded-full transition-all duration-300">
+                    {{ $ctaContent['button_text_2'] ?? 'Hubungi Kami' }}
+                </a>
+            </div>
+        </div>
+    </section>
 
     <x-footer></x-footer>
 

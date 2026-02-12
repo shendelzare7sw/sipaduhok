@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -55,12 +56,22 @@
         // Get Paket A, B, C sections
         $paketASection = $page->getSection('paket_a');
         $paketAContent = $paketASection->content ?? [];
+        $mataPelajaranASection = $page->getSection('mata_pelajaran_a');
+        $mataPelajaranAContent = $mataPelajaranASection->content ?? [];
 
         $paketBSection = $page->getSection('paket_b');
         $paketBContent = $paketBSection->content ?? [];
+        $mataPelajaranBSection = $page->getSection('mata_pelajaran_b');
+        $mataPelajaranBContent = $mataPelajaranBSection->content ?? [];
+        $keunggulanBSection = $page->getSection('keunggulan_b');
+        $keunggulanBContent = $keunggulanBSection->content ?? [];
 
         $paketCSection = $page->getSection('paket_c');
         $paketCContent = $paketCSection->content ?? [];
+        $jurusanCSection = $page->getSection('jurusan_c');
+        $jurusanCContent = $jurusanCSection->content ?? [];
+        $prospekCSection = $page->getSection('prospek_c');
+        $prospekCContent = $prospekCSection->content ?? [];
     @endphp
 
     <x-navbar></x-navbar>
@@ -92,17 +103,17 @@
 
     <!-- SD • Paket A -->
     <div id="tab-sd" class="tab-content">
-        @include('partials.program-sd-content', ['content' => $paketAContent])
+        @include('partials.program-sd-content', ['content' => $paketAContent, 'mataPelajaran' => $mataPelajaranAContent])
     </div>
 
     <!-- SMP • Paket B -->
     <div id="tab-smp" class="tab-content hidden">
-        @include('partials.program-smp-content', ['content' => $paketBContent])
+        @include('partials.program-smp-content', ['content' => $paketBContent, 'mataPelajaran' => $mataPelajaranBContent, 'keunggulan' => $keunggulanBContent])
     </div>
 
     <!-- SMA • Paket C -->
     <div id="tab-sma" class="tab-content hidden">
-        @include('partials.program-sma-content', ['content' => $paketCContent])
+        @include('partials.program-sma-content', ['content' => $paketCContent, 'jurusan' => $jurusanCContent, 'prospek' => $prospekCContent])
     </div>
 
     <!-- SIMPLE SCRIPT TO SWITCH TAB -->

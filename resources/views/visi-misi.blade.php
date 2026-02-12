@@ -99,7 +99,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($misiItems as $index => $item)
                     @php
-                        $itemColor = $colorMap[$item['color'] ?? 'primary'] ?? '#165fac';
+                        $colorValue = $item['color'] ?? 'primary';
+                        // Check if it's a hex code
+                        if (str_starts_with($colorValue, '#')) {
+                            $itemColor = $colorValue;
+                        } else {
+                            $itemColor = $colorMap[$colorValue] ?? '#165fac';
+                        }
                     @endphp
                     <div class="bg-gray-50 rounded-2xl p-6 border-t-4 hover:shadow-lg transition"
                         style="border-color: {{ $itemColor }}">
@@ -139,10 +145,18 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 @foreach($valuesItems as $item)
                     @php
-                        $iconClass = $iconColorMap[$item['icon_color'] ?? 'orange'] ?? 'text-orange-400';
+                        $iconColorValue = $item['icon_color'] ?? 'orange';
+                        $isHex = str_starts_with($iconColorValue, '#');
+                        $iconClass = $isHex ? '' : ($iconColorMap[$iconColorValue] ?? 'text-orange-400');
+                        $iconStyle = $isHex ? "color: {$iconColorValue};" : "";
                     @endphp
                     <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
-                        <div class="text-4xl mb-3"><i class="{{ $item['icon'] ?? 'fas fa-star' }} {{ $iconClass }}"></i>
+                        <div class="text-4xl mb-3 flex justify-center">
+                             @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                                <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-12 h-12 object-contain">
+                             @else
+                                <i class="{{ $item['icon'] ?? 'fas fa-star' }} {{ $iconClass }}" style="{{ $iconStyle }}"></i>
+                             @endif
                         </div>
                         <h3 class="text-white font-bold">{{ $item['title'] }}</h3>
                     </div>

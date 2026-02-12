@@ -204,18 +204,23 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($programsItems as $program)
                     @php
-                        $color = $colorMap[$program['color'] ?? 'blue'] ?? $colorMap['blue'];
+                        $inputColor = $program['color'] ?? 'blue';
+                        $color = $colorMap[$inputColor] ?? ['border' => $inputColor, 'bg' => $inputColor, 'text' => $inputColor];
                         $features = isset($program['features']) ? explode('|', $program['features']) : [];
                     @endphp
                     <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border-t-4"
                         style="border-color: {{ $color['border'] }}">
                         <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto"
                             style="background-color: {{ $color['bg'] }}20">
-                            <svg class="w-8 h-8" style="color: {{ $color['text'] }}" fill="currentColor"
-                                viewBox="0 0 20 20">
-                                <path
-                                    d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z" />
-                            </svg>
+                            @if(!empty($program['icon']) && str_contains($program['icon'], '/'))
+                                <img src="{{ asset($program['icon']) }}" alt="{{ $program['name'] }}" class="w-10 h-10 object-contain">
+                            @else
+                                <svg class="w-8 h-8" style="color: {{ $color['text'] }}" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838l-2.727 1.17 1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z" />
+                                </svg>
+                            @endif
                         </div>
                         <h3 class="text-2xl font-bold text-gray-800 mb-3 text-center">{{ $program['name'] }}</h3>
                         <p class="text-center text-3xl font-bold mb-4" style="color: {{ $color['text'] }}">
@@ -256,16 +261,23 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($kurikulumItems as $item)
-                    @php $color = $colorMap[$item['color'] ?? 'blue'] ?? $colorMap['blue']; @endphp
+                    @php
+                        $inputColor = $item['color'] ?? 'blue';
+                        $color = $colorMap[$inputColor] ?? ['border' => $inputColor, 'bg' => $inputColor, 'text' => $inputColor];
+                    @endphp
                     <div class="card-hover bg-gray-50 rounded-2xl p-8 border-l-4"
                         style="border-color: {{ $color['border'] }}">
                         <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
                             style="background-color: {{ $color['bg'] }}20">
-                            <svg class="w-7 h-7" style="color: {{ $color['text'] }}" fill="currentColor"
-                                viewBox="0 0 20 20">
-                                <path
-                                    d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-                            </svg>
+                            @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                                <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-9 h-9 object-contain">
+                            @else
+                                <svg class="w-7 h-7" style="color: {{ $color['text'] }}" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+                                </svg>
+                            @endif
                         </div>
                         <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] }}</h3>
                         <p class="text-gray-600">{{ $item['description'] }}</p>
@@ -321,15 +333,22 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach($fasilitasItems as $facility)
-                    @php $color = $colorMap[$facility['color'] ?? 'blue'] ?? $colorMap['blue']; @endphp
+                    @php
+                        $inputColor = $facility['color'] ?? 'blue';
+                        $color = $colorMap[$inputColor] ?? ['border' => $inputColor, 'bg' => $inputColor, 'text' => $inputColor];
+                    @endphp
                     <div class="bg-gray-50 rounded-xl p-6 text-center">
                         <div class="w-14 h-14 rounded-full flex items-center justify-center mb-4 mx-auto"
                             style="background-color: {{ $color['bg'] }}20">
-                            <svg class="w-7 h-7" style="color: {{ $color['text'] }}" fill="currentColor"
-                                viewBox="0 0 20 20">
-                                <path
-                                    d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-                            </svg>
+                            @if(!empty($facility['icon']) && str_contains($facility['icon'], '/'))
+                                <img src="{{ asset($facility['icon']) }}" alt="{{ $facility['title'] }}" class="w-9 h-9 object-contain">
+                            @else
+                                <svg class="w-7 h-7" style="color: {{ $color['text'] }}" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                                </svg>
+                            @endif
                         </div>
                         <h4 class="font-bold text-gray-800 mb-2">{{ $facility['title'] }}</h4>
                         <p class="text-sm text-gray-600">{{ $facility['description'] }}</p>

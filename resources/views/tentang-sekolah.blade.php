@@ -71,6 +71,19 @@
     @php
         $aboutSection = $page->getSection('intro');
         $aboutContent = $aboutSection->content ?? [];
+
+        $historySection = $page->getSection('history');
+        $historyContent = $historySection->content ?? [];
+        $historyHeader = $historyContent['header'] ?? [];
+        $historyItems = $historyContent['items'] ?? [];
+
+        $whySection = $page->getSection('why_choose_us');
+        $whyContent = $whySection->content ?? [];
+        $whyHeader = $whyContent['header'] ?? [];
+        $whyItems = $whyContent['items'] ?? [];
+
+        $ctaSection = $page->getSection('cta');
+        $ctaContent = $ctaSection->content ?? [];
     @endphp
     <!-- About Section -->
     <section class="py-20">
@@ -150,17 +163,16 @@
     </section>
 
 
-    <!-- ✔✔✔ SEJARAH DIGABUNG DI SINI -->
+    <!-- History Section -->
+    @if(!empty($historyItems))
     <section class="py-20 bg-white">
         <div class="max-w-4xl mx-auto px-4 text-center">
             <span class="inline-block bg-[#165fac]/10 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                Perjalanan Kami
+                {{ $historyHeader['badge'] ?? 'Perjalanan Kami' }}
             </span>
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">Sejarah PKBM House Of Knowledge</h2>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $historyHeader['title'] ?? 'Sejarah PKBM House Of Knowledge' }}</h2>
             <p class="text-gray-600 text-lg leading-relaxed">
-                PKBM House Of Knowledge didirikan dengan semangat untuk memberikan pendidikan berkualitas yang dapat
-                diakses oleh semua kalangan.
-                Berikut adalah perjalanan kami dari awal hingga saat ini.
+                {{ $historyHeader['description'] ?? '' }}
             </p>
         </div>
     </section>
@@ -173,180 +185,78 @@
 
             <div class="space-y-12">
 
-                <!-- 2014 -->
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/2 md:text-right md:pr-12">
-                        <div
-                            class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 md:border-l-0 md:border-r-4 border-[#165fac]">
-                            <span
-                                class="inline-block bg-[#165fac] text-white px-4 py-1 rounded-full text-sm font-bold mb-3">2014</span>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Awal Pendirian</h3>
-                            <p class="text-gray-600">PKBM House Of Knowledge didirikan dengan 5 orang guru dan 20 siswa
-                                pertama. Dimulai dari sebuah rumah sederhana dengan cita-cita besar.</p>
+                @foreach($historyItems as $index => $item)
+                    <div class="flex flex-col md:flex-row{{ $index % 2 != 0 ? '-reverse' : '' }} items-center gap-8">
+                        <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12' }}">
+                            <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 {{ $index % 2 == 0 ? 'md:border-l-0 md:border-r-4' : '' }}" 
+                                 style="border-color: {{ $item['color'] ?? '#165fac' }}">
+                                <span class="inline-block text-white px-4 py-1 rounded-full text-sm font-bold mb-3"
+                                      style="background-color: {{ $item['color'] ?? '#165fac' }}">
+                                    {{ $item['year'] ?? '' }}
+                                </span>
+                                <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $item['title'] ?? '' }}</h3>
+                                <p class="text-gray-600">{{ $item['description'] ?? '' }}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="hidden md:flex w-8 h-8 bg-[#165fac] rounded-full items-center justify-center z-10">
-                        <div class="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                    <div class="md:w-1/2 md:pl-12">
-                        <img src="{{ asset('img/sejarah-1.jpg') }}"
-                            class="rounded-2xl shadow-lg w-full h-48 object-cover">
-                    </div>
-                </div>
+                        
+                        <div class="hidden md:flex w-8 h-8 rounded-full items-center justify-center z-10"
+                             style="background-color: {{ $item['color'] ?? '#165fac' }}">
+                            <div class="w-3 h-3 bg-white rounded-full"></div>
+                        </div>
 
-                <!-- 2016 -->
-                <div class="flex flex-col md:flex-row-reverse items-center gap-8">
-                    <div class="md:w-1/2 md:text-left md:pl-12">
-                        <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 border-[#287f3b]">
-                            <span
-                                class="inline-block bg-[#287f3b] text-white px-4 py-1 rounded-full text-sm font-bold mb-3">2016</span>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Pengembangan Program</h3>
-                            <p class="text-gray-600">Membuka program pendidikan kesetaraan Paket A, B, dan C. Jumlah
-                                siswa meningkat menjadi 100 orang.</p>
+                        <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:pl-12' : 'md:pr-12' }}">
+                            <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}"
+                                class="rounded-2xl shadow-lg w-full h-48 object-cover">
                         </div>
                     </div>
-                    <div class="hidden md:flex w-8 h-8 bg-[#287f3b] rounded-full items-center justify-center z-10">
-                        <div class="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                    <div class="md:w-1/2 md:pr-12">
-                        <img src="{{ asset('img/sejarah-2.jpg') }}"
-                            class="rounded-2xl shadow-lg w-full h-48 object-cover">
-                    </div>
-                </div>
-
-                <!-- 2018 -->
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/2 md:text-right md:pr-12">
-                        <div
-                            class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 md:border-l-0 md:border-r-4 border-[#d45930]">
-                            <span
-                                class="inline-block bg-[#d45930] text-white px-4 py-1 rounded-full text-sm font-bold mb-3">2018</span>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Program Inklusi</h3>
-                            <p class="text-gray-600">Meluncurkan program pendidikan inklusi untuk anak berkebutuhan
-                                khusus dengan fasilitas terapi lengkap.</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:flex w-8 h-8 bg-[#d45930] rounded-full items-center justify-center z-10">
-                        <div class="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                    <div class="md:w-1/2 md:pl-12">
-                        <img src="{{ asset('img/sejarah-3.jpg') }}"
-                            class="rounded-2xl shadow-lg w-full h-48 object-cover">
-                    </div>
-                </div>
-
-                <!-- 2020 -->
-                <div class="flex flex-col md:flex-row-reverse items-center gap-8">
-                    <div class="md:w-1/2 md:text-left md:pl-12">
-                        <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 border-[#fac030]">
-                            <span
-                                class="inline-block bg-[#fac030] text-white px-4 py-1 rounded-full text-sm font-bold mb-3">2023</span>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Gedung Baru</h3>
-                            <p class="text-gray-600">Pindah ke gedung baru yang lebih luas di Pamulang dengan fasilitas
-                                modern dan lengkap.</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:flex w-8 h-8 bg-[#fac030] rounded-full items-center justify-center z-10">
-                        <div class="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                    <div class="md:w-1/2 md:pr-12">
-                        <img src="{{ asset('img/sejarah-4.jpg') }}"
-                            class="rounded-2xl shadow-lg w-full h-48 object-cover">
-                    </div>
-                </div>
-
-                <!-- 2024 -->
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/2 md:text-right md:pr-12">
-                        <div
-                            class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 md:border-l-0 md:border-r-4 border-[#165fac]">
-                            <span
-                                class="inline-block bg-[#165fac] text-white px-4 py-1 rounded-full text-sm font-bold mb-3">2025</span>
-                            <h3 class="text-xl font-bold text-gray-800 mb-2">Saat Ini</h3>
-                            <p class="text-gray-600">Melayani lebih dari 200 siswa dengan 50+ tenaga pengajar
-                                profesional. Terus berkembang dan berinovasi.</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:flex w-8 h-8 bg-[#165fac] rounded-full items-center justify-center z-10">
-                        <div class="w-3 h-3 bg-white rounded-full"></div>
-                    </div>
-                    <div class="md:w-1/2 md:pl-12">
-                        <img src="{{ asset('img/sejarah-5.jpg') }}"
-                            class="rounded-2xl shadow-lg w-full h-48 object-cover">
-                    </div>
-                </div>
+                @endforeach
 
             </div>
 
         </div>
     </section>
+    @endif
 
 
     <!-- Why Choose Us -->
+    @if(!empty($whyItems))
     <section class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span
-                    class="inline-block bg-[#165fac]/10 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">Keunggulan
-                    Kami</span>
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">Mengapa Memilih Kami?</h2>
+                    class="inline-block bg-[#165fac]/10 text-[#165fac] px-4 py-2 rounded-full text-sm font-semibold mb-4">{{ $whyHeader['badge'] ?? 'Keunggulan Kami' }}</span>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800">{{ $whyHeader['title'] ?? 'Mengapa Memilih Kami?' }}</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-                <!-- Card 1 -->
+                @foreach($whyItems as $item)
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
-                    <div class="w-16 h-16 bg-[#d45930]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-[#d45930]" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z" />
-                        </svg>
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background-color: {{ $item['icon_color'] ?? '#165fac' }}1A;"> 
+                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
+                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
+                         @else
+                             <svg class="w-8 h-8" style="color: {{ $item['icon_color'] ?? '#165fac' }};" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                             </svg>
+                         @endif
                     </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Berkualitas</h3>
-                    <p class="text-gray-600">Kurikulum yang dirancang untuk memaksimalkan potensi setiap siswa dengan
-                        metode pembelajaran modern.</p>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] ?? '' }}</h3>
+                    <p class="text-gray-600">{{ $item['description'] ?? '' }}</p>
                 </div>
-
-                <!-- Card 2 -->
-                <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
-                    <div class="w-16 h-16 bg-[#165fac]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-[#165fac]" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                                d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Tenaga Pengajar Ahli</h3>
-                    <p class="text-gray-600">Guru-guru berpengalaman dan terlatih dalam menangani berbagai kebutuhan
-                        belajar siswa.</p>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
-                    <div class="w-16 h-16 bg-[#287f3b]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-8 h-8 text-[#287f3b]" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-3">Pendidikan Inklusif</h3>
-                    <p class="text-gray-600">Menerima dan mendukung anak berkebutuhan khusus dengan program yang
-                        disesuaikan.</p>
-                </div>
-
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- CTA -->
     <section class="py-16" style="background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);">
         <div class="max-w-4xl mx-auto px-4 text-center">
-            <h2 class="text-3xl font-bold text-white mb-4">Tertarik Bergabung?</h2>
-            <p class="text-white/90 mb-8">Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa
-                depan yang cerah</p>
-            <a href="{{ url('/ppdb') }}"
+            <h2 class="text-3xl font-bold text-white mb-4">{{ $ctaContent['title'] ?? 'Tertarik Bergabung?' }}</h2>
+            <p class="text-white/90 mb-8">{{ $ctaContent['description'] ?? 'Daftarkan putra-putri Anda sekarang dan berikan pendidikan terbaik untuk masa depan yang cerah' }}</p>
+            <a href="{{ $ctaContent['button_link'] ?? url('/ppdb') }}"
                 class="inline-flex items-center px-8 py-4 bg-white text-[#165fac] font-semibold rounded-full hover:bg-gray-100 transition">
-                Daftar Sekarang
+                {{ $ctaContent['button_text'] ?? 'Daftar Sekarang' }}
                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>

@@ -127,8 +127,8 @@
                             </span>
                         </div>
                         <div class="p-6 text-center">
-                            <h3 class="font-bold text-gray-800 text-lg">{{ $staff['name'] }}</h3>
-                            <p class="text-gray-500 text-sm">{{ $staff['position'] }}</p>
+                            <h3 class="font-bold text-gray-800 text-lg">{{ $staff['name'] ?? 'Staff' }}</h3>
+                            <p class="text-gray-500 text-sm">{{ $staff['position'] ?? '' }}</p>
                         </div>
                     </div>
                 @endforeach
