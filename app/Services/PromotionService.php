@@ -156,15 +156,22 @@ class PromotionService
         $finalStatusPembayaran = $eligibility['financial']['status'];
         
         if ($eligibility['eligible']) {
+            // CRITICAL: Check final year FIRST before dispensation logic
+            // Final year students ALWAYS graduate regardless of financial status
             if ($this->isFinalYear($siswa)) {
-                $statusKelulusan = 'LULUS';
+                // Check if they have financial dispensation
+                if ($eligibility['financial']['status'] !== 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
+                    $statusKelulusan = 'LULUS_TUNGGAKAN'; // Graduated with outstanding bills
+                } else {
+                    $statusKelulusan = 'LULUS'; // Normal graduation
+                }
             } else {
-                $statusKelulusan = 'NAIK_KELAS';
-            }
-            
-            // Mark if promoted via dispensation
-            if ($eligibility['financial']['status'] !== 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
-                 $statusKelulusan = 'NAIK_KELAS_TUNGGAKAN';
+                // For non-final year students, check dispensation
+                if ($eligibility['financial']['status'] !== 'LUNAS' && $eligibility['financial']['is_dispensasi']) {
+                    $statusKelulusan = 'NAIK_KELAS_TUNGGAKAN';
+                } else {
+                    $statusKelulusan = 'NAIK_KELAS';
+                }
             }
         }
 
@@ -206,10 +213,20 @@ class PromotionService
                 $siswa->save();
                 $kelasTujuanNama = 'BELUM DITENTUKAN';
             }
-        } elseif ($statusKelulusan === 'LULUS') {
+        } elseif ($statusKelulusan === 'LULUS' || $statusKelulusan === 'LULUS_TUNGGAKAN') {
             $siswa->status = 'lulus';
             $siswa->kelas_id = null; // Detach from class for alumni
             $siswa->save();
+            
+            // Update user account status
+            // User requested that alumni MUST be able to login (e.g. to check bills)
+            // So we ensure is_active is TRUE, not false.
+            $user = \App\Models\User::where('siswa_id', $siswa->id)->first();
+            if ($user) {
+                $user->is_active = true;
+                $user->save();
+            }
+            
             $kelasTujuanNama = 'ALUMNI';
         }
 
@@ -245,8 +262,9 @@ class PromotionService
     {
         if (!$siswa->kelas) return false;
         $nama = strtoupper($siswa->kelas->nama_kelas);
-        // Check for 9/IX or 12/XII
-        return preg_match('/\b(9|IX|12|XII)\b/', $nama);
+        // Check for final year classes: 6 (SD), 9/IX (SMP), 12/XII (SMA)
+        // Also support variations like "Kelas 6", "VI", etc.
+        return preg_match('/\b(6|VI|9|IX|12|XII)\b/', $nama);
     }
 
     private function findNextClass($currentKelas, $currentYearId)
@@ -357,9 +375,16 @@ class PromotionService
             // Restore original class
             $siswa->kelas_id = $status->original_kelas_id;
             
-            // If status was LULUS, restore to aktif
-            if ($status->status_kelulusan === 'LULUS') {
+            // If status was LULUS or LULUS_TUNGGAKAN, restore to aktif and reactivate user account
+            if ($status->status_kelulusan === 'LULUS' || $status->status_kelulusan === 'LULUS_TUNGGAKAN') {
                 $siswa->status = 'aktif';
+                
+                // Restore user account access
+                $user = \App\Models\User::where('siswa_id', $siswa->id)->first();
+                if ($user) {
+                    $user->is_active = true;
+                    $user->save();
+                }
             }
             $siswa->save();
             

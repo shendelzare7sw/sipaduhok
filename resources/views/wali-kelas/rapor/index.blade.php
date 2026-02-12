@@ -102,15 +102,17 @@
                                 <th width="50">NO</th>
                                 <th width="120">NIS</th>
                                 <th class="text-start">NAMA LENGKAP SISWA</th>
-                                <th>STATUS</th>
+                                <th width="150">VALIDASI AKSES</th>
+                                <th>STATUS RAPOR</th>
                                 <th>RATA-RATA</th>
-                                <th width="300">AKSI KELOLA</th>
+                                <th width="350">AKSI KELOLA</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($siswaList ?? [] as $index => $siswa)
+                            @forelse($raporList ?? [] as $index => $item)
                                 @php
-                                    $rapor = $raporData[$siswa->id] ?? null;
+                                    $siswa = $item['siswa'];
+                                    $rapor = $item['rapor'];
                                     $status = $rapor ? $rapor->status : 'draft';
 
                                     // Hitung rata-rata preview (kasar)
@@ -137,6 +139,17 @@
                                         <small class="text-muted text-uppercase">{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
                                     </td>
                                     <td class="text-center align-middle">
+                                        @if($siswa->hasFullRaporAccess())
+                                            <span class="badge bg-success" title="Divalidasi oleh Bendahara, Wali, & Ketua">
+                                                <i class="fas fa-check-double me-1"></i> Valid (3)
+                                            </span>
+                                        @else
+                                            <span class="badge bg-danger" title="Belum lengkap">
+                                                <i class="fas fa-times-circle me-1"></i> Belum Valid
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center align-middle">
                                         @if($status == 'diterbitkan')
                                             <span class="badge bg-success badge-status"><i class="fas fa-check-circle me-1"></i> Diterbitkan</span>
                                         @elseif($rapor)
@@ -157,21 +170,122 @@
                                                 <i class="fas fa-eye"></i> Preview
                                             </a>
                                             @if($status == 'draft')
-                                                <form action="{{ route('wali.rapor.terbitkan', $rapor->id) }}" method="POST" class="d-inline">
+                                                <button type="button" class="btn btn-success btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#terbitkanModal{{ $rapor->id }}" title="Terbitkan rapor">
+                                                    <i class="fas fa-paper-plane"></i> Terbitkan
+                                                </button>
+
+                                                {{-- Modal Terbitkan --}}
+                                                <div class="modal fade" id="terbitkanModal{{ $rapor->id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content border-0 shadow-lg">
+                                                            <div class="modal-header bg-success text-white">
+                                                                <h5 class="modal-title fw-bold text-white">
+                                                                    <i class="fas fa-paper-plane me-2"></i>Konfirmasi Terbitkan Rapor
+                                                                </h5>
+                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <div class="text-center mb-3">
+                                                                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                                                    <h6 class="fw-bold mb-2">Terbitkan rapor {{ $siswa->nama_lengkap }}?</h6>
+                                                                </div>
+                                                                <div class="alert alert-info bg-light border-info mb-0">
+                                                                    <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-1"></i> Yang akan terjadi:</h6>
+                                                                    <ul class="mb-0 small">
+                                                                        <li>Status rapor berubah dari <strong>Draft</strong> ke <strong>Diterbitkan</strong></li>
+                                                                        <li>Rapor <strong>akan terlihat</strong> oleh orang tua dan siswa</li>
+                                                                        <li>Orang tua dapat melihat dan mengunduh rapor</li>
+                                                                        <li>Pastikan semua data sudah benar sebelum terbitkan</li>
+                                                                        <li class="text-muted fst-italic mt-2">💡 Jika ada kesalahan, Anda bisa tarik kembali rapor setelah diterbitkan</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer bg-light">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                    <i class="fas fa-times me-1"></i> Batal
+                                                                </button>
+                                                                <form action="{{ route('wali.rapor.terbitkan', $rapor->id) }}" method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    <button type="submit" class="btn btn-success">
+                                                                        <i class="fas fa-paper-plane me-1"></i> Ya, Terbitkan Sekarang
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <form action="{{ route('wali.rapor.destroy', $rapor->id) }}" method="POST" class="d-inline">
                                                     @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm shadow-sm" onclick="return confirm('Terbitkan rapor ini?')">
-                                                        <i class="fas fa-paper-plane"></i> Terbitkan
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm shadow-sm" onclick="return confirm('Hapus rapor draft ini? Anda bisa generate ulang setelah perbaikan nilai.')">
+                                                        <i class="fas fa-trash"></i> Hapus
                                                     </button>
                                                 </form>
+                                            @elseif($status == 'diterbitkan')
+                                                <button type="button" class="btn btn-warning btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#tarikKembaliModal{{ $rapor->id }}" title="Tarik kembali rapor">
+                                                    <i class="fas fa-undo"></i> Tarik Kembali
+                                                </button>
+
+                                                {{-- Modal Tarik Kembali --}}
+                                                <div class="modal fade" id="tarikKembaliModal{{ $rapor->id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content border-0 shadow-lg">
+                                                            <div class="modal-header bg-warning text-white">
+                                                                <h5 class="modal-title fw-bold text-white">
+                                                                    <i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Tarik Kembali Rapor
+                                                                </h5>
+                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body py-4">
+                                                                <div class="text-center mb-3">
+                                                                    <i class="fas fa-undo fa-3x text-warning mb-3"></i>
+                                                                    <h6 class="fw-bold mb-2">Tarik kembali rapor {{ $siswa->nama_lengkap }}?</h6>
+                                                                </div>
+                                                                <div class="alert alert-warning bg-light border-warning mb-0">
+                                                                    <h6 class="fw-bold mb-2"><i class="fas fa-info-circle me-1"></i> Yang akan terjadi:</h6>
+                                                                    <ul class="mb-0 small">
+                                                                        <li>Status rapor berubah dari <strong>Diterbitkan</strong> ke <strong>Draft</strong></li>
+                                                                        <li>Rapor <strong>tidak akan terlihat</strong> oleh orang tua/siswa</li>
+                                                                        <li>Data rapor <strong>tetap tersimpan</strong>, Anda bisa edit dan terbitkan ulang</li>
+                                                                        <li>Gunakan fitur ini jika ada kesalahan input yang perlu diperbaiki</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer bg-light">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                    <i class="fas fa-times me-1"></i> Batal
+                                                                </button>
+                                                                <form action="{{ route('wali.rapor.tarik-kembali', $rapor->id) }}" method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    <button type="submit" class="btn btn-warning">
+                                                                        <i class="fas fa-undo me-1"></i> Ya, Tarik Kembali
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             @endif
                                         @else
-                                            <small class="text-gray-500">Gunakan tombol Generate di atas</small>
+                                            @if($siswa->hasFullRaporAccess())
+                                                <form action="{{ route('wali.rapor.generate-single', $siswa->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="semester" value="{{ $semester }}">
+                                                    <input type="hidden" name="jenis_rapor" value="{{ $jenisRapor }}">
+                                                    <button type="submit" class="btn btn-primary btn-sm shadow-sm" title="Generate rapor siswa ini">
+                                                        <i class="fas fa-file-invoice"></i> Generate
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <small class="text-danger"><i class="fas fa-lock me-1"></i>Validasi belum lengkap</small>
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center py-5">
+                                    <td colspan="7" class="text-center py-5">
                                         <i class="fas fa-users-slash fa-3x text-gray-200 mb-2"></i>
                                         <p class="text-gray-500 mb-0">Tidak ada data siswa ditemukan di kelas ini.</p>
                                     </td>

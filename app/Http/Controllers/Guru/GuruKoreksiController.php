@@ -137,6 +137,54 @@ class GuruKoreksiController extends Controller
     }
 
     /**
+     * Get AI Suggestion for Assignment Grading (Multimodal)
+     */
+    public function getAiAssignmentSuggestion(Request $request, $kelasId, $mapelId, $tugasId, $submissionId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $submission = TugasSiswa::findOrFail($submissionId);
+        $tugas = Tugas::findOrFail($tugasId);
+
+        $aiService = new \App\Services\AiGradingService();
+
+        // Check if there is a file and if it's an image
+        if ($submission->file_jawaban) {
+            $path = storage_path('app/public/' . $submission->file_jawaban);
+            
+            // Check mime type
+            if (file_exists($path)) {
+                $mime = mime_content_type($path);
+                if (str_starts_with($mime, 'image/')) {
+                    // Vision AI
+                    $result = $aiService->evaluateImage(
+                        $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
+                        $path,
+                        $tugas->deskripsi // Use description as context/key
+                    );
+                    return response()->json($result);
+                }
+            }
+        }
+
+        // Fallback to text if no image or text-only submission
+        if ($submission->jawaban_text) {
+             $result = $aiService->evaluate(
+                $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
+                $submission->jawaban_text,
+                $tugas->deskripsi // Context
+            );
+            return response()->json($result);
+        }
+
+        return response()->json([
+            'error' => true,
+            'feedback' => 'Tidak ada jawaban teks atau gambar yang valid untuk dianalisis AI.'
+        ]);
+    }
+
+    /**
      * Verifikasi akses guru
      */
     private function verifyAccess($guruId, $kelasId, $mapelId)

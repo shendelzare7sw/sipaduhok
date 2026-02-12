@@ -65,6 +65,25 @@
                     @enderror
                 </div>
 
+                <!-- Custom Jenis Kegiatan (shown when Lainnya selected) -->
+                <div class="form-group" id="customJenisKegiatanGroup" style="display: none; margin-top: -8px;">
+                    <label for="custom_jenis_kegiatan" class="form-label">
+                        Jenis Kegiatan Kustom <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control @error('custom_jenis_kegiatan') is-invalid @enderror" 
+                           id="custom_jenis_kegiatan" 
+                           name="custom_jenis_kegiatan"
+                           placeholder="Contoh: Seminar Nasional, Workshop, Pelatihan Guru, dll"
+                           value="{{ old('custom_jenis_kegiatan', (isset($kalender) && $kalender->jenis_kegiatan && !in_array($kalender->jenis_kegiatan, ['field_trip', 'outing', 'live_in', 'hokfest', 'pts', 'pas', 'libur', 'ujian', 'acara_sekolah', 'lainnya'])) ? $kalender->jenis_kegiatan : '') }}">
+                    @error('custom_jenis_kegiatan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle"></i> Ketik nama jenis kegiatan sesuai kebutuhan Anda
+                    </small>
+                </div>
+
                 <!-- Tanggal -->
                 <div class="row">
                     <div class="col-md-6">
@@ -240,6 +259,36 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
-</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jenisKegiatanSelect = document.getElementById('jenis_kegiatan');
+    const customGroup = document.getElementById('customJenisKegiatanGroup');
+    const customInput = document.getElementById('custom_jenis_kegiatan');
+    
+    function toggleCustomInput() {
+        if (jenisKegiatanSelect.value === 'lainnya') {
+            customGroup.style.display = 'block';
+            customInput.required = true;
+        } else {
+            customGroup.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
+    }
+    
+    // On page load - check if editing with custom type
+    const currentCustomValue = customInput.value.trim();
+    if (currentCustomValue) {
+        jenisKegiatanSelect.value = 'lainnya';
+        toggleCustomInput();
+    }
+    
+    jenisKegiatanSelect.addEventListener('change', toggleCustomInput);
+});
+</script>
+@endpush
 @endsection

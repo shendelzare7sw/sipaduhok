@@ -186,6 +186,7 @@ class ValidasiAksesController extends Controller
 
     /**
      * Batalkan validasi akses rapor
+     * CASCADE: Reset Ketua PKBM validation
      */
     public function batalkanRapor($siswaId): RedirectResponse
     {
@@ -195,6 +196,10 @@ class ValidasiAksesController extends Controller
             'validasi_rapor_wali' => false,
             'tanggal_validasi_rapor_wali' => null,
             'validasi_rapor_oleh' => null,
+            // CASCADE: Reset juga validasi ketua PKBM
+            'validasi_rapor_ketua' => false,
+            'tanggal_validasi_rapor_ketua' => null,
+            'validasi_rapor_ketua_oleh' => null,
         ]);
 
         return back()->with('success', "Validasi akses rapor untuk {$siswa->nama_lengkap} dibatalkan!");

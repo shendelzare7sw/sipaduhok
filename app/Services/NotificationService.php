@@ -360,17 +360,17 @@ class NotificationService
 
         $semesterText = $rapor->jenis_rapor === 'uts' ? 'Tengah Semester' : 'Akhir Semester';
 
-        // Notify siswa
-        if ($siswa->user_id) {
-            $this->create(
-                $siswa->user_id,
-                Notification::TIPE_RAPOR,
-                'Rapor ' . $semesterText . ' Tersedia',
-                'Rapor semester ' . $rapor->semester . ' sudah bisa dilihat',
-                route('siswa.sia.rapor.index'),
-                ['rapor_id' => $rapor->id]
-            );
-        }
+        // Notify siswa - DISABLED: Siswa tidak berhak akses rapor
+        // if ($siswa->user_id) {
+        //     $this->create(
+        //         $siswa->user_id,
+        //         Notification::TIPE_RAPOR,
+        //         'Rapor ' . $semesterText . ' Tersedia',
+        //         'Rapor semester ' . $rapor->semester . ' sudah bisa dilihat',
+        //         route('siswa.sia.rapor.index'),
+        //         ['rapor_id' => $rapor->id]
+        //     );
+        // }
 
         // Notify orang tua
         $parents = $siswa->orangTua;

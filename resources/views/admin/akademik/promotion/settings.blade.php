@@ -4,7 +4,11 @@
 @section('page-title', 'Pengaturan Kenaikan Kelas')
 
 @section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
+    @if(auth()->user()->isWakilKepalaSekolah())
+        @include('waka.partials.sneat-sidebar-menu')
+    @elseif(auth()->user()->isAdmin())
+        @include('admin.partials.sneat-sidebar-menu')
+    @endif
 @endsection
 
 @section('content')
@@ -16,7 +20,10 @@
             <div class="card mb-4">
                 <h5 class="card-header">Konfigurasi Kenaikan Kelas</h5>
                 <div class="card-body">
-                    <form action="{{ route('admin.akademik.promotion.settings.store') }}" method="POST">
+                    @php
+                        $routePrefix = request()->routeIs('waka.*') ? 'waka.promotion' : 'admin.akademik.promotion';
+                    @endphp
+                    <form action="{{ route($routePrefix . '.settings.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
 
@@ -27,14 +34,27 @@
 
                         <div class="mb-3">
                             <label class="form-label">Tanggal Pembagian Rapor</label>
-                            <input type="date" name="tanggal_pengambilan_rapor" class="form-control" value="{{ $setting->tanggal_pengambilan_rapor ?? '' }}" required>
-                            <div class="form-text">Tanggal resmi pembagianapor kepada siswa.</div>
+                            <input type="date" name="tanggal_pengambilan_rapor" class="form-control" 
+                                   value="{{ $setting && $setting->tanggal_pengambilan_rapor ? $setting->tanggal_pengambilan_rapor : '' }}" 
+                                   required>
+                            <div class="form-text">Tanggal resmi pembagian rapor kepada siswa.</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Tanggal Eksekusi Kenaikan (Otomatis)</label>
-                            <input type="date" name="tanggal_eksekusi" class="form-control" value="{{ $setting->tanggal_eksekusi ?? '' }}">
-                            <div class="form-text">Jika diisi, sistem akan menjalankan job kenaikan otomatis pada tanggal ini. Kosongkan jika ingin eksekusi manual via tombol.</div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="date" name="tanggal_eksekusi" class="form-control" 
+                                           value="{{ $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('Y-m-d') : '' }}">
+                                    <div class="form-text">Tanggal eksekusi</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="time" name="waktu_eksekusi" class="form-control" 
+                                           value="{{ $setting && $setting->tanggal_eksekusi ? \Carbon\Carbon::parse($setting->tanggal_eksekusi)->format('H:i') : '02:00' }}">
+                                    <div class="form-text">Waktu eksekusi (WIB)</div>
+                                </div>
+                            </div>
+                            <div class="form-text mt-2">Jika diisi, sistem akan menjalankan job kenaikan otomatis pada tanggal & waktu ini. Kosongkan jika ingin eksekusi manual via tombol.</div>
                         </div>
 
                         <div class="mb-3">

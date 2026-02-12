@@ -68,6 +68,14 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
+<!-- Pengaturan AI -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.ai-settings') ? 'active' : '' }}">
+    <a href="{{ route('admin.ai-settings.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-robot"></i>
+        <div>Pengaturan AI</div>
+    </a>
+</li>
+
 <!-- Tahun Ajaran -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.tahun-ajaran') ? 'active' : '' }}">
     <a href="{{ route('admin.tahun-ajaran.index') }}" class="menu-link">

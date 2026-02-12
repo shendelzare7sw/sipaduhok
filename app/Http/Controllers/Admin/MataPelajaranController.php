@@ -61,6 +61,7 @@ class MataPelajaranController extends Controller
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:100',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
+            'kelompok' => 'nullable|in:A,B',
             'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel',
             'deskripsi' => 'nullable|string',
         ]);
@@ -106,6 +107,7 @@ class MataPelajaranController extends Controller
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:100',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
+            'kelompok' => 'nullable|in:A,B',
             'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,' . $mataPelajaran->id,
             'deskripsi' => 'nullable|string',
         ]);
@@ -191,5 +193,46 @@ class MataPelajaranController extends Controller
     {
         return Excel::download(new MataPelajaranTemplate(), 'template_mata_pelajaran.xlsx');
     }
-}
 
+    /**
+     * Get suggested kode mapel based on jenjang.
+     */
+    public function suggestKodeMapel(Request $request)
+    {
+        $jenjang = $request->input('jenjang');
+        
+        if (!$jenjang) {
+            return response()->json(['suggestions' => []]);
+        }
+
+        // Get all existing codes for this jenjang
+        $existingCodes = MataPelajaran::where('jenjang', $jenjang)
+            ->whereNotNull('kode_mapel')
+            ->pluck('kode_mapel')
+            ->toArray();
+
+        // Extract numbers from existing codes (e.g., "SMA-002" -> 2)
+        $usedNumbers = [];
+        foreach ($existingCodes as $code) {
+            // Match pattern: JENJANG-XXX
+            if (preg_match('/^' . preg_quote($jenjang, '/') . '-(\d+)$/', $code, $matches)) {
+                $usedNumbers[] = (int)$matches[1];
+            }
+        }
+
+        // Find next available numbers (suggest 5 options)
+        $suggestions = [];
+        $nextNumber = empty($usedNumbers) ? 1 : max($usedNumbers) + 1;
+        
+        for ($i = 0; $i < 5; $i++) {
+            $number = $nextNumber + $i;
+            $code = $jenjang . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            $suggestions[] = $code;
+        }
+
+        return response()->json([
+            'suggestions' => $suggestions,
+            'jenjang' => $jenjang
+        ]);
+    }
+}

@@ -14,34 +14,44 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Header removed, using layout title -->
 
-    <!-- Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
+    <!-- Statistics - Reorganized into 2 rows -->
+    <!-- Statistics - Single Row 5 Columns -->
+    <div class="row row-cols-1 row-cols-md-5 g-3 mb-4">
+        <div class="col">
+            <div class="card bg-success text-white h-100">
                 <div class="card-body">
                     <h5 class="card-title text-white">Naik Kelas</h5>
                     <h2>{{ $stats['NAIK_KELAS'] ?? 0 }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
+        <div class="col">
+            <div class="card bg-info text-white h-100">
                 <div class="card-body">
                     <h5 class="card-title text-white">Lulus</h5>
                     <h2>{{ $stats['LULUS'] ?? 0 }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-warning text-dark">
+        <div class="col">
+            <div class="card bg-warning text-dark h-100">
                 <div class="card-body">
                     <h5 class="card-title text-dark">Naik (Dispensasi)</h5>
                     <h2>{{ $stats['NAIK_KELAS_TUNGGAKAN'] ?? 0 }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white">
+        <div class="col">
+            <div class="card bg-label-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Lulus (Dispensasi)</h5>
+                    <h2 class="text-primary">{{ $stats['LULUS_TUNGGAKAN'] ?? 0 }}</h2>
+                    <small class="text-primary">Lulus meski ada tunggakan</small>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card bg-danger text-white h-100">
                 <div class="card-body">
                     <h5 class="card-title text-white">Tidak Naik</h5>
                     <h2>{{ $stats['TIDAK_NAIK_KELAS'] ?? 0 }}</h2>
@@ -117,11 +127,12 @@
                         </select>
                         
                         <!-- Filter Status (Existing) -->
-                        <select name="status" class="form-select" style="width: 150px;">
+                        <select name="status" class="form-select" style="width: 180px;">
                             <option value="">Semua Status</option>
                             <option value="NAIK_KELAS" {{ $filterStatus == 'NAIK_KELAS' ? 'selected' : '' }}>Naik Kelas</option>
                             <option value="LULUS" {{ $filterStatus == 'LULUS' ? 'selected' : '' }}>Lulus</option>
-                            <option value="NAIK_KELAS_TUNGGAKAN" {{ $filterStatus == 'NAIK_KELAS_TUNGGAKAN' ? 'selected' : '' }}>Dispensasi</option>
+                            <option value="NAIK_KELAS_TUNGGAKAN" {{ $filterStatus == 'NAIK_KELAS_TUNGGAKAN' ? 'selected' : '' }}>Naik (Dispensasi)</option>
+                            <option value="LULUS_TUNGGAKAN" {{ $filterStatus == 'LULUS_TUNGGAKAN' ? 'selected' : '' }}>Lulus (Dispensasi)</option>
                             <option value="TIDAK_NAIK_KELAS" {{ $filterStatus == 'TIDAK_NAIK_KELAS' ? 'selected' : '' }}>Tidak Naik</option>
                         </select>
 
@@ -169,6 +180,7 @@
                                         $badge = match($data->status_kelulusan) {
                                             'NAIK_KELAS' => 'success',
                                             'LULUS' => 'info',
+                                            'LULUS_TUNGGAKAN' => 'primary',
                                             'NAIK_KELAS_TUNGGAKAN' => 'warning',
                                             'TIDAK_NAIK_KELAS' => 'danger',
                                             default => 'secondary'
@@ -399,7 +411,7 @@
                             <tbody>
                                 @forelse ($schedules as $schedule)
                                 <tr>
-                                    <td>{{ $schedule->scheduled_at->format('d M Y H:i') }}</td>
+                                    <td>{{ $schedule->scheduled_at->format('d/m/y H:i') }}</td>
                                     <td>
                                         @if($schedule->status == 'PENDING')
                                             <span class="badge bg-warning">Menunggu</span>
@@ -413,7 +425,14 @@
                                             <span class="badge bg-secondary">Batal</span>
                                         @endif
                                     </td>
-                                    <td>{{ $schedule->creator->nama_lengkap ?? '-' }}</td>
+                                    <td>
+                                        <div>{{ $schedule->creator->name ?? '-' }}</div>
+                                        @if($schedule->creator)
+                                            <small class="text-muted">
+                                                {{ $schedule->creator->role === 'wakil_kepala_sekolah' ? 'Wakil Kepala Sekolah' : ucfirst($schedule->creator->role) }}
+                                            </small>
+                                        @endif
+                                    </td>
                                     <td>
                                         @if($schedule->status == 'COMPLETED')
                                             <small>
@@ -433,7 +452,7 @@
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#cancelScheduleModal"
                                                 data-url="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.cancel-schedule' : 'waka.promotion.cancel-schedule', $schedule->id) }}"
-                                                data-date="{{ $schedule->scheduled_at->format('d M Y H:i') }}">
+                                                data-date="{{ $schedule->scheduled_at->format('d/m/y H:i') }}">
                                                 Batal
                                             </button>
                                         @endif

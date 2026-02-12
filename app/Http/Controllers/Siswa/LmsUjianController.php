@@ -206,6 +206,7 @@ class LmsUjianController extends Controller
 
         // Simpan jawaban
         $totalNilai = 0;
+        $perluKoreksiManual = false;
         $soalList = SoalUjian::where('ujian_id', $ujianId)->get();
 
         foreach ($request->jawaban as $soalId => $jawaban) {
@@ -222,10 +223,17 @@ class LmsUjianController extends Controller
                     ]
                 );
 
-                // Auto-grade untuk pilihan ganda
-                if ($soal->tipe_soal === 'pilihan_ganda') {
-                    $jawabanSiswa->autoGrade();
-                    $totalNilai += $jawabanSiswa->nilai_soal ?? 0;
+                // Auto-grade untuk semua tipe yang bisa di-auto-grade
+                $result = $soal->checkAnswer($jawaban);
+
+                if ($result !== null) {
+                    // Tipe auto-gradable: pilgan, pilgan_kompleks, benar_salah, isian
+                    $score = $soal->calculatePartialScore($jawaban);
+                    $jawabanSiswa->update(['nilai_soal' => $score]);
+                    $totalNilai += $score;
+                } else {
+                    // Tipe uraian/essay → perlu koreksi manual oleh guru
+                    $perluKoreksiManual = true;
                 }
             }
         }
@@ -241,7 +249,14 @@ class LmsUjianController extends Controller
         $ujianSiswa->load(['ujian', 'siswa']);
         app(\App\Services\NotificationService::class)->notifyUjianSelesai($ujianSiswa);
 
+        $msg = 'Ujian berhasil dikumpulkan!';
+        if ($perluKoreksiManual) {
+            $msg .= ' Nilai sementara: ' . number_format($totalNilai, 1) . ' (beberapa soal menunggu koreksi guru)';
+        } else {
+            $msg .= ' Nilai: ' . number_format($totalNilai, 1);
+        }
+
         return redirect()->route('siswa.lms.mapel.show', $mapelId)
-            ->with('success', 'Ujian berhasil dikumpulkan! Nilai: ' . $totalNilai);
+            ->with('success', $msg);
     }
 }

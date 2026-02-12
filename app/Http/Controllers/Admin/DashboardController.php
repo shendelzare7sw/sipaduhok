@@ -20,8 +20,8 @@ class DashboardController extends Controller
         $totalGuru = \App\Models\TenagaPendidik::count();
         $totalKelas = \App\Models\Kelas::count();
         $totalUser = User::where('is_active', true)->count();
-        $siswaBaruBulanIni = Siswa::whereMonth('tanggal_masuk', now()->month)
-            ->whereYear('tanggal_masuk', now()->year)
+        $siswaBaruBulanIni = Siswa::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
             ->count();
 
         // Additional stats for cards

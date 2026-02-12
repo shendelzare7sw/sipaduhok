@@ -104,6 +104,7 @@ class PromotionReportController extends Controller
 
         // --- 4. Get Schedules ---
         $schedules = \App\Models\PromotionSchedule::where('tahun_ajaran_id', $selectedYear->id)
+            ->with('creator')
             ->orderBy('created_at', 'desc')
             ->get();
 

@@ -207,6 +207,7 @@ class ValidasiAksesController extends Controller
 
     /**
      * Batalkan validasi akses rapor
+     * CASCADE: Reset Wali Kelas + Ketua PKBM validation
      */
     public function batalkanRapor(Request $request, $siswaId)
     {
@@ -218,9 +219,13 @@ class ValidasiAksesController extends Controller
                 'validasi_rapor_bendahara' => false,
                 'tanggal_validasi_rapor_bendahara' => null,
                 'validasi_rapor_oleh' => null,
-                // Reset juga validasi wali kelas
+                // CASCADE: Reset juga validasi wali kelas
                 'validasi_rapor_wali' => false,
                 'tanggal_validasi_rapor_wali' => null,
+                // CASCADE: Reset juga validasi ketua PKBM
+                'validasi_rapor_ketua' => false,
+                'tanggal_validasi_rapor_ketua' => null,
+                'validasi_rapor_ketua_oleh' => null,
             ]);
 
             DB::commit();

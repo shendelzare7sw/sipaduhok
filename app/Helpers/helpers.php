@@ -38,3 +38,46 @@ if (!function_exists('terbilang')) {
         return trim($temp);
     }
 }
+
+/**
+ * Format jenis kegiatan untuk display
+ * Menangani custom event types dengan benar
+ */
+if (!function_exists('format_jenis_kegiatan')) {
+    function format_jenis_kegiatan($jenisKegiatan)
+    {
+        $labels = [
+            'field_trip' => 'Field Trip',
+            'outing' => 'Outing',
+            'live_in' => 'Live In',
+            'hokfest' => 'HOK Fest',
+            'pts' => 'PTS',
+            'pas' => 'PAS',
+            'libur' => 'Libur',
+            'ujian' => 'Ujian',
+            'acara_sekolah' => 'Acara Sekolah',
+            'lainnya' => 'Lainnya',
+        ];
+
+        return $labels[$jenisKegiatan] ?? ucwords(str_replace('_', ' ', $jenisKegiatan));
+    }
+}
+
+/**
+ * Mendapatkan CSS class untuk jenis kegiatan
+ * Untuk custom types, gunakan fallback class
+ */
+if (!function_exists('jenis_kegiatan_class')) {
+    function jenis_kegiatan_class($jenisKegiatan)
+    {
+        $predefined = ['field_trip', 'outing', 'live_in', 'hokfest', 'pts', 'pas', 'libur', 'ujian', 'acara_sekolah', 'lainnya'];
+        
+        // Jika predefined, return as is
+        if (in_array($jenisKegiatan, $predefined)) {
+            return $jenisKegiatan;
+        }
+        
+        // Custom type, gunakan 'lainnya' sebagai fallback class
+        return 'lainnya';
+    }
+}

@@ -509,18 +509,21 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        // Ambil semua rapor siswa
+        // Ambil semua rapor siswa yang sudah diterbitkan
         $rapor = Rapor::where('siswa_id', $siswa->id)
+            ->where('status', 'diterbitkan')
             ->with('tahunAjaran')
+            ->orderBy('tahun_ajaran_id', 'desc')
             ->orderBy('semester', 'desc')
             ->get();
 
-        // Cek Validasi Akses Rapor
-        if (!$siswa->validasi_rapor_wali) {
+        // Cek Validasi Akses Rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
+        if (!$siswa->hasFullRaporAccess()) {
              return view('orang-tua.rapor.index', [
-                'siswa' => $siswa, 
+                'siswa' => $siswa,
                 'rapor' => collect(),
-                'locked' => true // Pass locked status to view
+                'locked' => true, // Pass locked status to view
+                'message' => 'Akses rapor belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.'
              ]);
         }
 
@@ -535,7 +538,7 @@ class OrangTuaController extends Controller
         $user = Auth::user();
 
         // Ambil rapor dan pastikan itu milik anak dari orang tua yang login
-        $rapor = Rapor::with(['siswa.kelas', 'tahunAjaran', 'nilai.mataPelajaran'])
+        $rapor = Rapor::with(['siswa.kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])
             ->findOrFail($raporId);
 
         // Cek apakah siswa ini adalah anak dari orang tua yang login
@@ -546,11 +549,11 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke rapor ini.');
         }
 
-        // Cek Validasi Akses Rapor
+        // Cek Validasi Akses Rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
         $siswa = $rapor->siswa;
-        if (!$siswa->validasi_rapor_wali) {
+        if (!$siswa->hasFullRaporAccess()) {
             return redirect()->route('orang-tua.rapor.anak', $siswa->id)
-                ->with('error', 'Akses rapor untuk siswa ini belum dibuka oleh Wali Kelas.');
+                ->with('error', 'Akses rapor untuk siswa ini belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         return view('orang-tua.rapor.detail', compact('rapor'));

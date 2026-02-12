@@ -454,6 +454,88 @@
             border: 1px solid #bbf7d0;
             color: #166534;
         }
+    /* Responsive Styles */
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 16px !important;
+                padding: 16px;
+            }
+
+            .card-header > div {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            /* Title section on mobile */
+            .card-header > div:first-child {
+                margin-bottom: 8px;
+            }
+            
+            .w-100-mobile {
+                width: 100% !important;
+            }
+
+            /* Filter form on mobile */
+            .search-form {
+                flex-direction: column;
+                width: 100%;
+                align-items: stretch !important;
+                gap: 12px !important;
+            }
+
+            .filter-dropdown .dropdown-menu {
+                width: 100%;
+                max-width: none;
+            }
+            
+            .dropdown {
+                width: 100%;
+            }
+            
+            .dropdown-toggle {
+                width: 100%;
+                justify-content: space-between;
+                display: flex;
+                align-items: center;
+            }
+
+            .search-input-wrapper {
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100% !important;
+            }
+            
+            .btn-search {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Action buttons on mobile */
+            .card-header > div:last-child {
+                flex-direction: row;
+                gap: 8px !important;
+                justify-content: stretch;
+            }
+
+            .card-header > div:last-child .btn,
+            .card-header > div:last-child .btn-group {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .btn-group {
+                width: auto; 
+                flex: 0 0 auto !important;
+            }
+            
+            /* Make "Tambah" text shorter on mobile if needed or hide icon */
+            /* Removed CSS hack in favor of HTML classes */
+        }
     </style>
 
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -497,25 +579,30 @@
         @endif
 
         <div class="card">
-            <div class="card-header">
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <a href="{{ route('admin.users.index') }}" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i>
-                        Daftar Pengguna
-                    </a>
-                    <div>
-                        <h5 style="margin: 0; font-weight: 700; color: #111827;">Daftar Tenaga Pendidik</h5>
-                        <small style="color: #64748b;">Total: {{ $tenagaPendidik->total() }} tenaga pendidik</small>
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                {{-- Left Group: Title & Filter --}}
+                <div class="d-flex flex-wrap align-items-center gap-3 w-100-mobile">
+                    {{-- Title Group --}}
+                    <div class="d-flex gap-2 align-items-center justify-content-between w-100-mobile">
+                        <div class="d-flex gap-2 align-items-center">
+                            <a href="{{ route('admin.users.index') }}" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark">Daftar Tenaga Pendidik</h5>
+                                <small class="text-muted">Total: {{ $tenagaPendidik->total() }} tenaga pendidik</small>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="d-flex gap-2">
+
+                    {{-- Filter Form --}}
+                    <form action="{{ route('admin.users.tenaga-pendidik') }}" method="GET" class="search-form d-flex gap-2 align-items-center w-100-mobile">
                         {{-- Filter Dropdown --}}
-                        <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="filterDropdown" 
+                        <div class="dropdown filter-dropdown w-100-mobile">
+                            <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown" 
                                 data-bs-toggle="dropdown" aria-expanded="false" 
                                 data-bs-auto-close="outside" data-bs-display="static">
-                                <i class="fas fa-filter me-1"></i> Filter Data
+                                <span><i class="fas fa-filter me-1"></i> Filter</span>
                             </button>
                             <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="min-width: 250px; z-index: 9999;">
                                 <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
@@ -539,55 +626,55 @@
                         </div>
 
                         {{-- Search Input --}}
-                        <div class="search-input-wrapper">
+                        <div class="search-input-wrapper w-100-mobile">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" name="search" id="searchInput" class="search-input"
-                                placeholder="Cari nama atau NIP..." value="{{ request('search') }}" autocomplete="off">
+                                placeholder="Cari..." value="{{ request('search') }}" autocomplete="off" style="width: 200px;">
                             <button type="button" class="clear-search {{ request('search') ? 'show' : '' }}"
                                 id="clearSearch" title="Hapus pencarian">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
-                        <button type="submit" class="btn-search">
-                            <i class="fas fa-search"></i>
+                    </form>
+                </div>
+
+                {{-- Right Group: Actions --}}
+                <div class="d-flex gap-2 action-group-mobile">
+                    <form action="{{ route('admin.users.bulk-delete-tenaga-pendidik') }}" method="POST" id="bulkDeleteForm" style="display: none;">
+                        @csrf
+                        <input type="hidden" name="ids" id="bulkDeleteIds">
+                        <button type="button" class="btn btn-danger" onclick="showBulkDeleteModal()">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </form>
-                    <div style="display: flex; gap: 8px;">
-                        <form action="{{ route('admin.users.bulk-delete-tenaga-pendidik') }}" method="POST" id="bulkDeleteForm" style="display: none;">
-                            @csrf
-                            <input type="hidden" name="ids" id="bulkDeleteIds">
-                            <button type="button" class="btn btn-danger" onclick="showBulkDeleteModal()">
-                                <i class="fas fa-trash"></i> Hapus Terpilih
-                            </button>
-                        </form>
-                        <!-- Dropdown Menu Aksi -->
-                        <div class="btn-group" style="position: relative; display: inline-block;">
-                            <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-cog"></i> Menu Aksi
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a href="{{ route('admin.users.tenaga-pendidik.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
-                                        <i class="fas fa-print me-2"></i> Cetak Data (PDF)
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('admin.users.import-tenaga-pendidik') }}" class="dropdown-item">
-                                        <i class="fas fa-file-import me-2"></i> Import Excel
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('admin.users.tenaga-pendidik-template') }}" class="dropdown-item">
-                                        <i class="fas fa-download me-2"></i> Download Template
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                        <a href="{{ route('admin.users.create-tenaga-pendidik') }}" class="btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Tambah Baru
-                        </a>
+                    <!-- Dropdown Menu Aksi -->
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i> <span class="d-none d-md-inline">Menu Aksi</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a href="{{ route('admin.users.tenaga-pendidik.print') }}?{{ http_build_query(request()->all()) }}" class="dropdown-item" target="_blank">
+                                    <i class="fas fa-print me-2"></i> Cetak Data (PDF)
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.import-tenaga-pendidik') }}" class="dropdown-item">
+                                    <i class="fas fa-file-import me-2"></i> Import Excel
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.users.tenaga-pendidik-template') }}" class="dropdown-item">
+                                    <i class="fas fa-download me-2"></i> Download Template
+                                </a>
+                            </li>
+                        </ul>
                     </div>
+                    <a href="{{ route('admin.users.create-tenaga-pendidik') }}" class="btn-primary" style="white-space: nowrap;">
+                        <i class="fas fa-plus"></i>
+                        <span class="d-none d-md-inline">Tambah Tenaga Pendidik</span>
+                        <span class="d-md-none">Tambah</span>
+                    </a>
                 </div>
             </div>
 

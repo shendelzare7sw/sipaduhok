@@ -45,13 +45,14 @@ class SiaRaporController extends Controller
             ->orderBy('semester', 'desc')
             ->get();
 
-        // Cek validasi akses rapor
+        // Cek validasi akses rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
         $aksesRapor = [
             'bendahara' => $siswa->validasi_rapor_bendahara ?? false,
             'wali' => $siswa->validasi_rapor_wali ?? false,
+            'ketua' => $siswa->validasi_rapor_ketua ?? false,
         ];
 
-        $bolehLihat = $aksesRapor['bendahara'] && $aksesRapor['wali'];
+        $bolehLihat = $siswa->hasFullRaporAccess();
 
         return view('siswa.sia.rapor.index', compact('siswa', 'raporList', 'aksesRapor', 'bolehLihat'));
     }
@@ -69,10 +70,10 @@ class SiaRaporController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Cek validasi akses
-        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
+        // Cek validasi akses (3-level validation required)
+        if (!$siswa->hasFullRaporAccess()) {
             return redirect()->route('siswa.sia.rapor.index')
-                ->with('error', 'Belum Memiliki Akses Rapor. Silakan Periksa Tagihan Anda.');
+                ->with('error', 'Belum Memiliki Akses Rapor. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         $rapor = Rapor::where('id', $raporId)
@@ -100,10 +101,10 @@ class SiaRaporController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Cek validasi akses
-        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
+        // Cek validasi akses (3-level validation required)
+        if (!$siswa->hasFullRaporAccess()) {
             return redirect()->route('siswa.sia.rapor.index')
-                ->with('error', 'Belum Memiliki Akses Rapor. Silakan Periksa Tagihan Anda.');
+                ->with('error', 'Belum Memiliki Akses Rapor. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         $rapor = Rapor::where('id', $raporId)
@@ -131,10 +132,10 @@ class SiaRaporController extends Controller
                 ->with('error', 'Data siswa tidak ditemukan');
         }
 
-        // Cek validasi akses
-        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
+        // Cek validasi akses (3-level validation required)
+        if (!$siswa->hasFullRaporAccess()) {
             return redirect()->route('siswa.sia.rapor.index')
-                ->with('error', 'Belum Memiliki Akses Rapor. Silakan Periksa Tagihan Anda.');
+                ->with('error', 'Belum Memiliki Akses Rapor. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         $rapor = Rapor::where('id', $raporId)
@@ -143,12 +144,18 @@ class SiaRaporController extends Controller
             ->with(['raporNilai.mataPelajaran', 'kelas', 'tahunAjaran'])
             ->firstOrFail();
 
+        // Check if download is allowed for this rapor
+        if (!$rapor->allow_download) {
+            return redirect()->route('siswa.sia.rapor.index')
+                ->with('error', 'Download rapor belum diizinkan oleh Wali Kelas.');
+        }
+
         $rataRata = $rapor->raporNilai->avg('nilai_angka');
 
         $pdf = Pdf::loadView('siswa.sia.rapor.pdf-akhir', compact('siswa', 'rapor', 'rataRata'));
-        
+
         $filename = 'Rapor_' . $siswa->nama_lengkap . '_' . $rapor->semester . '_' . $rapor->tahunAjaran->nama_tahun_ajaran . '.pdf';
-        
+
         return $pdf->download($filename);
     }
 }

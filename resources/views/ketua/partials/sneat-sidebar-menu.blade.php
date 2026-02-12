@@ -30,6 +30,14 @@
     </a>
 </li>
 
+<!-- Validasi Rapor -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.validasi-rapor') ? 'active' : '' }}">
+    <a href="{{ route('ketua.validasi-rapor.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-certificate"></i>
+        <div>Validasi Rapor</div>
+    </a>
+</li>
+
 <!-- Menu Header - Monitoring -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring</span>

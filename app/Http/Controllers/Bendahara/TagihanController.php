@@ -57,8 +57,9 @@ class TagihanController extends Controller
             ->get();
 
         // Query siswa dengan filter
+        // IMPORTANT: Include alumni (status='lulus') so their outstanding bills remain accessible
         $query = Siswa::with(['kelas', 'cabang'])
-            ->where('status', 'aktif');
+            ->whereIn('status', ['aktif', 'lulus']);
 
         // Filter berdasarkan kelas
         if ($request->filled('kelas_id')) {

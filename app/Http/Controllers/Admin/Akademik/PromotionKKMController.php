@@ -59,8 +59,10 @@ class PromotionKKMController extends Controller
             );
         }
 
+        $routePrefix = $request->routeIs('waka.*') ? 'waka.promotion' : 'admin.akademik.promotion';
+
         return redirect()
-            ->route('admin.akademik.promotion.kkm.index', ['jenjang' => $validated['jenjang']])
+            ->route($routePrefix . '.kkm.index', ['jenjang' => $validated['jenjang']])
             ->with('success', 'Pengaturan KKM berhasil disimpan');
     }
 }

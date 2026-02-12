@@ -42,7 +42,7 @@
         id="mainForm">
         @csrf
 
-        <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 border-bottom shadow-sm"
+        <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm"
             style="z-index: 10;">
             <div>
                 <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
@@ -86,13 +86,13 @@
         <input type="hidden" name="original_judul" value="{{ $ujian->judul_ujian }}">
 
         {{-- Import/Export Tools --}}
-        <div class="d-flex justify-content-end gap-2 mb-3">
+        <div class="d-flex justify-content-end gap-2 mb-3 px-4">
             <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.template' : 'guru.lms.ujian.soal.template', [$kelas->id, $mapel->id, $ujian->id]) }}"
                 class="btn btn-outline-success btn-sm">
-                <i class="fas fa-download me-1"></i> Download Template
+                <i class="fas fa-download me-1"></i> Download Template {{ ucfirst($tipeUjian ?? 'ujian') }}
             </a>
             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importSoalModal">
-                <i class="fas fa-file-import me-1"></i> Import dari Excel
+                <i class="fas fa-file-import me-1"></i> Import {{ ucfirst($tipeUjian ?? 'ujian') }} dari Excel
             </button>
         </div>
 
@@ -144,7 +144,7 @@
                                 </label>
                             </div>
                             <small class="d-block mt-1 text-muted">
-                                Jika dicentang, aksi ini (dan soal-soal) akan diduplikasi ke semua ujian terkait di kelas lain.
+                                Jika dicentang, aksi ini (dan soal-soal) akan diduplikasi ke semua {{ $tipeUjian ?? 'ujian' }} terkait di kelas lain.
                             </small>
                         </div>
                     @else
@@ -186,7 +186,7 @@
                     method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="importSoalModalLabel">Import Soal dari Excel</h5>
+                        <h5 class="modal-title" id="importSoalModalLabel">Import Soal {{ ucfirst($tipeUjian ?? 'ujian') }} dari Excel</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -196,7 +196,7 @@
                         </div>
                         <div class="alert alert-warning small mb-0">
                             <i class="fas fa-info-circle me-1"></i>
-                            Soal yang diimport akan <strong>ditambahkan</strong> ke daftar soal yang sudah ada. Download template terlebih dahulu untuk format yang benar.
+                            Soal {{ $tipeUjian ?? 'ujian' }} yang diimport akan <strong>ditambahkan</strong> ke daftar soal yang sudah ada. Download template terlebih dahulu untuk format yang benar.
                         </div>
                     </div>
                     <div class="modal-footer">

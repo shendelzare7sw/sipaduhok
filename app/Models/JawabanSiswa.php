@@ -16,6 +16,7 @@ class JawabanSiswa extends Model
         'soal_ujian_id',
         'jawaban',
         'nilai_soal',
+        'feedback',
     ];
 
     protected $casts = [
@@ -33,21 +34,47 @@ class JawabanSiswa extends Model
         return $this->belongsTo(SoalUjian::class);
     }
 
-    // Helper: Auto-grading untuk pilihan ganda
+    /**
+     * Auto-grading untuk semua tipe soal yang bisa di-auto-grade.
+     * Return: true jika berhasil di-grade, false jika perlu manual.
+     */
     public function autoGrade()
     {
         $soal = $this->soalUjian;
         
-        if ($soal && $soal->tipe_soal === 'pilihan_ganda') {
-            if ($soal->checkAnswer($this->jawaban)) {
-                $this->nilai_soal = $soal->bobot_nilai;
-            } else {
-                $this->nilai_soal = 0;
-            }
+        if (!$soal) return false;
+
+        $result = $soal->checkAnswer($this->jawaban);
+
+        if ($result !== null) {
+            // Auto-gradable: pilgan, pilgan_kompleks, benar_salah, isian_singkat
+            $this->nilai_soal = $soal->calculatePartialScore($this->jawaban);
             $this->save();
             return true;
         }
         
-        return false; // Essay perlu grading manual
+        return false; // Uraian/Essay perlu grading manual
+    }
+
+    /**
+     * Cek apakah soal ini perlu koreksi manual
+     */
+    public function perluKoreksiManual(): bool
+    {
+        $soal = $this->soalUjian;
+        if (!$soal) return false;
+
+        return in_array($soal->tipe_soal, [
+            SoalUjian::TIPE_URAIAN,
+            SoalUjian::TIPE_ESSAY,
+        ]);
+    }
+
+    /**
+     * Cek apakah sudah dikoreksi (nilai_soal sudah diisi)
+     */
+    public function sudahDikoreksi(): bool
+    {
+        return $this->nilai_soal !== null;
     }
 }

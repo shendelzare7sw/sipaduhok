@@ -70,6 +70,7 @@
                         <th class="text-center">Waktu Selesai</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Nilai</th>
+                        <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -105,16 +106,30 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            @if($hasil->nilai)
+                            @if($hasil->nilai !== null)
                                 <strong class="fs-5 text-primary">{{ number_format($hasil->nilai, 1) }}</strong>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
+                        <td class="text-center">
+                            @if(in_array($hasil->status, ['selesai', 'dinilai']))
+                                @php
+                                    $isLatihan = request()->routeIs('guru.lms.latihan.*');
+                                    $koreksiRoute = $isLatihan ? 'guru.lms.latihan.koreksi.show' : 'guru.lms.ujian.koreksi.show';
+                                @endphp
+                                <a href="{{ route($koreksiRoute, [$kelas->id, $mapel->id, $ujian->id, $hasil->id]) }}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit me-1"></i> Koreksi
+                                </a>
+                            @else
+                                <span class="text-muted small">-</span>
+                            @endif
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
+                        <td colspan="7" class="text-center text-muted py-4">
                             Belum ada siswa yang mengerjakan ujian
                         </td>
                     </tr>

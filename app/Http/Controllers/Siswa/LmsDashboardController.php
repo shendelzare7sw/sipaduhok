@@ -176,6 +176,27 @@ class LmsDashboardController extends Controller
     }
 
     /**
+     * Daftar Pengumuman
+     */
+    public function pengumumanIndex()
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+        
+        if (!$siswa) {
+            return redirect()->route('siswa.lms.dashboard');
+        }
+        
+        $pengumumanList = Pengumuman::where('status', 'aktif')
+            ->where('tanggal_pengumuman', '<=', now()->toDateString())
+            ->orderBy('prioritas', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        return view('siswa.lms.pengumuman.index', compact('siswa', 'pengumumanList'));
+    }
+
+    /**
      * Detail Pengumuman
      */
     public function pengumumanDetail($id)

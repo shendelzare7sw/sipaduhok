@@ -53,6 +53,25 @@
                         </td>
                     </tr>
                     <tr>
+                        <th>Kelompok:</th>
+                        <td>
+                            @if($mataPelajaran->kelompok)
+                                <span class="badge {{ $mataPelajaran->kelompok === 'A' ? 'bg-primary' : 'bg-success' }}">
+                                    Kelompok {{ $mataPelajaran->kelompok }}
+                                </span>
+                                <span class="text-muted">
+                                    @if($mataPelajaran->kelompok === 'A')
+                                        (Mata Pelajaran Umum)
+                                    @else
+                                        (Mata Pelajaran Pilihan/Muatan Lokal)
+                                    @endif
+                                </span>
+                            @else
+                                <span class="text-muted">Belum ditentukan</span>
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Deskripsi:</th>
                         <td>{{ $mataPelajaran->deskripsi ?? '-' }}</td>
                     </tr>

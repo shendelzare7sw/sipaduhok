@@ -851,6 +851,99 @@ class GuruUjianController extends Controller
     }
 
     /**
+     * Tampilkan halaman koreksi jawaban siswa
+     */
+    public function koreksiShow($kelasId, $mapelId, $ujianId, $ujianSiswaId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $kelas = Kelas::findOrFail($kelasId);
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $ujian = Ujian::findOrFail($ujianId);
+        
+        $ujianSiswa = UjianSiswa::with(['siswa', 'jawabanSiswa.soalUjian'])
+            ->where('id', $ujianSiswaId)
+            ->where('ujian_id', $ujianId)
+            ->firstOrFail();
+
+        // Ambil semua soal untuk ditampilkan (termasuk yang tidak dijawab siswa)
+        $soalList = SoalUjian::where('ujian_id', $ujianId)
+            ->orderBy('urutan', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        return view('guru.lms.ujian.koreksi', [
+            'kelas' => $kelas,
+            'mapel' => $mataPelajaran,
+            'ujian' => $ujian,
+            'ujianSiswa' => $ujianSiswa,
+            'soalList' => $soalList,
+            'guru' => $tenagaPendidik,
+        ]);
+    }
+
+    /**
+     * Simpan hasil koreksi manual guru
+     */
+    public function koreksiStore(Request $request, $kelasId, $mapelId, $ujianId, $ujianSiswaId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $request->validate([
+            'nilai' => 'array',
+            'nilai.*' => 'numeric|min:0',
+            'feedback' => 'array',
+            'feedback.*' => 'nullable|string',
+        ]);
+
+        $ujianSiswa = UjianSiswa::findOrFail($ujianSiswaId);
+        $totalNilai = 0;
+
+        // Loop semua soal untuk update nilai & feedback
+        if ($request->has('nilai')) {
+            foreach ($request->nilai as $soalId => $nilai) {
+                $feedback = $request->feedback[$soalId] ?? null;
+
+                // Update or Create jawaban record
+                $jawabanSiswa = \App\Models\JawabanSiswa::updateOrCreate(
+                    [
+                        'ujian_siswa_id' => $ujianSiswa->id,
+                        'soal_ujian_id' => $soalId,
+                    ],
+                    [
+                        'nilai_soal' => $nilai,
+                        'feedback' => $feedback,
+                    ]
+                );
+                
+                // If clean record created, ensure jawaban has value so it's not null (if schema enforces)
+                if ($jawabanSiswa->wasRecentlyCreated && empty($jawabanSiswa->jawaban)) {
+                    $jawabanSiswa->jawaban = '-'; 
+                    $jawabanSiswa->save();
+                }
+            }
+        }
+
+        // Hitung ulang total nilai dari DB
+        $totalNilai = $ujianSiswa->jawabanSiswa()->sum('nilai_soal');
+
+        // Update status ujian siswa menjadi 'dinilai'
+        $ujianSiswa->update([
+            'nilai' => $totalNilai,
+            'status' => 'dinilai',
+        ]);
+
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $routeName = $isLatihan ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil';
+
+        return redirect()
+            ->route($routeName, [$kelasId, $mapelId, $ujianId])
+            ->with('success', 'Hasil koreksi berhasil disimpan. Nilai akhir: ' . number_format($totalNilai, 1));
+    }
+
+    /**
      * Download template Excel soal
      */
     public function downloadSoalTemplate($kelasId, $mapelId, $ujianId)
@@ -858,10 +951,50 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
+        $ujian = Ujian::findOrFail($ujianId);
+        $filename = ($ujian->tipe_ujian === 'latihan') ? 'template_soal_latihan.xlsx' : 'template_soal_ujian.xlsx';
+
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\SoalUjianTemplateExport(),
-            'template_soal_ujian.xlsx'
+            $filename
         );
+    }
+
+    /**
+     * Get AI Suggestion for Grading
+     */
+    public function getAiSuggestion(Request $request, $kelasId, $mapelId, $ujianId, $soalId)
+    {
+        $request->validate([
+            'answer' => 'required|string',
+        ]);
+
+        // Verify access
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $soal = SoalUjian::findOrFail($soalId);
+        
+        // Determine correct answer/key context
+        // Priority: kunci_jawaban > jawaban_benar
+        $kunciJawaban = $soal->kunci_jawaban ?? $soal->jawaban_benar;
+        
+        if (empty($kunciJawaban)) {
+            return response()->json([
+                'error' => true,
+                'feedback' => 'Soal ini tidak memiliki Kunci Jawaban yang tersimpan. AI membutuhkan kunci jawaban sebagai acuan penilaian.'
+            ]);
+        }
+        
+        $aiService = new \App\Services\AiGradingService();
+        $result = $aiService->evaluate(
+            $soal->pertanyaan,
+            $request->answer,
+            $kunciJawaban,
+            $soal->bobot_nilai
+        );
+
+        return response()->json($result);
     }
 
     /**
@@ -883,11 +1016,12 @@ class GuruUjianController extends Controller
             );
 
             $isLatihan = request()->routeIs('guru.lms.latihan.*');
+            $label = $isLatihan ? 'Latihan' : 'Ujian';
             $routeName = $isLatihan ? 'guru.lms.latihan.soal.manage' : 'guru.lms.ujian.soal.manage';
 
             return redirect()
                 ->route($routeName, [$kelasId, $mapelId, $ujianId])
-                ->with('success', 'Soal berhasil diimport dari Excel!');
+                ->with('success', "Soal $label berhasil diimport dari Excel!");
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
             $errors = [];

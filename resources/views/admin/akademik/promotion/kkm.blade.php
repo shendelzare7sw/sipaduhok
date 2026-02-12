@@ -4,7 +4,11 @@
 @section('page-title', 'Pengaturan KKM')
 
 @section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
+    @if(auth()->user()->isWakilKepalaSekolah())
+        @include('waka.partials.sneat-sidebar-menu')
+    @elseif(auth()->user()->isAdmin())
+        @include('admin.partials.sneat-sidebar-menu')
+    @endif
 @endsection
 
 @section('content')
@@ -13,8 +17,11 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
+            @php
+                $routePrefix = request()->routeIs('waka.*') ? 'waka.promotion' : 'admin.akademik.promotion';
+            @endphp
             <h5 class="mb-0">Daftar Mata Pelajaran & KKM</h5>
-            <form action="{{ route('admin.akademik.promotion.kkm.index') }}" method="GET" class="d-flex">
+            <form action="{{ route($routePrefix . '.kkm.index') }}" method="GET" class="d-flex">
                 <select name="jenjang" class="form-select me-2" onchange="this.form.submit()">
                     <option value="PAUD" {{ $jenjang == 'PAUD' ? 'selected' : '' }}>PAUD</option>
                     <option value="SD" {{ $jenjang == 'SD' ? 'selected' : '' }}>SD</option>
@@ -25,7 +32,7 @@
             </form>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.akademik.promotion.kkm.store') }}" method="POST">
+            <form action="{{ route($routePrefix . '.kkm.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
                 <input type="hidden" name="jenjang" value="{{ $jenjang }}">
