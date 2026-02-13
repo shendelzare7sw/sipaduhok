@@ -48,39 +48,107 @@ class PromotionReportController extends Controller
                 'status_naik_kelas_siswa.*',
                 'siswa.nama_lengkap',
                 'siswa.cabang_id',
+                'siswa.status as siswa_status',
                 DB::raw("COALESCE(kelas.nama_kelas, status_naik_kelas_siswa.kelas_asal) as kelas_current")
             );
 
-        if ($filterStatus) $query->where('status_kelulusan', $filterStatus);
+        if ($filterStatus) $query->where('status_naik_kelas_siswa.status_kelulusan', $filterStatus);
         if ($search) $query->where('siswa.nama_lengkap', 'like', "%{$search}%");
         if ($cabangId) $query->where('siswa.cabang_id', $cabangId);
-        if ($kelasId) $query->where('siswa.kelas_id', $kelasId);
 
-        $students = $query->paginate(20);
+        // FIX: Use historical kelas_asal instead of current kelas_id to include graduates
+        if ($kelasId) {
+            $query->where(function($q) use ($kelasId) {
+                $q->where('status_naik_kelas_siswa.kelas_asal', $kelasId)
+                  ->orWhere('siswa.kelas_id', $kelasId);
+            });
+        }
+
+        $students = $query->orderBy('status_naik_kelas_siswa.tanggal_eksekusi', 'desc')
+            ->paginate(20);
 
         // --- 2. Simulation Query ---
-        // FIX: Only show students who are currently in classes of the SELECTED YEAR.
-        // If selecting 2026/2027 (Future), and students are in 2025/2026, list should be empty.
-        $simQuery = Siswa::where('status', 'aktif')
-            ->whereHas('kelas', function($q) use ($selectedYear) {
-                $q->where('tahun_ajaran_id', $selectedYear->id);
-            })
-            ->with(['kelas', 'tagihan']);
+        // NEW: Support historical mode to show students as they were at execution time
+        $simMode = $request->get('sim_mode', 'current');
 
-        if ($search) $simQuery->where('nama_lengkap', 'like', "%{$search}%");
-        if ($cabangId) $simQuery->where('cabang_id', $cabangId);
-        if ($kelasId) $simQuery->where('kelas_id', $kelasId);
+        if ($simMode === 'historical') {
+            // Historical mode: Show students as they were BEFORE execution
+            $simQuery = DB::table('status_naik_kelas_siswa')
+                ->join('siswa', 'status_naik_kelas_siswa.siswa_id', '=', 'siswa.id')
+                ->leftJoin('kelas as kelas_asal', 'status_naik_kelas_siswa.kelas_asal', '=', 'kelas_asal.id')
+                ->where('status_naik_kelas_siswa.tahun_ajaran_id', $selectedYear->id)
+                ->select(
+                    'siswa.*',
+                    'status_naik_kelas_siswa.status_kelulusan',
+                    'status_naik_kelas_siswa.kelas_asal',
+                    'status_naik_kelas_siswa.kelas_tujuan',
+                    'kelas_asal.nama_kelas as kelas_nama'
+                );
 
-        $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
+            if ($search) $simQuery->where('siswa.nama_lengkap', 'like', "%{$search}%");
+            if ($cabangId) $simQuery->where('siswa.cabang_id', $cabangId);
+            if ($kelasId) $simQuery->where('status_naik_kelas_siswa.kelas_asal', $kelasId);
 
-        $simulationData = [];
-        $promotionService = app(\App\Services\PromotionService::class);
-        
-        foreach ($activeStudents as $siswa) {
-            $simulationData[] = [
-                'siswa' => $siswa,
-                'result' => $promotionService->checkEligibility($siswa, $selectedYear->id)
-            ];
+            $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
+
+            // For historical mode, data already includes results
+            $simulationData = $activeStudents->map(function($record) {
+                // Determine eligibility based on status (already executed, so all were eligible)
+                $isEligible = in_array($record->status_kelulusan, ['NAIK_KELAS', 'LULUS', 'NAIK_KELAS_TUNGGAKAN', 'LULUS_TUNGGAKAN']);
+
+                // Check if this student had dispensation
+                $hadDispensasi = in_array($record->status_kelulusan, ['NAIK_KELAS_TUNGGAKAN', 'LULUS_TUNGGAKAN']);
+
+                return [
+                    'siswa' => (object)[
+                        'id' => $record->id,
+                        'nama_lengkap' => $record->nama_lengkap,
+                        'nis' => $record->nis ?? '',
+                        'kelas' => (object)['nama_kelas' => $record->kelas_nama ?? 'N/A']
+                    ],
+                    'result' => [
+                        'eligible' => $isEligible,
+                        'status' => $record->status_kelulusan,
+                        'kelas_asal' => $record->kelas_asal,
+                        'kelas_tujuan' => $record->kelas_tujuan,
+                        'financial' => [
+                            'status' => $hadDispensasi ? 'BELUM_LUNAS' : 'LUNAS',
+                            'is_dispensasi' => $hadDispensasi,
+                            'unpaid_amount' => 0  // Historical data - amount not stored
+                        ],
+                        'academic' => [
+                            'is_tuntas' => $isEligible,
+                            'percentage' => $isEligible ? 100 : 0,
+                            'tuntas_count' => 0,  // Historical data - detail not stored
+                            'total_mapel' => 0,   // Historical data - detail not stored
+                            'threshold' => 70
+                        ]
+                    ]
+                ];
+            })->toArray();
+        } else {
+            // Current mode: Show students currently enrolled in this year
+            $simQuery = Siswa::where('status', 'aktif')
+                ->whereHas('kelas', function($q) use ($selectedYear) {
+                    $q->where('tahun_ajaran_id', $selectedYear->id);
+                })
+                ->with(['kelas', 'tagihan']);
+
+            if ($search) $simQuery->where('nama_lengkap', 'like', "%{$search}%");
+            if ($cabangId) $simQuery->where('cabang_id', $cabangId);
+            if ($kelasId) $simQuery->where('kelas_id', $kelasId);
+
+            $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
+
+            $simulationData = [];
+            $promotionService = app(\App\Services\PromotionService::class);
+
+            foreach ($activeStudents as $siswa) {
+                $simulationData[] = [
+                    'siswa' => $siswa,
+                    'result' => $promotionService->checkEligibility($siswa, $selectedYear->id)
+                ];
+            }
         }
 
         // --- 3. TA Validation for Promotion ---
@@ -124,6 +192,7 @@ class PromotionReportController extends Controller
             'kelasId' => $kelasId,
             'promotionReadiness' => $promotionReadiness,
             'schedules' => $schedules,
+            'simMode' => $simMode, // NEW: Simulation mode toggle
         ]);
     }
 
