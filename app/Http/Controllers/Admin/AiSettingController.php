@@ -16,7 +16,7 @@ class AiSettingController extends Controller
         return view('admin.ai-settings.index', [
             'apiKey' => $settings['ai_api_key'] ?? '',
             'model' => $settings['ai_model'] ?? 'llama3-70b-8192',
-            'visionModel' => $settings['ai_vision_model'] ?? 'llama-3.2-11b-vision-preview',
+            'visionModel' => $settings['ai_vision_model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct',
             'provider' => $settings['ai_provider'] ?? 'groq',
         ]);
     }
@@ -59,7 +59,9 @@ class AiSettingController extends Controller
 
         if ($provider === 'groq') {
             try {
-                $response = Http::withHeaders([
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type' => 'application/json',
                 ])->post('https://api.groq.com/openai/v1/chat/completions', [

@@ -132,7 +132,9 @@
                         <div id="sectionIsian" class="tipe-section" style="display:none;">
                             <label class="form-label text-muted">Kunci Jawaban Singkat</label>
                             <input type="text" name="kunci_jawaban_isian" class="form-control" value="{{ $soal->kunci_jawaban ?? '' }}" placeholder="Contoh: Soekarno">
-                            <small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Jawaban siswa harus persis sama (case-insensitive).</small>
+                            <small class="text-info">
+                                <i class="fas fa-info-circle"></i> Auto-grading butuh kecocokan persis. Gunakan <strong>AI Assistant</strong> di menu Koreksi untuk toleransi kesalahan ketik.
+                            </small>
                         </div>
 
                         {{-- 5. Uraian --}}

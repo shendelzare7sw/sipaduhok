@@ -104,7 +104,7 @@
                         <i class="fas fa-star me-2"></i>Berikan Nilai
                     </div>
                     @if($tugasSiswa->file_jawaban || $tugasSiswa->jawaban_text)
-                        <button type="button" class="btn btn-sm btn-outline-info" id="aiAssistBtn">
+                        <button type="button" class="btn btn-sm btn-ai-gradient" id="aiAssistBtn">
                             <i class="fas fa-robot me-1"></i> Analisis AI (Vision)
                         </button>
                     @endif
@@ -161,6 +161,29 @@
     </div>
 
     @push('scripts')
+    <style>
+        .btn-ai-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4), 0 2px 4px -1px rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-ai-gradient:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.5), 0 4px 6px -2px rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+        .btn-ai-gradient:active {
+            transform: translateY(0);
+        }
+        .btn-ai-gradient:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const aiBtn = document.getElementById('aiAssistBtn');
@@ -172,7 +195,7 @@
                 aiBtn.addEventListener('click', function() {
                     // UI Loading State
                     const originalContent = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mengolah...';
                     this.disabled = true;
                     toastMsg.textContent = "Sedang menganalisis jawaban (Vision AI)...";
                     toast.show();
@@ -199,6 +222,7 @@
                         const feedbackInput = document.getElementById('feedbackInput');
 
                         scoreInput.value = data.score;
+                        // Visual Feedback
                         scoreInput.classList.add('bg-success', 'text-white', 'bg-opacity-25');
                         
                         feedbackInput.value = `[AI Vision] ${data.feedback}\n\n` + feedbackInput.value;
@@ -206,6 +230,7 @@
 
                         setTimeout(() => {
                             scoreInput.classList.remove('bg-success', 'text-white', 'bg-opacity-25');
+                            scoreInput.classList.add('transition-fade'); // smooth remove if added css for it
                             feedbackInput.classList.remove('bg-info', 'text-white', 'bg-opacity-10');
                         }, 2000);
 

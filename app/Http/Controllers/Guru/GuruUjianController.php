@@ -976,14 +976,22 @@ class GuruUjianController extends Controller
         $soal = SoalUjian::findOrFail($soalId);
         
         // Determine correct answer/key context
-        // Priority: kunci_jawaban > jawaban_benar
+        // Priority: kunci_jawaban > jawaban_benar > narasi (for context)
         $kunciJawaban = $soal->kunci_jawaban ?? $soal->jawaban_benar;
         
         if (empty($kunciJawaban)) {
-            return response()->json([
-                'error' => true,
-                'feedback' => 'Soal ini tidak memiliki Kunci Jawaban yang tersimpan. AI membutuhkan kunci jawaban sebagai acuan penilaian.'
-            ]);
+            // For Essay/Uraian, if no key is provided, use Narasi or Question itself as context
+            if (in_array($soal->tipe_soal, ['uraian', 'essay']) && !empty($soal->narasi)) {
+                $kunciJawaban = "Gunakan konteks dari narasi berikut: \n" . $soal->narasi;
+            } elseif (in_array($soal->tipe_soal, ['uraian', 'essay'])) {
+                // If absolutely no key or narration, guide AI to be subjective/generative based on question logic
+                $kunciJawaban = "Tidak ada kunci jawaban spesifik. Analisis logika dan relevansi jawaban siswa terhadap pertanyaan.";
+            } else {
+                return response()->json([
+                    'error' => true,
+                    'feedback' => 'Soal ini tidak memiliki Kunci Jawaban yang tersimpan. AI membutuhkan kunci jawaban sebagai acuan penilaian.'
+                ]);
+            }
         }
         
         $aiService = new \App\Services\AiGradingService();

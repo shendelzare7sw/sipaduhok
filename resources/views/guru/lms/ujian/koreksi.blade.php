@@ -1,7 +1,7 @@
 @extends('layouts.lms-guru')
 
 @section('title', 'Koreksi Jawaban Siswa')
-@section('page-title', 'Koreksi Jawaban: ' . $siswa->nama_lengkap ?? $ujianSiswa->siswa->nama_lengkap)
+@section('page-title', 'Koreksi Jawaban: ' . ($ujianSiswa->siswa->nama_lengkap ?? '-'))
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
 
 @section('sidebar-menu')
@@ -65,7 +65,7 @@
             @foreach($soalList as $index => $soal)
                 @php
                     $jawaban = $ujianSiswa->jawabanSiswa->where('soal_ujian_id', $soal->id)->first();
-                    $isAutoGraded = !in_array($soal->tipe_soal, ['uraian', 'essay']);
+                    $isAutoGraded = !in_array($soal->tipe_soal, ['uraian', 'essay', 'isian_singkat']);
                     $bgColor = $isAutoGraded ? 'bg-light' : 'bg-white border-warning';
                     if (!$isAutoGraded && $jawaban && $jawaban->nilai_soal === null) {
                         $bgColor = 'bg-warning bg-opacity-10 border-warning'; // Highlight un-graded manual questions
@@ -79,15 +79,22 @@
                             <span class="badge bg-info text-dark">Bobot: {{ $soal->bobot_nilai }}</span>
                         </div>
                         
-                        <div class="mb-3 p-3 bg-white border rounded">
-                            {!! $soal->pertanyaan !!}
-                        </div>
+                            @if($soal->narasi)
+                                <div class="alert alert-secondary mb-3">
+                                    <strong class="d-block mb-1"><i class="fas fa-book-open me-2"></i>Narasi / Konteks:</strong>
+                                    <div class="fst-italic text-dark">{!! nl2br(e($soal->narasi)) !!}</div>
+                                </div>
+                            @endif
+
+                            <div class="mb-3 p-3 bg-white border rounded question-text">
+                                {!! $soal->pertanyaan !!}
+                            </div>
 
                         @if($isAutoGraded)
                             {{-- Tampilan Auto Graded (Read Only) --}}
                             <div class="mb-3">
-                                <label class="small text-muted fw-bold">Jawaban Siswa:</label>
-                                <div class="p-2 border rounded bg-white">
+                                <label class="small text-muted fw-bold mb-1">Jawaban Siswa:</label>
+                                <div class="p-3 border rounded student-answer-box">
                                     @if($soal->tipe_soal == 'pilihan_ganda')
                                         {{ $jawaban->jawaban ?? '-' }} 
                                         @if(isset($jawaban) && $soal->checkAnswer($jawaban->jawaban))
@@ -106,15 +113,15 @@
                             <div class="row">
                                 <div class="col-md-2">
                                     <label class="small text-muted fw-bold">Nilai Otomatis:</label>
-                                    <input type="text" class="form-control form-control-sm" value="{{ $jawaban->nilai_soal ?? 0 }}" readonly>
+                                    <input type="text" class="form-control form-control-lg-custom" value="{{ $jawaban->nilai_soal ?? 0 }}" readonly>
                                 </div>
                             </div>
 
                         @else
                             {{-- Tampilan Manual Grading --}}
                             <div class="mb-3">
-                                <label class="small text-muted fw-bold">Jawaban Siswa:</label>
-                                <div class="p-3 border rounded bg-white mb-2" style="min-height: 80px;">
+                                <label class="small text-muted fw-bold mb-1">Jawaban Siswa:</label>
+                                <div class="p-3 border rounded student-answer-box mb-3" style="min-height: 80px;">
                                     @if(isset($jawaban->jawaban) && $jawaban->jawaban)
                                         {!! nl2br(e($jawaban->jawaban)) !!}
                                     @else
@@ -129,23 +136,23 @@
                                     <input type="number" step="0.1" min="0" max="{{ $soal->bobot_nilai }}" 
                                         name="nilai[{{ $soal->id }}]" 
                                         id="nilai_{{ $soal->id }}"
-                                        class="form-control" 
+                                        class="form-control form-control-lg-custom" 
                                         value="{{ $jawaban->nilai_soal ?? 0 }}" required>
                                 </div>
                                 <div class="col-md-9">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <label class="form-label fw-bold text-secondary">Feedback / Komentar Guru (Opsional)</label>
-                                        <button type="button" class="btn btn-sm btn-outline-info ai-assist-btn" 
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <label class="form-label fw-bold text-secondary align-self-end">Feedback / Komentar Guru (Opsional)</label>
+                                        <button type="button" class="btn btn-ai-gradient ai-assist-btn px-4" 
                                             data-soal-id="{{ $soal->id }}" 
                                             data-answer="{{ $jawaban->jawaban ?? '' }}"
                                             data-max-score="{{ $soal->bobot_nilai }}">
-                                            <i class="fas fa-robot me-1"></i> Analisis AI
+                                            <i class="fas fa-robot me-2"></i> Analisis AI Assistant
                                         </button>
                                     </div>
                                     <textarea name="feedback[{{ $soal->id }}]" 
                                         id="feedback_{{ $soal->id }}"
-                                        class="form-control" 
-                                        rows="2"
+                                        class="form-control form-control-lg-custom" 
+                                        rows="3"
                                         placeholder="Berikan catatan koreksi...">{{ $jawaban->feedback ?? '' }}</textarea>
                                 </div>
                             </div>
@@ -181,6 +188,38 @@
         </div>
     </div>
 
+    @push('styles')
+    <style>
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+        .student-answer-box {
+            font-size: 1.05rem;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        .btn-ai-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-ai-gradient:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+        .form-control-lg-custom {
+            font-size: 1.1rem;
+            padding: 0.6rem 1rem;
+        }
+    </style>
+    @endpush
+
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -202,7 +241,7 @@
 
                     // UI Loading State
                     const originalContent = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengolah...';
                     this.disabled = true;
 
                     // Determine route based on context
@@ -213,10 +252,10 @@
                     // Easiest is to hardcode structure or use a JS variable for base URL
                     // But we used named route with parameters in web.php: /{ujian}/koreksi/{soal}/ai-suggest
                     
-                    // Let's use fetch with constructing URL.
-                    // Accessing PHP variables in JS is okay here.
-                    const url = `{{ url('/') }}/` + (isLatihan ? 'guru/lms/latihan' : 'guru/lms/ujian') + 
-                                `/{{ $ujian->id }}/koreksi/${soalId}/ai-suggest`;
+                    // Construct URL
+                    // Route pattern: guru/lms/{kelas}/{mapel}/{ujian_or_latihan}/{ujianId}/koreksi/{soalId}/ai-suggest
+                    const segment = isLatihan ? 'latihan' : 'ujian';
+                    const url = `{{ url('/') }}/guru/lms/{{ $kelas->id }}/{{ $mapel->id }}/${segment}/{{ $ujian->id }}/koreksi/${soalId}/ai-suggest`;
 
                     fetch(url, {
                         method: 'POST',

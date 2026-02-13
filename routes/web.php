@@ -1024,6 +1024,7 @@ Route::middleware(['auth'])->group(function () {
                 // Koreksi Tugas
                 Route::get('/{tugas}/koreksi', [GuruKoreksiController::class, 'index'])->name('koreksi');
                 Route::get('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'show'])->name('koreksi.show');
+                Route::post('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'store'])->name('koreksi.store');
                 Route::post('/{tugas}/koreksi/bulk', [GuruKoreksiController::class, 'bulkGrade'])->name('koreksi.bulk');
                 Route::post('/{tugas}/koreksi/{submission}/ai-suggest', [GuruKoreksiController::class, 'getAiAssignmentSuggestion'])->name('koreksi.ai-suggest');
             });

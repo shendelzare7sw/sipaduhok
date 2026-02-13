@@ -54,8 +54,12 @@
                             <label class="form-label fw-bold">Model Text (Chat)</label>
                             <select class="form-select" name="ai_model" id="ai_model">
                                 <optgroup label="Llama 3 (Groq)">
-                                    <option value="llama3-70b-8192" {{ $model == 'llama3-70b-8192' ? 'selected' : '' }}>Llama 3 70B (Recommended)</option>
-                                    <option value="llama3-8b-8192" {{ $model == 'llama3-8b-8192' ? 'selected' : '' }}>Llama 3 8B (Faster)</option>
+                                    <option value="llama-3.3-70b-versatile" {{ $model == 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B (Recommended)</option>
+                                    <option value="llama-3.1-8b-instant" {{ $model == 'llama-3.1-8b-instant' ? 'selected' : '' }}>Llama 3.1 8B (Fastest)</option>
+                                    <option value="llama-3.1-70b-versatile" {{ $model == 'llama-3.1-70b-versatile' ? 'selected' : '' }}>Llama 3.1 70B</option>
+                                </optgroup>
+                                <optgroup label="Gemma (Groq)">
+                                    <option value="gemma2-9b-it" {{ $model == 'gemma2-9b-it' ? 'selected' : '' }}>Gemma 2 9B</option>
                                 </optgroup>
                                 <optgroup label="Mixtral (Groq)">
                                     <option value="mixtral-8x7b-32768" {{ $model == 'mixtral-8x7b-32768' ? 'selected' : '' }}>Mixtral 8x7B</option>
@@ -70,9 +74,8 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold">Model Vision (Multimodal)</label>
                             <select class="form-select" name="ai_vision_model" id="ai_vision_model">
-                                <optgroup label="Llama 3.2 (Meta)">
-                                    <option value="llama-3.2-11b-vision-preview" {{ $visionModel == 'llama-3.2-11b-vision-preview' ? 'selected' : '' }}>Llama 3.2 11B Vision (Free Preview)</option>
-                                    <option value="llama-3.2-90b-vision-preview" {{ $visionModel == 'llama-3.2-90b-vision-preview' ? 'selected' : '' }}>Llama 3.2 90B Vision (Preview)</option>
+                                <optgroup label="Llama 4 (Groq)">
+                                    <option value="meta-llama/llama-4-scout-17b-16e-instruct" {{ $visionModel == 'meta-llama/llama-4-scout-17b-16e-instruct' ? 'selected' : '' }}>Llama 4 Scout (Multimodal)</option>
                                 </optgroup>
                             </select>
                             <div class="form-text">Model ini digunakan khusus untuk menganalisis gambar pada tugas.</div>

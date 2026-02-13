@@ -23,8 +23,21 @@ class AiGradingService
         $settings = AppSetting::whereIn('key', ['ai_api_key', 'ai_model', 'ai_vision_model', 'ai_provider'])->pluck('value', 'key');
 
         $this->apiKey = $settings['ai_api_key'] ?? null;
-        $this->model = $settings['ai_model'] ?? 'llama3-70b-8192'; 
-        $this->visionModel = $settings['ai_vision_model'] ?? 'llama-3.2-11b-vision-preview';
+        $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile'; 
+        
+        // Auto-fix for decommissioned model
+        if ($this->model === 'llama3-70b-8192') {
+            $this->model = 'llama-3.3-70b-versatile';
+        } 
+        
+        // Default to Llama 4 Scout (Vision capable)
+        $this->visionModel = $settings['ai_vision_model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct';
+        
+        // Auto-fix for decommissioned vision models (11b & 90b previews)
+        if (in_array($this->visionModel, ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'])) {
+            $this->visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
+        }
+
         $this->provider = $settings['ai_provider'] ?? 'groq';
     }
 
@@ -83,7 +96,9 @@ class AiGradingService
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}";
         
-        $response = Http::withHeaders([
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($url, [
             'contents' => [
@@ -114,7 +129,67 @@ class AiGradingService
         ];
     }
     
-    // ... evaluateWithGroq ...
+    protected function evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore)
+    {
+        $prompt = "Anda adalah asisten guru yang objektif. Tugas Anda adalah menilai jawaban siswa soal uraian.
+        
+        Soal: \"{$question}\"
+        Kunci Jawaban / Konteks: \"{$correctAnswer}\"
+        Jawaban Siswa: \"{$studentAnswer}\"
+        
+        Instruksi:
+        1. Bandingkan jawaban siswa dengan kunci jawaban.
+        2. Berikan nilai (score) antara 0 sampai {$maxScore}.
+        3. Berikan feedback singkat (maksimal 3 kalimat) dalam Bahasa Indonesia.
+        4. Output WAJIB berupa JSON valid dengan format: {\"score\": int, \"feedback\": string}. Jangan ada teks lain.";
+
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ])->post('https://api.groq.com/openai/v1/chat/completions', [
+            'model' => $this->model,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Anda adalah sistem penilaian otomatis yang outputnya selalu JSON.'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ]
+            ],
+            'temperature' => 0.2, // Low temperature for consistent grading
+            'max_tokens' => 300,
+            'response_format' => ['type' => 'json_object']
+        ]);
+
+        if ($response->failed()) {
+            throw new \Exception("Groq API Error: " . $response->body());
+        }
+
+        $json = $response->json();
+        $content = $json['choices'][0]['message']['content'] ?? '{}';
+        $result = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Fallback strategy if JSON is broken (regex)
+            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+            preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+            
+            $result = [
+                'score' => $scoreMatches[1] ?? 0,
+                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+            ];
+        }
+
+        return [
+            'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
+            'feedback' => $result['feedback'] ?? 'Tidak ada feedback dari AI.',
+            'error' => false
+        ];
+    }
 
     /**
      * Evaluate student answer with Image (Multimodal)
@@ -170,7 +245,9 @@ class AiGradingService
             4. Jika gambar tidak terbaca/irrelavan, beri nilai 0.
             5. Output WAJIB JSON valid: {\"score\": int, \"feedback\": string}";
 
-            $response = Http::withHeaders([
+            $response = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
@@ -231,7 +308,9 @@ class AiGradingService
 
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$this->apiKey}";
 
-        $response = Http::withHeaders([
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($url, [
             'contents' => [

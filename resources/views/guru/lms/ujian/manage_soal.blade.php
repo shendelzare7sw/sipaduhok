@@ -333,6 +333,9 @@
                             <label class="form-label small">Kunci Jawaban</label>
                             <input type="text" name="soal[{INDEX}][kunci_jawaban_isian]"
                                 class="form-control form-control-sm" placeholder="Jawaban singkat...">
+                            <small class="text-muted fst-italic" style="font-size: 0.75rem;">
+                                *AI Assistant tersedia saat koreksi untuk membantu menilai jawaban yang mirip.
+                            </small>
                         </div>
 
                         {{-- 5. URAIAN --}}
