@@ -713,10 +713,44 @@ class GuruUjianController extends Controller
                     break;
             }
 
+            // Handle Image Upload
+            $imagePath = null;
+            $existingImagePath = $data['existing_image'] ?? null;
+
+            // Check if new image uploaded
+            if ($request->hasFile("soal.{$index}.image")) {
+                $imageFile = $request->file("soal.{$index}.image");
+
+                // Validate image
+                $request->validate([
+                    "soal.{$index}.image" => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+                ]);
+
+                // Delete old image if exists
+                if ($existingImagePath && \Storage::disk('public')->exists($existingImagePath)) {
+                    \Storage::disk('public')->delete($existingImagePath);
+                }
+
+                // Store new image
+                $imagePath = $imageFile->store('soal-images', 'public');
+            } elseif ($existingImagePath) {
+                // Keep existing image if no new upload and existing_image has value
+                $imagePath = $existingImagePath;
+            } elseif (empty($existingImagePath) && !empty($data['id'])) {
+                // If existing_image is empty but soal has ID, delete old image
+                $existingSoal = SoalUjian::find($data['id']);
+                if ($existingSoal && $existingSoal->image_path) {
+                    if (\Storage::disk('public')->exists($existingSoal->image_path)) {
+                        \Storage::disk('public')->delete($existingSoal->image_path);
+                    }
+                }
+            }
+
             // Prepare Update/Create Data
             $saveData = [
                 'ujian_id' => $ujianId,
                 'narasi' => $data['narasi'] ?? null,
+                'image_path' => $imagePath,
                 'urutan' => $index + 1, // Auto number by loop index
                 'tipe_soal' => $data['tipe_soal'],
                 'pertanyaan' => $data['pertanyaan'],
@@ -1040,6 +1074,176 @@ class GuruUjianController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Import gagal: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * AI Question Bank Generator
+     * Generate questions using AI based on topic, type, difficulty
+     */
+    public function aiGenerateQuestions(Request $request, $kelasId, $mapelId, $ujianId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $validated = $request->validate([
+            'topic' => 'required|string|max:200',
+            'type' => 'required|in:pilihan_ganda,benar_salah,uraian,isian_singkat',
+            'difficulty' => 'required|in:easy,medium,hard',
+            'count' => 'required|integer|min:1|max:10',
+            'custom_instructions' => 'nullable|string|max:500',
+            'generate_narasi' => 'nullable|boolean',
+        ]);
+
+        try {
+            $ujian = Ujian::findOrFail($ujianId);
+            $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+            $kelas = Kelas::findOrFail($kelasId);
+
+            // Extract kelas number from nama_kelas (e.g., "X-A" -> 10, "7-B" -> 7)
+            preg_match('/^(\d+|[IVX]+)/', $kelas->nama_kelas, $matches);
+            $kelasNumber = isset($matches[1]) ? $this->romanToNumber($matches[1]) : 10;
+
+            // Call AI Question Generator Service
+            $generator = app(\App\Services\AiQuestionGeneratorService::class);
+            $result = $generator->generateQuestions(
+                $validated['topic'],
+                $validated['type'],
+                $validated['difficulty'],
+                $validated['count'],
+                $mataPelajaran->nama_mapel,
+                $kelasNumber,
+                $validated['custom_instructions'] ?? null,
+                $validated['generate_narasi'] ?? false
+            );
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['error'] ?? 'Gagal generate soal.',
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'questions' => $result['questions'],
+                'metadata' => $result['metadata'] ?? [],
+                'message' => 'Berhasil generate ' . count($result['questions']) . ' soal!',
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('AI Question Generation Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk Store AI-Generated Questions
+     * Save multiple questions at once from AI generator
+     */
+    public function bulkStoreSoal(Request $request, $kelasId, $mapelId, $ujianId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $validated = $request->validate([
+            'soal' => 'required|array|min:1|max:10',
+            'soal.*.tipe_soal' => 'required|in:pilihan_ganda,benar_salah,uraian,isian_singkat',
+            'soal.*.pertanyaan' => 'required|string',
+            'soal.*.bobot' => 'required|integer|min:1',
+            'soal.*.kunci_jawaban' => 'nullable',
+            'soal.*.pilihan_a' => 'nullable|string',
+            'soal.*.pilihan_b' => 'nullable|string',
+            'soal.*.pilihan_c' => 'nullable|string',
+            'soal.*.pilihan_d' => 'nullable|string',
+            'soal.*.pilihan_e' => 'nullable|string',
+            'soal.*.rubrik_penilaian' => 'nullable|string',
+            'soal.*.alternatif_jawaban' => 'nullable|array',
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            $ujian = Ujian::findOrFail($ujianId);
+            $currentMaxUrutan = Soal::where('ujian_id', $ujianId)->max('urutan') ?? 0;
+            $createdCount = 0;
+
+            foreach ($validated['soal'] as $index => $soalData) {
+                $urutan = $currentMaxUrutan + $index + 1;
+
+                // Prepare pilihan_jawaban based on tipe_soal
+                $pilihanJawaban = null;
+                $kunciJawaban = $soalData['kunci_jawaban'] ?? null;
+
+                if ($soalData['tipe_soal'] === 'pilihan_ganda') {
+                    $pilihanJawaban = [
+                        'A' => $soalData['pilihan_a'] ?? '',
+                        'B' => $soalData['pilihan_b'] ?? '',
+                        'C' => $soalData['pilihan_c'] ?? '',
+                        'D' => $soalData['pilihan_d'] ?? '',
+                        'E' => $soalData['pilihan_e'] ?? '',
+                    ];
+                } elseif ($soalData['tipe_soal'] === 'benar_salah') {
+                    // For true/false, kunci_jawaban is stored as 'B' or 'S'
+                    if (in_array(strtolower($kunciJawaban), ['benar', 'true', '1'])) {
+                        $kunciJawaban = 'B';
+                    } else {
+                        $kunciJawaban = 'S';
+                    }
+                }
+
+                Soal::create([
+                    'ujian_id' => $ujian->id,
+                    'urutan' => $urutan,
+                    'tipe_soal' => $soalData['tipe_soal'],
+                    'pertanyaan' => $soalData['pertanyaan'],
+                    'pilihan_jawaban' => $pilihanJawaban,
+                    'kunci_jawaban' => $kunciJawaban,
+                    'bobot' => $soalData['bobot'],
+                    'rubrik_penilaian' => $soalData['rubrik_penilaian'] ?? null,
+                ]);
+
+                $createdCount++;
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$createdCount} soal berhasil ditambahkan ke ujian!",
+                'created_count' => $createdCount,
+            ]);
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Bulk Store Soal Error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan soal: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Convert Roman numerals to number (for kelas like "X" -> 10)
+     */
+    private function romanToNumber($roman)
+    {
+        if (is_numeric($roman)) {
+            return (int) $roman;
+        }
+
+        $romanMap = [
+            'I' => 1, 'II' => 2, 'III' => 3, 'IV' => 4, 'V' => 5,
+            'VI' => 6, 'VII' => 7, 'VIII' => 8, 'IX' => 9, 'X' => 10,
+            'XI' => 11, 'XII' => 12,
+        ];
+
+        return $romanMap[strtoupper($roman)] ?? 10; // Default to 10 if not found
     }
 
     private function createUjianSiswaForKelas($ujian, $kelasId, $mataPelajaran)

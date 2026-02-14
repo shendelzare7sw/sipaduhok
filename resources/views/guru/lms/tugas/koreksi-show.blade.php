@@ -105,10 +105,18 @@
                     </div>
                     @if($tugasSiswa->file_jawaban || $tugasSiswa->jawaban_text)
                         <button type="button" class="btn btn-sm btn-ai-gradient" id="aiAssistBtn">
-                            <i class="fas fa-robot me-1"></i> Analisis AI (Vision)
+                            <i class="fas fa-robot me-1"></i> Analisis AI
                         </button>
                     @endif
                 </div>
+                @if($tugasSiswa->file_jawaban || $tugasSiswa->jawaban_text)
+                    <div class="px-3 pt-2 pb-1 bg-light border-bottom">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            AI dapat menganalisis: <strong>Gambar (JPG/PNG)</strong>, <strong>PDF (Digital & Scan)</strong>, dan <strong>Teks</strong>
+                        </small>
+                    </div>
+                @endif
                 <div class="p-3">
                     <form action="{{ route('guru.lms.tugas.koreksi.store', [$kelas->id, $mapel->id, $tugas->id, $tugasSiswa->id]) }}" 
                           method="POST">
@@ -191,8 +199,22 @@
                 const toastEl = document.getElementById('aiToast');
                 const toast = new bootstrap.Toast(toastEl);
                 const toastMsg = document.getElementById('aiToastMessage');
+                let isProcessing = false; // Race condition protection
 
                 aiBtn.addEventListener('click', function() {
+                    // Prevent multiple simultaneous requests
+                    if (isProcessing) return;
+
+                    // Validate if student has submitted answer
+                    const hasAnswer = {{ ($tugasSiswa->jawaban_text || $tugasSiswa->file_jawaban) ? 'true' : 'false' }};
+                    if (!hasAnswer) {
+                        toastMsg.textContent = 'Belum ada jawaban siswa untuk dianalisis.';
+                        toast.show();
+                        return;
+                    }
+
+                    isProcessing = true;
+
                     // UI Loading State
                     const originalContent = this.innerHTML;
                     this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mengolah...';
@@ -238,12 +260,13 @@
                     })
                     .catch(error => {
                         console.error(error);
-                        alert('Gagal mengambil analisis AI: ' + error.message);
                         toastMsg.textContent = "Gagal: " + error.message;
+                        toast.show();
                     })
                     .finally(() => {
                         this.innerHTML = originalContent;
                         this.disabled = false;
+                        isProcessing = false;
                     });
                 });
             }

@@ -380,19 +380,25 @@ class TagihanController extends Controller
 
         if ($request->isMethod('post')) {
             $request->validate([
-                'kelas_id' => 'required|exists:kelas,id',
+                'kelas_ids' => 'required|array|min:1',
+                'kelas_ids.*' => 'exists:kelas,id',
                 'tagihan' => 'required|array',
                 'tagihan.*' => 'nullable|numeric|min:0',
-                'tanggal_jatuh_tempo' => 'required|date',
+                'tanggal_jatuh_tempo' => 'required|array',
+                'tanggal_jatuh_tempo.*' => 'required|date',
+                'custom_tanggal_jatuh_tempo' => 'nullable|array',
+                'custom_tanggal_jatuh_tempo.*' => 'nullable|date',
             ]);
 
-            $siswaList = Siswa::where('kelas_id', $request->kelas_id)
+            $siswaList = Siswa::whereIn('kelas_id', $request->kelas_ids)
                 ->where('status', 'aktif')
                 ->get();
 
             if ($siswaList->isEmpty()) {
-                return redirect()->back()->with('error', 'Tidak ada siswa aktif di kelas ini.');
+                return redirect()->back()->with('error', 'Tidak ada siswa aktif di kelas yang dipilih.');
             }
+
+            $kelasCount = count($request->kelas_ids);
 
             DB::beginTransaction();
             try {
@@ -400,8 +406,9 @@ class TagihanController extends Controller
                     // Process default tagihan
                     foreach ($this->jenisTagihan as $key => $label) {
                         $jumlah = $request->input("tagihan.{$key}", 0);
+                        $jatuhTempo = $request->input("tanggal_jatuh_tempo.{$key}");
 
-                        if ($jumlah > 0) {
+                        if ($jumlah > 0 && $jatuhTempo) {
                             Tagihan::updateOrCreate(
                                 [
                                     'siswa_id' => $siswa->id,
@@ -410,7 +417,7 @@ class TagihanController extends Controller
                                 ],
                                 [
                                     'jumlah' => $jumlah,
-                                    'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
+                                    'tanggal_jatuh_tempo' => $jatuhTempo,
                                     'status' => 'belum_bayar',
                                 ]
                             );
@@ -420,9 +427,11 @@ class TagihanController extends Controller
                     // Process custom tagihan fields
                     $customJenis = $request->input('custom_jenis_tagihan', []);
                     $customTagihan = $request->input('custom_tagihan', []);
+                    $customJatuhTempo = $request->input('custom_tanggal_jatuh_tempo', []);
 
                     foreach ($customJenis as $index => $jenisNama) {
                         $jumlahCustom = $customTagihan[$index] ?? 0;
+                        $jatuhTempoCustom = $customJatuhTempo[$index] ?? now()->addMonth()->format('Y-m-d');
 
                         if (!empty($jenisNama) && $jumlahCustom > 0) {
                             // Create slug from jenis nama
@@ -436,7 +445,7 @@ class TagihanController extends Controller
                                 ],
                                 [
                                     'jumlah' => $jumlahCustom,
-                                    'tanggal_jatuh_tempo' => $request->tanggal_jatuh_tempo,
+                                    'tanggal_jatuh_tempo' => $jatuhTempoCustom,
                                     'status' => 'belum_bayar',
                                     'keterangan' => $jenisNama, // Store original name in keterangan
                                 ]
@@ -447,7 +456,7 @@ class TagihanController extends Controller
 
                 DB::commit();
                 return redirect()->route($this->getRoutePrefix() . '.index')
-                    ->with('success', "Tagihan berhasil dibuat untuk {$siswaList->count()} siswa.");
+                    ->with('success', "Tagihan berhasil dibuat untuk {$siswaList->count()} siswa dari {$kelasCount} kelas.");
             } catch (\Exception $e) {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -613,19 +622,23 @@ class TagihanController extends Controller
         if ($request->target_type === 'siswa') {
             $request->validate([
                 'target_type' => 'required|in:kelas,siswa',
+                'tipe_spp' => 'required|in:setahun,sebagian',
                 'siswa_ids' => 'required|array|min:1',
                 'siswa_ids.*' => 'exists:siswa,id',
                 'jumlah_spp' => 'required|numeric|min:1',
                 'tanggal_jatuh_tempo' => 'required|integer|min:1|max:31',
                 'bulan_mulai' => 'required|integer|min:1|max:12',
+                'jumlah_bulan' => 'required_if:tipe_spp,sebagian|nullable|integer|min:1|max:12',
             ]);
         } else {
             $request->validate([
                 'target_type' => 'required|in:kelas,siswa',
+                'tipe_spp' => 'required|in:setahun,sebagian',
                 'target_id' => 'required|exists:kelas,id',
                 'jumlah_spp' => 'required|numeric|min:1',
                 'tanggal_jatuh_tempo' => 'required|integer|min:1|max:31',
                 'bulan_mulai' => 'required|integer|min:1|max:12',
+                'jumlah_bulan' => 'required_if:tipe_spp,sebagian|nullable|integer|min:1|max:12',
             ]);
         }
 
@@ -672,9 +685,12 @@ class TagihanController extends Controller
             $totalCreated = 0;
             $bulanMulai = $request->bulan_mulai;
 
+            // Tentukan jumlah bulan yang akan digenerate
+            $jumlahBulanGenerate = $request->tipe_spp === 'setahun' ? 12 : $request->jumlah_bulan;
+
             foreach ($siswaList as $siswa) {
-                // Generate 12 bulan SPP
-                for ($i = 0; $i < 12; $i++) {
+                // Generate SPP sesuai jumlah bulan
+                for ($i = 0; $i < $jumlahBulanGenerate; $i++) {
                     $bulanIndex = (($bulanMulai + $i - 1) % 12) + 1;
                     $tahunSPP = date('Y') + floor(($bulanMulai + $i - 1) / 12);
 
@@ -701,8 +717,9 @@ class TagihanController extends Controller
             }
 
             DB::commit();
+            $tipeSppText = $request->tipe_spp === 'setahun' ? '(SPP Setahun)' : "(SPP {$jumlahBulanGenerate} Bulan)";
             return redirect()->route($this->getRoutePrefix() . '.index')
-                ->with('success', "Berhasil generate $totalCreated tagihan SPP untuk {$siswaList->count()} siswa.");
+                ->with('success', "Berhasil generate $totalCreated tagihan SPP {$tipeSppText} untuk {$siswaList->count()} siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal generate SPP: ' . $e->getMessage());

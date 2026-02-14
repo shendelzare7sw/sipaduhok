@@ -13,6 +13,8 @@ use App\Models\MataPelajaran;
 use App\Models\Tugas;
 use App\Models\TugasSiswa;
 use App\Models\Siswa;
+use Spatie\PdfToText\Pdf;
+use Spatie\PdfToImage\Pdf as PdfToImage;
 
 class GuruKoreksiController extends Controller
 {
@@ -149,21 +151,76 @@ class GuruKoreksiController extends Controller
 
         $aiService = new \App\Services\AiGradingService();
 
-        // Check if there is a file and if it's an image
+        // Check if there is a file and process based on type
         if ($submission->file_jawaban) {
             $path = storage_path('app/public/' . $submission->file_jawaban);
-            
+
             // Check mime type
             if (file_exists($path)) {
                 $mime = mime_content_type($path);
+
+                // Handle Image files
                 if (str_starts_with($mime, 'image/')) {
-                    // Vision AI
                     $result = $aiService->evaluateImage(
                         $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
                         $path,
-                        $tugas->deskripsi // Use description as context/key
+                        $tugas->deskripsi
                     );
                     return response()->json($result);
+                }
+
+                // Handle PDF files
+                if ($mime === 'application/pdf') {
+                    try {
+                        // Strategy 1: Try extract text (Digital PDF)
+                        $pdfText = Pdf::getText($path);
+                        $pdfText = trim($pdfText);
+
+                        // If we got meaningful text (> 10 chars), use text grading
+                        if (strlen($pdfText) > 10) {
+                            $result = $aiService->evaluate(
+                                $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
+                                $pdfText,
+                                $tugas->deskripsi
+                            );
+                            return response()->json($result);
+                        }
+
+                        // Strategy 2: No text found → Scanned/Image PDF
+                        // Convert first page to image and use Vision AI
+                        $imagePath = storage_path('app/temp/' . uniqid('pdf_') . '.jpg');
+
+                        // Ensure temp directory exists
+                        if (!file_exists(storage_path('app/temp'))) {
+                            mkdir(storage_path('app/temp'), 0755, true);
+                        }
+
+                        $pdf = new PdfToImage($path);
+                        $pdf->setPage(1)
+                            ->setResolution(150)
+                            ->saveImage($imagePath);
+
+                        // Use Vision AI on the converted image
+                        $result = $aiService->evaluateImage(
+                            $tugas->judul_tugas . "\n\n" . $tugas->deskripsi,
+                            $imagePath,
+                            $tugas->deskripsi
+                        );
+
+                        // Clean up temp image
+                        if (file_exists($imagePath)) {
+                            unlink($imagePath);
+                        }
+
+                        return response()->json($result);
+
+                    } catch (\Exception $e) {
+                        \Log::error('PDF Processing Error: ' . $e->getMessage());
+                        return response()->json([
+                            'error' => true,
+                            'feedback' => 'Gagal memproses file PDF. Error: ' . $e->getMessage()
+                        ]);
+                    }
                 }
             }
         }

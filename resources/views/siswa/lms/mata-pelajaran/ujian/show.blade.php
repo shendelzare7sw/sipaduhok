@@ -362,6 +362,23 @@
                                         </div>
                                     @endif
 
+                                    @if($soal->image_path)
+                                        <div class="soal-image-box mb-3">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-body p-2">
+                                                    <img src="{{ asset('storage/' . $soal->image_path) }}"
+                                                         alt="Gambar Soal {{ $index + 1 }}"
+                                                         class="img-fluid rounded"
+                                                         style="max-width: 100%; height: auto; cursor: pointer;"
+                                                         onclick="this.requestFullscreen()">
+                                                    <small class="text-muted d-block mt-2 text-center">
+                                                        <i class="fas fa-search-plus me-1"></i> Klik gambar untuk memperbesar
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     <!-- Question Text -->
                                     <div class="question-text">
                                         {!! nl2br(e($soal->pertanyaan)) !!}

@@ -38,63 +38,71 @@
 
 @section('content')
     <div class="manage-soal-container">
-    <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.storeAll' : 'guru.lms.ujian.soal.storeAll', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
-        id="mainForm">
-        @csrf
 
-        <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm"
-            style="z-index: 10;">
-            <div>
-                <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
-                    class="btn btn-outline-secondary mb-2 btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Kembali
-                </a>
-                <h4 class="mb-0">
-                    Menu Kelola Soal
-                    <span class="badge bg-primary ms-2" id="totalSoalBadge">0 Soal</span>
-                </h4>
-            </div>
-
-            <div class="d-flex gap-2">
-                {{-- Rilis / Tarik Toggle --}}
-                <button type="button" class="btn {{ $ujian->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}"
-                    onclick="confirmSyncAction('toggleStatusForm', '{{ $ujian->is_active ? 'Tarik Kembali ' . (ucfirst($tipeUjian ?? 'ujian')) : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}', 'Mengubah status...')"
-                    title="{{ $ujian->is_active ? 'Klik untuk menyembunyikan dari siswa' : 'Klik untuk menampilkan ke siswa' }}">
-                    <i class="fas {{ $ujian->is_active ? 'fa-eye-slash' : 'fa-eye' }} me-1"></i>
-                    {{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}
-                </button>
-
-                {{-- Tampilkan Nilai Toggle --}}
-                <button type="button" class="btn {{ $ujian->tampilkan_nilai ? 'btn-outline-danger' : 'btn-outline-info' }}"
-                    onclick="confirmSyncAction('toggleResultForm', '{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}', 'Mengubah visibilitas nilai...')"
-                    title="{{ $ujian->tampilkan_nilai ? 'Klik untuk menyembunyikan nilai dari siswa' : 'Klik untuk menampilkan nilai ke siswa' }}">
-                    <i class="fas {{ $ujian->tampilkan_nilai ? 'fa-eye-slash' : 'fa-poll' }} me-1"></i>
-                    {{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}
-                </button>
-
-                {{-- SIMPAN SEMUA --}}
-                <button type="button" class="btn btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')" 
-                    title="Simpan semua perubahan soal">
-                    <i class="fas fa-save me-1"></i> Simpan Semua
-                </button>
-            </div>
+    {{-- Header & Controls (Outside Form) --}}
+    <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm"
+        style="z-index: 10;">
+        <div>
+            <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
+                class="btn btn-outline-secondary mb-2 btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Kembali
+            </a>
+            <h4 class="mb-0">
+                Menu Kelola Soal
+                <span class="badge bg-primary ms-2" id="totalSoalBadge">0 Soal</span>
+            </h4>
         </div>
+
+        <div class="d-flex gap-2">
+            {{-- Rilis / Tarik Toggle --}}
+            <button type="button" class="btn {{ $ujian->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}"
+                onclick="confirmSyncAction('toggleStatusForm', '{{ $ujian->is_active ? 'Tarik Kembali ' . (ucfirst($tipeUjian ?? 'ujian')) : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}', 'Mengubah status...')"
+                title="{{ $ujian->is_active ? 'Klik untuk menyembunyikan dari siswa' : 'Klik untuk menampilkan ke siswa' }}">
+                <i class="fas {{ $ujian->is_active ? 'fa-eye-slash' : 'fa-eye' }} me-1"></i>
+                {{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}
+            </button>
+
+            {{-- Tampilkan Nilai Toggle --}}
+            <button type="button" class="btn {{ $ujian->tampilkan_nilai ? 'btn-outline-danger' : 'btn-outline-info' }}"
+                onclick="confirmSyncAction('toggleResultForm', '{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}', 'Mengubah visibilitas nilai...')"
+                title="{{ $ujian->tampilkan_nilai ? 'Klik untuk menyembunyikan nilai dari siswa' : 'Klik untuk menampilkan nilai ke siswa' }}">
+                <i class="fas {{ $ujian->tampilkan_nilai ? 'fa-eye-slash' : 'fa-poll' }} me-1"></i>
+                {{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}
+            </button>
+
+            {{-- SIMPAN SEMUA --}}
+            <button type="button" class="btn btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')"
+                title="Simpan semua perubahan soal">
+                <i class="fas fa-save me-1"></i> Simpan Semua
+            </button>
+        </div>
+    </div>
+
+    {{-- Import/Export Tools --}}
+    <div class="d-flex justify-content-end gap-2 mb-3 px-4">
+        <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.template' : 'guru.lms.ujian.soal.template', [$kelas->id, $mapel->id, $ujian->id]) }}"
+            class="btn btn-outline-success btn-sm">
+            <i class="fas fa-download me-1"></i> Download Template {{ ucfirst($tipeUjian ?? 'ujian') }}
+        </a>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importSoalModal">
+            <i class="fas fa-file-import me-1"></i> Import {{ ucfirst($tipeUjian ?? 'ujian') }} dari Excel
+        </button>
+
+        {{-- AI Generator Sidebar Trigger --}}
+        <button type="button" class="btn btn-info btn-sm" onclick="openAiSidebar()" title="Buka AI Question Generator">
+            <i class="fas fa-robot me-1"></i> AI Question Generator
+        </button>
+    </div>
+
+    {{-- MAIN FORM STARTS HERE --}}
+    <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.storeAll' : 'guru.lms.ujian.soal.storeAll', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
+        id="mainForm" enctype="multipart/form-data">
+        @csrf
 
         {{-- Hidden Input for Sync Logic --}}
         <input type="hidden" name="sync_kelas" id="sync_kelas_main" value="0">
         {{-- Pass title for safe lookup --}}
         <input type="hidden" name="original_judul" value="{{ $ujian->judul_ujian }}">
-
-        {{-- Import/Export Tools --}}
-        <div class="d-flex justify-content-end gap-2 mb-3 px-4">
-            <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.template' : 'guru.lms.ujian.soal.template', [$kelas->id, $mapel->id, $ujian->id]) }}"
-                class="btn btn-outline-success btn-sm">
-                <i class="fas fa-download me-1"></i> Download Template {{ ucfirst($tipeUjian ?? 'ujian') }}
-            </a>
-            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importSoalModal">
-                <i class="fas fa-file-import me-1"></i> Import {{ ucfirst($tipeUjian ?? 'ujian') }} dari Excel
-            </button>
-        </div>
 
         {{-- Accordion Container --}}
         <div class="accordion mb-4" id="soalAccordion">
@@ -210,6 +218,14 @@
 
     </div> {{-- End manage-soal-container --}}
 
+    {{-- AI Question Generator Sidebar --}}
+    @include('components.ai-sidebar', [
+        'ujianId' => $ujian->id,
+        'kelasId' => $kelas->id,
+        'mapelId' => $mapel->id,
+        'subjectName' => $mapel->nama_mapel
+    ])
+
     {{-- Template for New Question --}}
     <template id="soalTemplate">
         <div class="accordion-item soal-item" data-index="{INDEX}">
@@ -270,6 +286,35 @@
                         <textarea name="soal[{INDEX}][narasi]" class="form-control narasi-input" rows="2"
                             placeholder="Masukkan narasi/teks bacaan jika soal berbasis narasi..."></textarea>
                         <small class="text-muted">Soal dengan narasi yang sama akan dikelompokkan saat ujian.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">
+                            Gambar Soal <span class="text-muted fw-normal">(Opsional)</span>
+                        </label>
+                        <input type="file" name="soal[{INDEX}][image]" class="form-control form-control-sm image-upload"
+                            accept="image/png,image/jpeg,image/jpg,image/gif" onchange="previewImage(this, {INDEX})">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> Upload gambar untuk soal (maks 2MB). Format: JPG, PNG, GIF
+                        </small>
+
+                        <!-- Hidden field to store existing image path -->
+                        <input type="hidden" name="soal[{INDEX}][existing_image]" class="existing-image-path" value="{IMAGE_PATH}">
+
+                        <!-- Image Preview Area -->
+                        <div class="image-preview-container mt-2" id="imagePreview{INDEX}" style="display: none;">
+                            <div class="card border-info">
+                                <div class="card-body p-2">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <img src="" alt="Preview" class="preview-img img-thumbnail" style="max-width: 200px; max-height: 150px; object-fit: contain;">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeImage({INDEX})" title="Hapus gambar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">Gambar akan ditampilkan saat siswa mengerjakan soal</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -366,6 +411,9 @@
 @endsection
 
     @push('scripts')
+    {{-- AI Question Generator JavaScript --}}
+    <script src="{{ asset('js/ai-question-generator.js') }}"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Variables initialized after DOM load
@@ -395,7 +443,8 @@
                     .replace(/{INDEX}/g, index)
                     .replace(/{NUMBER}/g, number)
                     .replace(/{ID}/g, data ? data.id : '')
-                    .replace(/{PERTANYAAN}/g, ''); // We set value via JS to be safe
+                    .replace(/{PERTANYAAN}/g, '') // We set value via JS to be safe
+                    .replace(/{IMAGE_PATH}/g, data && data.image_path ? data.image_path : '');
 
                 // Insert HTML
                 container.insertAdjacentHTML('beforeend', html);
@@ -409,6 +458,14 @@
                 // Set Narasi if exists
                 if (data && data.narasi) {
                     el.querySelector('.narasi-input').value = data.narasi;
+                }
+
+                // Set Image Preview if exists
+                if (data && data.image_path) {
+                    const previewContainer = el.querySelector('#imagePreview' + index);
+                    const previewImg = previewContainer.querySelector('.preview-img');
+                    previewImg.src = '{{ asset('storage') }}/' + data.image_path;
+                    previewContainer.style.display = 'block';
                 }
 
                 if (data) {
@@ -619,6 +676,67 @@
                 var modal = bootstrap.Modal.getInstance(modalEl);
                 modal.hide();
             });
+
+            // --- IMAGE HANDLING FUNCTIONS ---
+
+            /**
+             * Preview image when file is selected
+             */
+            window.previewImage = function(input, index) {
+                const previewContainer = document.getElementById('imagePreview' + index);
+                const previewImg = previewContainer.querySelector('.preview-img');
+
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+
+                    // Validate file size (max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                        input.value = '';
+                        return;
+                    }
+
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Format gambar tidak valid! Gunakan JPG, PNG, atau GIF.');
+                        input.value = '';
+                        return;
+                    }
+
+                    // Read and preview image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.style.display = 'none';
+                }
+            };
+
+            /**
+             * Remove image preview and clear file input
+             */
+            window.removeImage = function(index) {
+                const soalItem = document.querySelector(`.soal-item[data-index="${index}"]`);
+                if (!soalItem) return;
+
+                const fileInput = soalItem.querySelector('.image-upload');
+                const existingImageInput = soalItem.querySelector('.existing-image-path');
+                const previewContainer = document.getElementById('imagePreview' + index);
+
+                // Clear file input
+                if (fileInput) fileInput.value = '';
+
+                // Clear existing image path (to delete on save)
+                if (existingImageInput) existingImageInput.value = '';
+
+                // Hide preview
+                if (previewContainer) previewContainer.style.display = 'none';
+            };
+
         });
     </script>
     <style>

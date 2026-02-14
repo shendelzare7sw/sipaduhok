@@ -20,25 +20,31 @@ class AiGradingService
 
     protected function loadConfig()
     {
-        $settings = AppSetting::whereIn('key', ['ai_api_key', 'ai_model', 'ai_vision_model', 'ai_provider'])->pluck('value', 'key');
+        $settings = AppSetting::whereIn('key', ['groq_api_key', 'gemini_api_key', 'ai_model', 'ai_vision_model', 'ai_provider'])->pluck('value', 'key');
 
-        $this->apiKey = $settings['ai_api_key'] ?? null;
-        $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile'; 
-        
-        // Auto-fix for decommissioned model
-        if ($this->model === 'llama3-70b-8192') {
+        $this->provider = $settings['ai_provider'] ?? 'groq';
+
+        // Load API key sesuai provider yang aktif
+        if ($this->provider === 'groq') {
+            $this->apiKey = $settings['groq_api_key'] ?? null;
+        } elseif ($this->provider === 'gemini') {
+            $this->apiKey = $settings['gemini_api_key'] ?? null;
+        }
+
+        $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
+
+        // Auto-fix for decommissioned models
+        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview'])) {
             $this->model = 'llama-3.3-70b-versatile';
-        } 
-        
+        }
+
         // Default to Llama 4 Scout (Vision capable)
         $this->visionModel = $settings['ai_vision_model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct';
-        
+
         // Auto-fix for decommissioned vision models (11b & 90b previews)
         if (in_array($this->visionModel, ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'])) {
             $this->visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
         }
-
-        $this->provider = $settings['ai_provider'] ?? 'groq';
     }
 
     /**
@@ -121,6 +127,17 @@ class AiGradingService
         $json = $response->json();
         $content = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
         $result = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Fallback strategy if JSON is broken (regex)
+            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+            preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+
+            $result = [
+                'score' => $scoreMatches[1] ?? 0,
+                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+            ];
+        }
 
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
@@ -213,6 +230,12 @@ class AiGradingService
             $mimeType = mime_content_type($imagePath);
             if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])) {
                 return ['score' => 0, 'feedback' => 'Format file tidak didukung AI (hanya JPG/PNG).', 'error' => true];
+            }
+
+            // Validate file size (max 4MB for vision APIs)
+            $fileSize = filesize($imagePath);
+            if ($fileSize > 4 * 1024 * 1024) {
+                return ['score' => 0, 'feedback' => 'File gambar terlalu besar (maksimal 4MB untuk AI Vision).', 'error' => true];
             }
 
             if ($this->provider === 'groq') {
@@ -339,6 +362,17 @@ class AiGradingService
         $json = $response->json();
         $content = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
         $result = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Fallback strategy if JSON is broken (regex)
+            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+            preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+
+            $result = [
+                'score' => $scoreMatches[1] ?? 0,
+                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+            ];
+        }
 
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,

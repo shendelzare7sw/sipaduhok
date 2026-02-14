@@ -23,7 +23,8 @@
       "Bash(php artisan migrate:status:*)",
       "Bash(cat:*)",
       "Bash(php artisan route:list:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(composer require:*)"
     ]
   }
 }

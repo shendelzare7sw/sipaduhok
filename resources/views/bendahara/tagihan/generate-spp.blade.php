@@ -222,6 +222,31 @@
                                 </h6>
                             </div>
                             <div class="card-body">
+                                {{-- Tipe SPP --}}
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold mb-3">
+                                        Tipe Generate SPP <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="tipe_spp" id="spp_setahun"
+                                                value="setahun" checked onchange="toggleTipeSpp()">
+                                            <label class="form-check-label fw-bold" for="spp_setahun">
+                                                <i class="fas fa-calendar-check text-success me-1"></i>SPP Setahun
+                                            </label>
+                                            <div><small class="text-muted">Generate 12 bulan SPP</small></div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="tipe_spp" id="spp_sebagian"
+                                                value="sebagian" onchange="toggleTipeSpp()">
+                                            <label class="form-check-label fw-bold" for="spp_sebagian">
+                                                <i class="fas fa-calendar-alt text-warning me-1"></i>SPP Sebagian
+                                            </label>
+                                            <div><small class="text-muted">Untuk siswa baru</small></div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {{-- Bulan Mulai --}}
                                 <div class="mb-3">
                                     <label for="bulan_mulai" class="form-label fw-bold">
@@ -242,6 +267,19 @@
                                         <option value="12">Desember</option>
                                     </select>
                                     <small class="text-muted">SPP akan dimulai dari bulan ini</small>
+                                </div>
+
+                                {{-- Jumlah Bulan (untuk SPP Sebagian) --}}
+                                <div class="mb-3" id="jumlahBulanSection" style="display: none;">
+                                    <label for="jumlah_bulan" class="form-label fw-bold">
+                                        Jumlah Bulan <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="jumlah_bulan" id="jumlah_bulan" class="form-select">
+                                        @for($i = 1; $i <= 12; $i++)
+                                            <option value="{{ $i }}">{{ $i }} Bulan</option>
+                                        @endfor
+                                    </select>
+                                    <small class="text-muted" id="bulanRangeInfo">SPP akan digenerate untuk berapa bulan</small>
                                 </div>
 
                                 {{-- Jumlah SPP --}}
@@ -271,11 +309,11 @@
                                 </div>
 
                                 {{-- Preview Info --}}
-                                <div class="alert alert-warning mb-3">
+                                <div class="alert alert-warning mb-3" id="previewInfo">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     <strong>Perhatian:</strong>
-                                    <ul class="mb-0 mt-2 small">
-                                        <li>Akan dibuat 12 tagihan SPP (Jan - Des)</li>
+                                    <ul class="mb-0 mt-2 small" id="previewList">
+                                        <li id="previewBulan">Akan dibuat <span id="totalBulanText">12</span> tagihan SPP</li>
                                         <li>Jika tagihan sudah ada, nominal akan diperbarui</li>
                                         <li>Status tagihan baru = "Belum Bayar"</li>
                                     </ul>
@@ -379,6 +417,43 @@
             document.getElementById('kelas_id').name = isKelas ? 'target_id' : 'target_id_kelas';
         }
 
+        function toggleTipeSpp() {
+            const isSetahun = document.getElementById('spp_setahun').checked;
+            const jumlahBulanSection = document.getElementById('jumlahBulanSection');
+            const totalBulanText = document.getElementById('totalBulanText');
+
+            if (isSetahun) {
+                jumlahBulanSection.style.display = 'none';
+                totalBulanText.textContent = '12';
+            } else {
+                jumlahBulanSection.style.display = 'block';
+                updateJumlahBulan();
+            }
+        }
+
+        function updateJumlahBulan() {
+            const jumlahBulan = document.getElementById('jumlah_bulan').value;
+            const bulanMulai = document.getElementById('bulan_mulai').value;
+            const totalBulanText = document.getElementById('totalBulanText');
+            const bulanRangeInfo = document.getElementById('bulanRangeInfo');
+
+            const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+            const bulanAkhir = (parseInt(bulanMulai) + parseInt(jumlahBulan) - 1);
+            const bulanAkhirIdx = ((bulanAkhir - 1) % 12);
+
+            totalBulanText.textContent = jumlahBulan;
+            bulanRangeInfo.innerHTML = `<i class="fas fa-calendar me-1"></i>${namaBulan[parseInt(bulanMulai) - 1]} - ${namaBulan[bulanAkhirIdx]}`;
+        }
+
+        // Event listeners for updates
+        document.getElementById('jumlah_bulan')?.addEventListener('change', updateJumlahBulan);
+        document.getElementById('bulan_mulai')?.addEventListener('change', function() {
+            if (!document.getElementById('spp_setahun').checked) {
+                updateJumlahBulan();
+            }
+        });
+
         function toggleSelectAll() {
             const selectAll = document.getElementById('selectAll');
             const visibleCheckboxes = document.querySelectorAll('.siswa-row:not([style*="display: none"]) .siswa-checkbox:not(#selectAll)');
@@ -394,6 +469,7 @@
 
         function confirmGenerate() {
             const targetType = document.querySelector('input[name="target_type"]:checked').value;
+            const tipeSpp = document.querySelector('input[name="tipe_spp"]:checked').value;
             const jumlahSpp = document.getElementById('jumlah_spp').value;
 
             let targetName = '';
@@ -436,9 +512,14 @@
                 return;
             }
 
+            const totalBulan = tipeSpp === 'setahun' ? 12 : document.getElementById('jumlah_bulan').value;
+            const infoText = tipeSpp === 'setahun'
+                ? 'Proses ini akan membuat tagihan untuk satu tahun ajaran penuh (12 bulan).'
+                : `Proses ini akan membuat tagihan untuk ${totalBulan} bulan.`;
+
             Swal.fire({
                 title: 'Konfirmasi Generate SPP',
-                html: `Anda akan membuat 12 tagihan SPP dengan nominal <strong>Rp ${jumlahSpp}</strong> untuk <strong>${targetCount}</strong>.<br><br><small class="text-muted">Proses ini akan membuat tagihan untuk satu tahun ajaran penuh.</small>`,
+                html: `Anda akan membuat <strong>${totalBulan} tagihan SPP</strong> dengan nominal <strong>Rp ${jumlahSpp}</strong> untuk <strong>${targetCount}</strong>.<br><br><small class="text-muted">${infoText}</small>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#696cff',

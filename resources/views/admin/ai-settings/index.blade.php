@@ -28,25 +28,41 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Provider AI</label>
                             <select class="form-select" name="ai_provider" id="ai_provider">
-                                <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>Groq Cloud (Llama 3 / Mixtral)</option>
+                                <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>Groq Cloud (Llama / Qwen / Mixtral)</option>
                                 <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>Google Gemini (Flash / Pro)</option>
-                                <option value="openai" {{ $provider == 'openai' ? 'selected' : '' }} disabled>OpenAI (GPT-3.5 / GPT-4) - Coming Soon</option>
                             </select>
                             <div class="form-text">Groq Cloud dan Google Gemini menawarkan Tier Gratis yang sangat generous.</div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">API Key</label>
+                        <!-- Groq API Key -->
+                        <div class="mb-3 provider-field" id="groq_field">
+                            <label class="form-label fw-bold">Groq Cloud API Key</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                <input type="password" class="form-control" name="ai_api_key" id="ai_api_key" 
-                                    value="{{ $apiKey }}" placeholder="gsk_... atau AIza..." required>
-                                <button class="btn btn-outline-secondary" type="button" id="toggleApiKey">
+                                <input type="password" class="form-control" name="groq_api_key" id="groq_api_key"
+                                    value="{{ $groqApiKey }}" placeholder="gsk_...">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleGroqApiKey">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                             <div class="form-text">
-                                Dapatkan API Key gratis di <a href="https://console.groq.com/keys" target="_blank">Groq Console</a> atau <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.
+                                Dapatkan API Key gratis di <a href="https://console.groq.com/keys" target="_blank">Groq Console</a>.
+                            </div>
+                        </div>
+
+                        <!-- Gemini API Key -->
+                        <div class="mb-3 provider-field" id="gemini_field" style="display: none;">
+                            <label class="form-label fw-bold">Google Gemini API Key</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                <input type="password" class="form-control" name="gemini_api_key" id="gemini_api_key"
+                                    value="{{ $geminiApiKey }}" placeholder="AIza...">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleGeminiApiKey">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                Dapatkan API Key gratis di <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.
                             </div>
                         </div>
 
@@ -57,6 +73,10 @@
                                     <option value="llama-3.3-70b-versatile" {{ $model == 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B (Recommended)</option>
                                     <option value="llama-3.1-8b-instant" {{ $model == 'llama-3.1-8b-instant' ? 'selected' : '' }}>Llama 3.1 8B (Fastest)</option>
                                     <option value="llama-3.1-70b-versatile" {{ $model == 'llama-3.1-70b-versatile' ? 'selected' : '' }}>Llama 3.1 70B</option>
+                                </optgroup>
+                                <optgroup label="Qwen 2.5 (Groq - Recommended)">
+                                    <option value="qwen-2.5-32b-instruct" {{ $model == 'qwen-2.5-32b-instruct' ? 'selected' : '' }}>Qwen 2.5 32B Instruct</option>
+                                    <option value="qwen-2.5-coder-32b-instruct" {{ $model == 'qwen-2.5-coder-32b-instruct' ? 'selected' : '' }}>Qwen 2.5 Coder 32B</option>
                                 </optgroup>
                                 <optgroup label="Gemma (Groq)">
                                     <option value="gemma2-9b-it" {{ $model == 'gemma2-9b-it' ? 'selected' : '' }}>Gemma 2 9B</option>
@@ -88,6 +108,17 @@
                             <button type="submit" class="btn btn-primary px-4 shadow-sm">
                                 <i class="fas fa-save me-2"></i> Simpan Pengaturan
                             </button>
+                        </div>
+
+                        <!-- Connection Status Alert (Inline) -->
+                        <div id="connectionAlert" class="alert mt-3 d-none fade show" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i id="connectionIcon" class="fas fa-info-circle me-2 fs-4"></i>
+                                <div>
+                                    <strong id="connectionTitle" class="d-block">Status Koneksi</strong>
+                                    <span id="connectionMessage">Checking...</span>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -143,49 +174,137 @@
         </div>
     </div>
 
-    <!-- Toast for Test Result -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="testToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <i class="fas fa-robot rounded me-2" id="toastIcon"></i>
-                <strong class="me-auto">System</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body" id="toastMessage">
-                Testing connection...
-            </div>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Toggle API Key Visibility
-            const toggleApiKey = document.getElementById('toggleApiKey');
-            const apiKeyInput = document.getElementById('ai_api_key');
-            
-            toggleApiKey.addEventListener('click', function() {
-                const type = apiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                apiKeyInput.setAttribute('type', type);
+            const providerSelect = document.getElementById('ai_provider');
+            const modelSelect = document.getElementById('ai_model');
+            const groqField = document.getElementById('groq_field');
+            const geminiField = document.getElementById('gemini_field');
+
+            // Model mapping by provider
+            const modelsByProvider = {
+                groq: [
+                    'llama-3.3-70b-versatile',
+                    'llama-3.1-8b-instant',
+                    'llama-3.1-70b-versatile',
+                    'qwen-2.5-32b-instruct',
+                    'qwen-2.5-coder-32b-instruct',
+                    'gemma2-9b-it',
+                    'mixtral-8x7b-32768'
+                ],
+                gemini: [
+                    'gemini-1.5-flash',
+                    'gemini-1.5-pro'
+                ]
+            };
+
+            // Toggle API Key Fields & Filter Models based on Provider
+            function toggleProviderFields() {
+                const provider = providerSelect.value;
+
+                // Show/Hide API Key Fields
+                if (provider === 'groq') {
+                    groqField.style.display = 'block';
+                    geminiField.style.display = 'none';
+                } else if (provider === 'gemini') {
+                    groqField.style.display = 'none';
+                    geminiField.style.display = 'block';
+                }
+
+                // Filter Models
+                filterModels(provider);
+            }
+
+            function filterModels(provider) {
+                const options = modelSelect.querySelectorAll('option');
+                const allowedModels = modelsByProvider[provider] || [];
+
+                options.forEach(option => {
+                    if (allowedModels.includes(option.value)) {
+                        option.style.display = '';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+
+                // Also hide/show optgroups
+                const optgroups = modelSelect.querySelectorAll('optgroup');
+                optgroups.forEach(optgroup => {
+                    const visibleOptions = Array.from(optgroup.querySelectorAll('option')).filter(opt => opt.style.display !== 'none');
+                    optgroup.style.display = visibleOptions.length > 0 ? '' : 'none';
+                });
+
+                // Auto-select first visible option if current selection is hidden
+                const currentOption = modelSelect.querySelector(`option[value="${modelSelect.value}"]`);
+                if (!currentOption || currentOption.style.display === 'none') {
+                    const firstVisible = Array.from(options).find(opt => opt.style.display !== 'none');
+                    if (firstVisible) {
+                        modelSelect.value = firstVisible.value;
+                    }
+                }
+            }
+
+            // Initialize on page load
+            toggleProviderFields();
+
+            // Listen to provider change
+            providerSelect.addEventListener('change', toggleProviderFields);
+
+            // Toggle API Key Visibility - Groq
+            const toggleGroqApiKey = document.getElementById('toggleGroqApiKey');
+            const groqApiKeyInput = document.getElementById('groq_api_key');
+
+            toggleGroqApiKey.addEventListener('click', function() {
+                const type = groqApiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                groqApiKeyInput.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+
+            // Toggle API Key Visibility - Gemini
+            const toggleGeminiApiKey = document.getElementById('toggleGeminiApiKey');
+            const geminiApiKeyInput = document.getElementById('gemini_api_key');
+
+            toggleGeminiApiKey.addEventListener('click', function() {
+                const type = geminiApiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                geminiApiKeyInput.setAttribute('type', type);
                 this.querySelector('i').classList.toggle('fa-eye');
                 this.querySelector('i').classList.toggle('fa-eye-slash');
             });
 
             // Test Connection Logic
             const testBtn = document.getElementById('testConnectionBtn');
-            const toastEl = document.getElementById('testToast');
-            const toast = new bootstrap.Toast(toastEl);
-            const toastMsg = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
+            const alertEl = document.getElementById('connectionAlert');
+            const alertMsg = document.getElementById('connectionMessage');
+            const alertTitle = document.getElementById('connectionTitle');
+            const alertIcon = document.getElementById('connectionIcon');
 
             testBtn.addEventListener('click', function() {
+                const provider = providerSelect.value;
+                const apiKey = provider === 'groq' ? groqApiKeyInput.value : geminiApiKeyInput.value;
+
+                if (!apiKey) {
+                    alertEl.classList.remove('d-none');
+                    alertEl.classList.add('alert-warning');
+                    alertEl.classList.remove('alert-success', 'alert-danger');
+                    alertTitle.textContent = "Peringatan!";
+                    alertMsg.textContent = `API Key untuk ${provider === 'groq' ? 'Groq Cloud' : 'Google Gemini'} belum diisi.`;
+                    alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
+                    return;
+                }
+
                 const originalText = this.innerHTML;
                 this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Testing...';
                 this.disabled = true;
 
+                // Reset Alert
+                alertEl.classList.add('d-none');
+                alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning');
+
                 const data = {
-                    api_key: document.getElementById('ai_api_key').value,
-                    model: document.getElementById('ai_model').value,
-                    provider: document.getElementById('ai_provider').value,
+                    api_key: apiKey,
+                    model: modelSelect.value,
+                    provider: provider,
                     _token: '{{ csrf_token() }}'
                 };
 
@@ -199,22 +318,25 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    toastMsg.textContent = data.message;
+                    alertEl.classList.remove('d-none');
+                    alertMsg.textContent = data.message;
+
                     if (data.success) {
-                        toastIcon.classList.remove('text-danger');
-                        toastIcon.classList.add('text-success');
-                        toastEl.classList.add('bg-success', 'text-white', 'bg-opacity-10');
+                        alertEl.classList.add('alert-success');
+                        alertTitle.textContent = "Berhasil!";
+                        alertIcon.className = "fas fa-check-circle me-2 fs-4";
                     } else {
-                        toastIcon.classList.remove('text-success');
-                        toastIcon.classList.add('text-danger');
-                        toastEl.classList.remove('bg-success', 'text-white', 'bg-opacity-10');
+                        alertEl.classList.add('alert-danger');
+                        alertTitle.textContent = "Gagal!";
+                        alertIcon.className = "fas fa-times-circle me-2 fs-4";
                     }
-                    toast.show();
                 })
                 .catch(error => {
-                    toastMsg.textContent = 'Error: ' + error.message;
-                    toastIcon.classList.add('text-danger');
-                    toast.show();
+                    alertEl.classList.remove('d-none');
+                    alertEl.classList.add('alert-danger');
+                    alertTitle.textContent = "Error Sistem";
+                    alertMsg.textContent = 'Terjadi kesalahan: ' + error.message;
+                    alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
                 })
                 .finally(() => {
                     this.innerHTML = originalText;

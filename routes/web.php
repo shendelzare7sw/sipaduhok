@@ -1052,6 +1052,10 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
 
+                // AI Question Bank Generator
+                Route::post('/{ujian}/ai-generate-questions', [GuruUjianController::class, 'aiGenerateQuestions'])->name('soal.ai-generate');
+                Route::post('/{ujian}/bulk-store-soal', [GuruUjianController::class, 'bulkStoreSoal'])->name('soal.bulk-store');
+
                 // Manajemen Soal (Bulk / Multi-Soal)
                 Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');
                 Route::post('/{ujian}/store-all-soal', [GuruUjianController::class, 'storeAllSoal'])->name('soal.storeAll');
@@ -1085,6 +1089,10 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/soal/{soal}/edit', [GuruUjianController::class, 'editSoal'])->name('soal.edit');
                 Route::put('/{ujian}/soal/{soal}', [GuruUjianController::class, 'updateSoal'])->name('soal.update');
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
+
+                // AI Question Bank Generator
+                Route::post('/{ujian}/ai-generate-questions', [GuruUjianController::class, 'aiGenerateQuestions'])->name('soal.ai-generate');
+                Route::post('/{ujian}/bulk-store-soal', [GuruUjianController::class, 'bulkStoreSoal'])->name('soal.bulk-store');
 
                 // Manajemen Soal Latihan (Bulk)
                 Route::get('/{ujian}/manage-soal', [GuruUjianController::class, 'manageSoal'])->name('soal.manage');

@@ -227,17 +227,25 @@
             const toastEl = document.getElementById('aiToast');
             const toast = new bootstrap.Toast(toastEl);
             const toastMsg = document.getElementById('aiToastMessage');
+            const processingButtons = new Set(); // Race condition protection
 
             aiButtons.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const soalId = this.dataset.soalId;
+
+                    // Prevent multiple simultaneous requests for same button
+                    if (processingButtons.has(soalId)) return;
+
                     const answer = this.dataset.answer;
                     const maxScore = parseFloat(this.dataset.maxScore);
-                    
+
                     if (!answer || answer === '-') {
-                        alert('Belum ada jawaban siswa untuk dianulisis.');
+                        toastMsg.textContent = 'Belum ada jawaban siswa untuk dianalisis.';
+                        toast.show();
                         return;
                     }
+
+                    processingButtons.add(soalId);
 
                     // UI Loading State
                     const originalContent = this.innerHTML;
@@ -246,16 +254,13 @@
 
                     // Determine route based on context
                     const isLatihan = {{ request()->routeIs('guru.lms.latihan.*') ? 'true' : 'false' }};
-                    const baseRoute = isLatihan ? 'guru.lms.latihan.koreksi.ai-suggest' : 'guru.lms.ujian.koreksi.ai-suggest';
-                    
-                    // Construct URL manually or use a data attribute if using route() in blade is messy due to parameters
-                    // Easiest is to hardcode structure or use a JS variable for base URL
-                    // But we used named route with parameters in web.php: /{ujian}/koreksi/{soal}/ai-suggest
-                    
-                    // Construct URL
-                    // Route pattern: guru/lms/{kelas}/{mapel}/{ujian_or_latihan}/{ujianId}/koreksi/{soalId}/ai-suggest
-                    const segment = isLatihan ? 'latihan' : 'ujian';
-                    const url = `{{ url('/') }}/guru/lms/{{ $kelas->id }}/{{ $mapel->id }}/${segment}/{{ $ujian->id }}/koreksi/${soalId}/ai-suggest`;
+
+                    // Use route helper with placeholder for dynamic soalId
+                    @php
+                        $routeName = request()->routeIs('guru.lms.latihan.*') ? 'guru.lms.latihan.koreksi.ai-suggest' : 'guru.lms.ujian.koreksi.ai-suggest';
+                        $urlTemplate = route($routeName, [$kelas->id, $mapel->id, $ujian->id, 'SOAL_ID_PLACEHOLDER']);
+                    @endphp
+                    const url = "{{ $urlTemplate }}".replace('SOAL_ID_PLACEHOLDER', soalId);
 
                     fetch(url, {
                         method: 'POST',
@@ -278,9 +283,10 @@
                         // Animate changed values
                         scoreInput.value = data.score;
                         scoreInput.classList.add('bg-success', 'text-white', 'bg-opacity-25');
-                        
-                        // Append or Replace feedback? Let's replace for now, maybe prepend.
-                        feedbackInput.value = `[AI Suggestion] ${data.feedback}`;
+
+                        // Prepend AI feedback (consistent with tugas behavior)
+                        const existingFeedback = feedbackInput.value.trim();
+                        feedbackInput.value = `[AI Suggestion] ${data.feedback}${existingFeedback ? '\n\n' + existingFeedback : ''}`;
                         feedbackInput.classList.add('bg-info', 'text-white', 'bg-opacity-10');
 
                         setTimeout(() => {
@@ -293,11 +299,13 @@
                     })
                     .catch(error => {
                         console.error(error);
-                        alert('Gagal mengambil analisis AI: ' + error.message);
+                        toastMsg.textContent = "Gagal: " + error.message;
+                        toast.show();
                     })
                     .finally(() => {
                         this.innerHTML = originalContent;
                         this.disabled = false;
+                        processingButtons.delete(soalId);
                     });
                 });
             });

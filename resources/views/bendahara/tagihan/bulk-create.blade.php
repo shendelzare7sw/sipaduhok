@@ -2,7 +2,7 @@
 
 @section('title', 'Buat Tagihan Massal')
 @section('page-title', 'Buat Tagihan Massal')
-@section('page-subtitle', 'Buat tagihan untuk seluruh siswa dalam satu kelas')
+@section('page-subtitle', 'Buat tagihan untuk seluruh siswa dalam satu atau lebih kelas')
 
 @section('sidebar-menu')
     @include('bendahara.partials.sneat-sidebar-menu')
@@ -23,6 +23,83 @@
     .swal2-html-container {
         color: #697a8d;
     }
+
+    /* Filter Dropdown Styles */
+    .filter-dropdown .dropdown-menu {
+        min-width: 320px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .kelas-checkbox-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-radius: 6px;
+        margin-bottom: 4px;
+    }
+
+    .kelas-checkbox-item:hover {
+        background: #f8fafc;
+    }
+
+    .kelas-checkbox-item label {
+        cursor: pointer;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .selected-kelas-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+        min-height: 32px;
+    }
+
+    .badge-kelas {
+        background: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .badge-kelas .remove-kelas {
+        cursor: pointer;
+        color: #0369a1;
+        font-weight: bold;
+        transition: color 0.2s;
+    }
+
+    .badge-kelas .remove-kelas:hover {
+        color: #dc2626;
+    }
+
+    .filter-section {
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .kelas-list-section {
+        padding: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 20px;
+        color: #94a3b8;
+    }
 </style>
 @section('content')
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -42,8 +119,8 @@
                     <div>
                         <strong>Informasi:</strong>
                         <p class="mb-0 mt-2">
-                            Fitur ini akan membuat tagihan untuk <strong>seluruh siswa aktif</strong> dalam kelas yang
-                            dipilih.
+                            Fitur ini akan membuat tagihan untuk <strong>seluruh siswa aktif</strong> dalam kelas-kelas yang
+                            dipilih (bisa lebih dari satu kelas).
                             Jika siswa sudah memiliki tagihan dengan jenis yang sama, maka tagihan tersebut akan
                             <strong>diperbarui</strong>.
                         </p>
@@ -68,33 +145,123 @@
                     <form action="{{ route('bendahara.tagihan.bulk-create') }}" method="POST">
                         @csrf
 
-                        <div class="row mb-4">
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Pilih Kelas <span class="text-danger">*</span></label>
-                                <select name="kelas_id" class="form-control border-start border-primary border-3 shadow-sm"
-                                    required>
-                                    <option value="">-- Pilih Kelas --</option>
-                                    @foreach($kelasList as $kelas)
-                                        <option value="{{ $kelas->id }}" {{ old('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                                            {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) -
-                                            {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('kelas_id')
+                                <div class="dropdown filter-dropdown">
+                                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
+                                            type="button"
+                                            id="kelasDropdown"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                            data-bs-auto-close="outside">
+                                        <span id="kelasDropdownLabel">
+                                            <i class="fas fa-school me-2"></i>Pilih Kelas (0 dipilih)
+                                        </span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu shadow-lg border-0 w-100" aria-labelledby="kelasDropdown">
+                                        <!-- Filter Section -->
+                                        <div class="filter-section">
+                                            <h6 class="small fw-bold text-primary mb-2">
+                                                <i class="fas fa-filter me-1"></i>Filter Kelas
+                                            </h6>
+
+                                            <!-- Filter Cabang -->
+                                            <div class="mb-2">
+                                                <label class="form-label small fw-bold mb-1">Cabang</label>
+                                                <select id="filterCabang" class="form-select form-select-sm">
+                                                    <option value="">Semua Cabang</option>
+                                                    @foreach($kelasList->unique('cabang_id') as $kelas)
+                                                        @if($kelas->cabang)
+                                                            <option value="{{ $kelas->cabang_id }}">{{ $kelas->cabang->nama_cabang }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <!-- Filter Jenjang -->
+                                            <div class="mb-2">
+                                                <label class="form-label small fw-bold mb-1">Jenjang</label>
+                                                <select id="filterJenjang" class="form-select form-select-sm">
+                                                    <option value="">Semua Jenjang</option>
+                                                    @foreach($kelasList->unique('jenjang') as $kelas)
+                                                        <option value="{{ $kelas->jenjang }}">{{ $kelas->jenjang }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <!-- Buttons -->
+                                            <div class="d-flex gap-2 mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="clearKelasSelection()">
+                                                    <i class="fas fa-times me-1"></i>Clear
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-primary flex-fill" onclick="selectAllKelas()">
+                                                    <i class="fas fa-check-double me-1"></i>Pilih Semua
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Kelas List Section -->
+                                        <div class="kelas-list-section" id="kelasListContainer">
+                                            @foreach($kelasList as $kelas)
+                                                <div class="kelas-checkbox-item"
+                                                     data-cabang-id="{{ $kelas->cabang_id }}"
+                                                     data-jenjang="{{ $kelas->jenjang }}">
+                                                    <label>
+                                                        <input type="checkbox"
+                                                               name="kelas_ids[]"
+                                                               value="{{ $kelas->id }}"
+                                                               class="form-check-input kelas-checkbox"
+                                                               data-nama="{{ $kelas->nama_kelas }}"
+                                                               data-jenjang="{{ $kelas->jenjang }}"
+                                                               data-cabang="{{ $kelas->cabang->nama_cabang ?? '' }}">
+                                                        <span class="flex-grow-1">
+                                                            <strong>{{ $kelas->nama_kelas }}</strong>
+                                                            <small class="text-muted d-block">
+                                                                {{ $kelas->jenjang }} - {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
+                                                            </small>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                            <div class="empty-state" id="emptyState" style="display: none;">
+                                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                                <p class="mb-0 small">Tidak ada kelas yang sesuai dengan filter</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Selected Kelas Badges -->
+                                <div class="selected-kelas-badges" id="selectedKelasBadges"></div>
+
+                                @error('kelas_ids')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                                @error('kelas_ids.*')
                                     <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Jatuh Tempo <span class="text-danger">*</span></label>
-                                <input type="date" name="tanggal_jatuh_tempo"
-                                    class="form-control border-start border-primary border-3 shadow-sm"
-                                    value="{{ old('tanggal_jatuh_tempo', now()->addMonth()->format('Y-m-d')) }}" required>
-                                @error('tanggal_jatuh_tempo')
-                                    <small class="text-danger">{{ $message }}</small>
-                                @enderror
+                                <label class="form-label fw-bold">Jatuh Tempo Global (Opsional)</label>
+                                <input type="date" id="globalJatuhTempo"
+                                    class="form-control border-start border-success border-3 shadow-sm"
+                                    value="{{ old('global_jatuh_tempo', now()->addMonth()->format('Y-m-d')) }}">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Isi field ini untuk mengisi semua tanggal jatuh tempo sekaligus
+                                </small>
                             </div>
+                        </div>
+
+                        <div class="alert alert-light border-start border-success border-3 mb-4">
+                            <small class="text-muted">
+                                <i class="fas fa-lightbulb text-warning me-1"></i>
+                                <strong>Tips:</strong> Anda bisa mengisi "Jatuh Tempo Global" untuk mengisi semua tanggal sekaligus,
+                                atau mengisi tanggal jatuh tempo untuk setiap jenis tagihan secara terpisah.
+                            </small>
                         </div>
 
                         <hr class="my-4">
@@ -117,10 +284,16 @@
                                 <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="default">
                                     <div class="p-3 bg-light rounded shadow-sm position-relative">
                                         <label class="form-label fw-bold small mb-2">{{ $label }}</label>
-                                        <div class="input-group">
+                                        <div class="input-group mb-2">
                                             <span class="input-group-text bg-white">Rp</span>
                                             <input type="text" name="tagihan[{{ $key }}]" class="form-control currency-input"
                                                 value="{{ old('tagihan.' . $key, '0') }}" placeholder="0">
+                                        </div>
+                                        <div>
+                                            <label class="form-label small mb-1">Jatuh Tempo</label>
+                                            <input type="date" name="tanggal_jatuh_tempo[{{ $key }}]"
+                                                class="form-control form-control-sm jatuh-tempo-input"
+                                                value="{{ old('tanggal_jatuh_tempo.' . $key, now()->addMonth()->format('Y-m-d')) }}">
                                         </div>
                                         <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
                                             onclick="removeTagihanField(this)" style="padding: 2px 8px;">
@@ -178,6 +351,7 @@
         function addTagihanField() {
             customFieldCounter++;
             const container = document.getElementById('tagihan-fields-container');
+            const defaultDate = document.getElementById('globalJatuhTempo').value || '{{ now()->addMonth()->format('Y-m-d') }}';
 
             const fieldHTML = `
                     <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="custom">
@@ -189,12 +363,19 @@
                                        placeholder="Nama Jenis Tagihan (contoh: Les Tambahan)"
                                        required>
                             </label>
-                            <div class="input-group">
+                            <div class="input-group mb-2">
                                 <span class="input-group-text bg-white">Rp</span>
                                 <input type="text"
                                        name="custom_tagihan[${customFieldCounter}]"
                                        class="form-control currency-input"
                                        placeholder="0">
+                            </div>
+                            <div>
+                                <label class="form-label small mb-1">Jatuh Tempo</label>
+                                <input type="date"
+                                       name="custom_tanggal_jatuh_tempo[${customFieldCounter}]"
+                                       class="form-control form-control-sm jatuh-tempo-input"
+                                       value="${defaultDate}">
                             </div>
                             <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
                                     onclick="removeTagihanField(this)" style="padding: 2px 8px;">
@@ -243,6 +424,19 @@
             const form = document.querySelector('form');
 
             form.addEventListener('submit', function (e) {
+                // Validate at least one kelas is selected
+                const selectedKelas = document.querySelectorAll('.kelas-checkbox:checked');
+                if (selectedKelas.length === 0) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Perhatian!',
+                        text: 'Pilih minimal satu kelas untuk membuat tagihan',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
                 // Parse all currency inputs
                 const currencyInputs = form.querySelectorAll('.currency-input');
                 currencyInputs.forEach(input => {
@@ -253,5 +447,113 @@
 
             // Confirm remove field button handler (removed as we use inline onClick/Swal callback)
         });
+
+        // Kelas Selection Management
+        const kelasCheckboxes = document.querySelectorAll('.kelas-checkbox');
+        const selectedBadgesContainer = document.getElementById('selectedKelasBadges');
+        const kelasDropdownLabel = document.getElementById('kelasDropdownLabel');
+        const filterCabang = document.getElementById('filterCabang');
+        const filterJenjang = document.getElementById('filterJenjang');
+        const kelasItems = document.querySelectorAll('.kelas-checkbox-item');
+        const emptyState = document.getElementById('emptyState');
+
+        // Update selected kelas display
+        function updateSelectedKelas() {
+            const selected = Array.from(kelasCheckboxes).filter(cb => cb.checked);
+            const count = selected.length;
+
+            // Update dropdown label
+            kelasDropdownLabel.innerHTML = `<i class="fas fa-school me-2"></i>Pilih Kelas (${count} dipilih)`;
+
+            // Update badges
+            selectedBadgesContainer.innerHTML = '';
+            selected.forEach(checkbox => {
+                const badge = document.createElement('span');
+                badge.className = 'badge-kelas';
+                badge.innerHTML = `
+                    <span>${checkbox.dataset.nama} (${checkbox.dataset.jenjang})</span>
+                    <span class="remove-kelas" onclick="removeKelas(${checkbox.value})">&times;</span>
+                `;
+                selectedBadgesContainer.appendChild(badge);
+            });
+        }
+
+        // Remove kelas from selection
+        function removeKelas(kelasId) {
+            const checkbox = document.querySelector(`.kelas-checkbox[value="${kelasId}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                updateSelectedKelas();
+            }
+        }
+
+        // Filter kelas list
+        function filterKelasList() {
+            const cabangId = filterCabang.value;
+            const jenjang = filterJenjang.value;
+            let visibleCount = 0;
+
+            kelasItems.forEach(item => {
+                const itemCabangId = item.dataset.cabangId;
+                const itemJenjang = item.dataset.jenjang;
+
+                let show = true;
+
+                if (cabangId && itemCabangId !== cabangId) {
+                    show = false;
+                }
+
+                if (jenjang && itemJenjang !== jenjang) {
+                    show = false;
+                }
+
+                item.style.display = show ? 'block' : 'none';
+                if (show) visibleCount++;
+            });
+
+            // Show/hide empty state
+            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        // Clear all selections
+        function clearKelasSelection() {
+            kelasCheckboxes.forEach(cb => cb.checked = false);
+            updateSelectedKelas();
+        }
+
+        // Select all visible kelas
+        function selectAllKelas() {
+            kelasItems.forEach(item => {
+                if (item.style.display !== 'none') {
+                    const checkbox = item.querySelector('.kelas-checkbox');
+                    if (checkbox) checkbox.checked = true;
+                }
+            });
+            updateSelectedKelas();
+        }
+
+        // Event listeners
+        kelasCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedKelas);
+        });
+
+        filterCabang.addEventListener('change', filterKelasList);
+        filterJenjang.addEventListener('change', filterKelasList);
+
+        // Initialize
+        updateSelectedKelas();
+
+        // Global Jatuh Tempo Sync
+        const globalJatuhTempo = document.getElementById('globalJatuhTempo');
+        if (globalJatuhTempo) {
+            globalJatuhTempo.addEventListener('change', function() {
+                const value = this.value;
+                if (value) {
+                    document.querySelectorAll('.jatuh-tempo-input').forEach(input => {
+                        input.value = value;
+                    });
+                }
+            });
+        }
     </script>
 @endsection
