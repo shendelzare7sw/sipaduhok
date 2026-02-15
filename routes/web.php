@@ -10,6 +10,7 @@ use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AiSettingController; // Added
+use App\Http\Controllers\AiChatbotController; // AI Chatbot General Assistant
 use App\Http\Controllers\Admin\TahunAjaranController;
 use App\Http\Controllers\Admin\CabangController;
 use App\Http\Controllers\Admin\KelasController;
@@ -207,6 +208,34 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/', [AiSettingController::class, 'update'])->name('update');
             Route::post('/test', [AiSettingController::class, 'testConnection'])->name('test');
         });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | AI CHATBOT ROUTES (All roles EXCEPT siswa - Auth middleware only)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('ai-chatbot')->name('ai-chatbot.')->group(function () {
+        // Send message (with optional file attachment)
+        Route::post('/send-message', [AiChatbotController::class, 'sendMessage'])
+            ->name('send-message')
+            ->middleware('throttle:10,1'); // 10 requests per minute
+
+        // Get available AI models
+        Route::get('/models', [AiChatbotController::class, 'getModels'])
+            ->name('models');
+
+        // Get role-specific quick actions
+        Route::get('/quick-actions', [AiChatbotController::class, 'getQuickActions'])
+            ->name('quick-actions');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN ROUTES (continued)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
 
         // Tahun Ajaran
         Route::resource('tahun-ajaran', TahunAjaranController::class);

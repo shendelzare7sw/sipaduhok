@@ -30,7 +30,8 @@
     },
     "autoload": {
         "files": [
-            "app/Helpers/helpers.php"
+            "app/Helpers/helpers.php",
+            "app/Helpers/ChatbotHelper.php"
         ],
         "psr-4": {
             "App\\": "app/",

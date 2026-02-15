@@ -681,7 +681,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             $response = Http::withOptions([
                 'verify' => false,
             ])->timeout(90)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$this->geminiApiKey}",
+                "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={$this->geminiApiKey}",
                 [
                     'contents' => [
                         [
@@ -718,7 +718,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             return [
                 'success' => true,
                 'content' => $content,
-                'model' => 'gemini-1.5-flash',
+                'model' => 'gemini-2.5-flash',
                 'provider' => 'gemini',
             ];
 

@@ -32,6 +32,25 @@
 
     {{-- Sidebar Body (Scrollable) --}}
     <div class="ai-sidebar-body">
+        {{-- Provider Info Badge --}}
+        @php
+            $currentProvider = \App\Models\AppSetting::where('key', 'ai_provider')->first()?->value ?? 'groq';
+            $providerName = $currentProvider === 'groq' ? 'Groq Cloud' : 'Google Gemini';
+            $providerIcon = $currentProvider === 'groq' ? 'fa-bolt' : 'fa-google';
+            $providerColor = $currentProvider === 'groq' ? 'primary' : 'success';
+        @endphp
+        <div class="alert alert-{{$providerColor}} alert-dismissible fade show mb-3" role="alert" style="padding: 0.75rem 1rem;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <i class="fas {{$providerIcon}} me-2"></i>
+                    <strong>Provider AI:</strong> <span class="fw-bold">{{ $providerName }}</span>
+                </div>
+                <a href="{{ route('admin.ai-settings.index') }}" class="btn btn-sm btn-outline-{{$providerColor}}" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Ganti Provider">
+                    <i class="fas fa-cog me-1"></i> Ubah
+                </a>
+            </div>
+        </div>
+
         {{-- Generator Form --}}
         <form id="aiGeneratorForm">
             {{-- Topic Input --}}

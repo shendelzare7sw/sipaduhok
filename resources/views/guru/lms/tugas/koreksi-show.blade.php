@@ -10,10 +10,31 @@
 
 @section('content')
     <div class="mb-3">
-        <a href="{{ route('guru.lms.tugas.koreksi', [$kelas->id, $mapel->id, $tugasSiswa->tugas_id]) }}" 
+        <a href="{{ route('guru.lms.tugas.koreksi', [$kelas->id, $mapel->id, $tugasSiswa->tugas_id]) }}"
            class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Koreksi
         </a>
+    </div>
+
+    {{-- AI Provider Info Badge --}}
+    @php
+        $currentProvider = \App\Models\AppSetting::where('key', 'ai_provider')->first()?->value ?? 'groq';
+        $providerName = $currentProvider === 'groq' ? 'Groq Cloud' : 'Google Gemini';
+        $providerIcon = $currentProvider === 'groq' ? 'fa-bolt' : 'fa-google';
+        $providerColor = $currentProvider === 'groq' ? 'primary' : 'success';
+    @endphp
+    <div class="alert alert-{{$providerColor}} alert-dismissible fade show mb-3" role="alert">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fas fa-robot me-2"></i>
+                <strong>AI Grading Assistant:</strong> Menggunakan <span class="fw-bold">{{ $providerName }}</span>
+            </div>
+            @if(auth()->user()->role === 'admin')
+            <a href="{{ route('admin.ai-settings.index') }}" class="btn btn-sm btn-outline-{{$providerColor}}">
+                <i class="fas fa-cog me-1"></i> Ubah Provider
+            </a>
+            @endif
+        </div>
     </div>
 
     <div class="row">

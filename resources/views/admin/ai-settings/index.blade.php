@@ -29,7 +29,7 @@
                             <label class="form-label fw-bold">Provider AI</label>
                             <select class="form-select" name="ai_provider" id="ai_provider">
                                 <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>Groq Cloud (Llama / Qwen / Mixtral)</option>
-                                <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>Google Gemini (Flash / Pro)</option>
+                                <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>Google Gemini (2.0 Flash / Experimental)</option>
                             </select>
                             <div class="form-text">Groq Cloud dan Google Gemini menawarkan Tier Gratis yang sangat generous.</div>
                         </div>
@@ -84,9 +84,9 @@
                                 <optgroup label="Mixtral (Groq)">
                                     <option value="mixtral-8x7b-32768" {{ $model == 'mixtral-8x7b-32768' ? 'selected' : '' }}>Mixtral 8x7B</option>
                                 </optgroup>
-                                <optgroup label="Google Gemini">
-                                    <option value="gemini-1.5-flash" {{ $model == 'gemini-1.5-flash' ? 'selected' : '' }}>Gemini 1.5 Flash (Fast & Free)</option>
-                                    <option value="gemini-1.5-pro" {{ $model == 'gemini-1.5-pro' ? 'selected' : '' }}>Gemini 1.5 Pro (Smarter)</option>
+                                <optgroup label="Google Gemini (FREE Tier)">
+                                    <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Recommended)</option>
+                                    <option value="gemini-2.0-flash" {{ $model == 'gemini-2.0-flash' ? 'selected' : '' }}>Gemini 2.0 Flash</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -95,10 +95,14 @@
                             <label class="form-label fw-bold">Model Vision (Multimodal)</label>
                             <select class="form-select" name="ai_vision_model" id="ai_vision_model">
                                 <optgroup label="Llama 4 (Groq)">
-                                    <option value="meta-llama/llama-4-scout-17b-16e-instruct" {{ $visionModel == 'meta-llama/llama-4-scout-17b-16e-instruct' ? 'selected' : '' }}>Llama 4 Scout (Multimodal)</option>
+                                    <option value="meta-llama/llama-4-scout-17b-16e-instruct" {{ $visionModel == 'meta-llama/llama-4-scout-17b-16e-instruct' ? 'selected' : '' }}>Llama 4 Scout (Image Only)</option>
+                                </optgroup>
+                                <optgroup label="Google Gemini">
+                                    <option value="gemini-2.5-flash" {{ $visionModel == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Image + PDF - Recommended)</option>
+                                    <option value="gemini-2.0-flash" {{ $visionModel == 'gemini-2.0-flash' ? 'selected' : '' }}>Gemini 2.0 Flash (Stable)</option>
                                 </optgroup>
                             </select>
-                            <div class="form-text">Model ini digunakan khusus untuk menganalisis gambar pada tugas.</div>
+                            <div class="form-text">Model ini digunakan khusus untuk menganalisis gambar dan PDF pada tugas. Gemini 2.0 Flash mendukung PDF lebih baik.</div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mt-4">
@@ -174,6 +178,132 @@
         </div>
     </div>
 
+    {{-- Chatbot Access Control Section --}}
+    <div class="row g-4 mt-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-bottom bg-transparent py-3">
+                    <h5 class="card-title mb-0 d-flex align-items-center">
+                        <i class="fas fa-user-shield me-2 text-success"></i>
+                        Kontrol Akses Chatbot AI
+                    </h5>
+                    <p class="text-muted small mb-0 mt-2">Atur role mana saja yang dapat mengakses fitur AI Chatbot Assistant. Role <strong>Admin</strong> selalu memiliki akses.</p>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ route('admin.ai-settings.update') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        {{-- Hidden fields to preserve other settings --}}
+                        <input type="hidden" name="groq_api_key" value="{{ $groqApiKey }}">
+                        <input type="hidden" name="gemini_api_key" value="{{ $geminiApiKey }}">
+                        <input type="hidden" name="ai_model" value="{{ $model }}">
+                        <input type="hidden" name="ai_vision_model" value="{{ $visionModel }}">
+                        <input type="hidden" name="ai_provider" value="{{ $provider }}">
+
+                        <div class="row g-3">
+                            {{-- Staff Roles (Left Column) --}}
+                            <div class="col-12 col-md-6">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-users me-2"></i>Role Staff
+                                </h6>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_ketua_pkbm" id="chatbot_ketua_pkbm"
+                                        {{ ($chatbotEnabledRoles['ketua_pkbm'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_ketua_pkbm">
+                                        <strong>Ketua PKBM</strong>
+                                        <span class="text-muted d-block small">Akses penuh untuk kepala pusat kegiatan</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_wakil_kepala_sekolah" id="chatbot_wakil_kepala_sekolah"
+                                        {{ ($chatbotEnabledRoles['wakil_kepala_sekolah'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_wakil_kepala_sekolah">
+                                        <strong>Wakil Kepala Sekolah</strong>
+                                        <span class="text-muted d-block small">Bantuan untuk tugas wakil kepala sekolah</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_sekretaris" id="chatbot_sekretaris"
+                                        {{ ($chatbotEnabledRoles['sekretaris'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_sekretaris">
+                                        <strong>Sekretaris</strong>
+                                        <span class="text-muted d-block small">Asisten untuk tugas administrasi</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_bendahara" id="chatbot_bendahara"
+                                        {{ ($chatbotEnabledRoles['bendahara'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_bendahara">
+                                        <strong>Bendahara</strong>
+                                        <span class="text-muted d-block small">Bantuan untuk keuangan dan pembayaran</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {{-- Teaching Staff & Users (Right Column) --}}
+                            <div class="col-12 col-md-6">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>Role Pengajar & Pengguna
+                                </h6>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_wali_kelas" id="chatbot_wali_kelas"
+                                        {{ ($chatbotEnabledRoles['wali_kelas'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_wali_kelas">
+                                        <strong>Wali Kelas</strong>
+                                        <span class="text-muted d-block small">Bantuan untuk presensi dan rapor</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_guru_pengajar" id="chatbot_guru_pengajar"
+                                        {{ ($chatbotEnabledRoles['guru_pengajar'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_guru_pengajar">
+                                        <strong>Guru Pengajar</strong>
+                                        <span class="text-muted d-block small">Asisten untuk LMS, nilai, dan soal ujian</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_siswa" id="chatbot_siswa"
+                                        {{ ($chatbotEnabledRoles['siswa'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_siswa">
+                                        <strong>Siswa</strong>
+                                        <span class="text-muted d-block small">Bantuan untuk pertanyaan seputar sistem</span>
+                                    </label>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="chatbot_orang_tua" id="chatbot_orang_tua"
+                                        {{ ($chatbotEnabledRoles['orang_tua'] ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="chatbot_orang_tua">
+                                        <strong>Orang Tua</strong>
+                                        <span class="text-muted d-block small">Bantuan untuk cek nilai dan pembayaran</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <div class="text-muted small">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Perubahan akan berlaku setelah user login kembali
+                            </div>
+                            <button type="submit" class="btn btn-success px-4 shadow-sm">
+                                <i class="fas fa-save me-2"></i> Simpan Pengaturan Akses
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const providerSelect = document.getElementById('ai_provider');
@@ -193,8 +323,8 @@
                     'mixtral-8x7b-32768'
                 ],
                 gemini: [
-                    'gemini-1.5-flash',
-                    'gemini-1.5-pro'
+                    'gemini-2.5-flash',
+                    'gemini-2.0-flash'
                 ]
             };
 
@@ -280,13 +410,16 @@
             const alertIcon = document.getElementById('connectionIcon');
 
             testBtn.addEventListener('click', function() {
+                // Reset Alert FIRST (clear previous state)
+                alertEl.classList.add('d-none');
+                alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning');
+
                 const provider = providerSelect.value;
                 const apiKey = provider === 'groq' ? groqApiKeyInput.value : geminiApiKeyInput.value;
 
                 if (!apiKey) {
                     alertEl.classList.remove('d-none');
                     alertEl.classList.add('alert-warning');
-                    alertEl.classList.remove('alert-success', 'alert-danger');
                     alertTitle.textContent = "Peringatan!";
                     alertMsg.textContent = `API Key untuk ${provider === 'groq' ? 'Groq Cloud' : 'Google Gemini'} belum diisi.`;
                     alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
@@ -296,10 +429,6 @@
                 const originalText = this.innerHTML;
                 this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Testing...';
                 this.disabled = true;
-
-                // Reset Alert
-                alertEl.classList.add('d-none');
-                alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning');
 
                 const data = {
                     api_key: apiKey,
@@ -325,10 +454,17 @@
                         alertEl.classList.add('alert-success');
                         alertTitle.textContent = "Berhasil!";
                         alertIcon.className = "fas fa-check-circle me-2 fs-4";
+
+                        // Auto-hide success alert after 10 seconds
+                        setTimeout(() => {
+                            alertEl.classList.add('d-none');
+                        }, 10000);
                     } else {
                         alertEl.classList.add('alert-danger');
                         alertTitle.textContent = "Gagal!";
                         alertIcon.className = "fas fa-times-circle me-2 fs-4";
+
+                        // Error tetap tampil, tidak auto-hide
                     }
                 })
                 .catch(error => {

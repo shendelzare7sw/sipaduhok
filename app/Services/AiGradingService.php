@@ -100,7 +100,8 @@ class AiGradingService
         3. Beri feedback (max 3 kalimat, Bahasa Indonesia).
         4. Output WAJIB JSON: {\"score\": int, \"feedback\": string} tanpa markdown ```json";
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}";
+        // Use v1 API for Gemini 2.0+ models
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$this->model}:generateContent?key={$this->apiKey}";
         
         $response = Http::withOptions([
             'verify' => false,
@@ -324,12 +325,13 @@ class AiGradingService
         
         Output JSON: {\"score\": int (0-{$maxScore}), \"feedback\": string (max 3 kalimat)}";
 
-        // Use configured text model for Gemini (Flash/Pro supports vision natively)
-        // Or explicitly use vision model setting if different, but usually gemini-1.5-flash is both.
+        // Use configured text model for Gemini (2.5 Flash supports vision natively)
+        // Or explicitly use vision model setting if different, but usually gemini-2.5-flash is both.
         // Let's use $this->model because Gemini models are multimodal by default.
-        $model = str_contains($this->model, 'gemini') ? $this->model : 'gemini-1.5-flash';
+        $model = str_contains($this->model, 'gemini') ? $this->model : 'gemini-2.5-flash';
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$this->apiKey}";
+        // Use v1 API for Gemini 2.0+ models
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$this->apiKey}";
 
         $response = Http::withOptions([
             'verify' => false,
