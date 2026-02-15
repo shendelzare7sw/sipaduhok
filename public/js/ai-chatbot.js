@@ -1,5 +1,5 @@
 /**
- * AI Chatbot General Assistant - Frontend Logic
+ * AI Chatbot General Assistant - Frontend Logic with Conversation History
  * SIPADUHOK - Claude/ChatGPT Style Interface
  */
 
@@ -9,22 +9,327 @@ const chatbotState = {
     conversationHistory: [], // [{role, content}, ...]
     isWaitingResponse: false,
     quickActionsLoaded: false,
-    modelsLoaded: false, // NEW: Track if models are loaded
+    modelsLoaded: false,
     selectedModel: 'llama-3.3-70b-versatile',
-    attachedFile: null, // {file: File, preview: string}
+    attachedFiles: [], // Multiple files: [{file: File, preview: string, dataUrl: string}, ...]
     availableModels: [],
-    fabPosition: { right: 96 }, // FAB position (draggable)
+    fabPosition: { right: 96 },
     isDragging: false,
+
+    // Conversation Management
+    conversations: [], // [{id, title, messages, created_at, updated_at}, ...]
+    currentConversationId: null,
+    isSidebarOpen: false,
 };
 
 // ==================== Initialize Chatbot ====================
 function initChatbot() {
-    // Don't load models here - only load when user opens chat window
-    // This prevents API errors from showing on every page load
+    loadConversationsFromStorage();
     restoreChatState();
     setupEventListeners();
-    initDraggableFab(); // NEW: Initialize draggable FAB
+    initDraggableFab();
     console.log('AI Chatbot initialized');
+}
+
+// ==================== Conversations Management ====================
+
+// Load conversations from localStorage
+function loadConversationsFromStorage() {
+    const stored = localStorage.getItem('aiChatbotConversations');
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            // Validate that it's an array
+            if (Array.isArray(parsed)) {
+                // Filter out invalid conversations
+                chatbotState.conversations = parsed.filter(conv =>
+                    conv &&
+                    typeof conv === 'object' &&
+                    conv.id &&
+                    conv.title !== undefined
+                );
+            } else {
+                console.warn('Invalid conversations data, resetting...');
+                chatbotState.conversations = [];
+                localStorage.removeItem('aiChatbotConversations');
+            }
+        } catch (e) {
+            console.error('Error loading conversations:', e);
+            chatbotState.conversations = [];
+            localStorage.removeItem('aiChatbotConversations');
+        }
+    }
+}
+
+// Save conversations to localStorage
+function saveConversationsToStorage() {
+    localStorage.setItem('aiChatbotConversations', JSON.stringify(chatbotState.conversations));
+}
+
+// Create new conversation
+function createNewConversation() {
+    // Save current conversation first
+    if (chatbotState.currentConversationId) {
+        saveCurrentConversation();
+    }
+
+    // Create new conversation
+    const newConv = {
+        id: 'conv_' + Date.now(),
+        title: 'New Chat',
+        messages: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    };
+
+    chatbotState.conversations.unshift(newConv);
+    chatbotState.currentConversationId = newConv.id;
+    chatbotState.conversationHistory = [];
+
+    saveConversationsToStorage();
+    renderConversationsList();
+    clearChatMessages();
+    updateConversationTitle('New Chat');
+
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        toggleConversationsSidebar();
+    }
+}
+
+// Save current conversation
+function saveCurrentConversation() {
+    if (!chatbotState.currentConversationId) return;
+
+    const conv = chatbotState.conversations.find(c => c.id === chatbotState.currentConversationId);
+    if (!conv) return;
+
+    conv.messages = chatbotState.conversationHistory;
+    conv.updated_at = new Date().toISOString();
+
+    // Auto-generate title from first user message
+    if (conv.title === 'New Chat' && conv.messages.length > 0) {
+        const firstUserMsg = conv.messages.find(m => m.role === 'user');
+        if (firstUserMsg) {
+            conv.title = firstUserMsg.content.substring(0, 50) + (firstUserMsg.content.length > 50 ? '...' : '');
+        }
+    }
+
+    saveConversationsToStorage();
+    renderConversationsList();
+}
+
+// Load conversation by ID
+function loadConversation(conversationId) {
+    // Save current first
+    if (chatbotState.currentConversationId) {
+        saveCurrentConversation();
+    }
+
+    const conv = chatbotState.conversations.find(c => c.id === conversationId);
+    if (!conv) return;
+
+    chatbotState.currentConversationId = conversationId;
+    chatbotState.conversationHistory = [...conv.messages];
+
+    clearChatMessages();
+
+    // Render all messages
+    conv.messages.forEach(msg => {
+        addMessage(msg.role, msg.content, null, false); // false = don't save to history
+    });
+
+    updateConversationTitle(conv.title);
+    renderConversationsList();
+    scrollToBottom();
+
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        toggleConversationsSidebar();
+    }
+}
+
+// Delete conversation
+function deleteConversation(conversationId, event) {
+    event.stopPropagation(); // Prevent loading conversation
+
+    // Show custom confirm dialog
+    showConfirmDialog('Hapus conversation ini?', () => {
+        chatbotState.conversations = chatbotState.conversations.filter(c => c.id !== conversationId);
+
+        // If deleting current conversation, create new one
+        if (chatbotState.currentConversationId === conversationId) {
+            chatbotState.currentConversationId = null;
+            chatbotState.conversationHistory = [];
+            clearChatMessages();
+            updateConversationTitle('New Chat');
+        }
+
+        saveConversationsToStorage();
+        renderConversationsList();
+
+        showToastChatbot('success', 'Conversation dihapus');
+    });
+}
+
+// Render conversations list
+function renderConversationsList() {
+    const container = document.getElementById('conversationsList');
+    if (!container) return;
+
+    console.log('[Chatbot] Rendering conversations:', chatbotState.conversations.length);
+
+    if (chatbotState.conversations.length === 0) {
+        container.innerHTML = '<p class="text-center text-muted" style="font-size: 12px; margin-top: 20px;">Belum ada conversation</p>';
+        return;
+    }
+
+    // Group by date
+    const groups = {
+        today: [],
+        yesterday: [],
+        thisWeek: [],
+        older: [],
+    };
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    chatbotState.conversations.forEach(conv => {
+        const convDate = new Date(conv.updated_at);
+        const convDay = new Date(convDate.getFullYear(), convDate.getMonth(), convDate.getDate());
+
+        if (convDay >= today) {
+            groups.today.push(conv);
+        } else if (convDay >= yesterday) {
+            groups.yesterday.push(conv);
+        } else if (convDay >= weekAgo) {
+            groups.thisWeek.push(conv);
+        } else {
+            groups.older.push(conv);
+        }
+    });
+
+    let html = '';
+
+    if (groups.today.length > 0) {
+        html += '<div class="conversation-date-group">Today</div>';
+        groups.today.forEach(conv => {
+            const item = renderConversationItem(conv);
+            if (item) html += item;
+        });
+    }
+
+    if (groups.yesterday.length > 0) {
+        html += '<div class="conversation-date-group">Yesterday</div>';
+        groups.yesterday.forEach(conv => {
+            const item = renderConversationItem(conv);
+            if (item) html += item;
+        });
+    }
+
+    if (groups.thisWeek.length > 0) {
+        html += '<div class="conversation-date-group">Last 7 Days</div>';
+        groups.thisWeek.forEach(conv => {
+            const item = renderConversationItem(conv);
+            if (item) html += item;
+        });
+    }
+
+    if (groups.older.length > 0) {
+        html += '<div class="conversation-date-group">Older</div>';
+        groups.older.forEach(conv => {
+            const item = renderConversationItem(conv);
+            if (item) html += item;
+        });
+    }
+
+    // Clear and set innerHTML
+    container.innerHTML = '';
+    container.innerHTML = html;
+}
+
+// Render single conversation item
+function renderConversationItem(conv) {
+    if (!conv || !conv.id) return '';
+
+    const isActive = conv.id === chatbotState.currentConversationId;
+    const date = new Date(conv.updated_at || new Date());
+    const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const title = conv.title || 'New Chat';
+
+    return `
+        <div class="conversation-item ${isActive ? 'active' : ''}" onclick="loadConversation('${conv.id}')" data-conv-id="${conv.id}">
+            <div class="conversation-title">${escapeHtml(title)}</div>
+            <div class="conversation-date">${timeStr}</div>
+            <button class="conversation-delete" onclick="deleteConversation('${conv.id}', event)" title="Delete">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+}
+
+// Update conversation title in footer
+function updateConversationTitle(title) {
+    const titleEl = document.getElementById('currentConversationTitle');
+    if (titleEl) {
+        titleEl.textContent = title;
+    }
+}
+
+// Clear chat messages (keep welcome message and quick actions)
+function clearChatMessages() {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+
+    // Remove all messages except first 2 (welcome + quick actions)
+    const messages = container.querySelectorAll('.message-group');
+    messages.forEach(msg => msg.remove());
+
+    // Re-add welcome message
+    const welcomeHtml = `
+        <div class="message-group ai-message">
+            <div class="message-avatar">AI</div>
+            <div class="message-content">
+                <div class="message-bubble">
+                    Halo! 👋 Saya asisten AI SIPADUHOK. Ada yang bisa saya bantu?
+                </div>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('afterbegin', welcomeHtml);
+
+    // Reload quick actions if needed
+    const quickActionsContainer = document.getElementById('quickActionsContainer');
+    if (quickActionsContainer && !chatbotState.quickActionsLoaded) {
+        loadQuickActions();
+    }
+}
+
+// Toggle conversations sidebar
+function toggleConversationsSidebar() {
+    const sidebar = document.getElementById('conversationsSidebar');
+    const chatWindow = document.getElementById('aiChatbotWindow');
+    if (!sidebar || !chatWindow) return;
+
+    sidebar.classList.toggle('active');
+    chatbotState.isSidebarOpen = sidebar.classList.contains('active');
+
+    // Toggle chat window width
+    if (chatbotState.isSidebarOpen) {
+        chatWindow.classList.add('sidebar-open');
+    } else {
+        chatWindow.classList.remove('sidebar-open');
+    }
+
+    // Load conversations list if opening for first time
+    if (chatbotState.isSidebarOpen && chatbotState.conversations.length > 0) {
+        renderConversationsList();
+    }
 }
 
 // ==================== Load Available Models ====================
@@ -49,14 +354,13 @@ async function loadAvailableModels() {
             chatbotState.availableModels = data.models;
             populateModelSelector(data.models);
         } else {
-            // API responded but no models configured
             console.error('[AI Chatbot] ✗ No models available. Response:', data);
             throw new Error(data.error || 'No models available');
         }
     } catch (error) {
         console.error('[AI Chatbot] ✗ Error loading models:', error);
 
-        // Fallback: Use default models if fetch fails
+        // Fallback: Use default models
         console.log('[AI Chatbot] Using fallback default models...');
         const defaultModels = [
             {
@@ -64,6 +368,7 @@ async function loadAvailableModels() {
                 name: 'Llama 3.3 70B (Fast)',
                 provider: 'groq',
                 supports_vision: false,
+                supports_pdf: false,
                 default: true
             },
             {
@@ -71,6 +376,7 @@ async function loadAvailableModels() {
                 name: 'Llama 4 Scout (Vision)',
                 provider: 'groq',
                 supports_vision: true,
+                supports_pdf: false,
                 default: false
             },
             {
@@ -78,6 +384,7 @@ async function loadAvailableModels() {
                 name: 'Qwen 2.5 32B',
                 provider: 'groq',
                 supports_vision: false,
+                supports_pdf: false,
                 default: false
             }
         ];
@@ -85,7 +392,6 @@ async function loadAvailableModels() {
         chatbotState.availableModels = defaultModels;
         populateModelSelector(defaultModels);
 
-        // Show warning (not blocking error)
         showChatError('⚠️ Menggunakan model default. Jika mengalami masalah, hubungi admin.');
     }
 }
@@ -95,23 +401,36 @@ function populateModelSelector(models) {
     const selector = document.getElementById('modelSelector');
     if (!selector) return;
 
-    selector.innerHTML = models.map(m =>
-        `<option value="${m.id}" ${m.default ? 'selected' : ''}>
-            ${m.name} ${m.supports_vision ? '📷' : ''}
-        </option>`
-    ).join('');
+    // FORCE DEFAULT: Always prefer Llama 3.3 70B (Groq) for chatbot to save Gemini quota
+    // Override backend default setting
+    const groqDefaultModel = models.find(m => m.id === 'llama-3.3-70b-versatile');
+    const forcedDefaultId = groqDefaultModel ? 'llama-3.3-70b-versatile' : models[0]?.id;
 
-    // Set initial selected model
-    const defaultModel = models.find(m => m.default);
-    if (defaultModel) {
-        chatbotState.selectedModel = defaultModel.id;
-    }
+    selector.innerHTML = models.map(m => {
+        let icons = '';
+        if (m.supports_vision) icons += '📷';
+        if (m.supports_pdf) icons += '📄';
 
-    // Restore saved model from localStorage
+        // Force Llama 3.3 70B as selected, ignore backend default
+        const isDefault = m.id === forcedDefaultId;
+
+        return `<option value="${m.id}" ${isDefault ? 'selected' : ''}>
+            ${m.name} ${icons}
+        </option>`;
+    }).join('');
+
+    // Set initial selected model to Groq default (Llama 3.3 70B)
+    chatbotState.selectedModel = forcedDefaultId;
+
+    // Restore saved model from localStorage ONLY if user has previously changed it
     const savedModel = localStorage.getItem('selectedChatModel');
     if (savedModel && models.some(m => m.id === savedModel)) {
         chatbotState.selectedModel = savedModel;
         selector.value = savedModel;
+        console.log(`[AI Chatbot] Restored saved model: ${savedModel}`);
+    } else {
+        // No saved model - use Llama 3.3 70B as default
+        console.log(`[AI Chatbot] Using forced default model: ${forcedDefaultId} (Groq - Free & Fast)`);
     }
 }
 
@@ -126,7 +445,7 @@ async function openChatWindow() {
     fab.classList.add('hidden');
     chatbotState.isOpen = true;
 
-    // Load models only when user first opens chat (not on page load)
+    // Load models only when user first opens chat
     if (!chatbotState.modelsLoaded) {
         await loadAvailableModels();
         chatbotState.modelsLoaded = true;
@@ -134,6 +453,11 @@ async function openChatWindow() {
 
     if (!chatbotState.quickActionsLoaded) {
         loadQuickActions();
+    }
+
+    // Create first conversation if none exists
+    if (chatbotState.conversations.length === 0 && !chatbotState.currentConversationId) {
+        createNewConversation();
     }
 
     localStorage.setItem('aiChatbotOpen', 'true');
@@ -145,6 +469,11 @@ function closeChatWindow() {
     const fab = document.getElementById('aiChatbotFab');
 
     if (!window || !fab) return;
+
+    // Save current conversation before closing
+    if (chatbotState.currentConversationId) {
+        saveCurrentConversation();
+    }
 
     window.classList.remove('active');
     fab.classList.remove('hidden');
@@ -194,35 +523,70 @@ function sendQuickAction(message) {
     }
 }
 
-// ==================== Handle File Attachment ====================
+// ==================== Handle Multiple File Attachments ====================
 function handleFileAttachment(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
 
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
-    if (!validTypes.includes(file.type)) {
-        showToastChatbot('error', 'Format file tidak didukung. Gunakan JPG, PNG, atau PDF.');
+    // Max 5 files
+    if (chatbotState.attachedFiles.length + files.length > 5) {
+        showToastChatbot('warning', 'Maksimal 5 file');
         event.target.value = '';
         return;
     }
 
-    // Validate file size (max 4MB)
-    if (file.size > 4 * 1024 * 1024) {
-        showToastChatbot('error', 'File terlalu besar. Maksimal 4MB.');
-        event.target.value = '';
-        return;
-    }
+    // Process each file
+    files.forEach(file => {
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
+        if (!validTypes.includes(file.type)) {
+            showToastChatbot('error', `${file.name}: Format tidak didukung`);
+            return;
+        }
 
-    // Smart model switching based on file type
-    const selectedModel = chatbotState.availableModels.find(m => m.id === chatbotState.selectedModel);
+        // Validate file size (max 4MB)
+        if (file.size > 4 * 1024 * 1024) {
+            showToastChatbot('error', `${file.name}: File terlalu besar (max 4MB)`);
+            return;
+        }
 
-    // Handle IMAGE files
-    if (file.type.startsWith('image/')) {
-        if (selectedModel && !selectedModel.supports_vision) {
-            showToastChatbot('warning', 'Model text-only tidak support gambar');
+        // Add to attached files
+        const fileObj = { file, preview: file.name, dataUrl: null };
 
-            // Auto-switch to vision model
+        // Generate preview for images
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                fileObj.dataUrl = e.target.result;
+                renderAttachmentsPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        chatbotState.attachedFiles.push(fileObj);
+    });
+
+    // Smart model switching for vision/PDF support
+    const hasPdf = chatbotState.attachedFiles.some(f => f.file.type === 'application/pdf');
+    const hasImage = chatbotState.attachedFiles.some(f => f.file.type.startsWith('image/'));
+
+    if (hasPdf || hasImage) {
+        const selectedModel = chatbotState.availableModels.find(m => m.id === chatbotState.selectedModel);
+
+        if (hasPdf) {
+            // PDF only supported by Gemini - force switch to Gemini 2.5 Flash
+            const geminiModel = chatbotState.availableModels.find(m => m.id === 'gemini-2.5-flash');
+
+            if (geminiModel && chatbotState.selectedModel !== 'gemini-2.5-flash') {
+                chatbotState.selectedModel = geminiModel.id;
+                const selector = document.getElementById('modelSelector');
+                if (selector) selector.value = geminiModel.id;
+                showToastChatbot('info', `🔄 PDF hanya support Gemini 2.5 Flash. Model beralih otomatis.`);
+            } else if (!geminiModel) {
+                showToastChatbot('error', 'PDF memerlukan Gemini 2.5 Flash. Hubungi admin untuk konfigurasi API key.');
+            }
+        } else if (hasImage && selectedModel && !selectedModel.supports_vision) {
+            // Image - switch to any vision model (Llama 4 Scout or Gemini)
             const visionModel = chatbotState.availableModels.find(m => m.supports_vision);
             if (visionModel) {
                 chatbotState.selectedModel = visionModel.id;
@@ -230,83 +594,76 @@ function handleFileAttachment(event) {
                 if (selector) selector.value = visionModel.id;
                 showToastChatbot('info', `✓ Beralih ke ${visionModel.name}`);
             } else {
-                showToastChatbot('error', 'Tidak ada model vision tersedia. Hubungi admin.');
-                event.target.value = '';
-                return;
+                showToastChatbot('error', 'Tidak ada model vision tersedia');
             }
         }
     }
 
-    // Handle PDF files - require Gemini for best support
-    if (file.type === 'application/pdf') {
-        // PDF works best with Gemini
-        const geminiModel = chatbotState.availableModels.find(m => m.provider === 'gemini');
+    renderAttachmentsPreview();
+    event.target.value = ''; // Reset input
+}
 
-        if (!selectedModel || !selectedModel.supports_vision) {
-            showToastChatbot('warning', 'PDF memerlukan model vision');
+// ==================== Render Attachments Preview ====================
+function renderAttachmentsPreview() {
+    const container = document.getElementById('attachmentsPreview');
+    if (!container) return;
 
-            if (geminiModel) {
-                chatbotState.selectedModel = geminiModel.id;
-                const selector = document.getElementById('modelSelector');
-                if (selector) selector.value = geminiModel.id;
-                showToastChatbot('info', `✓ Beralih ke ${geminiModel.name} (Best for PDF)`);
-            } else {
-                // Fallback to any vision model
-                const visionModel = chatbotState.availableModels.find(m => m.supports_vision);
-                if (visionModel) {
-                    chatbotState.selectedModel = visionModel.id;
-                    const selector = document.getElementById('modelSelector');
-                    if (selector) selector.value = visionModel.id;
-                    showToastChatbot('warning', `⚠️ Using ${visionModel.name} for PDF (Limited support)`);
-                } else {
-                    showToastChatbot('error', 'PDF memerlukan Gemini API. Hubungi admin.');
-                    event.target.value = '';
-                    return;
-                }
-            }
-        } else if (selectedModel.provider !== 'gemini') {
-            // Current model is vision but not Gemini - suggest switch
-            if (geminiModel) {
-                showToastChatbot('info', 'Gemini recommended for PDF');
-                // Optional auto-switch (uncomment if you want)
-                // chatbotState.selectedModel = geminiModel.id;
-                // document.getElementById('modelSelector').value = geminiModel.id;
-            }
+    if (chatbotState.attachedFiles.length === 0) {
+        container.classList.add('d-none');
+        return;
+    }
+
+    container.classList.remove('d-none');
+
+    const html = chatbotState.attachedFiles.map((fileObj, index) => {
+        const isImage = fileObj.file.type.startsWith('image/');
+
+        if (isImage && fileObj.dataUrl) {
+            return `
+                <div class="attachment-preview-item">
+                    <img src="${fileObj.dataUrl}" alt="${fileObj.file.name}" onclick="openLightbox('${fileObj.dataUrl}')">
+                    <button class="attachment-remove-btn" onclick="removeAttachmentByIndex(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="attachment-preview-item file-preview">
+                    <i class="fas fa-file-pdf"></i>
+                    <button class="attachment-remove-btn" onclick="removeAttachmentByIndex(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
         }
-    }
+    }).join('');
 
-    // Store file
-    chatbotState.attachedFile = {file, preview: file.name};
-
-    // Show preview
-    showAttachmentPreview(file);
+    container.innerHTML = html;
 }
 
-// ==================== Show Attachment Preview ====================
-function showAttachmentPreview(file) {
-    const preview = document.getElementById('attachmentPreview');
-    const nameEl = document.getElementById('attachmentName');
-
-    if (!preview || !nameEl) return;
-
-    const icon = file.type.startsWith('image/') ? 'fa-file-image' : 'fa-file-pdf';
-    const iconEl = preview.querySelector('i');
-    if (iconEl) {
-        iconEl.className = `fas ${icon} me-2`;
-    }
-
-    nameEl.textContent = file.name;
-    preview.classList.remove('d-none');
+// ==================== Remove Attachment by Index ====================
+function removeAttachmentByIndex(index) {
+    chatbotState.attachedFiles.splice(index, 1);
+    renderAttachmentsPreview();
 }
 
-// ==================== Remove Attachment ====================
-function removeAttachment() {
-    chatbotState.attachedFile = null;
-    const fileInput = document.getElementById('fileAttachment');
-    const preview = document.getElementById('attachmentPreview');
+// ==================== Image Lightbox ====================
+function openLightbox(dataUrl) {
+    const lightbox = document.getElementById('imageLightbox');
+    const lightboxImg = document.getElementById('lightboxImage');
 
-    if (fileInput) fileInput.value = '';
-    if (preview) preview.classList.add('d-none');
+    if (lightbox && lightboxImg) {
+        lightboxImg.src = dataUrl;
+        lightbox.classList.remove('d-none');
+    }
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById('imageLightbox');
+    if (lightbox) {
+        lightbox.classList.add('d-none');
+    }
 }
 
 // ==================== Send Message ====================
@@ -316,24 +673,26 @@ async function sendMessage(messageText = null) {
 
     const message = messageText || input.value.trim();
 
-    if (!message && !chatbotState.attachedFile) {
+    if (!message && chatbotState.attachedFiles.length === 0) {
         showToastChatbot('warning', 'Ketik pesan atau lampirkan file');
         return;
     }
 
     if (chatbotState.isWaitingResponse) return;
 
+    // Create conversation if first message
+    if (!chatbotState.currentConversationId) {
+        createNewConversation();
+    }
+
     // Add user message to UI
-    addMessage('user', message, chatbotState.attachedFile);
+    addMessage('user', message, chatbotState.attachedFiles);
 
     // Clear input
     input.value = '';
-    const currentFile = chatbotState.attachedFile;
-    chatbotState.attachedFile = null;
-    const preview = document.getElementById('attachmentPreview');
-    if (preview) preview.classList.add('d-none');
-    const fileInput = document.getElementById('fileAttachment');
-    if (fileInput) fileInput.value = '';
+    const currentFiles = [...chatbotState.attachedFiles];
+    chatbotState.attachedFiles = [];
+    renderAttachmentsPreview();
     updateCharCount(0);
 
     // Show typing indicator
@@ -341,7 +700,7 @@ async function sendMessage(messageText = null) {
 
     // Call API
     chatbotState.isWaitingResponse = true;
-    const response = await sendMessageToApi(message, currentFile);
+    const response = await sendMessageToApi(message, currentFiles);
     chatbotState.isWaitingResponse = false;
 
     // Hide typing indicator
@@ -354,18 +713,25 @@ async function sendMessage(messageText = null) {
         addMessage('assistant', `❌ Error: ${response.error}`);
     }
 
+    // Save conversation
+    saveCurrentConversation();
+
     scrollToBottom();
 }
 
 // ==================== Send Message to API ====================
-async function sendMessageToApi(message, attachedFile) {
+async function sendMessageToApi(message, attachedFiles) {
     const formData = new FormData();
     formData.append('message', message);
     formData.append('model', chatbotState.selectedModel);
     formData.append('history', JSON.stringify(chatbotState.conversationHistory));
 
-    if (attachedFile && attachedFile.file) {
-        formData.append('attachment', attachedFile.file);
+    // Attach multiple files
+    if (attachedFiles && attachedFiles.length > 0) {
+        attachedFiles.forEach((fileObj, index) => {
+            formData.append(`attachment_${index}`, fileObj.file);
+        });
+        formData.append('attachment_count', attachedFiles.length);
     }
 
     try {
@@ -391,44 +757,62 @@ async function sendMessageToApi(message, attachedFile) {
         if (data.success) {
             // Update conversation history
             chatbotState.conversationHistory.push(
-                {role: 'user', content: message},
-                {role: 'assistant', content: data.response}
+                { role: 'user', content: message },
+                { role: 'assistant', content: data.response }
             );
 
             // Trim history to last 20 messages (10 exchanges)
             if (chatbotState.conversationHistory.length > 20) {
                 chatbotState.conversationHistory = chatbotState.conversationHistory.slice(-20);
             }
+        } else if (data.switch_to_gemini) {
+            // Backend detected PDF with Groq model - auto-switch and retry
+            const geminiModel = chatbotState.availableModels.find(m => m.id === 'gemini-2.5-flash');
+            if (geminiModel) {
+                chatbotState.selectedModel = geminiModel.id;
+                const selector = document.getElementById('modelSelector');
+                if (selector) selector.value = geminiModel.id;
+
+                showToastChatbot('info', '🔄 Beralih ke Gemini untuk membaca PDF. Mengirim ulang...');
+
+                // Retry with Gemini
+                return await sendMessageToApi(message, attachedFiles);
+            }
         }
 
         return data;
     } catch (error) {
         console.error('API Error:', error);
-        return {success: false, error: error.message || 'Koneksi gagal. Coba lagi.'};
+        return { success: false, error: error.message || 'Koneksi gagal. Coba lagi.' };
     }
 }
 
 // ==================== Add Message to UI ====================
-function addMessage(role, content, attachment = null) {
+function addMessage(role, content, attachments = null, saveToHistory = true) {
     const messagesContainer = document.getElementById('chatMessages');
     if (!messagesContainer) return;
 
     const isUser = role === 'user';
     const now = new Date();
-    const time = now.toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'});
+    const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-    const attachmentHtml = attachment
-        ? `<div class="message-attachment">
-               <i class="fas ${attachment.file.type.startsWith('image/') ? 'fa-image' : 'fa-file-pdf'}"></i>
-               ${attachment.preview}
-           </div>`
-        : '';
+    // Render attachments
+    let attachmentsHtml = '';
+    if (attachments && attachments.length > 0) {
+        const items = attachments.map(fileObj => {
+            const isImage = fileObj.file.type.startsWith('image/');
+            const icon = isImage ? 'fa-image' : 'fa-file-pdf';
+            return `<div class="message-attachment-item"><i class="fas ${icon}"></i> ${fileObj.file.name}</div>`;
+        }).join('');
+
+        attachmentsHtml = `<div class="message-attachments">${items}</div>`;
+    }
 
     const messageHtml = `
         <div class="message-group ${isUser ? 'user-message' : 'ai-message'}">
             ${!isUser ? '<div class="message-avatar">AI</div>' : ''}
             <div class="message-content">
-                ${attachmentHtml}
+                ${attachmentsHtml}
                 <div class="message-bubble">${escapeHtml(content)}</div>
                 <div class="message-meta">
                     <span class="message-time">${time}</span>
@@ -440,6 +824,12 @@ function addMessage(role, content, attachment = null) {
     `;
 
     messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+
+    // Add to conversation history
+    if (saveToHistory) {
+        chatbotState.conversationHistory.push({ role, content });
+    }
+
     scrollToBottom();
 }
 
@@ -457,22 +847,6 @@ function hideTypingIndicator() {
     if (indicator) {
         indicator.classList.add('d-none');
     }
-}
-
-// ==================== Clear Conversation ====================
-function clearConversation() {
-    if (!confirm('Yakin ingin menghapus semua percakapan?')) return;
-
-    chatbotState.conversationHistory = [];
-
-    const messagesContainer = document.getElementById('chatMessages');
-    if (!messagesContainer) return;
-
-    // Clear all messages except welcome and quick actions
-    const messages = messagesContainer.querySelectorAll('.message-group:not(:first-child)');
-    messages.forEach(msg => msg.remove());
-
-    showToastChatbot('success', 'Percakapan dihapus');
 }
 
 // ==================== Copy Message ====================
@@ -529,7 +903,7 @@ function restoreChatState() {
 
 // ==================== Setup Event Listeners ====================
 function setupEventListeners() {
-    // FAB click handled in initDraggableFab() to prevent conflict with drag
+    // FAB click handled in initDraggableFab()
 
     // Model selector change
     const modelSelector = document.getElementById('modelSelector');
@@ -540,7 +914,7 @@ function setupEventListeners() {
         });
     }
 
-    // File attachment
+    // File attachment (multiple)
     const fileInput = document.getElementById('fileAttachment');
     if (fileInput) {
         fileInput.addEventListener('change', handleFileAttachment);
@@ -575,24 +949,21 @@ function initDraggableFab() {
     const fab = document.getElementById('aiChatbotFab');
     if (!fab) return;
 
-    // Restore saved position from localStorage
-    const savedPosition = localStorage.getItem('aiChatbotFabPosition');
-    if (savedPosition) {
-        chatbotState.fabPosition = JSON.parse(savedPosition);
-        fab.style.right = `${chatbotState.fabPosition.right}px`;
-    }
+    // Always start at default position (reset on every page load)
+    // Default position is set in CSS: right: 96px
+    chatbotState.fabPosition = { right: 96 };
 
     let isDraggingFab = false;
     let hasMoved = false;
     let startX = 0;
     let startRight = 0;
 
-    // Mouse events (desktop)
+    // Mouse events
     fab.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
 
-    // Touch events (mobile)
+    // Touch events
     fab.addEventListener('touchstart', onTouchStart, { passive: false });
     document.addEventListener('touchmove', onTouchMove, { passive: false });
     document.addEventListener('touchend', onTouchEnd);
@@ -603,17 +974,16 @@ function initDraggableFab() {
         startX = e.clientX;
         startRight = chatbotState.fabPosition.right;
         fab.style.cursor = 'grabbing';
-        fab.style.transition = 'none'; // Disable transition during drag
-        e.preventDefault(); // Prevent text selection
+        fab.style.transition = 'none';
+        e.preventDefault();
     }
 
     function onMouseMove(e) {
         if (!isDraggingFab) return;
 
-        const deltaX = startX - e.clientX; // Distance moved (right is positive)
+        const deltaX = startX - e.clientX;
         const newRight = startRight + deltaX;
 
-        // Limit drag area
         const viewportWidth = window.innerWidth;
         const fabWidth = fab.offsetWidth;
         const minRight = 24;
@@ -624,7 +994,6 @@ function initDraggableFab() {
         chatbotState.fabPosition.right = boundedRight;
         fab.style.right = `${boundedRight}px`;
 
-        // Mark as moved if dragged more than 5px
         if (Math.abs(deltaX) > 5) {
             hasMoved = true;
         }
@@ -635,17 +1004,14 @@ function initDraggableFab() {
 
         isDraggingFab = false;
         fab.style.cursor = 'grab';
-        fab.style.transition = ''; // Re-enable transition
+        fab.style.transition = '';
 
-        // Save position
-        localStorage.setItem('aiChatbotFabPosition', JSON.stringify(chatbotState.fabPosition));
+        // Position is NOT saved to localStorage (resets on page refresh)
 
-        // If not moved significantly, treat as click
         if (!hasMoved) {
             openChatWindow();
         }
 
-        // Reset
         hasMoved = false;
     }
 
@@ -689,7 +1055,7 @@ function initDraggableFab() {
         fab.style.cursor = 'grab';
         fab.style.transition = '';
 
-        localStorage.setItem('aiChatbotFabPosition', JSON.stringify(chatbotState.fabPosition));
+        // Position is NOT saved to localStorage (resets on page refresh)
 
         if (!hasMoved) {
             openChatWindow();
@@ -708,13 +1074,11 @@ function escapeHtml(text) {
 
 // ==================== Utility: Show Toast ====================
 function showToastChatbot(type, message) {
-    // Check if global showToast function exists (from other scripts)
     if (typeof window.showToast === 'function') {
         window.showToast(type, message);
         return;
     }
 
-    // Fallback: only log to console (NO ALERT to prevent disrupting user on every page)
     const icons = {
         success: '✅',
         error: '❌',
@@ -750,12 +1114,71 @@ function showChatError(message) {
     scrollToBottom();
 }
 
+// Clear all conversations (debugging)
+function clearAllConversations() {
+    showConfirmDialog('Hapus SEMUA conversation? Tindakan ini tidak dapat dibatalkan.', () => {
+        chatbotState.conversations = [];
+        chatbotState.currentConversationId = null;
+        chatbotState.conversationHistory = [];
+
+        saveConversationsToStorage();
+        renderConversationsList();
+        clearChatMessages();
+        updateConversationTitle('New Chat');
+
+        showToastChatbot('success', 'Semua conversation dihapus');
+
+        // Auto create new conversation
+        createNewConversation();
+    });
+}
+
+// ==================== Custom Confirmation Dialog ====================
+let confirmCallback = null;
+
+function showConfirmDialog(message, onConfirm) {
+    const dialog = document.getElementById('confirmDialog');
+    const messageEl = document.getElementById('confirmDialogMessage');
+
+    if (!dialog || !messageEl) return;
+
+    messageEl.textContent = message;
+    confirmCallback = onConfirm;
+    dialog.classList.remove('d-none');
+}
+
+function confirmAction() {
+    const dialog = document.getElementById('confirmDialog');
+    if (dialog) dialog.classList.add('d-none');
+
+    if (confirmCallback) {
+        confirmCallback();
+        confirmCallback = null;
+    }
+}
+
+function cancelConfirm() {
+    const dialog = document.getElementById('confirmDialog');
+    if (dialog) dialog.classList.add('d-none');
+
+    confirmCallback = null;
+}
+
 // ==================== Make Functions Global ====================
 window.initChatbot = initChatbot;
 window.openChatWindow = openChatWindow;
 window.closeChatWindow = closeChatWindow;
 window.sendMessage = sendMessage;
 window.sendQuickAction = sendQuickAction;
-window.removeAttachment = removeAttachment;
-window.clearConversation = clearConversation;
 window.copyMessage = copyMessage;
+window.toggleConversationsSidebar = toggleConversationsSidebar;
+window.createNewConversation = createNewConversation;
+window.loadConversation = loadConversation;
+window.deleteConversation = deleteConversation;
+window.clearAllConversations = clearAllConversations;
+window.removeAttachmentByIndex = removeAttachmentByIndex;
+window.openLightbox = openLightbox;
+window.closeLightbox = closeLightbox;
+window.showConfirmDialog = showConfirmDialog;
+window.confirmAction = confirmAction;
+window.cancelConfirm = cancelConfirm;

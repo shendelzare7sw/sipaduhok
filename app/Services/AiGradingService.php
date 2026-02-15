@@ -33,9 +33,28 @@ class AiGradingService
 
         $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
 
-        // Auto-fix for decommissioned models
+        // Auto-fix for decommissioned Groq models
         if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview'])) {
             $this->model = 'llama-3.3-70b-versatile';
+        }
+
+        // Auto-fix for deprecated Gemini models
+        if (in_array($this->model, ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'])) {
+            $this->model = 'gemini-2.5-flash';
+        }
+
+        // CRITICAL: Validate model compatibility with provider
+        $isGeminiModel = str_contains($this->model, 'gemini');
+        $isGroqModel = str_contains($this->model, 'llama') || str_contains($this->model, 'qwen') || str_contains($this->model, 'mixtral');
+
+        if ($this->provider === 'groq' && $isGeminiModel) {
+            // Provider is Groq but model is Gemini → fallback to Groq model
+            Log::warning("Model mismatch: Provider=groq but model={$this->model}. Fallback to llama-3.3-70b-versatile");
+            $this->model = 'llama-3.3-70b-versatile';
+        } elseif ($this->provider === 'gemini' && $isGroqModel) {
+            // Provider is Gemini but model is Groq → fallback to Gemini model
+            Log::warning("Model mismatch: Provider=gemini but model={$this->model}. Fallback to gemini-2.5-flash");
+            $this->model = 'gemini-2.5-flash';
         }
 
         // Default to Llama 4 Scout (Vision capable)

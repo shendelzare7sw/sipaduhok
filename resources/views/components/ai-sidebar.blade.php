@@ -45,9 +45,11 @@
                     <i class="fas {{$providerIcon}} me-2"></i>
                     <strong>Provider AI:</strong> <span class="fw-bold">{{ $providerName }}</span>
                 </div>
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.ai-settings.index') }}" class="btn btn-sm btn-outline-{{$providerColor}}" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" title="Ganti Provider">
                     <i class="fas fa-cog me-1"></i> Ubah
                 </a>
+                @endif
             </div>
         </div>
 

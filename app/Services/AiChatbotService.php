@@ -62,6 +62,7 @@ class AiChatbotService
                 'name' => 'Llama 3.3 70B (Fast)',
                 'provider' => 'groq',
                 'supports_vision' => false,
+                'supports_pdf' => false,
                 'default' => $this->defaultModel === 'llama-3.3-70b-versatile',
             ];
 
@@ -70,6 +71,7 @@ class AiChatbotService
                 'name' => 'Llama 4 Scout (Vision)',
                 'provider' => 'groq',
                 'supports_vision' => true,
+                'supports_pdf' => false, // Groq doesn't support PDF
                 'default' => false,
             ];
 
@@ -78,6 +80,7 @@ class AiChatbotService
                 'name' => 'Qwen 2.5 32B',
                 'provider' => 'groq',
                 'supports_vision' => false,
+                'supports_pdf' => false,
                 'default' => false,
             ];
         }
@@ -86,18 +89,11 @@ class AiChatbotService
         if (!empty($this->geminiApiKey)) {
             $models[] = [
                 'id' => 'gemini-2.5-flash',
-                'name' => 'Gemini 2.5 Flash (FREE)',
+                'name' => 'Gemini 2.5 Flash (PDF + Vision)',
                 'provider' => 'gemini',
                 'supports_vision' => true,
+                'supports_pdf' => true, // Only Gemini supports PDF
                 'default' => $this->defaultModel === 'gemini-2.5-flash',
-            ];
-
-            $models[] = [
-                'id' => 'gemini-2.0-flash',
-                'name' => 'Gemini 2.0 Flash',
-                'provider' => 'gemini',
-                'supports_vision' => true,
-                'default' => $this->defaultModel === 'gemini-2.0-flash',
             ];
         }
 
@@ -122,7 +118,7 @@ class AiChatbotService
      * @param array $conversationHistory
      * @param string $userRole
      * @param string $selectedModel
-     * @param array|null $attachedFile ['path' => string, 'mime' => string, 'size' => int, 'name' => string]
+     * @param array $attachedFiles Array of files [['path' => string, 'mime' => string, 'size' => int, 'name' => string], ...]
      * @return array ['success' => bool, 'response' => string, 'error' => string|null, 'model' => string]
      */
     public function sendMessage(
@@ -130,7 +126,7 @@ class AiChatbotService
         array $conversationHistory,
         string $userRole,
         string $selectedModel,
-        ?array $attachedFile = null
+        array $attachedFiles = []
     ): array {
         try {
             // Validate API keys
@@ -145,8 +141,19 @@ class AiChatbotService
                 ];
             }
 
+            // Validate PDF compatibility
+            $hasPdf = !empty($attachedFiles) && collect($attachedFiles)->contains('mime', 'application/pdf');
+            if ($hasPdf && $provider === 'groq') {
+                return [
+                    'success' => false,
+                    'error' => 'Model Groq tidak support PDF. Silakan gunakan Gemini 2.5 Flash untuk membaca PDF.',
+                    'model' => $selectedModel,
+                    'switch_to_gemini' => true, // Signal to frontend
+                ];
+            }
+
             // Build messages array
-            $messages = $this->buildMessagesArray($conversationHistory, $userMessage, $userRole, $attachedFile);
+            $messages = $this->buildMessagesArray($conversationHistory, $userMessage, $userRole, $attachedFiles, $provider);
 
             // Call AI with fallback
             $result = $this->callAiWithFallback($messages, $selectedModel, $provider);
@@ -215,10 +222,11 @@ class AiChatbotService
      * @param array $history Conversation history [{role, content}, ...]
      * @param string $userMessage Current user message
      * @param string $userRole User role for system prompt
-     * @param array|null $file Attached file data
+     * @param array $files Array of attached files
+     * @param string $provider 'groq' or 'gemini'
      * @return array
      */
-    private function buildMessagesArray(array $history, string $userMessage, string $userRole, ?array $file): array
+    private function buildMessagesArray(array $history, string $userMessage, string $userRole, array $files, string $provider): array
     {
         $messages = [];
 
@@ -238,17 +246,59 @@ class AiChatbotService
         }
 
         // Add current user message
-        if ($file && in_array($file['mime'], ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])) {
-            // Multimodal message (vision)
-            $base64Image = base64_encode(file_get_contents($file['path']));
-            $dataUrl = "data:{$file['mime']};base64,{$base64Image}";
+        $hasMultimodal = false;
+        $contentParts = [];
 
+        // Add text part first
+        $contentParts[] = [
+            'type' => 'text',
+            'text' => $userMessage ?: 'Lihat file yang saya lampirkan dan jelaskan.',
+        ];
+
+        // Add image/file parts
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                if (in_array($file['mime'], ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])) {
+                    // Image file - convert to base64 data URL
+                    $base64Image = base64_encode(file_get_contents($file['path']));
+                    $dataUrl = "data:{$file['mime']};base64,{$base64Image}";
+
+                    $contentParts[] = [
+                        'type' => 'image_url',
+                        'image_url' => ['url' => $dataUrl],
+                    ];
+
+                    $hasMultimodal = true;
+
+                } elseif ($file['mime'] === 'application/pdf') {
+                    // PDF file - only Gemini supports it
+                    if ($provider === 'gemini') {
+                        // Convert PDF to base64 for Gemini
+                        $base64Pdf = base64_encode(file_get_contents($file['path']));
+                        $dataUrl = "data:application/pdf;base64,{$base64Pdf}";
+
+                        $contentParts[] = [
+                            'type' => 'pdf_url', // Custom type for PDF
+                            'pdf_url' => ['url' => $dataUrl],
+                            'mime' => 'application/pdf',
+                            'base64' => $base64Pdf, // For Gemini inline_data format
+                        ];
+
+                        $hasMultimodal = true;
+                    } else {
+                        // Groq doesn't support PDF - just mention in text
+                        $contentParts[0]['text'] .= "\n\n[File PDF terlampir: {$file['name']} - Model tidak support PDF]";
+                    }
+                }
+            }
+        }
+
+        // Build final message
+        if ($hasMultimodal) {
+            // Multimodal message
             $messages[] = [
                 'role' => 'user',
-                'content' => [
-                    ['type' => 'text', 'text' => $userMessage ?: 'Lihat gambar ini dan jelaskan.'],
-                    ['type' => 'image_url', 'image_url' => ['url' => $dataUrl]],
-                ],
+                'content' => $contentParts,
             ];
         } else {
             // Text-only message
@@ -322,12 +372,12 @@ class AiChatbotService
                     'Authorization' => 'Bearer ' . $this->groqApiKey,
                     'Content-Type' => 'application/json',
                 ])
-                ->timeout(60)
+                ->timeout(120) // Increase timeout for longer responses
                 ->post('https://api.groq.com/openai/v1/chat/completions', [
                     'model' => $model,
                     'messages' => $messages,
                     'temperature' => 0.7,
-                    'max_tokens' => 1000,
+                    'max_tokens' => 8000, // Increased from 1000 to 8000 for longer responses
                 ]);
 
             if (!$response->successful()) {
@@ -406,6 +456,7 @@ class AiChatbotService
                         foreach ($msg['content'] as $item) {
                             if ($item['type'] === 'text') {
                                 $parts[] = ['text' => $item['text']];
+
                             } elseif ($item['type'] === 'image_url') {
                                 // Extract base64 from data URL
                                 $dataUrl = $item['image_url']['url'];
@@ -419,6 +470,15 @@ class AiChatbotService
                                         ],
                                     ];
                                 }
+
+                            } elseif ($item['type'] === 'pdf_url') {
+                                // PDF file - use inline_data format
+                                $parts[] = [
+                                    'inline_data' => [
+                                        'mime_type' => 'application/pdf',
+                                        'data' => $item['base64'],
+                                    ],
+                                ];
                             }
                         }
                         $contents[] = ['role' => $role, 'parts' => $parts];
@@ -445,12 +505,12 @@ class AiChatbotService
 
             $response = Http::withOptions(['verify' => false])
                 ->withHeaders(['Content-Type' => 'application/json'])
-                ->timeout(60)
+                ->timeout(120) // Increase timeout for PDF processing
                 ->post($url, [
                     'contents' => $contents,
                     'generationConfig' => [
                         'temperature' => 0.7,
-                        'maxOutputTokens' => 1000,
+                        'maxOutputTokens' => 8000, // Increased from 1000 to 8000 (max for free tier)
                     ],
                 ]);
 

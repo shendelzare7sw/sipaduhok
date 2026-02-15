@@ -40,7 +40,7 @@ class AiChatbotController extends Controller
             $validated = $request->validate([
                 'message' => 'required|string|max:2000',
                 'model' => 'required|string',
-                'attachment' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf|max:4096', // 4MB
+                'attachment_count' => 'nullable|integer|min:0|max:5',
             ]);
 
             // Validate history separately (already parsed from JSON)
@@ -66,29 +66,54 @@ class AiChatbotController extends Controller
             $history = $historyData;
             $userRole = auth()->user()->role;
 
-            // Handle file attachment
-            $attachedFile = null;
-            if ($request->hasFile('attachment')) {
-                $file = $request->file('attachment');
-                $path = $file->store('temp/chatbot-attachments', 'local');
+            // Handle multiple file attachments
+            $attachedFiles = [];
+            $tempPaths = [];
+            $attachmentCount = (int) ($validated['attachment_count'] ?? 0);
 
-                $attachedFile = [
-                    'path' => storage_path('app/' . $path),
-                    'mime' => $file->getMimeType(),
-                    'size' => $file->getSize(),
-                    'name' => $file->getClientOriginalName(),
-                ];
+            if ($attachmentCount > 0) {
+                for ($i = 0; $i < $attachmentCount; $i++) {
+                    $fieldName = "attachment_{$i}";
 
-                // Validate file
-                $fileValidation = $this->chatbotService->processFileAttachment($attachedFile);
-                if (!$fileValidation['success']) {
-                    // Delete temp file
-                    Storage::disk('local')->delete($path);
+                    if ($request->hasFile($fieldName)) {
+                        $file = $request->file($fieldName);
 
-                    return response()->json([
-                        'success' => false,
-                        'error' => $fileValidation['error'],
-                    ], 400);
+                        // Validate individual file
+                        $allowedMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
+                        if (!in_array($file->getMimeType(), $allowedMimes)) {
+                            // Clean up previously stored files
+                            foreach ($tempPaths as $tempPath) {
+                                Storage::disk('local')->delete($tempPath);
+                            }
+
+                            return response()->json([
+                                'success' => false,
+                                'error' => 'Format file tidak didukung. Gunakan JPG, PNG, WebP, atau PDF.',
+                            ], 400);
+                        }
+
+                        if ($file->getSize() > 4 * 1024 * 1024) {
+                            // Clean up previously stored files
+                            foreach ($tempPaths as $tempPath) {
+                                Storage::disk('local')->delete($tempPath);
+                            }
+
+                            return response()->json([
+                                'success' => false,
+                                'error' => 'File terlalu besar. Maksimal 4MB per file.',
+                            ], 400);
+                        }
+
+                        $path = $file->store('temp/chatbot-attachments', 'local');
+                        $tempPaths[] = $path;
+
+                        $attachedFiles[] = [
+                            'path' => storage_path('app/' . $path),
+                            'mime' => $file->getMimeType(),
+                            'size' => $file->getSize(),
+                            'name' => $file->getClientOriginalName(),
+                        ];
+                    }
                 }
             }
 
@@ -98,12 +123,12 @@ class AiChatbotController extends Controller
                 $history,
                 $userRole,
                 $selectedModel,
-                $attachedFile
+                $attachedFiles
             );
 
-            // Delete temp file after processing
-            if ($attachedFile && isset($path)) {
-                Storage::disk('local')->delete($path);
+            // Delete temp files after processing
+            foreach ($tempPaths as $tempPath) {
+                Storage::disk('local')->delete($tempPath);
             }
 
             if ($result['success']) {

@@ -25,13 +25,23 @@
                         @csrf
                         @method('PUT')
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Provider AI</label>
-                            <select class="form-select" name="ai_provider" id="ai_provider">
-                                <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>Groq Cloud (Llama / Qwen / Mixtral)</option>
-                                <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>Google Gemini (2.0 Flash / Experimental)</option>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-globe me-2 text-primary"></i>AI Provider (GLOBAL)
+                            </label>
+                            <select class="form-select form-select-lg" name="ai_provider" id="ai_provider" style="border: 2px solid #3b82f6;">
+                                <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>
+                                    ⚡ Groq Cloud (Llama / Qwen / Mixtral - FREE)
+                                </option>
+                                <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>
+                                    🤖 Google Gemini (2.5 Flash - FREE)
+                                </option>
                             </select>
-                            <div class="form-text">Groq Cloud dan Google Gemini menawarkan Tier Gratis yang sangat generous.</div>
+                            <div class="alert alert-info mt-2 mb-0" style="font-size: 13px;">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Provider ini berlaku untuk SEMUA user</strong> (Admin, Guru, Siswa).
+                                Groq Cloud dan Google Gemini menawarkan Tier Gratis yang generous.
+                            </div>
                         </div>
 
                         <!-- Groq API Key -->
@@ -85,8 +95,7 @@
                                     <option value="mixtral-8x7b-32768" {{ $model == 'mixtral-8x7b-32768' ? 'selected' : '' }}>Mixtral 8x7B</option>
                                 </optgroup>
                                 <optgroup label="Google Gemini (FREE Tier)">
-                                    <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Recommended)</option>
-                                    <option value="gemini-2.0-flash" {{ $model == 'gemini-2.0-flash' ? 'selected' : '' }}>Gemini 2.0 Flash</option>
+                                    <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Only FREE model)</option>
                                 </optgroup>
                             </select>
                         </div>
@@ -98,11 +107,10 @@
                                     <option value="meta-llama/llama-4-scout-17b-16e-instruct" {{ $visionModel == 'meta-llama/llama-4-scout-17b-16e-instruct' ? 'selected' : '' }}>Llama 4 Scout (Image Only)</option>
                                 </optgroup>
                                 <optgroup label="Google Gemini">
-                                    <option value="gemini-2.5-flash" {{ $visionModel == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Image + PDF - Recommended)</option>
-                                    <option value="gemini-2.0-flash" {{ $visionModel == 'gemini-2.0-flash' ? 'selected' : '' }}>Gemini 2.0 Flash (Stable)</option>
+                                    <option value="gemini-2.5-flash" {{ $visionModel == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Image + PDF - Only FREE)</option>
                                 </optgroup>
                             </select>
-                            <div class="form-text">Model ini digunakan khusus untuk menganalisis gambar dan PDF pada tugas. Gemini 2.0 Flash mendukung PDF lebih baik.</div>
+                            <div class="form-text">Model ini digunakan khusus untuk menganalisis gambar dan PDF pada tugas. Hanya Gemini 2.5 Flash yang gratis.</div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mt-4">
@@ -323,8 +331,7 @@
                     'mixtral-8x7b-32768'
                 ],
                 gemini: [
-                    'gemini-2.5-flash',
-                    'gemini-2.0-flash'
+                    'gemini-2.5-flash'
                 ]
             };
 
