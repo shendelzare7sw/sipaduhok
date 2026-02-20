@@ -221,7 +221,10 @@ class PromotionService
             // Update user account status
             // User requested that alumni MUST be able to login (e.g. to check bills)
             // So we ensure is_active is TRUE, not false.
-            $user = \App\Models\User::where('siswa_id', $siswa->id)->first();
+            // Update user account status
+            // User requested that alumni MUST be able to login (e.g. to check bills)
+            // So we ensure is_active is TRUE, not false.
+            $user = $siswa->user; 
             if ($user) {
                 $user->is_active = true;
                 $user->save();
@@ -261,38 +264,40 @@ class PromotionService
     private function isFinalYear($siswa)
     {
         if (!$siswa->kelas) return false;
-        $nama = strtoupper($siswa->kelas->nama_kelas);
-        // Check for final year classes: 6 (SD), 9/IX (SMP), 12/XII (SMA)
-        // Also support variations like "Kelas 6", "VI", etc.
-        return preg_match('/\b(6|VI|9|IX|12|XII)\b/', $nama);
+
+        $jenjang = $siswa->kelas->jenjang ?? null; // SD, SMP, SMA/SMK
+        $nama = strtoupper($siswa->kelas->nama_kelas ?? '');
+
+        // 1. Check by Jenjang with improved regex (word boundaries)
+        // \b matches "6" in "6A", "Kelas 6", "6-A", "VI B", etc.
+
+        if ($jenjang === 'SD') {
+            // Match 6 or VI as a word boundary (works with "6A", "6-A", "Kelas 6")
+            if (preg_match('/\b(6|VI)\b/i', $nama)) return true;
+        }
+        if ($jenjang === 'SMP') {
+            if (preg_match('/\b(9|IX)\b/i', $nama)) return true;
+        }
+        if ($jenjang === 'SMA' || $jenjang === 'SMA/SMK') {
+            if (preg_match('/\b(12|XII)\b/i', $nama)) return true;
+        }
+
+        // 2. Fallback: Check by grade number if jenjang is missing or ambiguous
+        // More robust - check if the grade number appears anywhere in the name
+        if ($jenjang) {
+            if ($jenjang == 'SD' && preg_match('/6/', $nama)) return true;
+            if ($jenjang == 'SMP' && preg_match('/9/', $nama)) return true;
+            if (($jenjang == 'SMA' || $jenjang == 'SMA/SMK') && preg_match('/12/', $nama)) return true;
+        }
+
+        return false;
     }
 
     private function findNextClass($currentKelas, $currentYearId)
     {
         if (!$currentKelas) return null;
         
-        // Find the TARGET academic year based on current year ID
-        // Note: The $currentYearId passed here is actually the "Context Year" (Source).
-        // BUT logic assumes checkEligibility passes the Active/Target year...
-        // WAIT: The executeStudentPromotion passes $tahunAjaranId.
-        // If $tahunAjaranId is 2025/2026 (Source/Active), we need to find class in 2026/2027 (Next).
-        
-        // Let's refine logic based on implementation:
-        // executeStudentPromotion is called with $activeYear->id.
-        // So we are looking for Next Class relative to Current Class, BUT inside the NEXT Year?
-        // OR is it simply looking for a class named "8A" inside the SAME $tahunAjaranId?
-        
-        // CORRECTION: 
-        // Logic should be: 
-        // 1. Get Target Year (Next Year after $tahunAjaranId)
-        // 2. Find Class in Target Year.
-        
-        // Current implementation of 'findNextClass' did:
-        // $nextClass = Kelas::where...->where('tahun_ajaran_id', $targetTahunAjaranId)...
-        // This implies $tahunAjaranId passed to execute is the TARGET year? NO.
-        // checkEligibility uses $activeYear->id (Current).
-        
-        // FIX: We need to find the NEXT TA first.
+        // Find the TARGET academic year
         $targetTA = TahunAjaran::where('is_active', false)
             ->where('id', '!=', $currentYearId) 
             ->where('tanggal_mulai', '>', function($q) use ($currentYearId) {
@@ -301,19 +306,36 @@ class PromotionService
             ->orderBy('tanggal_mulai', 'asc')
             ->first();
             
-        if (!$targetTA) return null; // No new year created yet
+        if (!$targetTA) return null;
 
         $name = $currentKelas->nama_kelas;
+        $cabangId = $currentKelas->cabang_id; // Branch Isolation
         
-        // Try Arabic (e.g., 7A -> 8A)
+        // Try to increment numeric level (e.g., 7A -> 8A)
+        // Matches "7" in "7A", "7-A", "Kelas 7"
         if (preg_match('/(\d+)/', $name, $matches)) {
             $level = intval($matches[1]);
             $nextLevel = $level + 1;
+            
+            // Construct fuzzy search pattern
+            // If "7A", we look for "8A"
+            // We replace the FIRST occurrence of the level number
             $nextNamePattern = preg_replace('/'.$level.'/', $nextLevel, $name, 1);
             
-            return Kelas::where('nama_kelas', $nextNamePattern)
-                ->where('tahun_ajaran_id', $targetTA->id)
-                ->first();
+            // Fix: Strict Cabang filtering
+            $query = Kelas::where('tahun_ajaran_id', $targetTA->id)
+                ->where('jenjang', $currentKelas->jenjang); // Same Jenjang
+
+            if ($cabangId) {
+                $query->where('cabang_id', $cabangId);
+            }
+                
+            $nextClass = $query->where('nama_kelas', $nextNamePattern)->first();
+            
+            if ($nextClass) return $nextClass;
+            
+            // Fallback: If exact replace fails (e.g. maybe structure changes?), try wildcards?
+            // For now, let's trust the naming convention remains consistent (7A -> 8A).
         }
         
         return null;
@@ -323,7 +345,6 @@ class PromotionService
     {
         if (!$currentKelas) return null;
 
-        // Find the TARGET academic year (Same as above)
         $targetTA = TahunAjaran::where('is_active', false)
             ->where('id', '!=', $currentYearId) 
             ->where('tanggal_mulai', '>', function($q) use ($currentYearId) {
@@ -334,11 +355,16 @@ class PromotionService
 
         if (!$targetTA) return null;
 
-        // Search for class with SAME NAME in Target Year
-        // "7A" -> "7A"
-        return Kelas::where('nama_kelas', $currentKelas->nama_kelas)
+        // Search for class with SAME NAME and SAME BRANCH
+        $query = Kelas::where('nama_kelas', $currentKelas->nama_kelas)
             ->where('tahun_ajaran_id', $targetTA->id)
-            ->first();
+            ->where('jenjang', $currentKelas->jenjang);
+
+        if ($currentKelas->cabang_id) {
+            $query->where('cabang_id', $currentKelas->cabang_id);
+        }
+
+        return $query->first();
     }
 
     /**
@@ -380,7 +406,7 @@ class PromotionService
                 $siswa->status = 'aktif';
                 
                 // Restore user account access
-                $user = \App\Models\User::where('siswa_id', $siswa->id)->first();
+                $user = $siswa->user;
                 if ($user) {
                     $user->is_active = true;
                     $user->save();

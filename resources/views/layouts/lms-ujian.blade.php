@@ -98,7 +98,9 @@
         <div class="exam-user">
             <div class="text-end d-none d-sm-block">
                 <div class="fw-bold">{{ Auth::user()->name }}</div>
-                <small style="opacity: 0.8">Peserta Ujian</small>
+                <small style="opacity: 0.8">
+                    {{ request()->routeIs('siswa.lms.latihan.*') ? 'Latihan' : 'Peserta Ujian' }}
+                </small>
             </div>
             <div class="user-avatar">
                 <i class="fas fa-user"></i>

@@ -85,6 +85,7 @@ class ExecuteScheduledPromotion extends Command
                         $stats['promoted']++;
                         break;
                     case 'LULUS':
+                    case 'LULUS_TUNGGAKAN':
                         $stats['graduated']++;
                         break;
                     case 'TIDAK_NAIK_KELAS':

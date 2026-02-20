@@ -847,6 +847,11 @@
                                             <i class="fas fa-door-open" style="font-size: 10px;"></i>
                                             {{ $s->kelas->nama_kelas }}
                                         </span>
+                                    @elseif($s->status === 'lulus')
+                                        <span style="color: #1e40af; font-size: 12px;">
+                                            <i class="fas fa-graduation-cap"></i>
+                                            Lulus
+                                        </span>
                                     @else
                                         <span style="color: #ef4444; font-size: 12px;">
                                             <i class="fas fa-exclamation-circle"></i>

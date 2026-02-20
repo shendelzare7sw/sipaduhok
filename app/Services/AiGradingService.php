@@ -20,12 +20,50 @@ class AiGradingService
 
     protected function loadConfig()
     {
-        $settings = AppSetting::whereIn('key', ['ai_api_key', 'ai_model', 'ai_vision_model', 'ai_provider'])->pluck('value', 'key');
+        $settings = AppSetting::whereIn('key', ['groq_api_key', 'gemini_api_key', 'ai_model', 'ai_vision_model', 'ai_provider'])->pluck('value', 'key');
 
-        $this->apiKey = $settings['ai_api_key'] ?? null;
-        $this->model = $settings['ai_model'] ?? 'llama3-70b-8192'; 
-        $this->visionModel = $settings['ai_vision_model'] ?? 'llama-3.2-11b-vision-preview';
         $this->provider = $settings['ai_provider'] ?? 'groq';
+
+        // Load API key sesuai provider yang aktif
+        if ($this->provider === 'groq') {
+            $this->apiKey = $settings['groq_api_key'] ?? null;
+        } elseif ($this->provider === 'gemini') {
+            $this->apiKey = $settings['gemini_api_key'] ?? null;
+        }
+
+        $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
+
+        // Auto-fix for decommissioned Groq models
+        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview'])) {
+            $this->model = 'llama-3.3-70b-versatile';
+        }
+
+        // Auto-fix for deprecated Gemini models
+        if (in_array($this->model, ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'])) {
+            $this->model = 'gemini-2.5-flash';
+        }
+
+        // CRITICAL: Validate model compatibility with provider
+        $isGeminiModel = str_contains($this->model, 'gemini');
+        $isGroqModel = str_contains($this->model, 'llama') || str_contains($this->model, 'qwen') || str_contains($this->model, 'mixtral');
+
+        if ($this->provider === 'groq' && $isGeminiModel) {
+            // Provider is Groq but model is Gemini → fallback to Groq model
+            Log::warning("Model mismatch: Provider=groq but model={$this->model}. Fallback to llama-3.3-70b-versatile");
+            $this->model = 'llama-3.3-70b-versatile';
+        } elseif ($this->provider === 'gemini' && $isGroqModel) {
+            // Provider is Gemini but model is Groq → fallback to Gemini model
+            Log::warning("Model mismatch: Provider=gemini but model={$this->model}. Fallback to gemini-2.5-flash");
+            $this->model = 'gemini-2.5-flash';
+        }
+
+        // Default to Llama 4 Scout (Vision capable)
+        $this->visionModel = $settings['ai_vision_model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct';
+
+        // Auto-fix for decommissioned vision models (11b & 90b previews)
+        if (in_array($this->visionModel, ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'])) {
+            $this->visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
+        }
     }
 
     /**
@@ -81,9 +119,12 @@ class AiGradingService
         3. Beri feedback (max 3 kalimat, Bahasa Indonesia).
         4. Output WAJIB JSON: {\"score\": int, \"feedback\": string} tanpa markdown ```json";
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}";
+        // Use v1 API for Gemini 2.0+ models
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$this->model}:generateContent?key={$this->apiKey}";
         
-        $response = Http::withHeaders([
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($url, [
             'contents' => [
@@ -107,6 +148,17 @@ class AiGradingService
         $content = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
         $result = json_decode($content, true);
 
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Fallback strategy if JSON is broken (regex)
+            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+            preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+
+            $result = [
+                'score' => $scoreMatches[1] ?? 0,
+                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+            ];
+        }
+
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
             'feedback' => $result['feedback'] ?? 'Tidak ada feedback dari AI.',
@@ -114,7 +166,67 @@ class AiGradingService
         ];
     }
     
-    // ... evaluateWithGroq ...
+    protected function evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore)
+    {
+        $prompt = "Anda adalah asisten guru yang objektif. Tugas Anda adalah menilai jawaban siswa soal uraian.
+        
+        Soal: \"{$question}\"
+        Kunci Jawaban / Konteks: \"{$correctAnswer}\"
+        Jawaban Siswa: \"{$studentAnswer}\"
+        
+        Instruksi:
+        1. Bandingkan jawaban siswa dengan kunci jawaban.
+        2. Berikan nilai (score) antara 0 sampai {$maxScore}.
+        3. Berikan feedback singkat (maksimal 3 kalimat) dalam Bahasa Indonesia.
+        4. Output WAJIB berupa JSON valid dengan format: {\"score\": int, \"feedback\": string}. Jangan ada teks lain.";
+
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ])->post('https://api.groq.com/openai/v1/chat/completions', [
+            'model' => $this->model,
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Anda adalah sistem penilaian otomatis yang outputnya selalu JSON.'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ]
+            ],
+            'temperature' => 0.2, // Low temperature for consistent grading
+            'max_tokens' => 300,
+            'response_format' => ['type' => 'json_object']
+        ]);
+
+        if ($response->failed()) {
+            throw new \Exception("Groq API Error: " . $response->body());
+        }
+
+        $json = $response->json();
+        $content = $json['choices'][0]['message']['content'] ?? '{}';
+        $result = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Fallback strategy if JSON is broken (regex)
+            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+            preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+            
+            $result = [
+                'score' => $scoreMatches[1] ?? 0,
+                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+            ];
+        }
+
+        return [
+            'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
+            'feedback' => $result['feedback'] ?? 'Tidak ada feedback dari AI.',
+            'error' => false
+        ];
+    }
 
     /**
      * Evaluate student answer with Image (Multimodal)
@@ -138,6 +250,12 @@ class AiGradingService
             $mimeType = mime_content_type($imagePath);
             if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'])) {
                 return ['score' => 0, 'feedback' => 'Format file tidak didukung AI (hanya JPG/PNG).', 'error' => true];
+            }
+
+            // Validate file size (max 4MB for vision APIs)
+            $fileSize = filesize($imagePath);
+            if ($fileSize > 4 * 1024 * 1024) {
+                return ['score' => 0, 'feedback' => 'File gambar terlalu besar (maksimal 4MB untuk AI Vision).', 'error' => true];
             }
 
             if ($this->provider === 'groq') {
@@ -170,7 +288,9 @@ class AiGradingService
             4. Jika gambar tidak terbaca/irrelavan, beri nilai 0.
             5. Output WAJIB JSON valid: {\"score\": int, \"feedback\": string}";
 
-            $response = Http::withHeaders([
+            $response = Http::withOptions([
+                'verify' => false,
+            ])->withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.groq.com/openai/v1/chat/completions', [
@@ -224,14 +344,17 @@ class AiGradingService
         
         Output JSON: {\"score\": int (0-{$maxScore}), \"feedback\": string (max 3 kalimat)}";
 
-        // Use configured text model for Gemini (Flash/Pro supports vision natively)
-        // Or explicitly use vision model setting if different, but usually gemini-1.5-flash is both.
+        // Use configured text model for Gemini (2.5 Flash supports vision natively)
+        // Or explicitly use vision model setting if different, but usually gemini-2.5-flash is both.
         // Let's use $this->model because Gemini models are multimodal by default.
-        $model = str_contains($this->model, 'gemini') ? $this->model : 'gemini-1.5-flash';
+        $model = str_contains($this->model, 'gemini') ? $this->model : 'gemini-2.5-flash';
 
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$this->apiKey}";
+        // Use v1 API for Gemini 2.0+ models
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$this->apiKey}";
 
-        $response = Http::withHeaders([
+        $response = Http::withOptions([
+            'verify' => false,
+        ])->withHeaders([
             'Content-Type' => 'application/json',
         ])->post($url, [
             'contents' => [
@@ -260,6 +383,17 @@ class AiGradingService
         $json = $response->json();
         $content = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
         $result = json_decode($content, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Fallback strategy if JSON is broken (regex)
+            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+            preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+
+            $result = [
+                'score' => $scoreMatches[1] ?? 0,
+                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+            ];
+        }
 
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,

@@ -89,58 +89,108 @@
         <div class="tab-pane fade {{ $activeTab == 'history' ? 'show active' : '' }}" id="history" role="tabpanel" aria-labelledby="history-tab">
             <div class="card">
                 <div class="card-header border-bottom">
-                    <h5 class="mb-3">Hasil Eksekusi Kenaikan Kelas</h5>
-                    
-                    <form action="{{ route(Route::currentRouteName()) }}" method="GET" class="d-flex gap-2 flex-wrap">
-                         <!-- Preserve Tab -->
-                         <input type="hidden" name="tab" value="history">
-
-                        <!-- Filter Tahun Ajaran -->
-                        <select name="tahun_ajaran_id" class="form-select" style="width: 150px;" onchange="this.form.submit()">
-                            @foreach($allTahunAjaran as $ta)
-                                <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
-                                    {{ $ta->nama_tahun_ajaran }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        <!-- Search -->
-                        <div class="input-group" style="width: 250px;">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" name="search" class="form-control" placeholder="Cari Nama Siswa..." value="{{ $search }}">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        {{-- Title --}}
+                        <div>
+                            <h5 class="mb-0">Hasil Eksekusi Kenaikan Kelas</h5>
+                            <small class="text-muted">Tahun Ajaran: {{ $tahun->nama_tahun_ajaran }}</small>
                         </div>
 
-                        <!-- Filter Cabang -->
-                        <select name="cabang_id" class="form-select" style="width: 150px;">
-                            <option value="">Semua Cabang</option>
-                            @foreach($cabangs as $cabang)
-                                <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                            @endforeach
-                        </select>
+                        {{-- Filter & Search --}}
+                        <form action="{{ route(Route::currentRouteName()) }}" method="GET" id="historyFilterForm" class="d-flex gap-2 align-items-center">
+                            <input type="hidden" name="tab" value="history">
 
-                        <!-- Filter Kelas -->
-                        <select name="kelas_id" class="form-select" style="width: 150px;">
-                            <option value="">Semua Kelas</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>{{ $kelas->nama_kelas }}</option>
-                            @endforeach
-                        </select>
-                        
-                        <!-- Filter Status (Existing) -->
-                        <select name="status" class="form-select" style="width: 180px;">
-                            <option value="">Semua Status</option>
-                            <option value="NAIK_KELAS" {{ $filterStatus == 'NAIK_KELAS' ? 'selected' : '' }}>Naik Kelas</option>
-                            <option value="LULUS" {{ $filterStatus == 'LULUS' ? 'selected' : '' }}>Lulus</option>
-                            <option value="NAIK_KELAS_TUNGGAKAN" {{ $filterStatus == 'NAIK_KELAS_TUNGGAKAN' ? 'selected' : '' }}>Naik (Dispensasi)</option>
-                            <option value="LULUS_TUNGGAKAN" {{ $filterStatus == 'LULUS_TUNGGAKAN' ? 'selected' : '' }}>Lulus (Dispensasi)</option>
-                            <option value="TIDAK_NAIK_KELAS" {{ $filterStatus == 'TIDAK_NAIK_KELAS' ? 'selected' : '' }}>Tidak Naik</option>
-                        </select>
+                            {{-- Tahun Ajaran Selector (Priority) --}}
+                            <select name="tahun_ajaran_id" class="form-select form-select-sm" style="width: 140px;" onchange="this.form.submit()">
+                                @foreach($allTahunAjaran as $ta)
+                                    <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
+                                        {{ $ta->nama_tahun_ajaran }}
+                                    </option>
+                                @endforeach
+                            </select>
 
-                        <button type="submit" class="btn btn-primary">Cari</button>
-                        @if($search || $cabangId || $kelasId || $filterStatus)
-                            <a href="{{ route(Route::currentRouteName()) }}" class="btn btn-outline-secondary">Reset</a>
-                        @endif
-                    </form>
+                            {{-- Filter Dropdown --}}
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                    <i class="fas fa-filter me-1"></i> Filter
+                                    @if($cabangId || $kelasId || $filterStatus)
+                                        <span class="badge bg-primary ms-1">{{ collect([$cabangId, $kelasId, $filterStatus])->filter()->count() }}</span>
+                                    @endif
+                                </button>
+                                <div class="dropdown-menu p-3 shadow" style="min-width: 280px;">
+                                    <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
+
+                                    {{-- Filter Cabang --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold mb-1">Cabang</label>
+                                        <select name="cabang_id" class="form-select form-select-sm">
+                                            <option value="">Semua Cabang</option>
+                                            @foreach($cabangs as $cabang)
+                                                <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
+                                                    {{ $cabang->nama_cabang }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- Filter Kelas --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold mb-1">Kelas</label>
+                                        <select name="kelas_id" class="form-select form-select-sm">
+                                            <option value="">Semua Kelas</option>
+                                            @foreach($kelasList as $kelas)
+                                                <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
+                                                    {{ $kelas->nama_kelas }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- Filter Status --}}
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold mb-1">Status Kelulusan</label>
+                                        <select name="status" class="form-select form-select-sm">
+                                            <option value="">Semua Status</option>
+                                            <option value="NAIK_KELAS" {{ $filterStatus == 'NAIK_KELAS' ? 'selected' : '' }}>Naik Kelas</option>
+                                            <option value="LULUS" {{ $filterStatus == 'LULUS' ? 'selected' : '' }}>Lulus</option>
+                                            <option value="NAIK_KELAS_TUNGGAKAN" {{ $filterStatus == 'NAIK_KELAS_TUNGGAKAN' ? 'selected' : '' }}>Naik (Dispensasi)</option>
+                                            <option value="LULUS_TUNGGAKAN" {{ $filterStatus == 'LULUS_TUNGGAKAN' ? 'selected' : '' }}>Lulus (Dispensasi)</option>
+                                            <option value="TIDAK_NAIK_KELAS" {{ $filterStatus == 'TIDAK_NAIK_KELAS' ? 'selected' : '' }}>Tidak Naik</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-check me-1"></i> Terapkan Filter
+                                        </button>
+                                        @if($cabangId || $kelasId || $filterStatus)
+                                            <a href="{{ route(Route::currentRouteName(), ['tab' => 'history', 'tahun_ajaran_id' => $tahun->id]) }}"
+                                               class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-times me-1"></i> Reset Filter
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Search --}}
+                            <div class="input-group" style="width: 220px;">
+                                <span class="input-group-text bg-white">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control form-control-sm"
+                                       placeholder="Cari nama..." value="{{ $search }}" autocomplete="off">
+                                @if($search)
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            onclick="this.previousElementSibling.value=''; this.form.submit();"
+                                            title="Hapus pencarian">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="table-responsive text-nowrap">
                     <table class="table table-striped">
@@ -215,33 +265,44 @@
         <div class="tab-pane fade {{ $activeTab == 'simulation' ? 'show active' : '' }}" id="simulation" role="tabpanel" aria-labelledby="simulation-tab">
             <div class="card">
                 <div class="card-header border-bottom">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Simulasi / Keadaan Siswa Sekarang</h5>
-                        
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                        {{-- Title --}}
+                        <div>
+                            <h5 class="mb-0">Simulasi Kenaikan Kelas</h5>
+                            <small class="text-muted">Tahun Ajaran: {{ $tahun->nama_tahun_ajaran }}</small>
+                        </div>
+
                         <!-- Execution Button (Trigger) -->
                         @if($promotionReadiness['isReady'])
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#executeModal">
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#executeModal">
                                 <i class="fas fa-cogs me-1"></i> Proses Kenaikan Kelas
                             </button>
                         @else
-                            <button type="button" class="btn btn-secondary" disabled title="Siapkan Tahun Ajaran dan Kelas baru terlebih dahulu">
+                            <button type="button" class="btn btn-secondary btn-sm" disabled title="Siapkan Tahun Ajaran dan Kelas baru terlebih dahulu">
                                 <i class="fas fa-lock me-1"></i> Proses Kenaikan Kelas
                             </button>
                         @endif
                     </div>
 
-                    <form action="{{ route(Route::currentRouteName()) }}" method="GET" class="d-flex gap-2 flex-wrap">
-                         <!-- Preserve Tab -->
-                         <input type="hidden" name="tab" value="simulation">
+                    <!-- Simulation Mode Toggle -->
+                    <div class="btn-group mb-3" role="group" aria-label="Simulation Mode">
+                        <a href="{{ route(Route::currentRouteName(), array_merge(request()->except('sim_mode'), ['sim_mode' => 'current', 'tab' => 'simulation'])) }}"
+                           class="btn btn-sm btn-{{ ($simMode ?? 'current') == 'current' ? 'primary' : 'outline-primary' }}">
+                            <i class="fas fa-users me-1"></i> Keadaan Saat Ini
+                        </a>
+                        <a href="{{ route(Route::currentRouteName(), array_merge(request()->except('sim_mode'), ['sim_mode' => 'historical', 'tab' => 'simulation'])) }}"
+                           class="btn btn-sm btn-{{ ($simMode ?? 'current') == 'historical' ? 'primary' : 'outline-primary' }}">
+                            <i class="fas fa-history me-1"></i> Keadaan Saat Eksekusi
+                        </a>
+                    </div>
 
-                        <!-- Search -->
-                        <div class="input-group me-2" style="width: 250px;">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" name="search" class="form-control" placeholder="Cari Nama Siswa..." value="{{ $search }}">
-                        </div>
+                    {{-- Filter & Search --}}
+                    <form action="{{ route(Route::currentRouteName()) }}" method="GET" id="simulationFilterForm" class="d-flex gap-2 align-items-center">
+                        <input type="hidden" name="tab" value="simulation">
+                        <input type="hidden" name="sim_mode" value="{{ $simMode ?? 'current' }}">
 
-                        <!-- Context Year Filter (Crucial for Manual Promotion) -->
-                        <select name="tahun_ajaran_id" class="form-select me-2" style="width: 140px;" onchange="this.form.submit()" data-bs-toggle="tooltip" title="Pilih Tahun Konteks Data">
+                        {{-- Tahun Ajaran Selector (Priority) --}}
+                        <select name="tahun_ajaran_id" class="form-select form-select-sm" style="width: 140px;" onchange="this.form.submit()">
                             @foreach($allTahunAjaran as $ta)
                                 <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
                                     {{ $ta->nama_tahun_ajaran }}
@@ -249,26 +310,73 @@
                             @endforeach
                         </select>
 
-                        <!-- Filter Cabang -->
-                        <select name="cabang_id" class="form-select" style="width: 150px;">
-                            <option value="">Semua Cabang</option>
-                            @foreach($cabangs as $cabang)
-                                <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                            @endforeach
-                        </select>
+                        {{-- Filter Dropdown --}}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                    data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                <i class="fas fa-filter me-1"></i> Filter
+                                @if($cabangId || $kelasId)
+                                    <span class="badge bg-primary ms-1">{{ collect([$cabangId, $kelasId])->filter()->count() }}</span>
+                                @endif
+                            </button>
+                            <div class="dropdown-menu p-3 shadow" style="min-width: 280px;">
+                                <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
 
-                        <!-- Filter Kelas -->
-                        <select name="kelas_id" class="form-select" style="width: 150px;">
-                            <option value="">Semua Kelas</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>{{ $kelas->nama_kelas }}</option>
-                            @endforeach
-                        </select>
+                                {{-- Filter Cabang --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold mb-1">Cabang</label>
+                                    <select name="cabang_id" class="form-select form-select-sm">
+                                        <option value="">Semua Cabang</option>
+                                        @foreach($cabangs as $cabang)
+                                            <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
+                                                {{ $cabang->nama_cabang }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
-                        <button type="submit" class="btn btn-primary">Cari</button>
-                        @if($search || $cabangId || $kelasId)
-                            <a href="{{ route(Route::currentRouteName(), ['tab' => 'simulation']) }}" class="btn btn-outline-secondary">Reset</a>
-                        @endif
+                                {{-- Filter Kelas --}}
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold mb-1">Kelas</label>
+                                    <select name="kelas_id" class="form-select form-select-sm">
+                                        <option value="">Semua Kelas</option>
+                                        @foreach($kelasList as $kelas)
+                                            <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
+                                                {{ $kelas->nama_kelas }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-check me-1"></i> Terapkan Filter
+                                    </button>
+                                    @if($cabangId || $kelasId)
+                                        <a href="{{ route(Route::currentRouteName(), ['tab' => 'simulation', 'sim_mode' => $simMode ?? 'current', 'tahun_ajaran_id' => $tahun->id]) }}"
+                                           class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-times me-1"></i> Reset Filter
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Search --}}
+                        <div class="input-group" style="width: 220px;">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control form-control-sm"
+                                   placeholder="Cari nama..." value="{{ $search }}" autocomplete="off">
+                            @if($search)
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        onclick="this.previousElementSibling.value=''; this.form.submit();"
+                                        title="Hapus pencarian">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            @endif
+                        </div>
                     </form>
                 </div>
                 <div class="card-body">

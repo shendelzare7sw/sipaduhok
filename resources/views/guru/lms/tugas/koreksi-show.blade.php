@@ -10,10 +10,31 @@
 
 @section('content')
     <div class="mb-3">
-        <a href="{{ route('guru.lms.tugas.koreksi', [$kelas->id, $mapel->id, $tugasSiswa->tugas_id]) }}" 
+        <a href="{{ route('guru.lms.tugas.koreksi', [$kelas->id, $mapel->id, $tugasSiswa->tugas_id]) }}"
            class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Koreksi
         </a>
+    </div>
+
+    {{-- AI Provider Info Badge --}}
+    @php
+        $currentProvider = \App\Models\AppSetting::where('key', 'ai_provider')->first()?->value ?? 'groq';
+        $providerName = $currentProvider === 'groq' ? 'Groq Cloud' : 'Google Gemini';
+        $providerIcon = $currentProvider === 'groq' ? 'fa-bolt' : 'fa-google';
+        $providerColor = $currentProvider === 'groq' ? 'primary' : 'success';
+    @endphp
+    <div class="alert alert-{{$providerColor}} alert-dismissible fade show mb-3" role="alert">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fas fa-robot me-2"></i>
+                <strong>AI Grading Assistant:</strong> Menggunakan <span class="fw-bold">{{ $providerName }}</span>
+            </div>
+            @if(auth()->user()->role === 'admin')
+            <a href="{{ route('admin.ai-settings.index') }}" class="btn btn-sm btn-outline-{{$providerColor}}">
+                <i class="fas fa-cog me-1"></i> Ubah Provider
+            </a>
+            @endif
+        </div>
     </div>
 
     <div class="row">
@@ -104,11 +125,19 @@
                         <i class="fas fa-star me-2"></i>Berikan Nilai
                     </div>
                     @if($tugasSiswa->file_jawaban || $tugasSiswa->jawaban_text)
-                        <button type="button" class="btn btn-sm btn-outline-info" id="aiAssistBtn">
-                            <i class="fas fa-robot me-1"></i> Analisis AI (Vision)
+                        <button type="button" class="btn btn-sm btn-ai-gradient" id="aiAssistBtn">
+                            <i class="fas fa-robot me-1"></i> Analisis AI
                         </button>
                     @endif
                 </div>
+                @if($tugasSiswa->file_jawaban || $tugasSiswa->jawaban_text)
+                    <div class="px-3 pt-2 pb-1 bg-light border-bottom">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            AI dapat menganalisis: <strong>Gambar (JPG/PNG)</strong>, <strong>PDF (Digital & Scan)</strong>, dan <strong>Teks</strong>
+                        </small>
+                    </div>
+                @endif
                 <div class="p-3">
                     <form action="{{ route('guru.lms.tugas.koreksi.store', [$kelas->id, $mapel->id, $tugas->id, $tugasSiswa->id]) }}" 
                           method="POST">
@@ -161,6 +190,29 @@
     </div>
 
     @push('scripts')
+    <style>
+        .btn-ai-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4), 0 2px 4px -1px rgba(99, 102, 241, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-ai-gradient:hover {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.5), 0 4px 6px -2px rgba(99, 102, 241, 0.3);
+            color: white;
+        }
+        .btn-ai-gradient:active {
+            transform: translateY(0);
+        }
+        .btn-ai-gradient:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const aiBtn = document.getElementById('aiAssistBtn');
@@ -168,11 +220,25 @@
                 const toastEl = document.getElementById('aiToast');
                 const toast = new bootstrap.Toast(toastEl);
                 const toastMsg = document.getElementById('aiToastMessage');
+                let isProcessing = false; // Race condition protection
 
                 aiBtn.addEventListener('click', function() {
+                    // Prevent multiple simultaneous requests
+                    if (isProcessing) return;
+
+                    // Validate if student has submitted answer
+                    const hasAnswer = {{ ($tugasSiswa->jawaban_text || $tugasSiswa->file_jawaban) ? 'true' : 'false' }};
+                    if (!hasAnswer) {
+                        toastMsg.textContent = 'Belum ada jawaban siswa untuk dianalisis.';
+                        toast.show();
+                        return;
+                    }
+
+                    isProcessing = true;
+
                     // UI Loading State
                     const originalContent = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mengolah...';
                     this.disabled = true;
                     toastMsg.textContent = "Sedang menganalisis jawaban (Vision AI)...";
                     toast.show();
@@ -199,6 +265,7 @@
                         const feedbackInput = document.getElementById('feedbackInput');
 
                         scoreInput.value = data.score;
+                        // Visual Feedback
                         scoreInput.classList.add('bg-success', 'text-white', 'bg-opacity-25');
                         
                         feedbackInput.value = `[AI Vision] ${data.feedback}\n\n` + feedbackInput.value;
@@ -206,6 +273,7 @@
 
                         setTimeout(() => {
                             scoreInput.classList.remove('bg-success', 'text-white', 'bg-opacity-25');
+                            scoreInput.classList.add('transition-fade'); // smooth remove if added css for it
                             feedbackInput.classList.remove('bg-info', 'text-white', 'bg-opacity-10');
                         }, 2000);
 
@@ -213,12 +281,13 @@
                     })
                     .catch(error => {
                         console.error(error);
-                        alert('Gagal mengambil analisis AI: ' + error.message);
                         toastMsg.textContent = "Gagal: " + error.message;
+                        toast.show();
                     })
                     .finally(() => {
                         this.innerHTML = originalContent;
                         this.disabled = false;
+                        isProcessing = false;
                     });
                 });
             }

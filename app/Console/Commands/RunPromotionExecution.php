@@ -88,9 +88,10 @@ class RunPromotionExecution extends Command
         $bar->start();
 
         $stats = [
-            'NAIK_KELAS' => 0, 
-            'LULUS' => 0, 
-            'NAIK_KELAS_TUNGGAKAN' => 0, 
+            'NAIK_KELAS' => 0,
+            'LULUS' => 0,
+            'NAIK_KELAS_TUNGGAKAN' => 0,
+            'LULUS_TUNGGAKAN' => 0,
             'TIDAK_NAIK_KELAS' => 0
         ];
 

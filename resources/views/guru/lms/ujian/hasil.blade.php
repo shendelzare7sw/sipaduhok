@@ -1,7 +1,12 @@
 @extends('layouts.lms-guru')
 
-@section('title', 'Hasil Ujian')
-@section('page-title', 'Hasil Ujian: ' . $ujian->judul_ujian)
+@php
+    $isLatihan = request()->routeIs('guru.lms.latihan.*');
+    $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+@endphp
+
+@section('title', 'Hasil ' . $tipeLabel)
+@section('page-title', 'Hasil ' . $tipeLabel . ': ' . $ujian->judul_ujian)
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
 
 @section('sidebar-menu')
@@ -9,8 +14,13 @@
 @endsection
 
 @section('content')
+    @php
+        $isLatihan = request()->routeIs('guru.lms.latihan.*');
+        $backRoute = $isLatihan ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index';
+    @endphp
+
     <div class="mb-3">
-        <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
+        <a href="{{ route($backRoute, [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
         </a>
     </div>
@@ -58,7 +68,7 @@
 
     <div class="card-custom">
         <div class="card-header-custom">
-            <i class="fas fa-chart-bar me-2"></i>Hasil Ujian Siswa
+            <i class="fas fa-chart-bar me-2"></i>Hasil {{ $tipeLabel }} Siswa
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -130,7 +140,7 @@
                     @empty
                     <tr>
                         <td colspan="7" class="text-center text-muted py-4">
-                            Belum ada siswa yang mengerjakan ujian
+                            Belum ada siswa yang mengerjakan {{ strtolower($tipeLabel) }}
                         </td>
                     </tr>
                     @endforelse
