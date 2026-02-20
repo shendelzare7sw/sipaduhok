@@ -318,17 +318,40 @@
 
                 @foreach($locationItems as $location)
                     @php
-                        $color = $colorClasses[$location['color'] ?? 'orange'] ?? $colorClasses['orange'];
+                        $inputColor = $location['color'] ?? 'orange';
+                        $isCustom = str_starts_with($inputColor, '#');
+                        
+                        if (!$isCustom) {
+                            $colorMap = $colorClasses[$inputColor] ?? $colorClasses['orange'];
+                            $borderClass = $colorMap['border'];
+                            $textClass = $colorMap['text'];
+                            $hoverClass = $colorMap['hover'];
+                            $borderStyle = '';
+                            $textStyle = '';
+                        } else {
+                            $borderClass = '';
+                            $textClass = '';
+                            $hoverClass = '';
+                            $borderStyle = "border-bottom-color: {$inputColor} !important;";
+                            $textStyle = "color: {$inputColor} !important;";
+                        }
                     @endphp
                     <div
-                        class="contact-card bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col group border-b-4 {{ $color['border'] }}">
+                        class="contact-card bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col group border-b-4 {{ $borderClass }}"
+                        style="{{ $borderStyle }}">
                         <div class="map-container relative h-64 w-full">
                             <iframe src="{{ $location['map_embed'] ?? '' }}" width="100%" height="100%" style="border:0;"
                                 allowfullscreen="" loading="lazy" class="w-full h-full object-cover">
                             </iframe>
 
                             <a href="{{ $location['map_link'] ?? '#' }}" target="_blank"
-                                class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg flex items-center justify-center gap-2 {{ $color['text'] }} font-bold text-sm {{ $color['hover'] }} hover:text-white transition-all duration-300 z-10">
+                                class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl shadow-lg flex items-center justify-center gap-2 {{ $textClass }} font-bold text-sm {{ $hoverClass }} hover:text-white transition-all duration-300 z-10"
+                                style="{{ $textStyle }}"
+                                @if($isCustom)
+                                    onmouseover="this.style.backgroundColor='{{ $inputColor }}'; this.style.color='#ffffff';"
+                                    onmouseout="this.style.backgroundColor='rgba(255,255,255,0.9)'; this.style.color='{{ $inputColor }}';"
+                                @endif
+                                >
                                 Buka di Google Maps
                             </a>
                         </div>

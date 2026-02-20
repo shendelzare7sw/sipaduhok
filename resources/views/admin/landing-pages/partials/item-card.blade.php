@@ -58,7 +58,13 @@
                         
                         @elseif(str_contains($key, 'color') || $key === 'color')
                             <div class="input-group input-group-sm">
-                                <input type="color" class="form-control form-control-color w-100" name="sections[{{ $section->id }}][items][{{ $itemIndex }}][{{ $key }}]" value="{{ $value && substr($value, 0, 1) === '#' ? $value : '#165fac' }}" title="Pilih Warna" {{ $isTemplate ? 'disabled' : '' }}>
+                                @php
+                                    $colorVal = $value;
+                                    if(empty($colorVal) || substr($colorVal, 0, 1) !== '#' || strlen($colorVal) !== 7) {
+                                        $colorVal = '#165fac';
+                                    }
+                                @endphp
+                                <input type="color" class="form-control form-control-color w-100" name="sections[{{ $section->id }}][items][{{ $itemIndex }}][{{ $key }}]" value="{{ $colorVal }}" title="Pilih Warna" {{ $isTemplate ? 'disabled' : '' }}>
                             </div>
                         @else
                              <input type="text" class="form-control" name="sections[{{ $section->id }}][items][{{ $itemIndex }}][{{ $key }}]" value="{{ $value }}" {{ $isTemplate ? 'disabled' : '' }}>

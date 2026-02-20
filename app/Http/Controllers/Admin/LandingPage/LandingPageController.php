@@ -63,7 +63,8 @@ class LandingPageController extends Controller
                         Str::contains($section->section_key, 'ruang_') || 
                         Str::contains($section->section_key, 'area_') || 
                         Str::contains($section->section_key, 'perpustakaan') || 
-                        Str::contains($section->section_key, 'gallery')
+                        Str::contains($section->section_key, 'gallery') ||
+                        Str::contains($section->section_key, 'biaya_')
                     ) {
                         $isDirectArray = false;
                     }
