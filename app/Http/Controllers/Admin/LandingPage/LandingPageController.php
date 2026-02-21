@@ -183,12 +183,24 @@ class LandingPageController extends Controller
 
     public function reset(LandingPage $landingPage)
     {
-        // Simple and brutal: run the specific seeder (or all seeders if specific not possible easily without refactoring seeder)
-        // Since LandingPageSeeder uses updateOrCreate based on slug/keys, it will restore the default values
+        // Re-run the seeders to restore default values.
+        // --force is REQUIRED for production environment, otherwise Laravel silently blocks the command.
+        // Since LandingPageSeeder uses updateOrCreate based on slug/keys, it will restore the default values.
 
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'LandingPageSeeder']);
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'FasilitasLibrarySeeder']);
+        try {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                '--class' => 'LandingPageSeeder',
+                '--force' => true,
+            ]);
+            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                '--class' => 'FasilitasLibrarySeeder',
+                '--force' => true,
+            ]);
 
-        return redirect()->back()->with('success', 'Konten halaman berhasil direset ke pengaturan awal.');
+            return redirect()->back()->with('success', 'Konten halaman berhasil direset ke pengaturan awal.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Landing page reset failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mereset konten halaman: ' . $e->getMessage());
+        }
     }
 }
