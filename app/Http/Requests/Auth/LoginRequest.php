@@ -72,6 +72,7 @@ class LoginRequest extends FormRequest
 
     /**
      * Ensure the login request is not rate limited.
+     * Lockout: 5 attempts per 5 minutes for brute force protection.
      */
     public function ensureIsNotRateLimited(): void
     {
@@ -93,6 +94,8 @@ class LoginRequest extends FormRequest
 
     /**
      * Get the rate limiting throttle key for the request.
+     * Uses login + IP to prevent brute force per account.
+     * Decay time: 5 minutes (300 seconds).
      */
     public function throttleKey(): string
     {

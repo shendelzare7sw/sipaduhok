@@ -133,10 +133,9 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| FILE PREVIEW ROUTES
+| FILE PREVIEW ROUTES (Moved to auth-protected group below)
 |--------------------------------------------------------------------------
 */
-Route::get('/storage-preview', [\App\Http\Controllers\FileController::class, 'preview'])->name('storage.preview');
 
 /*
 |--------------------------------------------------------------------------
@@ -145,6 +144,9 @@ Route::get('/storage-preview', [\App\Http\Controllers\FileController::class, 'pr
 */
 
 Route::middleware(['auth'])->group(function () {
+
+    // File preview (auth-protected to prevent unauthorized file access)
+    Route::get('/storage-preview', [\App\Http\Controllers\FileController::class, 'preview'])->name('storage.preview');
 
     /*
     |--------------------------------------------------------------------------

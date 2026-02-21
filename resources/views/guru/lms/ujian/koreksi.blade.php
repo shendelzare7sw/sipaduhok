@@ -108,7 +108,7 @@
                             @endif
 
                             <div class="mb-3 p-3 bg-white border rounded question-text">
-                                {!! $soal->pertanyaan !!}
+                                {!! nl2br(e($soal->pertanyaan)) !!}
                             </div>
 
                         @if($isAutoGraded)
