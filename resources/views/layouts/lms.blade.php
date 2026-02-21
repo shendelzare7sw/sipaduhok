@@ -523,7 +523,7 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <x-notification-bell />
+                    <x-notification-bell ctx="lms" />
                     <div class="dropdown">
                         <div class="user-profile" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar">

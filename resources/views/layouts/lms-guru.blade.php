@@ -366,7 +366,7 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <x-notification-bell />
+                    <x-notification-bell ctx="lms-guru" />
                     <div class="dropdown">
                         <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown"
                             aria-expanded="false">

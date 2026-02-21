@@ -1,4 +1,9 @@
-{{-- Notification Bell Component for Navbar --}}
+{{-- Notification Bell Component for Navbar
+     @prop ctx  Pass 'lms' (siswa LMS) or 'lms-guru' (guru LMS) to make
+                the "Lihat Semua" link and notification clicks context-aware.
+                Omit (or null) for Sneat layout context. --}}
+@props(['ctx' => null])
+
 <div class="nav-item dropdown navbar-dropdown" id="notification-dropdown">
     <a class="nav-link dropdown-toggle hide-arrow position-relative notification-bell-btn" href="javascript:void(0);"
         id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" onclick="loadNotifications()">
@@ -12,7 +17,7 @@
         aria-labelledby="notificationDropdown">
         <div class="dropdown-header d-flex justify-content-between align-items-center py-2 px-3 bg-light border-bottom">
             <h6 class="mb-0 fw-semibold"><i class="fas fa-bell me-2 text-primary"></i>Notifikasi</h6>
-            <a href="{{ route('notifications.index') }}" class="text-primary small fw-medium">Lihat Semua</a>
+            <a href="{{ route('notifications.index', $ctx ? ['ctx' => $ctx] : []) }}" class="text-primary small fw-medium">Lihat Semua</a>
         </div>
         <div id="notification-list" class="notif-list-scroll">
             <div class="text-center py-4">
@@ -42,13 +47,14 @@
         border-radius: 12px;
         border: 1px solid rgba(0, 0, 0, 0.08);
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        animation: notifFadeIn 0.18s ease-out;
-        margin-top: 0.5rem !important; /* Add some space below the bell */
+        /* No CSS animation — it uses transform which conflicts with our
+           fixed-position overrides in LMS layouts. Fade only. */
+        animation: notifFadeIn 0.15s ease-out;
     }
 
     @keyframes notifFadeIn {
-        from { opacity: 0; transform: translateY(-6px); }
-        to   { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; }
+        to   { opacity: 1; }
     }
 
     .notif-list-scroll {
@@ -157,8 +163,12 @@
     function loadNotifications() {
         if (notificationsLoaded) return;
 
-        fetch('{{ route("notifications.recent") }}')
-            .then(response => response.json())
+        // Use relative path — avoids http/https mismatch (APP_URL vs actual protocol)
+        fetch('/notifications/recent')
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
             .then(data => {
                 notificationsLoaded = true;
                 updateNotificationBadge(data.unread_count);
@@ -170,6 +180,8 @@
                         <i class="fas fa-exclamation-circle fa-lg mb-2 d-block"></i>
                         <p class="small mb-0">Gagal memuat notifikasi</p>
                     </div>`;
+                // Allow retry on next click
+                notificationsLoaded = false;
             });
     }
 
@@ -200,7 +212,7 @@
             const unreadClass = notif.read_at ? '' : 'unread';
             const colorClass  = notif.color || 'secondary';
             const iconClass   = notif.icon  || 'fas fa-bell';
-            const notifLink   = notif.link  || '{{ route("notifications.index") }}';
+            const notifLink   = notif.link  || '/notifications';
 
             html += `
             <div class="notification-item d-flex align-items-start ${unreadClass}"
@@ -221,86 +233,116 @@
     }
 
     function handleBellNotifClick(event, id, link) {
+        const bellCtx = '{{ $ctx ?? "" }}';
+
+        // If navigating to the notifications index, preserve the LMS context param
+        let target = link;
+        if (bellCtx && target.match(/\/notifications\/?(\?.*)?$/)) {
+            target += (target.includes('?') ? '&' : '?') + 'ctx=' + bellCtx;
+        }
+
         fetch(`/notifications/${id}/read`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
             }
-        }).finally(() => { window.location.href = link; });
+        }).finally(() => { window.location.href = target; });
     }
 
-    function fixNotifDropdownMobile() {
+    // Unified dropdown position fix.
+    // In LMS context (bellCtx set) the header is position:sticky which breaks
+    // Popper.js absolute positioning — so we always use position:fixed there.
+    // In Sneat context we let Bootstrap/Popper handle it normally.
+    function fixNotifDropdownPosition() {
         const menu = document.querySelector('.notif-dropdown-menu');
         if (!menu) return;
 
-        if (window.innerWidth > 575) {
-            // Kembalikan ke CSS normal (desktop/tablet)
-            menu.removeAttribute('style');
-            return;
-        }
-
-        const btn = document.getElementById('notificationDropdown');
+        const bellCtx  = '{{ $ctx ?? "" }}';
+        const btn      = document.getElementById('notificationDropdown');
         if (!btn) return;
 
-        const btnRect = btn.getBoundingClientRect();
-        const marginSisi = 20; // jarak dari tepi kiri & kanan viewport
+        const btnRect  = btn.getBoundingClientRect();
+        const isMobile = window.innerWidth <= 575;
 
-        // Cari tombol profil sebagai acuan batas kanan dropdown
-        // Fallback ke posisi kanan bell jika profil tidak ditemukan
-        const profileBtn = document.querySelector(
-            '.dropdown-user .nav-link, .navbar-dropdown.dropdown-user a, ' +
-            '.user-avatar, .avatar.avatar-online'
-        );
-        const anchorRight = profileBtn
-            ? profileBtn.getBoundingClientRect().right
-            : btnRect.right;
+        if (isMobile) {
+            // ── MOBILE (all contexts): full-width strip below the bell ──────────
+            const margin = 16;
+            // Try to anchor right edge to profile button, fallback to bell right
+            const profileBtn = document.querySelector(
+                '.user-profile, .dropdown-user .nav-link, ' +
+                '.navbar-dropdown.dropdown-user a, ' +
+                '.user-avatar, .avatar.avatar-online'
+            );
+            const anchorRight = profileBtn
+                ? profileBtn.getBoundingClientRect().right
+                : btnRect.right;
+            const rightOffset = Math.max(margin, window.innerWidth - anchorRight);
 
-        // Kanan dropdown sejajar dengan kanan tombol profil
-        const rightOffset = Math.max(marginSisi, window.innerWidth - anchorRight);
+            menu.setAttribute('style',
+                `position:fixed!important;` +
+                `top:${btnRect.bottom + 6}px!important;` +
+                `left:${margin}px!important;` +
+                `right:${rightOffset}px!important;` +
+                `width:auto!important;` +
+                `transform:none!important;` +
+                `z-index:9999!important;`
+            );
 
-        menu.setAttribute('style',
-            `position: fixed !important;` +
-            `top: ${btnRect.bottom + 6}px !important;` +
-            `left: ${marginSisi}px !important;` +
-            `right: ${rightOffset}px !important;` +
-            `width: auto !important;` +
-            `transform: none !important;` +
-            `z-index: 9999 !important;`
-        );
+        } else if (bellCtx) {
+            // ── DESKTOP/TABLET — LMS context ────────────────────────────────────
+            // Popper.js struggles with position:sticky headers, so we take over.
+            // Align right edge of dropdown with right edge of bell button.
+            const dropW    = window.innerWidth <= 991 ? 320 : 360;
+            const rightOff = Math.max(8, window.innerWidth - btnRect.right);
+
+            menu.setAttribute('style',
+                `position:fixed!important;` +
+                `top:${btnRect.bottom + 4}px!important;` +
+                `right:${rightOff}px!important;` +
+                `left:auto!important;` +
+                `width:${dropW}px!important;` +
+                `transform:none!important;` +
+                `z-index:9999!important;`
+            );
+
+        } else {
+            // ── DESKTOP/TABLET — Sneat context ──────────────────────────────────
+            // Bootstrap/Popper.js works fine here; just remove any leftover style.
+            menu.removeAttribute('style');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Load unread count
-        fetch('{{ route("notifications.unread-count") }}')
-            .then(r => r.json())
+        // Load unread count on page load — relative path, protocol-agnostic
+        fetch('/notifications/unread-count')
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(data => updateNotificationBadge(data.count))
             .catch(() => {});
 
         const btn = document.getElementById('notificationDropdown');
         if (btn) {
-            // Jalankan setelah Popper.js selesai positioning
             btn.addEventListener('show.bs.dropdown', function () {
-                requestAnimationFrame(fixNotifDropdownMobile);
+                // Two rAFs: first lets Popper.js run, second lets us override it
+                requestAnimationFrame(() => requestAnimationFrame(fixNotifDropdownPosition));
             });
 
-            // Reset saat dropdown ditutup
             btn.addEventListener('hidden.bs.dropdown', function () {
                 const menu = document.querySelector('.notif-dropdown-menu');
-                if (menu && window.innerWidth <= 575) menu.removeAttribute('style');
+                if (menu) menu.removeAttribute('style');
             });
         }
 
         window.addEventListener('resize', function () {
             if (document.querySelector('.notif-dropdown-menu.show')) {
-                fixNotifDropdownMobile();
+                fixNotifDropdownPosition();
             }
         });
     });
 
     setInterval(() => {
-        fetch('{{ route("notifications.unread-count") }}')
-            .then(r => r.json())
+        fetch('/notifications/unread-count')
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
             .then(data => updateNotificationBadge(data.count))
             .catch(() => {});
     }, 30000);
