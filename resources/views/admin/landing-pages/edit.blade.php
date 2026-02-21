@@ -473,6 +473,7 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -530,20 +531,31 @@ document.addEventListener('DOMContentLoaded', function() {
         if (removeButton) {
             e.preventDefault();
             
-            if (confirm('Hapus item ini?')) {
-                const wrapper = removeButton.closest('.item-wrapper');
-                const container = wrapper ? wrapper.closest('.items-container') : null;
-                
-                if (wrapper) {
-                    wrapper.style.transition = 'all 0.3s ease';
-                    wrapper.style.transform = 'translateX(-100%)';
-                    wrapper.style.opacity = '0';
-                    setTimeout(() => {
-                        wrapper.remove();
-                        if (container) reindexItems(container);
-                    }, 300);
+            Swal.fire({
+                title: 'Hapus item ini?',
+                text: "Tindakan ini tidak dapat dibatalkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const wrapper = removeButton.closest('.item-wrapper');
+                    const container = wrapper ? wrapper.closest('.items-container') : null;
+                    
+                    if (wrapper) {
+                        wrapper.style.transition = 'all 0.3s ease';
+                        wrapper.style.transform = 'translateX(-100%)';
+                        wrapper.style.opacity = '0';
+                        setTimeout(() => {
+                            wrapper.remove();
+                            if (container) reindexItems(container);
+                        }, 300);
+                    }
                 }
-            }
+            });
             return;
         }
     });
