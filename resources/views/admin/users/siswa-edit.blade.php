@@ -455,28 +455,29 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>
-                        <select name="kelas_id" class="form-control" required>
-                            <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" {{ $siswa->kelas_id == $kelas->id ? 'selected' : '' }}>
-                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group">
                         <label class="form-label">Cabang <span style="color: #ef4444;">*</span></label>
-                        <select name="cabang_id" class="form-control" required>
+                        <select name="cabang_id" id="cabangSelectEdit" class="form-control" required onchange="loadKelasOptionsEdit()">
                             <option value="">-- Pilih Cabang --</option>
                             @foreach($cabangList as $cabang)
-                                <option value="{{ $cabang->id }}" {{ $siswa->cabang_id == $cabang->id ? 'selected' : '' }}>
+                                <option value="{{ $cabang->id }}" {{ old('cabang_id', $siswa->cabang_id) == $cabang->id ? 'selected' : '' }}>
                                     {{ $cabang->nama_cabang }}
                                 </option>
                             @endforeach
                         </select>
+                        @error('cabang_id')
+                            <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col" id="kelasWrapperEdit">
+                    <div class="form-group">
+                        <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>
+                        <select name="kelas_id" id="kelasSelectEdit" class="form-control" required>
+                            <option value="">-- Pilih Kelas --</option>
+                        </select>
+                        @error('kelas_id')
+                            <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -875,6 +876,51 @@
         </div>
 
         <script>
+            // Kelas data grouped by cabang_id (for dynamic filtering)
+            const allKelasDataEdit = @json($kelasList->groupBy('cabang_id'));
+            const currentKelasId = @json(old('kelas_id', $siswa->kelas_id));
+            const currentCabangId = @json(old('cabang_id', $siswa->cabang_id));
+
+            function loadKelasOptionsEdit() {
+                const cabangId = document.getElementById('cabangSelectEdit').value;
+                const kelasWrapper = document.getElementById('kelasWrapperEdit');
+                const kelasSelect = document.getElementById('kelasSelectEdit');
+
+                // Clear existing options
+                kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+
+                if (!cabangId) {
+                    kelasWrapper.style.display = 'none';
+                    return;
+                }
+
+                const kelasList = allKelasDataEdit[cabangId] || [];
+
+                if (kelasList.length === 0) {
+                    kelasSelect.innerHTML = '<option value="">-- Tidak ada kelas tersedia --</option>';
+                } else {
+                    kelasList.forEach(function(kelas) {
+                        const option = document.createElement('option');
+                        option.value = kelas.id;
+                        option.textContent = kelas.nama_kelas + ' (' + kelas.jenjang + ')';
+                        // Select current kelas only if it belongs to the selected cabang
+                        if (currentKelasId && kelas.id == currentKelasId && kelas.cabang_id == cabangId) {
+                            option.selected = true;
+                        }
+                        kelasSelect.appendChild(option);
+                    });
+                }
+
+                kelasWrapper.style.display = 'block';
+            }
+
+            // On page load: populate kelas based on current cabang
+            document.addEventListener('DOMContentLoaded', function() {
+                if (currentCabangId) {
+                    loadKelasOptionsEdit();
+                }
+            });
+
             // Toggle password visibility
             function togglePassword(fieldId, iconId) {
                 const field = document.getElementById(fieldId);

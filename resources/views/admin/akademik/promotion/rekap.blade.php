@@ -1,5 +1,6 @@
 @extends('layouts.sneat')
 
+@section('title', 'Rekap Kenaikan Kelas')
 @section('page-title', 'Rekap Kenaikan Kelas')
 
 @section('sidebar-menu')

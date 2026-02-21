@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Admin - Pengaturan KKM')
+@section('title', 'Pengaturan KKM')
 @section('page-title', 'Pengaturan KKM')
 
 @section('sidebar-menu')

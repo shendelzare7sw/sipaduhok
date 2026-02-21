@@ -342,8 +342,10 @@ class UserController extends Controller
                 $q->where('jenjang', $request->jenjang);
             });
         }
-        if ($request->has('kelas_id') && $request->kelas_id != '') {
-            $query->where('kelas_id', $request->kelas_id);
+        if ($request->has('kelas_nama') && $request->kelas_nama != '') {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('nama_kelas', $request->kelas_nama);
+            });
         }
         if ($request->has('cabang_id') && $request->cabang_id != '') {
             $query->where('cabang_id', $request->cabang_id);
@@ -353,7 +355,9 @@ class UserController extends Controller
         }
 
         $siswa = $query->orderBy('nama_lengkap')->paginate(15);
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
+        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get()
+            ->unique(fn($k) => $k->cabang_id . '|' . $k->jenjang . '|' . $k->nama_kelas)
+            ->values();
         $cabangList = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
@@ -380,8 +384,10 @@ class UserController extends Controller
                 $q->where('jenjang', $request->jenjang);
             });
         }
-        if ($request->has('kelas_id') && $request->kelas_id != '') {
-            $query->where('kelas_id', $request->kelas_id);
+        if ($request->has('kelas_nama') && $request->kelas_nama != '') {
+            $query->whereHas('kelas', function ($q) use ($request) {
+                $q->where('nama_kelas', $request->kelas_nama);
+            });
         }
         if ($request->has('cabang_id') && $request->cabang_id != '') {
             $query->where('cabang_id', $request->cabang_id);
@@ -391,13 +397,12 @@ class UserController extends Controller
         }
 
         $siswa = $query->orderBy('nama_lengkap')->get();
-        
+
         // Prepare filter info for display
         $filterInfo = [];
         if ($request->jenjang) $filterInfo[] = "Jenjang: " . $request->jenjang;
-        if ($request->kelas_id) {
-            $kelas = Kelas::find($request->kelas_id);
-            if($kelas) $filterInfo[] = "Kelas: " . $kelas->nama_kelas;
+        if ($request->kelas_nama) {
+            $filterInfo[] = "Kelas: " . $request->kelas_nama;
         }
         if ($request->cabang_id) {
             $cabang = Cabang::find($request->cabang_id);
@@ -411,7 +416,7 @@ class UserController extends Controller
     public function createSiswa()
     {
         $cabangList = Cabang::where('is_active', true)->get();
-        $kelasList = Kelas::all();
+        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
         $orangTuaList = User::where('role', 'orang_tua')
             ->with(['studentParents.siswa'])
             ->orderBy('name')
@@ -539,7 +544,7 @@ class UserController extends Controller
     {
         $siswa = Siswa::with(['user', 'studentParents.parent'])->findOrFail($id);
         $cabangList = Cabang::where('is_active', true)->get();
-        $kelasList = Kelas::all();
+        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
         $orangTuaList = User::where('role', 'orang_tua')
             ->with(['studentParents.siswa'])
             ->orderBy('name')

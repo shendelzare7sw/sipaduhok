@@ -460,18 +460,35 @@
                     api_key: apiKey,
                     model: modelSelect.value,
                     provider: provider,
-                    _token: '{{ csrf_token() }}'
                 };
 
-                fetch('{{ route("admin.ai-settings.test") }}', {
+                // Use pathname only (relative) to avoid HTTP/HTTPS mixed-content error in production
+                const testUrl = new URL('{{ route("admin.ai-settings.test") }}').pathname;
+
+                // AbortController: cancel fetch after 30 seconds to prevent infinite hang
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+                fetch(testUrl, {
                     method: 'POST',
+                    signal: controller.signal,
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
                     body: JSON.stringify(data)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    // Handle non-JSON responses (e.g. HTML 500/419 error pages)
+                    const contentType = response.headers.get('Content-Type') || '';
+                    if (!contentType.includes('application/json')) {
+                        throw new Error('Server error (HTTP ' + response.status + '). Pastikan APP_URL di .env sudah benar dan jalankan php artisan config:clear.');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     // Set content
                     alertMsg.textContent = data.message;
@@ -503,9 +520,14 @@
                     }
                 })
                 .catch(error => {
+                    clearTimeout(timeoutId);
                     alertEl.classList.add('alert-danger');
                     alertTitle.textContent = "⚠️ Error Sistem";
-                    alertMsg.textContent = 'Terjadi kesalahan: ' + error.message;
+                    let errMsg = error.message || 'Terjadi kesalahan tidak diketahui.';
+                    if (error.name === 'AbortError') {
+                        errMsg = 'Request timeout (>30 detik). Server terlalu lama merespons.';
+                    }
+                    alertMsg.textContent = errMsg;
                     alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
 
                     // Show alert with smooth animation

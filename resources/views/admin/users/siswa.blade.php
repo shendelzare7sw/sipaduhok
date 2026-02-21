@@ -694,13 +694,13 @@
                                 {{-- Filter Kelas (Dependent on Jenjang) --}}
                                 <div class="mb-2" id="kelasFilterContainer" style="display: {{ request('jenjang') ? 'block' : 'none' }};">
                                     <label class="form-label small fw-bold">Kelas</label>
-                                    <select name="kelas_id" id="kelasSelect" class="form-select form-select-sm">
+                                    <select name="kelas_nama" id="kelasSelect" class="form-select form-select-sm">
                                         <option value="">Semua Kelas</option>
                                         @foreach($kelasList as $kelas)
-                                            <option value="{{ $kelas->id }}" 
+                                            <option value="{{ $kelas->nama_kelas }}"
                                                     data-cabang="{{ $kelas->cabang_id }}"
                                                     data-jenjang="{{ $kelas->jenjang }}"
-                                                    {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                                    {{ request('kelas_nama') == $kelas->nama_kelas ? 'selected' : '' }}>
                                                 {{ $kelas->nama_kelas }}
                                             </option>
                                         @endforeach
@@ -899,14 +899,14 @@
                                 <td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8;">
                                     <i class="fas fa-user-graduate fa-3x" style="margin-bottom: 12px; opacity: 0.5;"></i>
                                     <div style="font-size: 16px; font-weight: 500;">
-                                        @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
+                                        @if(request('search') || request('jenjang') || request('kelas_nama') || request('cabang_id') || request('status'))
                                             Tidak ada data siswa yang sesuai dengan filter yang dipilih
                                         @else
                                             Belum ada data siswa
                                         @endif
                                     </div>
                                     <small>
-                                        @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
+                                        @if(request('search') || request('jenjang') || request('kelas_nama') || request('cabang_id') || request('status'))
                                             Coba filter lain atau <a href="{{ route('admin.users.siswa') }}"
                                                 style="color: #2563eb; text-decoration: underline;">hapus semua filter</a>
                                         @else
@@ -1038,92 +1038,92 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const cabangSelect = document.getElementById('cabangSelect');
-            const JenjangSelect = document.getElementById('jenjangSelect');
-            const JenjangContainer = document.getElementById('jenjangFilterContainer');
             const jenjangSelect = document.getElementById('jenjangSelect');
             const jenjangContainer = document.getElementById('jenjangFilterContainer');
             const kelasSelect = document.getElementById('kelasSelect');
             const kelasContainer = document.getElementById('kelasFilterContainer');
-            
-            // Store original options
-            const originalJenjangOptions = Array.from(jenjangSelect.options);
-            const originalKelasOptions = Array.from(kelasSelect.options);
+
+            // Store original data as plain objects (NOT DOM references)
+            // so rebuilding never loses the source data
+            const allJenjangData = Array.from(jenjangSelect.options).map(o => ({
+                value: o.value, text: o.text
+            }));
+            const allKelasData = Array.from(kelasSelect.options).map(o => ({
+                value: o.value,
+                text: o.text,
+                cabang: o.getAttribute('data-cabang'),
+                jenjang: o.getAttribute('data-jenjang')
+            }));
+
+            function rebuildSelect(selectEl, options) {
+                const current = selectEl.value;
+                selectEl.innerHTML = '';
+                options.forEach(function(opt) {
+                    const el = document.createElement('option');
+                    el.value = opt.value;
+                    el.textContent = opt.text;
+                    if (opt.value && opt.value === current) el.selected = true;
+                    selectEl.appendChild(el);
+                });
+            }
 
             function updateFilters() {
                 const selectedCabangId = cabangSelect.value;
                 const selectedJenjang = jenjangSelect.value;
-                
-                // 1. Handle Jenjang Visibility & Options based on Cabang
+
+                // 1. Jenjang: tampilkan hanya yang ada kelasnya di cabang terpilih
                 if (selectedCabangId) {
                     jenjangContainer.style.display = 'block';
-                    
-                    // Filter Jenjangs based on available classes in this branch
-                    // Note: We use the kelasOptions to determine which jenjangs are valid for this branch
+
                     const availableJenjangs = new Set();
-                    originalKelasOptions.forEach(opt => {
-                        if (opt.getAttribute('data-cabang') == selectedCabangId) {
-                            availableJenjangs.add(opt.getAttribute('data-jenjang'));
+                    allKelasData.forEach(function(opt) {
+                        if (opt.value !== '' && opt.cabang == selectedCabangId) {
+                            availableJenjangs.add(opt.jenjang);
                         }
                     });
 
-                    // Update Jenjang Dropdown
-                    originalJenjangOptions.forEach(opt => {
-                        if (opt.value === "") {
-                            opt.style.display = 'block';
-                        } else {
-                            if (availableJenjangs.has(opt.value)) {
-                                opt.style.display = 'block';
-                            } else {
-                                opt.style.display = 'none';
-                                if (jenjangSelect.value === opt.value) jenjangSelect.value = "";
-                            }
-                        }
+                    const filteredJenjang = allJenjangData.filter(function(opt) {
+                        return opt.value === '' || availableJenjangs.has(opt.value);
                     });
+                    rebuildSelect(jenjangSelect, filteredJenjang);
 
+                    // Pertahankan pilihan jenjang jika masih valid
+                    if (availableJenjangs.has(selectedJenjang)) {
+                        jenjangSelect.value = selectedJenjang;
+                    }
                 } else {
                     jenjangContainer.style.display = 'none';
-                    jenjangSelect.value = "";
+                    rebuildSelect(jenjangSelect, allJenjangData);
                 }
 
-                // 2. Handle Kelas Visibility & Options based on Cabang AND Jenjang
-                if (selectedCabangId && selectedJenjang) {
+                // 2. Kelas: tampilkan hanya yang cocok dengan cabang + jenjang terpilih
+                const currentJenjang = jenjangSelect.value;
+                if (selectedCabangId && currentJenjang) {
                     kelasContainer.style.display = 'block';
 
-                    originalKelasOptions.forEach(opt => {
-                        if (opt.value === "") {
-                            opt.style.display = 'block';
-                        } else {
-                            const branchMatch = opt.getAttribute('data-cabang') == selectedCabangId;
-                            const jenjangMatch = opt.getAttribute('data-jenjang') == selectedJenjang;
-                            
-                            if (branchMatch && jenjangMatch) {
-                                opt.style.display = 'block';
-                            } else {
-                                opt.style.display = 'none';
-                                if (kelasSelect.value === opt.value) kelasSelect.value = "";
-                            }
-                        }
+                    const filteredKelas = allKelasData.filter(function(opt) {
+                        return opt.value === '' ||
+                            (opt.cabang == selectedCabangId && opt.jenjang == currentJenjang);
                     });
+                    rebuildSelect(kelasSelect, filteredKelas);
                 } else {
                     kelasContainer.style.display = 'none';
-                    kelasSelect.value = "";
+                    kelasSelect.value = '';
                 }
             }
 
             cabangSelect.addEventListener('change', function() {
-                // Reset child filters when parent changes
-                jenjangSelect.value = "";
-                kelasSelect.value = "";
+                jenjangSelect.value = '';
+                kelasSelect.value = '';
                 updateFilters();
             });
 
             jenjangSelect.addEventListener('change', function() {
-                // Reset child filter
-                kelasSelect.value = "";
+                kelasSelect.value = '';
                 updateFilters();
             });
 
-            // Initial run
+            // Jalankan saat halaman dimuat (restore filter dari URL)
             updateFilters();
         });
 

@@ -104,7 +104,7 @@ class AiSettingController extends Controller
                 ])->withHeaders([
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type' => 'application/json',
-                ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                ])->timeout(15)->post('https://api.groq.com/openai/v1/chat/completions', [
                     'model' => $model,
                     'messages' => [
                         ['role' => 'user', 'content' => 'Test connection. Reply with "OK".']

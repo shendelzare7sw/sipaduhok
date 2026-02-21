@@ -362,24 +362,27 @@
             <div class="row">
                 <div class="col">
                     <div class="form-group">
-                        <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>
-                        <select name="kelas_id" class="form-control" required>
-                            <option value="">-- Pilih Kelas --</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}">{{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-group">
                         <label class="form-label">Cabang <span style="color: #ef4444;">*</span></label>
-                        <select name="cabang_id" class="form-control" required>
+                        <select name="cabang_id" id="cabangSelect" class="form-control" required onchange="loadKelasOptions()">
                             <option value="">-- Pilih Cabang --</option>
                             @foreach($cabangList as $cabang)
-                                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                                <option value="{{ $cabang->id }}" {{ old('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
                             @endforeach
                         </select>
+                        @error('cabang_id')
+                            <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col" id="kelasWrapper" style="{{ old('cabang_id') ? '' : 'display: none;' }}">
+                    <div class="form-group">
+                        <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>
+                        <select name="kelas_id" id="kelasSelect" class="form-control">
+                            <option value="">-- Pilih Kelas --</option>
+                        </select>
+                        @error('kelas_id')
+                            <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -696,6 +699,50 @@
         </div>
 
         <script>
+            // Kelas data grouped by cabang_id
+            const allKelasData = @json($kelasList->groupBy('cabang_id'));
+            const oldKelasId = @json(old('kelas_id'));
+            const oldCabangId = @json(old('cabang_id'));
+
+            function loadKelasOptions() {
+                const cabangId = document.getElementById('cabangSelect').value;
+                const kelasWrapper = document.getElementById('kelasWrapper');
+                const kelasSelect = document.getElementById('kelasSelect');
+
+                // Clear existing options
+                kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+
+                if (!cabangId) {
+                    kelasWrapper.style.display = 'none';
+                    return;
+                }
+
+                const kelasList = allKelasData[cabangId] || [];
+
+                if (kelasList.length === 0) {
+                    kelasSelect.innerHTML = '<option value="">-- Tidak ada kelas tersedia --</option>';
+                } else {
+                    kelasList.forEach(function(kelas) {
+                        const option = document.createElement('option');
+                        option.value = kelas.id;
+                        option.textContent = kelas.nama_kelas + ' (' + kelas.jenjang + ')';
+                        if (oldKelasId && kelas.id == oldKelasId) {
+                            option.selected = true;
+                        }
+                        kelasSelect.appendChild(option);
+                    });
+                }
+
+                kelasWrapper.style.display = 'block';
+            }
+
+            // Initialize on page load if old cabang value exists (validation error repopulation)
+            document.addEventListener('DOMContentLoaded', function() {
+                if (oldCabangId) {
+                    loadKelasOptions();
+                }
+            });
+
             // Toggle password visibility
             function togglePassword(fieldId, iconId) {
                 const field = document.getElementById(fieldId);
