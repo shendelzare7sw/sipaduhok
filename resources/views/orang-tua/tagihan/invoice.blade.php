@@ -62,7 +62,7 @@
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: flex-end;
             margin-bottom: 40px;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 20px;
@@ -71,7 +71,7 @@
         .company-info h1 {
             margin: 0 0 5px;
             color: var(--primary);
-            font-size: 24px;
+            font-size: 18px;
         }
 
         .company-info p {
@@ -105,13 +105,16 @@
         
         .meta-label {
             font-weight: 600;
-            margin-right: 15px;
             color: var(--secondary);
+            width: 100px;
+            text-align: right;
         }
 
         .meta-value {
             font-weight: 500;
             color: var(--dark);
+            width: 180px;
+            text-align: right;
         }
 
         .info-grid {
@@ -265,10 +268,13 @@
         @endif
 
         <div class="header">
-            <div class="company-info">
-                <h1>{{ config('app.name', 'Sistem Sekolah') }}</h1>
-                <p>Jalan Pendidikan No. 123<br>Kota Pelajar, Indonesia 55281</p>
-                <p>Email: finance@sekolah.sch.id | Telp: (021) 123-4567</p>
+            <div class="company-info" style="display: flex; align-items: center; gap: 14px;">
+                <img src="{{ asset('img/logo/hok-watermark.png') }}" alt="Logo HOK" style="height: 70px; width: auto; flex-shrink: 0;">
+                <div>
+                    <h1>{{ preg_replace('/\s*\(Gedung\s+\w+\)$/i', '', $schoolInfo['nama']) }}</h1>
+                    <p>{{ $schoolInfo['alamat'] }}</p>
+                    <p>Email: {{ $schoolInfo['email'] }} | Telp: {{ $schoolInfo['telepon'] }}</p>
+                </div>
             </div>
             <div class="invoice-details">
                 <h2 class="invoice-title">INVOICE</h2>

@@ -86,10 +86,10 @@
                             <select name="jenis" class="form-select @error('jenis') is-invalid @enderror" required>
                                 <option value="">-- Pilih Jenis Izin --</option>
                                 <option value="sakit" {{ old('jenis', $presensi->status) === 'sakit' ? 'selected' : '' }}>
-                                    🏥 Sakit
+                                    Sakit
                                 </option>
                                 <option value="izin" {{ old('jenis', $presensi->status) === 'izin' ? 'selected' : '' }}>
-                                    <i class="fas fa-file-alt"></i> Izin
+                                    Izin
                                 </option>
                             </select>
                             @error('jenis')

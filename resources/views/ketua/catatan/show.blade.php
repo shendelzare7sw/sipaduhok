@@ -219,7 +219,7 @@
                         <span class="badge badge-{{ $catatan->prioritas }}">
                             @if($catatan->prioritas === 'biasa') <i class="fas fa-file-alt"></i>
                             @elseif($catatan->prioritas === 'penting') <i class="fas fa-exclamation-triangle"></i>
-                            @else 🚨
+                            @else <i class="fas fa-exclamation-circle"></i>
                             @endif
                             {{ strtoupper($catatan->prioritas) }}
                         </span>
@@ -237,7 +237,7 @@
                             </span>
                         @else
                             <span class="badge badge-individu">
-                                👤 {{ $catatan->penerima->name ?? 'User' }}
+                                <i class="fas fa-user"></i> {{ $catatan->penerima->name ?? 'User' }}
                             </span>
                         @endif
                     </div>
@@ -276,7 +276,7 @@
                         </div>
                         <div>
                             <span class="badge" style="background: #d1fae5; color: #065f46;">
-                                ✓ Sudah dibaca
+                                <i class="fas fa-check"></i> Sudah dibaca
                             </span>
                         </div>
                     </div>

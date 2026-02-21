@@ -10,6 +10,7 @@ use App\Models\Pembayaran;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\FinancialAuditLog;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -248,11 +249,18 @@ class PembayaranController extends Controller
 
             DB::commit();
 
-            // Notify orang tua about payment validation (only on approval)
+            // Notify orang tua about payment validation
+            $notificationService = app(NotificationService::class);
             if ($request->status_validasi === 'disetujui') {
                 foreach ($relatedPayments as $pembayaran) {
                     $pembayaran->load('siswa.orangTua');
-                    app(\App\Services\NotificationService::class)->notifyPembayaranValidasi($pembayaran);
+                    $notificationService->notifyPembayaranValidasi($pembayaran);
+                }
+            } else {
+                // Notify rejection
+                foreach ($relatedPayments as $pembayaran) {
+                    $pembayaran->load('siswa.orangTua');
+                    $notificationService->notifyPembayaranDitolak($pembayaran, $request->catatan_validasi);
                 }
             }
 
@@ -404,7 +412,7 @@ class PembayaranController extends Controller
                     'kode_pembayaran' => $kodePembayaran,
                     'order_id' => $orderId, // Link grouping for receipt
                     'jumlah_bayar' => $jumlahBayar,
-                    'tanggal_bayar' => $request->tanggal_bayar,
+                    'tanggal_bayar' => $request->tanggal_bayar . ' ' . now()->format('H:i:s'),
                     'metode_pembayaran' => 'tunai',
                     'status_validasi' => $validasiLangsung ? 'disetujui' : 'pending',
                     'divalidasi_oleh' => $validasiLangsung ? auth()->id() : null,
@@ -492,7 +500,7 @@ class PembayaranController extends Controller
                 'siswa_id' => $siswaId,
                 'kode_pembayaran' => $kodePembayaran,
                 'jumlah_bayar' => $request->jumlah_bayar,
-                'tanggal_bayar' => $request->tanggal_bayar,
+                'tanggal_bayar' => $request->tanggal_bayar . ' ' . now()->format('H:i:s'),
                 'metode_pembayaran' => 'tunai',
                 'status_validasi' => 'disetujui',
                 'divalidasi_oleh' => auth()->id(),
@@ -556,7 +564,7 @@ class PembayaranController extends Controller
      */
     public function cetakKwitansi($id)
     {
-        $pembayaran = Pembayaran::with(['siswa', 'siswa.kelas', 'siswa.cabang', 'tagihan', 'validator'])
+        $pembayaran = Pembayaran::with(['siswa', 'siswa.kelas', 'siswa.cabang', 'siswa.studentParents.parent', 'tagihan', 'validator'])
             ->findOrFail($id);
 
         // Only allow printing for approved payments
@@ -594,13 +602,22 @@ class PembayaranController extends Controller
             }
         }
 
-        // Get school info from settings
+        // Get school info from student's branch
+        $cabang = $pembayaran->siswa->cabang;
         $schoolInfo = [
-            'nama' => config('app.name', 'PKBM INKLUSI SIPADUHOK'),
-            'alamat' => 'Jl. Pendidikan No. 123, Jakarta',
-            'telepon' => '021-12345678',
-            'email' => 'info@sipaduhok.sch.id',
+            'nama' => $cabang ? $cabang->nama_cabang : config('app.name', 'PKBM INKLUSI SIPADUHOK'),
+            'alamat' => $cabang ? $cabang->alamat : 'Jl. Pendidikan No. 123, Jakarta',
+            'telepon' => $cabang ? $cabang->telepon : '021-12345678',
+            'email' => 'info@sipaduhok.sch.id', // Email tetap sama untuk semua cabang
         ];
+
+        // Get primary parent name for signature
+        $primaryParent = $pembayaran->siswa->studentParents()
+            ->where('is_primary', true)
+            ->with('parent')
+            ->first();
+
+        $parentName = $primaryParent ? $primaryParent->parent->name : '(..........................)';
 
         // Get jenis tagihan mapping
         $jenisTagihan = config('sipaduhok.jenis_tagihan', [
@@ -618,6 +635,7 @@ class PembayaranController extends Controller
             'totalBayar' => $totalBayar,
             'schoolInfo' => $schoolInfo,
             'jenisTagihan' => $jenisTagihan,
+            'parentName' => $parentName,
         ]);
     }
 }

@@ -13,6 +13,7 @@ use App\Models\MataPelajaran;
 use App\Models\Tugas;
 use App\Models\TugasSiswa;
 use App\Models\Siswa;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 
 class GuruTugasController extends Controller
@@ -113,6 +114,10 @@ class GuruTugasController extends Controller
         $tugas = Tugas::create(array_merge($tugasData, ['kelas_id' => $kelasId]));
         $this->createTugasSiswaForKelas($tugas, $kelasId, $mataPelajaran);
 
+        // Notify siswa in main class
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyTugasNew($tugas);
+
         // Duplikasi ke kelas tambahan
         $kelasTambahan = $request->input('kelas_tambahan', []);
         $jumlahDuplikasi = 0;
@@ -120,6 +125,7 @@ class GuruTugasController extends Controller
             if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
                 $tugasDuplikat = Tugas::create(array_merge($tugasData, ['kelas_id' => $kelasLainId]));
                 $this->createTugasSiswaForKelas($tugasDuplikat, $kelasLainId, $mataPelajaran);
+                $notificationService->notifyTugasNew($tugasDuplikat);
                 $jumlahDuplikasi++;
             }
         }

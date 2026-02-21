@@ -15,6 +15,25 @@
         .student-card { border: none !important; box-shadow: none !important; }
         body { font-size: 10pt; }
         .table { font-size: 9pt; }
+        /* Hide Sneat layout chrome */
+        .layout-navbar,
+        .layout-menu,
+        .layout-overlay,
+        .menu-vertical,
+        header.navbar,
+        .content-backdrop,
+        .navbar,
+        aside { display: none !important; }
+        /* Reset layout containers */
+        .layout-wrapper,
+        .layout-container,
+        .layout-page,
+        .content-wrapper {
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
     }
     .student-card {
         background: white;
@@ -71,9 +90,9 @@
             <a href="{{ route('wali.nilai.edit', $siswa->id) }}" class="btn btn-primary btn-sm fw-bold shadow-sm">
                 <i class="fas fa-edit me-1"></i> Edit Nilai
             </a>
-            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm fw-bold">
+            <a href="{{ route('wali.nilai.print-siswa', [$siswa->id, 'semester' => request('semester', '')]) }}" target="_blank" class="btn btn-outline-secondary btn-sm fw-bold">
                 <i class="fas fa-print me-1"></i> Cetak
-            </button>
+            </a>
         </div>
     </div>
 

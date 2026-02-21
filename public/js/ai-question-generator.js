@@ -437,12 +437,35 @@
      * Handle Regenerate
      */
     function handleRegenerate() {
-        if (confirm('Regenerate soal? Hasil generate sebelumnya akan hilang.')) {
-            generatedSection.classList.add('d-none');
-            generatedQuestions = [];
-            selectedQuestions.clear();
-            form.querySelector('button[type="submit"]').click();
+        // Show Bootstrap modal instead of native confirm
+        const modal = new bootstrap.Modal(document.getElementById('regenerateConfirmModal'));
+        modal.show();
+    }
+
+    /**
+     * Handle Confirmed Regenerate (from modal)
+     */
+    function handleConfirmedRegenerate() {
+        // Hide modal
+        const modalEl = document.getElementById('regenerateConfirmModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
         }
+
+        // Clear generated section
+        generatedSection.classList.add('d-none');
+        generatedQuestions = [];
+        selectedQuestions.clear();
+
+        // Trigger generate again
+        form.querySelector('button[type="submit"]').click();
+    }
+
+    // Attach event listener to confirm button in modal
+    const confirmRegenerateBtn = document.getElementById('confirmRegenerateBtn');
+    if (confirmRegenerateBtn) {
+        confirmRegenerateBtn.addEventListener('click', handleConfirmedRegenerate);
     }
 
     /**

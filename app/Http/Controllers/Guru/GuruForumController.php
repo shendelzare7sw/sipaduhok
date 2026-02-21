@@ -14,7 +14,7 @@ use App\Models\ForumDiskusi;
 use App\Models\ForumReply;
 use App\Models\Siswa;
 use Illuminate\Support\Facades\Storage;
-// use App\Services\NotificationService;
+use App\Services\NotificationService;
 
 class GuruForumController extends Controller
 {
@@ -192,7 +192,9 @@ class GuruForumController extends Controller
             'attachment' => !empty($attachmentPaths) ? $attachmentPaths : null,
         ]);
 
-        // Notification logic placeholder
+        // Notify siswa about reply
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyForumReply($reply);
 
         return back()->with('success', 'Balasan berhasil dikirim');
     }

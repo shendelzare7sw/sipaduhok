@@ -96,6 +96,16 @@
                             <small class="text-muted">Tahun Ajaran: {{ $tahun->nama_tahun_ajaran }}</small>
                         </div>
 
+                        {{-- Print Button --}}
+                        @php
+                            $printRouteName = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.report.print' : 'waka.promotion.report.print';
+                        @endphp
+                        <a href="{{ route($printRouteName, array_merge(request()->only(['tahun_ajaran_id', 'status', 'cabang_id', 'kelas_id']))) }}"
+                           target="_blank"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-print me-1"></i> Cetak Laporan
+                        </a>
+
                         {{-- Filter & Search --}}
                         <form action="{{ route(Route::currentRouteName()) }}" method="GET" id="historyFilterForm" class="d-flex gap-2 align-items-center">
                             <input type="hidden" name="tab" value="history">
@@ -701,6 +711,7 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function toggleAllCheckboxes(source, className) {
     const checkboxes = document.querySelectorAll('.' + className);
@@ -718,10 +729,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('selectedCount').textContent = checkedBoxes.length;
             
             if (checkedBoxes.length === 0) {
-                alert('Pilih siswa terlebih dahulu!');
-                // Prevent modal show? Bootstrap handles click first, so maybe simple alert is cleaner, 
-                // but let's rely on backend or just disable button if 0?
-                // Better UX: Disable button if 0 checked.
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: 'Pilih siswa terlebih dahulu!',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
             }
         });
     }

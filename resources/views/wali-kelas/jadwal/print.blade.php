@@ -24,16 +24,46 @@
             padding-bottom: 20px;
         }
 
+        .header-school {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 90px;
+            margin-bottom: 12px;
+        }
+
+        .school-logo-img {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 70px;
+            width: auto;
+        }
+
+        .school-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #165fac;
+            margin-bottom: 3px;
+        }
+
+        .school-sub {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .school-address {
+            font-size: 11px;
+            color: #777;
+        }
+
         .header h1 {
             color: #165fac;
             font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .header h2 {
-            color: #333;
-            font-size: 18px;
-            font-weight: normal;
+            margin-bottom: 0;
         }
 
         .info-box {
@@ -192,8 +222,24 @@
     </button>
 
     <div class="header">
+        @php
+            $cabang = $kelas->cabang ?? null;
+            $namaSekolah = $cabang
+                ? strtoupper(preg_replace('/\s*\(?\s*Gedung\s+\w+\s*\)?$/i', '', $cabang->nama_cabang))
+                : 'PKBM HOUSE OF KNOWLEDGE';
+            $alamatCabang = $cabang
+                ? ($cabang->alamat ?? 'Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan')
+                : 'Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan';
+        @endphp
+        <div class="header-school">
+            <img src="{{ asset('img/logo/hok-watermark.png') }}" alt="Logo HOK" class="school-logo-img">
+            <div>
+                <div class="school-name">{{ $namaSekolah }}</div>
+                <div class="school-sub">PUSAT KEGIATAN BELAJAR MASYARAKAT</div>
+                <div class="school-address">{{ $alamatCabang }}</div>
+            </div>
+        </div>
         <h1>JADWAL PELAJARAN</h1>
-        <h2>PKBM House of Knowledge</h2>
     </div>
 
     <div class="info-box">

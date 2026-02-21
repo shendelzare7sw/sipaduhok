@@ -124,7 +124,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                             <td style="padding: 10px 0; color: #64748b;">Status Akun</td>
                             <td style="padding: 10px 0;">
                                 <span style="background: {{ $siswa->user->is_active ? '#dcfce7' : '#fee2e2' }}; color: {{ $siswa->user->is_active ? '#166534' : '#991b1b' }}; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
-                                    {{ $siswa->user->is_active ? '✓ Aktif' : '✗ Non-Aktif' }}
+                                    {!! $siswa->user->is_active ? '<i class="fas fa-check"></i> Aktif' : '<i class="fas fa-times"></i> Non-Aktif' !!}
                                 </span>
                             </td>
                         </tr>

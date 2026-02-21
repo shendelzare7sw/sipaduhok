@@ -7,8 +7,16 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #165fac; padding-bottom: 20px; }
-        .header h1 { color: #165fac; font-size: 24px; margin-bottom: 10px; }
+        .header { margin-bottom: 20px; border-bottom: 3px solid #165fac; padding-bottom: 15px; }
+        .header-inner { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+        .header-text h1 { color: #165fac; font-size: 18px; margin-bottom: 3px; }
+        .header-text h2 { font-size: 13px; font-weight: normal; color: #555; margin-bottom: 2px; }
+        .header-text p { font-size: 11px; color: #777; }
+        .doc-title { text-align: center; font-size: 16px; font-weight: bold; color: #165fac; margin-top: 8px; }
+        .btn-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 999; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+        .btn-print { background: #165fac; color: white; }
+        .btn-close { background: #6b7280; color: white; text-decoration: none; display: flex; align-items: center; }
         .info-box { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
         .info-box div { margin-bottom: 8px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -18,14 +26,18 @@
         .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .summary-item { text-align: center; }
         .summary-item strong { display: block; font-size: 24px; color: #165fac; margin-bottom: 5px; }
-        @media print { body { padding: 10px; } @page { margin: 15mm; } }
+        @media print { body { padding: 10px; } @page { margin: 15mm; } .no-print { display: none !important; } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>REKAP PRESENSI SISWA</h1>
-        <h2>PKBM House of Knowledge</h2>
+    <div class="btn-actions no-print">
+        <button onclick="window.print()" class="btn btn-print">&#128438; Cetak</button>
+        <button onclick="window.close()" class="btn btn-close">Tutup</button>
     </div>
+
+    @include('partials.print-header', ['cabang' => $cabang ?? null])
+
+    <div style="text-align: center; margin-bottom: 15px;"><strong style="font-size: 12pt;">REKAP PRESENSI SISWA</strong></div>
 
     <div class="info-box">
         <div><strong>Kelas:</strong> {{ $kelas->nama_kelas }}</div>
@@ -102,6 +114,5 @@
         </div>
     </div>
 
-    <script>window.print();</script>
 </body>
 </html>

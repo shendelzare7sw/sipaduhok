@@ -175,9 +175,30 @@
                                 @csrf
                                 <input type="hidden" name="semester" value="{{ $semester }}">
                             </form>
-                            <a href="{{ route('guru.lms.nilai.export-excel', [$kelas->id, $mapel->id, 'semester' => $semester]) }}" class="btn btn-sm btn-success" target="_blank">
-                                <i class="fas fa-file-excel me-1"></i> Export Excel
-                            </a>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-file-excel me-1"></i> Excel
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('guru.lms.nilai.export-excel', [$kelas->id, $mapel->id, 'semester' => $semester]) }}" target="_blank">
+                                            <i class="fas fa-download me-2"></i> Export Nilai
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('guru.lms.nilai.download-template', [$kelas->id, $mapel->id, 'semester' => $semester]) }}">
+                                            <i class="fas fa-file-download me-2"></i> Download Template
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal">
+                                            <i class="fas fa-file-upload me-2"></i> Import Nilai
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -452,6 +473,66 @@
             </div>
         </div>
     </div>
+
+    <!-- Import Excel Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('guru.lms.nilai.import-excel', [$kelas->id, $mapel->id]) }}" method="POST" enctype="multipart/form-data" id="importForm">
+                    @csrf
+                    <input type="hidden" name="semester" value="{{ $semester }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importModalLabel">
+                            <i class="fas fa-file-upload me-2"></i>Import Nilai dari Excel
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Panduan Import:</strong>
+                            <ol class="mb-0 mt-2">
+                                <li>Download template Excel terlebih dahulu</li>
+                                <li>Isi nilai siswa pada kolom yang tersedia (0-100)</li>
+                                <li><strong>Jangan mengubah</strong> kolom: No, Nama Siswa, dan NIS/NISN</li>
+                                <li><strong>Kosongkan sel</strong> jika tidak ingin mengubah nilai yang sudah ada</li>
+                                <li><strong>Isi dengan nilai baru</strong> untuk menimpa nilai yang sudah tersimpan</li>
+                                <li>Upload file Excel yang sudah diisi</li>
+                            </ol>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="importFile" class="form-label fw-bold">
+                                <i class="fas fa-file-excel me-1"></i>Pilih File Excel
+                            </label>
+                            <input type="file" class="form-control" id="importFile" name="file" accept=".xlsx,.xls" required>
+                            <div class="form-text">Format: .xlsx atau .xls (Max: 5MB)</div>
+                        </div>
+
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <small>
+                                <strong>Smart Import:</strong>
+                                <ul class="mb-0 mt-1">
+                                    <li>Nilai yang <strong>diisi di Excel</strong> akan menimpa nilai lama</li>
+                                    <li>Nilai yang <strong>kosong di Excel</strong> akan tetap menggunakan nilai lama (tidak tertimpa)</li>
+                                    <li>Anda dapat mengimport hanya sebagian siswa tanpa khawatir menghapus nilai siswa lain</li>
+                                </ul>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="importBtn">
+                            <i class="fas fa-upload me-1"></i> Import Nilai
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -534,5 +615,47 @@ document.addEventListener('DOMContentLoaded', function() {
         var modal = new bootstrap.Modal(document.getElementById('recalculateModal'));
         modal.show();
     }
+
+    // Import Form Validation
+    document.getElementById('importForm')?.addEventListener('submit', function(e) {
+        const fileInput = document.getElementById('importFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            e.preventDefault();
+            alert('Pilih file Excel terlebih dahulu!');
+            return;
+        }
+
+        // Validate file extension
+        const allowedExtensions = /(\.xlsx|\.xls)$/i;
+        if (!allowedExtensions.exec(file.name)) {
+            e.preventDefault();
+            alert('File harus berformat .xlsx atau .xls');
+            fileInput.value = '';
+            return;
+        }
+
+        // Validate file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            e.preventDefault();
+            alert('Ukuran file maksimal 5MB');
+            fileInput.value = '';
+            return;
+        }
+
+        // Show loading state
+        const importBtn = document.getElementById('importBtn');
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Mengimport...';
+        importBtn.disabled = true;
+    });
+
+    // Reset form when modal is closed
+    document.getElementById('importModal')?.addEventListener('hidden.bs.modal', function() {
+        document.getElementById('importForm').reset();
+        const importBtn = document.getElementById('importBtn');
+        importBtn.innerHTML = '<i class="fas fa-upload me-1"></i> Import Nilai';
+        importBtn.disabled = false;
+    });
 </script>
 @endpush

@@ -129,12 +129,7 @@
         </button>
     </div>
 
-    <div class="header">
-        <h1>PKBM HOUSE OF KNOWLEDGE</h1>
-        <h2>SIPADUHOK - Sistem Informasi Akademik</h2>
-        <p>Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan</p>
-        <p>Telp: (021) 123-4567 | Email: info@hok.sch.id</p>
-    </div>
+    @include('partials.print-header', ['cabang' => $cabang ?? null])
 
     <div class="title">
         <h3>LAPORAN PEMBAYARAN BULANAN</h3>

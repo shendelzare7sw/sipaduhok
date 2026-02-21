@@ -235,4 +235,32 @@ class MataPelajaranController extends Controller
             'jenjang' => $jenjang
         ]);
     }
+
+    /**
+     * Print mata pelajaran list, optionally filtered by one or more jenjang.
+     */
+    public function print(Request $request)
+    {
+        $jenjangFilter = $request->input('jenjang');
+
+        // Normalize to array (supports single string or array input from multi-select)
+        if ($jenjangFilter && !is_array($jenjangFilter)) {
+            $jenjangFilter = [$jenjangFilter];
+        }
+
+        $query = MataPelajaran::query()->orderBy('jenjang')->orderBy('nama_mapel');
+
+        if (!empty($jenjangFilter)) {
+            $query->whereIn('jenjang', $jenjangFilter);
+        }
+
+        $mataPelajaranList = $query->get();
+
+        $stats = MataPelajaran::selectRaw('jenjang, count(*) as total')
+            ->groupBy('jenjang')
+            ->orderBy('jenjang')
+            ->pluck('total', 'jenjang');
+
+        return view('admin.mata-pelajaran.print', compact('mataPelajaranList', 'stats', 'jenjangFilter'));
+    }
 }

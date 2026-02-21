@@ -59,11 +59,20 @@ class AiChatbotService
         if (!empty($this->groqApiKey)) {
             $models[] = [
                 'id' => 'llama-3.3-70b-versatile',
-                'name' => 'Llama 3.3 70B (Fast)',
+                'name' => 'Llama 3.3 70B (Recommended)',
                 'provider' => 'groq',
                 'supports_vision' => false,
                 'supports_pdf' => false,
                 'default' => $this->defaultModel === 'llama-3.3-70b-versatile',
+            ];
+
+            $models[] = [
+                'id' => 'llama-3.1-8b-instant',
+                'name' => 'Llama 3.1 8B (Fastest)',
+                'provider' => 'groq',
+                'supports_vision' => false,
+                'supports_pdf' => false,
+                'default' => $this->defaultModel === 'llama-3.1-8b-instant',
             ];
 
             $models[] = [
@@ -72,15 +81,6 @@ class AiChatbotService
                 'provider' => 'groq',
                 'supports_vision' => true,
                 'supports_pdf' => false, // Groq doesn't support PDF
-                'default' => false,
-            ];
-
-            $models[] = [
-                'id' => 'qwen-2.5-32b-instruct',
-                'name' => 'Qwen 2.5 32B',
-                'provider' => 'groq',
-                'supports_vision' => false,
-                'supports_pdf' => false,
                 'default' => false,
             ];
         }
@@ -182,7 +182,7 @@ class AiChatbotService
      */
     private function buildSystemPrompt(string $userRole): string
     {
-        $basePrompt = "Anda adalah asisten virtual SIPADUHOK, sistem informasi PKBM (Pusat Kegiatan Belajar Masyarakat) Indonesia yang membantu pengguna dengan pertanyaan seputar sistem.\n\nJawab dengan:\n- Ramah dan profesional\n- Jelas dan to-the-point dalam Bahasa Indonesia\n- Step-by-step jika prosedur kompleks\n- Jika tidak yakin, arahkan ke menu terkait atau kontak admin";
+        $basePrompt = "Anda adalah asisten virtual SIPADUHOK, sistem informasi PKBM (Pusat Kegiatan Belajar Masyarakat) Indonesia yang membantu pengguna dengan pertanyaan seputar sistem.\n\n**PRINSIP JAWABAN:**\n1. **Ramah & Profesional** - Gunakan Bahasa Indonesia yang sopan dan mudah dipahami\n2. **Konkret & Actionable** - Selalu sebutkan nama menu, tombol, atau link yang harus diklik\n3. **Step-by-step** - Beri panduan langkah demi langkah yang jelas dengan format:\n   • Langkah 1: Klik menu [Nama Menu]\n   • Langkah 2: Pilih [Opsi]\n   • Langkah 3: Isi form dan klik [Tombol]\n4. **Contoh Nyata** - Berikan contoh konkret jika memungkinkan\n5. **Troubleshooting** - Jika ada kemungkinan error, sebutkan solusinya\n6. **Keterbatasan** - Jika tidak yakin 100%, katakan: \"Biasanya prosesnya adalah... Jika berbeda, silakan kontak admin atau coba eksplorasi menu terkait\"\n\n**FORMAT JAWABAN YANG BAIK:**\n```\nUntuk [tujuan user], berikut langkah-langkahnya:\n\n1. Buka menu [X] di sidebar kiri\n2. Klik tombol [Y] di pojok kanan atas\n3. Isi form dengan:\n   - Field A: [keterangan]\n   - Field B: [keterangan]\n4. Klik tombol \"Simpan\" untuk menyimpan data\n\n💡 Tips: [tips tambahan jika ada]\n⚠️ Catatan: [hal penting yang perlu diperhatikan]\n```\n\n**JANGAN:**\n❌ Jawaban terlalu umum seperti \"Silakan akses menu terkait\"\n❌ Tidak menyebutkan nama button/menu yang spesifik\n❌ Asumsi user sudah tahu cara navigasi sistem\n\n**LAKUKAN:**\n✅ Sebutkan nama exact dari menu/button (contoh: \"Klik tombol 'Tambah Ujian' berwarna biru\")\n✅ Jelaskan flow dari awal sampai selesai\n✅ Berikan alternatif jika ada lebih dari satu cara";
 
         $roleContext = match ($userRole) {
             // Role: Guru Pengajar

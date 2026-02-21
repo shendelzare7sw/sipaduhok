@@ -34,7 +34,14 @@ class AiGradingService
         $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
 
         // Auto-fix for decommissioned Groq models
-        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview'])) {
+        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview', 'llama-3.1-70b-versatile'])) {
+            Log::warning("Decommissioned model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
+            $this->model = 'llama-3.3-70b-versatile';
+        }
+
+        // Auto-fix for unavailable Qwen models (not free in Groq)
+        if (str_contains($this->model, 'qwen') || str_contains($this->model, 'mixtral') || str_contains($this->model, 'gemma')) {
+            Log::warning("Qwen/Mixtral/Gemma model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
             $this->model = 'llama-3.3-70b-versatile';
         }
 

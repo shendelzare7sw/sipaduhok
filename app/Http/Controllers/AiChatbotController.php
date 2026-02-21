@@ -210,19 +210,16 @@ class AiChatbotController extends Controller
                 'admin' => [
                     'Cara kelola pengguna?',
                     'Panduan sistem',
-                    'Kontak support',
                 ],
 
                 'bendahara' => [
                     'Cara catat pembayaran?',
                     'Laporan keuangan?',
-                    'Kontak admin',
                 ],
 
                 'wali_kelas' => [
                     'Cara isi rapor?',
                     'Panduan presensi',
-                    'Kontak admin',
                 ],
 
                 'wakil_kepala_sekolah' => [
@@ -234,24 +231,26 @@ class AiChatbotController extends Controller
                 'ketua' => [
                     'Dashboard overview?',
                     'Laporan lengkap?',
-                    'Kontak support',
                 ],
 
                 'sekretaris' => [
                     'Kelola dokumen?',
                     'Arsip data?',
-                    'Kontak admin',
                 ],
 
                 'orang_tua' => [
                     'Cara cek nilai anak?',
                     'Cara bayar SPP?',
-                    'Kontak sekolah',
+                ],
+
+                'siswa' => [
+                    'Cara cek nilai saya?',
+                    'Cara cek tagihan SPP?',
+                    'Jadwal pelajaran saya?',
                 ],
 
                 default => [
                     'Panduan sistem',
-                    'Kontak admin',
                 ],
             };
 

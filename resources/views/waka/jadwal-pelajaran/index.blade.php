@@ -933,7 +933,20 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function showToast(icon, title) {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                toast: true,
+                position: 'top',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true
+            });
+        }
+
         // Toggle select all checkboxes
         function toggleSelectAllJadwal() {
             const selectAll = document.getElementById('select-all-jadwal');
@@ -975,7 +988,7 @@
             const ids = Array.from(checkboxes).map(cb => cb.value);
 
             if (ids.length === 0) {
-                alert('Pilih minimal 1 jadwal untuk dihapus');
+                showToast('warning', 'Pilih minimal 1 jadwal untuk dihapus');
                 return;
             }
 
@@ -994,7 +1007,7 @@
             const ids = Array.from(checkboxes).map(cb => cb.value);
 
             if (ids.length === 0) {
-                alert('Pilih minimal 1 jadwal untuk diubah statusnya');
+                showToast('warning', 'Pilih minimal 1 jadwal untuk diubah statusnya');
                 return;
             }
 
@@ -1015,14 +1028,14 @@
             const idsJson = document.getElementById('bulkStatusModal').getAttribute('data-selected-ids');
 
             if (!idsJson) {
-                alert('Data tidak valid');
+                showToast('error', 'Data tidak valid');
                 return;
             }
 
             // Get selected status from radio buttons
             const statusRadio = document.querySelector('input[name="status_choice"]:checked');
             if (!statusRadio) {
-                alert('Pilih status terlebih dahulu');
+                showToast('warning', 'Pilih status terlebih dahulu');
                 return;
             }
 
@@ -1126,7 +1139,7 @@
         function submitCetakKelas(type) {
             const kelasId = document.getElementById('printKelasId').value;
             if (!kelasId) {
-                alert('Silakan pilih kelas terlebih dahulu!');
+                showToast('warning', 'Silakan pilih kelas terlebih dahulu!');
                 return;
             }
 

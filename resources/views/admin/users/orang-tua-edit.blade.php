@@ -377,8 +377,8 @@
             <div class="form-group">
                 <label class="form-label">Status Akun <span style="color: #ef4444;">*</span></label>
                 <select name="is_active" class="form-control">
-                    <option value="1" {{ $orangTua->is_active ? 'selected' : '' }}>✓ Aktif - Dapat Login</option>
-                    <option value="0" {{ !$orangTua->is_active ? 'selected' : '' }}>✗ Non-Aktif - Tidak Dapat Login</option>
+                    <option value="1" {{ $orangTua->is_active ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Dapat Login</option>
+                    <option value="0" {{ !$orangTua->is_active ? 'selected' : '' }}><i class="fas fa-times"></i> Non-Aktif - Tidak Dapat Login</option>
                 </select>
             </div>
         </div>

@@ -497,4 +497,12 @@ class WakilKepalaSekolahController extends Controller
         $catatan = Catatan::with(['pengirim', 'pembaca'])->findOrFail($id);
         return view('waka.catatan.show', compact('catatan'));
     }
+
+    public function catatanDestroy($id)
+    {
+        $catatan = Catatan::where('pengirim_id', auth()->id())->findOrFail($id);
+        $catatan->delete();
+
+        return redirect()->route('waka.catatan.index')->with('success', 'Catatan berhasil dihapus dari riwayat.');
+    }
 }

@@ -201,7 +201,7 @@ class ManajemenSiswaController extends Controller
 
     public function printKartu(Siswa $siswa)
     {
-        $siswa->load(['kelas', 'cabang']);
+        $siswa->load(['kelas.tahunAjaran', 'cabang', 'studentParents.parent']);
         return view('waka.manajemen-siswa.print-kartu', compact('siswa'));
     }
 

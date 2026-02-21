@@ -343,7 +343,7 @@
                             </div>
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold mb-2">Pilih Metode Pembayaran</label>
+                                <label class="form-label fw-bold mb-2">Pilihan Metode Pembayaran</label>
                                 <div class="row g-2">
                                     {{-- Midtrans Option --}}
                                     @if($infoPembayaran->isMidtransEnabled())
@@ -388,6 +388,16 @@
                                     </div>
                                     {{-- Tunai Option Removed from Selection --}}
                                 </div>
+
+                                    @if(!$infoPembayaran->isMidtransEnabled() && !$infoPembayaran->hasRekeningBank())
+                                        <div class="alert alert-warning d-flex align-items-center mt-3 mb-0" role="alert">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <div class="small">
+                                                <strong>Tidak ada metode pembayaran online yang tersedia.</strong>
+                                                Silakan lakukan pembayaran tunai di sekolah.
+                                            </div>
+                                        </div>
+                                    @endif
                             </div>
 
                             {{-- CONTENT SECTIONS --}}
@@ -488,7 +498,11 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary" id="btnSubmitBulk">
+                            <button type="submit" class="btn btn-primary" id="btnSubmitBulk"
+                                @if(!$infoPembayaran->isMidtransEnabled() && !$infoPembayaran->hasRekeningBank())
+                                    disabled
+                                @endif
+                            >
                                 <i class="fas fa-check-circle me-1"></i>Bayar
                             </button>
                         </div>
@@ -547,11 +561,11 @@
                                         <td class="text-end fw-bold">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
                                         <td>
                                             @if($bayar->metode_pembayaran == 'tunai')
-                                                <span class="badge bg-label-secondary">💵 Tunai</span>
+                                                <span class="badge bg-label-secondary"><i class="fas fa-money-bill-wave me-1"></i> Tunai</span>
                                             @elseif($bayar->metode_pembayaran == 'transfer')
-                                                <span class="badge bg-label-info">🏦 Transfer</span>
+                                                <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Transfer</span>
                                             @elseif($bayar->metode_pembayaran == 'midtrans')
-                                                <span class="badge bg-label-primary">💳 Digital</span>
+                                                <span class="badge bg-label-primary"><i class="fas fa-credit-card me-1"></i> Digital</span>
                                             @endif
                                         </td>
                                         <td class="text-center">

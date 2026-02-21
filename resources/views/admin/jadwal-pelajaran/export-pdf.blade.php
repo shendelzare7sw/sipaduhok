@@ -43,6 +43,28 @@
             padding-bottom: 15px;
         }
 
+        .header-school {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 90px;
+            margin-bottom: 10px;
+        }
+
+        .school-logo-img {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 70px;
+            width: auto;
+        }
+
+        .school-name { font-size: 15px; font-weight: bold; margin-bottom: 2px; }
+        .school-sub { font-size: 11px; margin-bottom: 2px; }
+        .school-address { font-size: 10px; color: #555; }
+
         .header h1 {
             font-size: 18px;
             font-weight: bold;
@@ -177,6 +199,14 @@
     </button>
 
     <div class="header">
+        <div class="header-school">
+            <img src="{{ asset('img/logo/hok-watermark.png') }}" alt="Logo HOK" class="school-logo-img">
+            <div>
+                <div class="school-name">PKBM HOUSE OF KNOWLEDGE</div>
+                <div class="school-sub">PUSAT KEGIATAN BELAJAR MASYARAKAT</div>
+                <div class="school-address">Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan</div>
+            </div>
+        </div>
         <h1>Jadwal Pelajaran</h1>
         <h2>{{ $tahunAjaran ? $tahunAjaran->nama_tahun_ajaran : 'Semua Tahun Ajaran' }}</h2>
         @if($filterInfo['cabang'] || $filterInfo['jenjang'] || $filterInfo['kelas'] || $filterInfo['guru'])

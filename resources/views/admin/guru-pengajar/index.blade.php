@@ -260,16 +260,9 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
             <small class="text-muted">Penugasan guru otomatis dari Jadwal Pelajaran</small>
         </div>
         <div class="d-flex gap-2">
-            <form action="{{ route('admin.guru-pengajar.rebuild') }}" method="POST" style="display: inline;"
-                onsubmit="return confirm('Sinkronkan ulang semua penugasan dari jadwal pelajaran?')">
-                @csrf
-                @if(request('tahun_ajaran_id'))
-                    <input type="hidden" name="tahun_ajaran_id" value="{{ request('tahun_ajaran_id') }}">
-                @endif
-                <button type="submit" class="btn btn-warning">
-                    <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari Jadwal
-                </button>
-            </form>
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalSinkronkan">
+                <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari Jadwal
+            </button>
             <a href="{{ route('admin.guru-pengajar.print', request()->query()) }}"
                class="btn btn-primary"
                target="_blank">
@@ -403,6 +396,45 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 </a>
             </div>
         @endif
+    </div>
+</div>
+
+{{-- Modal Konfirmasi Sinkronisasi --}}
+<div class="modal fade" id="modalSinkronkan" tabindex="-1" aria-labelledby="modalSinkronkanLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning bg-opacity-10">
+                <h5 class="modal-title" id="modalSinkronkanLabel">
+                    <i class="fas fa-sync-alt text-warning me-2"></i>Konfirmasi Sinkronisasi
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex gap-3 align-items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                    <div>
+                        <p class="mb-1"><strong>Apakah Anda yakin ingin menyinkronkan ulang?</strong></p>
+                        <p class="text-muted mb-0 small">Tindakan ini akan memperbarui semua penugasan guru berdasarkan jadwal pelajaran yang aktif. Penugasan yang tidak terdapat di jadwal akan dihapus.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Batal
+                </button>
+                <form action="{{ route('admin.guru-pengajar.rebuild') }}" method="POST" style="display: inline;">
+                    @csrf
+                    @if(request('tahun_ajaran_id'))
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ request('tahun_ajaran_id') }}">
+                    @endif
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-sync-alt me-1"></i>Ya, Sinkronkan
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

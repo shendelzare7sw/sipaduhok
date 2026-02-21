@@ -169,10 +169,15 @@ class CetakLaporanController extends Controller
             $query->where('jenjang', $request->jenjang);
         }
 
+        if ($request->filled('cabang_id')) {
+            $query->where('cabang_id', $request->cabang_id);
+        }
+
         $kelasList = $query->orderBy('jenjang')->orderBy('nama_kelas')->get();
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
+        $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
 
-        return view('admin.cetak-laporan.print-wali-kelas', compact('kelasList', 'tahunAjaran'));
+        return view('admin.cetak-laporan.print-wali-kelas', compact('kelasList', 'tahunAjaran', 'cabang'));
     }
 
     /**

@@ -274,10 +274,18 @@
                                         <span>Telah dibaca oleh <strong class="text-success">{{ $cat->totalPembaca() }}</strong>
                                             pengguna</span>
                                     </div>
-                                    <a href="{{ route('ketua.catatan.show', $cat->id) }}"
-                                        class="btn btn-light border btn-sm font-weight-bold text-primary shadow-sm">
-                                        Lihat Rincian & Grafik <i class="fas fa-arrow-right ml-2"></i>
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ route('ketua.catatan.show', $cat->id) }}"
+                                            class="btn btn-light border btn-sm font-weight-bold text-primary shadow-sm">
+                                            Lihat Rincian <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="confirmDeleteCatatan({{ $cat->id }}, '{{ addslashes($cat->judul) }}')"
+                                            title="Hapus dari riwayat">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -304,4 +312,52 @@
             </div>
         </div>
     </div>
+
+{{-- Delete Confirm Modal --}}
+<div class="modal fade" id="deleteCatatanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Hapus Catatan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <p class="mb-1">Hapus catatan "<strong id="deleteCatatanJudul"></strong>" dari riwayat?</p>
+                <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i>Catatan yang sudah terkirim ke penerima tidak akan terpengaruh.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" id="confirmDeleteCatatanBtn">
+                    <i class="fas fa-trash me-1"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="deleteCatatanForm" method="POST" style="display:none">
+    @csrf
+    @method('DELETE')
+</form>
+
+@endsection
+
+@section('scripts')
+<script>
+function confirmDeleteCatatan(id, judul) {
+    document.getElementById('deleteCatatanJudul').textContent = judul;
+    const modal = new bootstrap.Modal(document.getElementById('deleteCatatanModal'));
+    modal.show();
+    document.getElementById('confirmDeleteCatatanBtn').onclick = function() {
+        const form = document.getElementById('deleteCatatanForm');
+        form.action = '/ketua/catatan/' + id;
+        modal.hide();
+        form.submit();
+    };
+}
+</script>
 @endsection

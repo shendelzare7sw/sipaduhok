@@ -365,25 +365,25 @@ async function loadAvailableModels() {
         const defaultModels = [
             {
                 id: 'llama-3.3-70b-versatile',
-                name: 'Llama 3.3 70B (Fast)',
+                name: 'Llama 3.3 70B (Recommended)',
                 provider: 'groq',
                 supports_vision: false,
                 supports_pdf: false,
                 default: true
             },
             {
-                id: 'meta-llama/llama-4-scout-17b-16e-instruct',
-                name: 'Llama 4 Scout (Vision)',
+                id: 'llama-3.1-8b-instant',
+                name: 'Llama 3.1 8B (Fastest)',
                 provider: 'groq',
-                supports_vision: true,
+                supports_vision: false,
                 supports_pdf: false,
                 default: false
             },
             {
-                id: 'qwen-2.5-32b-instruct',
-                name: 'Qwen 2.5 32B',
+                id: 'meta-llama/llama-4-scout-17b-16e-instruct',
+                name: 'Llama 4 Scout (Vision)',
                 provider: 'groq',
-                supports_vision: false,
+                supports_vision: true,
                 supports_pdf: false,
                 default: false
             }
@@ -422,15 +422,26 @@ function populateModelSelector(models) {
     // Set initial selected model to Groq default (Llama 3.3 70B)
     chatbotState.selectedModel = forcedDefaultId;
 
-    // Restore saved model from localStorage ONLY if user has previously changed it
+    // Restore saved model from localStorage ONLY if it's a Groq model (not Gemini)
+    // Gemini should only be used for vision/PDF, not as default chat model
     const savedModel = localStorage.getItem('selectedChatModel');
     if (savedModel && models.some(m => m.id === savedModel)) {
-        chatbotState.selectedModel = savedModel;
-        selector.value = savedModel;
-        console.log(`[AI Chatbot] Restored saved model: ${savedModel}`);
+        const savedModelInfo = models.find(m => m.id === savedModel);
+
+        // Only restore if saved model is Groq (Llama/Qwen/etc), NOT Gemini
+        // Gemini is for vision/PDF use case only, always reset to Llama for text chat
+        if (savedModelInfo && savedModelInfo.provider === 'groq') {
+            chatbotState.selectedModel = savedModel;
+            selector.value = savedModel;
+            console.log(`[AI Chatbot] ✓ Restored saved Groq model: ${savedModel}`);
+        } else {
+            // Saved model is Gemini or invalid - ignore and use Llama default
+            console.log(`[AI Chatbot] ⚠ Ignoring saved Gemini model, using Llama 3.3 70B default`);
+            localStorage.removeItem('selectedChatModel'); // Clear invalid saved model
+        }
     } else {
         // No saved model - use Llama 3.3 70B as default
-        console.log(`[AI Chatbot] Using forced default model: ${forcedDefaultId} (Groq - Free & Fast)`);
+        console.log(`[AI Chatbot] ✓ Using forced default model: ${forcedDefaultId} (Groq - Free & Fast)`);
     }
 }
 
@@ -910,7 +921,17 @@ function setupEventListeners() {
     if (modelSelector) {
         modelSelector.addEventListener('change', (e) => {
             chatbotState.selectedModel = e.target.value;
-            localStorage.setItem('selectedChatModel', e.target.value);
+
+            // Only save to localStorage if it's a Groq model (not Gemini)
+            // Gemini should only be used temporarily for vision/PDF, not as default preference
+            const selectedModelInfo = chatbotState.availableModels.find(m => m.id === e.target.value);
+            if (selectedModelInfo && selectedModelInfo.provider === 'groq') {
+                localStorage.setItem('selectedChatModel', e.target.value);
+                console.log(`[AI Chatbot] ✓ Saved Groq model preference: ${e.target.value}`);
+            } else if (selectedModelInfo && selectedModelInfo.provider === 'gemini') {
+                // Don't save Gemini to localStorage - it's for temporary vision/PDF use only
+                console.log(`[AI Chatbot] ℹ Gemini selected (temporary for vision/PDF) - not saved as default`);
+            }
         });
     }
 

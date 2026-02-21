@@ -13,6 +13,7 @@ use App\Models\MataPelajaran;
 use App\Models\Tugas;
 use App\Models\TugasSiswa;
 use App\Models\Siswa;
+use App\Services\NotificationService;
 use Spatie\PdfToText\Pdf;
 use Spatie\PdfToImage\Pdf as PdfToImage;
 
@@ -106,6 +107,10 @@ class GuruKoreksiController extends Controller
             'status' => 'dinilai',
         ]);
 
+        // Notify siswa about nilai
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyNilaiUpdate($submission);
+
         return redirect()
             ->route('guru.lms.tugas.koreksi', [$kelasId, $mapelId, $tugasId])
             ->with('success', 'Nilai berhasil disimpan');
@@ -132,6 +137,13 @@ class GuruKoreksiController extends Controller
                 'feedback_guru' => $validated['feedback_guru'],
                 'status' => 'dinilai',
             ]);
+
+        // Notify each siswa about nilai
+        $notificationService = app(NotificationService::class);
+        $submissions = TugasSiswa::whereIn('id', $validated['siswa_ids'])->get();
+        foreach ($submissions as $submission) {
+            $notificationService->notifyNilaiUpdate($submission);
+        }
 
         return redirect()
             ->route('guru.lms.tugas.koreksi', [$kelasId, $mapelId, $tugasId])

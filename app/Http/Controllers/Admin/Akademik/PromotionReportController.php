@@ -196,6 +196,55 @@ class PromotionReportController extends Controller
         ]);
     }
 
+    public function print(Request $request): View
+    {
+        $activeYear = TahunAjaran::where('is_active', true)->firstOrFail();
+        $selectedYearId = $request->get('tahun_ajaran_id', $activeYear->id);
+        $selectedYear = TahunAjaran::find($selectedYearId) ?? $activeYear;
+
+        $stats = DB::table('status_naik_kelas_siswa')
+            ->where('tahun_ajaran_id', $selectedYear->id)
+            ->select('status_kelulusan', DB::raw('count(*) as total'))
+            ->groupBy('status_kelulusan')
+            ->pluck('total', 'status_kelulusan');
+
+        $filterStatus = $request->get('status');
+        $cabangId = $request->get('cabang_id');
+        $kelasId = $request->get('kelas_id');
+
+        $query = DB::table('status_naik_kelas_siswa')
+            ->join('siswa', 'status_naik_kelas_siswa.siswa_id', '=', 'siswa.id')
+            ->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->leftJoin('cabang', 'siswa.cabang_id', '=', 'cabang.id')
+            ->where('status_naik_kelas_siswa.tahun_ajaran_id', $selectedYear->id)
+            ->select(
+                'status_naik_kelas_siswa.*',
+                'siswa.nama_lengkap',
+                'siswa.nis',
+                'cabang.nama_cabang',
+                DB::raw("COALESCE(kelas.nama_kelas, status_naik_kelas_siswa.kelas_asal) as kelas_current")
+            );
+
+        if ($filterStatus) $query->where('status_naik_kelas_siswa.status_kelulusan', $filterStatus);
+        if ($cabangId) $query->where('siswa.cabang_id', $cabangId);
+        if ($kelasId) {
+            $query->where(function($q) use ($kelasId) {
+                $q->where('status_naik_kelas_siswa.kelas_asal', $kelasId)
+                  ->orWhere('siswa.kelas_id', $kelasId);
+            });
+        }
+
+        $students = $query->orderBy('status_naik_kelas_siswa.kelas_asal')
+            ->orderBy('siswa.nama_lengkap')
+            ->get();
+
+        $cabang = $cabangId ? \App\Models\Cabang::find($cabangId) : null;
+
+        return view('admin.akademik.promotion.print', compact(
+            'stats', 'students', 'selectedYear', 'filterStatus', 'cabang'
+        ));
+    }
+
     public function execute(Request $request)
     {
         // Require context year to be passed

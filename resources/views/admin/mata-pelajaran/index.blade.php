@@ -116,6 +116,9 @@
 
                 {{-- Add Button --}}
                 <div class="d-flex gap-2">
+                    <a href="{{ route('admin.mata-pelajaran.print', request()->only('jenjang')) }}" target="_blank" class="btn btn-outline-secondary">
+                        <i class="fas fa-print me-1"></i> Cetak
+                    </a>
                     <a href="{{ route('admin.mata-pelajaran.import') }}" class="btn btn-success">
                         <i class="fas fa-file-import me-1"></i> Import Excel
                     </a>

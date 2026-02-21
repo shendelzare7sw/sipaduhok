@@ -15,8 +15,13 @@
         }
 
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .header-school { position: relative; display: flex; align-items: center; justify-content: center; padding: 0 90px; margin-bottom: 10px; }
+        .school-logo-img { position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 70px; width: auto; }
+        .school-name { font-size: 15px; font-weight: bold; margin-bottom: 2px; }
+        .school-sub { font-size: 11px; margin-bottom: 2px; }
+        .school-address { font-size: 10px; color: #555; }
         .header h1 { font-size: 18px; margin-bottom: 5px; text-transform: uppercase; }
-        .header h2 { font-size: 14px; font-weight: normal; margin-bottom: 5px; }
+        .header p { font-size: 12px; color: #444; }
 
         .kelas-info { margin-bottom: 15px; }
         .kelas-info table { width: 100%; border-collapse: collapse; }
@@ -54,12 +59,27 @@
         $days = $scheduleGrid['days'];
         $rows = $scheduleGrid['rows'];
         $colWidth = 90 / count($days);
+
+        $cabangJadwal = $kelas->cabang ?? null;
+        $namaSekolahJadwal = $cabangJadwal
+            ? strtoupper(preg_replace('/\s*\(?\s*Gedung\s+\w+\s*\)?$/i', '', $cabangJadwal->nama_cabang))
+            : 'PKBM HOUSE OF KNOWLEDGE';
+        $alamatJadwal = $cabangJadwal
+            ? ($cabangJadwal->alamat ?? 'Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan')
+            : 'Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan';
     @endphp
 
     {{-- Header --}}
     <div class="header">
+        <div class="header-school">
+            <img src="{{ asset('img/logo/hok-watermark.png') }}" alt="Logo HOK" class="school-logo-img">
+            <div>
+                <div class="school-name">{{ $namaSekolahJadwal }}</div>
+                <div class="school-sub">PUSAT KEGIATAN BELAJAR MASYARAKAT</div>
+                <div class="school-address">{{ $alamatJadwal }}</div>
+            </div>
+        </div>
         <h1>Jadwal Pelajaran</h1>
-        <h2>{{ $kelas->cabang->nama_cabang }}</h2>
         <p>Tahun Ajaran: {{ $currentTahunAjaran->nama_tahun_ajaran }}</p>
     </div>
 

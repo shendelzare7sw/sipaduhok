@@ -10,7 +10,7 @@
                 <div class="avatar avatar-xl mx-auto mb-3">
                     <img src="{{ $siswa->foto_profil ?? asset('assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
                 </div>
-                <h3 class="fw-bold text-primary mb-2">Selamat, {{ $siswa->nama_lengkap }}! 🎓</h3>
+                <h3 class="fw-bold text-primary mb-2">Selamat, {{ $siswa->nama_lengkap }}! <i class="fas fa-graduation-cap"></i></h3>
                 <p class="text-muted mb-4">Anda telah dinyatakan <strong>LULUS</strong> dari PKBM House of Knowledge.</p>
                 <div class="alert alert-success d-flex align-items-center justify-content-center" role="alert">
                     <i class="bx bx-check-circle me-2"></i>

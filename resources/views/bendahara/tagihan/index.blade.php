@@ -10,6 +10,25 @@
 
 @section('styles')
 <style>
+    /* Card & Layout */
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: none;
+        margin-bottom: 24px;
+    }
+
+    .card-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        border-radius: 12px 12px 0 0;
+    }
+
     /* Styling Tabel & UI */
     .table thead th {
         background: #f8f9fc;
@@ -37,6 +56,144 @@
         font-weight: 800;
         border: 1px solid #e2e8f0;
     }
+
+    /* Buttons */
+    .btn-secondary {
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+        color: #1e293b;
+        text-decoration: none;
+    }
+
+    /* Search Form */
+    .search-form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        position: relative;
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-input {
+        padding: 8px 36px 8px 36px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 14px;
+        width: 240px;
+        transition: all 0.2s;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 8px;
+        background: #f1f5f9;
+        border: none;
+        border-radius: 4px;
+        color: #64748b;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 12px;
+        transition: all 0.2s;
+        display: none;
+    }
+
+    .clear-search:hover {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .clear-search.show {
+        display: block;
+    }
+
+    /* Filter Dropdown */
+    .filter-dropdown .dropdown-menu {
+        min-width: 320px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 16px;
+    }
+
+    .filter-dropdown .dropdown-header {
+        padding: 0 0 8px 0;
+        margin-bottom: 12px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 16px !important;
+            padding: 16px;
+        }
+
+        #filterForm {
+            flex-direction: column;
+            width: 100%;
+            align-items: stretch !important;
+            gap: 12px !important;
+        }
+
+        .dropdown {
+            width: 100%;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            justify-content: space-between;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-dropdown .dropdown-menu {
+            width: 100%;
+            max-width: none;
+        }
+
+        .search-input-wrapper {
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100% !important;
+        }
+    }
 </style>
 @endsection
 
@@ -44,83 +201,7 @@
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
 <div class="container-fluid px-0">
 
-    {{-- FILTER BOX --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter & Cari Data</h6>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('bendahara.tagihan.index') }}" method="GET">
-                <div class="row align-items-end">
-                    <div class="col-md-3 mb-2">
-                        <label class="small fw-bold">TAHUN AJARAN</label>
-                        <select name="tahun_ajaran_id" class="form-control form-control-sm border-start border-info border-3 shadow-sm" onchange="this.form.submit()">
-                            @foreach($allTahunAjaran as $ta)
-                                <option value="{{ $ta->id }}" {{ ($selectedYear->id ?? '') == $ta->id ? 'selected' : '' }}>
-                                    {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label class="small fw-bold">BERDASARKAN KELAS</label>
-                        <select name="kelas_id" class="form-control form-control-sm border-start border-primary border-3 shadow-sm">
-                            <option value="">-- Semua Kelas --</option>
-                            @foreach($kelasList as $kelas)
-                                <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
-                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label class="small fw-bold">CARI NAMA SISWA / NISN</label>
-                        <div class="input-group input-group-sm">
-                            <input type="text" name="search" class="form-control border-start border-primary border-3 shadow-sm" placeholder="Ketik nama atau NISN..." value="{{ $filters['search'] ?? '' }}">
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <button type="submit" class="btn btn-primary btn-sm px-4 shadow-sm fw-bold">
-                            <i class="fas fa-search me-1"></i> Cari
-                        </button>
-                        <a href="{{ route('bendahara.tagihan.index') }}" class="btn btn-light btn-sm border px-3 ms-1 fw-bold text-gray-700">
-                            <i class="fas fa-redo me-1"></i> Reset
-                        </a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    {{-- ACTION BAR & INFO --}}
-    <div class="row align-items-center mb-3">
-        <div class="col-md-6">
-            <span class="text-gray-600 small fw-bold">
-                <i class="fas fa-user-graduate me-1"></i> Menampilkan {{ $siswaList->count() }} dari {{ $siswaList->total() }} siswa terdaftar
-            </span>
-        </div>
-        <div class="col-md-6 text-end">
-            <div class="btn-group shadow-sm me-2" role="group">
-                <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-plus-circle me-1"></i> Buat Tagihan
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.bulk-create') }}">
-                        <i class="fas fa-users text-success me-2"></i> Tagihan Massal (Per Kelas)
-                    </a></li>
-                    <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.create-custom') }}">
-                        <i class="fas fa-user-plus text-primary me-2"></i> Tagihan Custom (Individual)
-                    </a></li>
-                    <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.generate-spp') }}">
-                        <i class="fas fa-calendar-alt text-info me-2"></i> Generate SPP Bulanan
-                    </a></li>
-                </ul>
-            </div>
-            <a href="{{ route('bendahara.tagihan.duplicate') }}" class="btn btn-outline-info btn-sm shadow-sm fw-bold px-3">
-                <i class="fas fa-copy me-1"></i> Duplikasi
-            </a>
-        </div>
-    </div>
 
     {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
     @if(!empty($tunggakanSummary))
@@ -150,6 +231,102 @@
 
     {{-- TABEL UTAMA --}}
     <div class="card shadow mb-4">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+            {{-- Left Group: Title & Filter --}}
+            <div class="d-flex flex-wrap align-items-center gap-3 w-100-mobile">
+                {{-- Title --}}
+                <div>
+                    <h6 class="mb-0 fw-bold text-primary">
+                        <i class="fas fa-list me-2"></i>Daftar Tagihan Siswa
+                    </h6>
+                    <small class="text-muted">{{ $siswaList->total() }} siswa terdaftar</small>
+                </div>
+
+                {{-- Filter Form --}}
+                <form action="{{ route('bendahara.tagihan.index') }}" method="GET" id="filterForm" class="d-flex gap-2 align-items-center w-100-mobile">
+                    {{-- Filter Dropdown --}}
+                    <div class="dropdown filter-dropdown w-100-mobile">
+                        <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown"
+                            data-bs-toggle="dropdown" aria-expanded="false"
+                            data-bs-auto-close="outside" data-bs-display="static">
+                            <span><i class="fas fa-filter me-1"></i> Filter</span>
+                        </button>
+                        <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="z-index: 9999;">
+                            <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+
+                            {{-- Filter Tahun Ajaran --}}
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold">Tahun Ajaran</label>
+                                <select name="tahun_ajaran_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    @foreach($allTahunAjaran as $ta)
+                                        <option value="{{ $ta->id }}" {{ ($selectedYear->id ?? '') == $ta->id ? 'selected' : '' }}>
+                                            {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Filter Kelas --}}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Kelas</label>
+                                <select name="kelas_id" class="form-select form-select-sm">
+                                    <option value="">Semua Kelas</option>
+                                    @foreach($kelasList as $kelas)
+                                        <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
+                                            {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+                                <a href="{{ route('bendahara.tagihan.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Search Input --}}
+                    <div class="search-input-wrapper w-100-mobile">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" name="search" id="searchInput" class="search-input"
+                            placeholder="Cari nama/NISN..." value="{{ $filters['search'] ?? '' }}"
+                            autocomplete="off">
+                        <button type="button" class="clear-search {{ ($filters['search'] ?? '') ? 'show' : '' }}"
+                            id="clearSearch" title="Hapus pencarian">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Right Group: Action Buttons --}}
+            <div class="d-flex gap-2 action-group-mobile">
+                <a href="{{ route('bendahara.tagihan.cetak-laporan', request()->query()) }}"
+                   class="btn btn-outline-secondary btn-sm shadow-sm fw-bold" target="_blank">
+                    <i class="fas fa-print me-1"></i> Cetak Laporan
+                </a>
+                <div class="btn-group shadow-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle fw-bold" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus-circle me-1"></i> Buat Tagihan
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.bulk-create') }}">
+                            <i class="fas fa-users text-success me-2"></i> Tagihan Massal
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.create-custom') }}">
+                            <i class="fas fa-user-plus text-primary me-2"></i> Tagihan Custom
+                        </a></li>
+                        <li><a class="dropdown-item" href="{{ route('bendahara.tagihan.generate-spp') }}">
+                            <i class="fas fa-calendar-alt text-info me-2"></i> Generate SPP
+                        </a></li>
+                    </ul>
+                </div>
+                <a href="{{ route('bendahara.tagihan.duplicate') }}" class="btn btn-outline-info btn-sm shadow-sm fw-bold">
+                    <i class="fas fa-copy me-1"></i> Duplikasi
+                </a>
+            </div>
+        </div>
         <div class="card-body p-0">
             @if($siswaList->isEmpty())
                 <div class="text-center py-5 text-muted opacity-50">
@@ -219,6 +396,9 @@
                                             <a href="{{ route('bendahara.pembayaran.riwayat-siswa', $siswa->id) }}" class="btn btn-sm btn-success" title="Riwayat Bayar">
                                                 <i class="fas fa-history"></i>
                                             </a>
+                                            <a href="{{ route('bendahara.tagihan.cetak', $siswa->id) }}" class="btn btn-sm btn-secondary" title="Cetak Tagihan" target="_blank">
+                                                <i class="fas fa-print"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -246,4 +426,30 @@
     </div>
 </div>
 </div>
+
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+
+    // Show/hide clear button
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                clearSearch.classList.add('show');
+            } else {
+                clearSearch.classList.remove('show');
+            }
+        });
+    }
+
+    // Clear search
+    if (clearSearch) {
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            clearSearch.classList.remove('show');
+            searchInput.focus();
+        });
+    }
+</script>
 @endsection

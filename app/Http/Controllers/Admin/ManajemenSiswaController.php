@@ -7,6 +7,7 @@ use App\Models\Siswa;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\Cabang;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class ManajemenSiswaController extends Controller
@@ -151,6 +152,11 @@ class ManajemenSiswaController extends Controller
         $siswa->update(['kelas_id' => $validated['kelas_id']]);
 
         if ($validated['kelas_id']) {
+            // Notify siswa and orang tua about class assignment
+            $siswa->refresh()->load('kelas');
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyPlottingSiswa($siswa);
+
             $newKelas = Kelas::find($validated['kelas_id']);
             return back()->with('success', "Siswa {$siswa->nama_lengkap} berhasil dipindahkan ke kelas {$newKelas->nama_kelas}!");
         } else {
@@ -180,6 +186,13 @@ class ManajemenSiswaController extends Controller
         }
 
         Siswa::whereIn('id', $validated['siswa_ids'])->update(['kelas_id' => $validated['kelas_id']]);
+
+        // Notify each siswa and orang tua about class assignment
+        $notificationService = app(NotificationService::class);
+        $siswaList = Siswa::whereIn('id', $validated['siswa_ids'])->with('kelas')->get();
+        foreach ($siswaList as $siswa) {
+            $notificationService->notifyPlottingSiswa($siswa);
+        }
 
         return back()->with('success', "Berhasil memindahkan {$newCount} siswa ke kelas {$kelas->nama_kelas}!");
     }
@@ -362,7 +375,7 @@ class ManajemenSiswaController extends Controller
      */
     public function printKartu(Siswa $siswa)
     {
-        $siswa->load(['cabang', 'kelas.tahunAjaran']);
+        $siswa->load(['cabang', 'kelas.tahunAjaran', 'studentParents.parent']);
         return view('admin.manajemen-siswa.print-kartu', compact('siswa'));
     }
 

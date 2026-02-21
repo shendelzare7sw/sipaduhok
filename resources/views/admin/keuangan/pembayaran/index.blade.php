@@ -75,6 +75,25 @@
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         }
 
+        /* Card & Layout */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-radius: 12px 12px 0 0;
+        }
+
         /* Table Styling */
         .table thead th {
             background-color: #f8f9fc;
@@ -96,6 +115,144 @@
             border-radius: 50px;
             font-weight: 700;
             font-size: 11px;
+        }
+
+        /* Buttons */
+        .btn-secondary {
+            background: white;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #1e293b;
+            text-decoration: none;
+        }
+
+        /* Search Form */
+        .search-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            position: relative;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 8px 36px 8px 36px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 240px;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 8px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 4px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 12px;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .clear-search:hover {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .clear-search.show {
+            display: block;
+        }
+
+        /* Filter Dropdown */
+        .filter-dropdown .dropdown-menu {
+            min-width: 320px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+        }
+
+        .filter-dropdown .dropdown-header {
+            padding: 0 0 8px 0;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .card-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 16px !important;
+                padding: 16px;
+            }
+
+            #filterForm {
+                flex-direction: column;
+                width: 100%;
+                align-items: stretch !important;
+                gap: 12px !important;
+            }
+
+            .dropdown {
+                width: 100%;
+            }
+
+            .dropdown-toggle {
+                width: 100%;
+                justify-content: space-between;
+                display: flex;
+                align-items: center;
+            }
+
+            .filter-dropdown .dropdown-menu {
+                width: 100%;
+                max-width: none;
+            }
+
+            .search-input-wrapper {
+                width: 100%;
+            }
+
+            .search-input {
+                width: 100% !important;
+            }
         }
     </style>
 @endsection
@@ -138,84 +295,98 @@
                 </div>
             </div>
 
-            {{-- Filter Section --}}
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter Pencarian Pembayaran</h6>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('admin.keuangan.pembayaran.index') }}" method="GET">
-                        <div class="row">
-                            <div class="col-md-3 mb-2">
-                                <label class="small fw-bold">STATUS</label>
-                                <select name="status"
-                                    class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                                    <option value="">Semua Status</option>
-                                    <option value="pending" {{ ($filters['status'] ?? '') == 'pending' ? 'selected' : '' }}>
-                                        Pending</option>
-                                    <option value="disetujui" {{ ($filters['status'] ?? '') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
-                                    <option value="ditolak" {{ ($filters['status'] ?? '') == 'ditolak' ? 'selected' : '' }}>
-                                        Ditolak</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label class="small fw-bold">METODE</label>
-                                <select name="metode"
-                                    class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                                    <option value="">Semua Metode</option>
-                                    <option value="tunai" {{ ($filters['metode'] ?? '') == 'tunai' ? 'selected' : '' }}>Tunai
-                                    </option>
-                                    <option value="transfer" {{ ($filters['metode'] ?? '') == 'transfer' ? 'selected' : '' }}>
-                                        Transfer</option>
-                                    <option value="midtrans" {{ ($filters['metode'] ?? '') == 'midtrans' ? 'selected' : '' }}>
-                                        Midtrans</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label class="small fw-bold">KELAS</label>
-                                <select name="kelas_id"
-                                    class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach($kelasList as $kelas)
-                                        <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
-                                            {{ $kelas->nama_kelas }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label class="small fw-bold">CARI SISWA/KODE</label>
-                                <input type="text" name="search" class="form-control form-control-sm shadow-sm"
-                                    placeholder="Nama/Kode..." value="{{ $filters['search'] ?? '' }}">
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label class="small fw-bold">DARI TANGGAL</label>
-                                <input type="date" name="tanggal_dari" class="form-control form-control-sm shadow-sm"
-                                    value="{{ $filters['tanggal_dari'] ?? '' }}">
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label class="small fw-bold">SAMPAI TANGGAL</label>
-                                <input type="date" name="tanggal_sampai" class="form-control form-control-sm shadow-sm"
-                                    value="{{ $filters['tanggal_sampai'] ?? '' }}">
-                            </div>
-                            <div class="col-md-6 mb-2 text-end align-self-end">
-                                <button type="submit" class="btn btn-primary btn-sm px-4 shadow-sm fw-bold">
-                                    <i class="fas fa-search me-1"></i> Cari Transaksi
-                                </button>
-                                <a href="{{ route('admin.keuangan.pembayaran.index') }}"
-                                    class="btn btn-light btn-sm border px-3 ms-2 fw-bold text-gray-800">
-                                    <i class="fas fa-sync me-1"></i> Reset
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
 
             {{-- Tabel Pembayaran --}}
             <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Rincian Transaksi Masuk</h6>
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    {{-- Left Group: Title & Filter --}}
+                    <div class="d-flex flex-wrap align-items-center gap-3 w-100-mobile">
+                        {{-- Title --}}
+                        <div>
+                            <h6 class="mb-0 fw-bold text-primary">
+                                <i class="fas fa-list me-2"></i>Rincian Transaksi Masuk
+                            </h6>
+                            <small class="text-muted">Total: {{ $pembayaranList->total() }} transaksi</small>
+                        </div>
+
+                        {{-- Filter Form --}}
+                        <form action="{{ route('admin.keuangan.pembayaran.index') }}" method="GET" id="filterForm" class="d-flex gap-2 align-items-center w-100-mobile">
+                            {{-- Filter Dropdown --}}
+                            <div class="dropdown filter-dropdown w-100-mobile">
+                                <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false"
+                                    data-bs-auto-close="outside" data-bs-display="static">
+                                    <span><i class="fas fa-filter me-1"></i> Filter</span>
+                                </button>
+                                <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="z-index: 9999;">
+                                    <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
+
+                                    {{-- Filter Status --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Status Validasi</label>
+                                        <select name="status" class="form-select form-select-sm">
+                                            <option value="">Semua Status</option>
+                                            <option value="pending" {{ ($filters['status'] ?? '') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="disetujui" {{ ($filters['status'] ?? '') == 'disetujui' ? 'selected' : '' }}>Disetujui</option>
+                                            <option value="ditolak" {{ ($filters['status'] ?? '') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Filter Metode --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Metode Pembayaran</label>
+                                        <select name="metode" class="form-select form-select-sm">
+                                            <option value="">Semua Metode</option>
+                                            <option value="tunai" {{ ($filters['metode'] ?? '') == 'tunai' ? 'selected' : '' }}>Tunai</option>
+                                            <option value="transfer" {{ ($filters['metode'] ?? '') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                                            <option value="midtrans" {{ ($filters['metode'] ?? '') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Filter Kelas --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Kelas</label>
+                                        <select name="kelas_id" class="form-select form-select-sm">
+                                            <option value="">Semua Kelas</option>
+                                            @foreach($kelasList as $kelas)
+                                                <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
+                                                    {{ $kelas->nama_kelas }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- Filter Tanggal --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Dari Tanggal</label>
+                                        <input type="date" name="tanggal_dari" class="form-control form-control-sm" value="{{ $filters['tanggal_dari'] ?? '' }}">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Sampai Tanggal</label>
+                                        <input type="date" name="tanggal_sampai" class="form-control form-control-sm" value="{{ $filters['tanggal_sampai'] ?? '' }}">
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm">Terapkan Filter</button>
+                                        <a href="{{ route('admin.keuangan.pembayaran.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Search Input --}}
+                            <div class="search-input-wrapper w-100-mobile">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" name="search" id="searchInput" class="search-input"
+                                    placeholder="Cari siswa/kode..." value="{{ $filters['search'] ?? '' }}"
+                                    autocomplete="off">
+                                <button type="button" class="clear-search {{ ($filters['search'] ?? '') ? 'show' : '' }}"
+                                    id="clearSearch" title="Hapus pencarian">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     @if($pembayaranList->isEmpty())
@@ -329,4 +500,30 @@
 
         </div>
     </div>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+
+        // Show/hide clear button
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    clearSearch.classList.add('show');
+                } else {
+                    clearSearch.classList.remove('show');
+                }
+            });
+        }
+
+        // Clear search
+        if (clearSearch) {
+            clearSearch.addEventListener('click', function() {
+                searchInput.value = '';
+                clearSearch.classList.remove('show');
+                searchInput.focus();
+            });
+        }
+    </script>
 @endsection

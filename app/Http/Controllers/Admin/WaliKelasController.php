@@ -8,6 +8,7 @@ use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
 use App\Models\Cabang;
 use App\Models\WaliKelasAssignment;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
 class WaliKelasController extends Controller
@@ -140,7 +141,7 @@ class WaliKelasController extends Controller
             }
 
             // Create new assignment (NOT replacing old ones)
-            WaliKelasAssignment::create([
+            $waliKelasAssignment = WaliKelasAssignment::create([
                 'tenaga_pendidik_id' => $waliKelasId,
                 'kelas_id' => $kelas->id,
                 'assigned_at' => now(),
@@ -148,6 +149,10 @@ class WaliKelasController extends Controller
 
             // Also update the legacy wali_kelas_id field for backward compatibility
             $kelas->update(['wali_kelas_id' => $waliKelasId]);
+
+            // Notify guru about wali kelas assignment
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyWaliKelasAssignment($waliKelasAssignment);
 
             $newWali = TenagaPendidik::find($waliKelasId);
             return back()->with('success', "Berhasil menambahkan {$newWali->nama_lengkap} sebagai Wali Kelas {$kelas->nama_kelas}!");
@@ -273,6 +278,8 @@ class WaliKelasController extends Controller
 
         $tahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
-        return view('admin.wali-kelas.print', compact('kelasList', 'tahunAjaran'));
+        $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
+
+        return view('admin.wali-kelas.print', compact('kelasList', 'tahunAjaran', 'cabang'));
     }
 }

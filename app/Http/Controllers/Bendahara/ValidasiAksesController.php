@@ -9,6 +9,7 @@ use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 
 class ValidasiAksesController extends Controller
@@ -148,6 +149,10 @@ class ValidasiAksesController extends Controller
                 'validasi_ujian_oleh' => auth()->id(),
             ]);
 
+            // Notify orang tua and siswa
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyValidasiAksesUjian($siswa, 'disetujui');
+
             DB::commit();
             return redirect()->back()->with('success', "Akses ujian untuk {$siswa->nama_lengkap} berhasil divalidasi.");
         } catch (\Exception $e) {
@@ -174,6 +179,10 @@ class ValidasiAksesController extends Controller
                 'tanggal_validasi_ujian_wali' => null,
             ]);
 
+            // Notify orang tua and siswa
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyValidasiAksesUjian($siswa, 'dibatalkan');
+
             DB::commit();
             return redirect()->back()->with('success', "Validasi akses ujian untuk {$siswa->nama_lengkap} dibatalkan.");
         } catch (\Exception $e) {
@@ -196,6 +205,10 @@ class ValidasiAksesController extends Controller
                 'tanggal_validasi_rapor_bendahara' => now(),
                 'validasi_rapor_oleh' => auth()->id(),
             ]);
+
+            // Notify orang tua
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyValidasiAksesRapor($siswa, 'disetujui');
 
             DB::commit();
             return redirect()->back()->with('success', "Akses rapor untuk {$siswa->nama_lengkap} berhasil divalidasi.");
@@ -227,6 +240,10 @@ class ValidasiAksesController extends Controller
                 'tanggal_validasi_rapor_ketua' => null,
                 'validasi_rapor_ketua_oleh' => null,
             ]);
+
+            // Notify orang tua
+            $notificationService = app(NotificationService::class);
+            $notificationService->notifyValidasiAksesRapor($siswa, 'dibatalkan');
 
             DB::commit();
             return redirect()->back()->with('success', "Validasi akses rapor untuk {$siswa->nama_lengkap} dibatalkan.");

@@ -262,55 +262,58 @@ class NilaiController extends Controller
         }
 
         $kelas->load(['siswa', 'tahunAjaran', 'cabang']);
-        
+        $cabang = $kelas->cabang;
+
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap', 'asc')
             ->get();
-        
+
         $selectedMapelId = $request->get('mata_pelajaran_id', null);
-        
+
         if ($selectedMapelId) {
             $selectedMapel = MataPelajaran::find($selectedMapelId);
-            
+
             if (!$selectedMapel) {
                 abort(404, 'Mata pelajaran tidak ditemukan');
             }
-            
+
             $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
             $semester = $request->get('semester', Nilai::getCurrentSemester());
-            
+
             $nilaiData = Nilai::where('kelas_id', $kelas->id)
                 ->where('mata_pelajaran_id', $selectedMapelId)
                 ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
                 ->where('semester', $semester)
                 ->get()
                 ->keyBy('siswa_id');
-            
+
             /*
             $pdf = Pdf::loadView('wali-kelas.nilai.print-detail', compact(
                 'kelas',
                 'siswaList',
                 'selectedMapel',
                 'nilaiData',
-                'wali'
+                'wali',
+                'cabang'
             ));
-            
+
             return $pdf->stream('Rekap_Nilai_' . $selectedMapel->nama_mapel . '_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
             */
-            
+
             return view('wali-kelas.nilai.print-detail', compact(
                 'kelas',
                 'siswaList',
                 'selectedMapel',
                 'nilaiData',
-                'wali'
+                'wali',
+                'cabang'
             ));
-            
+
         } else {
             $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
             $semester = $request->get('semester', Nilai::getCurrentSemester());
-            
+
             // Get mapel IDs that actually have grades for this student/class in this active year
             $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
                 ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
@@ -326,37 +329,104 @@ class NilaiController extends Controller
                 ->where('is_active', true)
                 ->orderBy('nama_mapel', 'asc')
                 ->get();
-            
+
             $allNilai = Nilai::where('kelas_id', $kelas->id)
                 ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
                 ->where('semester', $semester)
                 ->with('mataPelajaran')
                 ->get();
-            
+
             $allNilaiData = $allNilai;
-            
+
             /*
             $pdf = Pdf::loadView('wali-kelas.nilai.print-all', compact(
                 'kelas',
                 'siswaList',
                 'mataPelajaranList',
                 'allNilaiData',
-                'wali'
+                'wali',
+                'cabang'
             ));
-            
+
             return $pdf->stream('Rekap_Nilai_Semua_Mapel_' . $kelas->nama_kelas . '.pdf', ['Attachment' => 0]);
             */
-            
+
             return view('wali-kelas.nilai.print-all', compact(
                 'kelas',
                 'siswaList',
                 'mataPelajaranList',
                 'allNilaiData',
-                'wali'
+                'wali',
+                'cabang'
             ));
         }
     }
     
+    /**
+     * Print rekap nilai per siswa (standalone print view with logo)
+     */
+    public function printSiswa(Request $request, $siswaId)
+    {
+        $wali = $this->getTenagaPendidik();
+
+        if (!$wali) {
+            return redirect()->route('wali.dashboard')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
+
+        if (!$kelas) {
+            abort(404, 'Kelas tidak ditemukan');
+        }
+
+        $kelas->load(['tahunAjaran', 'cabang']);
+        $cabang = $kelas->cabang;
+
+        $siswa = Siswa::where('id', $siswaId)
+            ->where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->firstOrFail();
+
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $semester = $request->get('semester', Nilai::getCurrentSemester());
+
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $semester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+
+        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
+                $q->where('jenjang', $kelas->jenjang)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
+            ->where('is_active', true)
+            ->orderBy('nama_mapel', 'asc')
+            ->get()
+            ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
+
+        $nilaiData = Nilai::where('siswa_id', $siswaId)
+            ->where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $semester)
+            ->get()
+            ->keyBy('mata_pelajaran_id');
+
+        return view('wali-kelas.nilai.print', compact(
+            'siswa',
+            'kelas',
+            'mataPelajaranList',
+            'nilaiData',
+            'cabang'
+        ));
+    }
+
     /**
      * Edit nilai siswa
      */

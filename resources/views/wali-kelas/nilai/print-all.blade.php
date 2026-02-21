@@ -94,10 +94,9 @@
     </button>
 
     <div class="page-container">
-        <div class="header">
-            <h1>REKAPITULASI NILAI AKADEMIK</h1>
-            <h2>{{ config('app.name', 'SIPADUHOK') }}</h2>
-        </div>
+        @include('partials.print-header', ['cabang' => $cabang ?? null])
+
+        <div style="text-align: center; margin-bottom: 15px;"><h1>REKAPITULASI NILAI AKADEMIK</h1></div>
 
 
     <div class="info">

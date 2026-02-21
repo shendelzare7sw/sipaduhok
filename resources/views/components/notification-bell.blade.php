@@ -77,18 +77,52 @@
     /* Notification Bell Button Hover Fix */
     .notification-bell-btn {
         color: #555;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        /* Kotak dengan rounded corners */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background-color: rgba(0, 0, 0, 0.05);
+        /* Light background untuk visibility */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        /* Subtle shadow */
+        border: 1px solid transparent;
+        /* Prepare border for hover */
+        padding: 0 !important;
+        /* Remove default Bootstrap padding */
+        line-height: 1 !important;
+        /* Reset line height */
+    }
+
+    .notification-bell-btn i {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 !important;
+        /* Remove any margin */
     }
 
     .notification-bell-btn:hover {
+        background-color: rgba(0, 0, 0, 0.12);
+        /* Darker background on hover */
         color: #fbbf24 !important;
         /* Yellow/amber on hover */
-        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        /* Enhanced shadow */
+        transform: translateY(-2px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        /* Border saat hover */
     }
 
     .notification-bell-btn:focus {
         color: #fbbf24 !important;
-        box-shadow: none;
+        background-color: rgba(0, 0, 0, 0.12);
+        box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        /* Yellow glow on focus */
+        border: 1px solid rgba(0, 0, 0, 0.1);
     }
 </style>
 
@@ -144,32 +178,38 @@
             const unreadClass = notif.read_at ? '' : 'unread';
             const colorClass = notif.color || 'secondary';
             const iconClass = notif.icon || 'fas fa-bell';
+            const notifLink = notif.link || '{{ route("notifications.index") }}';
 
             html += `
-            <a href="${notif.link || '#'}" class="notification-item d-flex align-items-start text-decoration-none text-dark ${unreadClass}" onclick="markAsRead(${notif.id})">
+            <div class="notification-item d-flex align-items-start text-decoration-none text-dark ${unreadClass}"
+                style="cursor:pointer"
+                onclick="handleBellNotifClick(event, ${notif.id}, '${notifLink}')">
                 <div class="notification-icon bg-${colorClass} text-white me-3">
                     <i class="${iconClass}"></i>
                 </div>
                 <div class="flex-grow-1">
                     <h6 class="mb-1 small fw-bold">${notif.judul}</h6>
                     <p class="mb-1 small text-muted" style="line-height: 1.3;">${notif.pesan}</p>
-                    <small class="text-muted">${notif.created_at}</small>
+                    <small class="text-muted">${notif.created_at_formatted || ''}</small>
                 </div>
                 ${!notif.read_at ? '<span class="badge bg-primary rounded-pill ms-2">Baru</span>' : ''}
-            </a>
+            </div>
         `;
         });
 
         container.innerHTML = html;
     }
 
-    function markAsRead(id) {
+    function handleBellNotifClick(event, id, link) {
+        // Mark as read, then navigate (always navigate even if fetch fails)
         fetch(`/notifications/${id}/read`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json'
             }
+        }).finally(() => {
+            window.location.href = link;
         });
     }
 

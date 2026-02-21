@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Siswa;
-use App\Models\Kelas;
+use App\Models\Pembayaran;
 use App\Events\NotificationCreated;
 
 class NotificationService
@@ -84,12 +84,16 @@ class NotificationService
     {
         $siswaList = Siswa::where('kelas_id', $ujian->kelas_id)->get();
 
+        // Determine if this is latihan or ujian based on tipe_ujian
+        $isLatihan = $ujian->tipe_ujian === 'latihan';
+        $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+
         foreach ($siswaList as $siswa) {
             if ($siswa->user_id) {
                 $this->create(
                     $siswa->user_id,
                     Notification::TIPE_UJIAN,
-                    'Ujian Baru: ' . $ujian->judul_ujian,
+                    $tipeLabel . ' Baru: ' . $ujian->judul_ujian,
                     'Jadwal: ' . $ujian->tanggal_mulai->format('d M Y, H:i'),
                     route('siswa.lms.mapel.ujian.show', [$ujian->mata_pelajaran_id, $ujian->id]),
                     ['ujian_id' => $ujian->id, 'mapel_id' => $ujian->mata_pelajaran_id, 'tipe' => $ujian->tipe_ujian]
@@ -247,9 +251,26 @@ class NotificationService
         $pengirimName = $pengirim ? $pengirim->name : 'Pimpinan';
 
         // Determine target users based on catatan type
-        if ($catatan->tipe_penerima === 'role') {
-            // Send to all users with specific role
-            $targetUsers = User::where('role', $catatan->role_penerima)->get();
+        if ($catatan->tipe_penerima === 'semua') {
+            // Send to all active users except the sender
+            $targetUsers = User::where('is_active', true)
+                ->where('id', '!=', $catatan->pengirim_id)
+                ->get();
+            foreach ($targetUsers as $user) {
+                $this->create(
+                    $user->id,
+                    Notification::TIPE_CATATAN,
+                    'Catatan dari ' . $pengirimName,
+                    $catatan->judul,
+                    route('notifications.index'),
+                    ['catatan_id' => $catatan->id, 'prioritas' => $catatan->prioritas]
+                );
+            }
+        } elseif ($catatan->tipe_penerima === 'role') {
+            // Send to all users with specific role, except the sender
+            $targetUsers = User::where('role', $catatan->role_penerima)
+                ->where('id', '!=', $catatan->pengirim_id)
+                ->get();
             foreach ($targetUsers as $user) {
                 $this->create(
                     $user->id,
@@ -428,6 +449,13 @@ class NotificationService
         if (!$ujian || !$siswa)
             return;
 
+        // Determine if this is latihan or ujian based on tipe_ujian
+        $isLatihan = $ujian->tipe_ujian === 'latihan';
+        $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+
+        // Get appropriate route based on type
+        $routeName = $isLatihan ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil';
+
         // Get guru for this mapel and kelas
         $guruPengajarList = \App\Models\GuruPengajarKelas::where('kelas_id', $ujian->kelas_id)
             ->where('mata_pelajaran_id', $ujian->mata_pelajaran_id)
@@ -439,10 +467,10 @@ class NotificationService
                 $this->create(
                     $gpk->tenagaPendidik->user_id,
                     Notification::TIPE_UJIAN,
-                    'Ujian Selesai: ' . $siswa->nama_lengkap,
+                    $tipeLabel . ' Selesai: ' . $siswa->nama_lengkap,
                     $ujian->judul_ujian . ' - Nilai: ' . $ujianSiswa->nilai,
-                    route('guru.lms.ujian.hasil', [$ujian->kelas_id, $ujian->mata_pelajaran_id, $ujian->id]),
-                    ['ujian_id' => $ujian->id, 'ujian_siswa_id' => $ujianSiswa->id]
+                    route($routeName, [$ujian->kelas_id, $ujian->mata_pelajaran_id, $ujian->id]),
+                    ['ujian_id' => $ujian->id, 'ujian_siswa_id' => $ujianSiswa->id, 'tipe' => $ujian->tipe_ujian]
                 );
             }
         }
@@ -484,11 +512,12 @@ class NotificationService
     }
 
     /**
-     * Get recent notifications for user
+     * Get recent UNREAD notifications for user (bell dropdown)
      */
     public function getRecent($userId, $limit = 5)
     {
         return Notification::where('user_id', $userId)
+            ->whereNull('read_at')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
@@ -511,7 +540,7 @@ class NotificationService
     {
         $count = count($pembayaranIds);
         $pembayaran = \App\Models\Pembayaran::find($pembayaranIds[0]);
-        
+
         if (!$pembayaran) return;
 
         $amount = \App\Models\Pembayaran::whereIn('id', $pembayaranIds)->sum('jumlah_bayar');
@@ -519,7 +548,7 @@ class NotificationService
 
         // Notify Bendahara & Admin
         $targets = User::whereIn('role', ['admin', 'bendahara'])->get();
-        
+
         foreach ($targets as $target) {
             $route = $target->role === 'admin'
                 ? route('admin.keuangan.pembayaran.index')
@@ -534,5 +563,339 @@ class NotificationService
                 ['siswa_id' => $pembayaran->siswa_id]
             );
         }
+    }
+
+    /**
+     * Notify orang tua about payment rejection
+     */
+    public function notifyPembayaranDitolak($pembayaran, $alasan = null)
+    {
+        $siswa = $pembayaran->siswa;
+        if (!$siswa)
+            return;
+
+        // Notify all parents of this student
+        $parents = $siswa->orangTua;
+        foreach ($parents as $parent) {
+            if ($parent->user_id) {
+                $pesan = 'Pembayaran Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' ditolak';
+                if ($alasan) {
+                    $pesan .= '. Alasan: ' . $alasan;
+                }
+
+                $this->create(
+                    $parent->user_id,
+                    Notification::TIPE_PEMBAYARAN,
+                    'Pembayaran Ditolak',
+                    $pesan,
+                    route('orang-tua.tagihan.anak', $siswa->id),
+                    ['pembayaran_id' => $pembayaran->id, 'alasan' => $alasan]
+                );
+            }
+        }
+    }
+
+    /**
+     * Notify orang tua about ujian access validation
+     */
+    public function notifyValidasiAksesUjian($siswa, $status = 'disetujui')
+    {
+        if (!$siswa)
+            return;
+
+        $statusText = $status === 'disetujui' ? 'Diizinkan' : 'Dibatalkan';
+        $pesan = $status === 'disetujui'
+            ? $siswa->nama_lengkap . ' sudah dapat mengikuti ujian'
+            : 'Akses ujian ' . $siswa->nama_lengkap . ' telah dibatalkan';
+
+        // Notify all parents of this student
+        $parents = $siswa->orangTua;
+        foreach ($parents as $parent) {
+            if ($parent->user_id) {
+                $this->create(
+                    $parent->user_id,
+                    Notification::TIPE_PEMBAYARAN,
+                    'Akses Ujian ' . $statusText,
+                    $pesan,
+                    route('orang-tua.tagihan.anak', $siswa->id),
+                    ['siswa_id' => $siswa->id, 'status' => $status, 'tipe' => 'ujian']
+                );
+            }
+        }
+
+        // Notify siswa
+        if ($siswa->user_id) {
+            $this->create(
+                $siswa->user_id,
+                Notification::TIPE_PEMBAYARAN,
+                'Akses Ujian ' . $statusText,
+                $pesan,
+                route('siswa.lms.index'),
+                ['status' => $status, 'tipe' => 'ujian']
+            );
+        }
+    }
+
+    /**
+     * Notify orang tua about rapor access validation
+     */
+    public function notifyValidasiAksesRapor($siswa, $status = 'disetujui')
+    {
+        if (!$siswa)
+            return;
+
+        $statusText = $status === 'disetujui' ? 'Diizinkan' : 'Dibatalkan';
+        $pesan = $status === 'disetujui'
+            ? $siswa->nama_lengkap . ' sudah dapat mengakses rapor'
+            : 'Akses rapor ' . $siswa->nama_lengkap . ' telah dibatalkan';
+
+        // Notify all parents of this student
+        $parents = $siswa->orangTua;
+        foreach ($parents as $parent) {
+            if ($parent->user_id) {
+                $this->create(
+                    $parent->user_id,
+                    Notification::TIPE_RAPOR,
+                    'Akses Rapor ' . $statusText,
+                    $pesan,
+                    route('orang-tua.rapor.anak', $siswa->id),
+                    ['siswa_id' => $siswa->id, 'status' => $status, 'tipe' => 'rapor']
+                );
+            }
+        }
+    }
+
+    /**
+     * Notify orang tua about bulk tagihan created
+     */
+    public function notifyTagihanBulk($siswaIds, $jenisTagihan, $jumlah)
+    {
+        $siswaList = Siswa::whereIn('id', $siswaIds)->with('orangTua')->get();
+
+        foreach ($siswaList as $siswa) {
+            $parents = $siswa->orangTua;
+            foreach ($parents as $parent) {
+                if ($parent->user_id) {
+                    $this->create(
+                        $parent->user_id,
+                        Notification::TIPE_PEMBAYARAN,
+                        'Tagihan Baru: ' . $jenisTagihan,
+                        'Rp ' . number_format($jumlah, 0, ',', '.') . ' - ' . $siswa->nama_lengkap,
+                        route('orang-tua.tagihan.anak', $siswa->id),
+                        ['siswa_id' => $siswa->id, 'jenis' => $jenisTagihan, 'jumlah' => $jumlah]
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Notify guru when assigned as wali kelas
+     */
+    public function notifyWaliKelasAssignment($waliKelasAssignment)
+    {
+        $tenagaPendidik = $waliKelasAssignment->tenagaPendidik;
+        $kelas = $waliKelasAssignment->kelas;
+
+        if (!$tenagaPendidik || !$tenagaPendidik->user_id || !$kelas)
+            return;
+
+        $this->create(
+            $tenagaPendidik->user_id,
+            Notification::TIPE_KELAS,
+            'Penugasan Wali Kelas',
+            'Anda ditugaskan sebagai Wali Kelas ' . $kelas->nama_kelas,
+            route('wali.dashboard'),
+            ['kelas_id' => $kelas->id, 'wali_kelas_assignment_id' => $waliKelasAssignment->id]
+        );
+    }
+
+    /**
+     * Notify siswa and orang tua when assigned to a class
+     */
+    public function notifyPlottingSiswa($siswa)
+    {
+        if (!$siswa || !$siswa->kelas)
+            return;
+
+        $kelas = $siswa->kelas;
+
+        // Notify siswa
+        if ($siswa->user_id) {
+            $this->create(
+                $siswa->user_id,
+                Notification::TIPE_KELAS,
+                'Penempatan Kelas',
+                'Anda telah ditempatkan di kelas ' . $kelas->nama_kelas,
+                route('siswa.sia.dashboard'),
+                ['kelas_id' => $kelas->id]
+            );
+        }
+
+        // Notify orang tua
+        $parents = $siswa->orangTua;
+        foreach ($parents as $parent) {
+            if ($parent->user_id) {
+                $this->create(
+                    $parent->user_id,
+                    Notification::TIPE_KELAS,
+                    'Penempatan Kelas: ' . $siswa->nama_lengkap,
+                    $siswa->nama_lengkap . ' telah ditempatkan di kelas ' . $kelas->nama_kelas,
+                    route('orang-tua.dashboard'),
+                    ['siswa_id' => $siswa->id, 'kelas_id' => $kelas->id]
+                );
+            }
+        }
+    }
+
+    /**
+     * Notify users about new pengumuman
+     */
+    public function notifyPengumumanBaru($pengumuman)
+    {
+        $targetRoles = $pengumuman->target_role ? explode(',', $pengumuman->target_role) : ['siswa', 'guru', 'orang_tua'];
+
+        $targetUsers = User::whereIn('role', $targetRoles)->get();
+        foreach ($targetUsers as $user) {
+            // Role-specific routes
+            $route = match($user->role) {
+                'siswa' => route('siswa.lms.kalender'),
+                'guru' => route('guru.lms.index'),
+                'orang_tua' => route('orang-tua.dashboard'),
+                default => route('notifications.index'),
+            };
+
+            $this->create(
+                $user->id,
+                Notification::TIPE_PENGUMUMAN,
+                'Pengumuman: ' . $pengumuman->judul,
+                substr(strip_tags($pengumuman->isi), 0, 100) . '...',
+                $route,
+                ['pengumuman_id' => $pengumuman->id]
+            );
+        }
+    }
+
+    /**
+     * Notify users about new berita
+     */
+    public function notifyBeritaBaru($berita)
+    {
+        // Only notify featured/important news
+        if (!($berita->is_featured ?? false))
+            return;
+
+        $targetRoles = ['siswa', 'guru', 'orang_tua'];
+        $targetUsers = User::whereIn('role', $targetRoles)->get();
+
+        foreach ($targetUsers as $user) {
+            // Role-specific routes
+            $route = match($user->role) {
+                'siswa' => route('siswa.sia.berita.index'),
+                'guru' => route('guru.lms.index'),
+                'orang_tua' => route('orang-tua.dashboard'),
+                default => route('notifications.index'),
+            };
+
+            $this->create(
+                $user->id,
+                Notification::TIPE_PENGUMUMAN,
+                'Berita Terbaru: ' . $berita->judul,
+                substr(strip_tags($berita->konten), 0, 100) . '...',
+                $route,
+                ['berita_id' => $berita->id]
+            );
+        }
+    }
+
+    /**
+     * Send welcome notification to new user
+     */
+    public function notifyWelcome($user)
+    {
+        if (!$user)
+            return;
+
+        $roleLabel = match($user->role) {
+            'admin' => 'Administrator',
+            'ketua_pkbm' => 'Ketua PKBM',
+            'waka' => 'Wakil Kepala',
+            'bendahara' => 'Bendahara',
+            'sekretaris' => 'Sekretaris',
+            'wali_kelas' => 'Wali Kelas',
+            'guru' => 'Guru',
+            'orang_tua' => 'Orang Tua',
+            'siswa' => 'Siswa',
+            default => 'Pengguna',
+        };
+
+        // Role-specific routes
+        $route = match($user->role) {
+            'admin' => route('admin.dashboard'),
+            'ketua_pkbm' => route('ketua.dashboard'),
+            'waka' => route('waka.dashboard'),
+            'bendahara' => route('bendahara.dashboard'),
+            'sekretaris' => route('sekretaris.dashboard'),
+            'wali_kelas' => route('wali.dashboard'),
+            'guru' => route('guru.lms.index'),
+            'orang_tua' => route('orang-tua.dashboard'),
+            'siswa' => route('siswa.sia.dashboard'),
+            default => route('notifications.index'),
+        };
+
+        $this->create(
+            $user->id,
+            Notification::TIPE_SISTEM,
+            'Selamat Datang!',
+            'Selamat datang di SIPADUHOK sebagai ' . $roleLabel . '. Silakan lengkapi profil Anda dan mulai menggunakan sistem.',
+            $route
+        );
+    }
+
+    /**
+     * Notify about promotion/kenaikan kelas pengajuan
+     */
+    public function notifyPromotionPengajuan($promotion)
+    {
+        // Notify bendahara & admin about new promotion submission
+        $targets = User::whereIn('role', ['admin', 'bendahara'])->get();
+
+        foreach ($targets as $target) {
+            $route = $target->role === 'admin'
+                ? route('admin.keuangan.promotion.validation.index')
+                : route('bendahara.promotion.validation.index');
+
+            $this->create(
+                $target->id,
+                Notification::TIPE_KENAIKAN,
+                'Pengajuan Kenaikan Kelas',
+                'Pengajuan kenaikan kelas untuk ' . ($promotion->kelas->nama_kelas ?? 'kelas'),
+                $route,
+                ['promotion_id' => $promotion->id, 'kelas_id' => $promotion->kelas_id]
+            );
+        }
+    }
+
+    /**
+     * Notify siswa about ujian nilai (separate from tugas nilai)
+     */
+    public function notifyUjianNilaiUpdate($ujianSiswa)
+    {
+        $ujian = $ujianSiswa->ujian;
+        $siswa = $ujianSiswa->siswa;
+        if (!$ujian || !$siswa || !$siswa->user_id)
+            return;
+
+        $isLatihan = $ujian->tipe_ujian === 'latihan';
+        $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+
+        $this->create(
+            $siswa->user_id,
+            Notification::TIPE_NILAI,
+            'Nilai ' . $tipeLabel . ' Sudah Keluar',
+            $ujian->judul_ujian . ' - Nilai: ' . $ujianSiswa->nilai,
+            route('siswa.lms.mapel.ujian.show', [$ujian->mata_pelajaran_id, $ujian->id]),
+            ['ujian_id' => $ujian->id, 'nilai' => $ujianSiswa->nilai, 'tipe' => $ujian->tipe_ujian]
+        );
     }
 }

@@ -76,12 +76,12 @@
                                                 </span>
                                                 @if($isValidated)
                                                     @if($isApproved)
-                                                        <span class="badge bg-success ms-2">✓ Disetujui</span>
+                                                        <span class="badge bg-success ms-2"><i class="fas fa-check me-1"></i> Disetujui</span>
                                                     @elseif($isRejected)
-                                                        <span class="badge bg-danger ms-2">✗ Ditolak</span>
+                                                        <span class="badge bg-danger ms-2"><i class="fas fa-times me-1"></i> Ditolak</span>
                                                     @endif
                                                 @else
-                                                    <span class="badge bg-warning ms-2">⏳ Menunggu Validasi</span>
+                                                    <span class="badge bg-warning ms-2"><i class="fas fa-clock me-1"></i> Menunggu Validasi</span>
                                                 @endif
                                             </h6>
                                             <div class="text-muted small mb-2">

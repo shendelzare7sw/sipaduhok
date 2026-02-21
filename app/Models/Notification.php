@@ -40,6 +40,9 @@ class Notification extends Model
     const TIPE_CATATAN = 'catatan';
     const TIPE_PEMBAYARAN = 'pembayaran';
     const TIPE_RAPOR = 'rapor';
+    const TIPE_SISTEM = 'sistem';
+    const TIPE_KELAS = 'kelas';
+    const TIPE_KENAIKAN = 'kenaikan';
 
     // Icon mapping
     public static function getIcon($tipe)
@@ -56,6 +59,9 @@ class Notification extends Model
             self::TIPE_CATATAN => 'fas fa-sticky-note',
             self::TIPE_PEMBAYARAN => 'fas fa-money-check-alt',
             self::TIPE_RAPOR => 'fas fa-graduation-cap',
+            self::TIPE_SISTEM => 'fas fa-cog',
+            self::TIPE_KELAS => 'fas fa-users',
+            self::TIPE_KENAIKAN => 'fas fa-level-up-alt',
             default => 'fas fa-bell',
         };
     }
@@ -75,6 +81,9 @@ class Notification extends Model
             self::TIPE_CATATAN => 'info',
             self::TIPE_PEMBAYARAN => 'success',
             self::TIPE_RAPOR => 'primary',
+            self::TIPE_SISTEM => 'secondary',
+            self::TIPE_KELAS => 'info',
+            self::TIPE_KENAIKAN => 'success',
             default => 'secondary',
         };
     }

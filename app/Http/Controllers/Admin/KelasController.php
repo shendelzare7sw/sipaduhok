@@ -410,7 +410,9 @@ class KelasController extends Controller
             ? TahunAjaran::find($request->tahun_ajaran_id)
             : TahunAjaran::where('is_active', true)->first();
 
-        return view('admin.kelas.print', compact('kelas', 'tahunAjaran'));
+        $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
+
+        return view('admin.kelas.print', compact('kelas', 'tahunAjaran', 'cabang'));
     }
 
     /**

@@ -403,13 +403,67 @@ class KetuaController extends Controller
     {
         $roles = [
             'admin' => 'Admin',
+            'ketua_pkbm' => 'Ketua PKBM',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
             'sekretaris' => 'Sekretaris',
             'bendahara' => 'Bendahara',
             'wali_kelas' => 'Wali Kelas',
             'guru_pengajar' => 'Guru Pengajar',
             'siswa' => 'Siswa',
+            'orang_tua' => 'Orang Tua',
         ];
-        return view('ketua.catatan.create', compact('roles'));
+
+        // Remove sender's own role (cannot send to self)
+        unset($roles[auth()->user()->role]);
+
+        // Load all users except the sender
+        $users = \App\Models\User::whereIn('role', array_keys($roles))
+            ->where('is_active', true)
+            ->where('id', '!=', auth()->id())
+            ->with([
+                'cabang:id,nama_cabang',
+                'siswa:id,user_id,kelas_id,nama_lengkap',
+                'siswa.kelas:id,nama_kelas,cabang_id',
+                'siswa.kelas.cabang:id,nama_cabang',
+                'children:id,kelas_id',
+                'children.kelas:id,cabang_id',
+                'children.kelas.cabang:id,nama_cabang',
+            ])
+            ->orderBy('name')
+            ->get(['id', 'name', 'role', 'cabang_id']);
+
+        $usersForIndividu = $users->map(function ($u) use ($roles) {
+            // Resolve cabang based on role
+            $cabangId = $u->cabang_id;
+            $cabangName = $u->cabang?->nama_cabang ?? '-';
+
+            if (!$cabangId && $u->role === 'siswa' && $u->siswa && $u->siswa->kelas) {
+                $cabangId = $u->siswa->kelas->cabang_id;
+                $cabangName = $u->siswa->kelas->cabang->nama_cabang ?? '-';
+            }
+
+            if (!$cabangId && $u->role === 'orang_tua') {
+                // For orang_tua, resolve via their children (eager loaded)
+                $child = $u->children->first();
+                if ($child && $child->kelas) {
+                    $cabangId = $child->kelas->cabang_id;
+                    $cabangName = $child->kelas->cabang->nama_cabang ?? '-';
+                }
+            }
+
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'role' => $u->role,
+                'role_label' => $roles[$u->role] ?? $u->role,
+                'cabang_id' => $cabangId,
+                'cabang_name' => $cabangName,
+            ];
+        });
+
+        $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get(['id', 'nama_cabang']);
+
+        return view('ketua.catatan.create', compact('roles', 'usersForIndividu', 'cabangList'));
     }
 
     public function catatanStore(Request $request)
@@ -419,18 +473,43 @@ class KetuaController extends Controller
             'isi_catatan' => 'required|string',
             'tipe_penerima' => 'required|in:semua,role,individu',
             'role_penerima' => 'required_if:tipe_penerima,role',
-            'penerima_id' => 'required_if:tipe_penerima,individu|exists:users,id',
+            'penerima_ids' => 'required_if:tipe_penerima,individu|array|min:1',
+            'penerima_ids.*' => 'exists:users,id',
             'prioritas' => 'required|in:biasa,penting,mendesak',
         ]);
 
-        $validated['pengirim_id'] = auth()->id();
-        $validated['tanggal_kirim'] = now();
+        $pengirimId = auth()->id();
+        $tanggalKirim = now();
+        $notificationService = app(\App\Services\NotificationService::class);
 
-        $catatan = Catatan::create($validated);
-
-        // Send notifications to recipients
-        $catatan->load('pengirim');
-        app(\App\Services\NotificationService::class)->notifyCatatan($catatan);
+        if ($validated['tipe_penerima'] === 'individu') {
+            // Create one catatan record per recipient
+            foreach ($validated['penerima_ids'] as $penerimaId) {
+                $catatan = Catatan::create([
+                    'pengirim_id' => $pengirimId,
+                    'judul' => $validated['judul'],
+                    'isi_catatan' => $validated['isi_catatan'],
+                    'tipe_penerima' => 'individu',
+                    'penerima_id' => $penerimaId,
+                    'prioritas' => $validated['prioritas'],
+                    'tanggal_kirim' => $tanggalKirim,
+                ]);
+                $catatan->load('pengirim');
+                $notificationService->notifyCatatan($catatan);
+            }
+        } else {
+            $catatan = Catatan::create([
+                'pengirim_id' => $pengirimId,
+                'judul' => $validated['judul'],
+                'isi_catatan' => $validated['isi_catatan'],
+                'tipe_penerima' => $validated['tipe_penerima'],
+                'role_penerima' => $validated['role_penerima'] ?? null,
+                'prioritas' => $validated['prioritas'],
+                'tanggal_kirim' => $tanggalKirim,
+            ]);
+            $catatan->load('pengirim');
+            $notificationService->notifyCatatan($catatan);
+        }
 
         return redirect()->route('ketua.catatan.index')->with('success', 'Catatan berhasil dikirim!');
     }
@@ -439,5 +518,13 @@ class KetuaController extends Controller
     {
         $catatan = Catatan::with(['pengirim', 'pembaca'])->findOrFail($id);
         return view('ketua.catatan.show', compact('catatan'));
+    }
+
+    public function catatanDestroy($id)
+    {
+        $catatan = Catatan::where('pengirim_id', auth()->id())->findOrFail($id);
+        $catatan->delete();
+
+        return redirect()->route('ketua.catatan.index')->with('success', 'Catatan berhasil dihapus dari riwayat.');
     }
 }

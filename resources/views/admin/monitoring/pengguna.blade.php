@@ -220,9 +220,9 @@
                                     <td>{{ $tp->email ?? $tp->user->email }}</td>
                                     <td>
                                         @if($tp->user->is_active)
-                                            <span class="badge badge-success">✓ Aktif</span>
+                                            <span class="badge badge-success"><i class="fas fa-check"></i> Aktif</span>
                                         @else
-                                            <span class="badge badge-secondary">✗ Non-Aktif</span>
+                                            <span class="badge badge-secondary"><i class="fas fa-times"></i> Non-Aktif</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -296,16 +296,16 @@
                                     </td>
                                     <td>
                                         @if($s->status === 'aktif')
-                                            <span class="badge badge-success">✓ Aktif</span>
+                                            <span class="badge badge-success"><i class="fas fa-check"></i> Aktif</span>
                                         @else
                                             <span class="badge badge-secondary">{{ ucfirst($s->status) }}</span>
                                         @endif
                                     </td>
                                     <td>
                                         @if($s->user->is_active)
-                                            <span class="badge badge-success">✓ Aktif</span>
+                                            <span class="badge badge-success"><i class="fas fa-check"></i> Aktif</span>
                                         @else
-                                            <span class="badge badge-secondary">✗ Non-Aktif</span>
+                                            <span class="badge badge-secondary"><i class="fas fa-times"></i> Non-Aktif</span>
                                         @endif
                                     </td>
                                 </tr>

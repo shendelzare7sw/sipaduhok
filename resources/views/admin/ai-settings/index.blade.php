@@ -79,25 +79,15 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold">Model Text (Chat)</label>
                             <select class="form-select" name="ai_model" id="ai_model">
-                                <optgroup label="Llama 3 (Groq)">
-                                    <option value="llama-3.3-70b-versatile" {{ $model == 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B (Recommended)</option>
-                                    <option value="llama-3.1-8b-instant" {{ $model == 'llama-3.1-8b-instant' ? 'selected' : '' }}>Llama 3.1 8B (Fastest)</option>
-                                    <option value="llama-3.1-70b-versatile" {{ $model == 'llama-3.1-70b-versatile' ? 'selected' : '' }}>Llama 3.1 70B</option>
+                                <optgroup label="Llama 3 (Groq - FREE)">
+                                    <option value="llama-3.3-70b-versatile" {{ $model == 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B (Recommended - Best)</option>
+                                    <option value="llama-3.1-8b-instant" {{ $model == 'llama-3.1-8b-instant' ? 'selected' : '' }}>Llama 3.1 8B (Fastest - Light)</option>
                                 </optgroup>
-                                <optgroup label="Qwen 2.5 (Groq - Recommended)">
-                                    <option value="qwen-2.5-32b-instruct" {{ $model == 'qwen-2.5-32b-instruct' ? 'selected' : '' }}>Qwen 2.5 32B Instruct</option>
-                                    <option value="qwen-2.5-coder-32b-instruct" {{ $model == 'qwen-2.5-coder-32b-instruct' ? 'selected' : '' }}>Qwen 2.5 Coder 32B</option>
-                                </optgroup>
-                                <optgroup label="Gemma (Groq)">
-                                    <option value="gemma2-9b-it" {{ $model == 'gemma2-9b-it' ? 'selected' : '' }}>Gemma 2 9B</option>
-                                </optgroup>
-                                <optgroup label="Mixtral (Groq)">
-                                    <option value="mixtral-8x7b-32768" {{ $model == 'mixtral-8x7b-32768' ? 'selected' : '' }}>Mixtral 8x7B</option>
-                                </optgroup>
-                                <optgroup label="Google Gemini (FREE Tier)">
-                                    <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Only FREE model)</option>
+                                <optgroup label="Google Gemini (FREE)">
+                                    <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Vision + PDF Support)</option>
                                 </optgroup>
                             </select>
+                            <div class="form-text">Semua model di atas <strong>GRATIS</strong> dan telah diverifikasi berfungsi dengan baik.</div>
                         </div>
 
                         <div class="mb-4">
@@ -319,16 +309,11 @@
             const groqField = document.getElementById('groq_field');
             const geminiField = document.getElementById('gemini_field');
 
-            // Model mapping by provider
+            // Model mapping by provider (Only FREE & Verified working models)
             const modelsByProvider = {
                 groq: [
                     'llama-3.3-70b-versatile',
-                    'llama-3.1-8b-instant',
-                    'llama-3.1-70b-versatile',
-                    'qwen-2.5-32b-instruct',
-                    'qwen-2.5-coder-32b-instruct',
-                    'gemma2-9b-it',
-                    'mixtral-8x7b-32768'
+                    'llama-3.1-8b-instant'
                 ],
                 gemini: [
                     'gemini-2.5-flash'
@@ -416,20 +401,54 @@
             const alertTitle = document.getElementById('connectionTitle');
             const alertIcon = document.getElementById('connectionIcon');
 
+            // Helper function to hide alert with smooth fade
+            function hideAlertSmooth(element) {
+                element.classList.add('fading-out');
+                setTimeout(() => {
+                    element.classList.add('d-none');
+                    element.classList.remove('fading-out', 'alert-success', 'alert-danger', 'alert-warning');
+                    // Force reflow to reset animation state
+                    void element.offsetWidth;
+                }, 350);
+            }
+
+            // Helper function to show alert with smooth fade-in
+            function showAlertSmooth(element) {
+                // Remove d-none first
+                element.classList.remove('d-none', 'fading-out');
+
+                // Force reflow to ensure transition triggers
+                void element.offsetWidth;
+
+                // Add show class to trigger fade-in
+                element.classList.add('showing');
+            }
+
             testBtn.addEventListener('click', function() {
-                // Reset Alert FIRST (clear previous state)
+                // Reset Alert FIRST (clear previous state and force immediate hide)
                 alertEl.classList.add('d-none');
-                alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning');
+                alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning', 'fading-out', 'showing');
+
+                // Force reflow
+                void alertEl.offsetWidth;
 
                 const provider = providerSelect.value;
                 const apiKey = provider === 'groq' ? groqApiKeyInput.value : geminiApiKeyInput.value;
 
                 if (!apiKey) {
-                    alertEl.classList.remove('d-none');
                     alertEl.classList.add('alert-warning');
-                    alertTitle.textContent = "Peringatan!";
+                    alertTitle.textContent = "⚠️ Peringatan!";
                     alertMsg.textContent = `API Key untuk ${provider === 'groq' ? 'Groq Cloud' : 'Google Gemini'} belum diisi.`;
                     alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
+
+                    // Show alert with smooth animation
+                    showAlertSmooth(alertEl);
+
+                    // Auto-hide warning after 5 seconds
+                    setTimeout(() => {
+                        hideAlertSmooth(alertEl);
+                    }, 5000);
+
                     return;
                 }
 
@@ -454,32 +473,48 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alertEl.classList.remove('d-none');
+                    // Set content
                     alertMsg.textContent = data.message;
 
                     if (data.success) {
                         alertEl.classList.add('alert-success');
-                        alertTitle.textContent = "Berhasil!";
+                        alertTitle.textContent = "✅ Berhasil!";
                         alertIcon.className = "fas fa-check-circle me-2 fs-4";
 
-                        // Auto-hide success alert after 10 seconds
+                        // Show alert with smooth animation
+                        showAlertSmooth(alertEl);
+
+                        // Auto-hide success alert after 5 seconds with smooth fade
                         setTimeout(() => {
-                            alertEl.classList.add('d-none');
-                        }, 10000);
+                            hideAlertSmooth(alertEl);
+                        }, 5000);
                     } else {
                         alertEl.classList.add('alert-danger');
-                        alertTitle.textContent = "Gagal!";
+                        alertTitle.textContent = "❌ Gagal!";
                         alertIcon.className = "fas fa-times-circle me-2 fs-4";
 
-                        // Error tetap tampil, tidak auto-hide
+                        // Show alert with smooth animation
+                        showAlertSmooth(alertEl);
+
+                        // Auto-hide error alert after 6 seconds with smooth fade
+                        setTimeout(() => {
+                            hideAlertSmooth(alertEl);
+                        }, 6000);
                     }
                 })
                 .catch(error => {
-                    alertEl.classList.remove('d-none');
                     alertEl.classList.add('alert-danger');
-                    alertTitle.textContent = "Error Sistem";
+                    alertTitle.textContent = "⚠️ Error Sistem";
                     alertMsg.textContent = 'Terjadi kesalahan: ' + error.message;
                     alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
+
+                    // Show alert with smooth animation
+                    showAlertSmooth(alertEl);
+
+                    // Auto-hide error after 6 seconds with smooth fade
+                    setTimeout(() => {
+                        hideAlertSmooth(alertEl);
+                    }, 6000);
                 })
                 .finally(() => {
                     this.innerHTML = originalText;
@@ -492,6 +527,58 @@
     <style>
         .timeline-item:last-child {
             border-left-color: transparent !important;
+        }
+
+        /* Smooth alert animation */
+        #connectionAlert {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+        }
+
+        #connectionAlert.d-none {
+            display: none !important;
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+
+        /* Initial state before showing */
+        #connectionAlert:not(.showing):not(.d-none) {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+
+        /* Showing state */
+        #connectionAlert.showing {
+            display: block !important;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Alert fade-in animation (smoother) */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Alert fade-out animation */
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+        }
+
+        #connectionAlert.fading-out {
+            animation: fadeOut 0.4s ease-in-out forwards;
         }
     </style>
 @endsection

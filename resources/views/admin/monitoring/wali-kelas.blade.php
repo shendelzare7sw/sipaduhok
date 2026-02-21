@@ -216,7 +216,7 @@
                                             @elseif($wali->progress_rapor >= 75)
                                                 <i class="fas fa-file-alt"></i> Hampir selesai
                                             @elseif($wali->progress_rapor >= 50)
-                                                ⏳ Sedang proses
+                                                <i class="fas fa-hourglass-half"></i> Sedang proses
                                             @else
                                                 <i class="fas fa-exclamation-triangle"></i> Perlu ditindaklanjuti
                                             @endif

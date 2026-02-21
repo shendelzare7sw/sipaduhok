@@ -276,6 +276,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('mata-pelajaran/import', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'import'])->name('mata-pelajaran.import.store');
         Route::get('mata-pelajaran/template', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
         Route::get('mata-pelajaran/suggest-kode', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'suggestKodeMapel'])->name('mata-pelajaran.suggest-kode');
+        Route::get('mata-pelajaran/print', [\App\Http\Controllers\Admin\MataPelajaranController::class, 'print'])->name('mata-pelajaran.print');
         Route::resource('mata-pelajaran', \App\Http\Controllers\Admin\MataPelajaranController::class);
 
         // Pengaturan Istirahat
@@ -369,6 +370,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/api/siswa-by-kelas/{kelas}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'getSiswaByKelas'])->name('api.siswa-by-kelas');
                 Route::get('/api/tagihan-preview/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'getTagihanPreview'])->name('api.tagihan-preview');
 
+                Route::get('/cetak-laporan', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'cetakLaporan'])->name('cetak-laporan');
                 Route::get('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'show'])->name('show');
                 Route::get('/{siswa}/edit', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'edit'])->name('edit');
                 Route::put('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'update'])->name('update');
@@ -489,21 +491,22 @@ Route::middleware(['auth'])->group(function () {
             // Promotion System (Report, KKM, Settings)
             Route::prefix('promotion')->name('promotion.')->group(function () {
                 Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
+                Route::get('/report/print', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'print'])->name('report.print');
                 Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
-                
+
                 // Individual/Batch Rollback
                 Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
                 Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
-                
+
                 // Promote Selected (for failed students who now qualify)
                 Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
-                
+
                 // Scheduling
                 Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
 
                 // KKM (New Admin Access)
                 Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
-                
+
                 // Settings (New Admin Access)
                 Route::resource('settings', \App\Http\Controllers\Admin\Akademik\PromotionSettingsController::class)->only(['index', 'store']);
             });
@@ -552,6 +555,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [$monitoringController, 'catatanIndex'])->name('index');
             Route::get('/create', [$monitoringController, 'catatanCreate'])->name('create');
             Route::post('/', [$monitoringController, 'catatanStore'])->name('store');
+            Route::delete('/{id}', [$monitoringController, 'catatanDestroy'])->name('destroy');
             Route::get('/{id}', [$monitoringController, 'catatanShow'])->name('show');
         });
 
@@ -594,6 +598,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [KetuaController::class, 'catatanIndex'])->name('index');
             Route::get('/create', [KetuaController::class, 'catatanCreate'])->name('create');
             Route::post('/', [KetuaController::class, 'catatanStore'])->name('store');
+            Route::delete('/{id}', [KetuaController::class, 'catatanDestroy'])->name('destroy');
             Route::get('/{id}', [KetuaController::class, 'catatanShow'])->name('show');
         });
 
@@ -713,6 +718,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [WakilKepalaSekolahController::class, 'catatanIndex'])->name('index');
             Route::get('/create', [WakilKepalaSekolahController::class, 'catatanCreate'])->name('create');
             Route::post('/', [WakilKepalaSekolahController::class, 'catatanStore'])->name('store');
+            Route::delete('/{id}', [WakilKepalaSekolahController::class, 'catatanDestroy'])->name('destroy');
             Route::get('/{id}', [WakilKepalaSekolahController::class, 'catatanShow'])->name('show');
         });
 
@@ -731,21 +737,22 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('promotion')->name('promotion.')->group(function() {
             // Note: We use Admin controllers for shared functionality to ensure consistency
             // Settings and KKM are defined at the end of this group
-            
+
             // Report Access
             Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
+            Route::get('/report/print', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'print'])->name('report.print');
             Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
-            
+
             // Individual/Batch Rollback
             Route::post('/rollback/{statusId}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollback'])->name('rollback');
             Route::post('/rollback-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'rollbackSelected'])->name('rollback-selected');
-            
+
             // Promote Selected
             Route::post('/promote-selected', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'promoteSelected'])->name('promote-selected');
-            
+
             // Scheduling
             Route::post('/cancel-schedule/{id}', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'cancelSchedule'])->name('cancel-schedule');
-            
+
             // Settings and KKM
             Route::resource('settings', \App\Http\Controllers\Admin\Akademik\PromotionSettingsController::class)->only(['index', 'store']);
             Route::resource('kkm', \App\Http\Controllers\Admin\Akademik\PromotionKKMController::class)->only(['index', 'store']);
@@ -838,6 +845,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/api/siswa-by-kelas/{kelas}', [TagihanController::class, 'getSiswaByKelas'])->name('api.siswa-by-kelas');
             Route::get('/api/tagihan-preview/{siswa}', [TagihanController::class, 'getTagihanPreview'])->name('api.tagihan-preview');
 
+            Route::get('/cetak-laporan', [TagihanController::class, 'cetakLaporan'])->name('cetak-laporan');
             Route::get('/{siswa}', [TagihanController::class, 'show'])->name('show');
             Route::get('/{siswa}/edit', [TagihanController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [TagihanController::class, 'update'])->name('update');
@@ -954,6 +962,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [WaliKelasNilaiController::class, 'index'])->name('index');
             Route::get('/print', [WaliKelasNilaiController::class, 'print'])->name('print');
             Route::get('/{siswa}', [WaliKelasNilaiController::class, 'show'])->name('show');
+            Route::get('/{siswa}/print', [WaliKelasNilaiController::class, 'printSiswa'])->name('print-siswa');
             Route::get('/{siswa}/edit', [WaliKelasNilaiController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [WaliKelasNilaiController::class, 'update'])->name('update');
             Route::post('/{nilaiId}/clear', [WaliKelasNilaiController::class, 'clearNilai'])->name('clear');
@@ -1140,6 +1149,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/nilai/update-batch', [GuruNilaiController::class, 'updateBatch'])->name('nilai.updateBatch');
             Route::post('/nilai/recalculate', [GuruNilaiController::class, 'recalculate'])->name('nilai.recalculate');
             Route::get('/nilai/export-excel', [GuruNilaiController::class, 'exportExcel'])->name('nilai.export-excel');
+            Route::get('/nilai/download-template', [GuruNilaiController::class, 'downloadTemplate'])->name('nilai.download-template');
+            Route::post('/nilai/import-excel', [GuruNilaiController::class, 'importExcel'])->name('nilai.import-excel');
 
             // Forum Diskusi
             Route::prefix('forum')->name('forum.')->group(function () {
@@ -1361,10 +1372,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/recent', [App\Http\Controllers\NotificationController::class, 'recent'])->name('recent');
         Route::get('/unread-count', [App\Http\Controllers\NotificationController::class, 'unreadCount'])->name('unread-count');
         Route::get('/today', [App\Http\Controllers\NotificationController::class, 'today'])->name('today');
-        Route::post('/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-read');
         Route::post('/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::post('/bulk-action', [App\Http\Controllers\NotificationController::class, 'bulkAction'])->name('bulk-action');
+        Route::post('/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('mark-read');
         Route::delete('/{id}', [App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
-        Route::get('/type/{tipe}', [App\Http\Controllers\NotificationController::class, 'byType'])->name('by-type');
+        Route::get('/{id}', [App\Http\Controllers\NotificationController::class, 'show'])->name('show');
     });
 
     /*

@@ -14,6 +14,7 @@ use App\Models\Ujian;
 use App\Models\UjianSiswa;
 use App\Models\SoalUjian;
 use App\Models\Siswa;
+use App\Services\NotificationService;
 
 class GuruUjianController extends Controller
 {
@@ -132,6 +133,10 @@ class GuruUjianController extends Controller
         $ujian = Ujian::create(array_merge($ujianData, ['kelas_id' => $kelasId]));
         $this->createUjianSiswaForKelas($ujian, $kelasId, $mataPelajaran);
 
+        // Notify siswa in main class
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyUjianNew($ujian);
+
         // Duplikasi ke kelas tambahan
         $kelasTambahan = $request->input('kelas_tambahan', []);
         $jumlahDuplikasi = 0;
@@ -139,6 +144,7 @@ class GuruUjianController extends Controller
             if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
                 $ujianDuplikat = Ujian::create(array_merge($ujianData, ['kelas_id' => $kelasLainId]));
                 $this->createUjianSiswaForKelas($ujianDuplikat, $kelasLainId, $mataPelajaran);
+                $notificationService->notifyUjianNew($ujianDuplikat);
                 $jumlahDuplikasi++;
             }
         }
@@ -968,6 +974,10 @@ class GuruUjianController extends Controller
             'nilai' => $totalNilai,
             'status' => 'dinilai',
         ]);
+
+        // Notify siswa about nilai
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyUjianNilaiUpdate($ujianSiswa);
 
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
         $routeName = $isLatihan ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil';

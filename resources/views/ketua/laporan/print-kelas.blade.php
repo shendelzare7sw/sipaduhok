@@ -33,17 +33,12 @@
 </head>
 <body>
     <div class="btn-actions no-print">
-        <a href="{{ route('ketua.laporan.index') }}" class="btn btn-back">← Kembali</a>
+        <a href="{{ route(auth()->user()->role === 'admin' ? 'admin.laporan.index' : 'ketua.laporan.index') }}" class="btn btn-back">← Kembali</a>
         <button onclick="window.print()" class="btn btn-print">🖨️ Cetak</button>
     </div>
 
     <div class="container">
-        <div class="header">
-            <h1>PKBM HOUSE OF KNOWLEDGE</h1>
-            <h2>PUSAT KEGIATAN BELAJAR MASYARAKAT</h2>
-            <p>Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan</p>
-            <p>Telp: 021-7412345 | Email: info@hok.sch.id</p>
-        </div>
+        @include('partials.print-header', ['cabang' => $cabang ?? null])
 
         <div class="title">
             <h3>DAFTAR KELAS</h3>

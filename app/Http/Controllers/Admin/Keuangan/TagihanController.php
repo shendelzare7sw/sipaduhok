@@ -83,6 +83,18 @@ class TagihanController extends BendaharaTagihanController
     }
 
     /**
+     * Override cetakLaporan to use admin-specific view
+     */
+    public function cetakLaporan(\Illuminate\Http\Request $request)
+    {
+        $response = parent::cetakLaporan($request);
+        if ($response instanceof \Illuminate\View\View) {
+            return view('admin.keuangan.tagihan.cetak-laporan', $response->getData());
+        }
+        return $response;
+    }
+
+    /**
      * Show import form.
      */
     public function importForm()

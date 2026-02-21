@@ -6,7 +6,7 @@
     <title>Kalender Akademik - {{ $bulan }}</title>
     <style>
         @page {
-            margin: 15mm;
+            margin: 12mm;
             size: A4 landscape;
         }
 
@@ -18,57 +18,61 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 10pt;
+            font-size: 9pt;
             color: #000;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
+        .header-table {
+            width: 100%;
             border-bottom: 3px solid #3b82f6;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
         }
 
-        .header h1 {
-            font-size: 20pt;
+        .header-title {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .header-title h1 {
+            font-size: 17pt;
             color: #1e40af;
-            margin-bottom: 5px;
-        }
-
-        .header h2 {
-            font-size: 16pt;
-            color: #374151;
             margin-bottom: 3px;
         }
 
-        .header p {
-            font-size: 10pt;
+        .header-title h2 {
+            font-size: 13pt;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+
+        .header-title p {
+            font-size: 9pt;
             color: #6b7280;
         }
 
         .calendar {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .calendar th {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #3b82f6;
             color: white;
-            padding: 10px 5px;
+            padding: 5px 3px;
             text-align: center;
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 9pt;
             border: 1px solid #2563eb;
         }
 
         .calendar td {
             border: 1px solid #d1d5db;
-            padding: 5px;
+            padding: 3px 4px;
             vertical-align: top;
-            height: 100px;
+            height: 72px;
             width: 14.28%;
-            position: relative;
         }
 
         .calendar td.empty {
@@ -81,18 +85,18 @@
         }
 
         .day-number {
-            font-size: 14pt;
+            font-size: 10pt;
             font-weight: bold;
             color: #1f2937;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .event {
             background: #e0f2fe;
             border-left: 3px solid #0ea5e9;
-            padding: 3px 5px;
-            margin-bottom: 3px;
-            font-size: 8pt;
+            padding: 2px 4px;
+            margin-bottom: 2px;
+            font-size: 7pt;
             line-height: 1.2;
             border-radius: 2px;
             overflow: hidden;
@@ -101,98 +105,99 @@
         }
 
         .event.field_trip { background: #cffafe; border-left-color: #06b6d4; }
-        .event.outing { background: #d1fae5; border-left-color: #10b981; }
-        .event.live_in { background: #ede9fe; border-left-color: #8b5cf6; }
-        .event.hokfest { background: #fed7aa; border-left-color: #f97316; }
-        .event.pts { background: #fef3c7; border-left-color: #f59e0b; }
-        .event.pas { background: #fecaca; border-left-color: #ef4444; }
-        .event.libur { background: #e5e7eb; border-left-color: #6b7280; }
-        .event.ujian { background: #fce7f3; border-left-color: #ec4899; }
+        .event.outing     { background: #d1fae5; border-left-color: #10b981; }
+        .event.live_in    { background: #ede9fe; border-left-color: #8b5cf6; }
+        .event.hokfest    { background: #fed7aa; border-left-color: #f97316; }
+        .event.pts        { background: #fee2e2; border-left-color: #dc2626; }
+        .event.pas        { background: #dbeafe; border-left-color: #3b82f6; }
+        .event.libur      { background: #fecaca; border-left-color: #ef4444; }
+        .event.ujian      { background: #fce7f3; border-left-color: #ec4899; }
         .event.acara_sekolah { background: #ccfbf1; border-left-color: #14b8a6; }
 
         .legend {
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 8px;
+            padding: 8px 12px;
             background: #f9fafb;
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
         .legend h3 {
-            font-size: 12pt;
-            margin-bottom: 10px;
+            font-size: 9pt;
+            margin-bottom: 6px;
             color: #1f2937;
         }
 
-        .legend-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            font-size: 9pt;
-        }
-
-        .legend-color {
-            width: 20px;
-            height: 15px;
-            margin-right: 8px;
-            border-radius: 2px;
+        .legend-swatch {
+            width: 14px;
+            height: 10px;
         }
 
         .footer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 2px solid #e5e7eb;
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid #e5e7eb;
             text-align: right;
-            font-size: 9pt;
+            font-size: 8pt;
             color: #6b7280;
         }
 
         .event-list {
-            margin-top: 20px;
+            margin-top: 12px;
             page-break-before: auto;
         }
 
         .event-list h3 {
-            font-size: 12pt;
-            margin-bottom: 10px;
+            font-size: 10pt;
+            margin-bottom: 6px;
             color: #1f2937;
-            padding-bottom: 5px;
+            padding-bottom: 4px;
             border-bottom: 2px solid #3b82f6;
         }
 
         .event-list-item {
-            padding: 10px;
-            margin-bottom: 8px;
+            padding: 6px 8px;
+            margin-bottom: 5px;
             background: white;
-            border-left: 4px solid #3b82f6;
-            border-radius: 4px;
+            border-left: 3px solid #3b82f6;
+            border-radius: 3px;
+            font-size: 8pt;
         }
 
         .event-list-item strong {
             color: #1f2937;
-            font-size: 11pt;
+            font-size: 9pt;
         }
 
         .event-list-item .date {
             color: #6b7280;
-            font-size: 9pt;
-            margin-top: 3px;
+            font-size: 8pt;
+            margin-top: 2px;
         }
 
         .event-list-item .desc {
             color: #374151;
-            font-size: 9pt;
-            margin-top: 5px;
-            line-height: 1.4;
+            font-size: 8pt;
+            margin-top: 3px;
         }
     </style>
 </head>
 <body>
-    <div class="header">
+    {{-- Header with logo (table-based for dompdf compatibility) --}}
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td width="75" style="vertical-align: middle; padding-bottom: 8px;">
+                <img src="{{ public_path('img/logo/hok-watermark.png') }}" alt="Logo HOK" style="height: 60px; width: auto;">
+            </td>
+            <td style="text-align: center; vertical-align: middle; padding-bottom: 8px;">
+                <div style="font-size: 13pt; font-weight: bold; margin-bottom: 2px;">PKBM HOUSE OF KNOWLEDGE</div>
+                <div style="font-size: 9pt; margin-bottom: 2px;">PUSAT KEGIATAN BELAJAR MASYARAKAT</div>
+                <div style="font-size: 8pt; color: #555;">Jl. Ruko Reni Jaya Blok AF No. 22-23, Pamulang Barat, Tangerang Selatan</div>
+            </td>
+            <td width="75"></td>
+        </tr>
+    </table>
+
+    <div class="header-title">
         <h1>KALENDER AKADEMIK</h1>
         <h2>{{ $bulan }}</h2>
         <p>Tahun Ajaran {{ $tahunAjaran->nama_tahun_ajaran }}</p>
@@ -221,10 +226,7 @@
                                 <div class="day-number">{{ $day['date'] }}</div>
                                 @foreach($day['events'] as $event)
                                     <div class="event {{ $event->jenis_kegiatan }}" title="{{ $event->nama_kegiatan }}">
-                                        @if($event->is_hidden_siswa)
-                                            <span style="font-size: 8px; margin-right: 2px;">👁️‍🗨️</span> 
-                                        @endif
-                                        {{ Str::limit($event->nama_kegiatan, 20) }}
+                                        {{ Str::limit($event->nama_kegiatan, 18) }}
                                     </div>
                                 @endforeach
                             </td>
@@ -237,44 +239,64 @@
 
     <div class="legend">
         <h3>Keterangan Jenis Kegiatan:</h3>
-        <div class="legend-grid">
-            <div class="legend-item">
-                <div class="legend-color" style="background: #cffafe; border-left: 3px solid #06b6d4;"></div>
-                <span>Field Trip</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #d1fae5; border-left: 3px solid #10b981;"></div>
-                <span>Outing</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #ede9fe; border-left: 3px solid #8b5cf6;"></div>
-                <span>Live In</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #fed7aa; border-left: 3px solid #f97316;"></div>
-                <span>HOK Fest</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #fef3c7; border-left: 3px solid #f59e0b;"></div>
-                <span>PTS</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #fecaca; border-left: 3px solid #ef4444;"></div>
-                <span>PAS</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #e5e7eb; border-left: 3px solid #6b7280;"></div>
-                <span>Libur</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #fce7f3; border-left: 3px solid #ec4899;"></div>
-                <span>Ujian</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #ccfbf1; border-left: 3px solid #14b8a6;"></div>
-                <span>Acara Sekolah</span>
-            </div>
-        </div>
+        <table width="100%" cellpadding="3" cellspacing="0" style="font-size: 8pt;">
+            <tr>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #cffafe; border-left: 3px solid #06b6d4;"></div></td>
+                        <td style="padding-left: 3px;">Field Trip</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #d1fae5; border-left: 3px solid #10b981;"></div></td>
+                        <td style="padding-left: 3px;">Outing</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #ede9fe; border-left: 3px solid #8b5cf6;"></div></td>
+                        <td style="padding-left: 3px;">Live In</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #fed7aa; border-left: 3px solid #f97316;"></div></td>
+                        <td style="padding-left: 3px;">HOK Fest</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #fee2e2; border-left: 3px solid #dc2626;"></div></td>
+                        <td style="padding-left: 3px;">PTS</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #dbeafe; border-left: 3px solid #3b82f6;"></div></td>
+                        <td style="padding-left: 3px;">PAS</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #fecaca; border-left: 3px solid #ef4444;"></div></td>
+                        <td style="padding-left: 3px;">Libur</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #fce7f3; border-left: 3px solid #ec4899;"></div></td>
+                        <td style="padding-left: 3px;">Ujian</td>
+                    </tr></table>
+                </td>
+                <td style="white-space: nowrap;">
+                    <table cellpadding="0" cellspacing="0"><tr>
+                        <td><div class="legend-swatch" style="background: #ccfbf1; border-left: 3px solid #14b8a6;"></div></td>
+                        <td style="padding-left: 3px;">Acara Sekolah</td>
+                    </tr></table>
+                </td>
+            </tr>
+        </table>
     </div>
 
     @if($kegiatan->count() > 0)
@@ -284,14 +306,14 @@
             <div class="event-list-item">
                 <strong>{{ $event->nama_kegiatan }}</strong>
                 <div class="date">
-                    <i class="fas fa-calendar"></i> {{ $event->tanggal_mulai->format('d F Y') }}
+                    {{ $event->tanggal_mulai->format('d F Y') }}
                     @if($event->tanggal_selesai)
                         - {{ $event->tanggal_selesai->format('d F Y') }}
                     @endif
                     @if($event->waktu_mulai)
-                        | <i class="fas fa-clock"></i> {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}
+                        | {{ $event->waktu_mulai }} - {{ $event->waktu_selesai }}
                     @endif
-                    | <i class="fas fa-tag"></i> {{ $event->jenis_label }}
+                    | {{ $event->jenis_label }}
                     @if($event->is_hidden_siswa)
                         | <span style="color: #6b7280; font-weight: bold;">(Disembunyikan)</span>
                     @endif

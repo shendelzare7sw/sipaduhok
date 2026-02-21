@@ -1208,10 +1208,20 @@ class OrangTuaController extends Controller
                 ->get();
         }
 
+        // Dynamic school info based on student's branch
+        $cabang = $siswa->cabang;
+        $schoolInfo = [
+            'nama' => $cabang ? $cabang->nama_cabang : config('app.name', 'PKBM INKLUSI SIPADUHOK'),
+            'alamat' => $cabang ? $cabang->alamat : 'Jl. Pendidikan No. 123, Jakarta',
+            'telepon' => $cabang ? $cabang->telepon : '021-12345678',
+            'email' => 'info@sipaduhok.sch.id',
+        ];
+
         return view('orang-tua.tagihan.invoice', [
             'pembayaran' => $mainPayment, // Menggunakan payment pertama sebagai header info
             'items' => $items,            // Mengirim collection items untuk tabel
-            'siswa' => $siswa
+            'siswa' => $siswa,
+            'schoolInfo' => $schoolInfo
         ]);
     }
 }

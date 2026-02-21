@@ -32,10 +32,9 @@
                         str_contains(strtolower($kelas->nama_kelas), 'xii');
     @endphp
 
-    <div class="header">
-        <h1>REKAP NILAI SISWA</h1>
-        <h2>{{ config('app.name', 'SIPADUHOK') }}</h2>
-    </div>
+    @include('partials.print-header', ['cabang' => $cabang ?? null])
+
+    <div style="text-align: center; margin-bottom: 15px;"><strong style="font-size: 11pt;">REKAP NILAI SISWA</strong></div>
 
     <table class="info-table">
         <tr>

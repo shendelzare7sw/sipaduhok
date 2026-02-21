@@ -11,6 +11,7 @@ use App\Models\GuruPengajarKelas;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Materi;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 
 class GuruMateriController extends Controller
@@ -111,14 +112,19 @@ class GuruMateriController extends Controller
         ];
 
         // Buat untuk kelas utama
-        Materi::create(array_merge($materiData, ['kelas_id' => $kelasId]));
+        $materi = Materi::create(array_merge($materiData, ['kelas_id' => $kelasId]));
+
+        // Notify siswa in main class
+        $notificationService = app(NotificationService::class);
+        $notificationService->notifyMateriNew($materi);
 
         // Duplikasi ke kelas tambahan
         $kelasTambahan = $request->input('kelas_tambahan', []);
         $jumlahDuplikasi = 0;
         foreach ($kelasTambahan as $kelasLainId) {
             if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
-                Materi::create(array_merge($materiData, ['kelas_id' => $kelasLainId]));
+                $materiDuplikat = Materi::create(array_merge($materiData, ['kelas_id' => $kelasLainId]));
+                $notificationService->notifyMateriNew($materiDuplikat);
                 $jumlahDuplikasi++;
             }
         }

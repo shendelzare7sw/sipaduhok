@@ -242,6 +242,39 @@
 {{-- Backdrop (click to close) --}}
 <div id="aiSidebarBackdrop" class="ai-sidebar-backdrop" onclick="closeAiSidebar()"></div>
 
+{{-- Regenerate Confirmation Modal --}}
+<div class="modal fade" id="regenerateConfirmModal" tabindex="-1" aria-labelledby="regenerateConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning bg-opacity-10 border-bottom border-warning">
+                <h5 class="modal-title fw-bold" id="regenerateConfirmModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Konfirmasi Regenerate Soal
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Perhatian:</strong> Hasil generate sebelumnya akan hilang!
+                </div>
+                <p class="mb-0">
+                    Apakah Anda yakin ingin melakukan regenerate soal?
+                    Semua soal yang telah di-generate sebelumnya akan digantikan dengan hasil generate yang baru.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-warning" id="confirmRegenerateBtn">
+                    <i class="fas fa-redo me-1"></i> Ya, Regenerate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Hidden inputs for component data --}}
 <input type="hidden" id="aiGeneratorUjianId" value="{{ $ujianId }}">
 <input type="hidden" id="aiGeneratorKelasId" value="{{ $kelasId }}">

@@ -365,8 +365,8 @@
             <div class="form-group">
                 <label class="form-label">Status Akun <span style="color: #ef4444;">*</span></label>
                 <select name="is_active" class="form-control">
-                    <option value="1" {{ $siswa->user->is_active ? 'selected' : '' }}>✓ Aktif - Dapat Login</option>
-                    <option value="0" {{ !$siswa->user->is_active ? 'selected' : '' }}>✗ Non-Aktif - Tidak Dapat Login
+                    <option value="1" {{ $siswa->user->is_active ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Dapat Login</option>
+                    <option value="0" {{ !$siswa->user->is_active ? 'selected' : '' }}><i class="fas fa-times"></i> Non-Aktif - Tidak Dapat Login
                     </option>
                 </select>
             </div>
@@ -489,10 +489,10 @@
             <div class="form-group">
                 <label class="form-label">Status Siswa <span style="color: #ef4444;">*</span></label>
                 <select name="status" class="form-control">
-                    <option value="aktif" {{ $siswa->status == 'aktif' ? 'selected' : '' }}>✓ Aktif - Sedang Belajar</option>
-                    <option value="lulus" {{ $siswa->status == 'lulus' ? 'selected' : '' }}>🎓 Lulus</option>
-                    <option value="pindah" {{ $siswa->status == 'pindah' ? 'selected' : '' }}>🔄 Pindah Sekolah</option>
-                    <option value="keluar" {{ $siswa->status == 'keluar' ? 'selected' : '' }}>✗ Keluar</option>
+                    <option value="aktif" {{ $siswa->status == 'aktif' ? 'selected' : '' }}><i class="fas fa-check"></i> Aktif - Sedang Belajar</option>
+                    <option value="lulus" {{ $siswa->status == 'lulus' ? 'selected' : '' }}><i class="fas fa-graduation-cap"></i> Lulus</option>
+                    <option value="pindah" {{ $siswa->status == 'pindah' ? 'selected' : '' }}><i class="fas fa-exchange-alt"></i> Pindah Sekolah</option>
+                    <option value="keluar" {{ $siswa->status == 'keluar' ? 'selected' : '' }}><i class="fas fa-times"></i> Keluar</option>
                 </select>
             </div>
         </div>

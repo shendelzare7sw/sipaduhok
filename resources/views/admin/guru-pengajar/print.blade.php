@@ -39,12 +39,7 @@
     <button onclick="window.print()" class="print-button no-print"><i class="fas fa-print"></i> Cetak</button>
 
     <div class="container">
-        <div class="header">
-            <h1>PKBM HOUSE OF KNOWLEDGE</h1>
-            <h2>PUSAT KEGIATAN BELAJAR MASYARAKAT</h2>
-            <p>Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan</p>
-            <p>Telp: 021-7412345 | Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e980878f86a9818682c79a8a81c7808d">[email&#160;protected]</a></p>
-        </div>
+        @include('partials.print-header', ['cabang' => $cabang ?? null])
 
         <div class="title">
             <h3>DAFTAR GURU PENGAJAR</h3>

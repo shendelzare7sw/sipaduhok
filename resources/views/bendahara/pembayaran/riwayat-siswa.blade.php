@@ -135,7 +135,7 @@
                         <h6>Menunggu Validasi</h6>
                         <div class="stat-value">Rp {{ number_format($totalPending, 0, ',', '.') }}</div>
                         <div class="stat-label">Belum divalidasi</div>
-                        <div class="stat-icon">⏳</div>
+                        <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">

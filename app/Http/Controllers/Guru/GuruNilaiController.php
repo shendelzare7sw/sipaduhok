@@ -15,6 +15,9 @@ use App\Models\Siswa;
 use App\Models\TugasSiswa;
 use App\Models\UjianSiswa;
 use App\Models\TahunAjaran;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\Guru\NilaiSiswaImport;
+use App\Exports\Guru\NilaiSiswaTemplateExport;
 
 class GuruNilaiController extends Controller
 {
@@ -219,22 +222,22 @@ class GuruNilaiController extends Controller
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
-        
+
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $tahunAjaran = TahunAjaran::where('is_active', true)->first();
-        
+
         // Get semester from request or default to current
         $currentSemester = Nilai::getCurrentSemester();
         $semester = $request->get('semester', $currentSemester);
-        
+
         // Ambil semua siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelasId)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap')
             ->get()
             ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
-        
+
         // Buat atau ambil nilai untuk setiap siswa (per semester)
         $nilaiCollection = [];
         foreach ($siswaList as $siswa) {
@@ -246,24 +249,114 @@ class GuruNilaiController extends Controller
                 'semester' => $semester,
                 'guru_id' => $tenagaPendidik->id,
             ]);
-            
+
             // Calculate nilai if empty
             if (!$nilai->nilai_akhir) {
                 $this->calculateNilai($nilai);
             }
-            
+
             // Load siswa relation on nilai
             $nilai->siswa = $siswa;
             $nilaiCollection[] = $nilai;
         }
-        
+
         $nilaiCollection = collect($nilaiCollection);
         $fileName = 'Nilai_Siswa_' . \Str::slug($kelas->nama_kelas) . '_' . \Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
-        
+
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\Guru\NilaiSiswaExport($nilaiCollection, $kelas, $mataPelajaran, $semester),
             $fileName
         );
+    }
+
+    /**
+     * Download template Excel untuk import nilai
+     */
+    public function downloadTemplate(Request $request, $kelasId, $mapelId)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $kelas = Kelas::findOrFail($kelasId);
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+
+        // Ambil semua siswa di kelas
+        $siswaList = Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
+
+        $fileName = 'Template_Nilai_' . \Str::slug($kelas->nama_kelas) . '_' . \Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
+
+        return Excel::download(
+            new NilaiSiswaTemplateExport(collect($siswaList), $kelas, $mataPelajaran, $semester),
+            $fileName
+        );
+    }
+
+    /**
+     * Import nilai dari Excel
+     */
+    public function importExcel(Request $request, $kelasId, $mapelId): RedirectResponse
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120', // Max 5MB
+        ]);
+
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+
+        // Get semester from request or default to current
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = $request->get('semester', $currentSemester);
+
+        try {
+            $import = new NilaiSiswaImport(
+                $kelasId,
+                $mapelId,
+                $tahunAjaran->id,
+                $semester,
+                $tenagaPendidik->id
+            );
+
+            Excel::import($import, $request->file('file'));
+
+            // Check for errors
+            $errors = $import->getErrors();
+            $failures = $import->getFailures();
+
+            if (!empty($errors) || !empty($failures)) {
+                $errorMessages = [];
+
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error;
+                }
+
+                foreach ($failures as $failure) {
+                    $errorMessages[] = "Baris {$failure['row']}: " . implode(', ', $failure['errors']);
+                }
+
+                return redirect()
+                    ->route('guru.lms.nilai.index', [$kelasId, $mapelId, 'semester' => $semester])
+                    ->with('warning', 'Import selesai dengan beberapa error: ' . implode(' | ', $errorMessages));
+            }
+
+            return redirect()
+                ->route('guru.lms.nilai.index', [$kelasId, $mapelId, 'semester' => $semester])
+                ->with('success', 'Nilai berhasil diimpor dari Excel!');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('guru.lms.nilai.index', [$kelasId, $mapelId, 'semester' => $semester])
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage());
+        }
     }
     
     /**

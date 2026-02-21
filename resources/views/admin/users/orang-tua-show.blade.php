@@ -73,7 +73,7 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
                             <td style="padding: 10px 0; color: #64748b;">Status Akun</td>
                             <td style="padding: 10px 0;">
                                 <span style="background: {{ $orangTua->is_active ? '#dcfce7' : '#fee2e2' }}; color: {{ $orangTua->is_active ? '#166534' : '#991b1b' }}; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
-                                    {{ $orangTua->is_active ? '✓ Aktif' : '✗ Non-Aktif' }}
+                                    {!! $orangTua->is_active ? '<i class="fas fa-check"></i> Aktif' : '<i class="fas fa-times"></i> Non-Aktif' !!}
                                 </span>
                             </td>
                         </tr>

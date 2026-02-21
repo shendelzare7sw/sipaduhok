@@ -309,7 +309,7 @@
                                                         {{ \Carbon\Carbon::parse($s->tanggal_validasi_ujian_bendahara)->format('d/m/Y') }}
                                                     </div>
                                                 @else
-                                                    <span class="badge bg-warning badge-status text-white shadow-sm">⏳ BELUM</span>
+                                                    <span class="badge bg-warning badge-status text-white shadow-sm"><i class="fas fa-clock"></i> BELUM</span>
                                                 @endif
                                             </td>
                                             <td class="text-center align-middle">
@@ -320,7 +320,7 @@
                                                         {{ \Carbon\Carbon::parse($s->tanggal_validasi_rapor_bendahara)->format('d/m/Y') }}
                                                     </div>
                                                 @else
-                                                    <span class="badge bg-warning badge-status text-white shadow-sm">⏳ BELUM</span>
+                                                    <span class="badge bg-warning badge-status text-white shadow-sm"><i class="fas fa-clock"></i> BELUM</span>
                                                 @endif
                                             </td>
                                             <td class="text-center align-middle">

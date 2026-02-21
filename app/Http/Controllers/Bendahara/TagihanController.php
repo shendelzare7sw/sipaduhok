@@ -362,6 +362,68 @@ class TagihanController extends Controller
     }
 
     /**
+     * Cetak laporan rekap tagihan seluruh siswa (dengan filter)
+     */
+    public function cetakLaporan(Request $request)
+    {
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+
+        $selectedYearId = $request->get('tahun_ajaran_id', $tahunAjaranAktif->id ?? null);
+        $selectedYear = TahunAjaran::find($selectedYearId) ?? $tahunAjaranAktif;
+
+        $selectedKelas = null;
+
+        $query = Siswa::with(['kelas', 'cabang'])
+            ->whereIn('status', ['aktif', 'lulus']);
+
+        if ($request->filled('kelas_id')) {
+            $query->where('kelas_id', $request->kelas_id);
+            $selectedKelas = Kelas::with('cabang')->find($request->kelas_id);
+        }
+
+        if ($request->filled('search')) {
+            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+        }
+
+        $siswaList = $query->orderBy(
+            Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
+        )->orderBy('nama_lengkap', 'asc')->get();
+
+        // Hitung total tagihan per siswa (reuse logika dari index)
+        $siswaList->transform(function ($siswa) use ($selectedYear) {
+            $tagihan = Tagihan::where('siswa_id', $siswa->id)
+                ->when($selectedYear, function ($q) use ($selectedYear) {
+                    return $q->where('tahun_ajaran_id', $selectedYear->id);
+                })
+                ->get();
+
+            $totalTagihan = $tagihan->sum('jumlah');
+            $tagihanIds = $tagihan->pluck('id');
+            $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
+                ->whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            $siswa->total_tagihan = $totalTagihan;
+            $siswa->tagihan_lunas = $totalTerbayar;
+            $siswa->sisa_tagihan = $totalTagihan - $totalTerbayar;
+
+            return $siswa;
+        });
+
+        return view('bendahara.tagihan.cetak-laporan', [
+            'siswaList' => $siswaList,
+            'selectedYear' => $selectedYear,
+            'selectedKelas' => $selectedKelas,
+            'grandTotalTagihan' => $siswaList->sum('total_tagihan'),
+            'grandTotalLunas' => $siswaList->sum('tagihan_lunas'),
+            'grandTotalSisa' => $siswaList->sum('sisa_tagihan'),
+            'cabang' => $selectedKelas->cabang ?? null,
+            'filters' => $request->only(['kelas_id', 'search']),
+        ]);
+    }
+
+    /**
      * Bulk create tagihan untuk kelas tertentu
      */
     public function bulkCreate(Request $request)

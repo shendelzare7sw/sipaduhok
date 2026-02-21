@@ -32,9 +32,21 @@ class AiQuestionGeneratorService
         $this->provider = $settings['ai_provider'] ?? 'groq';
         $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
 
-        // Auto-fix for decommissioned models
-        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview'])) {
+        // Auto-fix for decommissioned Groq models
+        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview', 'llama-3.1-70b-versatile'])) {
+            Log::warning("Decommissioned model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
             $this->model = 'llama-3.3-70b-versatile';
+        }
+
+        // Auto-fix for unavailable Qwen/Mixtral/Gemma models (not free in Groq)
+        if (str_contains($this->model, 'qwen') || str_contains($this->model, 'mixtral') || str_contains($this->model, 'gemma')) {
+            Log::warning("Qwen/Mixtral/Gemma model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
+            $this->model = 'llama-3.3-70b-versatile';
+        }
+
+        // Auto-fix for deprecated Gemini models
+        if (in_array($this->model, ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'])) {
+            $this->model = 'gemini-2.5-flash';
         }
 
         // Load API key based on active provider (dual API key system)

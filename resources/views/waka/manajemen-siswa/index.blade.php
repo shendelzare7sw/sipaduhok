@@ -486,7 +486,7 @@
                         <div class="stat-number">{{ $stats['siswaNoKelas'] }}</div>
                         <div class="stat-desc">Perlu ditempatkan</div>
                     </div>
-                    <div class="stat-icon-bg">⏳</div>
+                    <div class="stat-icon-bg"><i class="fas fa-hourglass-half"></i></div>
                 </div>
             </div>
 

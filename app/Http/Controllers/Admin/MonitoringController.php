@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Ketua\KetuaController;
+use App\Models\Catatan;
 use Illuminate\Http\Request;
 
 /**
@@ -96,13 +97,63 @@ class MonitoringController extends KetuaController
 
     public function catatanStore(Request $request)
     {
-        return parent::catatanStore($request);
+        $validated = $request->validate([
+            'judul' => 'required|string|max:255',
+            'isi_catatan' => 'required|string',
+            'tipe_penerima' => 'required|in:semua,role,individu',
+            'role_penerima' => 'required_if:tipe_penerima,role',
+            'penerima_ids' => 'required_if:tipe_penerima,individu|array|min:1',
+            'penerima_ids.*' => 'exists:users,id',
+            'prioritas' => 'required|in:biasa,penting,mendesak',
+        ]);
+
+        $pengirimId = auth()->id();
+        $tanggalKirim = now();
+        $notificationService = app(\App\Services\NotificationService::class);
+
+        if ($validated['tipe_penerima'] === 'individu') {
+            foreach ($validated['penerima_ids'] as $penerimaId) {
+                $catatan = Catatan::create([
+                    'pengirim_id' => $pengirimId,
+                    'judul' => $validated['judul'],
+                    'isi_catatan' => $validated['isi_catatan'],
+                    'tipe_penerima' => 'individu',
+                    'penerima_id' => $penerimaId,
+                    'prioritas' => $validated['prioritas'],
+                    'tanggal_kirim' => $tanggalKirim,
+                ]);
+                $catatan->load('pengirim');
+                $notificationService->notifyCatatan($catatan);
+            }
+        } else {
+            $catatan = Catatan::create([
+                'pengirim_id' => $pengirimId,
+                'judul' => $validated['judul'],
+                'isi_catatan' => $validated['isi_catatan'],
+                'tipe_penerima' => $validated['tipe_penerima'],
+                'role_penerima' => $validated['role_penerima'] ?? null,
+                'prioritas' => $validated['prioritas'],
+                'tanggal_kirim' => $tanggalKirim,
+            ]);
+            $catatan->load('pengirim');
+            $notificationService->notifyCatatan($catatan);
+        }
+
+        return redirect()->route('admin.catatan.index')->with('success', 'Catatan berhasil dikirim!');
     }
 
     public function catatanShow($id)
     {
         $response = parent::catatanShow($id);
         return $this->wrapView($response, 'catatan.show');
+    }
+
+    public function catatanDestroy($id)
+    {
+        $catatan = Catatan::where('pengirim_id', auth()->id())->findOrFail($id);
+        $catatan->delete();
+
+        return redirect()->route('admin.catatan.index')->with('success', 'Catatan berhasil dihapus dari riwayat.');
     }
 
     /**

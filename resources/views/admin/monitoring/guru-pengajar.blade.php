@@ -247,7 +247,7 @@
                                                     style="color: #10b981;">{{ $guru->nilai_sudah_diisi }}</span>
                                             </div>
                                             <div class="stat-mini-row">
-                                                <span class="stat-label-small">⏳ Belum Dinilai</span>
+                                                <span class="stat-label-small"><i class="fas fa-clock"></i> Belum Dinilai</span>
                                                 <span class="stat-value-small"
                                                     style="color: #ef4444;">{{ $guru->total_nilai_harus_diisi }}</span>
                                             </div>

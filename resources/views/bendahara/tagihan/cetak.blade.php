@@ -18,21 +18,6 @@
         }
         .header {
             text-align: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            font-size: 16pt;
-            margin-bottom: 5px;
-        }
-        .header h2 {
-            font-size: 14pt;
-            font-weight: normal;
-        }
-        .header p {
-            font-size: 10pt;
-            color: #333;
         }
         .title {
             text-align: center;
@@ -130,12 +115,7 @@
         </button>
     </div>
 
-    <div class="header">
-        <h1>PKBM HOUSE OF KNOWLEDGE</h1>
-        <h2>SIPADUHOK - Sistem Informasi Akademik</h2>
-        <p>Jl. Ruko Reni Jaya Blok AF No. 22-23 Pamulang Barat, Tangerang Selatan</p>
-        <p>Telp: (021) 123-4567 | Email: info@hok.sch.id</p>
-    </div>
+    @include('partials.print-header', ['cabang' => $siswa->cabang ?? null])
 
     <div class="title">
         <h3>RINCIAN TAGIHAN SISWA</h3>

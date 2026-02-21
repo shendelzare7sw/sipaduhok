@@ -450,7 +450,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                     <div class="stat-number">{{ $stats['kelasWithoutWali'] }}</div>
                     <div class="stat-desc">Perlu ditunjuk</div>
                 </div>
-                <div class="stat-icon-bg">⏳</div>
+                <div class="stat-icon-bg"><i class="fas fa-hourglass-half"></i></div>
             </div>
         </div>
         

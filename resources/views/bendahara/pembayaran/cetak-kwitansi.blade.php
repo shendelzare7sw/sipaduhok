@@ -222,7 +222,7 @@
         <div class="receipt-container">
             {{-- Header --}}
             <div class="receipt-header">
-                <h2>{{ $schoolInfo['nama'] }}</h2>
+                <h2>{{ preg_replace('/\s*\(Gedung\s+\w+\)$/i', '', $schoolInfo['nama']) }}</h2>
                 <p>{{ $schoolInfo['alamat'] }}</p>
                 <p>Telp: {{ $schoolInfo['telepon'] }} | Email: {{ $schoolInfo['email'] }}</p>
             </div>
@@ -350,7 +350,7 @@
                 <div class="signature-box">
                     <p>Pembayar,</p>
                     <div class="signature-line"></div>
-                    <p>(................................)</p>
+                    <p>({{ $parentName }})</p>
                 </div>
             </div>
 
