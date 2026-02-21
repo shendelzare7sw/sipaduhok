@@ -893,6 +893,7 @@
                         $bgClass = $colorMap[$color]['bg'] ?? 'bg-primary/10';
                         $gradientClass = $colorMap[$color]['gradient'] ?? 'from-primary to-blue-600';
                         $icon = $iconMap[$color] ?? 'fa-book';
+                        $image = $header['image'] ?? null;
 
                         // Calculate totals from items
                         $pokokItems = collect($items)->where('type', 'pokok');
@@ -901,8 +902,12 @@
                     <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 {{ $borderClass }}">
                         <div class="text-center mb-6">
                             <div
-                                class="w-16 h-16 mx-auto mb-4 {{ $bgClass }} rounded-full flex items-center justify-center">
-                                <span class="text-3xl"><i class="fas {{ $icon }}"></i></span>
+                                class="w-16 h-16 mx-auto mb-4 {{ $bgClass }} rounded-full flex items-center justify-center overflow-hidden">
+                                @if($image)
+                                    <img src="{{ asset($image) }}" alt="{{ $header['title'] ?? 'Icon' }}" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-3xl"><i class="fas {{ $icon }}"></i></span>
+                                @endif
                             </div>
                             <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $header['title'] ?? 'Program' }}</h3>
                             <p class="text-sm text-gray-600">{{ $header['subtitle'] ?? '' }}</p>
@@ -1151,8 +1156,13 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span
-                        class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3"><i
-                            class="fas fa-money-bill-wave"></i></span>
+                        class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
+                        @if(isset($biayaPaudContent['header']['image']) && $biayaPaudContent['header']['image'])
+                            <img src="{{ asset($biayaPaudContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                        @else
+                            <i class="fas fa-money-bill-wave"></i>
+                        @endif
+                    </span>
                     Rincian Biaya {{ $biayaPaudContent['header']['title'] ?? 'PAUD' }}
                 </h3>
                 <button onclick="closeCostModal()" class="text-gray-400 hover:text-gray-600">
@@ -1282,8 +1292,13 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span
-                        class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3"><i
-                            class="fas fa-money-bill-wave"></i></span>
+                        class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
+                        @if(isset($biayaSmaContent['header']['image']) && $biayaSmaContent['header']['image'])
+                            <img src="{{ asset($biayaSmaContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                        @else
+                            <i class="fas fa-money-bill-wave"></i>
+                        @endif
+                    </span>
                     Rincian Biaya {{ $biayaSmaContent['header']['title'] ?? 'SMA' }}
                 </h3>
                 <button onclick="closeCostModalPaketC()" class="text-gray-400 hover:text-gray-600">
@@ -1404,8 +1419,13 @@
         <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 animate-fade-up max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3"><i
-                            class="fas fa-money-bill-wave"></i></span>
+                    <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
+                        @if(isset($biayaSdContent['header']['image']) && $biayaSdContent['header']['image'])
+                            <img src="{{ asset($biayaSdContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                        @else
+                            <i class="fas fa-money-bill-wave"></i>
+                        @endif
+                    </span>
                     Rincian Biaya {{ $biayaSdContent['header']['title'] ?? 'SD' }}
                 </h3>
                 <button onclick="closeCostModalPaketA()" class="text-gray-400 hover:text-gray-600">
@@ -1526,8 +1546,13 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span
-                        class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3"><i
-                            class="fas fa-money-bill-wave"></i></span>
+                        class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
+                        @if(isset($biayaSmpContent['header']['image']) && $biayaSmpContent['header']['image'])
+                            <img src="{{ asset($biayaSmpContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                        @else
+                            <i class="fas fa-money-bill-wave"></i>
+                        @endif
+                    </span>
                     Rincian Biaya {{ $biayaSmpContent['header']['title'] ?? 'SMP' }}
                 </h3>
                 <button onclick="closeCostModalPaketB()" class="text-gray-400 hover:text-gray-600">

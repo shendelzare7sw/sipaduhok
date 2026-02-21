@@ -13,6 +13,9 @@
     // Urutan section sesuai tampilan di halaman depan (home.blade.php) & tentang kami
     $sectionOrder = ['hero', 'intro', 'stats', 'program', 'history', 'why_choose_us', 'about', 'visi', 'misi', 'values', 'news_header', 'gallery_section', 'contact_section', 'cta_section'];
     
+    // Urutan khusus untuk PPDB
+    $ppdbSectionOrder = ['hero', 'quick_info', 'alur', 'investasi', 'biaya_paud', 'biaya_sd', 'biaya_smp', 'biaya_sma'];
+
     // Nama yang lebih mudah dipahami untuk setiap section
     $sectionLabels = [
         'hero' => 'Hero / Banner Utama',
@@ -29,6 +32,14 @@
         'visi' => 'Visi Sekolah',
         'misi' => 'Misi Sekolah',
         'values' => 'Nilai-Nilai (Values)',
+        // Label khusus PPDB
+        'quick_info' => 'Info Cepat & Statistik',
+        'alur' => 'Alur Pendaftaran',
+        'investasi' => 'Header Biaya / Investasi',
+        'biaya_paud' => 'Biaya PAUD',
+        'biaya_sd' => 'Biaya SD (Paket A)',
+        'biaya_smp' => 'Biaya SMP (Paket B)',
+        'biaya_sma' => 'Biaya SMA (Paket C)',
     ];
     
     // Deskripsi singkat untuk setiap section
@@ -47,16 +58,27 @@
         'visi' => 'Visi utama sekolah.',
         'misi' => 'Daftar misi sekolah.',
         'values' => 'Nilai-nilai utama yang dipegang teguh sekolah.',
+        // Deskripsi PPDB
+        'quick_info' => 'Informasi singkat mengenai periode, biaya pendaftaran, dan kuota.',
+        'alur' => 'Langkah-langkah pendaftaran.',
+        'investasi' => 'Judul dan deskripsi utama untuk bagian biaya.',
+        'biaya_paud' => 'Rincian biaya untuk jenjang PAUD.',
+        'biaya_sd' => 'Rincian biaya untuk jenjang SD.',
+        'biaya_smp' => 'Rincian biaya untuk jenjang SMP.',
+        'biaya_sma' => 'Rincian biaya untuk jenjang SMA.',
     ];
     
     // Section yang tidak boleh ditambah/hapus itemnya
-    $fixedSections = ['programs', 'kurikulum', 'fasilitas', 'services', 'therapy_types', 'stats', 'contact_info', 'program', 'contact_section', 'news_header', 'gallery_section', 'cta_section', 'hero', 'about', 'history', 'intro', 'why_choose_us'];
+    $fixedSections = ['programs', 'kurikulum', 'fasilitas', 'services', 'therapy_types', 'stats', 'contact_info', 'program', 'contact_section', 'news_header', 'gallery_section', 'cta_section', 'hero', 'about', 'history', 'intro', 'why_choose_us', 'quick_info', 'investasi'];
     
     // Sort sections
     $sortedSections = $landingPage->sections->filter(function($section) {
         return $section->section_key !== 'mata_pelajaran_c';
-    })->sortBy(function($section) use ($sectionOrder) {
-        $key = array_search($section->section_key, $sectionOrder);
+    })->sortBy(function($section) use ($sectionOrder, $ppdbSectionOrder, $landingPage) {
+        // Gunakan urutan khusus jika ini halaman PPDB
+        $orderList = ($landingPage->slug === 'ppdb') ? $ppdbSectionOrder : $sectionOrder;
+        
+        $key = array_search($section->section_key, $orderList);
         return $key !== false ? $key : 999;
     })->values();
 @endphp
@@ -155,24 +177,39 @@
                              if (str_contains($sectionKey, 'values') && empty($header)) {
                                 $header = ['title' => 'Nilai-Nilai Kami', 'description' => 'Prinsip yang menjadi landasan kami'];
                             }
+
+                            // Initialize header for Biaya sections
+                            if (str_contains($sectionKey, 'biaya_')) {
+                                if (empty($header)) {
+                                    $level = strtoupper(str_replace('biaya_', '', $sectionKey));
+                                    $header = ['title' => $level, 'image' => null];
+                                } elseif (!isset($header['image'])) {
+                                    // Always ensure image key exists for upload
+                                    $header['image'] = null;
+                                }
+                            }
                         }
 
                         // Define default item structure based on section key
                         $defaultItem = match(true) {
                             str_contains($sectionKey, 'stats') => ['value' => '', 'label' => ''],
                             str_contains($sectionKey, 'program') => ['icon' => null, 'color' => 'primary', 'title' => '', 'description' => '', 'link' => '#'],
+                            str_contains($sectionKey, 'biaya_') => ['name' => '', 'price' => '', 'type' => 'pokok'],
                             str_contains($sectionKey, 'why_choose_us') => ['icon' => null, 'icon_color' => '#165fac', 'title' => '', 'description' => ''],
                             str_contains($sectionKey, 'history') => ['year' => '', 'title' => '', 'description' => '', 'image' => null, 'color' => '#165fac'],
                             str_contains($sectionKey, 'misi') => ['title' => '', 'description' => '', 'color' => 'primary'],
                             str_contains($sectionKey, 'values') => ['icon' => 'fas fa-star', 'title' => '', 'icon_color' => 'orange'],
                             str_contains($sectionKey, 'jadwal') => ['time' => '', 'activity' => ''],
                             str_contains($sectionKey, 'staff_list') => ['image' => null, 'name' => '', 'department' => '', 'category' => '', 'position' => ''],
-                            str_contains($sectionKey, 'leaders') || str_contains($sectionKey, 'coordinators') || str_contains($sectionKey, 'staff') => ['image' => null, 'name' => '', 'department' => ''],
+                            str_contains($sectionKey, 'leaders') || str_contains($sectionKey, 'coordinators') || str_contains($sectionKey, 'staff') => ['image' => null, 'color' => '#165fac', 'name' => '', 'department' => '', 'position' => ''],
                             str_contains($sectionKey, 'mata_pelajaran') => ['icon' => null, 'icon_color' => '#165fac', 'title' => '', 'description' => '', 'card_color' => '#ffffff'],
                             str_contains($sectionKey, 'team') => ['icon' => null, 'color' => '#facc15', 'title' => '', 'description' => '', 'link' => '#'],
                             str_contains($sectionKey, 'jurusan') => ['icon' => null, 'icon_color' => '#165fac', 'title' => '', 'description' => '', 'features' => '', 'card_gradient_start' => '#ffffff', 'card_gradient_end' => '#ffffff'],
                             str_contains($sectionKey, 'prospek') => ['icon' => null, 'icon_color' => '#165fac', 'title' => '', 'description' => '', 'subtitle' => ''],
+                            str_contains($sectionKey, 'categories') => ['color' => '#165fac', 'title' => '', 'description' => '', 'key' => '', 'label' => ''],
+                            str_contains($sectionKey, 'gallery_items') => ['image' => null, 'title' => '', 'date' => '', 'category' => ''],
                             str_contains($sectionKey, 'ruang_') || str_contains($sectionKey, 'area_') || str_contains($sectionKey, 'perpustakaan') || str_contains($sectionKey, 'gallery') => ['image' => null, 'title' => '', 'description' => ''],
+                            str_contains($sectionKey, 'locations') => ['color' => '#165fac', 'area' => '', 'name' => '', 'address' => '', 'map_link' => '', 'map_embed' => ''],
                             default => ['title' => '', 'description' => '']
                         };
                     @endphp
@@ -211,12 +248,16 @@
                                                         <label class="form-label fw-semibold">
                                                             {{ ucwords(str_replace('_', ' ', $hKey)) }}
                                                         </label>
-                                                        @if($hKey === 'image' || str_contains($hKey, 'image') || $hKey === 'icon')
+                                                        @if($hKey === 'image' || str_contains($hKey, 'image'))
                                                             <div class="input-group">
                                                                 @if($hValue && (str_contains($hValue, '/') || str_contains($hValue, '.')))
                                                                     <span class="input-group-text p-0 overflow-hidden" style="width: 42px;">
                                                                         <img src="{{ asset($hValue) }}" alt="Preview" class="w-100 h-100" style="object-fit: cover; min-height: 38px;" onerror="this.parentElement.style.display='none'">
                                                                     </span>
+                                                                @endif
+                                                                {{-- Hidden input to preserve old value when no new file is uploaded --}}
+                                                                @if($hValue)
+                                                                    <input type="hidden" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue }}">
                                                                 @endif
                                                                 <input type="file" class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" accept="image/*">
                                                             </div>
@@ -249,10 +290,32 @@
                                                     continue;
                                                 }
 
+                                                // Khusus PPDB: Sembunyikan Title & Description pada section biaya
+                                                if ($landingPage->slug === 'ppdb' && str_contains($sectionKey, 'biaya_') && in_array($key, ['title', 'description'])) {
+                                                    continue;
+                                                }
+
+                                                // Gallery Items: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'gallery_items') && $key === 'description') {
+                                                    continue;
+                                                }
+
+                                                // Contact Info: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'contact_info') && $key === 'description') {
+                                                    continue;
+                                                }
+
+                                                // Locations: Sembunyikan Title & Description
+                                                if (str_contains($sectionKey, 'locations') && in_array($key, ['title', 'description'])) {
+                                                    continue;
+                                                }
+
                                                 // Group visual related keys
                                                 if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'background_image'])) {
                                                     // Explicitly exclude image/icon for jadwal section
                                                     if(str_contains($sectionKey, 'jadwal')) { continue; }
+                                                    // Explicitly exclude ONLY icon (upload) for stats section
+                                                    if(str_contains($sectionKey, 'stats') && $key === 'icon') { continue; }
                                                     $visualFields[$key] = $value;
                                                 // Exclude internal/legacy fields related to color text inputs
                                                 } elseif (str_contains($key, 'color') && (str_ends_with($key, '_text') || str_contains($key, 'text'))) {
@@ -273,8 +336,43 @@
                                             $templateVisualFields = [];
                                             $templateTextFields = [];
                                             foreach($defaultItem as $key => $value) {
-                                                 if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'background_image'])) {
+                                                // Apply same exclusions as item rendering
+
+                                                // Leaders, Coordinators, Staff, Staff List, Jadwal: Hide Title & Description
+                                                if ((str_contains($sectionKey, 'leaders') || str_contains($sectionKey, 'coordinators') || str_contains($sectionKey, 'staff') || str_contains($sectionKey, 'staff_list') || str_contains($sectionKey, 'jadwal')) && in_array($key, ['title', 'description'])) {
+                                                    continue;
+                                                }
+
+                                                // PPDB: Sembunyikan Title & Description pada section biaya
+                                                if ($landingPage->slug === 'ppdb' && str_contains($sectionKey, 'biaya_') && in_array($key, ['title', 'description'])) {
+                                                    continue;
+                                                }
+
+                                                // Gallery Items: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'gallery_items') && $key === 'description') {
+                                                    continue;
+                                                }
+
+                                                // Contact Info: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'contact_info') && $key === 'description') {
+                                                    continue;
+                                                }
+
+                                                // Locations: Sembunyikan Title & Description
+                                                if (str_contains($sectionKey, 'locations') && in_array($key, ['title', 'description'])) {
+                                                    continue;
+                                                }
+
+                                                // Group visual related keys
+                                                if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'background_image'])) {
+                                                    // Explicitly exclude image/icon for jadwal section
+                                                    if(str_contains($sectionKey, 'jadwal')) { continue; }
+                                                    // Explicitly exclude ONLY icon (upload) for stats section
+                                                    if(str_contains($sectionKey, 'stats') && $key === 'icon') { continue; }
                                                     $templateVisualFields[$key] = $value;
+                                                // Exclude internal/legacy fields related to color text inputs
+                                                } elseif (str_contains($key, 'color') && (str_ends_with($key, '_text') || str_contains($key, 'text'))) {
+                                                    continue;
                                                 } else {
                                                     $templateTextFields[$key] = $value;
                                                 }

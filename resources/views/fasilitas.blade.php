@@ -433,7 +433,7 @@
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto scale-in"
                     style="animation-delay: 0.6s;">
-                    @if(!empty($statsContent) && is_array($statsContent))
+                        @if(!empty($statsContent) && is_array($statsContent))
                         @foreach($statsContent as $stat)
                         <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
                             <p class="text-4xl font-bold text-white mb-2">{{ $stat['value'] ?? '0' }}</p>

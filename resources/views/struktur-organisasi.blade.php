@@ -90,7 +90,8 @@
             <div class="flex flex-col items-center">
                 @foreach($leaders as $index => $leader)
                     @php
-                        $leaderColor = $colorMap[$leader['color'] ?? 'primary'] ?? '#165fac';
+                        $rawColor = $leader['color'] ?? 'primary';
+                        $leaderColor = (str_starts_with($rawColor, '#')) ? $rawColor : ($colorMap[$rawColor] ?? '#165fac');
                     @endphp
                     <!-- Leader Card -->
                     <div class="org-card text-white rounded-2xl p-6 text-center shadow-xl mb-8"
@@ -114,7 +115,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-8">
                     @foreach($staffMembers as $staff)
                         @php
-                            $staffColor = $colorMap[$staff['color'] ?? 'primary'] ?? '#165fac';
+                            $rawStaffColor = $staff['color'] ?? 'primary';
+                            $staffColor = (str_starts_with($rawStaffColor, '#')) ? $rawStaffColor : ($colorMap[$rawStaffColor] ?? '#165fac');
                         @endphp
                         <div class="org-card bg-white rounded-2xl p-6 text-center shadow-lg border-t-4"
                             style="border-color: {{ $staffColor }}">
