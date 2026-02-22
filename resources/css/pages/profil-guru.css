@@ -1,0 +1,18 @@
+/* ===== Profil Guru Page Specific CSS ===== */
+
+.teacher-card {
+    transition: all 0.3s ease;
+}
+
+.teacher-card:hover {
+    transform: translateY(-8px);
+}
+
+.teacher-card:hover .teacher-overlay {
+    opacity: 1;
+}
+
+.teacher-overlay {
+    transition: all 0.3s ease;
+    opacity: 0;
+}

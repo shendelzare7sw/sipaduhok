@@ -1,0 +1,39 @@
+/* ===== Program PAUD-TK Page Specific CSS ===== */
+
+body {
+    background-color: #f9fafb;
+}
+
+:root {
+    --blue-main: #165fac;
+    --green-main: #287f3b;
+    --orange-main: #d45930;
+    --yellow-main: #fac030;
+}
+
+.badge {
+    padding: 0.4rem 1rem;
+    display: inline-block;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards;
+}
+
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Card hover override */
+.card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}

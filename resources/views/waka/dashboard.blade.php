@@ -104,6 +104,20 @@
         </div>
     </div>
 
+    <!-- Kontak Developer Alert -->
+    <div class="alert alert-info d-flex align-items-center mb-4 shadow-sm" role="alert" style="border-left: 4px solid #0dcaf0;">
+        <div class="d-flex bg-info text-white align-items-center justify-content-center rounded p-2 me-3">
+            <i class="fas fa-laptop-code fs-4"></i>
+        </div>
+        <div class="flex-grow-1">
+            <h6 class="alert-heading mb-1 fw-bold">Menemukan Bug atau Fitur Kurang Sesuai?</h6>
+            <p class="mb-0" style="font-size: 0.85rem;">Bantu kami meningkatkan kualitas sistem dengan melaporkan kendala yang ada.</p>
+        </div>
+        <a href="https://wa.me/6282113100791?text=Halo%20Developer,%20saya%20menemukan%20kendala/bug%20pada%20sistem" target="_blank" rel="noopener noreferrer" class="btn btn-info text-white btn-sm text-nowrap ms-3 fw-medium">
+            <i class="fab fa-whatsapp me-2"></i>Kontak Developer
+        </a>
+    </div>
+
     <!-- Statistics Cards -->
     <div class="row g-3 mb-4">
         <div class="col-xl-3 col-md-6">

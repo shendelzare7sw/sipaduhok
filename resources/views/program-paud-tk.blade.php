@@ -6,55 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendidikan PAUD - TK - PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+
+    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/paud-tk.css'])
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f9fafb;
-        }
-
-        .hero-overlay {
-            background: linear-gradient(135deg, rgba(22, 95, 172, 0.88) 0%, rgba(40, 127, 59, 0.85) 100%);
-        }
-
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
-        }
-
-        :root {
-            --blue-main: #165fac;
-            --green-main: #287f3b;
-            --orange-main: #d45930;
-            --yellow-main: #fac030;
-        }
-
-        .badge {
-            padding: 0.4rem 1rem;
-            display: inline-block;
-            border-radius: 999px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .fade-up {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeUp 0.6s ease forwards;
-        }
-
-        @keyframes fadeUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
 
 </head>
 

@@ -6,45 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Program Pendidikan SD - SMP - SMA | PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+
+    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/program-sd-sma.css'])
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .hero-overlay {
-            background: linear-gradient(135deg, rgba(22, 95, 172, 0.9) 0%, rgba(40, 127, 59, 0.8) 100%);
-        }
-
-        .card-hover {
-            transition: .3s ease;
-        }
-
-        .card-hover:hover {
-            transform: translateY(-5px);
-        }
-
-        .tab-btn.active {
-            background-color: #165fac;
-            color: white;
-        }
-
-        /* --- Animasi Smooth Saat Ganti Tab --- */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(10px);
-            animation: fadeInSoft .35s ease-out forwards;
-        }
-
-        @keyframes fadeInSoft {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
 
 </head>
 
@@ -116,40 +83,12 @@
         @include('partials.program-sma-content', ['content' => $paketCContent, 'jurusan' => $jurusanCContent, 'prospek' => $prospekCContent])
     </div>
 
-    <!-- SIMPLE SCRIPT TO SWITCH TAB -->
-    <script>
-        const tabs = document.querySelectorAll('.tab-btn');
-        const contents = document.querySelectorAll('.tab-content');
-
-        tabs.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                contents.forEach(c => c.classList.add('hidden'));
-
-                btn.classList.add('active');
-                const activeContent = document.getElementById('tab-' + btn.dataset.tab);
-
-                // FIX → Jangan sembunyikan elemen, cukup reset opacity
-                activeContent.style.opacity = 0;
-
-                // tampilkan
-                activeContent.classList.remove('hidden');
-
-                // animasi fade
-                setTimeout(() => {
-                    activeContent.classList.add('fade-in');
-                }, 10);
-            });
-        });
-
-        // default tab
-        tabs[0].click();
-    </script>
 
 
 
     <x-footer />
 
+    @vite(['resources/js/navbar.js', 'resources/js/pages/program-sd-sma.js'])
 </body>
 
 </html>

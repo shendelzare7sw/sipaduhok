@@ -1,0 +1,19 @@
+/* ===== Program SD-SMA Page Specific CSS ===== */
+
+.tab-btn.active {
+    background-color: #165fac;
+    color: white;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInSoft .35s ease-out forwards;
+}
+
+@keyframes fadeInSoft {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

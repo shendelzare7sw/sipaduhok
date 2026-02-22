@@ -9,26 +9,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Mobile menu elements
+    // Mobile menu toggle
     const mobileMenuButton = document.getElementById('mobileMenuButton');
     const closeMobileMenu = document.getElementById('closeMobileMenu');
     const mobileMenu = document.getElementById('mobileMenu');
 
-    // Open mobile menu
     mobileMenuButton.addEventListener('click', function() {
         mobileMenu.classList.add('active');
         document.body.style.overflow = 'hidden';
     });
 
-    // Close mobile menu
     closeMobileMenu.addEventListener('click', function() {
         mobileMenu.classList.remove('active');
         document.body.style.overflow = 'auto';
     });
 
-    // Mobile dropdown toggle
+    // Mobile dropdown toggles
     const mobileDropdownToggles = document.querySelectorAll('.mobile-dropdown-toggle');
-    
+
     mobileDropdownToggles.forEach(toggle => {
         toggle.addEventListener('click', function() {
             const dropdownContent = this.nextElementSibling;
@@ -38,9 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Desktop dropdown functionality
     const dropdowns = document.querySelectorAll('.dropdown');
-    
+
     dropdowns.forEach(dropdown => {
-        const dropdownTrigger = dropdown.querySelector('button'); 
+        const dropdownTrigger = dropdown.querySelector('button');
         const dropdownContent = dropdown.querySelector('.dropdown-content');
         let hoverTimeout;
         let isOpen = false;
@@ -55,33 +53,30 @@ document.addEventListener('DOMContentLoaded', function() {
             hoverTimeout = setTimeout(() => {
                 dropdownContent.classList.remove('show');
                 isOpen = false;
-            }, 250); 
+            }, 250);
         }
 
-        // Mouse enter dropdown area
         dropdown.addEventListener('mouseenter', () => {
             showDropdown();
         });
 
-        // Mouse leave dropdown area
         dropdown.addEventListener('mouseleave', () => {
             hideDropdown();
         });
 
-        // Click on dropdown trigger (button)
         if (dropdownTrigger) {
             dropdownTrigger.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                if (isOpen) {
-                    hideDropdown();
-                } else {
+                if (isOpen && dropdownTrigger.getAttribute('href') !== '#') {
+                    return true;
+                }
+
+                if (!isOpen) {
+                    e.preventDefault();
                     showDropdown();
                 }
             });
         }
 
-        // Keep dropdown open when hovering over content
         if (dropdownContent) {
             dropdownContent.addEventListener('mouseenter', () => {
                 clearTimeout(hoverTimeout);
@@ -93,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Close dropdown when clicking outside
+    // Close dropdowns when clicking outside
     document.addEventListener('click', function(event) {
         dropdowns.forEach(dropdown => {
             const dropdownContent = dropdown.querySelector('.dropdown-content');
@@ -105,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Close dropdown when pressing Escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             dropdowns.forEach(dropdown => {

@@ -1,0 +1,170 @@
+/* ===== Home Page Specific CSS ===== */
+
+/* Decorative Frame Tilt Style */
+.decorative-frame-tilt {
+    position: relative;
+    padding: 20px;
+}
+
+.decorative-frame-tilt::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100%;
+    height: 100%;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 1rem;
+    z-index: -1;
+    transform: rotate(6deg);
+    transition: transform 0.5s ease;
+}
+
+.decorative-frame-tilt::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 70%;
+    height: 70%;
+    background: linear-gradient(135deg, #287f3b 0%, #165fac 100%);
+    border-radius: 1rem;
+    z-index: -2;
+    opacity: 0.4;
+    transform: rotate(-6deg);
+    transition: transform 0.5s ease;
+}
+
+.decorative-frame-tilt:hover::before {
+    transform: rotate(3deg);
+}
+
+.decorative-frame-tilt:hover::after {
+    transform: rotate(-3deg);
+}
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.float-animation { animation: float 6s ease-in-out infinite; }
+.bounce-animation { animation: bounce 2s infinite; }
+
+/* Card Hover override (larger than standard) */
+.card-hover:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+/* 3D Carousel */
+.carousel-3d {
+    perspective: 1000px;
+    height: 450px;
+}
+
+.carousel-item {
+    position: absolute;
+    width: 280px;
+    height: 380px;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-item.center {
+    transform: translateX(-50%) scale(1.1);
+    left: 50%;
+    z-index: 5;
+    opacity: 1;
+}
+
+.carousel-item.left-1 {
+    transform: translateX(-50%) scale(0.9) rotateY(15deg);
+    left: 25%;
+    z-index: 4;
+    opacity: 0.9;
+}
+
+.carousel-item.left-2 {
+    transform: translateX(-50%) scale(0.75) rotateY(25deg);
+    left: 5%;
+    z-index: 3;
+    opacity: 0.6;
+}
+
+.carousel-item.right-1 {
+    transform: translateX(-50%) scale(0.9) rotateY(-15deg);
+    left: 75%;
+    z-index: 4;
+    opacity: 0.9;
+}
+
+.carousel-item.right-2 {
+    transform: translateX(-50%) scale(0.75) rotateY(-25deg);
+    left: 95%;
+    z-index: 3;
+    opacity: 0.6;
+}
+
+.carousel-item.hidden-item {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .carousel-3d { height: 350px; }
+    .carousel-item { width: 200px; height: 280px; }
+    .carousel-item.left-2, .carousel-item.right-2 { opacity: 0.4; }
+}
+
+/* Gallery Hover */
+.gallery-item {
+    overflow: hidden;
+}
+.gallery-item img {
+    transition: transform 0.5s ease;
+}
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+/* Contact Card Hover */
+.contact-hover:hover {
+    transform: translateX(10px);
+}
+
+/* Scroll Indicator Animation */
+.scroll-indicator {
+    animation: float-gentle 3s ease-in-out infinite;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+@keyframes float-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+}
+
+/* Mouse wheel scroll animation */
+.scroll-wheel {
+    animation: scroll-down 2s ease-in-out infinite;
+}
+
+@keyframes scroll-down {
+    0% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.3; transform: translateY(0.75rem); }
+    100% { opacity: 0; transform: translateY(0.75rem); }
+}
+
+.scroll-indicator.fade-out {
+    opacity: 0 !important;
+}

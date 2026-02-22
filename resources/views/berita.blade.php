@@ -7,84 +7,10 @@
     <title>Berita - PKBM House Of Knowledge</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+
+    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/berita.css'])
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'primary': '#165fac',
-                        'secondary': '#287f3b',
-                        'accent-orange': '#d45930',
-                        'accent-yellow': '#fac030',
-                        'accent-bright': '#ffe400',
-                        'cream': '#e8e7e2'
-                    },
-                    fontFamily: {
-                        'poppins': ['Poppins', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .hero-overlay { background: linear-gradient(135deg, rgba(22, 95, 172, 0.9) 0%, rgba(40, 127, 59, 0.8) 100%); }
-        .news-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .news-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-        .news-image-wrapper {
-            position: relative;
-            overflow: hidden;
-        }
-        .news-image-wrapper img {
-            transition: transform 0.5s ease;
-        }
-        .news-card:hover .news-image-wrapper img {
-            transform: scale(1.1);
-        }
-        .category-badge {
-            transition: all 0.3s ease;
-        }
-        .news-card:hover .category-badge {
-            transform: scale(1.05);
-        }
-        .filter-btn {
-            transition: all 0.3s ease;
-        }
-        .filter-btn.active {
-            background: linear-gradient(135deg, #165fac 0%, #287f3b 100%);
-            color: white;
-        }
-        html {
-            scroll-behavior: smooth;
-        }
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        .search-box {
-            transition: all 0.3s ease;
-        }
-        .search-box:focus-within {
-            box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.2);
-        }
-    </style>
 </head>
 <body class="bg-white">
 

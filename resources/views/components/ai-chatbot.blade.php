@@ -155,7 +155,7 @@
 /* ==================== FAB (Floating Action Button) ==================== */
 .ai-chatbot-fab {
     position: fixed;
-    bottom: 24px;
+    bottom: 40px;
     right: 96px; /* LEFT of scroll-up button (24px + 56px + 16px gap) */
     height: 56px;
     padding: 0 24px;

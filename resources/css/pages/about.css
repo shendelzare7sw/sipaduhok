@@ -1,0 +1,15 @@
+/* ===== Tentang Sekolah Page Specific CSS ===== */
+
+/* Timeline */
+.timeline-line {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #165fac, #287f3b);
+}
+
+@media (max-width: 768px) {
+    .timeline-line { left: 20px; }
+}

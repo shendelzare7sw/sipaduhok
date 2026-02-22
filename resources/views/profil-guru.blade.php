@@ -10,34 +10,11 @@
     @endphp
     <title>{{ $heroContent['title'] ?? 'Profil Guru & Tenaga Ahli' }} - PKBM House Of Knowledge</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/tailwind.config.js') }}"></script>
+
+    @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/profil-guru.css'])
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .hero-overlay {
-            background: linear-gradient(135deg, rgba(22, 95, 172, 0.9) 0%, rgba(40, 127, 59, 0.8) 100%);
-        }
-
-        .teacher-card {
-            transition: all 0.3s ease;
-        }
-
-        .teacher-card:hover {
-            transform: translateY(-8px);
-        }
-
-        .teacher-card:hover .teacher-overlay {
-            opacity: 1;
-        }
-
-        .teacher-overlay {
-            transition: all 0.3s ease;
-            opacity: 0;
-        }
-    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -153,29 +130,7 @@
     </section>
 
     <x-footer></x-footer>
-
-    <script>
-        function filterTeachers(category) {
-            const cards = document.querySelectorAll('.teacher-card');
-            const buttons = document.querySelectorAll('.filter-btn');
-
-            buttons.forEach(btn => {
-                btn.classList.remove('bg-[#165fac]', 'text-white');
-                btn.classList.add('bg-gray-100', 'text-gray-700');
-            });
-            event.target.classList.remove('bg-gray-100', 'text-gray-700');
-            event.target.classList.add('bg-[#165fac]', 'text-white');
-
-            cards.forEach(card => {
-                if (category === 'all' || card.dataset.category === category) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-    }
-    </script>
-
+    @vite(['resources/js/navbar.js', 'resources/js/pages/profil-guru.js'])
 </body>
 
 </html>

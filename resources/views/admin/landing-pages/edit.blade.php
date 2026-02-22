@@ -581,6 +581,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ===== Image Preview on File Change =====
+    document.addEventListener('change', function(e) {
+        const input = e.target;
+        if (input.type !== 'file' || !input.accept || !input.accept.includes('image')) return;
+
+        const file = input.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const newSrc = event.target.result;
+
+            // Case 1: item-card layout
+            // Preview is the div.bg-light immediately before the file input
+            const prevSibling = input.previousElementSibling;
+            if (prevSibling && prevSibling.classList.contains('text-center') && prevSibling.classList.contains('bg-light')) {
+                prevSibling.innerHTML = `<img src="${newSrc}" alt="Preview" class="img-fluid" style="max-height: 80px; object-fit: contain;">`;
+                return;
+            }
+
+            // Case 2 & 3: input-group layout (header / single section)
+            const inputGroup = input.closest('.input-group');
+            if (inputGroup) {
+                let previewSpan = inputGroup.querySelector('.input-group-text');
+                if (!previewSpan) {
+                    previewSpan = document.createElement('span');
+                    previewSpan.className = 'input-group-text p-0 overflow-hidden';
+                    previewSpan.style.width = '42px';
+                    inputGroup.insertBefore(previewSpan, input);
+                }
+                previewSpan.innerHTML = `<img src="${newSrc}" alt="Preview" class="w-100 h-100" style="object-fit: cover; min-height: 38px;">`;
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
     // ===== Active navigation on scroll =====
     const sections = document.querySelectorAll('.section-card');
     const navLinks = document.querySelectorAll('.section-nav-link');

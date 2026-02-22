@@ -711,6 +711,14 @@
                                     class="footer-link fw-semibold">SIPADUHOK</a> -
                                 PKBM House of Knowledge
                             </div>
+                            <div>
+                                @if(in_array(auth()->user()->role ?? '', ['admin', 'waka', 'super_admin']))
+                                    <a href="https://wa.me/6282113100791?text=Halo%20Developer,%20saya%20menemukan%20kendala/bug%20pada%20sistem" 
+                                       target="_blank" rel="noopener noreferrer" class="footer-link me-4">
+                                       <i class="fab fa-whatsapp me-1 text-success"></i> Kontak Developer
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </footer>
                     <!-- / Footer -->
@@ -728,8 +736,8 @@
     <!-- / Layout wrapper -->
 
     <!-- Scroll to Top Button -->
-    <a href="#" class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle" id="scrollToTop"
-        style="width: 48px; height: 48px; display: none; z-index: 1050;">
+    <a href="#" class="btn btn-primary position-fixed rounded-circle shadow" id="scrollToTop"
+        style="bottom: 40px; right: 24px; width: 48px; height: 48px; display: none; z-index: 1050; display: flex; align-items: center; justify-content: center;">
         <i class="fas fa-angle-up"></i>
     </a>
 
@@ -761,8 +769,6 @@
             window.addEventListener('scroll', function () {
                 if (window.scrollY > 300) {
                     scrollBtn.style.display = 'flex';
-                    scrollBtn.style.alignItems = 'center';
-                    scrollBtn.style.justifyContent = 'center';
                 } else {
                     scrollBtn.style.display = 'none';
                 }
