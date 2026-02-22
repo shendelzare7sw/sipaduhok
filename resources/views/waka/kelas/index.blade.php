@@ -752,30 +752,41 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
 {{-- Delete Modal (Single Reusable) --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus kelas:</p>
-                <p><strong style="color: #111827; font-size: 16px;" id="deleteKelasName"></strong></p>
-                <p class="text-muted" style="margin-top: 8px;">
-                    <i class="fas fa-exclamation-circle" style="color: #dc2626;"></i>
-                    <small>Data yang sudah dihapus tidak dapat dikembalikan.</small>
+        <div class="modal-content" style="border: none; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); overflow: hidden;">
+            <button type="button" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.05); border: none; color: #6b7280; transition: all 0.2s; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; z-index: 10;" onmouseover="this.style.background='rgba(0,0,0,0.1)'; this.style.color='#1f2937'" onmouseout="this.style.background='rgba(0,0,0,0.05)'; this.style.color='#6b7280'">
+                <i class="fas fa-times" style="font-size: 16px;"></i>
+            </button>
+            <div class="modal-body" style="padding: 40px 30px 30px; text-align: center;">
+                <div style="width: 80px; height: 80px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 36px; color: #ef4444;"></i>
+                </div>
+                
+                <h4 style="font-weight: 700; color: #111827; margin-bottom: 12px;">Konfirmasi Hapus</h4>
+                
+                <p style="color: #4b5563; font-size: 15px; margin-bottom: 24px; line-height: 1.6;">
+                    Apakah Anda yakin ingin menghapus kelas:<br>
+                    <strong style="color: #111827; font-size: 18px;" id="deleteKelasName"></strong>?
                 </p>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Batal
-                </button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Hapus
+                
+                <div style="background: #fef2f2; border: 1px dashed #fca5a5; border-radius: 12px; padding: 16px; margin-bottom: 28px; text-align: left; display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fas fa-exclamation-circle" style="color: #ef4444; font-size: 20px; margin-top: 2px;"></i>
+                    <p style="color: #b91c1c; font-size: 13px; margin: 0; line-height: 1.5; font-weight: 500;">
+                        Perhatian: Data kelas yang dihapus beserta seluruh data terkait di dalamnya tidak dapat dikembalikan.
+                    </p>
+                </div>
+                
+                <div style="display: flex; gap: 16px;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; background: #f1f5f9; color: #475569; border: none; transition: all 0.2s; justify-content: center;" onmouseover="this.style.background='#e2e8f0'; this.style.color='#1e293b'" onmouseout="this.style.background='#f1f5f9'; this.style.color='#475569'">
+                        Batal
                     </button>
-                </form>
+                    <form id="deleteForm" method="POST" style="flex: 1; margin: 0;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); justify-content: center;">
+                            <i class="fas fa-trash me-2"></i> Ya, Hapus Kelas
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

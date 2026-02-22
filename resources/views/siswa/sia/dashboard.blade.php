@@ -231,15 +231,19 @@
                     <div class="col-lg-4 mb-4 mb-lg-0 border-end-lg text-center text-lg-start">
                         <div class="d-flex align-items-center justify-content-center justify-content-lg-start">
                             <div class="me-4 position-relative">
-                                @if($siswa->foto)
+                                @if(auth()->user()->foto_profil)
+                                    <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="user"
+                                        class="rounded-circle border border-3 border-white shadow-sm"
+                                        style="width: 100px; height: 100px; object-fit: cover;">
+                                @elseif($siswa->foto)
                                     <img src="{{ asset('storage/' . $siswa->foto) }}" alt="user"
                                         class="rounded-circle border border-3 border-white shadow-sm"
                                         style="width: 100px; height: 100px; object-fit: cover;">
                                 @else
                                     <div class="avatar avatar-xl" style="width: 100px; height: 100px;">
                                         <span
-                                            class="avatar-initial rounded-circle bg-label-primary shadow-sm fw-bold border border-3 border-white"
-                                            style="font-size: 2.5rem;">
+                                            class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-3 border-white d-flex align-items-center justify-content-center"
+                                            style="font-size: 2.5rem; width: 100px; height: 100px;">
                                             {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
                                         </span>
                                     </div>
@@ -549,7 +553,6 @@
                                                 <th>Mata Pelajaran</th>
                                                 <th>Jenis</th>
                                                 <th class="text-center">Nilai</th>
-                                                <th class="text-center">Grade</th>
                                             </tr>
                                         </thead>
                                         <tbody class="small">
@@ -568,37 +571,6 @@
                                                         @endif
                                                     </td>
                                                     <td class="text-center"><strong>{{ $nilai->nilai ?? '-' }}</strong></td>
-                                                    <td class="text-center">
-                                                        @php
-                                                            $nilaiAngka = $nilai->nilai ?? 0;
-                                                            if ($nilaiAngka >= 90) {
-                                                                $grade = 'A';
-                                                                $badgeClass = 'bg-success';
-                                                            } elseif ($nilaiAngka >= 85) {
-                                                                $grade = 'A-';
-                                                                $badgeClass = 'bg-success';
-                                                            } elseif ($nilaiAngka >= 80) {
-                                                                $grade = 'B+';
-                                                                $badgeClass = 'bg-primary';
-                                                            } elseif ($nilaiAngka >= 75) {
-                                                                $grade = 'B';
-                                                                $badgeClass = 'bg-primary';
-                                                            } elseif ($nilaiAngka >= 70) {
-                                                                $grade = 'B-';
-                                                                $badgeClass = 'bg-info';
-                                                            } elseif ($nilaiAngka >= 65) {
-                                                                $grade = 'C+';
-                                                                $badgeClass = 'bg-warning text-dark';
-                                                            } elseif ($nilaiAngka >= 60) {
-                                                                $grade = 'C';
-                                                                $badgeClass = 'bg-warning text-dark';
-                                                            } else {
-                                                                $grade = 'D';
-                                                                $badgeClass = 'bg-danger';
-                                                            }
-                                                        @endphp
-                                                        <span class="badge {{ $badgeClass }}">{{ $grade }}</span>
-                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -733,13 +705,30 @@
             // 1. CHART LOGIC
             const ctx = document.getElementById('performaChart');
             if (ctx) {
+                const selesai = {{ $performa['tugas']['selesai'] ?? 0 }};
+                const total = {{ $performa['tugas']['total'] ?? 0 }};
+                const proses = total - selesai;
+                const tunda = 0;
+                
+                let chartData = [selesai, proses, tunda];
+                let bgColors = ['#10b981', '#f6c23e', '#e74a3b'];
+                let chartLabels = ['Lulus', 'Proses', 'Tunda'];
+                let tooltipCallback = null;
+                
+                if (selesai === 0 && proses === 0 && tunda === 0) {
+                    chartData = [1];
+                    bgColors = ['#e2e8f0'];
+                    chartLabels = ['Belum ada data'];
+                    tooltipCallback = function() { return 'Belum ada data'; };
+                }
+
                 new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Lulus', 'Proses', 'Tunda'],
+                        labels: chartLabels,
                         datasets: [{
-                            data: [{{ $performa['tugas']['selesai'] ?? 0 }}, {{ ($performa['tugas']['total'] ?? 0) - ($performa['tugas']['selesai'] ?? 0) }}, 0],
-                            backgroundColor: ['#10b981', '#f6c23e', '#e74a3b'],
+                            data: chartData,
+                            backgroundColor: bgColors,
                             borderWidth: 0,
                             cutout: '75%'
                         }]
@@ -747,7 +736,16 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } }
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: tooltipCallback || function(context) {
+                                        return context.label + ': ' + context.raw;
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
             }

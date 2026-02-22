@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Presensi - ' . $siswa->nama_lengkap)
+@section('page-title', 'Presensi')
 
 @section('sidebar-menu')
     @include('orang-tua.partials.sneat-sidebar-menu')
@@ -99,10 +100,16 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <div class="avatar avatar-lg">
-                        <div class="avatar-initial rounded-circle bg-label-primary">
-                            <i class="fas fa-user-graduate fa-2x"></i>
-                        </div>
+                    <div class="avatar avatar-lg" style="width: 60px; height: 60px;">
+                        @if($siswa->user && $siswa->user->foto_profil)
+                            <img src="{{ asset('storage/' . $siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                        @elseif($siswa->foto)
+                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                        @else
+                            <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-2 border-white d-flex align-items-center justify-content-center" style="font-size: 1.8rem; width: 100%; height: 100%;">
+                                {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
+                            </span>
+                        @endif
                     </div>
                 </div>
                 <div class="col">

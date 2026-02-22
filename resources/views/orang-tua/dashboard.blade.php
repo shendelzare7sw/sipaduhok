@@ -48,10 +48,16 @@
                         <div class="card-body">
                             <div class="d-flex align-items-start justify-content-between mb-3">
                                 <div class="d-flex align-items-center flex-wrap">
-                                    <div class="avatar flex-shrink-0 me-3 mb-2">
-                                        <div class="avatar-initial rounded-circle bg-label-primary">
-                                            <i class="fas fa-user-graduate"></i>
-                                        </div>
+                                    <div class="avatar flex-shrink-0 me-3 mb-2" style="width: 50px; height: 50px;">
+                                        @if($child->user && $child->user->foto_profil)
+                                            <img src="{{ asset('storage/' . $child->user->foto_profil) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @elseif($child->foto)
+                                            <img src="{{ asset('storage/' . $child->foto) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-2 border-white d-flex align-items-center justify-content-center" style="font-size: 1.5rem; width: 100%; height: 100%;">
+                                                {{ strtoupper(substr($child->nama_lengkap, 0, 1)) }}
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="mb-2">
                                         <div class="d-flex align-items-center flex-wrap">

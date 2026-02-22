@@ -42,7 +42,7 @@
 <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.info-pembayaran') ? 'active' : '' }}">
     <a href="{{ route('bendahara.info-pembayaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-cog"></i>
-        <div>Info Pembayaran</div>
+        <div>Config Pembayaran</div>
     </a>
 </li>
 

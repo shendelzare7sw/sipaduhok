@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Detail Rapor')
+@section('page-title', 'Detail Rapor')
 
 @section('sidebar-menu')
     @include('orang-tua.partials.sneat-sidebar-menu')
@@ -42,9 +43,17 @@
                     </h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <div class="d-flex">
-                                <div class="me-3 text-muted">
-                                    <i class="fas fa-user-graduate"></i>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar flex-shrink-0 me-3" style="width: 40px; height: 40px;">
+                                    @if($rapor->siswa->user && $rapor->siswa->user->foto_profil)
+                                        <img src="{{ asset('storage/' . $rapor->siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                                    @elseif($rapor->siswa->foto)
+                                        <img src="{{ asset('storage/' . $rapor->siswa->foto) }}" alt="avatar" class="rounded-circle border shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                                    @else
+                                        <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border d-flex align-items-center justify-content-center" style="font-size: 1.2rem; width: 100%; height: 100%;">
+                                            {{ strtoupper(substr($rapor->siswa->nama_lengkap, 0, 1)) }}
+                                        </span>
+                                    @endif
                                 </div>
                                 <div>
                                     <small class="text-muted d-block">Nama Siswa</small>

@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
-@section('title', 'Tagihan - ' . $siswa->nama_lengkap)
+@section('title', 'Tagihan & Pembayaran - ' . $siswa->nama_lengkap)
+@section('page-title', 'Tagihan & Pembayaran')
 
 @section('sidebar-menu')
     @include('orang-tua.partials.sneat-sidebar-menu')
@@ -678,8 +679,7 @@
                 itemCheckboxes.forEach(cb => {
                     if (cb.checked) {
                         count++;
-                        // Use dataset.amount instead of input value
-                        total += parseInt(cb.dataset.amount);
+                        total += parseInt(cb.dataset.amount) || 0;
                     }
                 });
 
@@ -712,13 +712,12 @@
             // 2. Individual Checkbox
             itemCheckboxes.forEach(cb => {
                 cb.addEventListener('change', function () {
-                    // toggleInput removed
-
-                    // Uncheck "Select All" if one is unchecked (optional logic)
-                    const group = this.classList[2].replace('group-', '');
-                    const selectAllVal = document.querySelector(`.select-all-group[data-group="${group}"]`);
-                    if (!this.checked && selectAllVal) selectAllVal.checked = false;
-
+                    const groupClass = Array.from(this.classList).find(c => c.startsWith('group-'));
+                    if (groupClass) {
+                        const group = groupClass.replace('group-', '');
+                        const selectAllVal = document.querySelector(`.select-all-group[data-group="${group}"]`);
+                        if (!this.checked && selectAllVal) selectAllVal.checked = false;
+                    }
                     updateTotal();
                 });
             });

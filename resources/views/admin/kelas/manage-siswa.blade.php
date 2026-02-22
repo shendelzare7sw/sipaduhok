@@ -657,31 +657,38 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border: none; border-radius: 16px; overflow: hidden;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; padding: 20px 24px;">
-                <h5 class="modal-title" id="deleteModalLabel" style="display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 600;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Konfirmasi Keluarkan Siswa
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" style="padding: 24px;">
-                <p style="margin-bottom: 16px; color: #374151; font-size: 15px;">Apakah Anda yakin ingin mengeluarkan siswa berikut dari kelas ini?</p>
-                <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                    <div style="font-weight: 600; color: #111827; margin-bottom: 4px;" id="siswaName"></div>
-                    <div style="font-size: 14px; color: #6b7280;">Kelas: {{ $kelas->nama_kelas }}</div>
+        <div class="modal-content" style="border: none; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); overflow: hidden;">
+            <button type="button" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.05); border: none; color: #6b7280; transition: all 0.2s; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; z-index: 10;" onmouseover="this.style.background='rgba(0,0,0,0.1)'; this.style.color='#1f2937'" onmouseout="this.style.background='rgba(0,0,0,0.05)'; this.style.color='#6b7280'">
+                <i class="fas fa-times" style="font-size: 16px;"></i>
+            </button>
+            <div class="modal-body" style="padding: 40px 30px 30px; text-align: center;">
+                <div style="width: 80px; height: 80px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 36px; color: #ef4444;"></i>
                 </div>
-                <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                    <i class="fas fa-info-circle"></i> Siswa akan dikeluarkan dari kelas dan dapat ditambahkan kembali nanti.
+                
+                <h4 style="font-weight: 700; color: #111827; margin-bottom: 12px;">Keluarkan Siswa?</h4>
+                
+                <p style="color: #4b5563; font-size: 15px; margin-bottom: 24px; line-height: 1.6;">
+                    Apakah Anda yakin ingin mengeluarkan <br>
+                    <strong style="color: #111827; font-size: 16px;" id="siswaName"></strong><br>
+                    dari <span style="font-weight: 500;">Kelas {{ $kelas->nama_kelas }}</span>?
                 </p>
-            </div>
-            <div class="modal-footer" style="border: none; padding: 16px 24px; background: #f9fafb; gap: 10px;">
-                <button type="button" class="btn btn-outline" data-bs-dismiss="modal" style="flex: 1;">
-                    <i class="fas fa-times"></i> Batal
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" style="flex: 1;">
-                    <i class="fas fa-user-minus"></i> Ya, Keluarkan
-                </button>
+                
+                <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 16px; margin-bottom: 28px; text-align: left; display: flex; align-items: flex-start; gap: 12px;">
+                    <i class="fas fa-info-circle" style="color: #64748b; font-size: 20px; margin-top: 2px;"></i>
+                    <p style="color: #64748b; font-size: 13px; margin: 0; line-height: 1.5;">
+                        Siswa akan dikeluarkan dari kelas ini, namun data siswa tetap tersimpan dan dapat ditambahkan kembali kapan saja.
+                    </p>
+                </div>
+                
+                <div style="display: flex; gap: 16px;">
+                    <button type="button" class="btn" data-bs-dismiss="modal" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; background: #f1f5f9; color: #475569; border: none; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'; this.style.color='#1e293b'" onmouseout="this.style.background='#f1f5f9'; this.style.color='#475569'">
+                        Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">
+                        <i class="fas fa-user-minus me-2"></i> Ya, Keluarkan
+                    </button>
+                </div>
             </div>
         </div>
     </div>

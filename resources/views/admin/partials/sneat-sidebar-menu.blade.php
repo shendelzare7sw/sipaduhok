@@ -179,7 +179,7 @@ Compatible dengan Sneat Bootstrap 5 Template
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.info-pembayaran') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.info-pembayaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-cog"></i>
-        <div>Info Pembayaran</div>
+        <div>Config Pembayaran</div>
     </a>
 </li>
 

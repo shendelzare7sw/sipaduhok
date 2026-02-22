@@ -194,10 +194,10 @@
 
 @keyframes float-gentle {
     0%, 100% {
-        transform: translate(-50%, 0);
+        transform: translateY(0);
     }
     50% {
-        transform: translate(-50%, 10px);
+        transform: translateY(10px);
     }
 }
 
@@ -209,15 +209,15 @@
 @keyframes scroll-down {
     0% {
         opacity: 1;
-        top: 0.75rem;
+        transform: translateY(0);
     }
     50% {
         opacity: 0.3;
-        top: 1.5rem;
+        transform: translateY(0.75rem);
     }
     100% {
         opacity: 0;
-        top: 1.5rem;
+        transform: translateY(0.75rem);
     }
 }
 
@@ -343,11 +343,11 @@ section {
         </div>
 
         <!-- Scroll Indicator -->
-        <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+        <div class="absolute bottom-28 sm:bottom-24 md:bottom-20 left-1/2 transform -translate-x-1/2 z-20">
             <a href="#stats" class="scroll-indicator flex flex-col items-center text-white/80 hover:text-white transition-all duration-300 group">
-                <span class="text-sm mb-3 font-medium tracking-wide">Scroll Down</span>
-                <div class="relative w-8 h-12 border-2 border-white rounded-full flex items-center justify-center group-hover:border-accent-yellow transition-colors duration-300">
-                    <div class="scroll-wheel absolute w-1 h-3 bg-white rounded-full top-3 group-hover:bg-accent-yellow transition-colors duration-300"></div>
+                <span class="text-xs sm:text-sm mb-2 sm:mb-3 font-medium tracking-wide">Scroll Down</span>
+                <div class="relative w-6 h-10 sm:w-8 sm:h-12 border-2 border-white rounded-full flex items-center justify-center group-hover:border-accent-yellow transition-colors duration-300">
+                    <div class="scroll-wheel absolute w-1 h-2 sm:h-3 bg-white rounded-full top-2 sm:top-3 group-hover:bg-accent-yellow transition-colors duration-300"></div>
                 </div>
             </a>
         </div>

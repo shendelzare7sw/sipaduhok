@@ -40,22 +40,22 @@
                 <div data-i18n="{{ $child->nama_lengkap }}">{{ Str::limit($child->nama_lengkap, 20) }}</div>
             </a>
             <ul class="menu-sub">
+                <li class="menu-item {{ Str::startsWith($currentRoute, 'orang-tua.presensi') && request()->route('siswa') == $child->id ? 'active' : '' }}">
+                    <a href="{{ route('orang-tua.presensi.anak', $child->id) }}" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                        <div data-i18n="Presensi">Presensi</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ $currentRoute == 'orang-tua.tagihan.anak' && request()->route('siswa') == $child->id ? 'active' : '' }}">
                     <a href="{{ route('orang-tua.tagihan.anak', $child->id) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                        <div data-i18n="Tagihan & Pembayaran">Tagihan & Pembayaran</div>
+                        <div data-i18n="Tagihan & Pembayaran">Tagihan</div>
                     </a>
                 </li>
                 <li class="menu-item {{ Str::startsWith($currentRoute, 'orang-tua.rapor') && request()->route('siswa') == $child->id ? 'active' : '' }}">
                     <a href="{{ route('orang-tua.rapor.anak', $child->id) }}" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-file"></i>
                         <div data-i18n="Rapor">Rapor</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ Str::startsWith($currentRoute, 'orang-tua.presensi') && request()->route('siswa') == $child->id ? 'active' : '' }}">
-                    <a href="{{ route('orang-tua.presensi.anak', $child->id) }}" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-calendar-check"></i>
-                        <div data-i18n="Presensi">Presensi</div>
                     </a>
                 </li>
             </ul>

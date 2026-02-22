@@ -98,13 +98,28 @@ class KelasController extends Controller
     {
         $validated = $request->validate([
             'nama_kelas' => 'required|string|max:255',
-            'kode_kelas' => 'required|string|max:50|unique:kelas,kode_kelas',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'cabang_id' => 'required|exists:cabang,id',
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
             'kuota_siswa' => 'required|integer|min:1',
         ]);
+
+        // Generate kode_kelas otomatis
+        $cabang = Cabang::find($validated['cabang_id']);
+        $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
+        $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
+
+        $kodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
+            strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
+
+        // Check if kode_kelas already exists
+        $existingKelas = Kelas::where('kode_kelas', $kodeKelas)->first();
+        if ($existingKelas) {
+            return back()->withInput()->with('error', 'Kelas dengan kode tersebut sudah ada. Silakan gunakan nama kelas yang berbeda.');
+        }
+
+        $validated['kode_kelas'] = $kodeKelas;
 
         $kelas = Kelas::create($validated);
 
@@ -163,13 +178,28 @@ class KelasController extends Controller
     {
         $validated = $request->validate([
             'nama_kelas' => 'required|string|max:255',
-            'kode_kelas' => 'required|string|max:50|unique:kelas,kode_kelas,' . $kelas->id,
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'cabang_id' => 'required|exists:cabang,id',
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
             'kuota_siswa' => 'required|integer|min:1',
         ]);
+
+        // Regenerate kode_kelas if needed
+        $cabang = Cabang::find($validated['cabang_id']);
+        $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
+        $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
+
+        $newKodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
+            strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
+
+        if ($newKodeKelas !== $kelas->kode_kelas) {
+            $existingKelas = Kelas::where('kode_kelas', $newKodeKelas)->first();
+            if ($existingKelas) {
+                return back()->withInput()->with('error', 'Kelas dengan kode tersebut sudah ada.');
+            }
+            $validated['kode_kelas'] = $newKodeKelas;
+        }
 
         $kelas->update($validated);
 
@@ -201,6 +231,31 @@ class KelasController extends Controller
                 ->with('success', 'Kelas berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus kelas');
+        }
+    }
+
+    public function assignWaliKelas(Request $request, Kelas $kelas)
+    {
+        $validated = $request->validate([
+            'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
+        ]);
+
+        $kelas->update(['wali_kelas_id' => $validated['wali_kelas_id']]);
+
+        // Sync with pivot table wali_kelas_assignments
+        WaliKelasAssignment::where('kelas_id', $kelas->id)->delete();
+        
+        if ($validated['wali_kelas_id']) {
+            WaliKelasAssignment::create([
+                'tenaga_pendidik_id' => $validated['wali_kelas_id'],
+                'kelas_id' => $kelas->id,
+                'assigned_at' => now(),
+            ]);
+            
+            $waliKelas = TenagaPendidik::find($validated['wali_kelas_id']);
+            return back()->with('success', $waliKelas->nama_lengkap . ' berhasil ditunjuk sebagai Wali Kelas!');
+        } else {
+            return back()->with('success', 'Wali Kelas berhasil dihapus dari kelas ini!');
         }
     }
 

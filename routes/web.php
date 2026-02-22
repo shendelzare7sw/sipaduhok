@@ -656,6 +656,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelas/{kelas}/manage-siswa', [WakaKelasController::class, 'manageSiswa'])->name('kelas.manage-siswa');
         Route::post('/kelas/{kelas}/add-siswa', [WakaKelasController::class, 'addSiswa'])->name('kelas.add-siswa');
         Route::post('/kelas/{kelas}/remove-siswa', [WakaKelasController::class, 'removeSiswa'])->name('kelas.remove-siswa');
+        Route::post('/kelas/{kelas}/assign-wali', [WakaKelasController::class, 'assignWaliKelas'])->name('kelas.assign-wali');
         Route::resource('kelas', WakaKelasController::class)->parameters(['kelas' => 'kelas']);
 
         // Manajemen Siswa

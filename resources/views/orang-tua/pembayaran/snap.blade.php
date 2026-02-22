@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Pembayaran Digital - Midtrans')
+@section('page-title', 'Pembayaran Digital')
 
 @section('sidebar-menu')
     @include('orang-tua.partials.sneat-sidebar-menu')

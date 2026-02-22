@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Riwayat Pengajuan Izin - ' . $siswa->nama_lengkap)
+@section('page-title', 'Riwayat Pengajuan Izin')
 
 @section('sidebar-menu')
     @include('orang-tua.partials.sneat-sidebar-menu')

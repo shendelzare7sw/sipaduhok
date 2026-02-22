@@ -1,6 +1,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Edit Pengajuan Izin')
+@section('page-title', 'Edit Pengajuan Izin')
 
 @section('sidebar-menu')
     @include('orang-tua.partials.sneat-sidebar-menu')
