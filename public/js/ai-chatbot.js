@@ -488,6 +488,7 @@ function closeChatWindow() {
 
     window.classList.remove('active');
     fab.classList.remove('hidden');
+    fab.classList.remove('fab-hidden-mobile'); // Always show FAB after closing chat
     chatbotState.isOpen = false;
 
     localStorage.setItem('aiChatbotOpen', 'false');
@@ -970,6 +971,9 @@ function initDraggableFab() {
     const fab = document.getElementById('aiChatbotFab');
     if (!fab) return;
 
+    // Mobile: no drag needed (CSS handles position right: 24px stacked with scroll-to-top)
+    if (window.innerWidth <= 768) return;
+
     // Always start at default position (reset on every page load)
     // Default position is set in CSS: right: 96px
     chatbotState.fabPosition = { right: 96 };
@@ -1024,7 +1028,7 @@ function initDraggableFab() {
         if (!isDraggingFab) return;
 
         isDraggingFab = false;
-        fab.style.cursor = 'grab';
+        fab.style.cursor = ''; // Let CSS handle cursor (pointer)
         fab.style.transition = '';
 
         // Position is NOT saved to localStorage (resets on page refresh)
@@ -1073,7 +1077,7 @@ function initDraggableFab() {
         if (!isDraggingFab) return;
 
         isDraggingFab = false;
-        fab.style.cursor = 'grab';
+        fab.style.cursor = ''; // Let CSS handle cursor
         fab.style.transition = '';
 
         // Position is NOT saved to localStorage (resets on page refresh)

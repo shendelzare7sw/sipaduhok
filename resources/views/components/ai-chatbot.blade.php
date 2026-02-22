@@ -156,7 +156,7 @@
 .ai-chatbot-fab {
     position: fixed;
     bottom: 82px;
-    right: 96px; /* LEFT of scroll-up button (24px + 56px + 16px gap) */
+    right: 96px;
     height: 56px;
     padding: 0 24px;
     border-radius: 28px;
@@ -170,8 +170,9 @@
     align-items: center;
     gap: 8px;
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
-    transition: all 0.3s ease;
-    cursor: grab;
+    transition: background 0.2s ease, box-shadow 0.3s ease,
+                transform 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -186,6 +187,13 @@
 
 .ai-chatbot-fab:active {
     cursor: grabbing;
+}
+
+/* Universal: hide both FABs when scrolling down (all screen sizes) */
+.ai-chatbot-fab.fab-hidden-mobile {
+    transform: translateX(200px);
+    opacity: 0;
+    pointer-events: none;
 }
 
 .ai-chatbot-fab.hidden {
@@ -979,15 +987,24 @@
 
 /* ==================== Mobile Responsive ==================== */
 @media (max-width: 768px) {
+    /* Mobile FAB: circular icon-only, stacked with scroll-to-top at right: 24px */
+    /* bottom: 82px is kept exactly as desktop — DO NOT change */
     .ai-chatbot-fab {
+        right: 24px;
+        width: 48px;
         height: 48px;
-        padding: 0 16px;
-        font-size: 14px;
-        right: 80px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
     }
 
     .fab-text {
-        display: none;
+        display: none !important;
+    }
+
+    /* Mobile: shorter slide distance */
+    .ai-chatbot-fab.fab-hidden-mobile {
+        transform: translateX(80px);
     }
 
     .ai-chatbot-window {
