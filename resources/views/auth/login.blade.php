@@ -156,7 +156,7 @@
 
             <!-- Footer -->
             <div class="text-center text-white/80 text-sm mt-6">
-                <p>&copy; 2025 PKBM House Of Knowledge. All rights reserved.</p>
+                <p>&copy; 2026 PKBM House Of Knowledge. All rights reserved.</p>
             </div>
         </div>
     </div>
