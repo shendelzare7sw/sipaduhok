@@ -1012,6 +1012,27 @@
         @media (max-width: 576px) {
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 14px 16px;
+            }
+
+            .section-container {
+                padding: 16px;
+            }
+
+            .welcome-banner {
+                padding: 20px;
+            }
+
+            .welcome-title {
+                font-size: 1.3rem;
+            }
+
+            .welcome-subtitle {
+                font-size: 0.875rem;
             }
 
             .timeline-item {
@@ -1022,8 +1043,19 @@
                 left: 77px;
             }
 
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+
             .courses-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 16px;
             }
         }
     </style>

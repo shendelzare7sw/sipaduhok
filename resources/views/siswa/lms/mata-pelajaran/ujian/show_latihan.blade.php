@@ -186,12 +186,31 @@
             padding: 15px 20px;
             border-bottom: 1px solid #e5e7eb;
             position: sticky;
-            top: 0;
+            top: 60px; /* Offset for fixed exam-header (60px tall) */
             z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
+        }
+
+        .latihan-header-left {
+            flex: 1;
+            min-width: 0; /* Allow truncation */
+        }
+
+        .latihan-header-left h5 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .latihan-header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .timer-badge {
@@ -203,6 +222,7 @@
             padding: 5px 12px;
             border: 1px solid #dee2e6;
             border-radius: 4px;
+            white-space: nowrap;
         }
 
         .question-card {
@@ -212,6 +232,50 @@
             margin-bottom: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid #e5e7eb;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 575px) {
+            .latihan-header {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+
+            .latihan-header-left h5 {
+                font-size: 0.85rem;
+            }
+
+            .latihan-header-left small {
+                display: none;
+            }
+
+            .timer-badge {
+                font-size: 0.95rem;
+                padding: 4px 8px;
+            }
+
+            .latihan-header-right .btn {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+
+            .latihan-header-right .btn .me-1 + span,
+            .latihan-header-right .btn i ~ * {
+                /* Keep icon, text still shows */
+            }
+
+            .question-card {
+                padding: 15px;
+                margin-bottom: 14px;
+            }
+
+            .question-text {
+                font-size: 0.95rem;
+            }
+
+            .option-item {
+                padding: 10px 12px;
+            }
         }
 
         .question-number {
@@ -272,17 +336,15 @@
         
         <!-- Sticky Header -->
         <div class="latihan-header">
-            <div>
+            <div class="latihan-header-left">
                 <h5 class="mb-0 fw-bold">{{ $ujian->judul_ujian }}</h5>
                 <small class="text-muted text-uppercase">{{ str_replace('_', ' ', $ujian->tipe_ujian) }}</small>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fas fa-clock text-secondary"></i>
-                    <div class="timer-badge" id="timer-display">00:00:00</div>
-                </div>
-                <button type="button" class="btn btn-primary fw-bold px-4" onclick="finishExam()">
-                    <i class="fas fa-paper-plane me-1"></i> SELESAI
+            <div class="latihan-header-right">
+                <i class="fas fa-clock text-secondary d-none d-sm-inline"></i>
+                <div class="timer-badge" id="timer-display">00:00:00</div>
+                <button type="button" class="btn btn-primary fw-bold" onclick="finishExam()">
+                    <i class="fas fa-paper-plane me-1"></i><span class="d-none d-sm-inline"> SELESAI</span>
                 </button>
             </div>
         </div>

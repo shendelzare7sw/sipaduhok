@@ -325,6 +325,36 @@
                 grid-template-columns: repeat(5, 1fr);
             }
         }
+
+        @media (max-width: 575px) {
+            .btn-nav-q {
+                min-width: 0;
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+
+            #btn-ragu {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+
+            .question-card {
+                padding: 16px;
+                min-height: auto;
+            }
+
+            .exam-sidebar {
+                padding: 12px;
+            }
+
+            .q-nav-grid {
+                gap: 4px;
+            }
+
+            .q-nav-item {
+                font-size: 0.75rem;
+            }
+        }
     </style>
 
     <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">

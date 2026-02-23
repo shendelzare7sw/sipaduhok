@@ -34,13 +34,53 @@
         border-color: #165fac;
         box-shadow: 0 0 0 0.2rem rgba(22, 95, 172, 0.1);
     }
+
+    /* === Mobile Responsive Toolbar === */
+    @media (max-width: 767px) {
+        /* Header: stack vertically on mobile */
+        .soal-toolbar-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 10px 12px !important;
+            gap: 8px;
+        }
+        .soal-toolbar-header .soal-toolbar-actions {
+            width: 100%;
+            flex-wrap: wrap;
+            gap: 6px !important;
+        }
+        .soal-toolbar-header .soal-toolbar-actions .btn {
+            flex: 1 1 auto;
+            font-size: 12px;
+            padding: 5px 8px;
+            min-width: 0;
+        }
+        /* Import/Export toolbar: wrap on mobile */
+        .soal-import-toolbar {
+            flex-wrap: wrap !important;
+            justify-content: flex-start !important;
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+            gap: 6px !important;
+        }
+        .soal-import-toolbar .btn {
+            font-size: 12px;
+            padding: 5px 8px;
+        }
+        /* Hide long text labels on extra-small screens, show short labels */
+        .btn-label-long { display: none; }
+        .btn-label-short { display: inline !important; }
+    }
+    @media (min-width: 768px) {
+        .btn-label-short { display: none; }
+    }
 </style>
 
 @section('content')
     <div class="manage-soal-container">
 
     {{-- Header & Controls (Outside Form) --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm"
+    <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm soal-toolbar-header"
         style="z-index: 10;">
         <div>
             <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
@@ -53,44 +93,54 @@
             </h4>
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 soal-toolbar-actions">
             {{-- Rilis / Tarik Toggle --}}
-            <button type="button" class="btn {{ $ujian->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}"
+            <button type="button" class="btn btn-sm {{ $ujian->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}"
                 onclick="confirmSyncAction('toggleStatusForm', '{{ $ujian->is_active ? 'Tarik Kembali ' . (ucfirst($tipeUjian ?? 'ujian')) : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}', 'Mengubah status...')"
                 title="{{ $ujian->is_active ? 'Klik untuk menyembunyikan dari siswa' : 'Klik untuk menampilkan ke siswa' }}">
                 <i class="fas {{ $ujian->is_active ? 'fa-eye-slash' : 'fa-eye' }} me-1"></i>
-                {{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}
+                <span class="btn-label-long">{{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}</span>
+                <span class="btn-label-short">{{ $ujian->is_active ? 'Tarik' : 'Rilis' }}</span>
             </button>
 
             {{-- Tampilkan Nilai Toggle --}}
-            <button type="button" class="btn {{ $ujian->tampilkan_nilai ? 'btn-outline-danger' : 'btn-outline-info' }}"
+            <button type="button" class="btn btn-sm {{ $ujian->tampilkan_nilai ? 'btn-outline-danger' : 'btn-outline-info' }}"
                 onclick="confirmSyncAction('toggleResultForm', '{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}', 'Mengubah visibilitas nilai...')"
                 title="{{ $ujian->tampilkan_nilai ? 'Klik untuk menyembunyikan nilai dari siswa' : 'Klik untuk menampilkan nilai ke siswa' }}">
                 <i class="fas {{ $ujian->tampilkan_nilai ? 'fa-eye-slash' : 'fa-poll' }} me-1"></i>
-                {{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}
+                <span class="btn-label-long">{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}</span>
+                <span class="btn-label-short">Nilai</span>
             </button>
 
             {{-- SIMPAN SEMUA --}}
-            <button type="button" class="btn btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')"
+            <button type="button" class="btn btn-sm btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')"
                 title="Simpan semua perubahan soal">
-                <i class="fas fa-save me-1"></i> Simpan Semua
+                <i class="fas fa-save me-1"></i>
+                <span class="btn-label-long">Simpan Semua</span>
+                <span class="btn-label-short">Simpan</span>
             </button>
         </div>
     </div>
 
     {{-- Import/Export Tools --}}
-    <div class="d-flex justify-content-end gap-2 mb-3 px-4">
+    <div class="d-flex justify-content-end gap-2 mb-3 px-4 soal-import-toolbar">
         <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.template' : 'guru.lms.ujian.soal.template', [$kelas->id, $mapel->id, $ujian->id]) }}"
             class="btn btn-outline-success btn-sm">
-            <i class="fas fa-download me-1"></i> Download Template {{ ucfirst($tipeUjian ?? 'ujian') }}
+            <i class="fas fa-download me-1"></i>
+            <span class="btn-label-long">Download Template {{ ucfirst($tipeUjian ?? 'ujian') }}</span>
+            <span class="btn-label-short">Template</span>
         </a>
         <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#importSoalModal">
-            <i class="fas fa-file-import me-1"></i> Import {{ ucfirst($tipeUjian ?? 'ujian') }} dari Excel
+            <i class="fas fa-file-import me-1"></i>
+            <span class="btn-label-long">Import {{ ucfirst($tipeUjian ?? 'ujian') }} dari Excel</span>
+            <span class="btn-label-short">Import</span>
         </button>
 
         {{-- AI Generator Sidebar Trigger --}}
         <button type="button" class="btn btn-info btn-sm" onclick="openAiSidebar()" title="Buka AI Question Generator">
-            <i class="fas fa-robot me-1"></i> AI Question Generator
+            <i class="fas fa-robot me-1"></i>
+            <span class="btn-label-long">AI Question Generator</span>
+            <span class="btn-label-short">AI</span>
         </button>
     </div>
 
