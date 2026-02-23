@@ -976,18 +976,21 @@ function initDraggableFab() {
     let isDraggingFab = false;
     let hasMoved = false;
     let startX = 0;
+    let startY = 0;
     let startRight = 0;
 
     function isMobileView() {
         return window.innerWidth <= 768;
     }
 
-    // ── Click: works on all devices & all resize states ──
-    // Mobile → browser generates click from tap (touchstart has no preventDefault)
-    // Desktop → fires after mouseup for normal clicks
-    fab.addEventListener('click', function() {
-        if (!hasMoved) openChatWindow();
-        hasMoved = false;
+    // ── Click: fallback for desktop mouse clicks ──
+    fab.addEventListener('click', function(e) {
+        if (hasMoved) { hasMoved = false; return; }
+        // On mobile, touchend handles open explicitly — click is a ghost and can be ignored
+        // but if touchend somehow didn't fire, this catches it
+        if (!isMobileView()) {
+            openChatWindow();
+        }
     });
 
     // ── Mouse drag (desktop only, checked at event time) ──
@@ -1013,26 +1016,50 @@ function initDraggableFab() {
         if (Math.abs(deltaX) > 5) hasMoved = true;
     });
 
-    document.addEventListener('mouseup', function(e) {
+    document.addEventListener('mouseup', function() {
         if (!isDraggingFab) return;
         isDraggingFab = false;
         fab.style.cursor = '';
         fab.style.transition = '';
-        // click event handles openChatWindow
+        // click event handles openChatWindow for desktop mouse
     });
 
-    // ── Touch drag (desktop touch screen only, checked at event time) ──
-    // Mobile: touchstart returns early → no preventDefault → browser fires click → opens chat
+    // ── Touch: ALWAYS record start position ──
     fab.addEventListener('touchstart', function(e) {
-        if (isMobileView()) return; // Mobile: let click handle it
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+
+        if (isMobileView()) {
+            // Mobile: touchend on FAB handles tap detection explicitly
+            // Do NOT preventDefault here — it would block scroll AND breaks some browsers
+            return;
+        }
+
+        // Desktop touch screen: set up drag
         isDraggingFab = true;
         hasMoved = false;
-        startX = e.touches[0].clientX;
         startRight = chatbotState.fabPosition.right;
         fab.style.transition = 'none';
-        e.preventDefault(); // Desktop touch: prevent ghost click, touchend handles open
+        e.preventDefault(); // Prevent ghost click on desktop touch
     }, { passive: false });
 
+    // ── Mobile tap: touchend on FAB (reliable on iOS + Android) ──
+    fab.addEventListener('touchend', function(e) {
+        if (!isMobileView()) return; // Desktop: document touchend handles drag
+
+        const touch = e.changedTouches[0];
+        const deltaX = Math.abs(touch.clientX - startX);
+        const deltaY = Math.abs(touch.clientY - startY);
+
+        // Tap = small movement (< 15px in any direction)
+        if (deltaX < 15 && deltaY < 15) {
+            e.preventDefault(); // Prevent ghost click after touchend
+            openChatWindow();
+        }
+        // If moved more than 15px, it was a scroll — do nothing
+    }, { passive: false });
+
+    // ── Desktop touch drag: touchmove + touchend on document ──
     document.addEventListener('touchmove', function(e) {
         if (!isDraggingFab || isMobileView()) return;
         const deltaX = startX - e.touches[0].clientX;
@@ -1045,12 +1072,12 @@ function initDraggableFab() {
         e.preventDefault();
     }, { passive: false });
 
-    document.addEventListener('touchend', function(e) {
-        if (!isDraggingFab || isMobileView()) return; // Mobile: click handles it
+    document.addEventListener('touchend', function() {
+        if (!isDraggingFab || isMobileView()) return;
         isDraggingFab = false;
         fab.style.cursor = '';
         fab.style.transition = '';
-        if (!hasMoved) openChatWindow(); // Desktop touch tap
+        if (!hasMoved) openChatWindow(); // Desktop touch tap (non-drag)
         hasMoved = false;
     });
 }
