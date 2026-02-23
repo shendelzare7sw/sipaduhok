@@ -971,11 +971,6 @@ function initDraggableFab() {
     const fab = document.getElementById('aiChatbotFab');
     if (!fab) return;
 
-    // Mobile: no drag needed (CSS handles position right: 24px stacked with scroll-to-top)
-    if (window.innerWidth <= 768) return;
-
-    // Always start at default position (reset on every page load)
-    // Default position is set in CSS: right: 96px
     chatbotState.fabPosition = { right: 96 };
 
     let isDraggingFab = false;
@@ -983,17 +978,21 @@ function initDraggableFab() {
     let startX = 0;
     let startRight = 0;
 
-    // Mouse events
-    fab.addEventListener('mousedown', onMouseDown);
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    function isMobileView() {
+        return window.innerWidth <= 768;
+    }
 
-    // Touch events
-    fab.addEventListener('touchstart', onTouchStart, { passive: false });
-    document.addEventListener('touchmove', onTouchMove, { passive: false });
-    document.addEventListener('touchend', onTouchEnd);
+    // ── Click: works on all devices & all resize states ──
+    // Mobile → browser generates click from tap (touchstart has no preventDefault)
+    // Desktop → fires after mouseup for normal clicks
+    fab.addEventListener('click', function() {
+        if (!hasMoved) openChatWindow();
+        hasMoved = false;
+    });
 
-    function onMouseDown(e) {
+    // ── Mouse drag (desktop only, checked at event time) ──
+    fab.addEventListener('mousedown', function(e) {
+        if (isMobileView()) return;
         isDraggingFab = true;
         hasMoved = false;
         startX = e.clientX;
@@ -1001,93 +1000,59 @@ function initDraggableFab() {
         fab.style.cursor = 'grabbing';
         fab.style.transition = 'none';
         e.preventDefault();
-    }
+    });
 
-    function onMouseMove(e) {
+    document.addEventListener('mousemove', function(e) {
         if (!isDraggingFab) return;
-
         const deltaX = startX - e.clientX;
         const newRight = startRight + deltaX;
-
-        const viewportWidth = window.innerWidth;
         const fabWidth = fab.offsetWidth;
-        const minRight = 24;
-        const maxRight = viewportWidth - fabWidth - 24;
-
-        const boundedRight = Math.max(minRight, Math.min(newRight, maxRight));
-
+        const boundedRight = Math.max(24, Math.min(newRight, window.innerWidth - fabWidth - 24));
         chatbotState.fabPosition.right = boundedRight;
         fab.style.right = `${boundedRight}px`;
+        if (Math.abs(deltaX) > 5) hasMoved = true;
+    });
 
-        if (Math.abs(deltaX) > 5) {
-            hasMoved = true;
-        }
-    }
-
-    function onMouseUp(e) {
+    document.addEventListener('mouseup', function(e) {
         if (!isDraggingFab) return;
-
         isDraggingFab = false;
-        fab.style.cursor = ''; // Let CSS handle cursor (pointer)
+        fab.style.cursor = '';
         fab.style.transition = '';
+        // click event handles openChatWindow
+    });
 
-        // Position is NOT saved to localStorage (resets on page refresh)
-
-        if (!hasMoved) {
-            openChatWindow();
-        }
-
-        hasMoved = false;
-    }
-
-    function onTouchStart(e) {
+    // ── Touch drag (desktop touch screen only, checked at event time) ──
+    // Mobile: touchstart returns early → no preventDefault → browser fires click → opens chat
+    fab.addEventListener('touchstart', function(e) {
+        if (isMobileView()) return; // Mobile: let click handle it
         isDraggingFab = true;
         hasMoved = false;
         startX = e.touches[0].clientX;
         startRight = chatbotState.fabPosition.right;
-        fab.style.cursor = 'grabbing';
         fab.style.transition = 'none';
-        e.preventDefault();
-    }
+        e.preventDefault(); // Desktop touch: prevent ghost click, touchend handles open
+    }, { passive: false });
 
-    function onTouchMove(e) {
-        if (!isDraggingFab) return;
-
+    document.addEventListener('touchmove', function(e) {
+        if (!isDraggingFab || isMobileView()) return;
         const deltaX = startX - e.touches[0].clientX;
         const newRight = startRight + deltaX;
-
-        const viewportWidth = window.innerWidth;
         const fabWidth = fab.offsetWidth;
-        const minRight = 24;
-        const maxRight = viewportWidth - fabWidth - 24;
-
-        const boundedRight = Math.max(minRight, Math.min(newRight, maxRight));
-
+        const boundedRight = Math.max(24, Math.min(newRight, window.innerWidth - fabWidth - 24));
         chatbotState.fabPosition.right = boundedRight;
         fab.style.right = `${boundedRight}px`;
-
-        if (Math.abs(deltaX) > 5) {
-            hasMoved = true;
-        }
-
+        if (Math.abs(deltaX) > 5) hasMoved = true;
         e.preventDefault();
-    }
+    }, { passive: false });
 
-    function onTouchEnd(e) {
-        if (!isDraggingFab) return;
-
+    document.addEventListener('touchend', function(e) {
+        if (!isDraggingFab || isMobileView()) return; // Mobile: click handles it
         isDraggingFab = false;
-        fab.style.cursor = ''; // Let CSS handle cursor
+        fab.style.cursor = '';
         fab.style.transition = '';
-
-        // Position is NOT saved to localStorage (resets on page refresh)
-
-        if (!hasMoved) {
-            openChatWindow();
-        }
-
+        if (!hasMoved) openChatWindow(); // Desktop touch tap
         hasMoved = false;
-    }
+    });
 }
 
 // ==================== Utility: Escape HTML ====================
