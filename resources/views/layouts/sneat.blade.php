@@ -993,7 +993,7 @@
     </div>
 
     <!-- Currency Format Script -->
-    <script src="{{ asset('js/currency-format.js') }}"></script>
+    <script src="{{ asset('js/currency-format.js') }}?v=1.0"></script>
 
     @stack('scripts')
     @yield('scripts')

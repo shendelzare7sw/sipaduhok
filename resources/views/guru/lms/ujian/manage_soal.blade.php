@@ -412,7 +412,7 @@
 
     @push('scripts')
     {{-- AI Question Generator JavaScript --}}
-    <script src="{{ asset('js/ai-question-generator.js') }}"></script>
+    <script src="{{ asset('js/ai-question-generator.js') }}?v=1.0"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
