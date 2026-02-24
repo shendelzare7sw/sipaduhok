@@ -84,6 +84,21 @@
             margin: 0;
             padding: 0;
         }
+
+        /* Mobile Responsive */
+        @media (max-width: 575px) {
+            .exam-header {
+                padding: 0.5rem 1rem;
+            }
+
+            .exam-brand {
+                font-size: 1rem;
+            }
+
+            .exam-wrapper {
+                padding: 0.5rem;
+            }
+        }
     </style>
     @stack('styles')
 </head>

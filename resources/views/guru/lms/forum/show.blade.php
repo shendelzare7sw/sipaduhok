@@ -170,6 +170,50 @@
             .reply-level-3 { margin-left: 45px; }
             .reply-level-4 { margin-left: 60px; }
             .reply-level-5 { margin-left: 75px; }
+
+            .post-content {
+                padding-left: 30px;
+            }
+
+            .attachments-container {
+                padding-left: 30px;
+            }
+
+            .reply-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .forum-container {
+                padding: 14px;
+            }
+
+            .post {
+                padding: 14px;
+            }
+
+            .post-content {
+                padding-left: 0;
+            }
+
+            .attachments-container {
+                padding-left: 0;
+            }
+
+            .reply-btn {
+                font-size: 11px;
+                padding: 5px 10px;
+                right: 14px;
+                top: 14px;
+            }
+
+            .reply-level-1 { margin-left: 8px; }
+            .reply-level-2 { margin-left: 12px; }
+            .reply-level-3 { margin-left: 16px; }
+            .reply-level-4 { margin-left: 18px; }
+            .reply-level-5 { margin-left: 20px; }
         }
 
         .reply-form {

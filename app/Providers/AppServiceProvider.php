@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS URL generation when behind Cloudflare Tunnel in production
+        if (config('app.env') === 'production') {
+            URL::forceScheme('https');
+        }
+
         // Force Laravel pagination to use Bootstrap 5
         Paginator::useBootstrapFive();
 

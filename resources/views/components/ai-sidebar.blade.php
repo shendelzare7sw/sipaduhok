@@ -290,11 +290,14 @@
     min-width: 350px;
     max-width: 800px;
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height - accounts for mobile browser chrome */
     background: white;
     box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2);
     z-index: 1050;
     transition: right 0.3s ease-in-out;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .ai-sidebar.active {
@@ -359,6 +362,7 @@
 .ai-sidebar-header {
     position: sticky;
     top: 0;
+    flex-shrink: 0; /* Don't shrink in flex container */
     background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
     color: white;
     padding: 1.25rem 1.5rem;
@@ -390,7 +394,10 @@
 .ai-sidebar-body {
     padding: 1.5rem;
     overflow-y: auto;
-    max-height: calc(100vh - 90px); /* Header height */
+    flex: 1; /* Fill remaining height after sticky header */
+    min-height: 0; /* Required for flex overflow-y: auto to work */
+    /* Bottom padding to prevent content hiding behind mobile browser nav bar */
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
 }
 
 /* Question Card in Sidebar */
@@ -416,6 +423,8 @@
         min-width: 100%;
         max-width: 100%;
         right: -100% !important;
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile browsers */
     }
 
     .ai-sidebar.active {
@@ -424,6 +433,11 @@
 
     .ai-sidebar-resize-handle {
         display: none; /* Hide resize handle on mobile */
+    }
+
+    /* Extra bottom padding on mobile to avoid browser nav bar overlap */
+    .ai-sidebar-body {
+        padding-bottom: max(80px, env(safe-area-inset-bottom, 80px));
     }
 }
 

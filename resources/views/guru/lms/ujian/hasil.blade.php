@@ -25,8 +25,8 @@
         </a>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-md-3">
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
             <div class="card-custom" style="border-left: 4px solid #165fac;">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-primary">{{ $hasilUjian->count() }}</div>
@@ -34,7 +34,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card-custom" style="border-left: 4px solid #10b981;">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-success">
@@ -44,7 +44,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card-custom" style="border-left: 4px solid #f59e0b;">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-warning">
@@ -54,7 +54,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card-custom" style="border-left: 4px solid #dc2626;">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-danger">

@@ -297,15 +297,14 @@
             <div class="container-xxl">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
+                        <button type="button" class="btn btn-primary btn-lg rounded-pill px-4" id="btnPaySelected">
+                            <i class="fas fa-wallet me-2"></i>Bayar Sekarang
+                        </button>
+                    </div>
+                    <div class="text-end">
                         <span class="text-muted small d-block">Total Pembayaran (<span id="selectedCount">0</span> item
                             terpilih)</span>
                         <h4 class="mb-0 fw-bold text-primary" id="grandTotalDisplay">Rp 0</h4>
-                    </div>
-                    <div>
-                        <button type="button" class="btn btn-primary btn-lg rounded-pill px-4" id="btnPaySelected"
-                            style="margin-right: 6rem;">
-                            <i class="fas fa-wallet me-2"></i>Bayar Sekarang
-                        </button>
                     </div>
                 </div>
             </div>
@@ -640,6 +639,13 @@
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
             color: #adb5bd;
+        }
+
+        /* Offset footer agar tidak tertutup sidebar di desktop */
+        @media (min-width: 1200px) {
+            #bulkPaymentFooter {
+                margin-left: 260px;
+            }
         }
     </style>
 @endsection

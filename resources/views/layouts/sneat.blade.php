@@ -736,10 +736,29 @@
     <!-- / Layout wrapper -->
 
     <!-- Scroll to Top Button -->
+    <!-- Desktop: bottom: 82px = sejajar dengan chatbot FAB (side by side) -->
     <a href="#" class="btn btn-primary position-fixed rounded-circle shadow" id="scrollToTop"
-        style="bottom: 40px; right: 24px; width: 48px; height: 48px; display: none; z-index: 1050; display: flex; align-items: center; justify-content: center;">
+        style="bottom: 82px; right: 24px; width: 48px; height: 48px; display: none; z-index: 1050; align-items: center; justify-content: center;">
         <i class="fas fa-angle-up"></i>
     </a>
+
+    <style>
+        /* Universal: smooth slide-out for auto-hide (all screen sizes) */
+        #scrollToTop {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        #scrollToTop.fab-hidden-mobile {
+            transform: translateX(80px) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        /* Mobile: scroll-to-top di bawah chatbot FAB */
+        @media (max-width: 768px) {
+            #scrollToTop {
+                bottom: 24px !important;
+            }
+        }
+    </style>
 
     <!-- jQuery (load first) -->
     <script
@@ -766,12 +785,45 @@
 
             // Scroll to top button
             const scrollBtn = document.getElementById('scrollToTop');
+            let lastScrollY = 0;
+            let fabHideTimer = null;
+
+            function showFabsMobile() {
+                const chatFab = document.getElementById('aiChatbotFab');
+                scrollBtn.classList.remove('fab-hidden-mobile');
+                chatFab?.classList.remove('fab-hidden-mobile');
+            }
+
+            function hideFabsMobile() {
+                const chatFab = document.getElementById('aiChatbotFab');
+                scrollBtn.classList.add('fab-hidden-mobile');
+                chatFab?.classList.add('fab-hidden-mobile');
+            }
+
             window.addEventListener('scroll', function () {
-                if (window.scrollY > 300) {
+                const currentScrollY = window.scrollY;
+
+                // Show/hide scroll-to-top based on scroll distance
+                if (currentScrollY > 300) {
                     scrollBtn.style.display = 'flex';
                 } else {
                     scrollBtn.style.display = 'none';
                 }
+
+                // All screens: auto-hide both FABs on scroll down
+                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                    // Scrolling down → hide both
+                    hideFabsMobile();
+                } else if (currentScrollY < lastScrollY) {
+                    // Scrolling up → show both
+                    showFabsMobile();
+                }
+
+                // Show again after scroll stops (1.5s)
+                clearTimeout(fabHideTimer);
+                fabHideTimer = setTimeout(showFabsMobile, 1500);
+
+                lastScrollY = currentScrollY;
             });
 
             scrollBtn.addEventListener('click', function (e) {
@@ -941,7 +993,7 @@
     </div>
 
     <!-- Currency Format Script -->
-    <script src="{{ asset('js/currency-format.js') }}"></script>
+    <script src="{{ asset('js/currency-format.js') }}?v=1.0"></script>
 
     @stack('scripts')
     @yield('scripts')

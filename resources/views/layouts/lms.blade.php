@@ -36,6 +36,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8f9fa;
             color: #333;
+            overflow-x: hidden;
         }
 
         /* Sidebar LMS */
@@ -439,6 +440,32 @@
 
             .stat-card .stat-value {
                 font-size: 24px;
+            }
+
+            /* Reduce content padding on small mobile */
+            .content-lms {
+                padding: 16px;
+            }
+
+            /* Header padding on small mobile */
+            .header-lms {
+                padding: 12px 16px;
+            }
+
+            /* Header title smaller */
+            .header-left h1 {
+                font-size: 18px;
+            }
+
+            /* Tables: scrollable on mobile */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Modals: better margin on small screens */
+            .modal-dialog {
+                margin: 0.5rem;
             }
         }
 

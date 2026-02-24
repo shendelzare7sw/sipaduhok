@@ -285,14 +285,9 @@
                 transform: translateX(-100%);
             }
 
-            /* On mobile, standard active class is used (transform 0) */
             .sidebar-lms.active {
                 transform: translateX(0) !important;
             }
-
-            /* collapsed state shouldn't affect mobile logic heavily, 
-               but ensure body.sidebar-collapsed doesn't break things. 
-               We will use specific JS logic to differentiate. */
 
             .main-content-lms {
                 margin-left: 0 !important;
@@ -302,15 +297,51 @@
 
             .sidebar-toggle {
                 display: block;
-                /* Always visible */
             }
 
-            /* ... existing mobile styles ... */
+            /* Reduce header padding on mobile */
             .header-lms {
-                padding: 16px 20px;
+                padding: 12px 16px;
             }
 
-            /* ... */
+            /* Reduce content padding on mobile */
+            .content-lms {
+                padding: 16px;
+            }
+
+            /* Header title smaller on mobile */
+            .header-left h1 {
+                font-size: 18px;
+            }
+
+            .header-left p {
+                font-size: 12px;
+            }
+
+            /* Stats cards: single column */
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-card .stat-value {
+                font-size: 24px;
+            }
+
+            /* Tables scrollable on mobile */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Modals: full width on small screens */
+            .modal-dialog {
+                margin: 0.5rem;
+            }
         }
 
         /* Overlay for mobile */

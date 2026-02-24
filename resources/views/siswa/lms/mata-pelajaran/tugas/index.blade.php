@@ -57,6 +57,42 @@
         border-radius: 12px;
         text-align: center;
     }
+
+    @media (max-width: 767px) {
+        /* Make summary boxes 2-column on mobile */
+        .row.mb-4 > [class*="col-md-3"] {
+            flex: 0 0 50%;
+            max-width: 50%;
+            margin-bottom: 12px;
+        }
+
+        /* Wrap badges in tugas card header */
+        .tugas-card .d-flex.align-items-center.gap-2.mb-2 {
+            flex-wrap: wrap;
+        }
+
+        /* Action button column: left-align on mobile */
+        .tugas-card .col-md-4.text-end {
+            text-align: left !important;
+            margin-top: 10px;
+        }
+
+        .tugas-card {
+            padding: 16px;
+        }
+
+        .filter-card {
+            padding: 16px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        /* Full-width summary boxes on very small screens */
+        .row.mb-4 > [class*="col-md-3"] {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
 </style>
 
 <!-- Summary Stats -->
