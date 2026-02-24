@@ -1191,6 +1191,27 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             ]
         );
 
+        // Alur Layanan Terapi Section
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $terapi->id, 'section_key' => 'alur_terapi'],
+            [
+                'type' => 'list',
+                'order' => 4,
+                'content' => [
+                    'header' => [
+                        'title' => 'Alur Layanan Terapi',
+                        'description' => 'Proses terapi yang terstruktur untuk hasil optimal',
+                    ],
+                    'items' => [
+                        ['title' => 'Konsultasi Awal', 'description' => 'Diskusi dengan orang tua mengenai kondisi dan kebutuhan anak'],
+                        ['title' => 'Asesmen', 'description' => 'Evaluasi menyeluruh untuk menentukan jenis terapi yang tepat'],
+                        ['title' => 'Sesi Terapi', 'description' => 'Pelaksanaan terapi sesuai program yang telah dirancang'],
+                        ['title' => 'Evaluasi & Laporan', 'description' => 'Monitoring berkala dan laporan perkembangan untuk orang tua'],
+                    ]
+                ]
+            ]
+        );
+
         // ==========================================
         // 10. FASILITAS PAGE
         // ==========================================

@@ -679,10 +679,10 @@
 
             @php
                 $colorMap = [
-                    'yellow' => ['border' => 'border-accent-yellow', 'bg' => 'bg-accent-yellow/10', 'gradient' => 'from-accent-yellow to-accent-bright'],
-                    'blue' => ['border' => 'border-primary', 'bg' => 'bg-primary/10', 'gradient' => 'from-primary to-blue-600'],
-                    'green' => ['border' => 'border-secondary', 'bg' => 'bg-secondary/10', 'gradient' => 'from-secondary to-green-600'],
-                    'orange' => ['border' => 'border-accent-orange', 'bg' => 'bg-accent-orange/10', 'gradient' => 'from-accent-orange to-red-600'],
+                    'yellow' => ['hex' => '#fac030', 'border' => 'border-accent-yellow', 'bg' => 'bg-accent-yellow/10', 'gradient' => 'from-accent-yellow to-accent-bright'],
+                    'blue' => ['hex' => '#165fac', 'border' => 'border-primary', 'bg' => 'bg-primary/10', 'gradient' => 'from-primary to-blue-600'],
+                    'green' => ['hex' => '#287f3b', 'border' => 'border-secondary', 'bg' => 'bg-secondary/10', 'gradient' => 'from-secondary to-green-600'],
+                    'orange' => ['hex' => '#d45930', 'border' => 'border-accent-orange', 'bg' => 'bg-accent-orange/10', 'gradient' => 'from-accent-orange to-red-600'],
                 ];
                 $iconMap = [
                     'yellow' => 'fa-palette',
@@ -704,24 +704,40 @@
                         $header = $section['content']['header'] ?? [];
                         $items = $section['items'] ?? [];
                         $color = $header['color'] ?? 'blue';
-                        $borderClass = $colorMap[$color]['border'] ?? 'border-primary';
-                        $bgClass = $colorMap[$color]['bg'] ?? 'bg-primary/10';
-                        $gradientClass = $colorMap[$color]['gradient'] ?? 'from-primary to-blue-600';
-                        $icon = $iconMap[$color] ?? 'fa-book';
+
+                        // Support both named colors and hex colors from admin editor
+                        $isHex = str_starts_with($color, '#');
+                        $hexColor = $isHex ? $color : ($colorMap[$color]['hex'] ?? '#165fac');
+
+                        // Use inline styles for hex colors, CSS classes for named colors
+                        $useInlineStyle = $isHex || !isset($colorMap[$color]);
+                        $borderClass = $useInlineStyle ? '' : ($colorMap[$color]['border'] ?? '');
+                        $bgClass = $useInlineStyle ? '' : ($colorMap[$color]['bg'] ?? '');
+                        $gradientClass = $useInlineStyle ? '' : ($colorMap[$color]['gradient'] ?? '');
+
+                        $icon = $header['icon'] ?? ($iconMap[$color] ?? 'fa-book');
+                        // Prepend 'fas ' if icon doesn't start with 'fa'
+                        if ($icon && !str_starts_with($icon, 'fa')) {
+                            $icon = 'fas fa-' . ltrim($icon, 'fa-');
+                        } elseif ($icon && str_starts_with($icon, 'fa-')) {
+                            $icon = 'fas ' . $icon;
+                        }
                         $image = $header['image'] ?? null;
 
                         // Calculate totals from items
                         $pokokItems = collect($items)->where('type', 'pokok');
                         $tambahanItems = collect($items)->where('type', 'tambahan');
                     @endphp
-                    <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 {{ $borderClass }}">
+                    <div class="card-hover bg-white rounded-3xl shadow-xl p-8 border-t-4 {{ $borderClass }}"
+                        @if($useInlineStyle) style="border-top-color: {{ $hexColor }}" @endif>
                         <div class="text-center mb-6">
                             <div
-                                class="w-16 h-16 mx-auto mb-4 {{ $bgClass }} rounded-full flex items-center justify-center overflow-hidden">
+                                class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center overflow-hidden {{ $bgClass }}"
+                                @if($useInlineStyle) style="background-color: {{ $hexColor }}15" @endif>
                                 @if($image)
                                     <img src="{{ asset($image) }}" alt="{{ $header['title'] ?? 'Icon' }}" class="w-full h-full object-cover">
                                 @else
-                                    <span class="text-3xl"><i class="fas {{ $icon }}"></i></span>
+                                    <span class="text-3xl" @if($useInlineStyle) style="color: {{ $hexColor }}" @endif><i class="{{ $icon }}"></i></span>
                                 @endif
                             </div>
                             <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $header['title'] ?? 'Program' }}</h3>
@@ -737,7 +753,8 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="price-badge bg-gradient-to-r {{ $gradientClass }} text-white text-center py-3 rounded-xl font-bold cursor-pointer"
+                        <div class="price-badge text-white text-center py-3 rounded-xl font-bold cursor-pointer {{ $gradientClass ? 'bg-gradient-to-r ' . $gradientClass : '' }}"
+                            @if($useInlineStyle) style="background: linear-gradient(to right, {{ $hexColor }}, {{ $hexColor }}cc)" @endif
                             onclick="{{ $section['modalFunc'] }}()">
                             {{ $header['badge_text'] ?? 'Lihat Detail' }}
                         </div>

@@ -52,19 +52,17 @@
             @foreach($mpItems as $item)
                 @php
                     $cardColor = $item['card_color'] ?? '#ffffff';
-                    $iconColor = $item['icon_color'] ?? 'blue';
-                    $iconClassMap = [
-                        'blue' => 'text-[#165fac]',
-                        'green' => 'text-[#287f3b]',
-                        'orange' => 'text-[#d45930]',
-                        'yellow' => 'text-[#fac030]',
+                    // Support both named colors (legacy) and hex values from admin
+                    $rawIconColor = $item['icon_color'] ?? 'blue';
+                    $iconColorMap = [
+                        'blue' => '#165fac',
+                        'green' => '#287f3b',
+                        'orange' => '#d45930',
+                        'yellow' => '#fac030',
                     ];
-                    $textColorClass = $iconClassMap[$iconColor] ?? 'text-gray-600';
-                    $borderColor = $iconClassMap[$iconColor] ?? 'border-gray-200'; // Extract color from class? Or just use card color for border?
-                    // The original used border-t-4 with specific colors. Let's use card_color for background or border styling.
-                    // Actually, the original design had border-t-4 border-[color].
-                    // Let's use the 'card_color' field for the top border color if it's a valid hex, or map icon_color.
-                    // But in seeder I populated card_color with full hex.
+                    $iconHex = (str_starts_with($rawIconColor, '#') && strlen($rawIconColor) === 7)
+                        ? $rawIconColor
+                        : ($iconColorMap[$rawIconColor] ?? '#165fac');
                 @endphp
                 <div class="card-hover bg-gray-50 rounded-2xl p-6 text-center border-t-4"
                      style="border-color: {{ $cardColor }}">
@@ -72,7 +70,7 @@
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-10 h-10 object-contain">
                          @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
-                            <i class="{{ $item['icon'] }}" style="color: {{ $cardColor }}"></i>
+                            <i class="{{ $item['icon'] }}" style="color: {{ $iconHex }}"></i>
                          @else
                             @php
                                 $title = strtolower($item['title'] ?? '');
@@ -133,14 +131,18 @@
             @php $kungItems = $keunggulan['items'] ?? []; @endphp
             @foreach($kungItems as $item)
                 @php
-                    $iconColor = $item['icon_color'] ?? 'blue';
+                    $rawColor = $item['color'] ?? ($item['icon_color'] ?? 'blue');
                     $colorMap = [
-                        'blue' => ['bg' => '#165fac', 'text' => '#165fac'],
-                        'green' => ['bg' => '#287f3b', 'text' => '#287f3b'],
-                        'orange' => ['bg' => '#d45930', 'text' => '#d45930'],
-                        'yellow' => ['bg' => '#fac030', 'text' => '#fac030'],
+                        'blue' => '#165fac',
+                        'green' => '#287f3b',
+                        'orange' => '#d45930',
+                        'yellow' => '#fac030',
                     ];
-                    $c = $colorMap[$iconColor] ?? $colorMap['blue'];
+                    // Support both named colors (legacy) and hex values from admin
+                    $themeColor = (str_starts_with($rawColor, '#') && strlen($rawColor) === 7)
+                        ? $rawColor
+                        : ($colorMap[$rawColor] ?? '#165fac');
+                    $c = ['bg' => $themeColor, 'text' => $themeColor];
                 @endphp
                 <div class="bg-white rounded-2xl p-8 shadow-lg text-center">
                     <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"

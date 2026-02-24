@@ -24,6 +24,11 @@
         $therapyHeader = $therapyContent['header'] ?? [];
         $therapyItems = $therapyContent['items'] ?? [];
 
+        $alurSection = $page->getSection('alur_terapi');
+        $alurContent = $alurSection->content ?? [];
+        $alurHeader = $alurContent['header'] ?? [];
+        $alurItems = $alurContent['items'] ?? [];
+
         // Color mapping
         $colorMap = [
             'orange' => ['border' => '#d45930', 'bg' => '#d45930', 'text' => '#d45930'],
@@ -143,7 +148,16 @@
                 @foreach($therapyItems as $item)
                     @php
                         $colorKey = $item['color'] ?? 'blue';
-                        $colors = $colorMap[$colorKey] ?? $colorMap['blue'];
+                        // Support hex values from admin color picker
+                        if (str_starts_with($colorKey, '#') && strlen($colorKey) === 7) {
+                            $hexColor = $colorKey;
+                        } else {
+                            $namedColorMap = [
+                                'orange' => '#d45930', 'blue' => '#165fac',
+                                'green' => '#287f3b', 'yellow' => '#fac030',
+                            ];
+                            $hexColor = $namedColorMap[$colorKey] ?? '#165fac';
+                        }
                         // Match by title, or fallback to default
                         $config = $therapyConfig[$item['title']] ?? ['icon_path' => $defaultIcon];
                         
@@ -151,12 +165,12 @@
                         $features = isset($item['features']) ? explode('|', $item['features']) : [];
                     @endphp
 
-                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" style="border-top: 4px solid {{ $colors['border'] }}">
+                    <div class="card-hover bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100" style="border-top: 4px solid {{ $hexColor }}">
                         <div class="h-48 flex items-center justify-center relative">
                             <!-- Helper div for background opacity -->
-                             <div class="absolute inset-0 opacity-10" style="background-color: {{ $colors['bg'] }}"></div>
+                             <div class="absolute inset-0 opacity-10" style="background-color: {{ $hexColor }}"></div>
                              
-                            <svg class="w-20 h-20 relative z-10" style="color: {{ $colors['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-20 h-20 relative z-10" style="color: {{ $hexColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="{{ $config['icon_path'] }}" />
                             </svg>
@@ -169,7 +183,7 @@
                                 <ul class="text-sm text-gray-600 space-y-2">
                                     @foreach($features as $feature)
                                         <li class="flex items-center gap-2">
-                                            <svg class="w-4 h-4" style="color: {{ $colors['text'] }}" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="w-4 h-4" style="color: {{ $hexColor }}" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
                                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                     clip-rule="evenodd" />
@@ -190,46 +204,20 @@
     <section class="py-20 bg-gradient-to-r from-[#165fac] to-[#287f3b]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Alur Layanan Terapi</h2>
-                <p class="text-white/80 max-w-2xl mx-auto">Proses terapi yang terstruktur untuk hasil optimal</p>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{{ $alurHeader['title'] ?? 'Alur Layanan Terapi' }}</h2>
+                <p class="text-white/80 max-w-2xl mx-auto">{{ $alurHeader['description'] ?? 'Proses terapi yang terstruktur untuk hasil optimal' }}</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Step 1 -->
+                @foreach($alurItems as $index => $step)
                 <div class="text-center">
                     <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-[#165fac]">1</span>
+                        <span class="text-2xl font-bold text-[#165fac]">{{ $index + 1 }}</span>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Konsultasi Awal</h3>
-                    <p class="text-white/80 text-sm">Diskusi dengan orang tua mengenai kondisi dan kebutuhan anak</p>
+                    <h3 class="text-xl font-bold text-white mb-2">{{ $step['title'] ?? '' }}</h3>
+                    <p class="text-white/80 text-sm">{{ $step['description'] ?? '' }}</p>
                 </div>
-
-                <!-- Step 2 -->
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-[#165fac]">2</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Asesmen</h3>
-                    <p class="text-white/80 text-sm">Evaluasi menyeluruh untuk menentukan jenis terapi yang tepat</p>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-[#165fac]">3</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Sesi Terapi</h3>
-                    <p class="text-white/80 text-sm">Pelaksanaan terapi sesuai program yang telah dirancang</p>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-[#165fac]">4</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Evaluasi & Laporan</h3>
-                    <p class="text-white/80 text-sm">Monitoring berkala dan laporan perkembangan untuk orang tua</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
