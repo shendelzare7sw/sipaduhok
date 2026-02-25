@@ -35,14 +35,19 @@
         $newsHeaderSection = $page->getSection('news_header');
         $newsHeader = $newsHeaderSection->content ?? [];
 
-        $gallerySection = $page->getSection('gallery_section');
+        $galeriPage = \App\Models\LandingPage::where('slug', 'galeri')->with('sections')->first();
+        $gallerySection = $galeriPage ? $galeriPage->getSection('gallery_items') : null;
         $galleryContent = $gallerySection->content ?? [];
-        $galleryHeader = $galleryContent['header'] ?? [];
-        $galleryItems = $galleryContent['items'] ?? [];
+        $galleryHeader = ['badge' => 'Galeri Kami', 'title' => 'Galeri', 'description' => 'Berisi Kegiatan Siswa Dan Siswi']; // Fallback header
+        
+        // Ambil data item, balik urutannya (terbaru di awal), dan batasi maksimal 6
+        $allGalleryItems = $galleryContent['items'] ?? [];
+        $galleryItems = array_slice(array_reverse($allGalleryItems), 0, 6);
 
-        $contactSection = $page->getSection('contact_section');
+        $kontakPage = \App\Models\LandingPage::where('slug', 'kontak')->with('sections')->first();
+        $contactSection = $kontakPage ? $kontakPage->getSection('locations') : null;
         $contactContent = $contactSection->content ?? [];
-        $contactHeader = $contactContent['header'] ?? [];
+        $contactHeader = ['badge' => 'Lokasi Kami', 'title' => 'Kunjungi Cabang Terdekat', 'description' => 'PKBM House Of Knowledge hadir di lokasi strategis untuk memudahkan akses pendidikan bagi putra-putri Anda.']; // Fallback header
         $contactItems = $contactContent['items'] ?? [];
 
         $ctaSection = $page->getSection('cta_section');
@@ -424,32 +429,53 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @php
+                    $colorClasses = [
+                        'orange' => ['border' => 'border-accent-orange', 'text' => 'text-accent-orange', 'bg' => 'bg-orange-50', 'icon_bg' => 'bg-orange-100', 'hover_bg' => 'hover:bg-accent-orange', 'shade' => 'orange'],
+                        'blue' => ['border' => 'border-primary', 'text' => 'text-primary', 'bg' => 'bg-blue-50', 'icon_bg' => 'bg-blue-100', 'hover_bg' => 'hover:bg-primary', 'shade' => 'blue'],
+                        'green' => ['border' => 'border-secondary', 'text' => 'text-secondary', 'bg' => 'bg-green-50', 'icon_bg' => 'bg-green-100', 'hover_bg' => 'hover:bg-secondary', 'shade' => 'green'],
+                    ];
+                @endphp
 
                 @foreach($contactItems as $item)
                 @php
-                    $isHex = isset($item['color']) && substr($item['color'], 0, 1) === '#';
-                    $themeColor = $item['color'] ?? 'primary';
-                    // Fallback for classes
-                    $borderColorClass = $isHex ? '' : 'border-' . $themeColor;
-                    $bgShadeClass = $isHex ? '' : ($item['shade_color'] ?? 'blue') . '-50';
-                    $iconBgClass = $isHex ? '' : ($item['shade_color'] ?? 'blue') . '-100';
-                    $textColorClass = $isHex ? '' : 'text-' . $themeColor;
+                    $inputColor = $item['color'] ?? 'orange';
+                    $isHex = str_starts_with($inputColor, '#');
                     
-                    // Inline styles for Hex
-                    $cardStyle = $isHex ? "border-bottom-color: $themeColor;" : "";
-                    $bgStyle = $isHex ? "background-color: {$themeColor}10;" : ""; // 10 = ~6% opacity
-                    $iconBgStyle = $isHex ? "background-color: {$themeColor}20; color: $themeColor;" : "";
-                    $textStyle = $isHex ? "color: $themeColor;" : "";
+                    if (!$isHex) {
+                        $colorMap = $colorClasses[$inputColor] ?? $colorClasses['orange'];
+                        $borderColorClass = $colorMap['border'];
+                        $bgShadeClass = $colorMap['bg'];
+                        $iconBgClass = $colorMap['icon_bg'];
+                        $textColorClass = $colorMap['text'];
+                        $iconHoverBgClass = "group-hover:" . str_replace('text-', 'bg-', $colorMap['text']);
+                        $cardStyle = "";
+                        $bgStyle = "";
+                        $iconBgStyle = "";
+                        $textStyle = "";
+                    } else {
+                        $themeColor = $inputColor;
+                        $borderColorClass = '';
+                        $bgShadeClass = '';
+                        $iconBgClass = '';
+                        $textColorClass = '';
+                        $iconHoverBgClass = '';
+                        
+                        $cardStyle = "border-bottom-color: $themeColor;";
+                        $bgStyle = "background-color: {$themeColor}10;";
+                        $iconBgStyle = "background-color: {$themeColor}20; color: $themeColor;";
+                        $textStyle = "color: $themeColor;";
+                    }
                 @endphp
                 <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 {{ $borderColorClass }} group relative overflow-hidden" 
                      style="{{ $cardStyle }}">
                     
                     {{-- Decorative Background Circle --}}
-                    <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 bg-{{ $isHex ? '' : ($item['shade_color'] ?? 'blue').'-50' }}"
+                    <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 {{ $bgShadeClass }}"
                          style="{{ $bgStyle }}"></div>
 
                     <div class="relative z-10">
-                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 {{ $isHex ? '' : "bg-" . ($item['shade_color'] ?? 'blue') . "-100 text-$themeColor group-hover:bg-$themeColor group-hover:text-white" }}"
+                        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 {{ $iconBgClass }} {{ $textColorClass }} {{ $iconHoverBgClass }} group-hover:text-white"
                              style="{{ $iconBgStyle }}">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                                  <img src="{{ asset($item['icon']) }}" alt="Icon" class="w-8 h-8 object-contain">
@@ -460,9 +486,9 @@
                             @endif
                         </div>
 
-                        <h3 class="text-xl font-bold text-gray-800 mb-1">{{ $item['title'] ?? '' }}</h3>
+                        <h3 class="text-xl font-bold text-gray-800 mb-1">{{ $item['name'] ?? '' }}</h3>
                         <p class="text-sm font-medium uppercase tracking-wider mb-4 {{ $textColorClass }}" style="{{ $textStyle }}">
-                            {{ $item['subtitle'] ?? '' }}
+                            {{ $item['area'] ?? '' }}
                         </p>
 
                         <p class="text-gray-600 text-sm leading-relaxed mb-4">

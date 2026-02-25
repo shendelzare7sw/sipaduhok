@@ -61,18 +61,18 @@
             @foreach($items as $item)
                 @php
                     $cardColor = $item['card_color'] ?? '#ffffff';
-                    // Determine text color based on card color (simple heuristic or passed from DB if needed)
-                    // For now assuming colors are light, so text is dark/colored.
-                    // We can also use icon_color for the icon text class if it's a class string.
-                    $iconColor = $item['icon_color'] ?? 'blue';
-                    $iconClassMap = [
-                        'orange' => 'text-orange-600',
-                        'blue' => 'text-blue-600',
-                        'green' => 'text-emerald-600',
-                        'yellow' => 'text-amber-600',
-                        'red' => 'text-rose-600',
+                    // Support both named colors (legacy) and hex values from admin
+                    $rawIconColor = $item['icon_color'] ?? 'blue';
+                    $iconColorMap = [
+                        'blue' => '#165fac',
+                        'green' => '#287f3b',
+                        'orange' => '#d45930',
+                        'yellow' => '#fac030',
+                        'red' => '#dc2626',
                     ];
-                    $textColorClass = $iconClassMap[$iconColor] ?? 'text-gray-600';
+                    $iconHex = (str_starts_with($rawIconColor, '#') && strlen($rawIconColor) === 7)
+                        ? $rawIconColor
+                        : ($iconColorMap[$rawIconColor] ?? '#165fac');
                 @endphp
                 <div
                     class="bg-white rounded-3xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100"
@@ -82,7 +82,7 @@
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-10 h-10 object-contain">
                          @elseif(!empty($item['icon']) && (str_starts_with($item['icon'], 'fa') || str_starts_with($item['icon'], 'bx')))
-                            <i class="{{ $item['icon'] }} text-2xl {{ $textColorClass }}"></i>
+                            <i class="{{ $item['icon'] }} text-2xl" style="color: {{ $iconHex }}"></i>
                          @else
                             @php
                                 $title = strtolower($item['title'] ?? '');

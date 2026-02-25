@@ -135,6 +135,29 @@
     <section id="fasilitas" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+            @php
+                // Helper: Resolve icon_color to hex
+                $colorNameMap = [
+                    'primary' => '#165fac', 'secondary' => '#287f3b',
+                    'accent-orange' => '#d45930', 'accent-yellow' => '#fac030',
+                    'orange' => '#d45930', 'blue' => '#165fac',
+                    'green' => '#287f3b', 'yellow' => '#fac030',
+                ];
+
+                // Resolve colors for each section
+                $rbColor = $ruangBelajarContent['header']['icon_color'] ?? $ruangBelajarContent['icon_color'] ?? 'primary';
+                $rbHex = str_starts_with($rbColor, '#') ? $rbColor : ($colorNameMap[$rbColor] ?? '#165fac');
+
+                $rtColor = $ruangTerapiContent['header']['icon_color'] ?? $ruangTerapiContent['icon_color'] ?? 'accent-orange';
+                $rtHex = str_starts_with($rtColor, '#') ? $rtColor : ($colorNameMap[$rtColor] ?? '#d45930');
+
+                $abColor = $areaBermainContent['header']['icon_color'] ?? $areaBermainContent['icon_color'] ?? 'accent-yellow';
+                $abHex = str_starts_with($abColor, '#') ? $abColor : ($colorNameMap[$abColor] ?? '#fac030');
+
+                $ppColor = $perpustakaanContent['header']['icon_color'] ?? $perpustakaanContent['icon_color'] ?? 'secondary';
+                $ppHex = str_starts_with($ppColor, '#') ? $ppColor : ($colorNameMap[$ppColor] ?? '#287f3b');
+            @endphp
+
             <!-- ===== 1. RUANG BELAJAR ===== -->
             <div class="mb-32">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -154,7 +177,6 @@
                                 </div>
                                 @endforeach
                             @else
-                                <!-- Fallback content -->
                                 <div class="carousel-slide">
                                     <img src="{{ asset('img/fasilitas-ruang-belajar-1.jpg') }}" alt="Ruang Belajar 1">
                                     <div class="carousel-caption">
@@ -208,26 +230,37 @@
                     <div>
                         <div class="flex items-center gap-3 mb-4">
                             <div
-                                class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center icon-float">
-                                <svg class="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z" />
-                                </svg>
+                                class="w-16 h-16 rounded-2xl flex items-center justify-center icon-float" style="background-color: {{ $rbHex }}15">
+                                @php $rbIcon = $ruangBelajarContent['header']['icon'] ?? $ruangBelajarContent['icon'] ?? null; @endphp
+                                @if($rbIcon && str_starts_with($rbIcon, 'fa'))
+                                    <i class="{{ $rbIcon }}" style="color: {{ $rbHex }}; font-size: 1.5rem;"></i>
+                                @else
+                                    <svg class="w-8 h-8" style="color: {{ $rbHex }}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z" />
+                                    </svg>
+                                @endif
                             </div>
                             <span
-                                class="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full">{{ $ruangBelajarContent['badge'] ?? 'Fasilitas Utama' }}</span>
+                                class="px-4 py-2 text-sm font-medium rounded-full" style="background-color: {{ $rbHex }}15; color: {{ $rbHex }}">{{ $ruangBelajarContent['header']['badge'] ?? $ruangBelajarContent['badge'] ?? 'Fasilitas Utama' }}</span>
                         </div>
 
                         <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
-                            {{ $ruangBelajarContent['title'] ?? 'Ruang Belajar' }}</h2>
+                            {{ $ruangBelajarContent['header']['title'] ?? $ruangBelajarContent['title'] ?? 'Ruang Belajar' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            {{ $ruangBelajarContent['description'] ?? 'Ruang belajar kami dirancang dengan konsep modern dan nyaman untuk menciptakan suasana belajar yang kondusif. Dilengkapi dengan teknologi pembelajaran terkini dan tata ruang yang mendukung interaksi optimal antara guru dan siswa.' }}
+                            {{ $ruangBelajarContent['header']['description'] ?? $ruangBelajarContent['description'] ?? 'Ruang belajar kami dirancang dengan konsep modern dan nyaman untuk menciptakan suasana belajar yang kondusif.' }}
                         </p>
 
                         <div class="space-y-4">
+                            @for($i = 1; $i <= 3; $i++)
+                            @php
+                                $fTitle = $ruangBelajarContent['header']['feature_'.$i.'_title'] ?? $ruangBelajarContent['feature_'.$i.'_title'] ?? null;
+                                $fDesc = $ruangBelajarContent['header']['feature_'.$i.'_desc'] ?? $ruangBelajarContent['feature_'.$i.'_desc'] ?? null;
+                            @endphp
+                            @if($fTitle)
                             <div class="feature-item flex items-start gap-4">
                                 <div
-                                    class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center mt-1">
+                                    class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1" style="background-color: {{ $rbHex }}">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -235,50 +268,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">
-                                        {{ $ruangBelajarContent['feature_1_title'] ?? 'Kapasitas 8-15 Siswa' }}</h4>
-                                    <p class="text-gray-600 text-sm">
-                                        {{ $ruangBelajarContent['feature_1_desc'] ?? 'Ukuran kelas ideal untuk pembelajaran personal' }}
-                                    </p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $fTitle }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $fDesc ?? '' }}</p>
                                 </div>
                             </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">
-                                        {{ $ruangBelajarContent['feature_2_title'] ?? 'Ruangan Ber AC' }}</h4>
-                                    <p class="text-gray-600 text-sm">
-                                        {{ $ruangBelajarContent['feature_2_desc'] ?? 'Setiap ruangan dilengkapi dengan AC untuk kenyamanan siswa.' }}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">
-                                        {{ $ruangBelajarContent['feature_3_title'] ?? 'Furniture Ergonomis' }}</h4>
-                                    <p class="text-gray-600 text-sm">
-                                        {{ $ruangBelajarContent['feature_3_desc'] ?? 'Meja dan kursi yang nyaman untuk belajar' }}
-                                    </p>
-                                </div>
-                            </div>
-
+                            @endif
+                            @endfor
                         </div>
                     </div>
                 </div>
@@ -291,26 +286,37 @@
                     <div class="order-2 lg:order-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div
-                                class="w-16 h-16 bg-accent-orange/10 rounded-2xl flex items-center justify-center icon-float">
-                                <svg class="w-8 h-8 text-accent-orange" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                                class="w-16 h-16 rounded-2xl flex items-center justify-center icon-float" style="background-color: {{ $rtHex }}15">
+                                @php $rtIcon = $ruangTerapiContent['header']['icon'] ?? $ruangTerapiContent['icon'] ?? null; @endphp
+                                @if($rtIcon && str_starts_with($rtIcon, 'fa'))
+                                    <i class="{{ $rtIcon }}" style="color: {{ $rtHex }}; font-size: 1.5rem;"></i>
+                                @else
+                                    <svg class="w-8 h-8" style="color: {{ $rtHex }}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                @endif
                             </div>
                             <span
-                                class="px-4 py-2 bg-accent-orange/10 text-accent-orange text-sm font-medium rounded-full">{{ $ruangTerapiContent['badge'] ?? 'Program Terapi' }}</span>
+                                class="px-4 py-2 text-sm font-medium rounded-full" style="background-color: {{ $rtHex }}15; color: {{ $rtHex }}">{{ $ruangTerapiContent['header']['badge'] ?? $ruangTerapiContent['badge'] ?? 'Program Terapi' }}</span>
                         </div>
 
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $ruangTerapiContent['title'] ?? 'Ruang Terapi' }}</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $ruangTerapiContent['header']['title'] ?? $ruangTerapiContent['title'] ?? 'Ruang Terapi' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            {{ $ruangTerapiContent['description'] ?? 'Menyediakan berbagai alat terapi yang digunakan khusus untuk mendukung perkembangan motorik dan sensorik pada anak-anak berkebutuhan khusus.' }}
+                            {{ $ruangTerapiContent['header']['description'] ?? $ruangTerapiContent['description'] ?? 'Menyediakan berbagai alat terapi yang digunakan khusus untuk mendukung perkembangan motorik dan sensorik pada anak-anak berkebutuhan khusus.' }}
                         </p>
 
                         <div class="space-y-4">
+                            @for($i = 1; $i <= 3; $i++)
+                            @php
+                                $fTitle = $ruangTerapiContent['header']['feature_'.$i.'_title'] ?? $ruangTerapiContent['feature_'.$i.'_title'] ?? null;
+                                $fDesc = $ruangTerapiContent['header']['feature_'.$i.'_desc'] ?? $ruangTerapiContent['feature_'.$i.'_desc'] ?? null;
+                            @endphp
+                            @if($fTitle)
                             <div class="feature-item flex items-start gap-4">
                                 <div
-                                    class="flex-shrink-0 w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center mt-1">
+                                    class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1" style="background-color: {{ $rtHex }}">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -318,41 +324,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $ruangTerapiContent['feature_1_title'] ?? 'Banyak Variasi' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $ruangTerapiContent['feature_1_desc'] ?? 'Disesuaikan Kebutuhan Siswa' }}</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $fTitle }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $fDesc ?? '' }}</p>
                                 </div>
                             </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $ruangTerapiContent['feature_2_title'] ?? 'Warna dan Bentuk Menarik' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $ruangTerapiContent['feature_2_desc'] ?? 'Menarik perhatian siswa' }}</p>
-                                </div>
-                            </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $ruangTerapiContent['feature_3_title'] ?? 'Aman Digunakan' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $ruangTerapiContent['feature_3_desc'] ?? 'Terjamin menggunakan alat terapi yang aman' }}</p>
-                                </div>
-                            </div>
-
+                            @endif
+                            @endfor
                         </div>
                     </div>
 
@@ -497,25 +474,36 @@
                     <div>
                         <div class="flex items-center gap-3 mb-4">
                             <div
-                                class="w-16 h-16 bg-accent-yellow/10 rounded-2xl flex items-center justify-center icon-float">
-                                <svg class="w-8 h-8 text-accent-yellow" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
+                                class="w-16 h-16 rounded-2xl flex items-center justify-center icon-float" style="background-color: {{ $abHex }}15">
+                                @php $abIcon = $areaBermainContent['header']['icon'] ?? $areaBermainContent['icon'] ?? null; @endphp
+                                @if($abIcon && str_starts_with($abIcon, 'fa'))
+                                    <i class="{{ $abIcon }}" style="color: {{ $abHex }}; font-size: 1.5rem;"></i>
+                                @else
+                                    <svg class="w-8 h-8" style="color: {{ $abHex }}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                @endif
                             </div>
                             <span
-                                class="px-4 py-2 bg-accent-yellow/10 text-accent-yellow text-sm font-medium rounded-full">{{ $areaBermainContent['badge'] ?? 'Fasilitas Rekreasi' }}</span>
+                                class="px-4 py-2 text-sm font-medium rounded-full" style="background-color: {{ $abHex }}15; color: {{ $abHex }}">{{ $areaBermainContent['header']['badge'] ?? $areaBermainContent['badge'] ?? 'Fasilitas Rekreasi' }}</span>
                         </div>
 
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $areaBermainContent['title'] ?? 'Area Bermain' }}</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $areaBermainContent['header']['title'] ?? $areaBermainContent['title'] ?? 'Area Bermain' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            {{ $areaBermainContent['description'] ?? 'Area bermain yang luas dan aman untuk mengembangkan motorik kasar anak. Dilengkapi dengan berbagai permainan edukatif yang mendukung perkembangan fisik dan sosial anak.' }}
+                            {{ $areaBermainContent['header']['description'] ?? $areaBermainContent['description'] ?? 'Area bermain yang luas dan aman untuk mengembangkan motorik kasar anak.' }}
                         </p>
 
                         <div class="space-y-4">
+                            @for($i = 1; $i <= 3; $i++)
+                            @php
+                                $fTitle = $areaBermainContent['header']['feature_'.$i.'_title'] ?? $areaBermainContent['feature_'.$i.'_title'] ?? null;
+                                $fDesc = $areaBermainContent['header']['feature_'.$i.'_desc'] ?? $areaBermainContent['feature_'.$i.'_desc'] ?? null;
+                            @endphp
+                            @if($fTitle)
                             <div class="feature-item flex items-start gap-4">
                                 <div
-                                    class="flex-shrink-0 w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center mt-1">
+                                    class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1" style="background-color: {{ $abHex }}">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -523,43 +511,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $areaBermainContent['feature_1_title'] ?? 'Playground Aman' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $areaBermainContent['feature_1_desc'] ?? 'Fasilitas bermain dengan standar keamanan tinggi' }}
-                                    </p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $fTitle }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $fDesc ?? '' }}</p>
                                 </div>
                             </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $areaBermainContent['feature_2_title'] ?? 'Permainan Edukatif' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $areaBermainContent['feature_2_desc'] ?? 'Bermain sambil belajar untuk perkembangan optimal' }}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-accent-yellow rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $areaBermainContent['feature_3_title'] ?? 'Area Luas & Bersih' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $areaBermainContent['feature_3_desc'] ?? 'Ruang bermain yang lapang dan terawat' }}</p>
-                                </div>
-                            </div>
-
+                            @endif
+                            @endfor
                         </div>
                     </div>
                 </div>
@@ -572,25 +529,48 @@
                     <div class="order-2 lg:order-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div
-                                class="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center icon-float">
-                                <svg class="w-8 h-8 text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                                </svg>
+                                class="w-16 h-16 rounded-2xl flex items-center justify-center icon-float" style="background-color: {{ $ppHex }}15">
+                                @php $ppIcon = $perpustakaanContent['header']['icon'] ?? $perpustakaanContent['icon'] ?? null; @endphp
+                                @if($ppIcon && str_starts_with($ppIcon, 'fa'))
+                                    <i class="{{ $ppIcon }}" style="color: {{ $ppHex }}; font-size: 1.5rem;"></i>
+                                @else
+                                    <svg class="w-8 h-8" style="color: {{ $ppHex }}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                                    </svg>
+                                @endif
                             </div>
                             <span
-                                class="px-4 py-2 bg-secondary/10 text-secondary text-sm font-medium rounded-full">{{ $perpustakaanContent['badge'] ?? 'Fasilitas Edukasi' }}</span>
+                                class="px-4 py-2 text-sm font-medium rounded-full" style="background-color: {{ $ppHex }}15; color: {{ $ppHex }}">{{ $perpustakaanContent['header']['badge'] ?? $perpustakaanContent['badge'] ?? 'Fasilitas Edukasi' }}</span>
                         </div>
 
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $perpustakaanContent['title'] ?? 'Perpustakaan' }}</h2>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">{{ $perpustakaanContent['header']['title'] ?? $perpustakaanContent['title'] ?? 'Perpustakaan' }}</h2>
                         <p class="text-gray-600 mb-6 leading-relaxed text-lg">
-                            {{ $perpustakaanContent['description'] ?? 'Perpustakaan dengan koleksi lengkap untuk menumbuhkan minat baca dan literasi siswa. Ruangan yang nyaman dengan koleksi buku yang terus diperbarui.' }}
+                            {{ $perpustakaanContent['header']['description'] ?? $perpustakaanContent['description'] ?? 'Perpustakaan dengan koleksi lengkap untuk menumbuhkan minat baca dan literasi siswa. Ruangan yang nyaman dengan koleksi buku yang terus diperbarui.' }}
                         </p>
 
                         <div class="space-y-4">
+                            @for($i = 1; $i <= 3; $i++)
+                            @php
+                                $fTitle = $perpustakaanContent['header']['feature_'.$i.'_title'] ?? $perpustakaanContent['feature_'.$i.'_title'] ?? null;
+                                $fDesc = $perpustakaanContent['header']['feature_'.$i.'_desc'] ?? $perpustakaanContent['feature_'.$i.'_desc'] ?? null;
+                                if (!$fTitle) {
+                                    $fTitle = match($i) {
+                                        1 => '1000+ Koleksi Buku',
+                                        2 => 'Ruang Baca Nyaman',
+                                        3 => 'Sistem Peminjaman Mudah',
+                                    };
+                                    $fDesc = $fDesc ?? match($i) {
+                                        1 => 'Beragam buku pelajaran, fiksi, dan non-fiksi',
+                                        2 => 'Suasana tenang untuk membaca dan belajar',
+                                        3 => 'Akses mudah untuk meminjam dan mengembalikan buku',
+                                    };
+                                }
+                            @endphp
+                            @if($fTitle)
                             <div class="feature-item flex items-start gap-4">
                                 <div
-                                    class="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center mt-1">
+                                    class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1" style="background-color: {{ $ppHex }}">
                                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -598,42 +578,12 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $perpustakaanContent['feature_1_title'] ?? '1000+ Koleksi Buku' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $perpustakaanContent['feature_1_desc'] ?? 'Beragam buku pelajaran, fiksi, dan non-fiksi' }}</p>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $fTitle }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ $fDesc ?? '' }}</p>
                                 </div>
                             </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $perpustakaanContent['feature_2_title'] ?? 'Ruang Baca Nyaman' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $perpustakaanContent['feature_2_desc'] ?? 'Suasana tenang untuk membaca dan belajar' }}</p>
-                                </div>
-                            </div>
-
-                            <div class="feature-item flex items-start gap-4">
-                                <div
-                                    class="flex-shrink-0 w-8 h-8 bg-secondary rounded-full flex items-center justify-center mt-1">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $perpustakaanContent['feature_3_title'] ?? 'Sistem Peminjaman Mudah' }}</h4>
-                                    <p class="text-gray-600 text-sm">{{ $perpustakaanContent['feature_3_desc'] ?? 'Akses mudah untuk meminjam dan mengembalikan buku' }}
-                                    </p>
-                                </div>
-                            </div>
-
+                            @endif
+                            @endfor
                         </div>
                     </div>
 

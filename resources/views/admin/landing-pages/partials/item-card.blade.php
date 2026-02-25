@@ -27,6 +27,9 @@
                             @php
                                 $label = match($key) {
                                     'icon_color' => 'Warna Icon',
+                                    'card_color' => 'Warna Card',
+                                    'card_gradient_start' => 'Gradient Awal',
+                                    'card_gradient_end' => 'Gradient Akhir',
                                     'background_image' => 'Gambar Latar',
                                     'image' => 'Gambar',
                                     'icon' => 'Icon / Logo',
@@ -56,7 +59,7 @@
                             </div>
                             <input type="file" class="form-control form-control-sm" name="sections[{{ $section->id }}][items][{{ $itemIndex }}][{{ $key }}]" accept="image/*" {{ $isTemplate ? 'disabled' : '' }}>
                         
-                        @elseif(str_contains($key, 'color') || $key === 'color')
+                        @elseif(str_contains($key, 'color') || str_contains($key, 'gradient') || $key === 'color')
                             <div class="input-group input-group-sm">
                                 @php
                                     $colorVal = $value;

@@ -40,6 +40,9 @@
         'biaya_sd' => 'Biaya SD (Paket A)',
         'biaya_smp' => 'Biaya SMP (Paket B)',
         'biaya_sma' => 'Biaya SMA (Paket C)',
+        // Label khusus Terapi
+        'therapy_types' => 'Jenis Layanan Terapi',
+        'alur_terapi' => 'Alur Layanan Terapi',
     ];
     
     // Deskripsi singkat untuk setiap section
@@ -66,13 +69,19 @@
         'biaya_sd' => 'Rincian biaya untuk jenjang SD.',
         'biaya_smp' => 'Rincian biaya untuk jenjang SMP.',
         'biaya_sma' => 'Rincian biaya untuk jenjang SMA.',
+        // Deskripsi Terapi
+        'therapy_types' => 'Daftar jenis layanan terapi yang tersedia.',
+        'alur_terapi' => 'Langkah-langkah alur layanan terapi.',
     ];
     
     // Section yang tidak boleh ditambah/hapus itemnya
-    $fixedSections = ['programs', 'kurikulum', 'fasilitas', 'services', 'therapy_types', 'stats', 'contact_info', 'program', 'contact_section', 'news_header', 'gallery_section', 'cta_section', 'hero', 'about', 'history', 'intro', 'why_choose_us', 'quick_info', 'investasi'];
+    $fixedSections = ['programs', 'kurikulum', 'fasilitas', 'services', 'stats', 'contact_info', 'program', 'contact_section', 'news_header', 'gallery_section', 'cta_section', 'hero', 'about', 'history', 'intro', 'why_choose_us', 'quick_info', 'investasi', 'social_media'];
     
     // Sort sections
-    $sortedSections = $landingPage->sections->filter(function($section) {
+    $sortedSections = $landingPage->sections->filter(function($section) use ($landingPage) {
+        if ($landingPage->slug === 'home' && in_array($section->section_key, ['gallery_section', 'contact_section'])) {
+            return false; // Hide gallery & contact from home edit
+        }
         return $section->section_key !== 'mata_pelajaran_c';
     })->sortBy(function($section) use ($sectionOrder, $ppdbSectionOrder, $landingPage) {
         // Gunakan urutan khusus jika ini halaman PPDB
@@ -193,6 +202,7 @@
                         // Define default item structure based on section key
                         $defaultItem = match(true) {
                             str_contains($sectionKey, 'stats') => ['value' => '', 'label' => ''],
+                            $sectionKey === 'program_links' || $sectionKey === 'quick_links' => ['label' => '', 'url' => ''],
                             str_contains($sectionKey, 'program') => ['icon' => null, 'color' => 'primary', 'title' => '', 'description' => '', 'link' => '#'],
                             str_contains($sectionKey, 'biaya_') => ['name' => '', 'price' => '', 'type' => 'pokok'],
                             str_contains($sectionKey, 'why_choose_us') => ['icon' => null, 'icon_color' => '#165fac', 'title' => '', 'description' => ''],
@@ -210,6 +220,10 @@
                             str_contains($sectionKey, 'gallery_items') => ['image' => null, 'title' => '', 'date' => '', 'category' => ''],
                             str_contains($sectionKey, 'ruang_') || str_contains($sectionKey, 'area_') || str_contains($sectionKey, 'perpustakaan') || str_contains($sectionKey, 'gallery') => ['image' => null, 'title' => '', 'description' => ''],
                             str_contains($sectionKey, 'locations') => ['color' => '#165fac', 'area' => '', 'name' => '', 'address' => '', 'map_link' => '', 'map_embed' => ''],
+                            str_contains($sectionKey, 'keunggulan') => ['icon' => null, 'color' => '#165fac', 'title' => '', 'description' => ''],
+                            str_contains($sectionKey, 'therapy_types') => ['color' => '#165fac', 'title' => '', 'description' => '', 'features' => ''],
+                            str_contains($sectionKey, 'alur_terapi') => ['title' => '', 'description' => ''],
+                            str_contains($sectionKey, 'social_media') => ['platform' => '', 'link' => ''],
                             default => ['title' => '', 'description' => '']
                         };
                     @endphp
@@ -261,6 +275,11 @@
                                                                 @endif
                                                                 <input type="file" class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" accept="image/*">
                                                             </div>
+                                                        @elseif(str_contains($hKey, 'color'))
+                                                            <div class="input-group">
+                                                                <input type="color" class="form-control form-control-color" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue && str_starts_with($hValue, '#') ? $hValue : '#165fac' }}" title="Pilih warna">
+                                                                <input type="text" class="form-control" value="{{ $hValue }}" readonly style="max-width: 120px; background: #f5f5f9;">
+                                                            </div>
                                                         @else
                                                             <input type="text" class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue }}">
                                                         @endif
@@ -295,6 +314,11 @@
                                                     continue;
                                                 }
 
+                                                // Gallery Categories: Sembunyikan Color, Title, & Description
+                                                if ($landingPage->slug === 'galeri' && str_contains($sectionKey, 'categories') && in_array($key, ['color', 'title', 'description'])) {
+                                                    continue;
+                                                }
+
                                                 // Gallery Items: Sembunyikan Description
                                                 if (str_contains($sectionKey, 'gallery_items') && $key === 'description') {
                                                     continue;
@@ -305,17 +329,41 @@
                                                     continue;
                                                 }
 
+                                                // Social Media: Sembunyikan Title, Description, Icon, & Color
+                                                if (str_contains($sectionKey, 'social_media') && in_array($key, ['title', 'description', 'icon', 'color'])) {
+                                                    continue;
+                                                }
+
+                                                // Program Links & Quick Links
+                                                if (($sectionKey === 'program_links' || $sectionKey === 'quick_links') && in_array($key, ['title', 'description', 'icon', 'color', 'link'])) {
+                                                    continue;
+                                                }
+
                                                 // Locations: Sembunyikan Title & Description
                                                 if (str_contains($sectionKey, 'locations') && in_array($key, ['title', 'description'])) {
                                                     continue;
                                                 }
 
+                                                // Mata Pelajaran: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'mata_pelajaran') && $key === 'description') {
+                                                    continue;
+                                                }
+
+                                                // Prospek: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'prospek') && $key === 'description') {
+                                                    continue;
+                                                }
+
                                                 // Group visual related keys
-                                                if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'background_image'])) {
+                                                if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'card_color', 'card_gradient_start', 'card_gradient_end', 'background_image'])) {
                                                     // Explicitly exclude image/icon for jadwal section
                                                     if(str_contains($sectionKey, 'jadwal')) { continue; }
                                                     // Explicitly exclude ONLY icon (upload) for stats section
                                                     if(str_contains($sectionKey, 'stats') && $key === 'icon') { continue; }
+                                                    // Explicitly exclude color for coordinators section
+                                                    if(str_contains($sectionKey, 'coordinators') && $key === 'color') { continue; }
+                                                    // Explicitly exclude icon_color for keunggulan section
+                                                    if(str_contains($sectionKey, 'keunggulan') && $key === 'icon_color') { continue; }
                                                     $visualFields[$key] = $value;
                                                 // Exclude internal/legacy fields related to color text inputs
                                                 } elseif (str_contains($key, 'color') && (str_ends_with($key, '_text') || str_contains($key, 'text'))) {
@@ -348,6 +396,11 @@
                                                     continue;
                                                 }
 
+                                                // Gallery Categories: Sembunyikan Color, Title, & Description
+                                                if ($landingPage->slug === 'galeri' && str_contains($sectionKey, 'categories') && in_array($key, ['color', 'title', 'description'])) {
+                                                    continue;
+                                                }
+
                                                 // Gallery Items: Sembunyikan Description
                                                 if (str_contains($sectionKey, 'gallery_items') && $key === 'description') {
                                                     continue;
@@ -358,17 +411,41 @@
                                                     continue;
                                                 }
 
+                                                // Social Media: Sembunyikan Title, Description, Icon, & Color
+                                                if (str_contains($sectionKey, 'social_media') && in_array($key, ['title', 'description', 'icon', 'color'])) {
+                                                    continue;
+                                                }
+
+                                                // Program Links & Quick Links
+                                                if (($sectionKey === 'program_links' || $sectionKey === 'quick_links') && in_array($key, ['title', 'description', 'icon', 'color', 'link'])) {
+                                                    continue;
+                                                }
+
                                                 // Locations: Sembunyikan Title & Description
                                                 if (str_contains($sectionKey, 'locations') && in_array($key, ['title', 'description'])) {
                                                     continue;
                                                 }
 
+                                                // Mata Pelajaran: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'mata_pelajaran') && $key === 'description') {
+                                                    continue;
+                                                }
+
+                                                // Prospek: Sembunyikan Description
+                                                if (str_contains($sectionKey, 'prospek') && $key === 'description') {
+                                                    continue;
+                                                }
+
                                                 // Group visual related keys
-                                                if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'background_image'])) {
+                                                if(in_array($key, ['image', 'icon', 'color', 'icon_color', 'card_color', 'card_gradient_start', 'card_gradient_end', 'background_image'])) {
                                                     // Explicitly exclude image/icon for jadwal section
                                                     if(str_contains($sectionKey, 'jadwal')) { continue; }
                                                     // Explicitly exclude ONLY icon (upload) for stats section
                                                     if(str_contains($sectionKey, 'stats') && $key === 'icon') { continue; }
+                                                    // Explicitly exclude color for coordinators section
+                                                    if(str_contains($sectionKey, 'coordinators') && $key === 'color') { continue; }
+                                                    // Explicitly exclude icon_color for keunggulan section
+                                                    if(str_contains($sectionKey, 'keunggulan') && $key === 'icon_color') { continue; }
                                                     $templateVisualFields[$key] = $value;
                                                 // Exclude internal/legacy fields related to color text inputs
                                                 } elseif (str_contains($key, 'color') && (str_ends_with($key, '_text') || str_contains($key, 'text'))) {
