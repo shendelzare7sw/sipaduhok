@@ -614,18 +614,11 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                         @endforeach
                     </select>
                     
-                    <select name="cabang_id" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangs as $c)
-                            <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama_cabang }}</option>
-                        @endforeach
-                    </select>
-                    
                     <button type="submit" class="btn btn-outline">
                         <i class="fas fa-filter"></i> Filter
                     </button>
-                    
-                    @if(request()->hasAny(['search', 'jenjang', 'cabang_id']) || (request('tahun_ajaran_id') && request('tahun_ajaran_id') != $currentTahunAjaran?->id))
+
+                    @if(request()->hasAny(['search', 'jenjang']) || (request('tahun_ajaran_id') && request('tahun_ajaran_id') != $currentTahunAjaran?->id))
                         <a href="{{ route('waka.kelas.index') }}" class="btn btn-outline">
                             <i class="fas fa-times"></i> Reset
                         </a>

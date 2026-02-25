@@ -101,7 +101,7 @@
                         @php
                             $printRouteName = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.report.print' : 'waka.promotion.report.print';
                         @endphp
-                        <a href="{{ route($printRouteName, array_merge(request()->only(['tahun_ajaran_id', 'status', 'cabang_id', 'kelas_id']))) }}"
+                        <a href="{{ route($printRouteName, array_merge(request()->only(['tahun_ajaran_id', 'status', 'cabang_id', 'jenjang', 'kelas_id']))) }}"
                            target="_blank"
                            class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-print me-1"></i> Cetak Laporan
@@ -125,14 +125,15 @@
                                 <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                                         data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                                     <i class="fas fa-filter me-1"></i> Filter
-                                    @if($cabangId || $kelasId || $filterStatus)
-                                        <span class="badge bg-primary ms-1">{{ collect([$cabangId, $kelasId, $filterStatus])->filter()->count() }}</span>
+                                    @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || $filterStatus)
+                                        <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId, $filterStatus])->filter()->count() }}</span>
                                     @endif
                                 </button>
                                 <div class="dropdown-menu p-3 shadow" style="min-width: 280px;">
                                     <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
 
-                                    {{-- Filter Cabang --}}
+                                    {{-- Filter Cabang (hanya untuk admin) --}}
+                                    @if(auth()->user()->role !== 'wakil_kepala_sekolah')
                                     <div class="mb-2">
                                         <label class="form-label small fw-bold mb-1">Cabang</label>
                                         <select name="cabang_id" class="form-select form-select-sm">
@@ -141,6 +142,18 @@
                                                 <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
                                                     {{ $cabang->nama_cabang }}
                                                 </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @endif
+
+                                    {{-- Filter Jenjang --}}
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold mb-1">Jenjang</label>
+                                        <select name="jenjang" class="form-select form-select-sm">
+                                            <option value="">Semua Jenjang</option>
+                                            @foreach(['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'] as $j)
+                                                <option value="{{ $j }}" {{ $jenjangFilter == $j ? 'selected' : '' }}>{{ $j }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -175,7 +188,7 @@
                                         <button type="submit" class="btn btn-primary btn-sm">
                                             <i class="fas fa-check me-1"></i> Terapkan Filter
                                         </button>
-                                        @if($cabangId || $kelasId || $filterStatus)
+                                        @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || $filterStatus)
                                             <a href="{{ route(Route::currentRouteName(), ['tab' => 'history', 'tahun_ajaran_id' => $tahun->id]) }}"
                                                class="btn btn-outline-secondary btn-sm">
                                                 <i class="fas fa-times me-1"></i> Reset Filter
@@ -326,14 +339,15 @@
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                                     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                                 <i class="fas fa-filter me-1"></i> Filter
-                                @if($cabangId || $kelasId)
-                                    <span class="badge bg-primary ms-1">{{ collect([$cabangId, $kelasId])->filter()->count() }}</span>
+                                @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId)
+                                    <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId])->filter()->count() }}</span>
                                 @endif
                             </button>
                             <div class="dropdown-menu p-3 shadow" style="min-width: 280px;">
                                 <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
 
-                                {{-- Filter Cabang --}}
+                                {{-- Filter Cabang (hanya untuk admin) --}}
+                                @if(auth()->user()->role !== 'wakil_kepala_sekolah')
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold mb-1">Cabang</label>
                                     <select name="cabang_id" class="form-select form-select-sm">
@@ -342,6 +356,18 @@
                                             <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
                                                 {{ $cabang->nama_cabang }}
                                             </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @endif
+
+                                {{-- Filter Jenjang --}}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-bold mb-1">Jenjang</label>
+                                    <select name="jenjang" class="form-select form-select-sm">
+                                        <option value="">Semua Jenjang</option>
+                                        @foreach(['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'] as $j)
+                                            <option value="{{ $j }}" {{ $jenjangFilter == $j ? 'selected' : '' }}>{{ $j }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -363,7 +389,7 @@
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="fas fa-check me-1"></i> Terapkan Filter
                                     </button>
-                                    @if($cabangId || $kelasId)
+                                    @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId)
                                         <a href="{{ route(Route::currentRouteName(), ['tab' => 'simulation', 'sim_mode' => $simMode ?? 'current', 'tahun_ajaran_id' => $tahun->id]) }}"
                                            class="btn btn-outline-secondary btn-sm">
                                             <i class="fas fa-times me-1"></i> Reset Filter

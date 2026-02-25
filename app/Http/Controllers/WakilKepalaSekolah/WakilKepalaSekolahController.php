@@ -29,22 +29,25 @@ class WakilKepalaSekolahController extends Controller
     public function dashboard()
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $userCabangId = auth()->user()->cabang_id;
 
         $stats = [
-            'totalSiswa' => Siswa::where('status', 'aktif')->count(),
-            'totalGuru' => TenagaPendidik::whereHas('user', fn($q) => $q->where('is_active', true))->count(),
-            'totalKelas' => Kelas::when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))->count(),
+            'totalSiswa' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->count(),
+            'totalGuru' => TenagaPendidik::whereHas('user', fn($q) => $q->where('is_active', true)->where('cabang_id', $userCabangId))->count(),
+            'totalKelas' => Kelas::where('cabang_id', $userCabangId)
+                ->when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))->count(),
             'totalMapel' => MataPelajaran::count(),
-            'kelasWithWali' => Kelas::when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
-                ->whereNotNull('wali_kelas_id')
-                ->count(),
-            'kelasWithoutWali' => Kelas::when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
-                ->whereNull('wali_kelas_id')
-                ->count(),
+            'kelasWithWali' => Kelas::where('cabang_id', $userCabangId)
+                ->when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+                ->whereNotNull('wali_kelas_id')->count(),
+            'kelasWithoutWali' => Kelas::where('cabang_id', $userCabangId)
+                ->when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+                ->whereNull('wali_kelas_id')->count(),
         ];
 
-        // Recent classes without wali kelas
+        // Recent classes without wali kelas (user's cabang only)
         $kelasWithoutWali = Kelas::with('cabang')
+            ->where('cabang_id', $userCabangId)
             ->when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->whereNull('wali_kelas_id')
             ->orderBy('jenjang')
@@ -52,9 +55,10 @@ class WakilKepalaSekolahController extends Controller
             ->take(5)
             ->get();
 
-        // Recent students
+        // Recent students (user's cabang only)
         $recentSiswa = Siswa::with(['kelas', 'cabang'])
             ->where('status', 'aktif')
+            ->where('cabang_id', $userCabangId)
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
@@ -306,19 +310,16 @@ class WakilKepalaSekolahController extends Controller
 
     public function monitoringGuruPengajar(Request $request)
     {
+        $userCabangId = auth()->user()->cabang_id;
+
         $query = TenagaPendidik::with(['guruKelas.kelas', 'guruKelas.mataPelajaran'])
-            ->whereHas('guruKelas');
+            ->whereHas('guruKelas.kelas', function ($q) use ($userCabangId) {
+                $q->where('cabang_id', $userCabangId);
+            });
 
         // Search
         if ($request->filled('search')) {
             $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
-        }
-
-        // Filter Cabang (via Guru Kelas -> Kelas)
-        if ($request->filled('cabang_id')) {
-            $query->whereHas('guruKelas.kelas', function ($q) use ($request) {
-                $q->where('cabang_id', $request->cabang_id);
-            });
         }
 
         $guruPengajar = $query->paginate(15);
@@ -338,26 +339,21 @@ class WakilKepalaSekolahController extends Controller
             return $tp;
         });
 
-        $cabangs = Cabang::all();
-
-        return view('waka.monitoring.guru-pengajar', compact('guruPengajar', 'cabangs'));
+        return view('waka.monitoring.guru-pengajar', compact('guruPengajar'));
     }
 
     public function monitoringWaliKelas(Request $request)
     {
+        $userCabangId = auth()->user()->cabang_id;
+
         $query = TenagaPendidik::with(['kelasWali.siswa', 'kelasWali.tahunAjaran'])
-            ->whereHas('kelasWali');
+            ->whereHas('kelasWali', function ($q) use ($userCabangId) {
+                $q->where('cabang_id', $userCabangId);
+            });
 
         // Search
         if ($request->filled('search')) {
             $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
-        }
-
-        // Filter Cabang (via Kelas Wali)
-        if ($request->filled('cabang_id')) {
-            $query->whereHas('kelasWali', function ($q) use ($request) {
-                $q->where('cabang_id', $request->cabang_id);
-            });
         }
 
         $waliKelas = $query->paginate(15);
@@ -379,24 +375,20 @@ class WakilKepalaSekolahController extends Controller
             return $tp;
         });
 
-        $cabangs = Cabang::all();
-
-        return view('waka.monitoring.wali-kelas', compact('waliKelas', 'cabangs'));
+        return view('waka.monitoring.wali-kelas', compact('waliKelas'));
     }
 
     public function monitoringSiswa(Request $request)
     {
+        $userCabangId = auth()->user()->cabang_id;
+
         $query = Siswa::with(['kelas', 'tagihan', 'pembayaran', 'tugasSiswa'])
-            ->where('status', 'aktif');
+            ->where('status', 'aktif')
+            ->where('cabang_id', $userCabangId);
 
         // Search
         if ($request->filled('search')) {
             $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
-        }
-
-        // Filter Cabang
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
         }
 
         // Filter Kelas
@@ -427,15 +419,11 @@ class WakilKepalaSekolahController extends Controller
             return $s;
         });
 
-        // Data for Filters
-        $cabangs = Cabang::all();
-        $kelasList = Kelas::query();
-        if ($request->filled('cabang_id')) {
-            $kelasList->where('cabang_id', $request->cabang_id);
-        }
-        $kelasList = $kelasList->orderBy('jenjang')->orderBy('nama_kelas')->get();
+        // Data for Filters (kelas only from user's cabang)
+        $kelasList = Kelas::where('cabang_id', $userCabangId)
+            ->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
-        return view('waka.monitoring.siswa', compact('siswa', 'cabangs', 'kelasList'));
+        return view('waka.monitoring.siswa', compact('siswa', 'kelasList'));
     }
 
     // ============================================
@@ -454,6 +442,8 @@ class WakilKepalaSekolahController extends Controller
 
     public function catatanCreate()
     {
+        $userCabangId = auth()->user()->cabang_id;
+
         $roles = [
             'wali_kelas' => 'Wali Kelas',
             'guru_pengajar' => 'Guru Pengajar',
@@ -461,10 +451,12 @@ class WakilKepalaSekolahController extends Controller
         ];
 
         $tenagaPendidik = TenagaPendidik::with('user')
-            ->whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar']))
+            ->whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
+                ->where('cabang_id', $userCabangId))
             ->get();
 
-        $siswaList = Siswa::with('user')->where('status', 'aktif')->get();
+        $siswaList = Siswa::with('user')->where('status', 'aktif')
+            ->where('cabang_id', $userCabangId)->get();
 
         return view('waka.catatan.create', compact('roles', 'tenagaPendidik', 'siswaList'));
     }

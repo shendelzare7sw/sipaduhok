@@ -34,8 +34,14 @@ class JadwalPelajaranController extends Controller
             $tahunAjaranId = $tahunAjaranAktif->id;
         }
 
-        // Get filter parameters
-        $cabangId = $request->cabang_id;
+        // Mandatory filter by user's assigned cabang
+        $userCabangId = auth()->user()->cabang_id;
+        if (!$userCabangId) {
+            return redirect()->back()->with('error', 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
+        }
+        $cabangId = $userCabangId; // Always use user's cabang, ignore request value
+
+        // Get filter parameters (cabang is no longer user-selectable)
         $jenjang = $request->jenjang;
         $kelasId = $request->kelas_id;
         $guruId = $request->guru_id;
@@ -48,10 +54,8 @@ class JadwalPelajaranController extends Controller
             'tahunAjaran'
         ])->byTahunAjaran($tahunAjaranId);
 
-        // Apply filters
-        if ($cabangId) {
-            $query->whereHas('kelas', fn($q) => $q->where('cabang_id', $cabangId));
-        }
+        // Mandatory cabang filter
+        $query->whereHas('kelas', fn($q) => $q->where('cabang_id', $cabangId));
 
         if ($jenjang) {
             $query->whereHas('kelas', fn($q) => $q->where('jenjang', $jenjang));
@@ -78,19 +82,17 @@ class JadwalPelajaranController extends Controller
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
-        $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get();
-
         $kelasList = Kelas::when($tahunAjaranId, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
-            ->when($cabangId, fn($q) => $q->where('cabang_id', $cabangId))
+            ->where('cabang_id', $cabangId)
             ->when($jenjang, fn($q) => $q->where('jenjang', $jenjang))
             ->with('cabang')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
-            ->orderBy('nama_kelas')
             ->get();
 
-        // Get ALL kelas for the dropdown in Modal (ignoring filters)
+        // Get ALL kelas for the dropdown in Modal (filtered by user's cabang)
         $allKelasList = Kelas::where('tahun_ajaran_id', $tahunAjaranId)
+            ->where('cabang_id', $cabangId)
             ->with('cabang')
             ->get()
             ->sortBy(function ($kelas) {
@@ -115,25 +117,27 @@ class JadwalPelajaranController extends Controller
             $q->where('is_active', true)->where('role', 'guru_pengajar');
         })->orderBy('nama_lengkap')->get();
 
-        // Statistics
+        // Statistics (filtered by user's cabang)
         $stats = [
-            'totalJadwal' => JadwalPelajaran::byTahunAjaran($tahunAjaranId)->aktif()->count(),
-            'jadwalKosong' => JadwalPelajaran::byTahunAjaran($tahunAjaranId)->where('status', 'kosong')->count(),
+            'totalJadwal' => JadwalPelajaran::byTahunAjaran($tahunAjaranId)->aktif()
+                ->whereHas('kelas', fn($q) => $q->where('cabang_id', $cabangId))->count(),
+            'jadwalKosong' => JadwalPelajaran::byTahunAjaran($tahunAjaranId)->where('status', 'kosong')
+                ->whereHas('kelas', fn($q) => $q->where('cabang_id', $cabangId))->count(),
             'totalGuru' => TenagaPendidik::whereHas('user', fn($q) => $q->where('is_active', true))
-                ->whereHas('jadwalMengajar', fn($q) => $q->byTahunAjaran($tahunAjaranId))
+                ->whereHas('jadwalMengajar', fn($q) => $q->byTahunAjaran($tahunAjaranId)
+                    ->whereHas('kelas', fn($kq) => $kq->where('cabang_id', $cabangId)))
                 ->count(),
-            'totalKelas' => Kelas::where('tahun_ajaran_id', $tahunAjaranId)->count(),
+            'totalKelas' => Kelas::where('tahun_ajaran_id', $tahunAjaranId)
+                ->where('cabang_id', $cabangId)->count(),
         ];
 
         return view('waka.jadwal-pelajaran.index', compact(
             'jadwalList',
             'tahunAjarans',
             'currentTahunAjaran',
-            'cabangList',
             'kelasList',
             'guruList',
             'stats',
-            'cabangId',
             'jenjang',
             'guruId',
             'allKelasList'
@@ -156,6 +160,7 @@ class JadwalPelajaranController extends Controller
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
 
         $kelasList = Kelas::where('tahun_ajaran_id', $tahunAjaranId)
+            ->where('cabang_id', auth()->user()->cabang_id)
             ->with('cabang')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
@@ -212,6 +217,15 @@ class JadwalPelajaranController extends Controller
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
 
+        // Security: pastikan semua kelas yang dipilih milik cabang waka
+        $userCabangId = auth()->user()->cabang_id;
+        $invalidKelas = Kelas::whereIn('id', $validated['kelas_ids'])
+            ->where('cabang_id', '!=', $userCabangId)
+            ->exists();
+        if ($invalidKelas) {
+            return back()->withInput()->with('error', 'Kelas yang dipilih tidak sesuai dengan cabang Anda.');
+        }
+
         // Validasi Jenjang Compatibility
         $genreCheck = $this->validateJenjangCompatibility($validated['kelas_ids'], $validated['mata_pelajaran_id']);
         if (!$genreCheck['valid']) {
@@ -267,6 +281,11 @@ class JadwalPelajaranController extends Controller
 
         $kelas = Kelas::with('cabang', 'tahunAjaran')->findOrFail($kelasId);
 
+        // Authorization: waka hanya boleh lihat jadwal kelas dari cabangnya
+        if ($kelas->cabang_id != auth()->user()->cabang_id) {
+            abort(403, 'Anda tidak berhak mengakses jadwal kelas ini.');
+        }
+
         $jadwalList = JadwalPelajaran::with(['mataPelajaran', 'guru'])
             ->byTahunAjaran($tahunAjaranId)
             ->byKelas($kelasId)
@@ -302,6 +321,7 @@ class JadwalPelajaranController extends Controller
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
         $kelasList = Kelas::where('tahun_ajaran_id', $jadwalPelajaran->tahun_ajaran_id)
+            ->where('cabang_id', auth()->user()->cabang_id)
             ->with('cabang')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
@@ -358,6 +378,15 @@ class JadwalPelajaranController extends Controller
             'siswa_ids.*' => 'exists:siswa,id',
         ]);
 
+        // Security: pastikan semua kelas yang dipilih milik cabang waka
+        $userCabangId = auth()->user()->cabang_id;
+        $invalidKelas = Kelas::whereIn('id', $validated['kelas_ids'])
+            ->where('cabang_id', '!=', $userCabangId)
+            ->exists();
+        if ($invalidKelas) {
+            return back()->withInput()->with('error', 'Kelas yang dipilih tidak sesuai dengan cabang Anda.');
+        }
+
         // Validasi Jenjang Compatibility
         $genreCheck = $this->validateJenjangCompatibility($validated['kelas_ids'], $validated['mata_pelajaran_id']);
         if (!$genreCheck['valid']) {
@@ -408,6 +437,12 @@ class JadwalPelajaranController extends Controller
         $guruId = $jadwalPelajaran->guru_id;
         $kelasIds = $jadwalPelajaran->kelas->pluck('id')->toArray();
         $mapelId = $jadwalPelajaran->mata_pelajaran_id;
+
+        // Authorization: waka hanya boleh hapus jadwal milik cabangnya
+        $belongsToUserCabang = $jadwalPelajaran->kelas->contains('cabang_id', auth()->user()->cabang_id);
+        if (!$belongsToUserCabang) {
+            abort(403, 'Anda tidak berhak menghapus jadwal ini.');
+        }
 
         $jadwalPelajaran->kelas()->detach();
         $jadwalPelajaran->delete();
@@ -914,7 +949,7 @@ class JadwalPelajaranController extends Controller
     {
         // Get filter parameters
         $tahunAjaranId = $request->tahun_ajaran_id;
-        $cabangId = $request->cabang_id;
+        $cabangId = auth()->user()->cabang_id; // Always use user's assigned cabang
         $jenjang = $request->jenjang;
         $kelasId = $request->kelas_id;
         $guruId = $request->guru_id;
@@ -986,7 +1021,7 @@ class JadwalPelajaranController extends Controller
         // Copying simplified logic
         
         $tahunAjaranId = $request->tahun_ajaran_id;
-        $cabangId = $request->cabang_id;
+        $cabangId = auth()->user()->cabang_id; // Always use user's assigned cabang
         $jenjang = $request->jenjang;
         $kelasId = $request->kelas_id;
         $guruId = $request->guru_id;

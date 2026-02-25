@@ -15,7 +15,15 @@ class ManajemenSiswaController extends Controller
 {
     public function index(Request $request)
     {
+        $userCabangId = auth()->user()->cabang_id;
+        if (!$userCabangId) {
+            return redirect()->back()->with('error', 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
+        }
+
         $query = Siswa::with(['kelas.tahunAjaran', 'cabang', 'user']);
+
+        // Mandatory filter by user's assigned cabang
+        $query->where('cabang_id', $userCabangId);
 
         // Search
         if ($request->filled('search')) {
@@ -25,11 +33,6 @@ class ManajemenSiswaController extends Controller
                     ->orWhere('nis', 'like', "%{$search}%")
                     ->orWhere('nisn', 'like', "%{$search}%");
             });
-        }
-
-        // Filter by cabang
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
         }
 
         // Filter by jenjang
@@ -57,24 +60,24 @@ class ManajemenSiswaController extends Controller
 
         $siswaList = $query->orderBy('nama_lengkap')->paginate(20);
 
-        // Data for filters
-        $cabangs = Cabang::where('is_active', true)->get();
+        // Data for filters (kelas only from user's cabang)
         $kelasList = Kelas::with('tahunAjaran')
+            ->where('cabang_id', $userCabangId)
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
-        // Statistics
+        // Statistics (filtered by user's cabang)
         $stats = [
-            'totalSiswa' => Siswa::where('status', 'aktif')->count(),
-            'siswaWithKelas' => Siswa::where('status', 'aktif')->whereNotNull('kelas_id')->count(),
-            'siswaNoKelas' => Siswa::where('status', 'aktif')->whereNull('kelas_id')->count(),
-            'siswaLaki' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'L')->count(),
-            'siswaPerempuan' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'P')->count(),
+            'totalSiswa' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->count(),
+            'siswaWithKelas' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->whereNotNull('kelas_id')->count(),
+            'siswaNoKelas' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->whereNull('kelas_id')->count(),
+            'siswaLaki' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->where('jenis_kelamin', 'L')->count(),
+            'siswaPerempuan' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->where('jenis_kelamin', 'P')->count(),
         ];
 
-        return view('waka.manajemen-siswa.index', compact('siswaList', 'cabangs', 'kelasList', 'jenjangs', 'stats'));
+        return view('waka.manajemen-siswa.index', compact('siswaList', 'kelasList', 'jenjangs', 'stats'));
     }
 
     public function show(Siswa $siswa)
@@ -160,9 +163,8 @@ class ManajemenSiswaController extends Controller
             });
         }
 
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
-        }
+        // Mandatory filter by user's assigned cabang
+        $query->where('cabang_id', auth()->user()->cabang_id);
 
         if ($request->filled('jenjang')) {
             $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
@@ -186,15 +188,13 @@ class ManajemenSiswaController extends Controller
         $sortBy = $request->input('sort_by', 'kelas');
         if ($sortBy == 'kelas') {
             $siswaList = $query->orderBy('kelas_id')->orderBy('nama_lengkap')->get();
-        } elseif ($sortBy == 'cabang') {
-            $siswaList = $query->orderBy('cabang_id')->orderBy('nama_lengkap')->get();
         } else {
             $siswaList = $query->orderBy('nama_lengkap')->get();
         }
 
-        // Get specific kelas or cabang if filtered
+        // Get specific kelas if filtered
         $kelas = $request->filled('kelas_id') ? Kelas::with('waliKelas')->find($request->kelas_id) : null;
-        $cabang = $request->filled('cabang_id') ? Cabang::find($request->cabang_id) : null;
+        $cabang = auth()->user()->cabang;
 
         return view('waka.manajemen-siswa.print', compact('siswaList', 'kelas', 'cabang', 'sortBy'));
     }

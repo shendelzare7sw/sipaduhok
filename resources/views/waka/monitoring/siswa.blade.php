@@ -167,14 +167,6 @@
                 <!-- Search -->
                 <input type="text" name="search" class="form-control" placeholder="Cari Nama Siswa..." value="{{ request('search') }}" style="width: 200px;">
 
-                <!-- Filter Cabang -->
-                <select name="cabang_id" class="form-control" onchange="this.form.submit()">
-                    <option value="">Semua Cabang</option>
-                    @foreach($cabangs as $cabang)
-                        <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                    @endforeach
-                </select>
-
                 <!-- Filter Kelas -->
                 <select name="kelas_id" class="form-control" onchange="this.form.submit()">
                     <option value="">Semua Kelas</option>
@@ -185,7 +177,7 @@
 
                 <noscript><button type="submit" class="btn btn-primary">Filter</button></noscript>
                 
-                @if(request()->anyFilled(['search', 'cabang_id', 'kelas_id']))
+                @if(request()->anyFilled(['search', 'kelas_id']))
                     <a href="{{ route('waka.monitoring.siswa') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Reset</a>
                 @endif
             </form>

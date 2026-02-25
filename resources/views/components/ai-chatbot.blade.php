@@ -112,9 +112,8 @@
 
             {{-- Footer Actions --}}
             <div class="footer-actions">
-                <small class="text-muted" id="conversationInfo">
-                    <i class="fas fa-comment-dots me-1"></i> <span id="currentConversationTitle">New Chat</span>
-                </small>
+                {{-- conversationInfo removed: managed via conversation sidebar toggle --}}
+                <span id="currentConversationTitle" style="display:none"></span>
                 <span class="char-count">
                     <span id="charCount">0</span>/2000
                 </span>
@@ -1136,7 +1135,8 @@ function createNewConversation() {
     renderConversationsList();
     clearChatMessages();
     updateConversationTitle('New Chat');
-    if (window.innerWidth <= 768) {
+    // Only CLOSE the sidebar (never auto-open it) — sidebar may have been opened by "+ New Chat" button
+    if (window.innerWidth <= 768 && chatbotState.isSidebarOpen) {
         toggleConversationsSidebar();
     }
 }
@@ -1172,7 +1172,8 @@ function loadConversation(conversationId) {
     updateConversationTitle(conv.title);
     renderConversationsList();
     scrollToBottom();
-    if (window.innerWidth <= 768) {
+    // Only CLOSE the sidebar if it's open (user selected a conversation from sidebar)
+    if (window.innerWidth <= 768 && chatbotState.isSidebarOpen) {
         toggleConversationsSidebar();
     }
 }
@@ -1362,8 +1363,16 @@ async function openChatWindow() {
     if (!chatbotState.quickActionsLoaded) {
         loadQuickActions();
     }
-    if (chatbotState.conversations.length === 0 && !chatbotState.currentConversationId) {
-        createNewConversation();
+    if (!chatbotState.currentConversationId) {
+        if (chatbotState.conversations.length === 0) {
+            // No conversations at all — create a fresh one
+            createNewConversation();
+        } else {
+            // Resume the most recent conversation silently (no sidebar toggle)
+            const mostRecent = chatbotState.conversations[0];
+            chatbotState.currentConversationId = mostRecent.id;
+            chatbotState.conversationHistory = mostRecent.messages || [];
+        }
     }
     localStorage.setItem('aiChatbotOpen', 'true');
     scrollToBottom();
@@ -1735,7 +1744,7 @@ function initDraggableFab() {
     // ── Click: fallback for desktop mouse clicks ──
     fab.addEventListener('click', function() {
         if (hasMoved) { hasMoved = false; return; }
-        if (!isMobileView()) openChatWindow();
+        openChatWindow(); // Works for all modes: desktop large, desktop resized, real mobile (touchend suppresses synthetic click via e.preventDefault)
     });
 
     // ── Mouse drag (desktop only) ──

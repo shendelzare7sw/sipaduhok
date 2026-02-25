@@ -505,12 +505,6 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                         @endforeach
                     </select>
                     
-                    <select name="cabang_id" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangs as $c)
-                            <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama_cabang }}</option>
-                        @endforeach
-                    </select>
 
                     <select name="status" class="filter-select" onchange="this.form.submit()">
                         <option value="">Semua Status</option>
@@ -522,7 +516,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                         <i class="fas fa-filter"></i> Filter
                     </button>
                     
-                    @if(request()->hasAny(['search', 'jenjang', 'cabang_id', 'status']))
+                    @if(request()->hasAny(['search', 'jenjang', 'status']))
                         <a href="{{ route('waka.wali-kelas.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline">
                             <i class="fas fa-times"></i> Reset
                         </a>
@@ -651,18 +645,6 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600; color: #374151;">
-                            Filter Cabang
-                        </label>
-                        <select id="filterCabang" class="form-select" style="border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 16px;">
-                            <option value="">Semua Cabang</option>
-                            @foreach($cabangs as $cabang)
-                                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
                         <label class="form-label" style="font-weight: 600; color: #374151;">Pilih Wali Kelas</label>
                         <div id="waliList" style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px;">
                             @foreach($waliKelasOptions as $wk)
@@ -771,7 +753,7 @@ function openAssignModal(kelasId, kelasName, currentWaliId) {
 
     // Reset search
     document.getElementById('searchWali').value = '';
-    document.getElementById('filterCabang').value = '';
+    // (filter cabang removed)
 
     // Set current wali if exists
     if (currentWaliId) {
@@ -790,21 +772,16 @@ function openAssignModal(kelasId, kelasName, currentWaliId) {
 
 // Search & Filter functionality
 document.getElementById('searchWali').addEventListener('input', filterWaliList);
-document.getElementById('filterCabang').addEventListener('change', filterWaliList);
 
 function filterWaliList() {
     const searchTerm = document.getElementById('searchWali').value.toLowerCase();
-    const cabangFilter = document.getElementById('filterCabang').value;
     const waliOptions = document.querySelectorAll('.wali-option');
 
     waliOptions.forEach(option => {
         const name = option.getAttribute('data-name');
-        const cabang = option.getAttribute('data-cabang');
-
         const matchSearch = searchTerm === '' || name.includes(searchTerm);
-        const matchCabang = cabangFilter === '' || cabang === cabangFilter;
 
-        if (matchSearch && matchCabang) {
+        if (matchSearch) {
             option.style.display = 'flex';
         } else {
             option.style.display = 'none';

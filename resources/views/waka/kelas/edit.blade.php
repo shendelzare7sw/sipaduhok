@@ -357,21 +357,15 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
                         </div>
 
                         <div class="form-group">
-                            <label for="cabang_id">Cabang <span class="required">*</span></label>
-                            <select class="form-control @error('cabang_id') is-invalid @enderror" 
-                                    id="cabang_id" name="cabang_id" required>
-                                <option value="">Pilih Cabang</option>
-                                @foreach($cabangs as $c)
-                                    <option value="{{ $c->id }}" 
-                                        {{ old('cabang_id', $kelas->cabang_id) == $c->id ? 'selected' : '' }}
-                                        data-kode="{{ $c->kode_cabang }}">
-                                        {{ $c->nama_cabang }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('cabang_id')
-                                <div class="invalid-feedback"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>
-                            @enderror
+                            <label for="cabang_id">Cabang</label>
+                            <input type="hidden" id="cabang_id" name="cabang_id"
+                                   value="{{ $kelas->cabang_id }}"
+                                   data-kode="{{ $kelas->cabang->kode_cabang ?? '' }}">
+                            <div class="form-control" style="background:#f9fafb;color:#6b7280;cursor:not-allowed;">
+                                <i class="fas fa-building" style="margin-right:8px;color:#9ca3af;"></i>
+                                {{ $kelas->cabang->nama_cabang ?? '-' }}
+                                <span style="font-size:12px;margin-left:8px;color:#9ca3af;">(Tidak dapat diubah)</span>
+                            </div>
                         </div>
                     </div>
 
@@ -486,26 +480,25 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const cabangSelect = document.getElementById('cabang_id');
+    const cabangInput = document.getElementById('cabang_id');
     const tahunAjaranSelect = document.getElementById('tahun_ajaran_id');
     const jenjangSelect = document.getElementById('jenjang');
     const namaKelasInput = document.getElementById('nama_kelas');
     const previewKode = document.getElementById('previewKode');
 
     function updatePreview() {
-        const cabangOption = cabangSelect.options[cabangSelect.selectedIndex];
+        const cabangKode = cabangInput ? cabangInput.dataset.kode : '';
         const tahunOption = tahunAjaranSelect.options[tahunAjaranSelect.selectedIndex];
         const jenjang = jenjangSelect.value;
         const namaKelas = namaKelasInput.value;
 
-        if (cabangOption && cabangOption.dataset.kode && jenjang && namaKelas && tahunOption && tahunOption.dataset.tahun) {
-            const kode = cabangOption.dataset.kode + '-' + jenjang + '-' + 
+        if (cabangKode && jenjang && namaKelas && tahunOption && tahunOption.dataset.tahun) {
+            const kode = cabangKode + '-' + jenjang + '-' +
                         namaKelas.toUpperCase().replace(/\s+/g, '') + '-' + tahunOption.dataset.tahun;
             previewKode.textContent = kode;
         }
     }
 
-    cabangSelect.addEventListener('change', updatePreview);
     tahunAjaranSelect.addEventListener('change', updatePreview);
     jenjangSelect.addEventListener('change', updatePreview);
     namaKelasInput.addEventListener('input', updatePreview);

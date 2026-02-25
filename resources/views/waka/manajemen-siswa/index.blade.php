@@ -542,14 +542,6 @@
                                 value="{{ request('search') }}">
                         </div>
 
-                        <select name="cabang_id" class="filter-select" onchange="this.form.submit()">
-                            <option value="">Semua Cabang</option>
-                            @foreach($cabangs as $c)
-                                <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>
-                                    {{ $c->nama_cabang }}</option>
-                            @endforeach
-                        </select>
-
                         <select name="jenjang" class="filter-select" onchange="this.form.submit()">
                             <option value="">Semua Jenjang</option>
                             @foreach($jenjangs as $j)
@@ -588,7 +580,7 @@
                             <i class="fas fa-filter"></i> Filter
                         </button>
 
-                        @if(request()->hasAny(['search', 'cabang_id', 'jenjang', 'kelas_id', 'no_kelas']) || request('status') != 'aktif')
+                        @if(request()->hasAny(['search', 'jenjang', 'kelas_id', 'no_kelas']) || request('status') != 'aktif')
                             <a href="{{ route('waka.manajemen-siswa.index') }}" class="btn btn-outline">
                                 <i class="fas fa-times"></i> Reset
                             </a>

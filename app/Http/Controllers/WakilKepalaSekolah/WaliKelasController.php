@@ -14,6 +14,11 @@ class WaliKelasController extends Controller
 {
     public function index(Request $request)
     {
+        $userCabangId = auth()->user()->cabang_id;
+        if (!$userCabangId) {
+            return redirect()->back()->with('error', 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
+        }
+
         $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelasAssignments.tenagaPendidik.user'])->withCount('siswa');
 
         // Filter by tahun ajaran
@@ -41,10 +46,8 @@ class WaliKelasController extends Controller
             $query->where('jenjang', $request->jenjang);
         }
 
-        // Filter by cabang
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
-        }
+        // Mandatory filter by user's assigned cabang
+        $query->where('cabang_id', $userCabangId);
 
         // Filter by status (assigned/unassigned)
         if ($request->filled('status')) {
@@ -59,7 +62,6 @@ class WaliKelasController extends Controller
 
         // Data untuk filter dan assignment
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
-        $cabangs = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
         // Get current tahun ajaran
@@ -81,20 +83,23 @@ class WaliKelasController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
-        // Statistics
+        // Statistics (filtered by user's cabang)
         $stats = [
-            'totalKelas' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
-            'kelasWithWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+            'totalKelas' => Kelas::where('cabang_id', $userCabangId)
+                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
+            'kelasWithWali' => Kelas::where('cabang_id', $userCabangId)
+                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereHas('waliKelasAssignments')->count(),
-            'kelasWithoutWali' => Kelas::when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+            'kelasWithoutWali' => Kelas::where('cabang_id', $userCabangId)
+                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereDoesntHave('waliKelasAssignments')->count(),
-            'totalWaliKelas' => TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar']))->count(),
+            'totalWaliKelas' => TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
+                ->where('cabang_id', $userCabangId))->count(),
         ];
 
         return view('waka.wali-kelas.index', compact(
             'kelasList',
             'tahunAjarans',
-            'cabangs',
             'jenjangs',
             'currentTahunAjaran',
             'waliKelasOptions',
@@ -182,9 +187,8 @@ class WaliKelasController extends Controller
             $query->where('jenjang', $request->jenjang);
         }
 
-        if ($request->filled('cabang_id')) {
-            $query->where('cabang_id', $request->cabang_id);
-        }
+        // Mandatory filter by user's assigned cabang
+        $query->where('cabang_id', auth()->user()->cabang_id);
 
         if ($request->filled('status')) {
             if ($request->status == 'assigned') {

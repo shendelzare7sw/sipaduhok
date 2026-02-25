@@ -7,7 +7,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
 @endsection
 
 @section('sidebar-menu')
-    @include('admin.partials.sneat-sidebar-menu')
+    @include('waka.partials.sneat-sidebar-menu')
 @endsection
 
 @section('styles')
@@ -263,7 +263,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalSinkronkan">
                 <i class="fas fa-sync-alt me-1"></i> Sinkronkan dari Jadwal
             </button>
-            <a href="{{ route('admin.guru-pengajar.print', request()->query()) }}"
+            <a href="{{ route('waka.guru-pengajar.print', request()->query()) }}"
                class="btn btn-primary"
                target="_blank">
                 <i class="fas fa-print me-1"></i> Cetak
@@ -273,7 +273,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
 
     <div class="card-body">
         {{-- Filter Section --}}
-        <form action="{{ route('admin.guru-pengajar.index') }}" method="GET">
+        <form action="{{ route('waka.guru-pengajar.index') }}" method="GET">
             <div class="filter-section">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -304,7 +304,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 </button>
 
                 @if(request()->hasAny(['search', 'status']))
-                    <a href="{{ route('admin.guru-pengajar.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
+                    <a href="{{ route('waka.guru-pengajar.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
                        class="btn btn-outline-secondary">
                         <i class="fas fa-times me-1"></i> Reset
                     </a>
@@ -364,7 +364,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                                 @endif
                             </td>
                             <td style="text-align: center;">
-                                <a href="{{ route('admin.guru-pengajar.show', ['guruPengajar' => $guru, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
+                                <a href="{{ route('waka.guru-pengajar.show', ['guruPengajar' => $guru, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
                                    class="btn btn-sm btn-primary"
                                    title="Kelola Penugasan">
                                     <i class="fas fa-cog"></i>
@@ -394,7 +394,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 Pastikan jadwal pelajaran sudah dibuat dan guru sudah ditugaskan di jadwal tersebut,<br>
                 lalu jalankan sinkronisasi untuk memperbarui data.</p>
                 <div class="d-flex gap-2 justify-content-center mt-3 flex-wrap">
-                    <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="btn btn-primary">
+                    <a href="{{ route('waka.jadwal-pelajaran.index') }}" class="btn btn-primary">
                         <i class="fas fa-calendar-alt me-1"></i> Buka Jadwal Pelajaran
                     </a>
                     <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalSinkronkan">
@@ -431,7 +431,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i>Batal
                 </button>
-                <form action="{{ route('admin.guru-pengajar.rebuild') }}" method="POST" style="display: inline;">
+                <form action="{{ route('waka.guru-pengajar.rebuild') }}" method="POST" style="display: inline;">
                     @csrf
                     @if(request('tahun_ajaran_id'))
                         <input type="hidden" name="tahun_ajaran_id" value="{{ request('tahun_ajaran_id') }}">

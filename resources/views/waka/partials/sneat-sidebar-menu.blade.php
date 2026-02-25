@@ -69,6 +69,15 @@
         <div>Jadwal Pelajaran</div>
     </a>
 </li>
+
+<!-- Guru Pengajar -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.guru-pengajar') ? 'active' : '' }}">
+    <a href="{{ route('waka.guru-pengajar.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-chalkboard-teacher"></i>
+        <div>Guru Pengajar</div>
+    </a>
+</li>
+
 <!-- Menu Header - Kenaikan Kelas -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>

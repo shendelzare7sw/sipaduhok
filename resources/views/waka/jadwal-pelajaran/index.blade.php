@@ -362,15 +362,6 @@
                         @endforeach
                     </select>
 
-                    <select name="cabang_id" class="form-select" onchange="this.form.submit()" style="width: auto;">
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangList as $cabang)
-                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
-                                {{ $cabang->nama_cabang }}
-                            </option>
-                        @endforeach
-                    </select>
-
                     <select name="jenjang" class="form-select" onchange="this.form.submit()" style="width: auto;">
                         <option value="">Semua Jenjang</option>
                         <option value="KB" {{ request('jenjang') == 'KB' ? 'selected' : '' }}>KB</option>
@@ -1078,26 +1069,16 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-info py-2">
-                        <small>Pilih Cabang dan Kelas untuk mencetak jadwal spesifik.</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Cabang</label>
-                        <select id="printCabangId" class="form-select" onchange="filterPrintKelas()">
-                            <option value="">-- Pilih Cabang --</option>
-                            @foreach($cabangList as $cabang)
-                                <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
-                            @endforeach
-                        </select>
+                        <small>Pilih Kelas untuk mencetak jadwal spesifik.</small>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Kelas</label>
-                        <select id="printKelasId" class="form-select" disabled>
+                        <select id="printKelasId" class="form-select">
                             <option value="">-- Pilih Kelas --</option>
                             @foreach($allKelasList as $kelas)
-                                <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}" style="display: none;">
-                                    {{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }} ({{ $kelas->jenjang }})
+                                <option value="{{ $kelas->id }}">
+                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
                                 </option>
                             @endforeach
                         </select>
@@ -1117,25 +1098,6 @@
     </div>
 
     <script>
-        function filterPrintKelas() {
-            const cabangId = document.getElementById('printCabangId').value;
-            const kelasSelect = document.getElementById('printKelasId');
-            const options = kelasSelect.querySelectorAll('option[data-cabang]');
-
-            kelasSelect.value = "";
-            kelasSelect.disabled = cabangId === "";
-
-            options.forEach(opt => {
-                if (cabangId === "" || opt.getAttribute('data-cabang') == cabangId) {
-                    opt.style.display = "";
-                } else {
-                    opt.style.display = "none";
-                    // If selected option is hidden, deselect
-                    if (opt.selected) kelasSelect.value = "";
-                }
-            });
-        }
-
         function submitCetakKelas(type) {
             const kelasId = document.getElementById('printKelasId').value;
             if (!kelasId) {

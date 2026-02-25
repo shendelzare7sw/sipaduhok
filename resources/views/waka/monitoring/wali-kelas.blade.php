@@ -155,17 +155,9 @@
                     <!-- Search -->
                     <input type="text" name="search" class="form-control" placeholder="Cari nama wali kelas..." value="{{ request('search') }}" style="width: 200px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
                     
-                    <!-- Filter Cabang -->
-                    <select name="cabang_id" class="form-control" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangs as $cabang)
-                            <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
-                        @endforeach
-                    </select>
-
                     <noscript><button type="submit" class="btn btn-primary">Filter</button></noscript>
-                    
-                     @if(request()->anyFilled(['search', 'cabang_id']))
+
+                    @if(request()->anyFilled(['search']))
                         <a href="{{ route('waka.monitoring.wali-kelas') }}" class="btn btn-secondary btn-sm"><i class="fas fa-undo"></i> Reset</a>
                     @endif
                 </form>

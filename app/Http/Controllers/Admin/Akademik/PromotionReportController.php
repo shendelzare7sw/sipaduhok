@@ -20,24 +20,35 @@ class PromotionReportController extends Controller
         $selectedYear = TahunAjaran::find($selectedYearId) ?? $activeYear;
         $allTahunAjaran = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
         
-        // Get Statistics
-        $stats = DB::table('status_naik_kelas_siswa')
-            ->where('tahun_ajaran_id', $selectedYear->id)
-            ->select('status_kelulusan', DB::raw('count(*) as total'))
-            ->groupBy('status_kelulusan')
-            ->pluck('total', 'status_kelulusan');
-            
-        // Get Detailed Lists
-        // Filter: status (NAIK, TIDAK, LULUS, TUNGGAKAN)
         // Filter Inputs
         $search = $request->get('search');
-        $cabangId = $request->get('cabang_id');
         $kelasId = $request->get('kelas_id');
+        $jenjangFilter = $request->get('jenjang');
         $filterStatus = $request->get('status');
+        // Auto-filter by cabang for waka role
+        $cabangId = auth()->user()->role === 'wakil_kepala_sekolah'
+            ? auth()->user()->cabang_id
+            : $request->get('cabang_id');
+
+        // Get Statistics (filtered by cabang when waka)
+        $stats = DB::table('status_naik_kelas_siswa')
+            ->join('siswa', 'status_naik_kelas_siswa.siswa_id', '=', 'siswa.id')
+            ->where('status_naik_kelas_siswa.tahun_ajaran_id', $selectedYear->id)
+            ->when($cabangId, fn($q) => $q->where('siswa.cabang_id', $cabangId))
+            ->select('status_naik_kelas_siswa.status_kelulusan', DB::raw('count(*) as total'))
+            ->groupBy('status_naik_kelas_siswa.status_kelulusan')
+            ->pluck('total', 'status_kelulusan');
+
+        // Get Detailed Lists
+        // Filter: status (NAIK, TIDAK, LULUS, TUNGGAKAN)
 
         // Lists for Dropdown
         $cabangs = \App\Models\Cabang::all();
-        $kelasList = \App\Models\Kelas::where('tahun_ajaran_id', $selectedYear->id)->get();
+        $kelasList = \App\Models\Kelas::where('tahun_ajaran_id', $selectedYear->id)
+            ->when($cabangId, fn($q) => $q->where('cabang_id', $cabangId))
+            ->when($jenjangFilter, fn($q) => $q->where('jenjang', $jenjangFilter))
+            ->orderBy('jenjang')->orderBy('nama_kelas')
+            ->get();
         
         // --- 1. History Query ---
         $query = DB::table('status_naik_kelas_siswa')
@@ -55,6 +66,10 @@ class PromotionReportController extends Controller
         if ($filterStatus) $query->where('status_naik_kelas_siswa.status_kelulusan', $filterStatus);
         if ($search) $query->where('siswa.nama_lengkap', 'like', "%{$search}%");
         if ($cabangId) $query->where('siswa.cabang_id', $cabangId);
+        if ($jenjangFilter) {
+            $kelasIdsForJenjang = \App\Models\Kelas::where('jenjang', $jenjangFilter)->pluck('id');
+            $query->whereIn('status_naik_kelas_siswa.kelas_asal', $kelasIdsForJenjang);
+        }
 
         // FIX: Use historical kelas_asal instead of current kelas_id to include graduates
         if ($kelasId) {
@@ -87,6 +102,7 @@ class PromotionReportController extends Controller
 
             if ($search) $simQuery->where('siswa.nama_lengkap', 'like', "%{$search}%");
             if ($cabangId) $simQuery->where('siswa.cabang_id', $cabangId);
+            if ($jenjangFilter) $simQuery->where('kelas_asal.jenjang', $jenjangFilter);
             if ($kelasId) $simQuery->where('status_naik_kelas_siswa.kelas_asal', $kelasId);
 
             $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
@@ -136,6 +152,7 @@ class PromotionReportController extends Controller
 
             if ($search) $simQuery->where('nama_lengkap', 'like', "%{$search}%");
             if ($cabangId) $simQuery->where('cabang_id', $cabangId);
+            if ($jenjangFilter) $simQuery->whereHas('kelas', fn($q) => $q->where('jenjang', $jenjangFilter));
             if ($kelasId) $simQuery->where('kelas_id', $kelasId);
 
             $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
@@ -190,6 +207,7 @@ class PromotionReportController extends Controller
             'search' => $search,
             'cabangId' => $cabangId,
             'kelasId' => $kelasId,
+            'jenjangFilter' => $jenjangFilter,
             'promotionReadiness' => $promotionReadiness,
             'schedules' => $schedules,
             'simMode' => $simMode, // NEW: Simulation mode toggle
@@ -202,15 +220,20 @@ class PromotionReportController extends Controller
         $selectedYearId = $request->get('tahun_ajaran_id', $activeYear->id);
         $selectedYear = TahunAjaran::find($selectedYearId) ?? $activeYear;
 
-        $stats = DB::table('status_naik_kelas_siswa')
-            ->where('tahun_ajaran_id', $selectedYear->id)
-            ->select('status_kelulusan', DB::raw('count(*) as total'))
-            ->groupBy('status_kelulusan')
-            ->pluck('total', 'status_kelulusan');
-
         $filterStatus = $request->get('status');
-        $cabangId = $request->get('cabang_id');
+        // Auto-filter by cabang for waka role
+        $cabangId = auth()->user()->role === 'wakil_kepala_sekolah'
+            ? auth()->user()->cabang_id
+            : $request->get('cabang_id');
         $kelasId = $request->get('kelas_id');
+
+        $stats = DB::table('status_naik_kelas_siswa')
+            ->join('siswa', 'status_naik_kelas_siswa.siswa_id', '=', 'siswa.id')
+            ->where('status_naik_kelas_siswa.tahun_ajaran_id', $selectedYear->id)
+            ->when($cabangId, fn($q) => $q->where('siswa.cabang_id', $cabangId))
+            ->select('status_naik_kelas_siswa.status_kelulusan', DB::raw('count(*) as total'))
+            ->groupBy('status_naik_kelas_siswa.status_kelulusan')
+            ->pluck('total', 'status_kelulusan');
 
         $query = DB::table('status_naik_kelas_siswa')
             ->join('siswa', 'status_naik_kelas_siswa.siswa_id', '=', 'siswa.id')

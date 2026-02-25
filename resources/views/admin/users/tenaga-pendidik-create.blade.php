@@ -268,7 +268,7 @@
 
     <script>
         // Flexible roles that should have locked cabang
-        const flexibleRoles = ['ketua_pkbm', 'sekretaris', 'bendahara', 'wakil_kepala_sekolah'];
+        const flexibleRoles = ['ketua_pkbm', 'sekretaris', 'bendahara'];
         const defaultCabangId = '1'; // PKBM House Of Knowledge (Gedung Utama)
 
         const roleSelect = document.querySelector('select[name="role"]');

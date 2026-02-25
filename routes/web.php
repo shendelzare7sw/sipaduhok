@@ -32,6 +32,7 @@ use App\Http\Controllers\WakilKepalaSekolah\ManajemenSiswaController as WakaMana
 use App\Http\Controllers\WakilKepalaSekolah\WaliKelasController as WakaWaliKelasController;
 use App\Http\Controllers\WakilKepalaSekolah\JadwalPelajaranController as WakaJadwalPelajaranController;
 use App\Http\Controllers\WakilKepalaSekolah\PengaturanIstirahatController as WakaPengaturanIstirahatController;
+use App\Http\Controllers\WakilKepalaSekolah\GuruPengajarController as WakaGuruPengajarController;
 
 // Sekretaris Controllers
 use App\Http\Controllers\Sekretaris\SekretarisController;
@@ -707,6 +708,15 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/get-students/{kelas}', [WakaJadwalPelajaranController::class, 'getStudents'])->name('get-students');
             Route::get('/api/kelas/{kelas}', [WakaJadwalPelajaranController::class, 'getByKelas'])->name('api.by-kelas');
             Route::get('/api/guru/{guru}', [WakaJadwalPelajaranController::class, 'getByGuru'])->name('api.by-guru');
+        });
+
+        // Guru Pengajar (read-only, derived from Jadwal Pelajaran, filtered by waka's cabang)
+        Route::prefix('guru-pengajar')->name('guru-pengajar.')->group(function () {
+            Route::get('/', [WakaGuruPengajarController::class, 'index'])->name('index');
+            Route::get('/print', [WakaGuruPengajarController::class, 'print'])->name('print');
+            Route::post('/rebuild', [WakaGuruPengajarController::class, 'rebuildFromJadwal'])->name('rebuild');
+            Route::get('/kelas/{kelas}', [WakaGuruPengajarController::class, 'manageKelas'])->name('manage-kelas');
+            Route::get('/{guruPengajar}', [WakaGuruPengajarController::class, 'show'])->name('show');
         });
 
         // Monitoring
