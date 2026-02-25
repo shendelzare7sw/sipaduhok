@@ -461,11 +461,22 @@
                 flex-direction: column;
             }
 
+            .resizer {
+                display: none !important;
+                height: 0 !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+            }
+
+            .calendar-section {
+                border-right: none;
+                padding-right: 0;
+            }
+
             .legend {
                 width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 15px;
+                padding-left: 0;
             }
 
             .legend-item {
@@ -480,6 +491,127 @@
 
             .event {
                 font-size: 9px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .calendar-container {
+                padding: 16px;
+            }
+
+            .calendar-header {
+                gap: 10px;
+            }
+
+            .calendar-title {
+                font-size: 18px;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .calendar-table th {
+                padding: 8px 4px;
+                font-size: 13px;
+            }
+
+            .calendar-table td {
+                height: 70px;
+                padding: 3px;
+            }
+
+            .date-number {
+                font-size: 12px;
+            }
+
+            .event {
+                font-size: 8px;
+                padding: 2px 4px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .calendar-container {
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            .calendar-page-header {
+                font-size: 15px;
+            }
+
+            .calendar-title {
+                font-size: 16px;
+            }
+
+            .year-title {
+                font-size: 13px;
+            }
+
+            .calendar-table th {
+                padding: 6px 2px;
+                font-size: 11px;
+            }
+
+            .calendar-table td {
+                height: 55px;
+                padding: 2px;
+            }
+
+            .date-number {
+                font-size: 11px;
+                margin-bottom: 2px;
+            }
+
+            .event {
+                font-size: 7px;
+                padding: 2px 3px;
+                gap: 2px;
+            }
+
+            .event-dot {
+                width: 4px;
+                height: 4px;
+            }
+
+            .calendar-nav .month-title {
+                font-size: 14px;
+                min-width: 110px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calendar-container {
+                padding: 10px;
+            }
+
+            .calendar-table th {
+                padding: 5px 1px;
+                font-size: 10px;
+            }
+
+            .calendar-table td {
+                height: 45px;
+                padding: 2px;
+            }
+
+            .date-number {
+                font-size: 10px;
+            }
+
+            .event-text {
+                display: none;
+            }
+
+            .event {
+                padding: 2px;
+                justify-content: center;
+            }
+
+            .event-dot {
+                width: 5px;
+                height: 5px;
             }
         }
     </style>

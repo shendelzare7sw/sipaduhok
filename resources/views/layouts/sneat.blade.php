@@ -358,15 +358,18 @@
 
             /* Hide menu off-screen by default */
             .layout-menu {
+                display: block !important;        /* Cegah display:none dari Sneat JS */
                 position: fixed !important;
                 top: 0;
                 left: 0;
                 height: 100vh;
                 width: 260px;
                 z-index: 1100;
-                transform: translate3d(-100%, 0, 0);
-                transition: transform 0.3s ease;
+                transform: translate3d(-100%, 0, 0) !important;
+                transition: transform 0.3s ease !important;
                 box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                will-change: transform;           /* GPU acceleration untuk animasi mulus */
+                visibility: visible !important;
             }
 
             /* Show menu when menu-shown class is added */
@@ -386,11 +389,13 @@
                 opacity: 0;
                 visibility: hidden;
                 transition: opacity 0.3s ease, visibility 0.3s ease;
+                pointer-events: none;
             }
 
             .layout-overlay.active {
                 opacity: 1;
                 visibility: visible;
+                pointer-events: auto;
             }
 
             /* Hamburger button - transform to X when menu open */
@@ -870,9 +875,11 @@
             }
 
             // Toggle menu when clicking hamburger/X
+            // stopPropagation: cegah Sneat's menu.js (CDN) dari menangani event yang sama
             if (menuToggleBtn) {
                 menuToggleBtn.addEventListener('click', function (e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     toggleMenu();
                 });
             }
@@ -882,6 +889,7 @@
             if (sidebarToggleBtn) {
                 sidebarToggleBtn.addEventListener('click', function (e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     closeMenu();
                 });
             }

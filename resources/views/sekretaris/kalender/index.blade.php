@@ -463,7 +463,7 @@
     }
 
     /* Responsive Design */
-    @media (max-width: 1200px) {
+    @media (max-width: 1399px) {
         .main-content {
             flex-direction: column;
         }
@@ -482,7 +482,11 @@
         }
 
         .resizer {
-            display: none;
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
         }
     }
 
@@ -494,6 +498,19 @@
 
         .search-box {
             max-width: 100%;
+        }
+
+        .calendar-container {
+            padding: 16px;
+        }
+
+        .calendar-title {
+            font-size: 18px;
+        }
+
+        .calendar-table th {
+            padding: 8px 4px;
+            font-size: 13px;
         }
 
         .calendar-table td {
@@ -508,6 +525,110 @@
         .calendar-nav {
             flex-direction: column;
             align-items: flex-start;
+        }
+
+        .resizer {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+        }
+
+        .calendar-nav .month-title {
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .calendar-container {
+            padding: 12px;
+        }
+
+        .calendar-title {
+            font-size: 15px;
+        }
+
+        .calendar-table th {
+            padding: 6px 2px;
+            font-size: 11px;
+        }
+
+        .calendar-table td {
+            height: 65px;
+            padding: 2px;
+        }
+
+        .date-number {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .event {
+            font-size: 8px;
+            padding: 2px 3px;
+        }
+
+        .calendar-nav .month-title {
+            font-size: 14px;
+            min-width: 110px;
+        }
+
+        .calendar-nav .btn {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .card-header {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .calendar-container {
+            padding: 8px;
+        }
+
+        .calendar-section {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .calendar-table {
+            min-width: 280px;
+        }
+
+        .calendar-table th {
+            padding: 5px 1px;
+            font-size: 9px;
+        }
+
+        .calendar-table td {
+            height: 50px;
+            padding: 1px;
+        }
+
+        .date-number {
+            font-size: 10px;
+        }
+
+        .event-text {
+            display: none;
+        }
+
+        .event {
+            padding: 1px 2px;
+            gap: 2px;
+            justify-content: center;
+        }
+
+        .event-dot {
+            width: 8px;
+            height: 8px;
+        }
+
+        .calendar-nav .month-title {
+            font-size: 13px;
+            min-width: 100px;
         }
     }
 </style>
