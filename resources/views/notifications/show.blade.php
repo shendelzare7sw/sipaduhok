@@ -1,21 +1,28 @@
 @php
     $userRole = auth()->user()->role ?? 'siswa';
+    $ctx = request('ctx'); // 'lms', 'lms-guru', or null (Sneat context)
+
+    // Determine layout based on role and context (ctx param from index or bell)
     $layout = match ($userRole) {
-        'siswa' => 'layouts.lms',
-        'guru_pengajar' => 'layouts.lms-guru',
-        default => 'layouts.sneat',
+        'siswa'         => ($ctx === 'lms')      ? 'layouts.lms'      : 'layouts.sneat',
+        'guru_pengajar' => ($ctx === 'lms-guru') ? 'layouts.lms-guru' : 'layouts.sneat',
+        default         => 'layouts.sneat',
     };
-    $sidebarPartial = match ($userRole) {
-        'siswa' => 'siswa.partials.sidebar-lms',
-        'guru_pengajar' => 'guru.partials.sidebar-lms',
-        'admin' => 'admin.partials.sneat-sidebar-menu',
-        'bendahara' => 'bendahara.partials.sneat-sidebar-menu',
-        'wali_kelas' => 'wali-kelas.partials.sneat-sidebar-menu',
-        'ketua_pkbm' => 'ketua.partials.sneat-sidebar-menu',
-        'wakil_kepala_sekolah' => 'waka.partials.sneat-sidebar-menu',
-        'sekretaris' => 'sekretaris.partials.sneat-sidebar-menu',
-        'orang_tua' => 'orang-tua.partials.sneat-sidebar-menu',
-        default => 'partials.sneat-sidebar',
+
+    // Determine sidebar partial
+    $sidebarPartial = match (true) {
+        $userRole === 'siswa'         && $ctx === 'lms'      => 'siswa.partials.sidebar-lms',
+        $userRole === 'siswa'                                 => 'siswa.partials.sneat-sidebar-sia',
+        $userRole === 'guru_pengajar' && $ctx === 'lms-guru' => 'guru.partials.sidebar-lms-notif',
+        $userRole === 'guru_pengajar'                        => 'guru.partials.sneat-sidebar-menu',
+        $userRole === 'admin'                                => 'admin.partials.sneat-sidebar-menu',
+        $userRole === 'bendahara'                            => 'bendahara.partials.sneat-sidebar-menu',
+        $userRole === 'wali_kelas'                           => 'wali-kelas.partials.sneat-sidebar-menu',
+        $userRole === 'ketua_pkbm'                           => 'ketua.partials.sneat-sidebar-menu',
+        $userRole === 'wakil_kepala_sekolah'                 => 'waka.partials.sneat-sidebar-menu',
+        $userRole === 'sekretaris'                           => 'sekretaris.partials.sneat-sidebar-menu',
+        $userRole === 'orang_tua'                            => 'orang-tua.partials.sneat-sidebar-menu',
+        default                                              => 'partials.sneat-sidebar',
     };
 
     $colors = [
@@ -49,7 +56,7 @@
 
     {{-- Back button --}}
     <div class="mb-3">
-        <a href="{{ route('notifications.index') }}" class="btn btn-sm btn-outline-secondary">
+        <a href="{{ route('notifications.index', $ctx ? ['ctx' => $ctx] : []) }}" class="btn btn-sm btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i> Kembali ke Notifikasi
         </a>
     </div>
@@ -102,49 +109,14 @@
         </div>
 
         {{-- Footer actions --}}
-        <div class="card-footer bg-light d-flex justify-content-between align-items-center px-4 py-2">
+        <div class="card-footer bg-light px-4 py-2">
             <small class="text-muted">
                 <i class="fas fa-check me-1 text-success"></i> Sudah dibaca
             </small>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteNotifModal">
-                <i class="fas fa-trash me-1"></i> Hapus
-            </button>
         </div>
     </div>
 
 </div>
-</div>
-
-{{-- Hidden delete form --}}
-<form id="deleteNotifForm" action="{{ route('notifications.destroy', $notification->id) }}" method="POST" style="display:none">
-    @csrf
-    @method('DELETE')
-</form>
-
-{{-- Delete Confirm Modal --}}
-<div class="modal fade" id="deleteNotifModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title text-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Hapus Notifikasi
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body pt-2">
-                <p class="mb-1">Yakin ingin menghapus notifikasi ini?</p>
-                <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i>Tindakan ini tidak dapat dibatalkan.</p>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Batal
-                </button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('deleteNotifForm').submit()">
-                    <i class="fas fa-trash me-1"></i> Ya, Hapus
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
 
 @endsection

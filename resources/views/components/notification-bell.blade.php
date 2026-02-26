@@ -216,7 +216,7 @@
 
             html += `
             <div class="notification-item d-flex align-items-start ${unreadClass}"
-                onclick="handleBellNotifClick(event, ${notif.id}, '${notifLink}')">
+                onclick="handleBellNotifClick(event, ${notif.id}, '${notifLink}', '${notif.tipe || ''}')">
                 <div class="notification-icon bg-${colorClass} text-white me-3">
                     <i class="${iconClass}"></i>
                 </div>
@@ -232,10 +232,18 @@
         container.innerHTML = html;
     }
 
-    function handleBellNotifClick(event, id, link) {
+    function handleBellNotifClick(event, id, link, tipe) {
         const bellCtx = '{{ $ctx ?? "" }}';
 
-        // If navigating to the notifications index, preserve the LMS context param
+        // Catatan type → open detail page
+        if (tipe === 'catatan') {
+            let showUrl = '/notifications/' + id;
+            if (bellCtx) showUrl += '?ctx=' + bellCtx;
+            window.location.href = showUrl;
+            return;
+        }
+
+        // Other types → mark as read, then navigate to linked menu
         let target = link;
         if (bellCtx && target.match(/\/notifications\/?(\?.*)?$/)) {
             target += (target.includes('?') ? '&' : '?') + 'ctx=' + bellCtx;

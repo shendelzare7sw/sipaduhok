@@ -251,6 +251,7 @@
             <div class="notif-item {{ $isUnread ? 'unread' : '' }}"
                 id="notif-{{ $notif->id }}"
                 data-link="{{ $notif->link ?? '' }}"
+                data-tipe="{{ $notif->tipe }}"
                 onclick="handleNotifClick(event, {{ $notif->id }}, this)">
 
                 <input type="checkbox" class="notif-cb notif-check"
@@ -362,14 +363,27 @@ function debounceSubmit() {
     searchTimer = setTimeout(() => document.getElementById('filterForm').submit(), 500);
 }
 
-// Click on notification row — mark as read silently, then navigate to the target menu
+// Click on notification row
+// - catatan type → navigate to detail page (Gmail-style)
+// - other types  → mark as read, then redirect to linked menu
 function handleNotifClick(event, id, el) {
     if (event.target.type === 'checkbox') return;
 
-    const link = el.dataset.link;
-    const currentBase = '{{ url("/notifications") }}';
+    const tipe = el.dataset.tipe;
+    const baseUrl = '{{ url("/notifications") }}';
 
-    fetch(`${currentBase}/${id}/read`, {
+    if (tipe === 'catatan') {
+        // Open detail page
+        let showUrl = baseUrl + '/' + id;
+        @if(request('ctx'))
+            showUrl += '?ctx={{ request("ctx") }}';
+        @endif
+        window.location.href = showUrl;
+        return;
+    }
+
+    // Other types: mark as read silently, then go to linked menu
+    fetch(`${baseUrl}/${id}/read`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -380,8 +394,8 @@ function handleNotifClick(event, id, el) {
     el.classList.remove('unread');
     el.querySelector('.unread-dot')?.remove();
 
-    // Navigate to target if link points outside this notifications page
-    if (link && !link.match(/\/notifications\/?(\?.*)?$/)) {
+    const link = el.dataset.link;
+    if (link && link.trim() !== '') {
         window.location.href = link;
     }
 }

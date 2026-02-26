@@ -54,15 +54,21 @@ class NotificationController extends Controller
     }
 
     /**
-     * Show/redirect a single notification - marks as read and navigates to target
-     * Notifications are alerts, not messages; always redirect to the linked menu.
+     * Show a single notification.
+     * - 'catatan' type → renders detail page (Gmail-style)
+     * - all other types → marks as read and redirects to the linked menu
      */
     public function show($id)
     {
         $notification = Notification::where('user_id', Auth::id())->findOrFail($id);
         $notification->markAsRead();
 
-        // Always redirect to the linked menu page if available
+        // Only catatan gets a detail page
+        if ($notification->tipe === Notification::TIPE_CATATAN) {
+            return view('notifications.show', compact('notification'));
+        }
+
+        // All other types → redirect to linked menu
         if ($notification->link) {
             return redirect($this->resolveNotificationLink($notification->link));
         }
