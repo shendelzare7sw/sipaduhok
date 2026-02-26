@@ -2,7 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Guru Pengajar - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
@@ -29,14 +31,37 @@
         .footer-right { text-align: center; }
         .signature-line { margin-top: 60px; border-bottom: 1px solid #000; width: 200px; margin: 60px auto 0; }
         .print-date { font-size: 10pt; color: #666; margin-top: 30px; }
-        .print-button { position: fixed; top: 20px; right: 20px; padding: 12px 24px; background: #14b8a6; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .back-button { position: fixed; top: 20px; right: 130px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; }
+        .print-controls {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            display: flex; justify-content: flex-end; align-items: center;
+            gap: 8px; padding: 10px 16px;
+            background: rgba(255,255,255,0.97);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .print-button {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px; background: #14b8a6; color: white;
+            border: none; border-radius: 6px; cursor: pointer;
+            font-size: 13px; font-weight: 500; font-family: sans-serif;
+        }
+        .back-button {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px; background: #6b7280; color: white;
+            border: none; border-radius: 6px; text-decoration: none;
+            font-size: 13px; font-weight: 500; font-family: sans-serif;
+        }
         @media print { .no-print { display: none !important; } .container { padding: 0; } }
+        @media (max-width: 600px) {
+            .print-controls { justify-content: center; flex-wrap: wrap; padding: 8px 10px; }
+            .print-button, .back-button { font-size: 12px; padding: 7px 14px; }
+        }
     </style>
 </head>
 <body>
-    <a href="{{ route('waka.guru-pengajar.index') }}" class="back-button no-print">← Kembali</a>
-    <button onclick="window.print()" class="print-button no-print"><i class="fas fa-print"></i> Cetak</button>
+    <div class="print-controls no-print">
+        <a href="{{ route('waka.guru-pengajar.index') }}" class="back-button"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <button onclick="window.print()" class="print-button"><i class="fas fa-print"></i> Cetak</button>
+    </div>
 
     <div class="container">
         @include('partials.print-header', ['cabang' => $cabang ?? null])

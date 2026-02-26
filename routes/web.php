@@ -313,7 +313,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{jadwalPelajaran}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'destroy'])->name('destroy');
             Route::post('/{jadwalPelajaran}/ganti-guru', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'gantiGuru'])->name('ganti-guru');
             Route::post('/bulk-replace-guru', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkReplaceGuru'])->name('bulk-replace-guru');
-            Route::delete('/bulk-delete', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::post('/bulk-delete', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
             Route::post('/bulk-update-status', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
             Route::get('/get-students/{kelas}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'getStudents'])->name('get-students');
             Route::get('/api/kelas/{kelas}', [\App\Http\Controllers\Admin\JadwalPelajaranController::class, 'getByKelas'])->name('api.by-kelas');
@@ -703,7 +703,7 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/{jadwalPelajaran}', [WakaJadwalPelajaranController::class, 'destroy'])->name('destroy');
             Route::post('/{jadwalPelajaran}/ganti-guru', [WakaJadwalPelajaranController::class, 'gantiGuru'])->name('ganti-guru');
             Route::post('/bulk-replace-guru', [WakaJadwalPelajaranController::class, 'bulkReplaceGuru'])->name('bulk-replace-guru');
-            Route::delete('/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::post('/bulk-delete', [WakaJadwalPelajaranController::class, 'bulkDelete'])->name('bulk-delete');
             Route::post('/bulk-update-status', [WakaJadwalPelajaranController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
             Route::get('/get-students/{kelas}', [WakaJadwalPelajaranController::class, 'getStudents'])->name('get-students');
             Route::get('/api/kelas/{kelas}', [WakaJadwalPelajaranController::class, 'getByKelas'])->name('api.by-kelas');

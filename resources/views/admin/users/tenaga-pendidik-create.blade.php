@@ -94,6 +94,27 @@
             margin-top: 4px;
         }
 
+        /* Responsive */
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+            .col {
+                min-width: 100%;
+            }
+            .tp-form-actions {
+                flex-direction: column-reverse;
+                gap: 10px;
+            }
+            .tp-form-actions a,
+            .tp-form-actions button {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+                justify-content: center;
+            }
+        }
+
         /* Password Field Styles */
         .password-wrapper {
             position: relative;
@@ -260,7 +281,7 @@
             </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 40px;">
+        <div class="tp-form-actions" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 40px;">
             <a href="{{ route('admin.users.tenaga-pendidik') }}" class="btn-secondary">Batal</a>
             <button type="submit" class="btn-primary">Simpan Data</button>
         </div>

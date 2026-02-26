@@ -1006,6 +1006,41 @@
     @stack('scripts')
     @yield('scripts')
 
+    {{-- Unsaved Changes Warning: active on pages with PUT/PATCH forms (edit pages) --}}
+    <script>
+    (function () {
+        // Only activate when there is an edit form (hidden _method = PUT/PATCH)
+        var hasPutForm = document.querySelector('input[name="_method"][value="PUT"], input[name="_method"][value="PATCH"]');
+        if (!hasPutForm) return;
+
+        var isDirty = false;
+        var isSubmitting = false;
+
+        document.addEventListener('input', function (e) {
+            if (e.target.closest('form')) isDirty = true;
+        });
+        document.addEventListener('change', function (e) {
+            if (e.target.closest('form')) isDirty = true;
+        });
+        document.addEventListener('submit', function () {
+            isSubmitting = true;
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (isDirty && !isSubmitting) {
+                e.preventDefault();
+                e.returnValue = 'Perubahan belum disimpan. Yakin ingin meninggalkan halaman ini?';
+            }
+        });
+
+        // Allow programmatic navigation (e.g. back buttons with href) to bypass
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-unsaved-bypass]');
+            if (btn) isSubmitting = true;
+        });
+    })();
+    </script>
+
     {{-- AI Chatbot Component - Role-based access control via admin settings --}}
     @if(auth()->check() && canAccessChatbot(auth()->user()->role))
         @include('components.ai-chatbot')

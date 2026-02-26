@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadwal Pelajaran - {{ $kelas->nama_kelas }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Arial', sans-serif; padding: 20px; font-size: 11px; }
@@ -201,9 +202,9 @@
     @if(!isset($preview) || !$preview)
     <script>window.onload = function() { window.print(); }</script>
     @else
-    <div class="no-print" style="position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; gap: 10px;">
-        <button onclick="window.print()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">Cetak</button>
-        <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer;">Tutup</button>
+    <div class="no-print" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 10px 16px; background: rgba(255,255,255,0.97); box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <button onclick="window.print()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;"><i class="fas fa-print"></i> Cetak</button>
+        <button onclick="window.close()" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#6b7280;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;"><i class="fas fa-times"></i> Tutup</button>
     </div>
     @endif
 </body>

@@ -15,11 +15,74 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
 @endsection
 
 @section('content')
+<style>
+.ot-detail-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+.ot-show-footer {
+    padding: 20px;
+    background: #fffbeb;
+    border-top: 1px solid #fef3c7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.ot-show-footer-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+@media (max-width: 768px) {
+    .ot-detail-two-col {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    .ot-show-detail-body {
+        padding: 16px !important;
+    }
+    .ot-show-header-block {
+        padding: 20px !important;
+    }
+    .ot-show-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .ot-show-footer > a,
+    .ot-show-footer-actions {
+        width: 100%;
+    }
+    .ot-show-footer-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .ot-show-footer-actions a,
+    .ot-show-footer-actions form,
+    .ot-show-footer-actions button {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        display: flex !important;
+        justify-content: center;
+    }
+    .ot-show-footer > a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .show-ot-table td {
+        word-break: break-word;
+    }
+}
+</style>
 <div style="max-width: 1000px; margin: 0 auto;">
 
     <div style="background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
         {{-- Header Profil --}}
-        <div style="background: #fffbeb; padding: 30px; border-bottom: 1px solid #fef3c7; text-align: center;">
+        <div class="ot-show-header-block" style="background: #fffbeb; padding: 30px; border-bottom: 1px solid #fef3c7; text-align: center;">
             <div style="width: 100px; height: 100px; background: #fef3c7; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #92400e;">
                 <i class="fas fa-user-friends"></i>
             </div>
@@ -38,28 +101,28 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
         </div>
 
         {{-- Detail Data --}}
-        <div style="padding: 30px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <div class="ot-show-detail-body" style="padding: 30px;">
+            <div class="ot-detail-two-col">
 
                 {{-- Kolom Kiri --}}
                 <div>
                     <h5 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #3b82f6; display: inline-block; padding-bottom: 5px;">Informasi Akun</h5>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                    <table class="show-ot-table" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b; width: 40%;">Nama Lengkap</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ $orangTua->name }}</td>
+                            <td style="padding: 10px 0; color: #64748b; width: 40%; padding-right: 8px;">Nama Lengkap</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ $orangTua->name }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">Username</td>
-                            <td style="padding: 10px 0; font-weight: 500; font-family: 'Courier New', monospace;">{{ $orangTua->username }}</td>
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Username</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word; font-family: 'Courier New', monospace;">{{ $orangTua->username }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">Email</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ $orangTua->email ?? '-' }}</td>
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Email</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ $orangTua->email ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">No. Telepon/WA</td>
-                            <td style="padding: 10px 0; font-weight: 500;">
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">No. Telepon/WA</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">
                                 @if($orangTua->phone)
                                     <a href="https://wa.me/{{ preg_replace('/^0/', '62', $orangTua->phone) }}" target="_blank" style="color: #10b981; text-decoration: none;">
                                         <i class="fab fa-whatsapp"></i> {{ $orangTua->phone }}
@@ -70,7 +133,7 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">Status Akun</td>
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Status Akun</td>
                             <td style="padding: 10px 0;">
                                 <span style="background: {{ $orangTua->is_active ? '#dcfce7' : '#fee2e2' }}; color: {{ $orangTua->is_active ? '#166534' : '#991b1b' }}; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
                                     {!! $orangTua->is_active ? '<i class="fas fa-check"></i> Aktif' : '<i class="fas fa-times"></i> Non-Aktif' !!}
@@ -78,25 +141,25 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">Terdaftar Sejak</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ \Carbon\Carbon::parse($orangTua->created_at)->locale('id')->translatedFormat('d F Y') }}</td>
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Terdaftar Sejak</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ \Carbon\Carbon::parse($orangTua->created_at)->locale('id')->translatedFormat('d F Y') }}</td>
                         </tr>
                     </table>
 
                     @if($orangTua->studentParents && $orangTua->studentParents->count() > 0)
                     <h5 style="margin-bottom: 20px; color: #3b82f6; border-bottom: 2px solid #3b82f6; display: inline-block; padding-bottom: 5px;">Informasi Tambahan</h5>
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table class="show-ot-table" style="width: 100%; border-collapse: collapse;">
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b; width: 40%;">Total Anak</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ $orangTua->studentParents->count() }} Siswa</td>
+                            <td style="padding: 10px 0; color: #64748b; width: 40%; padding-right: 8px;">Total Anak</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ $orangTua->studentParents->count() }} Siswa</td>
                         </tr>
                         @php
                             $jenjangList = $orangTua->studentParents->pluck('siswa.kelas.jenjang')->filter()->unique();
                         @endphp
                         @if($jenjangList->count() > 0)
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">Jenjang Anak</td>
-                            <td style="padding: 10px 0; font-weight: 500;">
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Jenjang Anak</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">
                                 @foreach($jenjangList as $jenjang)
                                     <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-right: 4px;">
                                         {{ $jenjang }}
@@ -110,8 +173,8 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
                         @endphp
                         @if($cabangList->count() > 0)
                         <tr>
-                            <td style="padding: 10px 0; color: #64748b;">Cabang</td>
-                            <td style="padding: 10px 0; font-weight: 500;">{{ $cabangList->join(', ') }}</td>
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Cabang</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ $cabangList->join(', ') }}</td>
                         </tr>
                         @endif
                     </table>
@@ -197,18 +260,18 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
             </div>
         </div>
 
-        <div style="padding: 20px; background: #fffbeb; border-top: 1px solid #fef3c7; display: flex; justify-content: space-between; align-items: center;">
-            <a href="{{ route('admin.users.orang-tua') }}" style="background: #6b7280; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;">
+        <div class="ot-show-footer">
+            <a href="{{ route('admin.users.orang-tua') }}" style="background: #6b7280; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; justify-content: center;">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a>
-            <div style="display: flex; gap: 10px;">
-                <a href="{{ route('admin.users.edit-orang-tua', $orangTua->id) }}" style="background: #f59e0b; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+            <div class="ot-show-footer-actions">
+                <a href="{{ route('admin.users.edit-orang-tua', $orangTua->id) }}" style="background: #f59e0b; color: white; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; justify-content: center;">
                     <i class="fas fa-edit"></i>
                     Edit Data
                 </a>
-                <form action="{{ route('admin.users.toggle-orang-tua-status', $orangTua->id) }}" method="POST" style="display: inline;">
+                <form action="{{ route('admin.users.toggle-orang-tua-status', $orangTua->id) }}" method="POST" style="display: inline; margin: 0;">
                     @csrf
-                    <button type="submit" style="background: {{ $orangTua->is_active ? '#dc2626' : '#10b981' }}; color: white; padding: 10px 24px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                    <button type="submit" style="background: {{ $orangTua->is_active ? '#dc2626' : '#10b981' }}; color: white; padding: 10px 24px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; justify-content: center; width: 100%;">
                         <i class="fas fa-{{ $orangTua->is_active ? 'ban' : 'check' }}"></i>
                         {{ $orangTua->is_active ? 'Nonaktifkan Akun' : 'Aktifkan Akun' }}
                     </button>

@@ -195,7 +195,12 @@ class GuruPengajarController extends Controller
 
         $fromJadwal = collect();
         foreach ($jadwalList as $jadwal) {
-            foreach ($jadwal->kelas->where('cabang_id', $cabangId) as $kelas) {
+            // Use pivot kelas if available, fallback to kelas_id for legacy records
+            $baseKelas = $jadwal->kelas->isNotEmpty()
+                ? $jadwal->kelas
+                : \App\Models\Kelas::where('id', $jadwal->kelas_id)->get();
+
+            foreach ($baseKelas->where('cabang_id', $cabangId) as $kelas) {
                 $key = $jadwal->guru_id . '-' . $kelas->id . '-' . $jadwal->mata_pelajaran_id;
                 if (!$fromJadwal->has($key)) {
                     $fromJadwal->put($key, [

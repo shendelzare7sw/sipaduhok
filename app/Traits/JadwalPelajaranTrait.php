@@ -341,24 +341,42 @@ trait JadwalPelajaranTrait
             if ($guruConflict) {
                 $sameSubject = $mataPelajaranId && $guruConflict->mata_pelajaran_id == $mataPelajaranId;
 
-                $newBranchIds = Kelas::whereIn('id', $kelasIds)->pluck('cabang_id')->unique();
-                $existingBranchIds = $guruConflict->kelas->pluck('cabang_id')->unique();
-
-                $sameBranch = false;
-                if ($newBranchIds->count() == 1 && $existingBranchIds->count() == 1) {
-                    if ($newBranchIds->first() == $existingBranchIds->first()) {
-                        $sameBranch = true;
-                    }
-                }
-
-                if ($sameSubject && $sameBranch) {
-                    // Allowed (Merge / Combined Class)
+                // Check if the conflicting schedule is also a religion subject
+                $existingMapel = $guruConflict->mataPelajaran;
+                $existingIsAgama = $existingMapel && (
+                    stripos($existingMapel->nama_mapel, 'Agama') !== false ||
+                    stripos($existingMapel->nama_mapel, 'Religi') !== false
+                );
+                // Allow: same teacher teaches different religion denominations at same time
+                // (students are physically in separate groups)
+                if ($isAgama && $existingIsAgama && !$sameSubject) {
+                    // Different denomination subjects — skip guru conflict
                 } else {
-                    $conflictClasses = $guruConflict->kelas->pluck('nama_kelas')->join(', ');
-                    return [
-                        'hasConflict' => true,
-                        'message' => "Guru sedang mengajar di kelas {$conflictClasses} pada jam tersebut"
-                    ];
+                    $newBranchIds = Kelas::whereIn('id', $kelasIds)->pluck('cabang_id')->unique()->filter();
+
+                    // Fallback: if kelas pivot not populated, use kelas_id column
+                    $fallbackKelas = null;
+                    if ($guruConflict->kelas->isNotEmpty()) {
+                        $existingBranchIds = $guruConflict->kelas->pluck('cabang_id')->unique()->filter();
+                    } else {
+                        $fallbackKelas = Kelas::find($guruConflict->kelas_id);
+                        $existingBranchIds = collect($fallbackKelas ? [$fallbackKelas->cabang_id] : [])->filter();
+                    }
+
+                    // sameBranch: new classes and existing classes share at least one common branch
+                    $sameBranch = $newBranchIds->intersect($existingBranchIds)->isNotEmpty();
+
+                    if ($sameSubject && $sameBranch) {
+                        // Allowed (Merge / Combined Class — same subject, same branch)
+                    } else {
+                        $conflictKelasNames = $guruConflict->kelas->isNotEmpty()
+                            ? $guruConflict->kelas->pluck('nama_kelas')->join(', ')
+                            : ($fallbackKelas ? $fallbackKelas->nama_kelas : 'kelas lain');
+                        return [
+                            'hasConflict' => true,
+                            'message' => "Guru sedang mengajar di kelas {$conflictKelasNames} pada jam tersebut"
+                        ];
+                    }
                 }
             }
         }

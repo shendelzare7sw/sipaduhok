@@ -15,6 +15,14 @@ class NotificationService
      */
     public function create($userId, $tipe, $judul, $pesan, $link = null, $data = null)
     {
+        // Normalize link to a relative path so it stays valid across environments
+        // (prevents storing http://sipaduhok.test/... in production DB)
+        if ($link && filter_var($link, FILTER_VALIDATE_URL)) {
+            $path  = parse_url($link, PHP_URL_PATH) ?? '/';
+            $query = parse_url($link, PHP_URL_QUERY);
+            $link  = $path . ($query ? '?' . $query : '');
+        }
+
         $notification = Notification::create([
             'user_id' => $userId,
             'tipe' => $tipe,

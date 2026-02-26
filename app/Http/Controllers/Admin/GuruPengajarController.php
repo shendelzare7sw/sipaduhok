@@ -174,7 +174,12 @@ class GuruPengajarController extends Controller
         // Collect unique guru-kelas-mapel combinations
         $fromJadwal = collect();
         foreach ($jadwalList as $jadwal) {
-            foreach ($jadwal->kelas as $kelas) {
+            // Use pivot kelas if available, fallback to kelas_id for legacy records
+            $kelasList = $jadwal->kelas->isNotEmpty()
+                ? $jadwal->kelas
+                : \App\Models\Kelas::where('id', $jadwal->kelas_id)->get();
+
+            foreach ($kelasList as $kelas) {
                 $key = $jadwal->guru_id . '-' . $kelas->id . '-' . $jadwal->mata_pelajaran_id;
                 if (!$fromJadwal->has($key)) {
                     $fromJadwal->put($key, [

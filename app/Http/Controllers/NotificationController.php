@@ -64,7 +64,7 @@ class NotificationController extends Controller
 
         // Always redirect to the linked menu page if available
         if ($notification->link) {
-            return redirect($notification->link);
+            return redirect($this->resolveNotificationLink($notification->link));
         }
 
         return redirect()->route('notifications.index');
@@ -168,10 +168,28 @@ class NotificationController extends Controller
 
         // Redirect to notification link if exists
         if ($notification->link) {
-            return redirect($notification->link);
+            return redirect($this->resolveNotificationLink($notification->link));
         }
 
         return back();
+    }
+
+    /**
+     * Normalize a notification link to a relative path.
+     * Strips the domain so old links stored with the wrong domain (e.g. sipaduhok.test)
+     * still work correctly in production.
+     */
+    private function resolveNotificationLink(string $link): string
+    {
+        // If it's an absolute URL, extract only the path + query
+        if (filter_var($link, FILTER_VALIDATE_URL)) {
+            $path  = parse_url($link, PHP_URL_PATH) ?? '/';
+            $query = parse_url($link, PHP_URL_QUERY);
+            return $path . ($query ? '?' . $query : '');
+        }
+
+        // Already a relative path — return as-is
+        return $link;
     }
 
     /**
