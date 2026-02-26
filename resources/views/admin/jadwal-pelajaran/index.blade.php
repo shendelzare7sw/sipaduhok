@@ -322,6 +322,37 @@
                 font-size: 28px;
             }
         }
+
+        /* ── Fix Modal Close Button Clipping ── */
+        .modal-content[style*="overflow: hidden"],
+        .modal-content[style*="overflow:hidden"] {
+            overflow: visible !important;
+        }
+
+        .modal-content[style*="border-radius: 12px"] > .modal-header:first-child {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .modal .btn-close {
+            opacity: 0.85;
+            padding: 0.75rem;
+            margin: -0.25rem -0.25rem -0.25rem auto;
+            z-index: 2;
+        }
+
+        .modal .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* ── Fix Modal Header Text Readability ── */
+        .modal-header.text-white,
+        .modal-header.text-white .modal-title,
+        .modal-header.text-white h6,
+        .modal-header.text-white h5,
+        .modal-header.text-white i {
+            color: #ffffff !important;
+        }
     </style>
 @endsection
 
