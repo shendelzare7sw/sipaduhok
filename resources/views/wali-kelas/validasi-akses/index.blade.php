@@ -170,10 +170,10 @@
                         <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="small fw-bold text-muted text-uppercase">Aksi Terpilih:</span>
-                                <button type="submit" formaction="{{ route('wali.validasi-akses.bulk-validasi-ujian') }}" class="btn btn-success btn-sm shadow-sm" onclick="return confirm('Validasi akses UJIAN untuk siswa terpilih?')">
+                                <button type="button" id="btnBulkUjian" class="btn btn-success btn-sm shadow-sm">
                                     <i class="fas fa-check-double me-1"></i> Validasi Ujian
                                 </button>
-                                <button type="submit" formaction="{{ route('wali.validasi-akses.bulk-validasi-rapor') }}" class="btn btn-info btn-sm shadow-sm text-white" onclick="return confirm('Validasi akses RAPOR untuk siswa terpilih?')">
+                                <button type="button" id="btnBulkRapor" class="btn btn-info btn-sm shadow-sm text-white">
                                     <i class="fas fa-file-contract me-1"></i> Validasi Rapor
                                 </button>
                             </div>
@@ -296,6 +296,86 @@
 </div>
 </div>
 
+{{-- MODAL PERINGATAN PILIH SISWA --}}
+<div class="modal fade" id="peringatanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p class="mb-0 fw-bold">Pilih minimal 1 siswa terlebih dahulu.</p>
+            </div>
+            <div class="modal-footer bg-light justify-content-center">
+                <button type="button" class="btn btn-warning fw-bold" data-bs-dismiss="modal">
+                    <i class="fas fa-check me-1"></i> Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL KONFIRMASI VALIDASI TERPILIH UJIAN --}}
+<div class="modal fade" id="validasiTerpilihUjianModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-check-double me-2"></i>Konfirmasi Validasi Ujian
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-check-double fa-3x text-success mb-3"></i>
+                <h6 class="fw-bold mb-2">Validasi akses UJIAN untuk siswa terpilih?</h6>
+                <p class="text-muted small mb-0">
+                    Hanya siswa yang sudah dicentang yang akan divalidasi.
+                </p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-success fw-bold" id="btnKonfirmasiBulkUjian">
+                    <i class="fas fa-check me-1"></i> Ya, Validasi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL KONFIRMASI VALIDASI TERPILIH RAPOR --}}
+<div class="modal fade" id="validasiTerpilihRaporModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-file-contract me-2"></i>Konfirmasi Validasi Rapor
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-file-contract fa-3x text-info mb-3"></i>
+                <h6 class="fw-bold mb-2">Validasi akses RAPOR untuk siswa terpilih?</h6>
+                <p class="text-muted small mb-0">
+                    Hanya siswa yang sudah dicentang yang akan divalidasi.
+                </p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-info fw-bold" id="btnKonfirmasiBulkRapor">
+                    <i class="fas fa-check me-1"></i> Ya, Validasi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- MODAL KONFIRMASI VALIDASI SEMUA UJIAN --}}
 <div class="modal fade" id="validasiSemuaUjianModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -368,14 +448,41 @@
     document.addEventListener('DOMContentLoaded', function() {
         const selectAll = document.getElementById('selectAll');
         const checkboxes = document.querySelectorAll('.student-checkbox');
+        const bulkForm = document.getElementById('bulkForm');
+
+        const peringatanModal = new bootstrap.Modal(document.getElementById('peringatanModal'));
+        const terpilihUjianModal = new bootstrap.Modal(document.getElementById('validasiTerpilihUjianModal'));
+        const terpilihRaporModal = new bootstrap.Modal(document.getElementById('validasiTerpilihRaporModal'));
 
         if (selectAll) {
             selectAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => {
-                    cb.checked = this.checked;
-                });
+                checkboxes.forEach(cb => { cb.checked = this.checked; });
             });
         }
+
+        function getSelectedCount() {
+            return document.querySelectorAll('.student-checkbox:checked').length;
+        }
+
+        document.getElementById('btnBulkUjian')?.addEventListener('click', function() {
+            if (getSelectedCount() === 0) { peringatanModal.show(); return; }
+            terpilihUjianModal.show();
+        });
+
+        document.getElementById('btnBulkRapor')?.addEventListener('click', function() {
+            if (getSelectedCount() === 0) { peringatanModal.show(); return; }
+            terpilihRaporModal.show();
+        });
+
+        document.getElementById('btnKonfirmasiBulkUjian')?.addEventListener('click', function() {
+            bulkForm.action = '{{ route("wali.validasi-akses.bulk-validasi-ujian") }}';
+            bulkForm.submit();
+        });
+
+        document.getElementById('btnKonfirmasiBulkRapor')?.addEventListener('click', function() {
+            bulkForm.action = '{{ route("wali.validasi-akses.bulk-validasi-rapor") }}';
+            bulkForm.submit();
+        });
     });
 </script>
 @endsection

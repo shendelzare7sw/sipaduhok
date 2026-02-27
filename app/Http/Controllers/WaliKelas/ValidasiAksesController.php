@@ -90,8 +90,7 @@ class ValidasiAksesController extends Controller
         } elseif ($filterStatus == 'ujian_selesai') {
             $siswaList = $siswaList->where('validasi_ujian_wali', true);
         } elseif ($filterStatus == 'rapor_pending') {
-            $siswaList = $siswaList->where('validasi_rapor_bendahara', true)
-                ->where('validasi_rapor_wali', false);
+            $siswaList = $siswaList->where('validasi_rapor_wali', false);
         } elseif ($filterStatus == 'rapor_selesai') {
             $siswaList = $siswaList->where('validasi_rapor_wali', true);
         }
@@ -109,7 +108,6 @@ class ValidasiAksesController extends Controller
                 ->count(),
             'raporPending' => Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
-                ->where('validasi_rapor_bendahara', true)
                 ->where('validasi_rapor_wali', false)
                 ->count(),
             'raporValid' => Siswa::where('kelas_id', $kelas->id)
@@ -171,17 +169,13 @@ class ValidasiAksesController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
-        if (!$siswa->validasi_rapor_bendahara) {
-            return back()->with('error', 'Akses rapor belum divalidasi oleh Bendahara!');
-        }
-
         $siswa->update([
             'validasi_rapor_wali' => true,
             'tanggal_validasi_rapor_wali' => now(),
             'validasi_rapor_oleh' => auth()->id(),
         ]);
 
-        return back()->with('success', "Akses rapor untuk {$siswa->nama_lengkap} berhasil divalidasi!");
+        return back()->with('success', "Rapor {$siswa->nama_lengkap} berhasil dikirim ke Ketua PKBM!");
     }
 
     /**
@@ -246,7 +240,7 @@ class ValidasiAksesController extends Controller
         foreach ($request->siswa_ids as $siswaId) {
             $siswa = Siswa::find($siswaId);
             
-            if ($siswa && $siswa->validasi_rapor_bendahara && !$siswa->validasi_rapor_wali) {
+            if ($siswa && !$siswa->validasi_rapor_wali) {
                 $siswa->update([
                     'validasi_rapor_wali' => true,
                     'tanggal_validasi_rapor_wali' => now(),
@@ -302,7 +296,6 @@ class ValidasiAksesController extends Controller
 
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
-            ->where('validasi_rapor_bendahara', true)
             ->where('validasi_rapor_wali', false)
             ->get();
 
@@ -314,6 +307,6 @@ class ValidasiAksesController extends Controller
             ]);
         }
 
-        return back()->with('success', "Berhasil validasi akses rapor untuk {$siswaList->count()} siswa!");
+        return back()->with('success', "Berhasil mengirim {$siswaList->count()} rapor ke Ketua PKBM!");
     }
 }

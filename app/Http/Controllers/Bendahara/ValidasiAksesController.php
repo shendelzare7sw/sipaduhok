@@ -211,7 +211,7 @@ class ValidasiAksesController extends Controller
             $notificationService->notifyValidasiAksesRapor($siswa, 'disetujui');
 
             DB::commit();
-            return redirect()->back()->with('success', "Akses rapor untuk {$siswa->nama_lengkap} berhasil divalidasi.");
+            return redirect()->back()->with('success', "Akses rapor untuk {$siswa->nama_lengkap} berhasil divalidasi. Wali kelas kini dapat menerbitkan rapor.");
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

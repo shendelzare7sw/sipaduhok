@@ -112,6 +112,7 @@
     border-radius: 8px;
     font-size: 14px;
     width: 220px;
+    max-width: 100%;
     transition: all 0.3s;
 }
 
@@ -330,6 +331,75 @@
     font-size: 12px;
     max-width: 150px;
 }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 767.98px) {
+    .search-box {
+        width: 100% !important;
+    }
+    .search-box input {
+        width: 100% !important;
+    }
+    .filter-section {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .filter-section .filter-select,
+    .filter-section .btn,
+    .filter-section > label,
+    .filter-section .dropdown {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+    .filter-section .dropdown button {
+        width: 100% !important;
+    }
+    /* Table → Card per row */
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent !important; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        min-height: 44px;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td.mobile-card-head {
+        background: #f8fafc;
+        padding: 14px;
+        border-bottom: 2px solid #e5e7eb !important;
+        justify-content: flex-start;
+    }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        padding-right: 10px;
+        min-width: 60px;
+    }
+    .table-card-mobile tbody td.mobile-card-actions {
+        border-bottom: none !important;
+        justify-content: flex-end;
+    }
+    .stat-number { font-size: 26px; }
+    .col-md-2-4 { flex: 0 0 50% !important; max-width: 50% !important; }
+}
 </style>
 
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -524,7 +594,7 @@
             {{-- Table --}}
             @if($siswaList->count() > 0)
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-card-mobile">
                         <thead>
                             <tr>
                                 <th>Siswa</th>
@@ -538,7 +608,7 @@
                         <tbody>
                             @foreach($siswaList as $siswa)
                             <tr>
-                                <td>
+                                <td class="mobile-card-head">
                                     <div class="siswa-info">
                                         <div class="siswa-avatar {{ $siswa->jenis_kelamin == 'P' ? 'female' : '' }}">
                                             {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
@@ -549,13 +619,13 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="JK">
                                     <span class="badge {{ $siswa->jenis_kelamin == 'L' ? 'badge-l' : 'badge-p' }}">
                                         {{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                     </span>
                                 </td>
-                                <td>{{ $siswa->cabang->nama_cabang ?? '-' }}</td>
-                                <td>
+                                <td data-label="Cabang">{{ $siswa->cabang->nama_cabang ?? '-' }}</td>
+                                <td data-label="Kelas">
                                     @if($siswa->kelas)
                                         <span class="kelas-badge">
                                             <i class="fas fa-graduation-cap"></i>
@@ -565,7 +635,7 @@
                                         <span class="no-kelas">Belum ada kelas</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     @php
                                         $statusClass = [
                                             'aktif' => 'badge-success',
@@ -576,7 +646,7 @@
                                     @endphp
                                     <span class="badge {{ $statusClass }}">{{ ucfirst($siswa->status) }}</span>
                                 </td>
-                                <td>
+                                <td class="mobile-card-actions">
                                     <div class="action-buttons">
                                         <a href="{{ route('admin.manajemen-siswa.show', $siswa) }}" class="btn btn-icon btn-light-primary" title="Detail">
                                             <i class="fas fa-eye"></i>

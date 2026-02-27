@@ -12,6 +12,9 @@ use App\Models\Nilai;
 use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\WaliKelas\NilaiPerSiswaTemplateExport;
+use App\Imports\WaliKelas\NilaiPerSiswaImport;
 
 class NilaiController extends Controller
 {
@@ -623,5 +626,158 @@ class NilaiController extends Controller
             'rata_uh' => $nilai->rata_uh,
             'nilai_akhir' => $nilai->nilai_akhir,
         ]);
+    }
+
+    /**
+     * Download template Excel untuk import nilai per siswa
+     */
+    public function downloadTemplate(Request $request, $siswaId)
+    {
+        $wali = $this->getTenagaPendidik();
+
+        if (!$wali) {
+            return redirect()->route('wali.dashboard')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
+
+        if (!$kelas) {
+            return redirect()->route('wali.nilai.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
+
+        $siswa = Siswa::where('id', $siswaId)
+            ->where('kelas_id', $kelas->id)
+            ->firstOrFail();
+
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $currentSemester  = Nilai::getCurrentSemester();
+
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $currentSemester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+
+        $mataPelajaranList = MataPelajaran::where(function ($q) use ($kelas, $existingNilaiMapelIds) {
+                $q->where('jenjang', $kelas->jenjang)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
+            ->where('is_active', true)
+            ->orderBy('nama_mapel', 'asc')
+            ->get()
+            ->filter(fn($mapel) => $siswa->canAccessMapel($mapel))
+            ->values();
+
+        $isKelasAkhir = $this->isKelasAkhir($kelas->nama_kelas);
+
+        $fileName = 'Template_Nilai_' . \Str::slug($siswa->nama_lengkap) . '_' . $kelas->nama_kelas . '.xlsx';
+
+        return Excel::download(
+            new NilaiPerSiswaTemplateExport($mataPelajaranList, $siswa, $kelas, $currentSemester, $isKelasAkhir),
+            $fileName
+        );
+    }
+
+    /**
+     * Import nilai per siswa dari file Excel
+     */
+    public function importExcel(Request $request, $siswaId)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:5120',
+        ]);
+
+        $wali = $this->getTenagaPendidik();
+
+        if (!$wali) {
+            return redirect()->route('wali.dashboard')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
+
+        if (!$kelas) {
+            return redirect()->route('wali.nilai.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
+
+        $siswa = Siswa::where('id', $siswaId)
+            ->where('kelas_id', $kelas->id)
+            ->firstOrFail();
+
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $currentSemester  = Nilai::getCurrentSemester();
+
+        $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
+            ->where('semester', $currentSemester)
+            ->pluck('mata_pelajaran_id')
+            ->unique()
+            ->toArray();
+
+        $mapelCollection = MataPelajaran::where(function ($q) use ($kelas, $existingNilaiMapelIds) {
+                $q->where('jenjang', $kelas->jenjang)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
+            ->where('is_active', true)
+            ->get()
+            ->filter(fn($mapel) => $siswa->canAccessMapel($mapel))
+            ->values();
+
+        try {
+            $import = new NilaiPerSiswaImport(
+                $siswa->id,
+                $kelas->id,
+                $tahunAjaranAktif->id,
+                $currentSemester,
+                $wali->id,
+                $mapelCollection
+            );
+
+            Excel::import($import, $request->file('file'));
+
+            $errors   = $import->getErrors();
+            $failures = $import->getFailures();
+
+            if (!empty($errors) || !empty($failures)) {
+                $messages = array_merge(
+                    $errors,
+                    array_map(fn($f) => "Baris {$f['row']}: " . implode(', ', $f['errors']), $failures)
+                );
+                return redirect()
+                    ->route('wali.nilai.edit', $siswaId)
+                    ->with('warning', 'Import selesai dengan peringatan: ' . implode(' | ', array_slice($messages, 0, 5)));
+            }
+
+            return redirect()
+                ->route('wali.nilai.edit', $siswaId)
+                ->with('success', 'Import nilai berhasil.');
+
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('wali.nilai.edit', $siswaId)
+                ->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper: check if a class is a final year class (kelas 9 or 12).
+     */
+    private function isKelasAkhir(string $namaKelas): bool
+    {
+        $nama = strtolower($namaKelas);
+        return str_contains($nama, '9')  || str_contains($nama, '12') ||
+               str_contains($nama, 'ix') || str_contains($nama, 'xii');
     }
 }

@@ -977,6 +977,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{siswa}', [WaliKelasNilaiController::class, 'show'])->name('show');
             Route::get('/{siswa}/print', [WaliKelasNilaiController::class, 'printSiswa'])->name('print-siswa');
             Route::get('/{siswa}/edit', [WaliKelasNilaiController::class, 'edit'])->name('edit');
+            Route::get('/{siswa}/download-template', [WaliKelasNilaiController::class, 'downloadTemplate'])->name('download-template');
+            Route::post('/{siswa}/import', [WaliKelasNilaiController::class, 'importExcel'])->name('import');
             Route::put('/{siswa}', [WaliKelasNilaiController::class, 'update'])->name('update');
             Route::post('/{nilaiId}/clear', [WaliKelasNilaiController::class, 'clearNilai'])->name('clear');
         });
@@ -998,6 +1000,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{rapor}/export-excel', [RaporController::class, 'exportExcel'])->name('export-excel'); // NEW
             Route::post('/apply-template', [RaporController::class, 'applyTemplate'])->name('apply-template'); // NEW
             Route::post('/apply-template-all', [RaporController::class, 'applyTemplateToAll'])->name('apply-template-all'); // NEW
+            // Kirim validasi ke Ketua PKBM
+            Route::post('/{rapor}/kirim-validasi', [RaporController::class, 'kirimValidasi'])->name('kirim-validasi');
+            Route::post('/{rapor}/batalkan-kirim-validasi', [RaporController::class, 'batalkanKirimValidasi'])->name('batalkan-kirim-validasi');
+            Route::post('/kirim-validasi-semua', [RaporController::class, 'kirimValidasiSemua'])->name('kirim-validasi-semua');
         });
 
         // Validasi Akses

@@ -92,7 +92,7 @@ class PromotionService
 
         $totalMapel = $gradesByMapel->count(); // Jumlah mapel unik
         $tuntasCount = 0;
-        $jenjang = $siswa->kelas->jenjang ?? 'SMP';
+        $jenjang = $siswa->kelas->jenjang ?? 'SMA';
 
         foreach ($gradesByMapel as $mapelId => $semesterGrades) {
             // Rata-rata nilai_akhir dari semester ganjil + genap

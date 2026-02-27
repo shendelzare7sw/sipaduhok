@@ -72,13 +72,12 @@
                                 <button type="button" class="btn btn-info btn-sm" onclick="editTemplate({{ json_encode($template) }})">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <form action="{{ route('wali.template-capaian.destroy', $template->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus template ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal" data-bs-target="#hapusTemplateModal"
+                                    data-action="{{ route('wali.template-capaian.destroy', $template->id) }}"
+                                    data-nama="{{ $template->nama_template }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         @empty
@@ -179,6 +178,38 @@
     </div>
 </div>
 
+<!-- Modal Hapus Template -->
+<div class="modal fade" id="hapusTemplateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-trash me-2"></i>Hapus Template
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                <h6 class="fw-bold mb-2">Hapus template ini?</h6>
+                <p class="text-muted small mb-1">Template: <strong id="namaTemplateDihapus"></strong></p>
+                <p class="text-muted small mb-0">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <form id="formHapusTemplate" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="fas fa-trash me-1"></i> Ya, Hapus
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 function editTemplate(template) {
@@ -188,6 +219,12 @@ function editTemplate(template) {
     document.getElementById('edit_template_text').value = template.template_text;
     $('#editModal').modal('show');
 }
+
+document.getElementById('hapusTemplateModal')?.addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('formHapusTemplate').action = btn.dataset.action;
+    document.getElementById('namaTemplateDihapus').textContent = btn.dataset.nama;
+});
 </script>
 @endpush
 @endsection

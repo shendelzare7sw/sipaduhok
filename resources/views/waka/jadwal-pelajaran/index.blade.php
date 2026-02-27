@@ -353,6 +353,114 @@
         .modal-header.text-white i {
             color: #ffffff !important;
         }
+
+        /* ── Mobile Responsive: Table Card Layout ── */
+        @media (max-width: 767.98px) {
+            .btn-scroll-mobile {
+                overflow-x: auto;
+                flex-wrap: nowrap !important;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 4px;
+            }
+            .btn-scroll-mobile::-webkit-scrollbar { height: 3px; }
+            .btn-scroll-mobile::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+            .filter-section {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            .filter-section .form-select,
+            .filter-section .btn {
+                width: 100% !important;
+            }
+
+            .table-card-mobile thead { display: none; }
+            .table-card-mobile tbody tr {
+                display: block;
+                position: relative;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                overflow: hidden;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+                background: #fff;
+                transition: border-color 0.15s, background 0.15s;
+            }
+            .table-card-mobile tbody tr.card-selected {
+                border-color: #696cff !important;
+                box-shadow: 0 0 0 2px rgba(105,108,255,0.18) !important;
+            }
+            .table-card-mobile tbody tr.card-selected td.mobile-card-head {
+                background: #eeeeff !important;
+            }
+            .table-card-mobile tbody td {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 14px;
+                border: none !important;
+                border-bottom: 1px solid #f3f4f6 !important;
+                min-height: 44px;
+                font-size: 13px;
+            }
+            .table-card-mobile tbody td.mobile-card-head {
+                background: #f8fafc;
+                padding: 12px 14px;
+                padding-right: 48px;
+                border-bottom: 2px solid #e5e7eb !important;
+                justify-content: flex-start;
+                gap: 10px;
+                font-size: 14px;
+            }
+            /* Checkbox floats top-right inside card */
+            .table-card-mobile tbody td.mobile-card-checkbox {
+                position: absolute;
+                top: 10px;
+                right: 12px;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                border: none !important;
+                background: transparent;
+                min-height: auto;
+                width: 28px;
+                z-index: 2;
+            }
+            .table-card-mobile tbody td.mobile-card-checkbox .form-check-input {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+                margin: 0;
+            }
+            .table-card-mobile tbody td[data-label]::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 10px;
+                text-transform: uppercase;
+                color: #9ca3af;
+                letter-spacing: 0.5px;
+                flex-shrink: 0;
+                padding-right: 10px;
+                min-width: 55px;
+            }
+            .table-card-mobile tbody td.mobile-card-full {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .table-card-mobile tbody td.mobile-card-full::before { min-width: unset; }
+            .table-card-mobile tbody td.mobile-card-hide { display: none !important; }
+            .table-card-mobile tbody td.mobile-card-actions {
+                border-bottom: none !important;
+                justify-content: flex-end;
+                padding: 10px 14px;
+            }
+            /* Mobile select-all bar */
+            .mobile-select-bar { display: flex; align-items: center; gap: 8px; }
+            /* Bulk action bar wraps nicely on mobile */
+            .bulk-action-bar { flex-wrap: wrap; }
+        }
     </style>
 @endsection
 
@@ -417,7 +525,7 @@
                 </h5>
                 <small class="text-muted">Kelola dan atur jadwal mengajar untuk setiap kelas</small>
             </div>
-            <div class="d-flex gap-2 flex-wrap">
+            <div class="d-flex gap-2 flex-wrap btn-scroll-mobile">
                 <a href="{{ route('waka.pengaturan-istirahat.index') }}" class="btn btn-warning btn-sm">
                     <i class="fas fa-coffee me-1"></i> Atur Waktu Istirahat
                 </a>
@@ -502,7 +610,15 @@
             @if($jadwalList->count() > 0)
                 <form id="bulk-form-jadwal">
                     @csrf
-                    <div class="mb-3 d-flex gap-2 align-items-center">
+                    <div class="mb-3 d-flex gap-2 align-items-center bulk-action-bar">
+                        {{-- Mobile: Select All (only visible on mobile, desktop uses thead checkbox) --}}
+                        <div class="d-flex align-items-center gap-2 d-md-none mobile-select-bar">
+                            <input type="checkbox" id="mobile-select-all-jadwal" class="form-check-input"
+                                style="width:18px;height:18px;cursor:pointer;" onclick="mobileToggleSelectAll()">
+                            <label for="mobile-select-all-jadwal" class="mb-0 small fw-semibold text-secondary" style="cursor:pointer;">
+                                Pilih Semua
+                            </label>
+                        </div>
                         <button type="button" class="btn btn-danger btn-sm" onclick="bulkDelete()" id="bulkDeleteBtn"
                             style="display: none;">
                             <i class="fas fa-trash me-1"></i> Hapus Terpilih (<span id="selectedCount">0</span>)
@@ -513,7 +629,7 @@
                         </button>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover jadwal-table">
+                        <table class="table table-hover jadwal-table table-card-mobile">
                             <thead>
                                 <tr>
                                     <th style="width: 40px;">
@@ -532,7 +648,7 @@
                             <tbody>
                                 @foreach($jadwalList as $jadwal)
                                     <tr>
-                                        <td class="text-center align-middle">
+                                        <td class="text-center align-middle mobile-card-checkbox">
                                             <input type="checkbox" name="jadwal_ids[]" value="{{ $jadwal->id }}"
                                                 class="form-check-input jadwal-checkbox" onchange="updateBulkButtons()"
                                                 data-mapel="{{ $jadwal->mataPelajaran->nama_mapel }}"
@@ -540,27 +656,27 @@
                                                 data-hari="{{ $jadwal->hari }}"
                                                 data-jam="{{ $jadwal->jam_mulai->format('H:i') }}-{{ $jadwal->jam_selesai->format('H:i') }}">
                                         </td>
-                                        <td>
+                                        <td class="mobile-card-head">
                                             <span class="hari-badge hari-{{ strtolower($jadwal->hari) }}">
                                                 {{ $jadwal->hari }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Jam">
                                             <span class="jam-badge">
                                                 {{ $jadwal->jam_mulai->format('H:i') }} -
                                                 {{ $jadwal->jam_selesai->format('H:i') }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Kelas">
                                             <div class="kelas-chip">
                                                 <i class="fas fa-school"></i>
                                                 <span>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</span>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Mapel">
                                             <strong>{{ $jadwal->mataPelajaran->nama_mapel }}</strong>
                                         </td>
-                                        <td>
+                                        <td data-label="Guru">
                                             @if($jadwal->guru)
                                                 <div class="guru-info">
                                                     <div class="guru-avatar-sm">
@@ -572,14 +688,14 @@
                                                 <span class="text-muted fst-italic">Belum ditugaskan</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td data-label="Status">
                                             @if($jadwal->status == 'aktif')
                                                 <span class="status-badge status-aktif">Aktif</span>
                                             @else
                                                 <span class="status-badge status-kosong">Kosong</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: center;">
+                                        <td class="mobile-card-actions" style="text-align: center;">
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
                                                     data-bs-target="#gantiGuruModal{{ $jadwal->id }}" title="Ganti Guru">
@@ -1019,19 +1135,27 @@
             });
         }
 
-        // Toggle select all checkboxes
+        // Toggle select all (desktop thead checkbox)
         function toggleSelectAllJadwal() {
             const selectAll = document.getElementById('select-all-jadwal');
             const checkboxes = document.querySelectorAll('.jadwal-checkbox');
-
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAll.checked;
-            });
-
+            checkboxes.forEach(checkbox => { checkbox.checked = selectAll.checked; });
+            const mobileSelectAll = document.getElementById('mobile-select-all-jadwal');
+            if (mobileSelectAll) mobileSelectAll.checked = selectAll.checked;
             updateBulkButtons();
         }
 
-        // Update bulk action buttons visibility
+        // Toggle select all (mobile "Pilih Semua" checkbox)
+        function mobileToggleSelectAll() {
+            const mobileSelectAll = document.getElementById('mobile-select-all-jadwal');
+            const checkboxes = document.querySelectorAll('.jadwal-checkbox');
+            checkboxes.forEach(cb => { cb.checked = mobileSelectAll.checked; });
+            const desktopSelectAll = document.getElementById('select-all-jadwal');
+            if (desktopSelectAll) desktopSelectAll.checked = mobileSelectAll.checked;
+            updateBulkButtons();
+        }
+
+        // Update bulk action buttons visibility + card highlight
         function updateBulkButtons() {
             const checkboxes = document.querySelectorAll('.jadwal-checkbox:checked');
             const count = checkboxes.length;
@@ -1048,10 +1172,19 @@
                 bulkStatusBtn.style.display = 'none';
             }
 
-            // Update select all checkbox state
+            // Sync desktop select-all checkbox state
             const selectAll = document.getElementById('select-all-jadwal');
             const allCheckboxes = document.querySelectorAll('.jadwal-checkbox');
-            selectAll.checked = allCheckboxes.length > 0 && count === allCheckboxes.length;
+            const allChecked = allCheckboxes.length > 0 && count === allCheckboxes.length;
+            selectAll.checked = allChecked;
+            const mobileSelectAll = document.getElementById('mobile-select-all-jadwal');
+            if (mobileSelectAll) mobileSelectAll.checked = allChecked;
+
+            // Highlight selected cards on mobile
+            allCheckboxes.forEach(cb => {
+                const tr = cb.closest('tr');
+                if (tr) tr.classList.toggle('card-selected', cb.checked);
+            });
         }
 
         // Bulk delete function

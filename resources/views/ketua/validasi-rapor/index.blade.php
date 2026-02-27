@@ -2,7 +2,7 @@
 
 @section('title', 'Validasi Akses Rapor')
 @section('page-title', 'Validasi Akses Rapor - Ketua PKBM')
-@section('page-subtitle', 'Level 3 Validation (Final Approval)')
+@section('page-subtitle', 'Tinjau dan setujui rapor yang dikirim wali kelas')
 
 @section('sidebar-menu')
     @include('ketua.partials.sneat-sidebar-menu')
@@ -10,26 +10,17 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800">Validasi Akses Rapor - Ketua PKBM</h1>
-            <p class="text-muted mb-0">Level 3 Validation (Final Approval)</p>
-        </div>
-    </div>
 
-    <!-- Stats Cards -->
+    {{-- Stats Cards --}}
     <div class="row mb-4">
         <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card border-start border-warning border-4 shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Menunggu Validasi Ketua
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['pendingTotal'] }}</div>
-                            <small class="text-muted">Siswa yang sudah divalidasi Bendahara & Wali Kelas</small>
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Menunggu Validasi Ketua</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">{{ $stats['pendingTotal'] }}</div>
+                            <small class="text-muted">Rapor yang sudah dikirim wali kelas</small>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clock fa-2x text-gray-300"></i>
@@ -38,17 +29,14 @@
                 </div>
             </div>
         </div>
-
         <div class="col-xl-6 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+            <div class="card border-start border-success border-4 shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Divalidasi Hari Ini
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['validatedToday'] }}</div>
-                            <small class="text-muted">Siswa yang divalidasi oleh Ketua hari ini</small>
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Divalidasi Hari Ini</div>
+                            <div class="h5 mb-0 fw-bold text-gray-800">{{ $stats['validatedToday'] }}</div>
+                            <small class="text-muted">Siswa yang divalidasi hari ini</small>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-check-circle fa-2x text-gray-300"></i>
@@ -59,160 +47,131 @@
         </div>
     </div>
 
-    <!-- Filter & Search -->
+    {{-- Filter & Search --}}
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filter & Pencarian</h6>
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-filter me-2"></i>Filter & Pencarian</h6>
         </div>
         <div class="card-body">
             <form method="GET" action="{{ route('ketua.validasi-rapor.index') }}">
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Kelas</label>
-                            <select name="kelas_id" class="form-control">
-                                <option value="">Semua Kelas</option>
-                                @foreach($kelasList as $kelas)
-                                    <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                                        {{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <label class="form-label small fw-bold">Kelas</label>
+                        <select name="kelas_id" class="form-select">
+                            <option value="">Semua Kelas</option>
+                            @foreach($kelasList as $kelas)
+                                <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                    {{ $kelas->nama_kelas }} - {{ $kelas->cabang->nama_cabang ?? '' }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
-
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Status Ketua</label>
-                            <select name="status_ketua" class="form-control">
-                                <option value="">Semua Status</option>
-                                <option value="pending" {{ request('status_ketua') == 'pending' ? 'selected' : '' }}>Belum Divalidasi</option>
-                                <option value="validated" {{ request('status_ketua') == 'validated' ? 'selected' : '' }}>Sudah Divalidasi</option>
-                            </select>
-                        </div>
+                        <label class="form-label small fw-bold">Status Validasi Ketua</label>
+                        <select name="status_ketua" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="pending" {{ request('status_ketua') == 'pending' ? 'selected' : '' }}>Belum Divalidasi</option>
+                            <option value="validated" {{ request('status_ketua') == 'validated' ? 'selected' : '' }}>Sudah Divalidasi</option>
+                        </select>
                     </div>
-
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Pencarian (Nama/NIS)</label>
-                            <input type="text" name="search" class="form-control" placeholder="Cari nama atau NIS..." value="{{ request('search') }}">
-                        </div>
+                        <label class="form-label small fw-bold">Cari Nama / NIS</label>
+                        <input type="text" name="search" class="form-control" placeholder="Cari..." value="{{ request('search') }}">
                     </div>
                 </div>
-
-                <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Filter
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary shadow-sm">
+                        <i class="fas fa-search me-1"></i> Filter
                     </button>
-                    <a href="{{ route('ketua.validasi-rapor.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-redo"></i> Reset
+                    <a href="{{ route('ketua.validasi-rapor.index') }}" class="btn btn-secondary shadow-sm">
+                        <i class="fas fa-redo me-1"></i> Reset
                     </a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Data Table -->
+    {{-- Data Table --}}
     <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Daftar Siswa</h6>
-            <div>
-                <button type="button" class="btn btn-success btn-sm" onclick="validasiSemua()">
-                    <i class="fas fa-check-double"></i> Validasi Semua
+        <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Daftar Siswa</h6>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-success btn-sm shadow-sm" onclick="openValidasiSemuaModal()">
+                    <i class="fas fa-check-double me-1"></i> Validasi Semua
                 </button>
-                <button type="button" class="btn btn-info btn-sm" onclick="validasiTerpilih()">
-                    <i class="fas fa-check"></i> Validasi Terpilih
+                <button type="button" class="btn btn-info btn-sm shadow-sm" onclick="openValidasiTerpilihModal()">
+                    <i class="fas fa-check me-1"></i> Validasi Terpilih
                 </button>
             </div>
         </div>
-        <div class="card-body">
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show">
-                    {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
-                    {{ session('error') }}
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                </div>
-            @endif
-
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="dataTable">
-                    <thead class="thead-light">
+                <table class="table table-hover mb-0" id="dataTable">
+                    <thead class="table-light">
                         <tr>
-                            <th width="30">
-                                <input type="checkbox" id="checkAll">
+                            <th width="40" class="text-center">
+                                <input type="checkbox" id="checkAll" class="form-check-input">
                             </th>
-                            <th width="50">No</th>
+                            <th width="50" class="text-center">No</th>
                             <th>NIS</th>
                             <th>Nama Lengkap</th>
                             <th>Kelas</th>
-                            <th width="80" class="text-center">Bendahara</th>
-                            <th width="80" class="text-center">Wali Kelas</th>
-                            <th width="80" class="text-center">Ketua PKBM</th>
-                            <th width="150" class="text-center">Aksi</th>
+                            <th width="90" class="text-center">Wali Kelas</th>
+                            <th width="110" class="text-center">Status Ketua</th>
+                            <th width="180" class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($siswaList as $siswa)
                         <tr>
-                            <td>
+                            <td class="text-center align-middle">
                                 @if(!$siswa->validasi_rapor_ketua)
-                                <input type="checkbox" class="siswa-checkbox" value="{{ $siswa->id }}">
+                                    <input type="checkbox" class="siswa-checkbox form-check-input" value="{{ $siswa->id }}">
                                 @endif
                             </td>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $siswa->nis }}</td>
-                            <td>{{ $siswa->nama_lengkap }}</td>
-                            <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                            <td class="text-center">
-                                @if($siswa->validasi_rapor_bendahara)
-                                    <span class="badge badge-success"><i class="fas fa-check"></i></span>
-                                @else
-                                    <span class="badge badge-secondary"><i class="fas fa-times"></i></span>
-                                @endif
+                            <td class="text-center align-middle fw-bold text-muted">{{ $loop->iteration }}</td>
+                            <td class="align-middle fw-bold">{{ $siswa->nis }}</td>
+                            <td class="align-middle">
+                                <div class="fw-bold">{{ $siswa->nama_lengkap }}</div>
                             </td>
-                            <td class="text-center">
+                            <td class="align-middle">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
+                            <td class="text-center align-middle">
                                 @if($siswa->validasi_rapor_wali)
-                                    <span class="badge badge-success"><i class="fas fa-check"></i></span>
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Sudah</span>
                                 @else
-                                    <span class="badge badge-secondary"><i class="fas fa-times"></i></span>
+                                    <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Belum</span>
                                 @endif
                             </td>
-                            <td class="text-center">
+                            <td class="text-center align-middle">
                                 @if($siswa->validasi_rapor_ketua)
-                                    <span class="badge badge-success"><i class="fas fa-check"></i> Valid</span>
-                                    <br><small class="text-muted">{{ $siswa->tanggal_validasi_rapor_ketua ? $siswa->tanggal_validasi_rapor_ketua->format('d/m/Y') : '' }}</small>
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> Valid</span>
+                                    <div><small class="text-muted">{{ $siswa->tanggal_validasi_rapor_ketua ? $siswa->tanggal_validasi_rapor_ketua->format('d/m/Y') : '' }}</small></div>
                                 @else
-                                    <span class="badge badge-warning"><i class="fas fa-clock"></i> Pending</span>
+                                    <span class="badge bg-warning text-white"><i class="fas fa-clock me-1"></i> Pending</span>
                                 @endif
                             </td>
-                            <td class="text-center">
+                            <td class="text-center align-middle">
                                 @if($siswa->validasi_rapor_ketua)
-                                    <form action="{{ route('ketua.validasi-rapor.batalkan', $siswa->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Batalkan validasi untuk {{ $siswa->nama_lengkap }}?')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-times"></i> Batalkan
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-danger btn-sm shadow-sm"
+                                            data-bs-toggle="modal" data-bs-target="#batalkanModal"
+                                            data-action="{{ route('ketua.validasi-rapor.batalkan', $siswa->id) }}"
+                                            data-name="{{ $siswa->nama_lengkap }}">
+                                        <i class="fas fa-times me-1"></i> Batalkan
+                                    </button>
                                 @else
-                                    <form action="{{ route('ketua.validasi-rapor.validasi', $siswa->id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success btn-sm">
-                                            <i class="fas fa-check"></i> Validasi
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-success btn-sm shadow-sm"
+                                            data-bs-toggle="modal" data-bs-target="#validasiModal"
+                                            data-action="{{ route('ketua.validasi-rapor.validasi', $siswa->id) }}"
+                                            data-name="{{ $siswa->nama_lengkap }}">
+                                        <i class="fas fa-check me-1"></i> Validasi
+                                    </button>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center text-muted">
-                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block text-gray-300"></i>
                                 Tidak ada data siswa
                             </td>
                         </tr>
@@ -220,9 +179,169 @@
                     </tbody>
                 </table>
             </div>
-
-            <div class="mt-3">
+            <div class="p-3">
                 {{ $siswaList->links() }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ======================== MODALS ======================== --}}
+
+{{-- Modal: Validasi per siswa --}}
+<div class="modal fade" id="validasiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-check-circle me-2"></i>Konfirmasi Validasi Rapor
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h6 class="fw-bold mb-1">Validasi rapor untuk:</h6>
+                <p class="text-primary fw-bold mb-3" id="validasiNamaSiswa">-</p>
+                <div class="alert alert-success bg-light border-success text-start small mb-0">
+                    <ul class="mb-0">
+                        <li>Status validasi Ketua PKBM akan menjadi <strong>Disetujui</strong></li>
+                        <li>Rapor akan diteruskan ke Bendahara untuk diproses</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <form id="validasiForm" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i> Ya, Validasi
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal: Batalkan validasi per siswa --}}
+<div class="modal fade" id="batalkanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-times-circle me-2"></i>Batalkan Validasi Rapor
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                <h6 class="fw-bold mb-1">Batalkan validasi rapor untuk:</h6>
+                <p class="text-danger fw-bold mb-3" id="batalkanNamaSiswa">-</p>
+                <div class="alert alert-danger bg-light border-danger text-start small mb-0">
+                    <ul class="mb-0">
+                        <li>Status validasi Ketua PKBM akan <strong>direset</strong></li>
+                        <li>Validasi Bendahara (jika sudah ada) juga ikut direset</li>
+                        <li>Wali kelas perlu mengirim ulang rapor</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <form id="batalkanForm" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times me-1"></i> Ya, Batalkan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal: Validasi Terpilih --}}
+<div class="modal fade" id="validasiTerpilihModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-check me-2"></i>Validasi Siswa Terpilih
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <i class="fas fa-users fa-3x text-info mb-3"></i>
+                <h6 class="fw-bold mb-1">Validasi <span id="jumlahTerpilih" class="text-info">0</span> siswa yang dipilih?</h6>
+                <p class="text-muted small mb-3">Semua siswa yang dicentang akan langsung divalidasi oleh Ketua PKBM.</p>
+                <div class="alert alert-info bg-light border-info text-start small mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Rapor yang divalidasi akan diteruskan ke Bendahara untuk verifikasi keuangan.
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <button type="button" class="btn btn-info" id="btnKonfirmasiTerpilih">
+                    <i class="fas fa-check me-1"></i> Ya, Validasi Terpilih
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal: Validasi Semua --}}
+<div class="modal fade" id="validasiSemuaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-check-double me-2"></i>Validasi Semua Rapor Pending
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <i class="fas fa-check-double fa-3x text-success mb-3"></i>
+                <h6 class="fw-bold mb-2">Validasi semua siswa yang masih pending?</h6>
+                <p class="text-muted small mb-3">Seluruh rapor yang sudah dikirim wali kelas dan belum divalidasi akan langsung disetujui.</p>
+                <div class="alert alert-warning bg-light border-warning text-start small mb-0">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Pastikan Anda sudah meninjau semua rapor sebelum melakukan validasi massal.
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <form action="{{ route('ketua.validasi-rapor.validasi-semua') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-double me-1"></i> Ya, Validasi Semua
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal: Peringatan tidak ada yang dipilih --}}
+<div class="modal fade" id="peringatanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Perhatian
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-mouse-pointer fa-3x text-warning mb-3"></i>
+                <p class="fw-bold mb-0">Pilih minimal 1 siswa terlebih dahulu.</p>
+            </div>
+            <div class="modal-footer bg-light justify-content-center">
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Mengerti</button>
             </div>
         </div>
     </div>
@@ -232,22 +351,39 @@
 <script>
 // Check all functionality
 document.getElementById('checkAll').addEventListener('change', function() {
-    const checkboxes = document.querySelectorAll('.siswa-checkbox');
-    checkboxes.forEach(cb => cb.checked = this.checked);
+    document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = this.checked);
 });
 
-// Validasi terpilih
-function validasiTerpilih() {
-    const selected = Array.from(document.querySelectorAll('.siswa-checkbox:checked')).map(cb => cb.value);
+// Populate reusable Validasi modal via data-attributes
+document.getElementById('validasiModal').addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('validasiNamaSiswa').textContent = btn.dataset.name;
+    document.getElementById('validasiForm').action = btn.dataset.action;
+});
+
+// Populate reusable Batalkan modal via data-attributes
+document.getElementById('batalkanModal').addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('batalkanNamaSiswa').textContent = btn.dataset.name;
+    document.getElementById('batalkanForm').action = btn.dataset.action;
+});
+
+// Validasi Terpilih
+function openValidasiTerpilihModal() {
+    const selected = Array.from(document.querySelectorAll('.siswa-checkbox:checked'));
 
     if (selected.length === 0) {
-        alert('Pilih minimal 1 siswa untuk divalidasi');
+        new bootstrap.Modal(document.getElementById('peringatanModal')).show();
         return;
     }
 
-    if (!confirm(`Validasi ${selected.length} siswa terpilih?`)) {
-        return;
-    }
+    document.getElementById('jumlahTerpilih').textContent = selected.length;
+    new bootstrap.Modal(document.getElementById('validasiTerpilihModal')).show();
+}
+
+// Submit bulk validasi terpilih
+document.getElementById('btnKonfirmasiTerpilih').addEventListener('click', function() {
+    const selected = Array.from(document.querySelectorAll('.siswa-checkbox:checked')).map(cb => cb.value);
 
     const form = document.createElement('form');
     form.method = 'POST';
@@ -269,26 +405,11 @@ function validasiTerpilih() {
 
     document.body.appendChild(form);
     form.submit();
-}
+});
 
-// Validasi semua
-function validasiSemua() {
-    if (!confirm('Validasi SEMUA siswa yang pending?')) {
-        return;
-    }
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route("ketua.validasi-rapor.validasi-semua") }}';
-
-    const csrf = document.createElement('input');
-    csrf.type = 'hidden';
-    csrf.name = '_token';
-    csrf.value = '{{ csrf_token() }}';
-    form.appendChild(csrf);
-
-    document.body.appendChild(form);
-    form.submit();
+// Validasi Semua
+function openValidasiSemuaModal() {
+    new bootstrap.Modal(document.getElementById('validasiSemuaModal')).show();
 }
 </script>
 @endpush

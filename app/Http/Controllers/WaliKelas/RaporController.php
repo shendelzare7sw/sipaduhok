@@ -135,12 +135,9 @@ class RaporController extends Controller
             return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
-        // Get semua siswa di kelas YANG SUDAH DIVALIDASI 3 LEVEL
+        // Get semua siswa aktif di kelas
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
-            ->where('validasi_rapor_bendahara', true)
-            ->where('validasi_rapor_wali', true)
-            ->where('validasi_rapor_ketua', true)
             ->get();
 
         $generated = 0;
@@ -163,7 +160,7 @@ class RaporController extends Controller
         }
 
         if ($generated == 0 && $skipped == 0) {
-            return back()->with('info', 'Tidak ada siswa dengan validasi lengkap (Bendahara + Wali + Ketua PKBM) untuk generate rapor.');
+            return back()->with('info', 'Tidak ada siswa aktif di kelas ini.');
         }
 
         return back()->with('success', "Berhasil generate {$generated} rapor! " . ($skipped > 0 ? "({$skipped} sudah ada)" : ""));
@@ -198,11 +195,6 @@ class RaporController extends Controller
 
         if (!$siswa) {
             return back()->with('error', 'Siswa tidak ditemukan di kelas ini.');
-        }
-
-        // Cek validasi 3 level
-        if (!$siswa->hasFullRaporAccess()) {
-            return back()->with('error', 'Siswa belum divalidasi lengkap oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
         // Cek apakah rapor sudah ada
@@ -612,6 +604,110 @@ class RaporController extends Controller
             ]);
 
         return back()->with('success', "Template berhasil diterapkan ke {$updated} siswa (yang deskripsinya masih kosong)!");
+    }
+
+    /**
+     * Kirim rapor ke Ketua PKBM untuk divalidasi (sets validasi_rapor_wali = true on siswa)
+     */
+    public function kirimValidasi($raporId): RedirectResponse
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        $rapor = Rapor::findOrFail($raporId);
+
+        if ($kelas && $rapor->kelas_id != $kelas->id) {
+            return back()->with('error', 'Rapor tidak ditemukan di kelas ini.');
+        }
+
+        $siswa = $rapor->siswa;
+
+        if ($siswa->validasi_rapor_wali) {
+            return back()->with('info', 'Rapor sudah pernah dikirim ke Ketua PKBM.');
+        }
+
+        $siswa->update([
+            'validasi_rapor_wali'              => true,
+            'tanggal_validasi_rapor_wali'      => now(),
+            'validasi_rapor_oleh'              => auth()->id(),
+        ]);
+
+        return back()->with('success', "Rapor {$siswa->nama_lengkap} berhasil dikirim ke Ketua PKBM untuk divalidasi.");
+    }
+
+    /**
+     * Batalkan kiriman validasi ke Ketua PKBM (cascade reset ketua & bendahara)
+     */
+    public function batalkanKirimValidasi($raporId): RedirectResponse
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        $rapor = Rapor::findOrFail($raporId);
+
+        if ($kelas && $rapor->kelas_id != $kelas->id) {
+            return back()->with('error', 'Rapor tidak ditemukan di kelas ini.');
+        }
+
+        $siswa = $rapor->siswa;
+
+        $siswa->update([
+            'validasi_rapor_wali'              => false,
+            'tanggal_validasi_rapor_wali'      => null,
+            'validasi_rapor_oleh'              => null,
+            // CASCADE: reset ketua & bendahara
+            'validasi_rapor_ketua'             => false,
+            'tanggal_validasi_rapor_ketua'     => null,
+            'validasi_rapor_ketua_oleh'        => null,
+            'validasi_rapor_bendahara'         => false,
+            'tanggal_validasi_rapor_bendahara' => null,
+        ]);
+
+        return back()->with('success', "Kiriman validasi rapor {$siswa->nama_lengkap} berhasil dibatalkan.");
+    }
+
+    /**
+     * Kirim validasi semua rapor di kelas sekaligus
+     */
+    public function kirimValidasiSemua(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'semester'   => 'required|in:ganjil,genap',
+            'jenis_rapor' => 'required|in:tengah_semester,akhir_semester',
+        ]);
+
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        if (!$kelas) {
+            return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
+
+        // Get semua siswa yang punya rapor draft dan belum dikirim
+        $raporList = Rapor::where('kelas_id', $kelas->id)
+            ->where('semester', $request->semester)
+            ->where('jenis_rapor', $request->jenis_rapor)
+            ->with('siswa')
+            ->get();
+
+        $sent = 0;
+        foreach ($raporList as $rapor) {
+            $siswa = $rapor->siswa;
+            if ($siswa && !$siswa->validasi_rapor_wali) {
+                $siswa->update([
+                    'validasi_rapor_wali'         => true,
+                    'tanggal_validasi_rapor_wali' => now(),
+                    'validasi_rapor_oleh'         => auth()->id(),
+                ]);
+                $sent++;
+            }
+        }
+
+        if ($sent === 0) {
+            return back()->with('info', 'Semua rapor sudah pernah dikirim ke Ketua PKBM.');
+        }
+
+        return back()->with('success', "Berhasil mengirim {$sent} rapor ke Ketua PKBM untuk divalidasi.");
     }
 
     /**

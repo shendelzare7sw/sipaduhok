@@ -199,6 +199,79 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
     color: #9ca3af;
     margin-bottom: 16px;
 }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 767.98px) {
+    .search-box {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+    .search-box input {
+        width: 100% !important;
+    }
+    .filter-section {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .filter-section .form-select,
+    .filter-section .btn {
+        width: 100% !important;
+    }
+    .assignment-list {
+        max-width: 100% !important;
+    }
+    /* Table → Card per row */
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent !important; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        min-height: 44px;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td.mobile-card-head {
+        background: #f8fafc;
+        padding: 14px;
+        border-bottom: 2px solid #e5e7eb !important;
+        justify-content: flex-start;
+    }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        padding-right: 10px;
+        min-width: 65px;
+    }
+    .table-card-mobile tbody td.mobile-card-full {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .table-card-mobile tbody td.mobile-card-full::before { min-width: unset; }
+    .table-card-mobile tbody td.mobile-card-actions {
+        border-bottom: none !important;
+        justify-content: flex-end;
+    }
+    .stat-number { font-size: 28px; }
+    .stat-card-gradient { padding: 16px; }
+}
 </style>
 @endsection
 
@@ -315,7 +388,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
         {{-- Table --}}
         @if($guruList->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover table-card-mobile">
                     <thead>
                         <tr>
                             <th>Guru Pengajar</th>
@@ -328,7 +401,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                     <tbody>
                         @foreach($guruList as $guru)
                         <tr>
-                            <td>
+                            <td class="mobile-card-head">
                                 <div class="guru-info">
                                     <div class="guru-avatar">{{ strtoupper(substr($guru->nama_lengkap, 0, 1)) }}</div>
                                     <div class="guru-details">
@@ -337,15 +410,15 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $guru->telepon ?? '-' }}</td>
-                            <td>
+                            <td data-label="Telepon">{{ $guru->telepon ?? '-' }}</td>
+                            <td data-label="Status">
                                 @if($guru->user->is_active)
                                     <span class="badge bg-success">Aktif</span>
                                 @else
                                     <span class="badge bg-warning">Tidak Aktif</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Penugasan" class="mobile-card-full">
                                 @if($guru->guruKelas->count() > 0)
                                     <div class="assignment-list">
                                         @foreach($guru->guruKelas->take(3) as $assignment)
@@ -363,7 +436,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                                     <span class="no-assignment">Belum ada penugasan</span>
                                 @endif
                             </td>
-                            <td style="text-align: center;">
+                            <td class="mobile-card-actions" style="text-align: center;">
                                 <a href="{{ route('admin.guru-pengajar.show', ['guruPengajar' => $guru, 'tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
                                    class="btn btn-sm btn-primary"
                                    title="Kelola Penugasan">

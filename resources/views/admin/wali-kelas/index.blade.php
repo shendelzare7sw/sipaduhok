@@ -130,6 +130,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
     border-radius: 8px;
     font-size: 14px;
     width: 220px;
+    max-width: 100%;
     transition: all 0.3s;
 }
 
@@ -416,6 +417,78 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
 .quick-assign-form button {
     flex-shrink: 0;
 }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 767.98px) {
+    .search-box {
+        width: 100% !important;
+    }
+    .search-box input {
+        width: 100% !important;
+    }
+    .filter-section {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .filter-section .filter-select,
+    .filter-section .btn {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+    /* Table → Card per row */
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent !important; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        min-height: 44px;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td.mobile-card-head {
+        background: #f8fafc;
+        padding: 14px;
+        border-bottom: 2px solid #e5e7eb !important;
+        justify-content: flex-start;
+    }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        padding-right: 10px;
+        min-width: 65px;
+    }
+    .table-card-mobile tbody td.mobile-card-full {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .table-card-mobile tbody td.mobile-card-full::before { min-width: unset; }
+    .table-card-mobile tbody td.mobile-card-actions {
+        border-bottom: none !important;
+        justify-content: flex-end;
+    }
+    .stat-number { font-size: 28px; }
+    .stat-card { padding: 16px; }
+    /* Stat grid: 2 columns on mobile */
+    .col-md-3 { flex: 0 0 50% !important; max-width: 50% !important; }
+}
 </style>
 
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -533,7 +606,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
             {{-- Table --}}
             @if($kelasList->count() > 0)
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-card-mobile">
                         <thead>
                             <tr>
                                 <th>Kelas</th>
@@ -547,13 +620,13 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                         <tbody>
                             @foreach($kelasList as $kelas)
                             <tr>
-                                <td>
+                                <td class="mobile-card-head">
                                     <div class="kelas-info">
                                         <span class="kelas-nama">{{ $kelas->nama_kelas }}</span>
                                         <span class="kelas-kode">{{ $kelas->kode_kelas }}</span>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Jenjang">
                                     @php
                                         $jenjangClass = [
                                             'PAUD' => 'badge-paud',
@@ -564,11 +637,11 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                                     @endphp
                                     <span class="badge {{ $jenjangClass }}">{{ $kelas->jenjang }}</span>
                                 </td>
-                                <td>{{ $kelas->cabang->nama_cabang ?? '-' }}</td>
-                                <td>
+                                <td data-label="Cabang">{{ $kelas->cabang->nama_cabang ?? '-' }}</td>
+                                <td data-label="Siswa">
                                     <span class="badge badge-info">{{ $kelas->siswa_count }} siswa</span>
                                 </td>
-                                <td class="wali-kelas-cell">
+                                <td data-label="Wali Kelas" class="wali-kelas-cell mobile-card-full">
                                     @if($kelas->waliKelasAssignments->count() > 0)
                                         @foreach($kelas->waliKelasAssignments as $assignment)
                                             <div class="wali-info" style="margin-bottom: 4px;">
@@ -583,7 +656,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                                         <span class="status-unassigned">Belum ada wali kelas</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="mobile-card-actions">
                                     <div class="action-buttons">
                                         <button type="button" class="btn btn-icon btn-light-purple" title="Assign Wali Kelas" onclick="openAssignModal({{ $kelas->id }}, '{{ $kelas->nama_kelas }}', {{ $kelas->wali_kelas_id ?? 'null' }})">
                                             <i class="fas fa-user-tie"></i>

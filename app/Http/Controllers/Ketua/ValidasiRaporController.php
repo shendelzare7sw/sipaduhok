@@ -20,9 +20,8 @@ class ValidasiRaporController extends Controller
     {
         $activeYear = TahunAjaran::where('is_active', true)->first();
 
-        // Base query: Students with both Bendahara and Wali validated
+        // Base query: Students that Wali Kelas has submitted for Ketua review
         $query = Siswa::with(['kelas.cabang', 'kelas.tahunAjaran'])
-            ->where('validasi_rapor_bendahara', true)
             ->where('validasi_rapor_wali', true)
             ->where('status', 'aktif');
 
@@ -61,8 +60,7 @@ class ValidasiRaporController extends Controller
 
         // Stats for cards
         $stats = [
-            'pendingTotal' => Siswa::where('validasi_rapor_bendahara', true)
-                                   ->where('validasi_rapor_wali', true)
+            'pendingTotal' => Siswa::where('validasi_rapor_wali', true)
                                    ->where('validasi_rapor_ketua', false)
                                    ->where('status', 'aktif')
                                    ->count(),
@@ -94,9 +92,9 @@ class ValidasiRaporController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
-        // Ensure prerequisites: Bendahara and Wali must be validated first
-        if (!$siswa->validasi_rapor_bendahara || !$siswa->validasi_rapor_wali) {
-            return redirect()->back()->with('error', 'Bendahara dan Wali Kelas harus memvalidasi terlebih dahulu.');
+        // Ensure prerequisite: Wali Kelas must have submitted first
+        if (!$siswa->validasi_rapor_wali) {
+            return redirect()->back()->with('error', 'Wali Kelas belum mengirim rapor ini untuk divalidasi.');
         }
 
         $siswa->validasi_rapor_ketua = true;
@@ -133,7 +131,6 @@ class ValidasiRaporController extends Controller
         ]);
 
         $siswaList = Siswa::whereIn('id', $request->siswa_ids)
-            ->where('validasi_rapor_bendahara', true)
             ->where('validasi_rapor_wali', true)
             ->get();
 
@@ -154,8 +151,7 @@ class ValidasiRaporController extends Controller
      */
     public function validasiSemuaRapor(): RedirectResponse
     {
-        $siswaList = Siswa::where('validasi_rapor_bendahara', true)
-            ->where('validasi_rapor_wali', true)
+        $siswaList = Siswa::where('validasi_rapor_wali', true)
             ->where('validasi_rapor_ketua', false)
             ->where('status', 'aktif')
             ->get();

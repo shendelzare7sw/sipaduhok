@@ -16,8 +16,8 @@ class PromotionKKMController extends Controller
     {
         $tahunActive = TahunAjaran::where('is_active', true)->firstOrFail();
         
-        // Filter jenjang if needed, default SMP
-        $jenjang = $request->get('jenjang', 'SMP');
+        // Filter jenjang if needed, default SMA
+        $jenjang = $request->get('jenjang', 'SMA');
         
         $mapelList = MataPelajaran::where('jenjang', $jenjang)->get();
         
@@ -39,7 +39,7 @@ class PromotionKKMController extends Controller
     {
         $validated = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
-            'jenjang' => 'required|in:PAUD,SD,SMP,SMA,SMK',
+            'jenjang' => 'required|in:PAUD,SD,SMP,SMA',
             'kkm' => 'required|array',
             'kkm.*' => 'required|integer|min:0|max:100',
         ]);

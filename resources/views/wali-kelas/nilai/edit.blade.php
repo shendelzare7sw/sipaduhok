@@ -2,7 +2,6 @@
 
 @section('title', 'Edit Nilai Siswa')
 @section('page-title', 'Edit Nilai Siswa')
-@section('page-subtitle', 'Perbarui nilai per mata pelajaran')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
@@ -10,147 +9,180 @@
 
 @section('styles')
 <style>
-    .table thead th {
-        background: #f8f9fc;
-        color: #4e73df;
-        font-weight: 700;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #e3e6f0;
-        vertical-align: middle;
-    }
-    .nilai-akhir-display {
-        padding: 8px;
-        background: #d4edda;
-        border-radius: 6px;
-        font-weight: 700;
-        color: #155724;
-    }
-    .student-info-card {
-        background: white;
-        border-radius: 15px;
-        border-left: 5px solid #4e73df;
-    }
-    /* Input wrapper dengan spinner di luar */
-    .input-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-    }
-    .input-nilai {
-        width: 55px;
-        padding: 7px 5px;
-        font-size: 14px;
-        text-align: center;
-        border-radius: 5px;
-        border: 1px solid #ced4da;
-        -moz-appearance: textfield;
-    }
-    .input-nilai::-webkit-outer-spin-button,
-    .input-nilai::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    .input-nilai:focus {
-        border-color: #4e73df;
-        box-shadow: 0 0 0 3px rgba(78,115,223,0.25);
-        outline: none;
-    }
-    /* Spinner buttons di luar input */
-    .spinner-btns {
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-    }
-    .spinner-btn {
-        width: 16px;
-        height: 14px;
-        padding: 0;
-        font-size: 9px;
-        line-height: 1;
-        border: 1px solid #ced4da;
-        background: #f8f9fa;
-        border-radius: 2px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-    }
-    .spinner-btn:hover {
-        background: #e9ecef;
-        border-color: #4e73df;
-        color: #4e73df;
-    }
-    .spinner-btn:active {
-        background: #4e73df;
-        color: white;
-    }
-    .rata-cell {
-        background: #e9ecef;
-        font-weight: 700;
-        color: #165fac;
-        text-align: center;
-        font-size: 14px;
-    }
-    .th-tugas { background: #e3f2fd !important; }
-    .th-latihan { background: #fff3e0 !important; }
-    .th-uh { background: #fce4ec !important; }
-    .th-tingkat-akhir { background: #e8f5e9 !important; }
-    .mapel-row {
-        border-left: 3px solid #4e73df;
-    }
+/* ─── Table base ─────────────────────────────────────── */
+.table-nilai {
+    font-size: 12.5px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.table-nilai th {
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    vertical-align: middle;
+    white-space: nowrap;
+    background: #f8f9fc;
+}
+.table-nilai td {
+    vertical-align: middle;
+    padding: 4px 3px;
+}
+
+/* ─── Sticky columns ─────────────────────────────────── */
+.sticky-no {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: white;
+    min-width: 36px;
+    box-shadow: 1px 0 0 #dee2e6;
+}
+.sticky-mapel {
+    position: sticky;
+    left: 36px;
+    z-index: 3;
+    background: white;
+    min-width: 160px;
+    max-width: 180px;
+    box-shadow: 2px 0 4px rgba(0,0,0,.08);
+}
+thead .sticky-no,
+thead .sticky-mapel {
+    z-index: 4;
+    background: #f8f9fc;
+}
+
+/* ─── Group header colours ───────────────────────────── */
+.th-tugas   { background: #e3f2fd !important; }
+.th-latihan { background: #fff3e0 !important; }
+.th-uh      { background: #fce4ec !important; }
+.th-akhir   { background: #e8f5e9 !important; }
+
+/* ─── Rata / Nilai Akhir cells ───────────────────────── */
+.rata-cell {
+    background: #e9ecef;
+    font-weight: 700;
+    color: #165fac;
+    text-align: center;
+    min-width: 50px;
+}
+.nilai-akhir-cell {
+    background: #d4edda;
+    font-weight: 800;
+    color: #155724;
+    text-align: center;
+    min-width: 68px;
+}
+
+/* ─── Input + spinner ────────────────────────────────── */
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    justify-content: center;
+}
+.input-nilai {
+    width: 52px;
+    min-width: 52px;
+    padding: 5px 3px;
+    font-size: 12.5px;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    -moz-appearance: textfield;
+}
+.input-nilai::-webkit-outer-spin-button,
+.input-nilai::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input-nilai:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 2px rgba(78,115,223,.2);
+    outline: none;
+}
+.spinner-btns { display: flex; flex-direction: column; gap: 1px; }
+.spinner-btn {
+    width: 15px; height: 13px;
+    padding: 0; font-size: 8px; line-height: 1;
+    border: 1px solid #ced4da; background: #f8f9fa;
+    border-radius: 2px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #666;
+}
+.spinner-btn:hover { background: #e9ecef; border-color: #4e73df; color: #4e73df; }
+.spinner-btn:active { background: #4e73df; color: white; }
+
+/* ─── Scroll wrapper ─────────────────────────────────── */
+.scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Mobile: shrink mapel column ───────────────────── */
+@media (max-width: 575.98px) {
+    .sticky-mapel { min-width: 120px; max-width: 140px; font-size: 11px; }
+    .input-nilai  { width: 46px; min-width: 46px; font-size: 11.5px; }
+    .table-nilai  { font-size: 11.5px; }
+}
 </style>
 @endsection
 
 @section('content')
 @php
-    $isKelasAkhir = str_contains(strtolower($kelas->nama_kelas), '9') || 
+    $isKelasAkhir = str_contains(strtolower($kelas->nama_kelas), '9')  ||
                     str_contains(strtolower($kelas->nama_kelas), '12') ||
                     str_contains(strtolower($kelas->nama_kelas), 'ix') ||
                     str_contains(strtolower($kelas->nama_kelas), 'xii');
 @endphp
-<div style="max-width: 1600px; margin: 0 auto; padding: 0 1rem;">
-<div class="container-fluid px-0">
 
-    {{-- Back Button --}}
-    <div class="mb-4 no-print">
-        <a href="{{ route('wali.nilai.index') }}" class="btn btn-light btn-sm fw-bold shadow-sm border text-gray-700">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Daftar Nilai
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    {{-- ── Top bar: back + import buttons ── --}}
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3 no-print">
+        <a href="{{ route('wali.nilai.index') }}" class="btn btn-light btn-sm border fw-semibold">
+            <i class="bx bx-arrow-back me-1"></i> Kembali ke Daftar Nilai
         </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ route('wali.nilai.download-template', $siswa->id) }}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="bx bx-download me-1"></i> Template Excel
+            </a>
+            <button type="button" class="btn btn-outline-success btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="bx bx-import me-1"></i> Import Nilai
+            </button>
+        </div>
     </div>
 
-    {{-- Student Info Card --}}
-    <div class="card student-info-card shadow-sm mb-4">
-        <div class="card-body p-4">
-            <h4 class="fw-bold text-gray-900 mb-2">Edit Nilai - {{ $siswa->nama_lengkap }}</h4>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">NIS</div>
-                    <div class="fw-bold text-dark">{{ $siswa->nis }}</div>
+    {{-- ── Student info card ── --}}
+    <div class="card mb-3 border-start border-primary border-4">
+        <div class="card-body py-3">
+            <h5 class="fw-bold mb-2">Edit Nilai — {{ $siswa->nama_lengkap }}</h5>
+            <div class="row g-2">
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted fw-semibold text-uppercase">NIS</div>
+                    <div class="fw-bold">{{ $siswa->nis }}</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">NISN</div>
-                    <div class="fw-bold text-dark">{{ $siswa->nisn }}</div>
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted fw-semibold text-uppercase">NISN</div>
+                    <div class="fw-bold">{{ $siswa->nisn }}</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">Kelas</div>
-                    <div class="fw-bold text-dark">{{ $kelas->nama_kelas }}</div>
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted fw-semibold text-uppercase">Kelas</div>
+                    <div class="fw-bold">{{ $kelas->nama_kelas }}</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="small text-muted fw-bold text-uppercase">Tahun Ajaran</div>
-                    <div class="fw-bold text-dark">{{ $kelas->tahunAjaran->nama_tahun_ajaran }}</div>
+                <div class="col-6 col-sm-3">
+                    <div class="small text-muted fw-semibold text-uppercase">Tahun Ajaran</div>
+                    <div class="fw-bold">{{ $kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Validation Errors --}}
+    {{-- ── Validation errors ── --}}
     @if ($errors->any())
-        <div class="alert alert-danger shadow-sm border-start border-danger border-4 mb-4">
-            <h6 class="fw-bold mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Ada kesalahan dalam input data:</h6>
-            <ul class="mb-0">
+        <div class="alert alert-danger border-start border-danger border-4 mb-3">
+            <h6 class="fw-bold mb-1"><i class="bx bx-error-circle me-1"></i>Ada kesalahan:</h6>
+            <ul class="mb-0 small">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -158,218 +190,288 @@
         </div>
     @endif
 
-    {{-- Edit Form --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-3">
+            <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show mb-3">
+            <i class="bx bx-error me-1"></i> {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
+            <i class="bx bx-x-circle me-1"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    {{-- ── Main form ── --}}
     <form action="{{ route('wali.nilai.update', $siswa->id) }}" method="POST" id="nilaiForm">
         @csrf
         @method('PUT')
 
-        @foreach($mataPelajaranList as $mapelIndex => $mapel)
-            @php
-                $nilai = $nilaiData[$mapel->id] ?? null;
-            @endphp
-            
-            <div class="card shadow mb-3">
-                <div class="card-header py-2 bg-white border-bottom">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 fw-bold text-primary">
-                            <i class="fas fa-book me-2"></i>{{ $mapel->nama_mapel }}
-                            <small class="text-muted ms-2">({{ $mapel->kode_mapel }})</small>
-                        </h6>
-                        <span class="badge bg-primary fs-6">Nilai Akhir: <span id="nilai_akhir_{{ $mapel->id }}">{{ $nilai ? number_format($nilai->nilai_akhir, 2) : '-' }}</span></span>
-                    </div>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <span class="fw-semibold">Daftar Nilai Mata Pelajaran</span>
+                <span class="badge bg-label-primary">{{ $mataPelajaranList->count() }} Mapel</span>
+            </div>
+
+            @if($mataPelajaranList->isEmpty())
+                <div class="card-body text-center py-5">
+                    <i class="bx bx-book-open fs-1 text-muted"></i>
+                    <p class="mt-2 text-muted">Belum ada mata pelajaran yang terdaftar untuk kelas ini.</p>
                 </div>
-                <div class="card-body p-3">
-                    <input type="hidden" name="nilai[{{ $mapel->id }}][mata_pelajaran_id]" value="{{ $mapel->id }}">
-                    
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered mb-0">
-                            <thead>
-                                <tr>
-                                    <th colspan="6" class="text-center th-tugas">Tugas</th>
-                                    <th colspan="6" class="text-center th-latihan">Latihan</th>
-                                    <th colspan="6" class="text-center th-uh">Ulangan Harian</th>
-                                    <th rowspan="2" class="text-center" style="width: 75px; vertical-align: middle;">PTS</th>
-                                    <th rowspan="2" class="text-center" style="width: 75px; vertical-align: middle;">PAS</th>
-                                </tr>
-                                <tr>
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <th class="text-center th-tugas" style="width: 75px;">T{{ $i }}</th>
-                                    @endfor
-                                    <th class="text-center th-tugas rata-cell" style="width: 60px;">Rata</th>
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <th class="text-center th-latihan" style="width: 75px;">L{{ $i }}</th>
-                                    @endfor
-                                    <th class="text-center th-latihan rata-cell" style="width: 60px;">Rata</th>
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <th class="text-center th-uh" style="width: 75px;">UH{{ $i }}</th>
-                                    @endfor
-                                    <th class="text-center th-uh rata-cell" style="width: 60px;">Rata</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    {{-- Tugas 1-5 --}}
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <td class="text-center p-1">
-                                            <div class="input-wrapper justify-content-center">
-                                                <input type="number" step="0.01" min="0" max="100"
-                                                    name="nilai[{{ $mapel->id }}][tugas_{{ $i }}]"
-                                                    class="form-control input-nilai tugas-input-{{ $mapel->id }}"
-                                                    id="tugas_{{ $mapel->id }}_{{ $i }}"
-                                                    data-mapel="{{ $mapel->id }}"
-                                                    value="{{ $nilai && $nilai->{'tugas_'.$i} !== null ? $nilai->{'tugas_'.$i} : '' }}"
-                                                    placeholder="-">
-                                                <div class="spinner-btns">
-                                                    <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $mapel->id }}_{{ $i }}', 1)">▲</button>
-                                                    <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $mapel->id }}_{{ $i }}', -1)">▼</button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    @endfor
-                                    <td class="text-center rata-cell p-2" id="rata_tugas_{{ $mapel->id }}">
-                                        {{ $nilai && $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}
-                                    </td>
-                                    
-                                    {{-- Latihan 1-5 --}}
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <td class="text-center p-1">
-                                            <div class="input-wrapper justify-content-center">
-                                                <input type="number" step="0.01" min="0" max="100"
-                                                    name="nilai[{{ $mapel->id }}][latihan_{{ $i }}]"
-                                                    class="form-control input-nilai latihan-input-{{ $mapel->id }}"
-                                                    id="latihan_{{ $mapel->id }}_{{ $i }}"
-                                                    data-mapel="{{ $mapel->id }}"
-                                                    value="{{ $nilai && $nilai->{'latihan_'.$i} !== null ? $nilai->{'latihan_'.$i} : '' }}"
-                                                    placeholder="-">
-                                                <div class="spinner-btns">
-                                                    <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $mapel->id }}_{{ $i }}', 1)">▲</button>
-                                                    <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $mapel->id }}_{{ $i }}', -1)">▼</button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    @endfor
-                                    <td class="text-center rata-cell p-2" id="rata_latihan_{{ $mapel->id }}">
-                                        {{ $nilai && $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}
-                                    </td>
-                                    
-                                    {{-- UH 1-5 --}}
-                                    @for($i = 1; $i <= 5; $i++)
-                                        <td class="text-center p-1">
-                                            <div class="input-wrapper justify-content-center">
-                                                <input type="number" step="0.01" min="0" max="100"
-                                                    name="nilai[{{ $mapel->id }}][uh_{{ $i }}]"
-                                                    class="form-control input-nilai uh-input-{{ $mapel->id }}"
-                                                    id="uh_{{ $mapel->id }}_{{ $i }}"
-                                                    data-mapel="{{ $mapel->id }}"
-                                                    value="{{ $nilai && $nilai->{'uh_'.$i} !== null ? $nilai->{'uh_'.$i} : '' }}"
-                                                    placeholder="-">
-                                                <div class="spinner-btns">
-                                                    <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $mapel->id }}_{{ $i }}', 1)">▲</button>
-                                                    <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $mapel->id }}_{{ $i }}', -1)">▼</button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    @endfor
-                                    <td class="text-center rata-cell p-2" id="rata_uh_{{ $mapel->id }}">
-                                        {{ $nilai && $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}
-                                    </td>
-                                    
-                                    {{-- PTS --}}
-                                    <td class="text-center p-1">
-                                        <div class="input-wrapper justify-content-center">
-                                            <input type="number" step="0.01" min="0" max="100"
-                                                name="nilai[{{ $mapel->id }}][pts]"
-                                                class="form-control input-nilai pts-input-{{ $mapel->id }}"
-                                                id="pts_{{ $mapel->id }}"
-                                                data-mapel="{{ $mapel->id }}"
-                                                value="{{ $nilai && $nilai->pts !== null ? $nilai->pts : '' }}"
-                                                placeholder="-">
-                                            <div class="spinner-btns">
-                                                <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $mapel->id }}', 1)">▲</button>
-                                                <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $mapel->id }}', -1)">▼</button>
-                                            </div>
+            @else
+                <div class="scroll-wrapper">
+                    <table class="table table-sm table-bordered table-nilai mb-0">
+                        <thead>
+                            <tr>
+                                <th class="sticky-no text-center" rowspan="2">#</th>
+                                <th class="sticky-mapel" rowspan="2">Mata Pelajaran</th>
+                                <th colspan="6" class="text-center th-tugas">Tugas</th>
+                                <th colspan="6" class="text-center th-latihan">Latihan</th>
+                                <th colspan="6" class="text-center th-uh">Ulangan Harian</th>
+                                <th class="text-center" rowspan="2" style="min-width:62px;">PTS</th>
+                                <th class="text-center" rowspan="2" style="min-width:62px;">PAS</th>
+                                <th class="text-center nilai-akhir-cell" rowspan="2" style="min-width:72px;">Nilai Akhir</th>
+                                @if($isKelasAkhir)
+                                <th colspan="5" class="text-center th-akhir">Tingkat Akhir</th>
+                                @endif
+                            </tr>
+                            <tr>
+                                {{-- Tugas --}}
+                                @for($i=1;$i<=5;$i++)
+                                <th class="text-center th-tugas" style="min-width:62px;">T{{ $i }}</th>
+                                @endfor
+                                <th class="text-center th-tugas rata-cell">Rata</th>
+                                {{-- Latihan --}}
+                                @for($i=1;$i<=5;$i++)
+                                <th class="text-center th-latihan" style="min-width:62px;">L{{ $i }}</th>
+                                @endfor
+                                <th class="text-center th-latihan rata-cell">Rata</th>
+                                {{-- UH --}}
+                                @for($i=1;$i<=5;$i++)
+                                <th class="text-center th-uh" style="min-width:62px;">UH{{ $i }}</th>
+                                @endfor
+                                <th class="text-center th-uh rata-cell">Rata</th>
+                                {{-- Tingkat Akhir sub-headers --}}
+                                @if($isKelasAkhir)
+                                <th class="text-center th-akhir" style="min-width:62px;">TO 1</th>
+                                <th class="text-center th-akhir" style="min-width:62px;">TO 2</th>
+                                <th class="text-center th-akhir" style="min-width:62px;">TO 3</th>
+                                <th class="text-center th-akhir" style="min-width:62px;">UPK</th>
+                                <th class="text-center th-akhir" style="min-width:80px;">Ujian Praktek</th>
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($mataPelajaranList as $idx => $mapel)
+                            @php $nilai = $nilaiData[$mapel->id] ?? null; @endphp
+                            <tr>
+                                {{-- No --}}
+                                <td class="sticky-no text-center text-muted">{{ $idx + 1 }}</td>
+
+                                {{-- Mata Pelajaran --}}
+                                <td class="sticky-mapel">
+                                    <input type="hidden" name="nilai[{{ $mapel->id }}][mata_pelajaran_id]" value="{{ $mapel->id }}">
+                                    <div class="fw-semibold lh-sm" style="font-size:12px;">{{ $mapel->nama_mapel }}</div>
+                                    <small class="text-muted" style="font-size:10px;">{{ $mapel->kode_mapel }}</small>
+                                </td>
+
+                                {{-- Tugas 1-5 --}}
+                                @for($j=1;$j<=5;$j++)
+                                <td class="p-1">
+                                    <div class="input-wrapper">
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            name="nilai[{{ $mapel->id }}][tugas_{{ $j }}]"
+                                            class="form-control input-nilai tugas-input-{{ $mapel->id }}"
+                                            id="tugas_{{ $mapel->id }}_{{ $j }}"
+                                            value="{{ $nilai && $nilai->{'tugas_'.$j} !== null ? $nilai->{'tugas_'.$j} : '' }}"
+                                            placeholder="-">
+                                        <div class="spinner-btns">
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $mapel->id }}_{{ $j }}', 1)">▲</button>
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $mapel->id }}_{{ $j }}', -1)">▼</button>
                                         </div>
-                                    </td>
-                                    
-                                    {{-- PAS --}}
-                                    <td class="text-center p-1">
-                                        <div class="input-wrapper justify-content-center">
-                                            <input type="number" step="0.01" min="0" max="100"
-                                                name="nilai[{{ $mapel->id }}][pas]"
-                                                class="form-control input-nilai pas-input-{{ $mapel->id }}"
-                                                id="pas_{{ $mapel->id }}"
-                                                data-mapel="{{ $mapel->id }}"
-                                                value="{{ $nilai && $nilai->pas !== null ? $nilai->pas : '' }}"
-                                                placeholder="-">
-                                            <div class="spinner-btns">
-                                                <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $mapel->id }}', 1)">▲</button>
-                                                <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $mapel->id }}', -1)">▼</button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    {{-- Tingkat Akhir Fields (only for kelas 9/12) --}}
-                    @if($isKelasAkhir)
-                    <div class="mt-3 pt-3 border-top">
-                        <small class="text-muted fw-bold text-uppercase">Penilaian Tingkat Akhir</small>
-                        <div class="row mt-2">
-                            @foreach(['to_1' => 'TO 1', 'to_2' => 'TO 2', 'to_3' => 'TO 3', 'upk' => 'UPK', 'ujian_praktek' => 'Ujian Praktek'] as $field => $label)
-                            <div class="col">
-                                <label class="form-label small text-muted mb-1">{{ $label }}</label>
-                                <div class="input-wrapper">
-                                    <input type="number" step="0.01" min="0" max="100"
-                                        name="nilai[{{ $mapel->id }}][{{ $field }}]"
-                                        class="form-control input-nilai"
-                                        id="{{ $field }}_{{ $mapel->id }}"
-                                        value="{{ $nilai && $nilai->$field !== null ? $nilai->$field : '' }}"
-                                        placeholder="-">
-                                    <div class="spinner-btns">
-                                        <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $mapel->id }}', 1)">▲</button>
-                                        <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $mapel->id }}', -1)">▼</button>
                                     </div>
-                                </div>
-                            </div>
+                                </td>
+                                @endfor
+                                <td class="rata-cell" id="rata_tugas_{{ $mapel->id }}">
+                                    {{ $nilai && $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}
+                                </td>
+
+                                {{-- Latihan 1-5 --}}
+                                @for($j=1;$j<=5;$j++)
+                                <td class="p-1">
+                                    <div class="input-wrapper">
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            name="nilai[{{ $mapel->id }}][latihan_{{ $j }}]"
+                                            class="form-control input-nilai latihan-input-{{ $mapel->id }}"
+                                            id="latihan_{{ $mapel->id }}_{{ $j }}"
+                                            value="{{ $nilai && $nilai->{'latihan_'.$j} !== null ? $nilai->{'latihan_'.$j} : '' }}"
+                                            placeholder="-">
+                                        <div class="spinner-btns">
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $mapel->id }}_{{ $j }}', 1)">▲</button>
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $mapel->id }}_{{ $j }}', -1)">▼</button>
+                                        </div>
+                                    </div>
+                                </td>
+                                @endfor
+                                <td class="rata-cell" id="rata_latihan_{{ $mapel->id }}">
+                                    {{ $nilai && $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}
+                                </td>
+
+                                {{-- UH 1-5 --}}
+                                @for($j=1;$j<=5;$j++)
+                                <td class="p-1">
+                                    <div class="input-wrapper">
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            name="nilai[{{ $mapel->id }}][uh_{{ $j }}]"
+                                            class="form-control input-nilai uh-input-{{ $mapel->id }}"
+                                            id="uh_{{ $mapel->id }}_{{ $j }}"
+                                            value="{{ $nilai && $nilai->{'uh_'.$j} !== null ? $nilai->{'uh_'.$j} : '' }}"
+                                            placeholder="-">
+                                        <div class="spinner-btns">
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $mapel->id }}_{{ $j }}', 1)">▲</button>
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $mapel->id }}_{{ $j }}', -1)">▼</button>
+                                        </div>
+                                    </div>
+                                </td>
+                                @endfor
+                                <td class="rata-cell" id="rata_uh_{{ $mapel->id }}">
+                                    {{ $nilai && $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}
+                                </td>
+
+                                {{-- PTS --}}
+                                <td class="p-1">
+                                    <div class="input-wrapper">
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            name="nilai[{{ $mapel->id }}][pts]"
+                                            class="form-control input-nilai pts-input-{{ $mapel->id }}"
+                                            id="pts_{{ $mapel->id }}"
+                                            value="{{ $nilai && $nilai->pts !== null ? $nilai->pts : '' }}"
+                                            placeholder="-">
+                                        <div class="spinner-btns">
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $mapel->id }}', 1)">▲</button>
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $mapel->id }}', -1)">▼</button>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- PAS --}}
+                                <td class="p-1">
+                                    <div class="input-wrapper">
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            name="nilai[{{ $mapel->id }}][pas]"
+                                            class="form-control input-nilai pas-input-{{ $mapel->id }}"
+                                            id="pas_{{ $mapel->id }}"
+                                            value="{{ $nilai && $nilai->pas !== null ? $nilai->pas : '' }}"
+                                            placeholder="-">
+                                        <div class="spinner-btns">
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $mapel->id }}', 1)">▲</button>
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $mapel->id }}', -1)">▼</button>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                {{-- Nilai Akhir --}}
+                                <td class="nilai-akhir-cell" id="nilai_akhir_{{ $mapel->id }}">
+                                    {{ $nilai && $nilai->nilai_akhir !== null ? number_format($nilai->nilai_akhir, 2) : '-' }}
+                                </td>
+
+                                {{-- Tingkat Akhir (kelas 9/12 only) --}}
+                                @if($isKelasAkhir)
+                                @foreach(['to_1'=>'TO 1','to_2'=>'TO 2','to_3'=>'TO 3','upk'=>'UPK','ujian_praktek'=>'Ujian Praktek'] as $field => $label)
+                                <td class="p-1">
+                                    <div class="input-wrapper">
+                                        <input type="number" step="0.01" min="0" max="100"
+                                            name="nilai[{{ $mapel->id }}][{{ $field }}]"
+                                            class="form-control input-nilai"
+                                            id="{{ $field }}_{{ $mapel->id }}"
+                                            value="{{ $nilai && $nilai->$field !== null ? $nilai->$field : '' }}"
+                                            placeholder="-">
+                                        <div class="spinner-btns">
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $mapel->id }}', 1)">▲</button>
+                                            <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $mapel->id }}', -1)">▼</button>
+                                        </div>
+                                    </div>
+                                </td>
+                                @endforeach
+                                @endif
+                            </tr>
                             @endforeach
-                        </div>
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Info box --}}
+                <div class="px-3 pt-3 pb-0">
+                    <div class="alert alert-info border-0 mb-3 py-2 small">
+                        <i class="bx bx-info-circle me-1"></i>
+                        Kolom kosong <strong>tidak dihitung sebagai 0</strong>.
+                        Nilai Akhir = <strong>((Rata Tugas×1) + (Rata Latihan×1) + (Rata UH×2) + (PTS×3) + (PAS×3)) / 10</strong>.
+                        Nilai valid: <strong>0–100</strong>.
                     </div>
-                    @endif
                 </div>
-            </div>
-        @endforeach
 
-        {{-- Information Box --}}
-        <div class="alert alert-info border-0 mb-4">
-            <div class="d-flex align-items-start">
-                <i class="fas fa-info-circle fa-2x text-info opacity-50 me-3"></i>
-                <div>
-                    <div class="fw-bold text-info text-uppercase small mb-1">Informasi Pengisian Nilai</div>
-                    <ul class="mb-0 small text-gray-700">
-                        <li>Kolom <strong>Tugas, Latihan, UH</strong> dapat diisi sebagian. Rata-rata dihitung hanya dari nilai yang terisi.</li>
-                        <li>Kolom kosong <strong>tidak dihitung sebagai 0</strong> dalam perhitungan rata-rata.</li>
-                        <li>Nilai Akhir dihitung otomatis: <strong>((Rata Tugas × 1) + (Rata Latihan × 1) + (Rata UH × 2) + (PTS × 3) + (PAS × 3)) / 10</strong></li>
-                        <li>Nilai valid: <strong>0 - 100</strong></li>
-                    </ul>
+                {{-- Action buttons --}}
+                <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
+                    <a href="{{ route('wali.nilai.index') }}" class="btn btn-secondary btn-sm">
+                        <i class="bx bx-x me-1"></i> Batal
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-sm px-4 fw-semibold">
+                        <i class="bx bx-save me-1"></i> Simpan Semua Perubahan
+                    </button>
                 </div>
-            </div>
-        </div>
-
-        {{-- Action Buttons --}}
-        <div class="d-flex gap-2 justify-content-end mb-5">
-            <a href="{{ route('wali.nilai.show', $siswa->id) }}" class="btn btn-secondary shadow-sm">
-                <i class="fas fa-times me-1"></i> Batal
-            </a>
-            <button type="submit" class="btn btn-primary shadow-sm px-4 fw-bold">
-                <i class="fas fa-save me-1"></i> Simpan Semua Perubahan
-            </button>
+            @endif
         </div>
     </form>
 
 </div>
+
+{{-- ── Import Modal ── --}}
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="bx bx-import me-1"></i> Import Nilai dari Excel
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('wali.nilai.import', $siswa->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info py-2 small mb-3">
+                        <i class="bx bx-info-circle me-1"></i>
+                        Download <strong>Template Excel</strong> terlebih dahulu, isi nilai, lalu upload di sini.<br>
+                        <strong>Jangan ubah</strong> kolom <code>kode_mapel</code> pada template.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">File Excel (.xlsx / .xls)</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx,.xls" required>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bx bx-download text-secondary"></i>
+                        <a href="{{ route('wali.nilai.download-template', $siswa->id) }}" class="small text-decoration-none">
+                            Download template untuk siswa ini
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success btn-sm fw-semibold">
+                        <i class="bx bx-upload me-1"></i> Upload & Import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+
 @endsection
 
 @section('scripts')
@@ -377,114 +479,87 @@
 function adjustValue(inputId, delta) {
     const input = document.getElementById(inputId);
     if (!input) return;
-    
-    let currentValue = parseFloat(input.value) || 0;
-    let newValue = currentValue + delta;
-    
-    // Clamp between 0 and 100
-    newValue = Math.max(0, Math.min(100, newValue));
-    
-    // Limit to 2 decimals
-    newValue = Math.round(newValue * 100) / 100;
-    
-    input.value = newValue;
+    let val = parseFloat(input.value) || 0;
+    val = Math.max(0, Math.min(100, Math.round((val + delta) * 100) / 100));
+    input.value = val;
     input.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Global Input Validation (Auto-Decimal & Max 100)
-    const allGradeInputs = document.querySelectorAll('.input-nilai');
-    allGradeInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            let value = this.value;
-            if (value === '') return;
-            let num = parseFloat(value);
-            
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Input validation ── */
+    document.querySelectorAll('.input-nilai').forEach(input => {
+        input.addEventListener('input', function () {
+            if (this.value === '') return;
+            let num = parseFloat(this.value);
             if (num > 100) {
-                let strVal = value.toString();
-                if (!strVal.includes('.')) {
-                    let corrected = strVal.slice(0, -1) + '.' + strVal.slice(-1);
-                    if (parseFloat(corrected) <= 100) {
-                        this.value = corrected;
-                        return;
-                    }
+                const s = this.value.toString();
+                if (!s.includes('.')) {
+                    const corrected = s.slice(0, -1) + '.' + s.slice(-1);
+                    if (parseFloat(corrected) <= 100) { this.value = corrected; return; }
                 }
                 this.value = 100;
             }
         });
-        
-        input.addEventListener('keydown', function(e) {
-            if (['e', 'E', '-', '+'].includes(e.key)) e.preventDefault();
-        });
-        
-        input.addEventListener('blur', function() {
-             let val = parseFloat(this.value);
-             if (!isNaN(val)) {
-                 if (val > 100) this.value = 100;
-                 if (val < 0) this.value = 0;
-             }
+        input.addEventListener('keydown', e => { if (['e','E','-','+'].includes(e.key)) e.preventDefault(); });
+        input.addEventListener('blur', function () {
+            const v = parseFloat(this.value);
+            if (!isNaN(v)) {
+                if (v > 100) this.value = 100;
+                if (v < 0)   this.value = 0;
+            }
         });
     });
-    // Calculate rata-rata and nilai akhir for each mapel
+
+    /* ── Per-mapel live recalculation ── */
     @foreach($mataPelajaranList as $mapel)
-    (function() {
-        const mapelId = {{ $mapel->id }};
-        
-        const tugasInputs = document.querySelectorAll(`.tugas-input-${mapelId}`);
-        const latihanInputs = document.querySelectorAll(`.latihan-input-${mapelId}`);
-        const uhInputs = document.querySelectorAll(`.uh-input-${mapelId}`);
-        const ptsInput = document.querySelector(`.pts-input-${mapelId}`);
-        const pasInput = document.querySelector(`.pas-input-${mapelId}`);
-        
-        const rataTugasDisplay = document.getElementById(`rata_tugas_${mapelId}`);
-        const rataLatihanDisplay = document.getElementById(`rata_latihan_${mapelId}`);
-        const rataUhDisplay = document.getElementById(`rata_uh_${mapelId}`);
-        const nilaiAkhirDisplay = document.getElementById(`nilai_akhir_${mapelId}`);
-        
-        function calculateAverage(inputs) {
-            let sum = 0;
-            let count = 0;
-            inputs.forEach(input => {
-                const val = parseFloat(input.value);
-                if (!isNaN(val) && input.value.trim() !== '') {
-                    sum += val;
-                    count++;
-                }
+    (function () {
+        const mid = {{ $mapel->id }};
+
+        const tugasInputs   = document.querySelectorAll(`.tugas-input-${mid}`);
+        const latihanInputs = document.querySelectorAll(`.latihan-input-${mid}`);
+        const uhInputs      = document.querySelectorAll(`.uh-input-${mid}`);
+        const ptsInput      = document.querySelector(`.pts-input-${mid}`);
+        const pasInput      = document.querySelector(`.pas-input-${mid}`);
+
+        const rataTugasEl   = document.getElementById(`rata_tugas_${mid}`);
+        const rataLatihanEl = document.getElementById(`rata_latihan_${mid}`);
+        const rataUhEl      = document.getElementById(`rata_uh_${mid}`);
+        const nilaiAkhirEl  = document.getElementById(`nilai_akhir_${mid}`);
+
+        function avg(inputs) {
+            let sum = 0, count = 0;
+            inputs.forEach(inp => {
+                const v = parseFloat(inp.value);
+                if (!isNaN(v) && inp.value.trim() !== '') { sum += v; count++; }
             });
             return count > 0 ? sum / count : null;
         }
-        
-        function updateAll() {
-            const rataTugas = calculateAverage(tugasInputs);
-            const rataLatihan = calculateAverage(latihanInputs);
-            const rataUh = calculateAverage(uhInputs);
+
+        function recalc() {
+            const rt = avg(tugasInputs);
+            const rl = avg(latihanInputs);
+            const ru = avg(uhInputs);
             const pts = parseFloat(ptsInput?.value) || 0;
             const pas = parseFloat(pasInput?.value) || 0;
-            
-            // Display averages
-            rataTugasDisplay.textContent = rataTugas !== null ? rataTugas.toFixed(1) : '-';
-            rataLatihanDisplay.textContent = rataLatihan !== null ? rataLatihan.toFixed(1) : '-';
-            rataUhDisplay.textContent = rataUh !== null ? rataUh.toFixed(1) : '-';
-            
-            // Calculate nilai akhir using new formula
-            const rt = rataTugas || 0;
-            const rl = rataLatihan || 0;
-            const ru = rataUh || 0;
-            
+
+            rataTugasEl.textContent   = rt !== null ? rt.toFixed(1) : '-';
+            rataLatihanEl.textContent = rl !== null ? rl.toFixed(1) : '-';
+            rataUhEl.textContent      = ru !== null ? ru.toFixed(1) : '-';
+
             if (rt || rl || ru || pts || pas) {
-                const nilaiAkhir = ((rt * 1) + (rl * 1) + (ru * 2) + (pts * 3) + (pas * 3)) / 10;
-                nilaiAkhirDisplay.textContent = nilaiAkhir.toFixed(2);
+                const na = ((rt||0)*1 + (rl||0)*1 + (ru||0)*2 + pts*3 + pas*3) / 10;
+                nilaiAkhirEl.textContent = na.toFixed(2);
             } else {
-                nilaiAkhirDisplay.textContent = '-';
+                nilaiAkhirEl.textContent = '-';
             }
         }
-        
-        // Attach listeners
-        tugasInputs.forEach(input => input.addEventListener('input', updateAll));
-        latihanInputs.forEach(input => input.addEventListener('input', updateAll));
-        uhInputs.forEach(input => input.addEventListener('input', updateAll));
-        ptsInput?.addEventListener('input', updateAll);
-        pasInput?.addEventListener('input', updateAll);
+
+        tugasInputs.forEach(i => i.addEventListener('input', recalc));
+        latihanInputs.forEach(i => i.addEventListener('input', recalc));
+        uhInputs.forEach(i => i.addEventListener('input', recalc));
+        ptsInput?.addEventListener('input', recalc);
+        pasInput?.addEventListener('input', recalc);
     })();
     @endforeach
 });
