@@ -81,7 +81,8 @@
 
 .kelas-info-right {
     display: flex;
-    gap: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .kelas-stat {
@@ -89,6 +90,8 @@
     padding: 12px 20px;
     background: rgba(255,255,255,0.15);
     border-radius: 10px;
+    flex: 1;
+    min-width: 80px;
 }
 
 .kelas-stat-value {
@@ -217,6 +220,9 @@
 .user-avatar {
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
@@ -383,6 +389,88 @@
     color: #92400e;
     border: 1px solid #fcd34d;
 }
+
+@media (max-width: 767.98px) {
+    .kelas-info-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .kelas-info-right {
+        width: 100%;
+    }
+    .kelas-stat-value {
+        font-size: 22px;
+    }
+
+    /* Table → Card layout */
+    .table-card-mobile thead {
+        display: none;
+    }
+    .table-card-mobile tbody tr {
+        display: block;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding: 10px 14px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        position: relative;
+    }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 0;
+        border: none;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        flex-shrink: 0;
+        margin-right: 8px;
+    }
+    .table-card-mobile tbody td.mobile-card-head {
+        font-size: 13px;
+        font-weight: 600;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 8px;
+        padding-right: 32px;
+        margin-bottom: 2px;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+    .table-card-mobile tbody td.mobile-card-head::before {
+        display: none;
+    }
+    .table-card-mobile tbody td.mobile-card-hide {
+        display: none;
+    }
+    .table-card-mobile tbody td.mobile-card-actions {
+        justify-content: flex-end;
+        padding-top: 8px;
+    }
+    .table-card-mobile tbody td.mobile-card-actions::before {
+        display: none;
+    }
+    .table-card-mobile tbody td.mobile-card-checkbox {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        display: flex !important;
+        width: 28px;
+        padding: 0;
+        border: none;
+        z-index: 2;
+    }
+    .table-card-mobile tbody td.mobile-card-checkbox::before {
+        display: none;
+    }
+}
 </style>
 
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -443,7 +531,7 @@
                 
                 @if($siswaInKelas->count() > 0)
                     <div class="table-responsive">
-                        <table class="table" id="tableInKelas">
+                        <table class="table table-card-mobile" id="tableInKelas">
                             <thead>
                                 <tr>
                                     <th style="width: 50px;">No</th>
@@ -455,22 +543,20 @@
                             <tbody>
                                 @foreach($siswaInKelas as $index => $s)
                                 <tr data-nama="{{ strtolower($s->nama_lengkap) }}">
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>
-                                        <div class="user-info">
-                                            <div class="user-avatar">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
-                                            <div>
-                                                <div class="user-name">{{ $s->nama_lengkap }}</div>
-                                                <div class="user-nisn">{{ $s->nis }}</div>
-                                            </div>
+                                    <td class="mobile-card-hide" data-label="No">{{ $index + 1 }}</td>
+                                    <td class="mobile-card-head">
+                                        <div class="user-avatar">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
+                                        <div>
+                                            <div class="user-name">{{ $s->nama_lengkap }}</div>
+                                            <div class="user-nisn">{{ $s->nis }}</div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="JK">
                                         <span class="badge {{ $s->jenis_kelamin == 'L' ? 'badge-info' : 'badge-purple' }}">
                                             {{ $s->jenis_kelamin }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="mobile-card-actions">
                                         <form action="{{ route('admin.kelas.remove-siswa', $kelas) }}" method="POST" id="deleteForm{{ $s->id }}">
                                             @csrf
                                             <input type="hidden" name="siswa_id" value="{{ $s->id }}">
@@ -517,7 +603,7 @@
                         </div>
                         
                         <div class="table-responsive">
-                            <table class="table" id="tableAvailable">
+                            <table class="table table-card-mobile" id="tableAvailable">
                                 <thead>
                                     <tr class="select-all-row">
                                         <th style="width: 40px;">
@@ -531,25 +617,23 @@
                                 <tbody>
                                     @foreach($siswaAvailable as $s)
                                     <tr data-nama="{{ strtolower($s->nama_lengkap) }}">
-                                        <td>
-                                            <input type="checkbox" class="checkbox-custom siswa-checkbox" 
+                                        <td class="mobile-card-checkbox">
+                                            <input type="checkbox" class="checkbox-custom siswa-checkbox"
                                                    name="siswa_ids[]" value="{{ $s->id }}">
                                         </td>
-                                        <td>
-                                            <div class="user-info">
-                                                <div class="user-avatar blue">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
-                                                <div>
-                                                    <div class="user-name">{{ $s->nama_lengkap }}</div>
-                                                    <div class="user-nisn">{{ $s->nis }}</div>
-                                                </div>
+                                        <td class="mobile-card-head">
+                                            <div class="user-avatar blue">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
+                                            <div>
+                                                <div class="user-name">{{ $s->nama_lengkap }}</div>
+                                                <div class="user-nisn">{{ $s->nis }}</div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="JK">
                                             <span class="badge {{ $s->jenis_kelamin == 'L' ? 'badge-info' : 'badge-purple' }}">
                                                 {{ $s->jenis_kelamin }}
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Kelas">
                                             @if($s->kelas_id)
                                                 <span class="badge badge-warning">{{ $s->kelas->nama_kelas ?? 'Ada kelas' }}</span>
                                             @else

@@ -116,6 +116,7 @@
 .header-actions {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .header-stats {
@@ -297,6 +298,9 @@
 .wali-avatar {
     width: 56px;
     height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     color: white;
@@ -380,6 +384,9 @@
 .user-avatar {
     width: 36px;
     height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
@@ -421,6 +428,70 @@
     display: flex;
     justify-content: center;
     padding-top: 16px;
+}
+
+@media (max-width: 767.98px) {
+    .header-card {
+        padding: 20px;
+    }
+    .header-text h1 {
+        font-size: 20px;
+    }
+    .header-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+    }
+    .header-stat-value {
+        font-size: 24px;
+    }
+
+    /* Table → Card layout for Daftar Siswa */
+    .table-card-mobile thead {
+        display: none;
+    }
+    .table-card-mobile tbody tr {
+        display: block;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        padding: 12px 16px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0;
+        border: none;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        flex-shrink: 0;
+        margin-right: 8px;
+    }
+    .table-card-mobile tbody td.mobile-card-head {
+        font-size: 14px;
+        font-weight: 600;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 10px;
+        margin-bottom: 4px;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+    .table-card-mobile tbody td.mobile-card-head::before {
+        display: none;
+    }
+    .table-card-mobile tbody td.mobile-card-hide {
+        display: none;
+    }
 }
 </style>
 
@@ -559,7 +630,7 @@
         <div class="card-body">
             @if($siswa->count() > 0)
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-card-mobile">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -572,25 +643,23 @@
                         <tbody>
                             @foreach($siswa as $index => $s)
                             <tr>
-                                <td>{{ $siswa->firstItem() + $index }}</td>
-                                <td><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $s->nis }}</code></td>
-                                <td>
-                                    <div class="user-info">
-                                        <div class="user-avatar">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
-                                        <div>
-                                            <div class="user-name">{{ $s->nama_lengkap }}</div>
-                                            <div class="user-nisn">NISN: {{ $s->nisn }}</div>
-                                        </div>
+                                <td class="mobile-card-hide" data-label="No">{{ $siswa->firstItem() + $index }}</td>
+                                <td data-label="NIS"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $s->nis }}</code></td>
+                                <td class="mobile-card-head">
+                                    <div class="user-avatar">{{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}</div>
+                                    <div>
+                                        <div class="user-name">{{ $s->nama_lengkap }}</div>
+                                        <div class="user-nisn">NISN: {{ $s->nisn }}</div>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Jenis Kelamin">
                                     @if($s->jenis_kelamin == 'L')
                                         <span class="badge badge-info"><i class="fas fa-mars"></i> Laki-laki</span>
                                     @else
                                         <span class="badge badge-purple"><i class="fas fa-venus"></i> Perempuan</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     <span class="badge badge-success">{{ ucfirst($s->status) }}</span>
                                 </td>
                             </tr>

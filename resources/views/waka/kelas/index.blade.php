@@ -334,6 +334,8 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
 .wali-avatar {
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     color: white;
@@ -342,6 +344,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
     justify-content: center;
     font-weight: 600;
     font-size: 12px;
+    flex-shrink: 0;
 }
 
 .wali-name {
@@ -511,6 +514,106 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
 .btn-print:hover {
     background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
 }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 767.98px) {
+    /* Card header: wrap buttons */
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .card-header > div:last-child {
+        flex-wrap: wrap !important;
+        width: 100%;
+    }
+    .card-header > div:last-child .btn {
+        flex: 1 1 auto;
+        min-width: 120px;
+        justify-content: center;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+
+    /* Filter: stack vertically */
+    .filter-section {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .filter-section .search-box {
+        width: 100%;
+    }
+    .filter-section .search-box input {
+        width: 100% !important;
+    }
+    .filter-section .filter-select,
+    .filter-section .btn {
+        width: 100% !important;
+    }
+
+    /* Stat cards */
+    .stat-card { padding: 16px; }
+    .stat-number { font-size: 28px; }
+
+    /* Table → Card per row */
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        position: relative;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+    }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        min-height: 44px;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td.mobile-card-head {
+        background: #f8fafc;
+        padding: 12px 14px;
+        border-bottom: 2px solid #e5e7eb !important;
+        justify-content: flex-start;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        padding-right: 10px;
+        min-width: 75px;
+    }
+    .table-card-mobile tbody td.mobile-card-full {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .table-card-mobile tbody td.mobile-card-full::before { min-width: unset; }
+    .table-card-mobile tbody td.mobile-card-actions {
+        border-bottom: none !important;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 14px;
+    }
+    /* Kuota bar: adapt on mobile */
+    .kuota-bar { width: 100%; max-width: 160px; }
+    /* Action buttons */
+    .action-buttons { justify-content: flex-end; }
+}
 </style>
 
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -576,7 +679,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                 <h5><i class="fas fa-chalkboard" style="color: #3b82f6; margin-right: 10px;"></i>Daftar Kelas</h5>
                 <small style="color: #6b7280;">Kelola data kelas per tahun ajaran</small>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="{{ route('waka.kelas.import') }}" class="btn btn-outline" style="background: #dcfce7; border-color: #86efac; color: #166534;">
                     <i class="fas fa-file-import"></i> Import Excel
                 </a>
@@ -629,7 +732,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
             {{-- Table --}}
             @if($kelas->count() > 0)
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-card-mobile">
                         <thead>
                             <tr>
                                 <th>Kelas</th>
@@ -644,13 +747,13 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                         <tbody>
                             @foreach($kelas as $k)
                             <tr>
-                                <td>
+                                <td class="mobile-card-head">
                                     <div class="kelas-info">
                                         <span class="kelas-nama">{{ $k->nama_kelas }}</span>
                                         <span class="kelas-kode">{{ $k->kode_kelas }}</span>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Jenjang">
                                     @php
                                         $jenjangClass = [
                                             'KB' => 'badge-kb',
@@ -663,10 +766,10 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                     @endphp
                                     <span class="badge {{ $jenjangClass }}">{{ $k->jenjang }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Cabang">
                                     <span style="color: #6b7280;">{{ $k->cabang->nama_cabang ?? '-' }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Wali Kelas" class="mobile-card-full">
                                     @if($k->waliKelasAssignments->count() > 0)
                                         @foreach($k->waliKelasAssignments as $assignment)
                                             <div class="wali-kelas-info" style="margin-bottom: 4px;">
@@ -680,7 +783,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                         </span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Siswa">
                                     @php
                                         $percentage = $k->kuota_siswa > 0 ? ($k->siswa_count / $k->kuota_siswa) * 100 : 0;
                                         $barClass = $percentage < 50 ? 'low' : ($percentage < 80 ? 'medium' : 'high');
@@ -692,10 +795,10 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                         <span class="kuota-text">{{ $k->siswa_count }} / {{ $k->kuota_siswa }} siswa</span>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="T. Ajaran">
                                     <span class="badge badge-info">{{ $k->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
                                 </td>
-                                <td>
+                                <td class="mobile-card-actions">
                                     <div class="action-buttons">
                                         <a href="{{ route('waka.kelas.show', $k) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
                                             <i class="fas fa-eye"></i>

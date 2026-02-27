@@ -49,7 +49,7 @@
         .break-TK, .break-TKA, .break-TKB { background-color: #FF9800; color: white; font-weight: bold; }
         .break-KB { background-color: #E91E63; color: white; font-weight: bold; }
 
-        .footer { margin-top: 30px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; page-break-inside: avoid; }
         .signature { width: 30%; text-align: center; margin-top: 20px; }
         .signature-line { margin-top: 60px; border-top: 1px solid #000; padding-top: 5px; }
     </style>
@@ -96,6 +96,7 @@
     </div>
 
     {{-- Schedule Table --}}
+    <div style="overflow-x: auto;">
     <table class="schedule-table style-{{ $jenjangClass }}">
         <thead>
             <tr>
@@ -182,6 +183,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     {{-- Footer --}}
     <div class="footer">

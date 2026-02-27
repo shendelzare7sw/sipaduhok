@@ -254,6 +254,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    flex-wrap: wrap;
     padding-top: 24px;
     border-top: 1px solid #e5e7eb;
     margin-top: 32px;

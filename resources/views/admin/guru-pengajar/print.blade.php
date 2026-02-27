@@ -22,16 +22,21 @@
         .no-assignment { color: #666; font-style: italic; font-size: 10pt; }
         .summary { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; }
         .summary h4 { font-size: 11pt; margin-bottom: 10px; }
-        .summary-grid { display: flex; gap: 30px; }
+        .summary-grid { display: flex; gap: 30px; flex-wrap: wrap; }
+        .table-wrapper { overflow-x: auto; }
         .summary-item .label { font-size: 9pt; color: #666; }
         .summary-item .value { font-size: 14pt; font-weight: bold; }
         .footer { margin-top: 40px; display: flex; justify-content: space-between; }
         .footer-right { text-align: center; }
         .signature-line { margin-top: 60px; border-bottom: 1px solid #000; width: 200px; margin: 60px auto 0; }
         .print-date { font-size: 10pt; color: #666; margin-top: 30px; }
-        .print-button { position: fixed; top: 20px; right: 20px; padding: 12px 24px; background: #14b8a6; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .back-button { position: fixed; top: 20px; right: 130px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; }
+        .print-button { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #14b8a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
+        .back-button { position: fixed; top: 20px; right: 130px; padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
         @media print { .no-print { display: none !important; } .container { padding: 0; } }
+        @media (max-width: 575.98px) {
+            .print-button { top: auto; bottom: 20px; right: 20px; font-size: 13px; padding: 8px 14px; }
+            .back-button { top: auto; bottom: 20px; right: 110px; font-size: 13px; padding: 8px 14px; }
+        }
     </style>
 </head>
 <body>
@@ -47,6 +52,7 @@
         </div>
 
         @if($guruList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -79,6 +85,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <h4>Ringkasan:</h4>

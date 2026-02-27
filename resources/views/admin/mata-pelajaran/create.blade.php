@@ -12,7 +12,7 @@
 <div class="row justify-content-center">
     <div class="col-xl-8">
         <div class="card">
-            <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <h5 class="mb-0">
                     <i class="fas fa-plus-circle text-primary me-2"></i>Form Tambah Mata Pelajaran
                 </h5>

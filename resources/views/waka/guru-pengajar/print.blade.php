@@ -24,7 +24,8 @@
         .no-assignment { color: #666; font-style: italic; font-size: 10pt; }
         .summary { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; }
         .summary h4 { font-size: 11pt; margin-bottom: 10px; }
-        .summary-grid { display: flex; gap: 30px; }
+        .summary-grid { display: flex; gap: 30px; flex-wrap: wrap; }
+        .table-wrapper { overflow-x: auto; }
         .summary-item .label { font-size: 9pt; color: #666; }
         .summary-item .value { font-size: 14pt; font-weight: bold; }
         .footer { margin-top: 40px; display: flex; justify-content: space-between; }
@@ -72,6 +73,7 @@
         </div>
 
         @if($guruList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -104,6 +106,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <h4>Ringkasan:</h4>

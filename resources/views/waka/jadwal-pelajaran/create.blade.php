@@ -276,7 +276,7 @@
                 </div>
 
                 {{-- Action Buttons --}}
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <a href="{{ route('waka.jadwal-pelajaran.index', request()->query()) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Kembali
                     </a>

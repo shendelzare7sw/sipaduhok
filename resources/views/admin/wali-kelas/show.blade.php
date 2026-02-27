@@ -116,6 +116,7 @@
 .header-actions {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .header-stats {
@@ -241,6 +242,9 @@
 .wali-avatar {
     width: 80px;
     height: 80px;
+    min-width: 80px;
+    min-height: 80px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     color: white;
@@ -405,6 +409,9 @@
 .user-avatar {
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
@@ -425,6 +432,54 @@
     font-size: 48px;
     margin-bottom: 12px;
     opacity: 0.5;
+}
+
+@media (max-width: 767.98px) {
+    .header-card { padding: 20px; }
+    .header-icon { width: 56px; height: 56px; font-size: 24px; border-radius: 12px; }
+    .header-text h1 { font-size: 20px; }
+    .header-info { flex-wrap: wrap; }
+    .header-actions { width: 100%; }
+    .header-actions .btn { flex: 1; justify-content: center; }
+
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: white;
+    }
+    .table-card-mobile tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 4px;
+        border: none;
+        font-size: 13px;
+    }
+    .table-card-mobile tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #6b7280;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 8px;
+    }
+    .table-card-mobile tbody td.mobile-card-hide { display: none; }
+    .table-card-mobile tbody td.mobile-card-head {
+        display: flex;
+        align-items: center;
+        padding-bottom: 8px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .table-card-mobile tbody td.mobile-card-head::before { display: none; }
 }
 </style>
 
@@ -575,27 +630,27 @@
         <div class="card-body">
             @if($kelas->siswa->count() > 0)
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-card-mobile">
                         <thead>
                             <tr>
-                                <th>No</th>
-                                <th>NIS</th>
-                                <th>Nama Siswa</th>
-                                <th>Jenis Kelamin</th>
+                                <th class="mobile-card-hide">No</th>
+                                <th data-label="NIS">NIS</th>
+                                <th class="mobile-card-head">Nama Siswa</th>
+                                <th data-label="Jenis Kelamin">Jenis Kelamin</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($kelas->siswa->sortBy('nama_lengkap') as $index => $siswa)
                             <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $siswa->nis }}</code></td>
-                                <td>
+                                <td class="mobile-card-hide">{{ $index + 1 }}</td>
+                                <td data-label="NIS"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $siswa->nis }}</code></td>
+                                <td class="mobile-card-head">
                                     <div class="user-info">
                                         <div class="user-avatar">{{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}</div>
                                         <span>{{ $siswa->nama_lengkap }}</span>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Jenis Kelamin">
                                     <span class="badge {{ $siswa->jenis_kelamin == 'L' ? 'badge-info' : 'badge-purple' }}">
                                         {{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                     </span>

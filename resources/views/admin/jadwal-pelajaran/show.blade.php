@@ -19,6 +19,7 @@
     border: 2px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
+    min-width: 600px;
 }
 
 .schedule-header {
@@ -153,6 +154,11 @@
         min-height: 60px;
     }
 }
+
+@media (max-width: 767.98px) {
+    .kelas-info-card { padding: 16px; }
+    .kelas-info-title { font-size: 18px; }
+}
 </style>
 @endsection
 
@@ -185,11 +191,11 @@
 {{-- Action Buttons --}}
 <div class="card mb-4 no-print">
     <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <a href="{{ route('admin.jadwal-pelajaran.index', ['tahun_ajaran_id' => $currentTahunAjaran->id]) }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <a href="{{ route('admin.jadwal-pelajaran.create', ['tahun_ajaran_id' => $currentTahunAjaran->id, 'kelas_id' => $kelas->id]) }}"
                    class="btn btn-primary">
                     <i class="fas fa-plus me-1"></i> Tambah Jadwal
@@ -217,6 +223,7 @@
         </h5>
     </div>
     <div class="card-body">
+        <div style="overflow-x: auto;">
         <div class="schedule-grid">
             {{-- Header Row --}}
             <div class="schedule-header">Waktu</div>
@@ -272,6 +279,7 @@
                     @endif
                 @endforeach
             @endforeach
+        </div>
         </div>
 
         @if($jadwalByHari->flatten()->isEmpty())

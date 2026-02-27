@@ -20,16 +20,21 @@
         table td.center { text-align: center; }
         .summary { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; }
         .summary h4 { font-size: 11pt; margin-bottom: 10px; }
-        .summary-grid { display: flex; gap: 30px; }
+        .summary-grid { display: flex; flex-wrap: wrap; gap: 30px; }
         .summary-item .label { font-size: 9pt; color: #666; }
         .summary-item .value { font-size: 14pt; font-weight: bold; }
-        .footer { margin-top: 40px; display: flex; justify-content: space-between; }
+        .footer { margin-top: 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
         .footer-right { text-align: center; }
         .signature-line { margin-top: 60px; border-bottom: 1px solid #000; width: 200px; margin: 60px auto 0; }
         .print-date { font-size: 10pt; color: #666; margin-top: 30px; }
-        .print-button { position: fixed; top: 20px; right: 20px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; }
-        .back-button { position: fixed; top: 20px; right: 130px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; }
+        .table-wrapper { overflow-x: auto; }
+        .print-button { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
+        .back-button { position: fixed; top: 20px; right: 130px; padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
         @media print { .no-print { display: none !important; } .container { padding: 0; } }
+        @media (max-width: 575.98px) {
+            .print-button { top: auto; bottom: 20px; right: 20px; }
+            .back-button { top: auto; bottom: 20px; right: 110px; }
+        }
     </style>
 </head>
 <body>
@@ -60,6 +65,7 @@
         </div>
 
         @if($siswaList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -99,6 +105,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <h4>Ringkasan:</h4>

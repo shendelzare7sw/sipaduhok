@@ -68,6 +68,7 @@
 
         .info-banner-stats {
             display: flex;
+            flex-wrap: wrap;
             gap: 16px;
         }
 
@@ -114,6 +115,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .card-header h5 {
@@ -136,6 +139,7 @@
 
         .form-row {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 16px;
         }
@@ -240,6 +244,9 @@
         .siswa-avatar {
             width: 36px;
             height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            flex-shrink: 0;
             border-radius: 50%;
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
@@ -409,6 +416,7 @@
                 </div>
                 <div class="card-body" style="padding: 0;">
                     @if($siswaList->count() > 0)
+                        <div style="overflow-x: auto;">
                         <table class="table">
                             <thead>
                                 <tr>
@@ -450,6 +458,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @else
                         <div class="empty-state">
                             <i class="fas fa-users"></i>
@@ -460,7 +469,7 @@
             </div>
         </div>
 
-        <div style="margin-top: 24px;">
+        <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
             <a href="{{ route('admin.manajemen-siswa.index') }}" class="btn btn-outline">
                 <i class="fas fa-arrow-left"></i> Kembali ke Daftar Siswa
             </a>

@@ -69,6 +69,7 @@
         .info-banner-stats {
             display: flex;
             gap: 24px;
+            flex-wrap: wrap;
         }
 
         .info-banner-stat {
@@ -113,6 +114,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .card-header h5 {
@@ -258,6 +261,9 @@
         .guru-avatar {
             width: 36px;
             height: 36px;
+            min-width: 36px;
+            min-height: 36px;
+            flex-shrink: 0;
             border-radius: 50%;
             background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
             color: white;
@@ -299,6 +305,49 @@
             background: #fee2e2;
             color: #dc2626;
             border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 767.98px) {
+            .info-banner { padding: 16px 20px; }
+            .info-banner h2 { font-size: 18px; }
+
+            .table-card-mobile thead { display: none; }
+            .table-card-mobile tbody tr {
+                display: block;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 10px;
+                background: white;
+            }
+            .table-card-mobile tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 4px;
+                border: none;
+                font-size: 13px;
+            }
+            .table-card-mobile tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #6b7280;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                flex-shrink: 0;
+                margin-right: 8px;
+            }
+            .table-card-mobile tbody td.mobile-card-head {
+                display: flex;
+                align-items: center;
+                padding-bottom: 8px;
+                margin-bottom: 4px;
+                border-bottom: 1px solid #f3f4f6;
+                font-size: 14px;
+                font-weight: 600;
+            }
+            .table-card-mobile tbody td.mobile-card-head::before { display: none; }
         }
     </style>
 
@@ -363,17 +412,17 @@
             <div class="card-body">
                 @if($kelas->guruPengajar->count() > 0)
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-card-mobile">
                             <thead>
                                 <tr>
-                                    <th>Guru</th>
-                                    <th>Mata Pelajaran</th>
+                                    <th class="mobile-card-head">Guru</th>
+                                    <th data-label="Mata Pelajaran">Mata Pelajaran</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($kelas->guruPengajar as $assignment)
                                     <tr>
-                                        <td>
+                                        <td class="mobile-card-head">
                                             <div class="guru-info">
                                                 <div class="guru-avatar">
                                                     {{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}
@@ -381,7 +430,7 @@
                                                 <span>{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Mata Pelajaran">
                                             <span class="badge badge-teal">{{ $assignment->mataPelajaran->nama_mapel }}</span>
                                         </td>
                                     </tr>
@@ -394,22 +443,22 @@
                     @if($jadwalList->count() > 0)
                         <h6 class="mt-4 mb-2"><i class="fas fa-calendar-alt"></i> Jadwal di Kelas Ini</h6>
                         <div class="table-responsive">
-                            <table class="table table-sm">
+                            <table class="table table-sm table-card-mobile">
                                 <thead>
                                     <tr>
-                                        <th>Hari</th>
-                                        <th>Jam</th>
-                                        <th>Mata Pelajaran</th>
-                                        <th>Guru</th>
+                                        <th class="mobile-card-head">Hari</th>
+                                        <th data-label="Jam">Jam</th>
+                                        <th data-label="Mata Pelajaran">Mata Pelajaran</th>
+                                        <th data-label="Guru">Guru</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($jadwalList as $jadwal)
                                         <tr>
-                                            <td>{{ $jadwal->hari }}</td>
-                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
-                                            <td>{{ $jadwal->mataPelajaran->nama_mapel ?? '-' }}</td>
-                                            <td>{{ $jadwal->guru->nama_lengkap ?? '-' }}</td>
+                                            <td class="mobile-card-head">{{ $jadwal->hari }}</td>
+                                            <td data-label="Jam">{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                            <td data-label="Mata Pelajaran">{{ $jadwal->mataPelajaran->nama_mapel ?? '-' }}</td>
+                                            <td data-label="Guru">{{ $jadwal->guru->nama_lengkap ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

@@ -180,7 +180,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             background: #8b5cf6;
             color: white;
             border: none;
@@ -190,16 +190,16 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
         }
-        
+
         .print-button:hover {
             background: #7c3aed;
         }
-        
+
         .back-button {
             position: fixed;
             top: 20px;
             right: 130px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             background: #6b7280;
             color: white;
             border: none;
@@ -210,9 +210,30 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             z-index: 1000;
         }
-        
+
         .back-button:hover {
             background: #4b5563;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 575.98px) {
+            .print-button {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                font-size: 13px;
+                padding: 8px 14px;
+            }
+            .back-button {
+                top: auto;
+                bottom: 20px;
+                right: 110px;
+                font-size: 13px;
+                padding: 8px 14px;
+            }
         }
     </style>
 </head>
@@ -233,6 +254,7 @@
         </div>
 
         @if($kelasList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -266,6 +288,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <h4>Ringkasan:</h4>

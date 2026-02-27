@@ -25,15 +25,19 @@
         .summary-grid { display: flex; flex-wrap: wrap; gap: 15px; }
         .summary-item .label { font-size: 9pt; color: #666; }
         .summary-item .value { font-size: 13pt; font-weight: bold; }
-        .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 10pt; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; font-size: 10pt; }
         .footer-right { text-align: center; }
         .signature-line { margin-top: 50px; border-bottom: 1px solid #000; width: 180px; margin-left: auto; margin-right: auto; }
         .print-date { font-size: 9pt; color: #666; }
-        .btn-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 999; }
+        .table-wrapper { overflow-x: auto; }
+        .btn-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 999; flex-wrap: wrap; max-width: calc(100vw - 30px); justify-content: flex-end; }
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
         .btn-print { background: #696cff; color: white; }
         .btn-back { background: #6b7280; color: white; }
         @media print { .no-print { display: none !important; } .container { padding: 0; } }
+        @media (max-width: 575.98px) {
+            .btn-actions { top: auto; bottom: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -58,6 +62,7 @@
 
         @if($mataPelajaranList->count() > 0)
             @php $currentJenjang = ''; $no = 1; @endphp
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -88,6 +93,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <h4>Ringkasan Per Jenjang:</h4>

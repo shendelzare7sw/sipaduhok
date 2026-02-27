@@ -14,7 +14,7 @@
         {{-- Info Card --}}
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
+                <h5 class="mb-0" style="color: white;">
                     <i class="fas fa-book me-2"></i>Informasi Mata Pelajaran
                 </h5>
             </div>
@@ -158,9 +158,9 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>
-                                    <strong>{{ $jadwal->kelas->nama_kelas }}</strong>
+                                    <strong>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</strong>
                                     <br>
-                                    <small class="text-muted">{{ $jadwal->kelas->cabang->nama_cabang }}</small>
+                                    <small class="text-muted">{{ $jadwal->kelas->map(fn($k) => $k->cabang->nama_cabang ?? '-')->unique()->join(', ') }}</small>
                                 </td>
                                 <td>
                                     <span class="badge bg-primary">{{ $jadwal->hari }}</span>

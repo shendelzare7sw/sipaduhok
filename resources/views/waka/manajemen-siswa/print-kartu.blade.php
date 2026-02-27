@@ -114,14 +114,20 @@
 
         .print-button {
             position: fixed; top: 20px; right: 20px;
-            padding: 12px 24px; background: #3b82f6; color: white;
+            padding: 10px 20px; background: #3b82f6; color: white;
             border: none; border-radius: 8px; cursor: pointer;
-            font-size: 14px; font-weight: bold;
+            font-size: 13px; font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
         }
         .back-button {
-            position: fixed; top: 20px; right: 160px;
-            padding: 12px 24px; background: #6b7280; color: white;
-            border: none; border-radius: 8px; text-decoration: none; font-size: 14px;
+            position: fixed; top: 20px; right: 150px;
+            padding: 10px 20px; background: #6b7280; color: white;
+            border: none; border-radius: 8px; text-decoration: none; font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
+        }
+        @media (max-width: 575.98px) {
+            .print-button { top: auto; bottom: 20px; right: 20px; }
+            .back-button { top: auto; bottom: 20px; right: 130px; }
         }
 
         .upload-area {

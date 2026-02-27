@@ -244,6 +244,7 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
     padding-top: 24px;
     border-top: 1px solid #e5e7eb;
     margin-top: 32px;
@@ -252,6 +253,7 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
 .form-actions-left, .form-actions-right {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .btn {

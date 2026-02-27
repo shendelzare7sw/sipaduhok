@@ -189,7 +189,7 @@
                                 <button type="button" class="btn btn-secondary" onclick="clearFile()"
                                     style="padding:6px 12px"><i class="fas fa-times"></i></button>
                             </div>
-                            <div style="display:flex;gap:12px;margin-top:24px">
+                            <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap">
                                 <a href="{{ route('waka.jadwal-pelajaran.index') }}" class="btn btn-secondary"><i
                                         class="fas fa-arrow-left"></i> Kembali</a>
                                 <button type="submit" class="btn btn-primary" id="submitBtn" disabled><i

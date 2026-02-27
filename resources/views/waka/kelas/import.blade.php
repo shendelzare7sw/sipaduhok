@@ -157,6 +157,7 @@
         .form-actions {
             display: flex;
             gap: 12px;
+            flex-wrap: wrap;
             margin-top: 24px;
         }
 
@@ -234,7 +235,8 @@
                     <h5><i class="fas fa-table" style="color: #10b981; margin-right: 10px;"></i>Format Kolom</h5>
                 </div>
                 <div class="card-body">
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 400px;">
                         <thead>
                             <tr style="background: #f9fafb;">
                                 <th style="padding: 12px 16px; text-align: left; border-bottom: 2px solid #e5e7eb;">Kolom
@@ -290,6 +292,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

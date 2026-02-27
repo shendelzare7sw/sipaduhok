@@ -76,22 +76,26 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            flex-wrap: wrap;
         }
 
         .header-avatar {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
+            min-width: 80px;
+            min-height: 80px;
+            flex-shrink: 0;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
         }
 
         .header-text h1 {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 700;
             margin-bottom: 8px;
         }
@@ -117,6 +121,7 @@
         .header-actions {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -342,6 +347,26 @@
         .badge-warning {
             background: #fef3c7;
             color: #92400e;
+        }
+
+        @media (max-width: 767.98px) {
+            .header-card {
+                padding: 20px;
+            }
+            .header-text h1 {
+                font-size: 18px;
+            }
+            .header-top {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .header-actions {
+                width: 100%;
+            }
+            .header-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
         }
     </style>
 
