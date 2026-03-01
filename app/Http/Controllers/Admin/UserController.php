@@ -1138,16 +1138,12 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
         }
 
-        $users = User::whereIn('id', function($query) use ($ids) {
-            $query->select('user_id')->from('tenaga_pendidik')->whereIn('id', $ids);
-        })->get();
-
-        TenagaPendidik::whereIn('id', $ids)->delete();
+        // IDs received are User IDs (from blade checkboxes)
+        // Delete associated TenagaPendidik profiles first
+        TenagaPendidik::whereIn('user_id', $ids)->delete();
         
-        // Also delete associated users
-        foreach($users as $user) {
-            $user->delete();
-        }
+        // Then delete the User accounts
+        User::whereIn('id', $ids)->delete();
 
         return redirect()->back()->with('success', count($ids) . ' data tenaga pendidik berhasil dihapus');
     }

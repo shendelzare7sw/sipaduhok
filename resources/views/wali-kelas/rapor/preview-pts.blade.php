@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor {{ $rapor->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }} - {{ $rapor->siswa->nama_lengkap }}</title>
+    @include('partials.anti-screenshot')
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -355,8 +356,9 @@
                 @php
                     $totalPTS = 0;
                     $jumlahMapel = 0;
+                    $visibleNilai = $rapor->raporNilai->filter(fn($rn) => $rn->is_visible)->values();
                 @endphp
-                @foreach($rapor->raporNilai as $index => $raporNilai)
+                @foreach($visibleNilai as $index => $raporNilai)
                     @php
                         $nilai = $raporNilai->nilai;
                         $mapel = $raporNilai->mataPelajaran;

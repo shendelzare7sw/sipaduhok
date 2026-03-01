@@ -11,6 +11,26 @@
 @section('content')
 <div class="container-fluid">
 
+    {{-- ALUR INFO --}}
+    <div class="alert alert-light border border-primary border-opacity-25 shadow-sm mb-4">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <small class="text-muted fw-bold text-uppercase">Alur Review Rapor:</small>
+            <span class="badge bg-info"><i class="fas fa-paper-plane me-1"></i>1. Wali Kirim Rapor</span>
+            <i class="fas fa-arrow-right text-muted small"></i>
+            <span class="badge bg-warning text-white"><i class="fas fa-eye me-1"></i>2. Ketua Preview & Review</span>
+            <i class="fas fa-arrow-right text-muted small"></i>
+            <span class="badge bg-success"><i class="fas fa-check me-1"></i>3. Validasi / Minta Revisi</span>
+            <i class="fas fa-arrow-right text-muted small"></i>
+            <span class="badge bg-primary"><i class="fas fa-money-bill me-1"></i>4. Lanjut ke Bendahara</span>
+        </div>
+        <div class="mt-2 small text-muted">
+            <i class="fas fa-info-circle me-1"></i>
+            Klik <strong>Preview</strong> untuk melihat rapor sebelum menyetujui.
+            Jika ada kesalahan, klik <strong>Revisi</strong> untuk mengembalikan rapor ke Wali Kelas dengan catatan perbaikan.
+            Setelah validasi, rapor diteruskan ke Bendahara untuk verifikasi keuangan.
+        </div>
+    </div>
+
     {{-- Stats Cards --}}
     <div class="row mb-4">
         <div class="col-xl-6 col-md-6 mb-4">
@@ -151,6 +171,9 @@
                                 @endif
                             </td>
                             <td class="text-center align-middle">
+                                <a href="{{ route('ketua.validasi-rapor.preview', $siswa->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank" title="Preview Rapor">
+                                    <i class="fas fa-eye me-1"></i> Preview
+                                </a>
                                 @if($siswa->validasi_rapor_ketua)
                                     <button type="button" class="btn btn-danger btn-sm shadow-sm"
                                             data-bs-toggle="modal" data-bs-target="#batalkanModal"
@@ -164,6 +187,12 @@
                                             data-action="{{ route('ketua.validasi-rapor.validasi', $siswa->id) }}"
                                             data-name="{{ $siswa->nama_lengkap }}">
                                         <i class="fas fa-check me-1"></i> Validasi
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm shadow-sm"
+                                            data-bs-toggle="modal" data-bs-target="#revisiModal"
+                                            data-action="{{ route('ketua.validasi-rapor.minta-revisi', $siswa->id) }}"
+                                            data-name="{{ $siswa->nama_lengkap }}">
+                                        <i class="fas fa-edit me-1"></i> Revisi
                                     </button>
                                 @endif
                             </td>
@@ -347,6 +376,38 @@
     </div>
 </div>
 
+{{-- Modal: Minta Revisi --}}
+<div class="modal fade" id="revisiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <form id="revisiForm" method="POST">
+                @csrf
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title fw-bold text-white">
+                        <i class="fas fa-edit me-2"></i>Minta Revisi Rapor
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="mb-2">Kirim catatan revisi ke wali kelas untuk: <strong id="revisiNamaSiswa">-</strong></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Catatan Revisi</label>
+                        <textarea name="catatan_revisi" class="form-control" rows="4" required placeholder="Tuliskan apa yang perlu diperbaiki oleh wali kelas..."></textarea>
+                    </div>
+                    <div class="alert alert-warning bg-light border-warning text-start small mb-0">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Rapor akan dikembalikan ke wali kelas. Status validasi wali & ketua akan direset.
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-warning fw-bold"><i class="fas fa-paper-plane me-1"></i> Kirim Revisi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 // Check all functionality
@@ -405,6 +466,13 @@ document.getElementById('btnKonfirmasiTerpilih').addEventListener('click', funct
 
     document.body.appendChild(form);
     form.submit();
+});
+
+// Populate Revisi modal
+document.getElementById('revisiModal').addEventListener('show.bs.modal', function(e) {
+    const btn = e.relatedTarget;
+    document.getElementById('revisiNamaSiswa').textContent = btn.dataset.name;
+    document.getElementById('revisiForm').action = btn.dataset.action;
 });
 
 // Validasi Semua

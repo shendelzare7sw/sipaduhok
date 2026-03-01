@@ -18,6 +18,7 @@ use App\Models\MataPelajaran;
 use App\Models\RaporKegiatanEkstra;
 use App\Models\TemplateCapaianKompetensi;
 use App\Models\TahunAjaran;
+use App\Models\RequestDownloadRapor;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RaporExport;
@@ -277,7 +278,7 @@ class RaporController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
         $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        $rapor = Rapor::with(['siswa', 'kelas', 'raporNilai.mataPelajaran'])->findOrFail($raporId);
+        $rapor = Rapor::with(['siswa', 'kelas', 'raporNilai.mataPelajaran', 'raporNilai.nilai'])->findOrFail($raporId);
 
         // Pastikan rapor ini milik kelas wali kelas
         if ($rapor->kelas_id != $kelas->id) {
@@ -323,10 +324,26 @@ class RaporController extends Controller
         ]);
 
         // Update nilai rapor jika ada
-        if ($request->has('nilai')) {
-            foreach ($request->nilai as $raporNilaiId => $data) {
+        if ($request->has('deskripsi')) {
+            foreach ($request->deskripsi as $raporNilaiId => $deskripsi) {
                 RaporNilai::where('id', $raporNilaiId)->update([
-                    'deskripsi' => $data['deskripsi'] ?? null,
+                    'deskripsi' => $deskripsi,
+                ]);
+            }
+        }
+
+        // Update visibility per mata pelajaran
+        if ($request->has('visible')) {
+            $visibleIds = array_keys(array_filter($request->visible));
+            RaporNilai::where('rapor_id', $rapor->id)->update(['is_visible' => false]);
+            RaporNilai::where('rapor_id', $rapor->id)->whereIn('id', $visibleIds)->update(['is_visible' => true]);
+        }
+
+        // Update kelompok override
+        if ($request->has('kelompok_override')) {
+            foreach ($request->kelompok_override as $raporNilaiId => $kelompok) {
+                RaporNilai::where('id', $raporNilaiId)->update([
+                    'kelompok_override' => $kelompok ?: null,
                 ]);
             }
         }
@@ -353,18 +370,61 @@ class RaporController extends Controller
     }
 
     /**
-     * Terbitkan rapor
+     * Terbitkan rapor (dengan optional tanggal_rilis)
      */
-    public function terbitkan($raporId): RedirectResponse
+    public function terbitkan(Request $request, $raporId): RedirectResponse
     {
         $rapor = Rapor::findOrFail($raporId);
+
+        // Set tanggal_rilis: dari input atau default hari ini
+        $tanggalRilis = $request->input('tanggal_rilis') ? $request->input('tanggal_rilis') : now()->toDateString();
+        $rapor->tanggal_rilis = $tanggalRilis;
+        $rapor->save();
+
         $rapor->terbitkan();
 
         // Notify siswa and orang tua about published rapor
         $rapor->load('siswa.orangTua');
         app(\App\Services\NotificationService::class)->notifyRaporTerbit($rapor);
 
-        return back()->with('success', 'Rapor berhasil diterbitkan!');
+        return back()->with('success', 'Rapor berhasil diterbitkan! Tanggal rilis: ' . \Carbon\Carbon::parse($tanggalRilis)->format('d/m/Y'));
+    }
+
+    /**
+     * Reset nilai rapor dari data nilai terbaru
+     */
+    public function resetNilai($raporId): RedirectResponse
+    {
+        $rapor = Rapor::findOrFail($raporId);
+
+        if ($rapor->status === 'diterbitkan') {
+            return back()->with('error', 'Tidak bisa reset nilai rapor yang sudah diterbitkan. Tarik kembali dulu.');
+        }
+
+        $rapor->generateFromNilai();
+
+        return back()->with('success', 'Nilai rapor berhasil direset dari data nilai terbaru.');
+    }
+
+    /**
+     * Reorder mata pelajaran (JSON endpoint)
+     */
+    public function reorderNilai(Request $request, $raporId)
+    {
+        $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:rapor_nilai,id',
+        ]);
+
+        $rapor = Rapor::findOrFail($raporId);
+
+        foreach ($request->order as $index => $raporNilaiId) {
+            RaporNilai::where('id', $raporNilaiId)
+                ->where('rapor_id', $rapor->id)
+                ->update(['urutan' => $index]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Urutan berhasil disimpan.']);
     }
 
     /**
@@ -632,6 +692,14 @@ class RaporController extends Controller
             'validasi_rapor_oleh'              => auth()->id(),
         ]);
 
+        // Clear revisi status if previously returned for revision
+        if ($rapor->status_review_ketua === 'perlu_revisi') {
+            $rapor->update([
+                'status_review_ketua' => 'pending',
+                'catatan_revisi_ketua' => null,
+            ]);
+        }
+
         return back()->with('success', "Rapor {$siswa->nama_lengkap} berhasil dikirim ke Ketua PKBM untuk divalidasi.");
     }
 
@@ -721,5 +789,62 @@ class RaporController extends Controller
         $filename = "Rapor_{$rapor->siswa->nama_lengkap}_{$rapor->getPeriodeLabel()}.xlsx";
 
         return Excel::download(new RaporExport($rapor), $filename);
+    }
+
+    /**
+     * Daftar request download rapor dari orang tua.
+     */
+    public function requestDownloadIndex(): View
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+
+        $query = RequestDownloadRapor::with(['rapor.siswa', 'user', 'siswa.kelas'])
+            ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'ditolak')")
+            ->latest('tanggal_request');
+
+        if ($kelas) {
+            $query->whereHas('siswa', fn($q) => $q->where('kelas_id', $kelas->id));
+        }
+
+        $requests = $query->paginate(25);
+
+        return view('wali-kelas.rapor.request-download', compact('requests', 'kelas'));
+    }
+
+    /**
+     * Approve request download rapor.
+     */
+    public function approveDownload(Request $request, $id): RedirectResponse
+    {
+        $downloadRequest = RequestDownloadRapor::findOrFail($id);
+
+        $downloadRequest->update([
+            'status' => 'disetujui',
+            'diputuskan_oleh' => auth()->id(),
+            'catatan_admin' => $request->catatan_admin,
+            'tanggal_keputusan' => now(),
+        ]);
+
+        $downloadRequest->generateDownloadToken(24);
+
+        return back()->with('success', "Request download dari {$downloadRequest->user->name} berhasil disetujui. Link berlaku 24 jam.");
+    }
+
+    /**
+     * Reject request download rapor.
+     */
+    public function rejectDownload(Request $request, $id): RedirectResponse
+    {
+        $downloadRequest = RequestDownloadRapor::findOrFail($id);
+
+        $downloadRequest->update([
+            'status' => 'ditolak',
+            'diputuskan_oleh' => auth()->id(),
+            'catatan_admin' => $request->catatan_admin,
+            'tanggal_keputusan' => now(),
+        ]);
+
+        return back()->with('success', "Request download berhasil ditolak.");
     }
 }

@@ -82,9 +82,11 @@
         <tbody>
             @php
                 $no = 1;
+                $visibleNilai = $rapor->raporNilai->filter(fn($rn) => $rn->is_visible);
             @endphp
-            @foreach($rapor->raporNilai as $nilai)
-                @if(trim($nilai->mataPelajaran->kelompok) == 'A')
+            @foreach($visibleNilai as $nilai)
+                @php $kel = $nilai->kelompok_override ?? ($nilai->mataPelajaran->kelompok ?? ''); @endphp
+                @if(trim($kel) == 'A')
                 <tr>
                     <td>{{ $no++ }}</td>
                     <td>{{ $nilai->mataPelajaran->nama_mapel }}</td>
@@ -113,8 +115,9 @@
             @php
                 $no = 1;
             @endphp
-            @foreach($rapor->raporNilai as $nilai)
-                @if(trim($nilai->mataPelajaran->kelompok) == 'B')
+            @foreach($visibleNilai as $nilai)
+                @php $kel = $nilai->kelompok_override ?? ($nilai->mataPelajaran->kelompok ?? ''); @endphp
+                @if(trim($kel) == 'B')
                 <tr>
                     <td>{{ $no++ }}</td>
                     <td>{{ $nilai->mataPelajaran->nama_mapel }}</td>

@@ -638,7 +638,7 @@ class NotificationService
                 Notification::TIPE_PEMBAYARAN,
                 'Akses Ujian ' . $statusText,
                 $pesan,
-                route('siswa.lms.index'),
+                route('siswa.lms.dashboard'),
                 ['status' => $status, 'tipe' => 'ujian']
             );
         }

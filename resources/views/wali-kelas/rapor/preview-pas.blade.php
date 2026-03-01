@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor PAS - {{ $rapor->siswa->nama_lengkap }}</title>
+    @include('partials.anti-screenshot')
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -362,18 +363,23 @@
             </thead>
             <tbody>
                 @php
-                    // Use database field for kelompok filtering
-                    $mapelKelompokA = $rapor->raporNilai->filter(function($rn) {
-                        return trim($rn->mataPelajaran->kelompok) == 'A';
+                    // Filter hanya yang visible
+                    $visibleNilai = $rapor->raporNilai->filter(fn($rn) => $rn->is_visible);
+
+                    // Use kelompok_override if set, otherwise use mataPelajaran.kelompok
+                    $mapelKelompokA = $visibleNilai->filter(function($rn) {
+                        $kel = $rn->kelompok_override ?? ($rn->mataPelajaran->kelompok ?? '');
+                        return trim($kel) == 'A';
                     })->values();
-                    
-                    $mapelKelompokB = $rapor->raporNilai->filter(function($rn) {
-                        return trim($rn->mataPelajaran->kelompok) == 'B';
+
+                    $mapelKelompokB = $visibleNilai->filter(function($rn) {
+                        $kel = $rn->kelompok_override ?? ($rn->mataPelajaran->kelompok ?? '');
+                        return trim($kel) == 'B';
                     })->values();
-                    
+
                     // Handle subjects with NULL kelompok (legacy data)
-                    $mapelNoKelompok = $rapor->raporNilai->filter(function($rn) {
-                        $kel = $rn->mataPelajaran->kelompok;
+                    $mapelNoKelompok = $visibleNilai->filter(function($rn) {
+                        $kel = $rn->kelompok_override ?? ($rn->mataPelajaran->kelompok ?? '');
                         return $kel === null || trim($kel) === '';
                     })->values();
                 @endphp

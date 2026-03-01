@@ -96,15 +96,15 @@
                 <small class="text-muted fw-bold text-uppercase">Alur Validasi:</small>
                 <span class="badge bg-primary"><i class="fas fa-edit me-1"></i>1. Buat Rapor</span>
                 <i class="fas fa-arrow-right text-muted small"></i>
-                <span class="badge bg-info"><i class="fas fa-paper-plane me-1"></i>2. Kirim ke Ketua PKBM</span>
+                <span class="badge bg-info"><i class="fas fa-paper-plane me-1"></i>2. Kirim ke Ketua</span>
                 <i class="fas fa-arrow-right text-muted small"></i>
-                <span class="badge bg-warning text-white"><i class="fas fa-user-check me-1"></i>3. Validasi Ketua</span>
+                <span class="badge bg-warning text-white"><i class="fas fa-user-check me-1"></i>3. Ketua Approve</span>
                 <i class="fas fa-arrow-right text-muted small"></i>
-                <span class="badge bg-secondary"><i class="fas fa-money-bill me-1"></i>4. Validasi Bendahara</span>
+                <span class="badge bg-primary"><i class="fas fa-calendar-alt me-1"></i>4. Set Tanggal Rilis</span>
                 <i class="fas fa-arrow-right text-muted small"></i>
-                <span class="badge bg-primary"><i class="fas fa-file-alt me-1"></i>5. Wali Terbitkan Rapor</span>
+                <span class="badge bg-secondary"><i class="fas fa-money-bill me-1"></i>5. Cek Keuangan</span>
                 <i class="fas fa-arrow-right text-muted small"></i>
-                <span class="badge bg-success"><i class="fas fa-unlock me-1"></i>6. Akses Orang Tua Terbuka</span>
+                <span class="badge bg-success"><i class="fas fa-unlock me-1"></i>6. Akses Orang Tua</span>
             </div>
         </div>
 
@@ -158,6 +158,14 @@
                                     <td class="align-middle">
                                         <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>
                                         <small class="text-muted text-uppercase">{{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
+                                        @if($rapor && $rapor->status_review_ketua === 'perlu_revisi' && $rapor->catatan_revisi_ketua)
+                                            <div class="mt-1">
+                                                <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Perlu Revisi</span>
+                                                <div class="small text-danger mt-1" title="{{ $rapor->catatan_revisi_ketua }}">
+                                                    <i class="fas fa-comment-dots me-1"></i>{{ Str::limit($rapor->catatan_revisi_ketua, 50) }}
+                                                </div>
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="text-center align-middle">
                                         @if($validasiStage === 'bendahara')
@@ -202,12 +210,49 @@
                                             @if($status == 'draft')
                                                 {{-- Kirim / Batalkan Kirim ke Ketua --}}
                                                 @if(!$siswa->validasi_rapor_wali)
-                                                    <form action="{{ route('wali.rapor.kirim-validasi', $rapor->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-success btn-sm shadow-sm" title="Kirim ke Ketua PKBM untuk divalidasi">
-                                                            <i class="fas fa-paper-plane"></i> Kirim ke Ketua
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-success btn-sm shadow-sm" title="Kirim ke Ketua PKBM untuk divalidasi"
+                                                            data-bs-toggle="modal" data-bs-target="#kirimKetuaModal{{ $rapor->id }}">
+                                                        <i class="fas fa-paper-plane"></i> Kirim ke Ketua
+                                                    </button>
+
+                                                    {{-- Modal Kirim ke Ketua --}}
+                                                    <div class="modal fade" id="kirimKetuaModal{{ $rapor->id }}" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content border-0 shadow-lg">
+                                                                <div class="modal-header bg-success text-white">
+                                                                    <h5 class="modal-title fw-bold text-white">
+                                                                        <i class="fas fa-paper-plane me-2"></i>Kirim Rapor ke Ketua
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                                </div>
+                                                                <div class="modal-body py-4">
+                                                                    <div class="text-center mb-3">
+                                                                        <i class="fas fa-paper-plane fa-3x text-success mb-3"></i>
+                                                                        <h6 class="fw-bold mb-1">Kirim rapor untuk divalidasi?</h6>
+                                                                        <p class="text-muted small mb-0">{{ $siswa->nama_lengkap }}</p>
+                                                                    </div>
+                                                                    <div class="alert alert-success bg-light border-success mb-0 small">
+                                                                        <ul class="mb-0">
+                                                                            <li>Rapor dikirim ke <strong>Ketua PKBM</strong> untuk review</li>
+                                                                            <li>Anda tidak bisa edit sampai proses validasi selesai</li>
+                                                                            <li>Anda bisa <strong>batalkan kiriman</strong> selama belum divalidasi</li>
+                                                                        </ul>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer bg-light">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                        <i class="fas fa-times me-1"></i> Batal
+                                                                    </button>
+                                                                    <form action="{{ route('wali.rapor.kirim-validasi', $rapor->id) }}" method="POST" class="d-inline">
+                                                                        @csrf
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="fas fa-paper-plane me-1"></i> Ya, Kirim ke Ketua
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 @elseif(!$siswa->validasi_rapor_ketua)
                                                     <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm"
                                                             data-bs-toggle="modal" data-bs-target="#batalkanKirimanModal{{ $rapor->id }}"
@@ -255,32 +300,82 @@
                                                     </div>
                                                 @endif
 
-                                                {{-- Terbitkan: hanya jika Bendahara sudah approve --}}
+                                                {{-- Set Tanggal Rilis / Rilis Sekarang: hanya jika Bendahara sudah approve --}}
                                                 @if($siswa->validasi_rapor_bendahara)
-                                                    <button type="button" class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#terbitkanModal{{ $rapor->id }}" title="Terbitkan rapor ke orang tua">
-                                                        <i class="fas fa-paper-plane"></i> Terbitkan
+                                                    @if(!$rapor->tanggal_rilis)
+                                                        <button type="button" class="btn btn-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#tanggalRilisModal{{ $rapor->id }}" title="Set tanggal rilis rapor">
+                                                            <i class="fas fa-calendar-alt"></i> Set Tanggal Rilis
+                                                        </button>
+                                                    @else
+                                                        <span class="badge bg-info text-white me-1" title="Dijadwalkan rilis {{ $rapor->tanggal_rilis->format('d/m/Y') }}">
+                                                            <i class="fas fa-calendar-check me-1"></i>{{ $rapor->tanggal_rilis->format('d/m/Y') }}
+                                                        </span>
+                                                    @endif
+
+                                                    <button type="button" class="btn btn-success btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#rilisSekarangModal{{ $rapor->id }}" title="Terbitkan rapor sekarang">
+                                                        <i class="fas fa-paper-plane"></i> Rilis Sekarang
                                                     </button>
 
-                                                    {{-- Modal Terbitkan --}}
-                                                    <div class="modal fade" id="terbitkanModal{{ $rapor->id }}" tabindex="-1" aria-hidden="true">
+                                                    {{-- Modal Set Tanggal Rilis --}}
+                                                    <div class="modal fade" id="tanggalRilisModal{{ $rapor->id }}" tabindex="-1" aria-hidden="true">
                                                         <div class="modal-dialog modal-dialog-centered">
                                                             <div class="modal-content border-0 shadow-lg">
                                                                 <div class="modal-header bg-primary text-white">
                                                                     <h5 class="modal-title fw-bold text-white">
-                                                                        <i class="fas fa-paper-plane me-2"></i>Konfirmasi Terbitkan Rapor
+                                                                        <i class="fas fa-calendar-alt me-2"></i>Set Tanggal Rilis Rapor
                                                                     </h5>
                                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                                 </div>
-                                                                <div class="modal-body py-4">
-                                                                    <div class="text-center mb-3">
-                                                                        <i class="fas fa-check-circle fa-3x text-primary mb-3"></i>
-                                                                        <h6 class="fw-bold mb-2">Terbitkan rapor {{ $siswa->nama_lengkap }}?</h6>
+                                                                <form action="{{ route('wali.rapor.terbitkan', $rapor->id) }}" method="POST">
+                                                                    @csrf
+                                                                    <div class="modal-body py-4">
+                                                                        <div class="text-center mb-3">
+                                                                            <i class="fas fa-calendar-alt fa-3x text-primary mb-3"></i>
+                                                                            <h6 class="fw-bold mb-2">{{ $siswa->nama_lengkap }}</h6>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label fw-bold small">Tanggal Rilis</label>
+                                                                            <input type="date" name="tanggal_rilis" class="form-control"
+                                                                                   value="{{ $rapor->tanggal_rilis ? $rapor->tanggal_rilis->format('Y-m-d') : '' }}"
+                                                                                   min="{{ now()->format('Y-m-d') }}" required>
+                                                                            <small class="text-muted">Rapor akan otomatis terlihat oleh orang tua pada tanggal ini</small>
+                                                                        </div>
+                                                                        <div class="alert alert-info bg-light border-info mb-0 small">
+                                                                            <ul class="mb-0">
+                                                                                <li>Status rapor berubah ke <strong>Diterbitkan</strong></li>
+                                                                                <li>Orang tua dapat melihat rapor mulai tanggal rilis</li>
+                                                                                <li>Anda bisa <strong>tarik kembali</strong> kapan saja</li>
+                                                                            </ul>
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="alert alert-info bg-light border-info mb-0 small">
-                                                                        <ul class="mb-0">
-                                                                            <li>Status rapor berubah ke <strong>Diterbitkan</strong></li>
-                                                                            <li>Orang tua dapat melihat dan mengunduh rapor</li>
-                                                                            <li>Anda bisa <strong>tarik kembali</strong> kapan saja jika perlu perbaikan</li>
+                                                                    <div class="modal-footer bg-light">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                        <button type="submit" class="btn btn-primary">
+                                                                            <i class="fas fa-calendar-check me-1"></i> Set Tanggal & Terbitkan
+                                                                        </button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Modal Rilis Sekarang --}}
+                                                    <div class="modal fade" id="rilisSekarangModal{{ $rapor->id }}" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content border-0 shadow-lg">
+                                                                <div class="modal-header bg-success text-white">
+                                                                    <h5 class="modal-title fw-bold text-white">
+                                                                        <i class="fas fa-paper-plane me-2"></i>Rilis Rapor Sekarang
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                                </div>
+                                                                <div class="modal-body py-4 text-center">
+                                                                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                                                    <h6 class="fw-bold mb-2">Terbitkan rapor {{ $siswa->nama_lengkap }} sekarang?</h6>
+                                                                    <div class="alert alert-success bg-light border-success mb-0 small">
+                                                                        <ul class="mb-0 text-start">
+                                                                            <li>Tanggal rilis diset ke <strong>hari ini</strong></li>
+                                                                            <li>Orang tua <strong>langsung bisa melihat</strong> rapor</li>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -288,8 +383,8 @@
                                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                                                     <form action="{{ route('wali.rapor.terbitkan', $rapor->id) }}" method="POST" class="d-inline">
                                                                         @csrf
-                                                                        <button type="submit" class="btn btn-primary">
-                                                                            <i class="fas fa-paper-plane me-1"></i> Ya, Terbitkan
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="fas fa-paper-plane me-1"></i> Ya, Rilis Sekarang
                                                                         </button>
                                                                     </form>
                                                                 </div>
@@ -388,15 +483,94 @@
                                                 </div>
                                             @endif
                                         @else
-                                            {{-- Rapor belum ada → Generate --}}
-                                            <form action="{{ route('wali.rapor.generate-single', $siswa->id) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <input type="hidden" name="semester" value="{{ $semester }}">
-                                                <input type="hidden" name="jenis_rapor" value="{{ $jenisRapor }}">
-                                                <button type="submit" class="btn btn-primary btn-sm shadow-sm" title="Generate rapor siswa ini">
-                                                    <i class="fas fa-file-invoice"></i> Generate
-                                                </button>
-                                            </form>
+                                            {{-- Rapor belum ada → Generate atau Upload PDF --}}
+                                            <button type="button" class="btn btn-primary btn-sm shadow-sm" title="Generate rapor siswa ini"
+                                                    data-bs-toggle="modal" data-bs-target="#generateRaporModal{{ $siswa->id }}">
+                                                <i class="fas fa-file-invoice"></i> Generate
+                                            </button>
+
+                                            {{-- Modal Generate Rapor --}}
+                                            <div class="modal fade" id="generateRaporModal{{ $siswa->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow-lg">
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title fw-bold text-white">
+                                                                <i class="fas fa-file-invoice me-2"></i>Generate Rapor
+                                                            </h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body py-4">
+                                                            <div class="text-center mb-3">
+                                                                <i class="fas fa-file-invoice fa-3x text-primary mb-3"></i>
+                                                                <h6 class="fw-bold mb-1">Generate rapor untuk siswa ini?</h6>
+                                                                <p class="text-muted small mb-0">{{ $siswa->nama_lengkap }}</p>
+                                                            </div>
+                                                            <div class="alert alert-info bg-light border-info mb-0 small">
+                                                                <ul class="mb-0">
+                                                                    <li>Rapor akan di-generate berdasarkan <strong>nilai yang sudah diinput</strong></li>
+                                                                    <li>Anda dapat <strong>edit catatan & kehadiran</strong> setelah generate</li>
+                                                                    <li>Rapor berstatus <strong>Draft</strong> hingga diterbitkan</li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                <i class="fas fa-times me-1"></i> Batal
+                                                            </button>
+                                                            <form action="{{ route('wali.rapor.generate-single', $siswa->id) }}" method="POST" class="d-inline">
+                                                                @csrf
+                                                                <input type="hidden" name="semester" value="{{ $semester }}">
+                                                                <input type="hidden" name="jenis_rapor" value="{{ $jenisRapor }}">
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    <i class="fas fa-file-invoice me-1"></i> Ya, Generate
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm shadow-sm"
+                                                    data-bs-toggle="modal" data-bs-target="#uploadPdfModal{{ $siswa->id }}"
+                                                    title="Upload rapor PDF manual">
+                                                <i class="fas fa-file-pdf"></i> Upload PDF
+                                            </button>
+
+                                            {{-- Modal Upload PDF --}}
+                                            <div class="modal fade" id="uploadPdfModal{{ $siswa->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow-lg">
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title fw-bold text-white">
+                                                                <i class="fas fa-file-pdf me-2"></i>Upload Rapor PDF
+                                                            </h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <form action="{{ route('wali.rapor.create-with-mode') }}" method="POST" enctype="multipart/form-data">
+                                                            @csrf
+                                                            <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
+                                                            <input type="hidden" name="semester" value="{{ $semester }}">
+                                                            <input type="hidden" name="jenis_rapor" value="{{ $jenisRapor }}">
+                                                            <input type="hidden" name="mode" value="upload_pdf">
+                                                            <div class="modal-body py-4">
+                                                                <div class="text-center mb-3">
+                                                                    <h6 class="fw-bold">{{ $siswa->nama_lengkap }}</h6>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold small">File PDF Rapor</label>
+                                                                    <input type="file" name="uploaded_pdf" class="form-control" accept=".pdf" required>
+                                                                    <small class="text-muted">Maks. 10MB, format PDF</small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer bg-light">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                <button type="submit" class="btn btn-primary">
+                                                                    <i class="fas fa-upload me-1"></i> Upload
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         @endif
                                     </td>
                                 </tr>
@@ -422,8 +596,10 @@
                     <li><strong>Generate:</strong> Membuat draf rapor berdasarkan nilai yang ada. Bisa dilakukan kapan saja.</li>
                     <li><strong>Edit:</strong> Mengisi catatan wali kelas, data kehadiran, dan kegiatan ekstrakurikuler.</li>
                     <li><strong>Preview:</strong> Melihat tampilan akhir rapor sebelum dikirmkan.</li>
-                    <li><strong>Kirim ke Ketua:</strong> Mengirim rapor untuk divalidasi Ketua PKBM. Setelah Ketua & Bendahara menyetujui, tombol <strong>Terbitkan</strong> akan muncul.</li>
-                    <li><strong>Terbitkan:</strong> Muncul setelah Bendahara menyetujui. Klik untuk membuka akses rapor ke orang tua.</li>
+                    <li><strong>Kirim ke Ketua:</strong> Mengirim rapor untuk divalidasi Ketua PKBM.</li>
+                    <li><strong>Set Tanggal Rilis:</strong> Muncul setelah Bendahara menyetujui. Pilih tanggal kapan rapor bisa dilihat orang tua.</li>
+                    <li><strong>Rilis Sekarang:</strong> Terbitkan rapor dan langsung bisa dilihat orang tua hari ini.</li>
+                    <li><strong>Upload PDF:</strong> Upload rapor PDF manual untuk siswa yang belum ada rapornya.</li>
                     <li><strong>Tarik Kembali:</strong> Menarik rapor yang sudah diterbitkan kembali ke draft jika ada perbaikan.</li>
                 </ul>
             </div>

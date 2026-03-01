@@ -249,6 +249,20 @@ class PembayaranController extends Controller
 
             DB::commit();
 
+            // Auto-validasi akses ujian/rapor jika siswa sudah lunas
+            if ($request->status_validasi === 'disetujui') {
+                $processedSiswaIds = [];
+                foreach ($relatedPayments as $pembayaran) {
+                    if ($pembayaran->siswa_id && !in_array($pembayaran->siswa_id, $processedSiswaIds)) {
+                        $siswa = \App\Models\Siswa::find($pembayaran->siswa_id);
+                        if ($siswa) {
+                            app(\App\Services\ValidasiAksesService::class)->autoValidasiSetelahBayar($siswa);
+                        }
+                        $processedSiswaIds[] = $pembayaran->siswa_id;
+                    }
+                }
+            }
+
             // Notify orang tua about payment validation
             $notificationService = app(NotificationService::class);
             if ($request->status_validasi === 'disetujui') {

@@ -7,8 +7,10 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@include('partials.anti-screenshot')
+
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y protected-content">
 
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -25,7 +27,34 @@
                 <i class="fas fa-user-graduate me-1"></i>{{ $rapor->siswa->nama_lengkap }}
             </p>
         </div>
-        <div>
+        <div class="d-flex gap-2 flex-wrap">
+            @php
+                $activeDownload = \App\Models\RequestDownloadRapor::where('rapor_id', $rapor->id)
+                    ->where('user_id', auth()->id())
+                    ->where('status', 'disetujui')
+                    ->where('download_expired_at', '>', now())
+                    ->first();
+                $pendingRequest = \App\Models\RequestDownloadRapor::where('rapor_id', $rapor->id)
+                    ->where('user_id', auth()->id())
+                    ->where('status', 'menunggu')
+                    ->exists();
+            @endphp
+
+            @if($activeDownload)
+                <a href="{{ route('orang-tua.rapor.download', $activeDownload->download_token) }}" class="btn btn-success btn-sm" target="_blank">
+                    <i class="fas fa-download me-1"></i>Download Rapor
+                </a>
+                <small class="text-muted align-self-center">Berlaku hingga {{ $activeDownload->download_expired_at->format('d/m/Y H:i') }}</small>
+            @elseif($pendingRequest)
+                <button class="btn btn-secondary btn-sm" disabled>
+                    <i class="fas fa-hourglass-half me-1"></i>Menunggu Persetujuan
+                </button>
+            @else
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#requestDownloadModal">
+                    <i class="fas fa-download me-1"></i>Minta Download
+                </button>
+            @endif
+
             <a href="{{ route('orang-tua.rapor.anak', $rapor->siswa_id) }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-arrow-left me-1"></i>Kembali
             </a>
@@ -213,5 +242,31 @@
         </div>
     @endif
 
+</div>
+
+{{-- Modal Request Download --}}
+<div class="modal fade" id="requestDownloadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="{{ route('orang-tua.rapor.request-download', $rapor->id) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-download me-2 text-primary"></i>Minta Download Rapor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Kirim permintaan untuk mendapatkan link download rapor. Setelah disetujui, link download akan tersedia selama 24 jam.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Alasan (opsional)</label>
+                        <textarea name="alasan" class="form-control form-control-sm" rows="2" placeholder="Contoh: Untuk keperluan pendaftaran sekolah lanjutan..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary fw-bold"><i class="fas fa-paper-plane me-1"></i> Kirim Permintaan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

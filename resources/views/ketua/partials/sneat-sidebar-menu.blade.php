@@ -38,6 +38,18 @@
     </a>
 </li>
 
+<!-- Dispensasi Keuangan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.dispensasi') ? 'active' : '' }}">
+    <a href="{{ route('ketua.dispensasi.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-hand-holding-heart"></i>
+        <div>Dispensasi Keuangan</div>
+        @php $pendingDispensasi = \App\Models\PengajuanRaporKetua::where('status', 'menunggu')->count(); @endphp
+        @if($pendingDispensasi > 0)
+            <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingDispensasi }}</span>
+        @endif
+    </a>
+</li>
+
 <!-- Menu Header - Monitoring -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring</span>

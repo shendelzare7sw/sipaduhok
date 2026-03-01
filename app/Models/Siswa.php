@@ -196,13 +196,27 @@ class Siswa extends Model
     }
 
     /**
-     * Check if student has full rapor access (all 3 validators approved).
-     * Returns true only if Bendahara, Wali Kelas, and Ketua PKBM all validated.
+     * Check if student has full rapor access.
+     * New flow: wali kirim → ketua approve → cek keuangan (lunas/dispensasi) → akses terbuka
      */
     public function hasFullRaporAccess(): bool
     {
-        return $this->validasi_rapor_bendahara
-            && $this->validasi_rapor_wali
-            && $this->validasi_rapor_ketua;
+        // Wali harus sudah kirim
+        if (!$this->validasi_rapor_wali) {
+            return false;
+        }
+
+        // Ketua harus sudah approve
+        if (!$this->validasi_rapor_ketua) {
+            return false;
+        }
+
+        // Bendahara sudah validasi (manual atau auto via lunas/dispensasi)
+        if ($this->validasi_rapor_bendahara) {
+            return true;
+        }
+
+        // Fallback: cek via service (lunas otomatis / dispensasi)
+        return app(\App\Services\ValidasiAksesService::class)->cekAksesRapor($this);
     }
 }

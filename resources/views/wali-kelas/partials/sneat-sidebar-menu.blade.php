@@ -120,6 +120,18 @@
     </a>
 </li>
 
+<!-- Request Download Rapor -->
+<li class="menu-item {{ $currentRoute == 'wali.rapor.request-download.index' ? 'active' : '' }}">
+    <a href="{{ route('wali.rapor.request-download.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-download"></i>
+        <div>Request Download</div>
+        @php $pendingDownload = \App\Models\RequestDownloadRapor::where('status', 'menunggu')->whereHas('siswa', fn($q) => $q->where('kelas_id', session('selected_kelas_id')))->count(); @endphp
+        @if($pendingDownload > 0)
+            <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingDownload }}</span>
+        @endif
+    </a>
+</li>
+
 <!-- Menu Header - Kenaikan Kelas -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>

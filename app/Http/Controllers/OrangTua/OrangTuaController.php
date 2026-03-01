@@ -12,6 +12,7 @@ use App\Models\Rapor;
 use App\Models\Presensi;
 use Illuminate\Support\Facades\DB;
 use App\Services\MidtransService;
+use App\Models\RequestDownloadRapor;
 
 class OrangTuaController extends Controller
 {
@@ -1223,5 +1224,89 @@ class OrangTuaController extends Controller
             'siswa' => $siswa,
             'schoolInfo' => $schoolInfo
         ]);
+    }
+
+    /**
+     * Request download rapor (orang tua).
+     */
+    public function requestDownloadRapor(Request $request, $raporId)
+    {
+        $request->validate([
+            'alasan' => 'nullable|string|max:500',
+        ]);
+
+        $user = Auth::user();
+        $rapor = Rapor::findOrFail($raporId);
+
+        // Verify parent-child relationship
+        $isMyChild = $user->children()->where('siswa.id', $rapor->siswa_id)->exists();
+        if (!$isMyChild) {
+            return back()->with('error', 'Anda tidak memiliki akses ke rapor ini.');
+        }
+
+        // Check if already has pending request
+        $existing = RequestDownloadRapor::where('rapor_id', $raporId)
+            ->where('user_id', $user->id)
+            ->where('status', 'menunggu')
+            ->exists();
+
+        if ($existing) {
+            return back()->with('info', 'Anda sudah memiliki permintaan download yang sedang diproses.');
+        }
+
+        // Check if already has active download token
+        $activeToken = RequestDownloadRapor::where('rapor_id', $raporId)
+            ->where('user_id', $user->id)
+            ->where('status', 'disetujui')
+            ->where('download_expired_at', '>', now())
+            ->exists();
+
+        if ($activeToken) {
+            return back()->with('info', 'Anda masih memiliki link download yang aktif.');
+        }
+
+        RequestDownloadRapor::create([
+            'rapor_id' => $raporId,
+            'user_id' => $user->id,
+            'siswa_id' => $rapor->siswa_id,
+            'alasan' => $request->alasan,
+            'tanggal_request' => now(),
+        ]);
+
+        return back()->with('success', 'Permintaan download rapor berhasil dikirim. Menunggu persetujuan.');
+    }
+
+    /**
+     * Download rapor via approved token.
+     */
+    public function downloadRapor($token)
+    {
+        $user = Auth::user();
+
+        $request = RequestDownloadRapor::where('download_token', $token)
+            ->where('user_id', $user->id)
+            ->where('status', 'disetujui')
+            ->with('rapor.siswa')
+            ->first();
+
+        if (!$request) {
+            return redirect()->route('orang-tua.dashboard')->with('error', 'Link download tidak valid.');
+        }
+
+        if ($request->isExpired()) {
+            return redirect()->route('orang-tua.dashboard')->with('error', 'Link download sudah kadaluarsa.');
+        }
+
+        $rapor = $request->rapor;
+
+        // Render rapor to PDF (reuse existing preview view)
+        $viewName = $rapor->jenis_rapor === 'tengah_semester'
+            ? 'wali-kelas.rapor.print-pts'
+            : 'wali-kelas.rapor.print-pas';
+
+        $rapor->load(['siswa.kelas.waliKelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'raporNilai.nilai', 'kegiatanEkstra']);
+
+        // Return printable view (user can Ctrl+P from browser)
+        return view($viewName, compact('rapor'));
     }
 }

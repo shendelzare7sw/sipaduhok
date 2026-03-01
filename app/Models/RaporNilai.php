@@ -18,10 +18,14 @@ class RaporNilai extends Model
         'nilai_angka',
         'nilai_huruf',
         'deskripsi',
+        'urutan',
+        'is_visible',
+        'kelompok_override',
     ];
 
     protected $casts = [
         'nilai_angka' => 'decimal:2',
+        'is_visible' => 'boolean',
     ];
 
     // Relationships

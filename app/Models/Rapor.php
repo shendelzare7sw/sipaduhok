@@ -25,9 +25,12 @@ class Rapor extends Model
         'jumlah_alpha',
         'status',
         'tanggal_terbit',
-        'uploaded_pdf_path', // NEW: Path to uploaded PDF file
-        'input_mode', // NEW: auto_generate or upload_pdf
-        'allow_download', // NEW: Download control toggle
+        'uploaded_pdf_path',
+        'input_mode',
+        'allow_download',
+        'tanggal_rilis',
+        'catatan_revisi_ketua',
+        'status_review_ketua',
     ];
 
     protected $casts = [
@@ -35,6 +38,7 @@ class Rapor extends Model
         'jumlah_izin' => 'integer',
         'jumlah_alpha' => 'integer',
         'tanggal_terbit' => 'date',
+        'tanggal_rilis' => 'date',
     ];
 
     // Relationships
@@ -55,7 +59,7 @@ class Rapor extends Model
 
     public function raporNilai()
     {
-        return $this->hasMany(RaporNilai::class);
+        return $this->hasMany(RaporNilai::class)->orderBy('urutan');
     }
 
     public function kegiatanEkstra()
@@ -97,6 +101,7 @@ class Rapor extends Model
             ->where('tahun_ajaran_id', $this->tahun_ajaran_id)
             ->get();
 
+        $index = 0;
         foreach ($nilaiList as $nilai) {
             // Tentukan nilai angka berdasarkan jenis rapor
             $nilaiAngka = 0;
@@ -116,9 +121,11 @@ class Rapor extends Model
                 [
                     'nilai_id' => $nilai->id,
                     'nilai_angka' => $nilaiAngka,
-                    'nilai_huruf' => $this->konversiHuruf($nilaiAngka), // Use helper for consistency
+                    'nilai_huruf' => $this->konversiHuruf($nilaiAngka),
+                    'urutan' => $index,
                 ]
             );
+            $index++;
         }
 
         return $this;

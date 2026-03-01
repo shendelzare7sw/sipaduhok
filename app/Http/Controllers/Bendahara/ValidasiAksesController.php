@@ -9,6 +9,8 @@ use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use App\Models\PengaturanBatasPembayaran;
+use App\Models\PengajuanRaporKetua;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
 
@@ -120,17 +122,37 @@ class ValidasiAksesController extends Controller
             'rapor_valid' => Siswa::where('status', 'aktif')->where('validasi_rapor_bendahara', true)->count(),
         ];
 
+        // Batas pembayaran per periode
+        $batasPembayaran = [];
+        if ($tahunAjaranAktif) {
+            $batasPembayaran = PengaturanBatasPembayaran::where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                ->get()
+                ->keyBy('periode');
+        }
+
+        // Daftar jenis tagihan yang tersedia
+        $jenisTagihanList = \App\Models\Tagihan::select('jenis_tagihan')
+            ->distinct()
+            ->orderBy('jenis_tagihan')
+            ->pluck('jenis_tagihan');
+
+        // Dispensasi pending count
+        $dispensasiPending = PengajuanRaporKetua::where('status', 'menunggu')->count();
+
         return view('bendahara.validasi-akses.index', [
             'siswa' => $siswaList,
             'kelasList' => $kelasList,
-            'cabangList' => $cabangList, // Pass data cabang
-            'jenjangList' => $jenjangList, // Pass data jenjang
+            'cabangList' => $cabangList,
+            'jenjangList' => $jenjangList,
             'tahunAjaran' => $tahunAjaranAktif,
             'totalSiswa' => $stats['total_siswa'],
             'validasiUjian' => $stats['ujian_valid'],
             'validasiRapor' => $stats['rapor_valid'],
             'belumValidasi' => $stats['total_siswa'] - $stats['ujian_valid'] - $stats['rapor_valid'],
             'filters' => $request->only(['kelas_id', 'status_ujian', 'status_rapor', 'search', 'cabang_id', 'jenjang']),
+            'batasPembayaran' => $batasPembayaran,
+            'jenisTagihanList' => $jenisTagihanList,
+            'dispensasiPending' => $dispensasiPending,
         ]);
     }
 
@@ -198,6 +220,10 @@ class ValidasiAksesController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
+        if (!$siswa->validasi_rapor_ketua) {
+            return redirect()->back()->with('error', 'Rapor belum divalidasi oleh Ketua PKBM.');
+        }
+
         DB::beginTransaction();
         try {
             $siswa->update([
@@ -232,13 +258,6 @@ class ValidasiAksesController extends Controller
                 'validasi_rapor_bendahara' => false,
                 'tanggal_validasi_rapor_bendahara' => null,
                 'validasi_rapor_oleh' => null,
-                // CASCADE: Reset juga validasi wali kelas
-                'validasi_rapor_wali' => false,
-                'tanggal_validasi_rapor_wali' => null,
-                // CASCADE: Reset juga validasi ketua PKBM
-                'validasi_rapor_ketua' => false,
-                'tanggal_validasi_rapor_ketua' => null,
-                'validasi_rapor_ketua_oleh' => null,
             ]);
 
             // Notify orang tua
@@ -292,6 +311,7 @@ class ValidasiAksesController extends Controller
     {
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
+            ->where('validasi_rapor_ketua', true)
             ->where('validasi_rapor_bendahara', false)
             ->get();
 
@@ -330,11 +350,18 @@ class ValidasiAksesController extends Controller
 
         DB::beginTransaction();
         try {
-            $field = $request->tipe === 'ujian' 
+            $field = $request->tipe === 'ujian'
                 ? ['validasi_ujian_bendahara' => true, 'tanggal_validasi_ujian_bendahara' => now(), 'validasi_ujian_oleh' => auth()->id()]
                 : ['validasi_rapor_bendahara' => true, 'tanggal_validasi_rapor_bendahara' => now(), 'validasi_rapor_oleh' => auth()->id()];
 
-            Siswa::whereIn('id', $request->siswa_ids)->update($field);
+            $query = Siswa::whereIn('id', $request->siswa_ids);
+
+            // Untuk rapor, hanya validasi siswa yang sudah divalidasi ketua
+            if ($request->tipe === 'rapor') {
+                $query->where('validasi_rapor_ketua', true);
+            }
+
+            $query->update($field);
 
             DB::commit();
             
@@ -395,5 +422,75 @@ class ValidasiAksesController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Update pengaturan batas pembayaran per periode.
+     */
+    public function updateBatasPembayaran(Request $request)
+    {
+        $request->validate([
+            'periode' => 'required|in:pts_ganjil,pas_ganjil,pts_genap,pas_genap,ujian_akhir',
+            'jenis_tagihan_required' => 'nullable|array',
+            'jenis_tagihan_required.*' => 'string',
+        ]);
+
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        if (!$tahunAjaran) {
+            return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
+        }
+
+        PengaturanBatasPembayaran::updateOrCreate(
+            [
+                'tahun_ajaran_id' => $tahunAjaran->id,
+                'periode' => $request->periode,
+            ],
+            [
+                'jenis_tagihan_required' => $request->jenis_tagihan_required ?? [],
+                'created_by' => auth()->id(),
+            ]
+        );
+
+        $label = str_replace('_', ' ', strtoupper($request->periode));
+        return redirect()->back()->with('success', "Pengaturan batas pembayaran {$label} berhasil disimpan.");
+    }
+
+    /**
+     * Ajukan dispensasi ke Ketua PKBM.
+     */
+    public function ajukanDispensasi(Request $request)
+    {
+        $request->validate([
+            'siswa_ids' => 'required|array',
+            'siswa_ids.*' => 'exists:siswa,id',
+            'tipe' => 'required|in:rapor,ujian',
+            'periode' => 'nullable|in:pts_ganjil,pas_ganjil,pts_genap,pas_genap,ujian_akhir',
+            'alasan' => 'required|string|max:500',
+        ]);
+
+        $created = 0;
+        foreach ($request->siswa_ids as $siswaId) {
+            // Cek belum ada pengajuan yang pending
+            $exists = PengajuanRaporKetua::where('siswa_id', $siswaId)
+                ->where('tipe', $request->tipe)
+                ->where('status', 'menunggu')
+                ->exists();
+
+            if (!$exists) {
+                PengajuanRaporKetua::create([
+                    'siswa_id' => $siswaId,
+                    'diajukan_oleh' => auth()->id(),
+                    'alasan' => $request->alasan,
+                    'tipe' => $request->tipe,
+                    'periode' => $request->periode,
+                    'status' => 'menunggu',
+                    'tanggal_pengajuan' => now(),
+                ]);
+                $created++;
+            }
+        }
+
+        $label = $request->tipe === 'ujian' ? 'ujian' : 'rapor';
+        return redirect()->back()->with('success', "Berhasil mengajukan dispensasi {$label} untuk {$created} siswa ke Ketua PKBM.");
     }
 }

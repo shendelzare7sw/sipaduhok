@@ -422,6 +422,12 @@ Route::middleware(['auth'])->group(function () {
 
                 // Reset validasi
                 Route::post('/reset', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'resetValidasi'])->name('reset');
+
+                // Pengaturan batas pembayaran
+                Route::post('/batas-pembayaran', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'updateBatasPembayaran'])->name('batas-pembayaran');
+
+                // Dispensasi
+                Route::post('/dispensasi', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'ajukanDispensasi'])->name('dispensasi');
             });
 
             // Info Pembayaran (API Midtrans & Rekening Bank)
@@ -619,6 +625,15 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{siswa}/batalkan', [KetuaValidasiRaporController::class, 'batalkanRapor'])->name('batalkan');
             Route::post('/bulk-validasi', [KetuaValidasiRaporController::class, 'bulkValidasi'])->name('bulk-validasi');
             Route::post('/validasi-semua', [KetuaValidasiRaporController::class, 'validasiSemuaRapor'])->name('validasi-semua');
+            Route::get('/{siswa}/preview', [KetuaValidasiRaporController::class, 'previewRapor'])->name('preview');
+            Route::post('/{siswa}/minta-revisi', [KetuaValidasiRaporController::class, 'mintaRevisi'])->name('minta-revisi');
+        });
+
+        // Dispensasi (Bendahara → Ketua)
+        Route::prefix('dispensasi')->name('dispensasi.')->group(function() {
+            Route::get('/', [KetuaValidasiRaporController::class, 'dispensasiIndex'])->name('index');
+            Route::post('/approve', [KetuaValidasiRaporController::class, 'approveDispensasi'])->name('approve');
+            Route::post('/reject', [KetuaValidasiRaporController::class, 'rejectDispensasi'])->name('reject');
         });
     });
 
@@ -909,6 +924,12 @@ Route::middleware(['auth'])->group(function () {
 
             // Reset validasi
             Route::post('/reset', [BendaharaValidasiAksesController::class, 'resetValidasi'])->name('reset');
+
+            // Pengaturan batas pembayaran
+            Route::post('/batas-pembayaran', [BendaharaValidasiAksesController::class, 'updateBatasPembayaran'])->name('batas-pembayaran');
+
+            // Dispensasi
+            Route::post('/dispensasi', [BendaharaValidasiAksesController::class, 'ajukanDispensasi'])->name('dispensasi');
         });
 
         // Laporan Pembayaran
@@ -1000,10 +1021,16 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{rapor}/export-excel', [RaporController::class, 'exportExcel'])->name('export-excel'); // NEW
             Route::post('/apply-template', [RaporController::class, 'applyTemplate'])->name('apply-template'); // NEW
             Route::post('/apply-template-all', [RaporController::class, 'applyTemplateToAll'])->name('apply-template-all'); // NEW
+            Route::post('/{rapor}/reset-nilai', [RaporController::class, 'resetNilai'])->name('reset-nilai');
+            Route::post('/{rapor}/reorder-nilai', [RaporController::class, 'reorderNilai'])->name('reorder-nilai');
             // Kirim validasi ke Ketua PKBM
             Route::post('/{rapor}/kirim-validasi', [RaporController::class, 'kirimValidasi'])->name('kirim-validasi');
             Route::post('/{rapor}/batalkan-kirim-validasi', [RaporController::class, 'batalkanKirimValidasi'])->name('batalkan-kirim-validasi');
             Route::post('/kirim-validasi-semua', [RaporController::class, 'kirimValidasiSemua'])->name('kirim-validasi-semua');
+            // Request download rapor
+            Route::get('/request-download', [RaporController::class, 'requestDownloadIndex'])->name('request-download.index');
+            Route::post('/request-download/{id}/approve', [RaporController::class, 'approveDownload'])->name('request-download.approve');
+            Route::post('/request-download/{id}/reject', [RaporController::class, 'rejectDownload'])->name('request-download.reject');
         });
 
         // Validasi Akses
@@ -1350,6 +1377,8 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('rapor')->name('rapor.')->group(function () {
             Route::get('/anak/{siswa}', [OrangTuaController::class, 'raporAnak'])->name('anak');
             Route::get('/detail/{rapor}', [OrangTuaController::class, 'detailRapor'])->name('detail');
+            Route::post('/request-download/{rapor}', [OrangTuaController::class, 'requestDownloadRapor'])->name('request-download');
+            Route::get('/download/{token}', [OrangTuaController::class, 'downloadRapor'])->name('download');
         });
 
         // Monitoring Presensi & Pengajuan Izin Anak

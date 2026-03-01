@@ -82,8 +82,9 @@
                 $no = 1;
                 $totalNilai = 0;
                 $count = 0;
+                $visibleNilai = $rapor->raporNilai->filter(fn($rn) => $rn->is_visible);
             @endphp
-            @foreach($rapor->raporNilai as $nilai)
+            @foreach($visibleNilai as $nilai)
             <tr>
                 <td>{{ $no++ }}</td>
                 <td>{{ $nilai->mataPelajaran->nama_mapel ?? '-' }}</td>

@@ -34,9 +34,10 @@ class LmsUjianController extends Controller
 
         // Cek validasi akses ujian untuk semester (PTS/PAS/UTS/UAS)
         if ($ujian->requiresValidation()) {
-            if (!$siswa->validasi_ujian_bendahara || !$siswa->validasi_ujian_wali) {
+            $aksesService = app(\App\Services\ValidasiAksesService::class);
+            if (!$aksesService->cekAksesUjian($siswa)) {
                 return redirect()->route('siswa.lms.mapel.show', $mapelId)
-                    ->with('error', 'Belum Memiliki Akses Ujian.');
+                    ->with('error', 'Belum Memiliki Akses Ujian. Pastikan pembayaran sudah lunas atau hubungi Bendahara.');
             }
         }
 
@@ -124,7 +125,7 @@ class LmsUjianController extends Controller
 
         // Cek validasi akses untuk ujian semester (PTS/PAS/UTS/UAS)
         if ($ujian->requiresValidation()) {
-            if (!$siswa->validasi_ujian_bendahara || !$siswa->validasi_ujian_wali) {
+            if (!$siswa->validasi_ujian_bendahara) {
                 return back()->with('error', 'Belum Memiliki Akses Ujian.');
             }
         }

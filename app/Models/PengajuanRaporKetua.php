@@ -12,6 +12,8 @@ class PengajuanRaporKetua extends Model
         'siswa_id',
         'diajukan_oleh',
         'alasan',
+        'tipe',
+        'periode',
         'status',
         'diputuskan_oleh',
         'catatan_ketua',

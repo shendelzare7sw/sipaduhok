@@ -297,69 +297,6 @@
             text-decoration: none;
         }
 
-        // Bulk Selection Logic
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectAll = document.getElementById('selectAll');
-            const selectItems = document.querySelectorAll('.select-item');
-            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
-            const bulkDeleteIds = document.getElementById('bulkDeleteIds');
-
-            function updateBulkDeleteButton() {
-                const selectedCount = document.querySelectorAll('.select-item:checked').length;
-                if (selectedCount > 0) {
-                    bulkDeleteForm.style.display = 'block';
-                } else {
-                    bulkDeleteForm.style.display = 'none';
-                }
-            }
-
-            if(selectAll) {
-                selectAll.addEventListener('change', function() {
-                    selectItems.forEach(item => {
-                        item.checked = this.checked;
-                    });
-                    updateBulkDeleteButton();
-                });
-            }
-
-            selectItems.forEach(item => {
-                item.addEventListener('change', function() {
-                    const allChecked = document.querySelectorAll('.select-item:checked').length === selectItems.length;
-                    if(selectAll) selectAll.checked = allChecked;
-                    updateBulkDeleteButton();
-                });
-            });
-        });
-
-        function showBulkDeleteModal() {
-            const selectedItems = document.querySelectorAll('.select-item:checked');
-            if (selectedItems.length === 0) return;
-
-            const modal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
-            document.getElementById('selectedCount').textContent = selectedItems.length;
-            modal.show();
-        }
-
-        function submitBulkDelete() {
-            const selectedItems = document.querySelectorAll('.select-item:checked');
-            const ids = Array.from(selectedItems).map(item => item.value);
-            
-            const form = document.getElementById('bulkDeleteForm');
-            // Clear existing hidden inputs for ids
-            const existingInputs = form.querySelectorAll('input[name="ids[]"]');
-            existingInputs.forEach(input => input.remove());
-
-            ids.forEach(id => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'ids[]';
-                input.value = id;
-                form.appendChild(input);
-            });
-
-            form.submit();
-        }
-
         /* Modal Styles */
         .modal {
             display: none;
