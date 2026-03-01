@@ -171,30 +171,32 @@
                                 @endif
                             </td>
                             <td class="text-center align-middle">
-                                <a href="{{ route('ketua.validasi-rapor.preview', $siswa->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank" title="Preview Rapor">
-                                    <i class="fas fa-eye me-1"></i> Preview
-                                </a>
-                                @if($siswa->validasi_rapor_ketua)
-                                    <button type="button" class="btn btn-danger btn-sm shadow-sm"
-                                            data-bs-toggle="modal" data-bs-target="#batalkanModal"
-                                            data-action="{{ route('ketua.validasi-rapor.batalkan', $siswa->id) }}"
-                                            data-name="{{ $siswa->nama_lengkap }}">
-                                        <i class="fas fa-times me-1"></i> Batalkan
-                                    </button>
-                                @else
-                                    <button type="button" class="btn btn-success btn-sm shadow-sm"
-                                            data-bs-toggle="modal" data-bs-target="#validasiModal"
-                                            data-action="{{ route('ketua.validasi-rapor.validasi', $siswa->id) }}"
-                                            data-name="{{ $siswa->nama_lengkap }}">
-                                        <i class="fas fa-check me-1"></i> Validasi
-                                    </button>
-                                    <button type="button" class="btn btn-warning btn-sm shadow-sm"
-                                            data-bs-toggle="modal" data-bs-target="#revisiModal"
-                                            data-action="{{ route('ketua.validasi-rapor.minta-revisi', $siswa->id) }}"
-                                            data-name="{{ $siswa->nama_lengkap }}">
-                                        <i class="fas fa-edit me-1"></i> Revisi
-                                    </button>
-                                @endif
+                                <div class="d-flex flex-wrap justify-content-center gap-1">
+                                    <a href="{{ route('ketua.validasi-rapor.preview', $siswa->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank" title="Preview Rapor">
+                                        <i class="fas fa-eye me-1"></i> Preview
+                                    </a>
+                                    @if($siswa->validasi_rapor_ketua)
+                                        <button type="button" class="btn btn-danger btn-sm shadow-sm"
+                                                data-bs-toggle="modal" data-bs-target="#batalkanModal"
+                                                data-action="{{ route('ketua.validasi-rapor.batalkan', $siswa->id) }}"
+                                                data-name="{{ $siswa->nama_lengkap }}">
+                                            <i class="fas fa-times me-1"></i> Batalkan
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-success btn-sm shadow-sm"
+                                                data-bs-toggle="modal" data-bs-target="#validasiModal"
+                                                data-action="{{ route('ketua.validasi-rapor.validasi', $siswa->id) }}"
+                                                data-name="{{ $siswa->nama_lengkap }}">
+                                            <i class="fas fa-check me-1"></i> Validasi
+                                        </button>
+                                        <button type="button" class="btn btn-warning btn-sm shadow-sm"
+                                                data-bs-toggle="modal" data-bs-target="#revisiModal"
+                                                data-action="{{ route('ketua.validasi-rapor.minta-revisi', $siswa->id) }}"
+                                                data-name="{{ $siswa->nama_lengkap }}">
+                                            <i class="fas fa-edit me-1"></i> Revisi
+                                        </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

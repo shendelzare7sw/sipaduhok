@@ -1265,13 +1265,17 @@ class OrangTuaController extends Controller
             return back()->with('info', 'Anda masih memiliki link download yang aktif.');
         }
 
-        RequestDownloadRapor::create([
+        $downloadRequest = RequestDownloadRapor::create([
             'rapor_id' => $raporId,
             'user_id' => $user->id,
             'siswa_id' => $rapor->siswa_id,
             'alasan' => $request->alasan,
             'tanggal_request' => now(),
         ]);
+
+        // Notify Wali Kelas
+        $downloadRequest->load(['siswa.kelas', 'user']);
+        app(\App\Services\NotificationService::class)->notifyRequestDownloadRapor($downloadRequest);
 
         return back()->with('success', 'Permintaan download rapor berhasil dikirim. Menunggu persetujuan.');
     }

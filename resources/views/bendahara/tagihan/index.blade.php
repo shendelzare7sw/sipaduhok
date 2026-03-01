@@ -193,6 +193,57 @@
         .search-input {
             width: 100% !important;
         }
+
+        .w-100-mobile {
+            width: 100% !important;
+        }
+
+        .action-group-mobile {
+            flex-wrap: wrap !important;
+            width: 100%;
+        }
+
+        .action-group-mobile > * {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .action-group-mobile .btn {
+            font-size: 12px;
+            padding: 6px 10px;
+            white-space: nowrap;
+        }
+
+        .action-group-mobile .btn-group {
+            flex: 1 1 auto;
+        }
+
+        .action-group-mobile .btn-group .btn {
+            width: 100%;
+        }
+
+        .table td, .table th {
+            font-size: 12px;
+            padding: 8px 6px;
+        }
+
+        .currency-font {
+            font-size: 12px;
+        }
+
+        .student-name {
+            font-size: 13px;
+        }
+
+        .badge-status {
+            font-size: 9px;
+            padding: 4px 8px;
+        }
+
+        .btn-group .btn.btn-sm {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
     }
 </style>
 @endsection

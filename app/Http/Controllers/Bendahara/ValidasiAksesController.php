@@ -491,6 +491,12 @@ class ValidasiAksesController extends Controller
         }
 
         $label = $request->tipe === 'ujian' ? 'ujian' : 'rapor';
+
+        // Notify Ketua PKBM
+        if ($created > 0) {
+            app(\App\Services\NotificationService::class)->notifyDispensasiDiajukan($created, $request->tipe, auth()->user());
+        }
+
         return redirect()->back()->with('success', "Berhasil mengajukan dispensasi {$label} untuk {$created} siswa ke Ketua PKBM.");
     }
 }

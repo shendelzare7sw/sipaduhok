@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Rapor PTS - {{ $rapor->siswa->nama_lengkap }}</title>
     <style>
-        @page { margin: 20mm; }
+        @page { margin: 15mm; size: A4 portrait; }
         body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; }
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { font-size: 16pt; margin: 5px 0; }
@@ -13,8 +13,8 @@
         .info-table { width: 100%; margin-bottom: 15px; }
         .info-table td { padding: 3px 8px; }
         .info-table td:first-child { width: 150px; font-weight: bold; }
-        .nilai-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .nilai-table th, .nilai-table td { border: 1px solid #000; padding: 6px; text-align: center; }
+        .nilai-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+        .nilai-table th, .nilai-table td { border: 1px solid #000; padding: 4px; text-align: center; font-size: 10pt; }
         .nilai-table th { background-color: #f0f0f0; font-weight: bold; }
         .nilai-table td:nth-child(2) { text-align: left; }
         .ekstra-table { width: 60%; border-collapse: collapse; margin-bottom: 20px; }
@@ -67,14 +67,14 @@
     <table class="nilai-table">
         <thead>
             <tr>
-                <th width="40">No</th>
+                <th width="30">No</th>
                 <th>Mata Pelajaran</th>
-                <th width="60">KKM</th>
-                <th width="60">Tugas</th>
-                <th width="60">U1</th>
-                <th width="60">U2</th>
-                <th width="60">PTS</th>
-                <th width="120">Keterangan</th>
+                <th width="45">KKM</th>
+                <th width="45">Tugas</th>
+                <th width="45">U1</th>
+                <th width="45">U2</th>
+                <th width="45">PTS</th>
+                <th width="80">Keterangan</th>
             </tr>
         </thead>
         <tbody>

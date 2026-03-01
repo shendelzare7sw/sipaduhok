@@ -239,10 +239,14 @@ class LmsUjianController extends Controller
             }
         }
 
+        // Normalisasi nilai ke skala 0-100
+        $totalBobot = $soalList->sum('bobot_nilai');
+        $nilaiNormalized = $totalBobot > 0 ? round(($totalNilai / $totalBobot) * 100, 1) : 0;
+
         // Update status ujian siswa
         $ujianSiswa->update([
             'waktu_selesai' => now(),
-            'nilai' => $totalNilai,
+            'nilai' => $nilaiNormalized,
             'status' => 'selesai',
         ]);
 
@@ -250,14 +254,16 @@ class LmsUjianController extends Controller
         $ujianSiswa->load(['ujian', 'siswa']);
         app(\App\Services\NotificationService::class)->notifyUjianSelesai($ujianSiswa);
 
-        $msg = 'Ujian berhasil dikumpulkan!';
+        $tipeLabel = ($ujian->tipe_ujian === 'latihan') ? 'Latihan' : 'Ujian';
+        $msg = "$tipeLabel berhasil dikumpulkan!";
         if ($perluKoreksiManual) {
-            $msg .= ' Nilai sementara: ' . number_format($totalNilai, 1) . ' (beberapa soal menunggu koreksi guru)';
+            $msg .= ' Nilai sementara: ' . number_format($nilaiNormalized, 1) . '/100 (beberapa soal menunggu koreksi guru)';
         } else {
-            $msg .= ' Nilai: ' . number_format($totalNilai, 1);
+            $msg .= ' Nilai: ' . number_format($nilaiNormalized, 1) . '/100';
         }
 
         return redirect()->route('siswa.lms.mapel.show', $mapelId)
             ->with('success', $msg);
     }
+
 }

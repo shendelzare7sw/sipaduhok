@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Services\PromotionService;
+use App\Services\NotificationService;
 
 class PromotionValidationController extends Controller
 {
@@ -83,15 +84,59 @@ class PromotionValidationController extends Controller
             'diajukan_oleh' => auth()->id(),
             'tanggal_pengajuan' => now(),
             'alasan_pengajuan' => $validated['alasan'],
-            'total_tunggakan' => 0, // Placeholder or calculate real sum
+            'total_tunggakan' => 0,
             'status' => 'MENUNGGU',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
+        app(NotificationService::class)->notifyPromotionDispensasiDiajukan(1, auth()->user());
+
         return redirect()
             ->route('bendahara.promotion.validation.index')
             ->with('success', 'Pengajuan izin khusus berhasil dikirim ke Ketua PKBM');
+    }
+
+    public function bulkStore(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'siswa_ids' => 'required|array|min:1',
+            'siswa_ids.*' => 'exists:siswa,id',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+            'alasan' => 'required|string|max:500',
+        ]);
+
+        $created = 0;
+        foreach ($validated['siswa_ids'] as $siswaId) {
+            $existing = DB::table('izin_naik_kelas_khusus')
+                ->where('siswa_id', $siswaId)
+                ->where('tahun_ajaran_id', $validated['tahun_ajaran_id'])
+                ->where('status', 'MENUNGGU')
+                ->exists();
+
+            if (!$existing) {
+                DB::table('izin_naik_kelas_khusus')->insert([
+                    'siswa_id' => $siswaId,
+                    'tahun_ajaran_id' => $validated['tahun_ajaran_id'],
+                    'diajukan_oleh' => auth()->id(),
+                    'tanggal_pengajuan' => now(),
+                    'alasan_pengajuan' => $validated['alasan'],
+                    'total_tunggakan' => 0,
+                    'status' => 'MENUNGGU',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $created++;
+            }
+        }
+
+        if ($created > 0) {
+            app(NotificationService::class)->notifyPromotionDispensasiDiajukan($created, auth()->user());
+        }
+
+        return redirect()
+            ->route('bendahara.promotion.validation.index')
+            ->with('success', "Berhasil mengajukan dispensasi untuk {$created} siswa ke Ketua PKBM");
     }
 
     public function history(Request $request): View

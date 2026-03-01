@@ -12,7 +12,7 @@
 <style>
     .rapor-container {
         background: white;
-        padding: 40px;
+        padding: 30px;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         max-width: 900px;
@@ -44,6 +44,7 @@
         width: 100%;
         border-collapse: collapse;
         margin: 20px 0;
+        table-layout: fixed;
     }
     .tabel-nilai th {
         background: #165fac;
@@ -117,14 +118,14 @@
     <table class="tabel-nilai">
         <thead>
             <tr>
-                <th width="40">No</th>
+                <th width="30">No</th>
                 <th>Mata Pelajaran</th>
-                <th width="60">KKM</th>
-                <th width="70">Tugas</th>
-                <th width="70">U1</th>
-                <th width="70">U2</th>
-                <th width="70">PTS</th>
-                <th width="100">Keterangan</th>
+                <th width="45">KKM</th>
+                <th width="45">Tugas</th>
+                <th width="40">U1</th>
+                <th width="40">U2</th>
+                <th width="45">PTS</th>
+                <th width="80">Keterangan</th>
             </tr>
         </thead>
         <tbody>

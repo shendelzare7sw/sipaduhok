@@ -11,6 +11,99 @@
     @endif
 @endsection
 
+@section('styles')
+<style>
+/* Make tab content cards stretch wider */
+.tab-content > .tab-pane > .card {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-radius: 0;
+}
+
+/* Responsive Styles - Mobile Only */
+@media (max-width: 768px) {
+    /* Nav tabs scrollable */
+    .nav-tabs {
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .nav-tabs .nav-item {
+        flex-shrink: 0;
+    }
+
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+
+    /* Card headers: stack vertically */
+    .card-header .d-flex.flex-wrap {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    /* Filter forms: stack vertically */
+    #historyFilterForm,
+    #simulationFilterForm {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100%;
+    }
+
+    #historyFilterForm select[style*="width: 140px"],
+    #simulationFilterForm select[style*="width: 140px"] {
+        width: 100% !important;
+    }
+
+    #historyFilterForm .input-group[style*="width: 220px"],
+    #simulationFilterForm .input-group[style*="width: 220px"] {
+        width: 100% !important;
+    }
+
+    #historyFilterForm .dropdown,
+    #simulationFilterForm .dropdown {
+        width: 100%;
+    }
+
+    #historyFilterForm .dropdown .btn,
+    #simulationFilterForm .dropdown .btn {
+        width: 100%;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Mode toggle btn-group */
+    .btn-group[role="group"] {
+        width: 100%;
+    }
+
+    .btn-group[role="group"] .btn {
+        flex: 1;
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+
+    /* Pagination area */
+    .p-3.d-flex.justify-content-between {
+        flex-direction: column !important;
+        gap: 10px;
+    }
+}
+</style>
+@endsection
+
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Header removed, using layout title -->
@@ -69,17 +162,17 @@
     <ul class="nav nav-tabs mb-3" id="promotionTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link {{ $activeTab == 'simulation' ? 'active' : '' }}" id="simulation-tab" data-bs-toggle="tab" data-bs-target="#simulation" type="button" role="tab" aria-controls="simulation" aria-selected="{{ $activeTab == 'simulation' ? 'true' : 'false' }}">
-                <i class="fas fa-flask me-1"></i> Simulasi / Keadaan Sekarang
+                <i class="fas fa-flask me-1"></i> <span class="d-none d-md-inline">Simulasi / Keadaan Sekarang</span><span class="d-inline d-md-none">Simulasi</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link {{ $activeTab == 'history' ? 'active' : '' }}" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="{{ $activeTab == 'history' ? 'true' : 'false' }}">
-                <i class="fas fa-history me-1"></i> Riwayat Eksekusi ({{ $students->total() }})
+                <i class="fas fa-history me-1"></i> <span class="d-none d-md-inline">Riwayat Eksekusi ({{ $students->total() }})</span><span class="d-inline d-md-none">Riwayat ({{ $students->total() }})</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link {{ $activeTab == 'scheduling' ? 'active' : '' }}" id="scheduling-tab" data-bs-toggle="tab" data-bs-target="#scheduling" type="button" role="tab" aria-controls="scheduling" aria-selected="{{ $activeTab == 'scheduling' ? 'true' : 'false' }}">
-                <i class="fas fa-clock me-1"></i> Jadwal Otomatis
+                <i class="fas fa-clock me-1"></i> <span class="d-none d-md-inline">Jadwal Otomatis</span><span class="d-inline d-md-none">Jadwal</span>
             </button>
         </li>
     </ul>

@@ -700,6 +700,9 @@ class RaporController extends Controller
             ]);
         }
 
+        // Notify Ketua PKBM
+        app(\App\Services\NotificationService::class)->notifyRaporDikirimKeKetua($siswa, auth()->user());
+
         return back()->with('success', "Rapor {$siswa->nama_lengkap} berhasil dikirim ke Ketua PKBM untuk divalidasi.");
     }
 
@@ -775,6 +778,9 @@ class RaporController extends Controller
             return back()->with('info', 'Semua rapor sudah pernah dikirim ke Ketua PKBM.');
         }
 
+        // Notify Ketua PKBM (bulk)
+        app(\App\Services\NotificationService::class)->notifyRaporBulkDikirimKeKetua($sent, $kelas->nama_kelas, auth()->user());
+
         return back()->with('success', "Berhasil mengirim {$sent} rapor ke Ketua PKBM untuk divalidasi.");
     }
 
@@ -828,6 +834,10 @@ class RaporController extends Controller
 
         $downloadRequest->generateDownloadToken(24);
 
+        // Notify Orang Tua
+        $downloadRequest->load('siswa');
+        app(\App\Services\NotificationService::class)->notifyKeputusanDownloadRapor($downloadRequest);
+
         return back()->with('success', "Request download dari {$downloadRequest->user->name} berhasil disetujui. Link berlaku 24 jam.");
     }
 
@@ -844,6 +854,10 @@ class RaporController extends Controller
             'catatan_admin' => $request->catatan_admin,
             'tanggal_keputusan' => now(),
         ]);
+
+        // Notify Orang Tua
+        $downloadRequest->load('siswa');
+        app(\App\Services\NotificationService::class)->notifyKeputusanDownloadRapor($downloadRequest);
 
         return back()->with('success', "Request download berhasil ditolak.");
     }

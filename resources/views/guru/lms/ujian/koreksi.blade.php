@@ -1,5 +1,10 @@
 @extends('layouts.lms-guru')
 
+@php
+    $isLatihan = request()->routeIs('guru.lms.latihan.*');
+    $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+@endphp
+
 @section('title', 'Koreksi Jawaban Siswa')
 @section('page-title', 'Koreksi Jawaban: ' . ($ujianSiswa->siswa->nama_lengkap ?? '-'))
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
@@ -11,7 +16,6 @@
 @section('content')
     <div class="mb-3">
         @php
-            $isLatihan = request()->routeIs('guru.lms.latihan.*');
             $backRoute = $isLatihan ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil';
         @endphp
         <a href="{{ route($backRoute, [$kelas->id, $mapel->id, $ujian->id]) }}" class="btn btn-secondary btn-sm">
@@ -50,7 +54,7 @@
                             <td class="fw-bold">: {{ $ujianSiswa->siswa->nama_lengkap }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Judul Ujian</td>
+                            <td class="text-muted">Judul {{ $tipeLabel }}</td>
                             <td class="fw-bold">: {{ $ujian->judul_ujian }}</td>
                         </tr>
                     </table>
@@ -71,7 +75,7 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Nilai Saat Ini</td>
-                            <td class="fw-bold fs-5 text-primary">: {{ number_format($ujianSiswa->nilai ?? 0, 1) }}</td>
+                            <td class="fw-bold fs-5 text-primary">: {{ number_format($ujianSiswa->nilai ?? 0, 1) }}/100</td>
                         </tr>
                     </table>
                 </div>

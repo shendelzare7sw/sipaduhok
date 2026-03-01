@@ -117,7 +117,7 @@
                         </td>
                         <td class="text-center">
                             @if($hasil->nilai !== null)
-                                <strong class="fs-5 text-primary">{{ number_format($hasil->nilai, 1) }}</strong>
+                                <strong class="fs-5 text-primary">{{ number_format($hasil->nilai, 1) }}/100</strong>
                             @else
                                 <span class="text-muted">-</span>
                             @endif

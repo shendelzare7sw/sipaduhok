@@ -88,6 +88,116 @@
 }
 
 .currency-font { font-family: 'Nunito', sans-serif; font-weight: 700; }
+
+/* Filter Section */
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 140px;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.filter-divider {
+    width: 100%;
+    border-top: 1px dashed #e5e7eb;
+    margin: 8px 0;
+}
+
+.filter-cascade-hidden {
+    display: none;
+}
+
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.active-filter-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-number {
+        font-size: 16px;
+    }
+
+    .stat-title {
+        font-size: 11px;
+    }
+
+    .stat-icon-bg {
+        font-size: 40px;
+        right: 12px;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    .filter-row {
+        gap: 8px;
+    }
+
+    .d-flex.align-items-end.justify-content-between {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .chart-bar {
+        min-width: 8px;
+    }
+
+    .table thead th {
+        font-size: 10px;
+        padding: 8px 6px;
+    }
+
+    .table td {
+        font-size: 12px;
+        padding: 8px 6px;
+    }
+
+    .currency-font {
+        font-size: 12px;
+    }
+
+    .card-header.d-flex {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+}
 </style>
 @endsection
 
@@ -97,52 +207,123 @@
 
     {{-- FILTER SECTION --}}
     <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-sliders-h me-2"></i>Filter Laporan</h6>
+        </div>
         <div class="card-body">
-            <form action="{{ route('bendahara.laporan.index') }}" method="GET" class="row align-items-end">
-                <div class="col-md-2 mb-2">
-                    <label class="small fw-bold">BULAN</label>
-                    <select name="bulan" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                        @foreach($bulanList as $key => $nama)
-                            <option value="{{ $key }}" {{ $bulan == $key ? 'selected' : '' }}>{{ $nama }}</option>
-                        @endforeach
-                    </select>
+            <form action="{{ route('bendahara.laporan.index') }}" method="GET" id="filterForm">
+                {{-- Row 1: Periode & Metode --}}
+                <div class="filter-row">
+                    <div class="filter-group" style="max-width: 160px;">
+                        <label><i class="fas fa-calendar-alt me-1"></i>Tahun</label>
+                        <select name="tahun" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
+                            @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                                <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="filter-group" style="max-width: 180px;">
+                        <label><i class="fas fa-calendar me-1"></i>Bulan</label>
+                        <select name="bulan" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
+                            @foreach($bulanList as $key => $nama)
+                                <option value="{{ $key }}" {{ $bulan == $key ? 'selected' : '' }}>{{ $nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group" style="max-width: 180px;">
+                        <label><i class="fas fa-credit-card me-1"></i>Metode</label>
+                        <select name="metode" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
+                            <option value="">Semua Metode</option>
+                            <option value="tunai" {{ request('metode') == 'tunai' ? 'selected' : '' }}>Tunai</option>
+                            <option value="transfer" {{ request('metode') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                            <option value="midtrans" {{ request('metode') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-2 mb-2">
-                    <label class="small fw-bold">TAHUN</label>
-                    <select name="tahun" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                            <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
+
+                <div class="filter-divider"></div>
+
+                {{-- Row 2: Lokasi Cascading --}}
+                <div class="filter-row">
+                    <div class="filter-group" style="max-width: 200px;">
+                        <label><i class="fas fa-building me-1"></i>Cabang</label>
+                        <select name="cabang_id" id="cabangFilter" class="form-select form-select-sm border-start border-success border-3 shadow-sm">
+                            <option value="">Semua Cabang</option>
+                            @foreach($cabangList as $cabang)
+                                <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
+                                    {{ $cabang->nama_cabang }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group {{ !request('cabang_id') ? 'filter-cascade-hidden' : '' }}" id="jenjangFilterContainer" style="max-width: 180px;">
+                        <label><i class="fas fa-layer-group me-1"></i>Jenjang</label>
+                        <select name="jenjang" id="jenjangFilter" class="form-select form-select-sm border-start border-success border-3 shadow-sm">
+                            <option value="">Semua Jenjang</option>
+                            @foreach($jenjangList as $j)
+                                <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group {{ !request('jenjang') ? 'filter-cascade-hidden' : '' }}" id="kelasFilterContainer" style="max-width: 200px;">
+                        <label><i class="fas fa-door-open me-1"></i>Kelas</label>
+                        <select name="kelas_id" id="kelasFilter" class="form-select form-select-sm border-start border-success border-3 shadow-sm">
+                            <option value="">Semua Kelas</option>
+                            @foreach($kelasList as $kelas)
+                                <option value="{{ $kelas->id }}"
+                                        data-cabang="{{ $kelas->cabang_id }}"
+                                        data-jenjang="{{ $kelas->jenjang }}"
+                                        {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
+                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <label class="small fw-bold">KELAS</label>
-                    <select name="kelas_id" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                        <option value="">Semua Kelas</option>
-                        @foreach($kelasList as $kelas)
-                            <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
-                                {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <label class="small fw-bold">METODE</label>
-                    <select name="metode" class="form-select form-select-sm border-start border-primary border-3 shadow-sm">
-                        <option value="">Semua Metode</option>
-                        <option value="tunai" {{ request('metode') == 'tunai' ? 'selected' : '' }}>Tunai</option>
-                        <option value="transfer" {{ request('metode') == 'transfer' ? 'selected' : '' }}>Transfer</option>
-                        <option value="midtrans" {{ request('metode') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
-                    </select>
-                </div>
-                <div class="col-md-3 mb-2 text-end">
-                    <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm fw-bold">
-                        <i class="fas fa-filter me-1"></i> Filter
+
+                {{-- Buttons --}}
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary btn-sm px-4 shadow-sm fw-bold">
+                        <i class="fas fa-filter me-1"></i> Terapkan Filter
                     </button>
-                    <a href="{{ route('bendahara.laporan.cetak', request()->query()) }}" target="_blank" class="btn btn-success btn-sm px-3 shadow-sm fw-bold">
+                    <a href="{{ route('bendahara.laporan.index') }}" class="btn btn-outline-secondary btn-sm px-3 fw-bold">
+                        <i class="fas fa-undo me-1"></i> Reset
+                    </a>
+                    <a href="{{ route('bendahara.laporan.cetak', request()->query()) }}" target="_blank" class="btn btn-success btn-sm px-3 shadow-sm fw-bold ms-auto">
                         <i class="fas fa-print me-1"></i> Cetak
                     </a>
                 </div>
+
+                {{-- Active Filter Badges --}}
+                @if(request('cabang_id') || request('jenjang') || request('kelas_id') || request('metode'))
+                <div class="active-filters">
+                    <span style="font-size: 11px; color: #6b7280; font-weight: 600; line-height: 24px;">Filter aktif:</span>
+                    @if(request('metode'))
+                        <span class="active-filter-badge"><i class="fas fa-credit-card"></i> {{ ucfirst(request('metode')) }}</span>
+                    @endif
+                    @if(request('cabang_id'))
+                        @php $cabangNama = $cabangList->firstWhere('id', request('cabang_id'))?->nama_cabang; @endphp
+                        @if($cabangNama)
+                            <span class="active-filter-badge" style="background: #f0fdf4; color: #16a34a; border-color: #86efac;">
+                                <i class="fas fa-building"></i> {{ $cabangNama }}
+                            </span>
+                        @endif
+                    @endif
+                    @if(request('jenjang'))
+                        <span class="active-filter-badge" style="background: #fefce8; color: #ca8a04; border-color: #fde68a;">
+                            <i class="fas fa-layer-group"></i> {{ request('jenjang') }}
+                        </span>
+                    @endif
+                    @if(request('kelas_id'))
+                        @php $kelasNama = $kelasList->firstWhere('id', request('kelas_id'))?->nama_kelas; @endphp
+                        @if($kelasNama)
+                            <span class="active-filter-badge" style="background: #faf5ff; color: #7c3aed; border-color: #c4b5fd;">
+                                <i class="fas fa-door-open"></i> {{ $kelasNama }}
+                            </span>
+                        @endif
+                    @endif
+                </div>
+                @endif
             </form>
         </div>
     </div>
@@ -203,7 +384,7 @@
                         $maxJumlah = $pembayaranPerHari->max() ?: 1;
                         $height = ($jumlah / $maxJumlah) * 100;
                     @endphp
-                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 2px;">
+                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 0 2px; height: 100%;">
                         <div class="chart-bar w-100 shadow-sm" style="height: {{ $height }}%;" 
                              title="Tanggal {{ $hari }}: Rp {{ number_format($jumlah, 0, ',', '.') }}"></div>
                         <span style="font-size: 9px; font-weight: 700; color: #4e73df; margin-top: 5px;">{{ $hari }}</span>
@@ -339,4 +520,98 @@
 
 </div>
 </div>
+
+{{-- Cascading Filter JavaScript --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cabangSelect = document.getElementById('cabangFilter');
+    const jenjangSelect = document.getElementById('jenjangFilter');
+    const jenjangContainer = document.getElementById('jenjangFilterContainer');
+    const kelasSelect = document.getElementById('kelasFilter');
+    const kelasContainer = document.getElementById('kelasFilterContainer');
+
+    // Store original data
+    const allJenjangData = Array.from(jenjangSelect.options).map(o => ({
+        value: o.value, text: o.text
+    }));
+    const allKelasData = Array.from(kelasSelect.options).map(o => ({
+        value: o.value,
+        text: o.text,
+        cabang: o.getAttribute('data-cabang'),
+        jenjang: o.getAttribute('data-jenjang')
+    }));
+
+    function rebuildSelect(selectEl, options) {
+        const current = selectEl.value;
+        selectEl.innerHTML = '';
+        options.forEach(function(opt) {
+            const el = document.createElement('option');
+            el.value = opt.value;
+            el.textContent = opt.text;
+            if (opt.cabang) el.setAttribute('data-cabang', opt.cabang);
+            if (opt.jenjang) el.setAttribute('data-jenjang', opt.jenjang);
+            if (opt.value && opt.value === current) el.selected = true;
+            selectEl.appendChild(el);
+        });
+    }
+
+    function updateFilters() {
+        const selectedCabangId = cabangSelect.value;
+        const selectedJenjang = jenjangSelect.value;
+
+        // 1. Jenjang: filter berdasarkan cabang terpilih
+        if (selectedCabangId) {
+            jenjangContainer.classList.remove('filter-cascade-hidden');
+
+            const availableJenjangs = new Set();
+            allKelasData.forEach(function(opt) {
+                if (opt.value !== '' && opt.cabang == selectedCabangId) {
+                    availableJenjangs.add(opt.jenjang);
+                }
+            });
+
+            const filteredJenjang = allJenjangData.filter(function(opt) {
+                return opt.value === '' || availableJenjangs.has(opt.value);
+            });
+            rebuildSelect(jenjangSelect, filteredJenjang);
+
+            if (availableJenjangs.has(selectedJenjang)) {
+                jenjangSelect.value = selectedJenjang;
+            }
+        } else {
+            jenjangContainer.classList.add('filter-cascade-hidden');
+            jenjangSelect.value = '';
+        }
+
+        // 2. Kelas: filter berdasarkan cabang + jenjang terpilih
+        const currentJenjang = jenjangSelect.value;
+        if (currentJenjang) {
+            kelasContainer.classList.remove('filter-cascade-hidden');
+
+            const filteredKelas = allKelasData.filter(function(opt) {
+                return opt.value === '' ||
+                    (opt.cabang == selectedCabangId && opt.jenjang == currentJenjang);
+            });
+            rebuildSelect(kelasSelect, filteredKelas);
+        } else {
+            kelasContainer.classList.add('filter-cascade-hidden');
+            kelasSelect.value = '';
+        }
+    }
+
+    cabangSelect.addEventListener('change', function() {
+        jenjangSelect.value = '';
+        kelasSelect.value = '';
+        updateFilters();
+    });
+
+    jenjangSelect.addEventListener('change', function() {
+        kelasSelect.value = '';
+        updateFilters();
+    });
+
+    // Initialize on load (for when filters are pre-selected via URL params)
+    updateFilters();
+});
+</script>
 @endsection

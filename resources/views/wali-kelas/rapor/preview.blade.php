@@ -19,7 +19,7 @@
             max-width: 900px;
             margin: 0 auto;
             background: white;
-            padding: 40px;
+            padding: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             position: relative;
         }
@@ -86,7 +86,7 @@
         /* Student Info (2-column) */
         .student-info {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 3fr 2fr;
             gap: 20px;
             margin-bottom: 15px;
             font-size: 11pt;
@@ -113,6 +113,7 @@
             border-collapse: collapse;
             margin-bottom: 15px;
             font-size: 11pt;
+            table-layout: fixed;
         }
 
         table th, table td {
@@ -188,17 +189,28 @@
         @media print {
             /* Remove browser headers and footers (date, URL, page numbers) */
             @page {
-                margin: 0.5cm;
+                margin: 10mm;
+                size: A4 portrait;
             }
 
             body {
                 padding: 0;
                 background: white;
+                font-size: 10pt;
             }
 
             .rapor-wrapper {
                 box-shadow: none;
-                padding: 20px;
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            table {
+                font-size: 9pt;
+            }
+
+            table th, table td {
+                padding: 3px 4px;
             }
 
             .btn-print {
@@ -338,17 +350,17 @@
         <table class="grade-table">
             <thead>
                 <tr>
-                    <th rowspan="2" style="width: 40px;">No</th>
+                    <th rowspan="2" style="width: 30px;">No</th>
                     <th rowspan="2">Mata Pelajaran</th>
-                    <th rowspan="2" style="width: 50px;">KKM</th>
+                    <th rowspan="2" style="width: 40px;">KKM</th>
                     <th colspan="4">Nilai</th>
-                    <th rowspan="2" style="width: 100px;">Keterangan</th>
+                    <th rowspan="2" style="width: 80px;">Keterangan</th>
                 </tr>
                 <tr>
-                    <th style="width: 60px;">Tugas</th>
-                    <th style="width: 50px;">U<sub>1</sub></th>
-                    <th style="width: 50px;">U<sub>2</sub></th>
-                    <th style="width: 50px;">PTS</th>
+                    <th style="width: 45px;">Tugas</th>
+                    <th style="width: 40px;">U<sub>1</sub></th>
+                    <th style="width: 40px;">U<sub>2</sub></th>
+                    <th style="width: 40px;">PTS</th>
                 </tr>
             </thead>
             <tbody>

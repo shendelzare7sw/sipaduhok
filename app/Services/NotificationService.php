@@ -153,7 +153,7 @@ class NotificationService
                     Notification::TIPE_FORUM,
                     'Pertanyaan Baru dari Siswa',
                     $forumDiskusi->judul,
-                    route('guru.lms.kelas.forum.show', [$forumDiskusi->kelas_id, $forumDiskusi->id]),
+                    route('guru.lms.forum.show', [$forumDiskusi->kelas_id, $forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
                     ['forum_id' => $forumDiskusi->id, 'topik' => $forumDiskusi->topik]
                 );
             }
@@ -768,7 +768,7 @@ class NotificationService
             // Role-specific routes
             $route = match($user->role) {
                 'siswa' => route('siswa.lms.kalender'),
-                'guru' => route('guru.lms.index'),
+                'guru' => route('guru.dashboard'),
                 'orang_tua' => route('orang-tua.dashboard'),
                 default => route('notifications.index'),
             };
@@ -799,8 +799,8 @@ class NotificationService
         foreach ($targetUsers as $user) {
             // Role-specific routes
             $route = match($user->role) {
-                'siswa' => route('siswa.sia.berita.index'),
-                'guru' => route('guru.lms.index'),
+                'siswa' => route('siswa.sia.dashboard'),
+                'guru' => route('guru.dashboard'),
                 'orang_tua' => route('orang-tua.dashboard'),
                 default => route('notifications.index'),
             };
@@ -845,7 +845,7 @@ class NotificationService
             'bendahara' => route('bendahara.dashboard'),
             'sekretaris' => route('sekretaris.dashboard'),
             'wali_kelas' => route('wali.dashboard'),
-            'guru' => route('guru.lms.index'),
+            'guru' => route('guru.dashboard'),
             'orang_tua' => route('orang-tua.dashboard'),
             'siswa' => route('siswa.sia.dashboard'),
             default => route('notifications.index'),
@@ -880,6 +880,317 @@ class NotificationService
                 'Pengajuan kenaikan kelas untuk ' . ($promotion->kelas->nama_kelas ?? 'kelas'),
                 $route,
                 ['promotion_id' => $promotion->id, 'kelas_id' => $promotion->kelas_id]
+            );
+        }
+    }
+
+    /**
+     * Notify Ketua PKBM when admin/bendahara submits promotion dispensasi
+     */
+    public function notifyPromotionDispensasiDiajukan($count, $pengaju)
+    {
+        $ketuaUsers = User::where('role', 'ketua_pkbm')->get();
+
+        foreach ($ketuaUsers as $ketua) {
+            $this->create(
+                $ketua->id,
+                Notification::TIPE_KENAIKAN,
+                'Dispensasi Naik Kelas Baru',
+                $pengaju->name . ' mengajukan dispensasi naik kelas untuk ' . $count . ' siswa. Menunggu keputusan Anda.',
+                route('ketua.promotion.approval.index'),
+                ['count' => $count, 'pengaju_id' => $pengaju->id]
+            );
+        }
+    }
+
+    /**
+     * Notify pengaju (admin/bendahara) when Ketua decides on promotion dispensasi
+     */
+    public function notifyPromotionDispensasiKeputusan($ids, $status, $ketuaName)
+    {
+        $records = \Illuminate\Support\Facades\DB::table('izin_naik_kelas_khusus')
+            ->whereIn('id', $ids)
+            ->get();
+
+        $pengajuIds = $records->pluck('diajukan_oleh')->unique();
+        $count = count($ids);
+        $statusLabel = $status === 'DISETUJUI' ? 'menyetujui' : 'menolak';
+
+        foreach ($pengajuIds as $pengajuId) {
+            $pengaju = User::find($pengajuId);
+            if (!$pengaju) continue;
+
+            $route = match($pengaju->role) {
+                'admin' => route('admin.keuangan.promotion.validation.history'),
+                'bendahara' => route('bendahara.promotion.validation.history'),
+                default => route('notifications.index'),
+            };
+
+            $this->create(
+                $pengaju->id,
+                Notification::TIPE_KENAIKAN,
+                'Keputusan Dispensasi Naik Kelas',
+                'Ketua PKBM ' . $ketuaName . ' ' . $statusLabel . ' ' . $count . ' pengajuan dispensasi naik kelas.',
+                $route,
+                ['status' => $status, 'count' => $count]
+            );
+        }
+    }
+
+    // ===================================================================
+    // RAPOR & UJIAN FLOW NOTIFICATIONS
+    // ===================================================================
+
+    /**
+     * Notify Ketua PKBM when Wali Kelas submits rapor for validation.
+     */
+    public function notifyRaporDikirimKeKetua($siswa, $pengirim = null)
+    {
+        if (!$siswa) return;
+
+        $pengirimName = $pengirim ? $pengirim->name : 'Wali Kelas';
+
+        // Notify all Ketua PKBM users
+        $ketuaUsers = User::where('role', 'ketua_pkbm')->get();
+        foreach ($ketuaUsers as $ketua) {
+            $this->create(
+                $ketua->id,
+                Notification::TIPE_RAPOR,
+                'Rapor Menunggu Validasi',
+                $pengirimName . ' mengirim rapor ' . $siswa->nama_lengkap . ' (' . ($siswa->kelas->nama_kelas ?? '-') . ') untuk divalidasi',
+                route('ketua.validasi-rapor.index'),
+                ['siswa_id' => $siswa->id]
+            );
+        }
+    }
+
+    /**
+     * Notify Ketua PKBM when multiple rapor sent at once (bulk).
+     */
+    public function notifyRaporBulkDikirimKeKetua($count, $kelasName, $pengirim = null)
+    {
+        if ($count <= 0) return;
+
+        $pengirimName = $pengirim ? $pengirim->name : 'Wali Kelas';
+
+        $ketuaUsers = User::where('role', 'ketua_pkbm')->get();
+        foreach ($ketuaUsers as $ketua) {
+            $this->create(
+                $ketua->id,
+                Notification::TIPE_RAPOR,
+                'Rapor Menunggu Validasi (' . $count . ' Siswa)',
+                $pengirimName . ' mengirim ' . $count . ' rapor dari kelas ' . $kelasName . ' untuk divalidasi',
+                route('ketua.validasi-rapor.index'),
+                ['count' => $count, 'kelas' => $kelasName]
+            );
+        }
+    }
+
+    /**
+     * Notify Wali Kelas & Bendahara when Ketua approves rapor.
+     */
+    public function notifyKetuaApproveRapor($siswa)
+    {
+        if (!$siswa) return;
+
+        // Notify Wali Kelas of the student's class
+        $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
+            ->with('tenagaPendidik.user')
+            ->first();
+
+        if ($waliKelasAssignment && $waliKelasAssignment->tenagaPendidik && $waliKelasAssignment->tenagaPendidik->user_id) {
+            $this->create(
+                $waliKelasAssignment->tenagaPendidik->user_id,
+                Notification::TIPE_RAPOR,
+                'Rapor Disetujui Ketua',
+                'Rapor ' . $siswa->nama_lengkap . ' telah disetujui oleh Ketua PKBM. Menunggu validasi Bendahara.',
+                route('wali.rapor.index'),
+                ['siswa_id' => $siswa->id]
+            );
+        }
+
+        // Notify Bendahara & Admin
+        $targets = User::whereIn('role', ['bendahara', 'admin'])->get();
+        foreach ($targets as $target) {
+            $route = $target->role === 'admin'
+                ? route('admin.keuangan.validasi-akses.index')
+                : route('bendahara.validasi-akses.index');
+
+            $this->create(
+                $target->id,
+                Notification::TIPE_RAPOR,
+                'Rapor Siap Divalidasi',
+                'Rapor ' . $siswa->nama_lengkap . ' (' . ($siswa->kelas->nama_kelas ?? '-') . ') sudah di-approve Ketua PKBM. Silakan validasi akses rapor.',
+                $route,
+                ['siswa_id' => $siswa->id]
+            );
+        }
+    }
+
+    /**
+     * Notify Wali Kelas when Ketua rejects/cancels rapor validation.
+     */
+    public function notifyKetuaBatalkanRapor($siswa)
+    {
+        if (!$siswa) return;
+
+        $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
+            ->with('tenagaPendidik.user')
+            ->first();
+
+        if ($waliKelasAssignment && $waliKelasAssignment->tenagaPendidik && $waliKelasAssignment->tenagaPendidik->user_id) {
+            $this->create(
+                $waliKelasAssignment->tenagaPendidik->user_id,
+                Notification::TIPE_RAPOR,
+                'Validasi Rapor Dibatalkan',
+                'Ketua PKBM membatalkan validasi rapor ' . $siswa->nama_lengkap . '. Validasi bendahara juga di-reset.',
+                route('wali.rapor.index'),
+                ['siswa_id' => $siswa->id]
+            );
+        }
+    }
+
+    /**
+     * Notify Wali Kelas when Ketua requests revision on rapor.
+     */
+    public function notifyKetuaMintaRevisi($siswa, $catatan)
+    {
+        if (!$siswa) return;
+
+        $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
+            ->with('tenagaPendidik.user')
+            ->first();
+
+        if ($waliKelasAssignment && $waliKelasAssignment->tenagaPendidik && $waliKelasAssignment->tenagaPendidik->user_id) {
+            $this->create(
+                $waliKelasAssignment->tenagaPendidik->user_id,
+                Notification::TIPE_RAPOR,
+                'Rapor Perlu Revisi',
+                'Ketua PKBM meminta revisi rapor ' . $siswa->nama_lengkap . ': ' . \Str::limit($catatan, 80),
+                route('wali.rapor.index'),
+                ['siswa_id' => $siswa->id]
+            );
+        }
+    }
+
+    /**
+     * Notify Wali Kelas when Orang Tua requests rapor download.
+     */
+    public function notifyRequestDownloadRapor($downloadRequest)
+    {
+        if (!$downloadRequest) return;
+
+        $siswa = $downloadRequest->siswa;
+        $parentName = $downloadRequest->user->name ?? 'Orang Tua';
+
+        if (!$siswa) return;
+
+        $waliKelasAssignment = \App\Models\WaliKelasAssignment::where('kelas_id', $siswa->kelas_id)
+            ->with('tenagaPendidik.user')
+            ->first();
+
+        if ($waliKelasAssignment && $waliKelasAssignment->tenagaPendidik && $waliKelasAssignment->tenagaPendidik->user_id) {
+            $this->create(
+                $waliKelasAssignment->tenagaPendidik->user_id,
+                Notification::TIPE_RAPOR,
+                'Request Download Rapor',
+                $parentName . ' mengajukan download rapor ' . $siswa->nama_lengkap,
+                route('wali.rapor.request-download.index'),
+                ['request_id' => $downloadRequest->id, 'siswa_id' => $siswa->id]
+            );
+        }
+    }
+
+    /**
+     * Notify Orang Tua when Wali Kelas approves/rejects download request.
+     */
+    public function notifyKeputusanDownloadRapor($downloadRequest)
+    {
+        if (!$downloadRequest || !$downloadRequest->user_id) return;
+
+        $siswa = $downloadRequest->siswa;
+        $siswaName = $siswa ? $siswa->nama_lengkap : 'anak';
+        $isApproved = $downloadRequest->status === 'disetujui';
+
+        $judul = $isApproved ? 'Download Rapor Disetujui' : 'Download Rapor Ditolak';
+        $pesan = $isApproved
+            ? 'Permintaan download rapor ' . $siswaName . ' telah disetujui. Link berlaku 24 jam.'
+            : 'Permintaan download rapor ' . $siswaName . ' telah ditolak.';
+
+        $link = $siswa ? route('orang-tua.rapor.anak', $siswa->id) : route('orang-tua.dashboard');
+
+        $this->create(
+            $downloadRequest->user_id,
+            Notification::TIPE_RAPOR,
+            $judul,
+            $pesan,
+            $link,
+            ['request_id' => $downloadRequest->id, 'status' => $downloadRequest->status]
+        );
+    }
+
+    /**
+     * Notify Ketua PKBM when Bendahara/Admin submits dispensasi request.
+     */
+    public function notifyDispensasiDiajukan($count, $tipe, $pengaju)
+    {
+        if ($count <= 0) return;
+
+        $pengajuName = $pengaju ? $pengaju->name : 'Bendahara';
+        $tipeLabel = $tipe === 'ujian' ? 'Ujian' : 'Rapor';
+
+        $ketuaUsers = User::where('role', 'ketua_pkbm')->get();
+        foreach ($ketuaUsers as $ketua) {
+            $this->create(
+                $ketua->id,
+                Notification::TIPE_RAPOR,
+                'Dispensasi ' . $tipeLabel . ' Baru',
+                $pengajuName . ' mengajukan dispensasi ' . strtolower($tipeLabel) . ' untuk ' . $count . ' siswa. Menunggu keputusan Anda.',
+                route('ketua.dispensasi.index'),
+                ['count' => $count, 'tipe' => $tipe]
+            );
+        }
+    }
+
+    /**
+     * Notify pengaju (Bendahara/Admin) when Ketua approves/rejects dispensasi.
+     */
+    public function notifyKeputusanDispensasi($pengajuanList, $status, $catatan = null)
+    {
+        if ($pengajuanList->isEmpty()) return;
+
+        $isApproved = $status === 'disetujui';
+        $statusText = $isApproved ? 'Disetujui' : 'Ditolak';
+
+        // Group by pengaju to avoid duplicate notifications
+        $grouped = $pengajuanList->groupBy('diajukan_oleh');
+
+        foreach ($grouped as $pengajuId => $items) {
+            $pengaju = User::find($pengajuId);
+            if (!$pengaju) continue;
+
+            $tipe = $items->first()->tipe;
+            $tipeLabel = $tipe === 'ujian' ? 'Ujian' : 'Rapor';
+            $count = $items->count();
+
+            $route = match($pengaju->role) {
+                'admin' => route('admin.keuangan.validasi-akses.index'),
+                'bendahara' => route('bendahara.validasi-akses.index'),
+                default => route('notifications.index'),
+            };
+
+            $pesan = 'Dispensasi ' . strtolower($tipeLabel) . ' untuk ' . $count . ' siswa telah ' . strtolower($statusText) . ' oleh Ketua PKBM.';
+            if ($catatan) {
+                $pesan .= ' Catatan: ' . \Str::limit($catatan, 80);
+            }
+
+            $this->create(
+                $pengajuId,
+                Notification::TIPE_RAPOR,
+                'Dispensasi ' . $tipeLabel . ' ' . $statusText,
+                $pesan,
+                $route,
+                ['count' => $count, 'status' => $status, 'tipe' => $tipe]
             );
         }
     }

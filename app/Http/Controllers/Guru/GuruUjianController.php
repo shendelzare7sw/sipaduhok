@@ -676,9 +676,8 @@ class GuruUjianController extends Controller
                 case 'pilihan_ganda_kompleks':
                     $pilihanJawaban = $data['pilihan_jawaban_kompleks'] ?? [];
                     $kunciJawaban = $data['kunci_jawaban_kompleks'] ?? []; // Array
-                    // Normalize for complex to include 'jawaban_benar' inside pilihan structure if needed by frontend
-                    // But model expects keys: options, jawaban_benar separately usually or standard structure.
-                    // Let's stick to standard: pilihan_jawaban = inputs, kunci_jawaban = selected keys
+                    // Store jawaban_benar inside pilihan_jawaban for model checkPilihanGandaKompleks()
+                    $pilihanJawaban['jawaban_benar'] = array_map('strtoupper', $kunciJawaban);
                     break;
 
                 case 'benar_salah':
@@ -711,7 +710,8 @@ class GuruUjianController extends Controller
                 case 'isian_singkat':
                     $jawabanBenarStr = $data['kunci_jawaban_isian'] ?? '';
                     $kunciJawaban = $jawabanBenarStr; // Store simple string in kunci_jawaban col
-                    // Optional: store multiple possibilities in pilihan_jawaban if supported
+                    // Store jawaban_benar inside pilihan_jawaban for model checkIsianSingkat()
+                    $pilihanJawaban = ['jawaban_benar' => [$jawabanBenarStr]];
                     break;
 
                 case 'uraian':
@@ -969,9 +969,13 @@ class GuruUjianController extends Controller
         // Hitung ulang total nilai dari DB
         $totalNilai = $ujianSiswa->jawabanSiswa()->sum('nilai_soal');
 
+        // Normalisasi nilai ke skala 0-100
+        $totalBobot = SoalUjian::where('ujian_id', $ujianId)->sum('bobot_nilai');
+        $nilaiNormalized = $totalBobot > 0 ? round(($totalNilai / $totalBobot) * 100, 1) : 0;
+
         // Update status ujian siswa menjadi 'dinilai'
         $ujianSiswa->update([
-            'nilai' => $totalNilai,
+            'nilai' => $nilaiNormalized,
             'status' => 'dinilai',
         ]);
 
@@ -981,10 +985,11 @@ class GuruUjianController extends Controller
 
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
         $routeName = $isLatihan ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil';
+        $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
 
         return redirect()
             ->route($routeName, [$kelasId, $mapelId, $ujianId])
-            ->with('success', 'Hasil koreksi berhasil disimpan. Nilai akhir: ' . number_format($totalNilai, 1));
+            ->with('success', "Hasil koreksi $tipeLabel berhasil disimpan. Nilai akhir: " . number_format($nilaiNormalized, 1) . '/100');
     }
 
     /**

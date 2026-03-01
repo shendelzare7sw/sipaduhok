@@ -104,6 +104,9 @@ class ValidasiRaporController extends Controller
         $siswa->validasi_rapor_ketua_oleh = auth()->id();
         $siswa->save();
 
+        // Notify Wali Kelas & Bendahara
+        app(\App\Services\NotificationService::class)->notifyKetuaApproveRapor($siswa);
+
         return redirect()->back()->with('success', "Akses rapor untuk {$siswa->nama_lengkap} berhasil divalidasi.");
     }
 
@@ -123,6 +126,9 @@ class ValidasiRaporController extends Controller
         $siswa->validasi_rapor_oleh = null;
         $siswa->save();
 
+        // Notify Wali Kelas
+        app(\App\Services\NotificationService::class)->notifyKetuaBatalkanRapor($siswa);
+
         return redirect()->back()->with('success', "Validasi rapor untuk {$siswa->nama_lengkap} berhasil dibatalkan.");
     }
 
@@ -141,11 +147,13 @@ class ValidasiRaporController extends Controller
             ->get();
 
         $validated = 0;
+        $notifService = app(\App\Services\NotificationService::class);
         foreach ($siswaList as $siswa) {
             $siswa->validasi_rapor_ketua = true;
             $siswa->tanggal_validasi_rapor_ketua = now();
             $siswa->validasi_rapor_ketua_oleh = auth()->id();
             $siswa->save();
+            $notifService->notifyKetuaApproveRapor($siswa);
             $validated++;
         }
 
@@ -197,11 +205,13 @@ class ValidasiRaporController extends Controller
             return redirect()->back()->with('info', 'Tidak ada siswa yang perlu divalidasi.');
         }
 
+        $notifService = app(\App\Services\NotificationService::class);
         foreach ($siswaList as $siswa) {
             $siswa->validasi_rapor_ketua = true;
             $siswa->tanggal_validasi_rapor_ketua = now();
             $siswa->validasi_rapor_ketua_oleh = auth()->id();
             $siswa->save();
+            $notifService->notifyKetuaApproveRapor($siswa);
         }
 
         return redirect()->back()->with('success', "Berhasil memvalidasi {$siswaList->count()} siswa.");
@@ -241,6 +251,9 @@ class ValidasiRaporController extends Controller
             'tanggal_validasi_rapor_ketua' => null,
             'validasi_rapor_ketua_oleh' => null,
         ]);
+
+        // Notify Wali Kelas about revision request
+        app(\App\Services\NotificationService::class)->notifyKetuaMintaRevisi($siswa, $request->catatan_revisi);
 
         return redirect()->back()->with('success', "Catatan revisi berhasil dikirim ke wali kelas untuk rapor {$siswa->nama_lengkap}.");
     }
@@ -317,6 +330,9 @@ class ValidasiRaporController extends Controller
             $approved++;
         }
 
+        // Notify pengaju (bendahara/admin)
+        app(\App\Services\NotificationService::class)->notifyKeputusanDispensasi($pengajuanList, 'disetujui', $request->catatan_ketua);
+
         return redirect()->back()->with('success', "Berhasil menyetujui {$approved} dispensasi.");
     }
 
@@ -331,7 +347,12 @@ class ValidasiRaporController extends Controller
             'catatan_ketua' => 'nullable|string|max:500',
         ]);
 
-        $rejected = 0;
+        // Get the list before updating for notification
+        $pengajuanList = PengajuanRaporKetua::whereIn('id', $request->dispensasi_ids)
+            ->where('status', 'menunggu')
+            ->with('pengaju')
+            ->get();
+
         PengajuanRaporKetua::whereIn('id', $request->dispensasi_ids)
             ->where('status', 'menunggu')
             ->update([
@@ -341,6 +362,9 @@ class ValidasiRaporController extends Controller
                 'tanggal_keputusan' => now(),
             ]);
         $rejected = count($request->dispensasi_ids);
+
+        // Notify pengaju (bendahara/admin)
+        app(\App\Services\NotificationService::class)->notifyKeputusanDispensasi($pengajuanList, 'ditolak', $request->catatan_ketua);
 
         return redirect()->back()->with('success', "Berhasil menolak {$rejected} dispensasi.");
     }

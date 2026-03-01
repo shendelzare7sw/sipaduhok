@@ -80,7 +80,7 @@
                             <tbody>
                                 @forelse($history as $item)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->translatedFormat('d F Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d F Y') }}</td>
                                     <td class="fw-bold">{{ $item->nama_siswa }}</td>
                                     <td>{{ $item->nama_kelas }}</td>
                                     <td>
@@ -96,7 +96,7 @@
                                     <td>{{ $item->penyetuju ?? '-' }}</td>
                                     <td>
                                         @if($item->tanggal_persetujuan)
-                                            {{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->translatedFormat('d F Y') }}
+                                            {{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->locale('id')->translatedFormat('d F Y') }}
                                         @else
                                             -
                                         @endif

@@ -8,6 +8,7 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Kelas;
+use App\Models\Cabang;
 use App\Models\TahunAjaran;
 use Carbon\Carbon;
 
@@ -33,6 +34,7 @@ class LaporanPembayaranController extends Controller
     public function index(Request $request)
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $cabangList = Cabang::where('is_active', true)->orderBy('nama_cabang')->get();
         $kelasList = Kelas::when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
             return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
         })->orderBy('jenjang')->orderBy('nama_kelas')->get();
@@ -41,6 +43,8 @@ class LaporanPembayaranController extends Controller
         $bulan = $request->get('bulan', now()->month);
         $tahun = $request->get('tahun', now()->year);
         $kelasId = $request->get('kelas_id');
+        $cabangId = $request->get('cabang_id');
+        $jenjang = $request->get('jenjang');
         $metode = $request->get('metode');
 
         // Query pembayaran
@@ -53,6 +57,17 @@ class LaporanPembayaranController extends Controller
             $query->whereHas('siswa', function($q) use ($kelasId) {
                 $q->where('kelas_id', $kelasId);
             });
+        } elseif ($jenjang) {
+            $query->whereHas('siswa.kelas', function($q) use ($jenjang, $cabangId) {
+                $q->where('jenjang', $jenjang);
+                if ($cabangId) {
+                    $q->where('cabang_id', $cabangId);
+                }
+            });
+        } elseif ($cabangId) {
+            $query->whereHas('siswa.kelas', function($q) use ($cabangId) {
+                $q->where('cabang_id', $cabangId);
+            });
         }
 
         if ($metode) {
@@ -61,121 +76,71 @@ class LaporanPembayaranController extends Controller
 
         $pembayaran = $query->orderBy('tanggal_bayar', 'desc')->paginate(20)->appends($request->query());
 
-        // Statistik bulanan
-        $totalPembayaran = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
+        // Reusable closure for location-based filtering (cabang → jenjang → kelas)
+        $applyLocationFilter = function($q) use ($kelasId, $jenjang, $cabangId) {
+            if ($kelasId) {
+                $q->whereHas('siswa', function($q2) use ($kelasId) {
                     $q2->where('kelas_id', $kelasId);
                 });
-            })
-            ->when($metode, function($q) use ($metode) {
-                return $q->where('metode_pembayaran', $metode);
-            })
+            } elseif ($jenjang) {
+                $q->whereHas('siswa.kelas', function($q2) use ($jenjang, $cabangId) {
+                    $q2->where('jenjang', $jenjang);
+                    if ($cabangId) $q2->where('cabang_id', $cabangId);
+                });
+            } elseif ($cabangId) {
+                $q->whereHas('siswa.kelas', function($q2) use ($cabangId) {
+                    $q2->where('cabang_id', $cabangId);
+                });
+            }
+            return $q;
+        };
+
+        // Base query builder for approved payments in selected period
+        $baseQuery = function() use ($bulan, $tahun, $applyLocationFilter) {
+            $q = Pembayaran::where('status_validasi', 'disetujui')
+                ->whereMonth('tanggal_bayar', $bulan)
+                ->whereYear('tanggal_bayar', $tahun);
+            return $applyLocationFilter($q);
+        };
+
+        // Statistik bulanan
+        $totalPembayaran = (clone $baseQuery())
+            ->when($metode, fn($q) => $q->where('metode_pembayaran', $metode))
             ->sum('jumlah_bayar');
         
-        $jumlahTransaksi = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->when($metode, function($q) use ($metode) {
-                return $q->where('metode_pembayaran', $metode);
-            })
+        $jumlahTransaksi = (clone $baseQuery())
+            ->when($metode, fn($q) => $q->where('metode_pembayaran', $metode))
             ->count();
         
         // Per metode pembayaran
-        $totalTunai = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->where('metode_pembayaran', 'tunai')
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->sum('jumlah_bayar');
-        
-        $jumlahTunai = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->where('metode_pembayaran', 'tunai')
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->count();
-        
-        $totalTransfer = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->where('metode_pembayaran', 'transfer')
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->sum('jumlah_bayar');
-        
-        $jumlahTransfer = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->where('metode_pembayaran', 'transfer')
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->count();
-        
-        $totalMidtrans = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->where('metode_pembayaran', 'midtrans')
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->sum('jumlah_bayar');
-        
-        $jumlahMidtrans = Pembayaran::where('status_validasi', 'disetujui')
-            ->whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->where('metode_pembayaran', 'midtrans')
-            ->when($kelasId, function($q) use ($kelasId) {
-                return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                    $q2->where('kelas_id', $kelasId);
-                });
-            })
-            ->count();
+        $totalTunai = (clone $baseQuery())->where('metode_pembayaran', 'tunai')->sum('jumlah_bayar');
+        $jumlahTunai = (clone $baseQuery())->where('metode_pembayaran', 'tunai')->count();
+        $totalTransfer = (clone $baseQuery())->where('metode_pembayaran', 'transfer')->sum('jumlah_bayar');
+        $jumlahTransfer = (clone $baseQuery())->where('metode_pembayaran', 'transfer')->count();
+        $totalMidtrans = (clone $baseQuery())->where('metode_pembayaran', 'midtrans')->sum('jumlah_bayar');
+        $jumlahMidtrans = (clone $baseQuery())->where('metode_pembayaran', 'midtrans')->count();
 
         $totalNonTunai = $totalTransfer + $totalMidtrans;
         $jumlahNonTunai = $jumlahTransfer + $jumlahMidtrans;
 
-        // Pembayaran per hari (untuk grafik)
+        // Pembayaran per hari (untuk grafik) - Faster Grouped Query
         $pembayaranPerHari = collect();
         $daysInMonth = Carbon::create($tahun, $bulan, 1)->daysInMonth;
         
+        // Inisialisasi semua hari dengan 0
         for ($day = 1; $day <= $daysInMonth; $day++) {
-            $total = Pembayaran::where('status_validasi', 'disetujui')
-                ->whereDate('tanggal_bayar', Carbon::create($tahun, $bulan, $day))
-                ->when($kelasId, function($q) use ($kelasId) {
-                    return $q->whereHas('siswa', function($q2) use ($kelasId) {
-                        $q2->where('kelas_id', $kelasId);
-                    });
-                })
-                ->when($metode, function($q) use ($metode) {
-                    return $q->where('metode_pembayaran', $metode);
-                })
-                ->sum('jumlah_bayar');
-            
-            $pembayaranPerHari->put($day, $total);
+            $pembayaranPerHari->put($day, 0);
+        }
+
+        // Ambil data dalam satu query
+        $dailyData = (clone $baseQuery())
+            ->when($metode, fn($q) => $q->where('metode_pembayaran', $metode))
+            ->selectRaw('DAY(tanggal_bayar) as day, SUM(jumlah_bayar) as total')
+            ->groupBy('day')
+            ->get();
+
+        foreach ($dailyData as $data) {
+            $pembayaranPerHari->put((int) $data->day, (float) $data->total);
         }
 
         // Generate daftar bulan untuk dropdown
@@ -185,12 +150,17 @@ class LaporanPembayaranController extends Controller
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
 
+        // Daftar jenjang unik untuk filter
+        $jenjangList = $kelasList->pluck('jenjang')->unique()->sort()->values();
+
         return view('bendahara.laporan.index', [
             'pembayaran' => $pembayaran,
             'kelasList' => $kelasList,
+            'cabangList' => $cabangList,
+            'jenjangList' => $jenjangList,
             'bulanList' => $bulanList,
-            'bulan' => (int)$bulan, // Pastikan integer
-            'tahun' => (int)$tahun, // Pastikan integer
+            'bulan' => (int)$bulan,
+            'tahun' => (int)$tahun,
             'totalPembayaran' => $totalPembayaran,
             'jumlahTransaksi' => $jumlahTransaksi,
             'totalTunai' => $totalTunai,
@@ -267,16 +237,24 @@ class LaporanPembayaranController extends Controller
                 ->where('status', 'aktif')
                 ->pluck('id');
 
-            $tagihan = Tagihan::whereIn('siswa_id', $siswaIds)
+            $totalTagihan = Tagihan::whereIn('siswa_id', $siswaIds)
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
-                ->get();
+                ->sum('jumlah');
 
-            $totalTagihan = $tagihan->sum('jumlah');
-            // Sisa tagihan berdasarkan status tagihan (lebih robust)
-            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-            $totalBayar = $totalTagihan - $sisaTagihan;
+            // Hitung total pembayaran yang sudah disetujui (actual payments)
+            $tagihanIds = Tagihan::whereIn('siswa_id', $siswaIds)
+                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                    return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+                })
+                ->pluck('id');
+
+            $totalBayar = Pembayaran::whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            $sisaTagihan = max(0, $totalTagihan - $totalBayar);
 
             $kelas->total_tagihan = $totalTagihan;
             $kelas->total_bayar = $totalBayar;
@@ -324,16 +302,24 @@ class LaporanPembayaranController extends Controller
                 ->where('status', 'aktif')
                 ->pluck('id');
 
-            $tagihan = Tagihan::whereIn('siswa_id', $siswaIds)
+            $totalTagihan = Tagihan::whereIn('siswa_id', $siswaIds)
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
                 })
-                ->get();
+                ->sum('jumlah');
 
-            $totalTagihan = $tagihan->sum('jumlah');
-            // Sisa tagihan berdasarkan status tagihan (lebih robust)
-            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-            $totalBayar = $totalTagihan - $sisaTagihan;
+            // Hitung total pembayaran yang sudah disetujui (actual payments)
+            $tagihanIds = Tagihan::whereIn('siswa_id', $siswaIds)
+                ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                    return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+                })
+                ->pluck('id');
+
+            $totalBayar = Pembayaran::whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            $sisaTagihan = max(0, $totalTagihan - $totalBayar);
 
             $kelas->total_tagihan = $totalTagihan;
             $kelas->total_bayar = $totalBayar;
@@ -381,16 +367,20 @@ class LaporanPembayaranController extends Controller
 
         // Filter hanya siswa yang belum lunas
         $siswaList = $siswaList->filter(function($siswa) use ($tahunAjaranAktif) {
-            $tagihan = Tagihan::where('siswa_id', $siswa->id)
+            $tagihanQuery = Tagihan::where('siswa_id', $siswa->id)
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                })
-                ->get();
+                });
 
-            $totalTagihan = $tagihan->sum('jumlah');
-            // Sisa tagihan berdasarkan status tagihan (lebih robust)
-            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-            $totalBayar = $totalTagihan - $sisaTagihan;
+            $totalTagihan = $tagihanQuery->sum('jumlah');
+
+            // Hitung total pembayaran yang sudah disetujui (actual payments)
+            $tagihanIds = $tagihanQuery->pluck('id');
+            $totalBayar = Pembayaran::whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            $sisaTagihan = max(0, $totalTagihan - $totalBayar);
 
             $siswa->total_tagihan = $totalTagihan;
             $siswa->total_bayar = $totalBayar;
@@ -429,16 +419,20 @@ class LaporanPembayaranController extends Controller
         )->orderBy('nama_lengkap')->get();
 
         $siswaList = $siswaList->filter(function($siswa) use ($tahunAjaranAktif) {
-            $tagihan = Tagihan::where('siswa_id', $siswa->id)
+            $tagihanQuery = Tagihan::where('siswa_id', $siswa->id)
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                })
-                ->get();
+                });
 
-            $totalTagihan = $tagihan->sum('jumlah');
-            // Sisa tagihan berdasarkan status tagihan (lebih robust)
-            $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-            $totalBayar = $totalTagihan - $sisaTagihan;
+            $totalTagihan = $tagihanQuery->sum('jumlah');
+
+            // Hitung total pembayaran yang sudah disetujui (actual payments)
+            $tagihanIds = $tagihanQuery->pluck('id');
+            $totalBayar = Pembayaran::whereIn('tagihan_id', $tagihanIds)
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            $sisaTagihan = max(0, $totalTagihan - $totalBayar);
 
             $siswa->total_tagihan = $totalTagihan;
             $siswa->total_bayar = $totalBayar;

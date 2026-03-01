@@ -8,6 +8,7 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use App\Models\TahunAjaran;
+use App\Services\NotificationService;
 
 class PromotionApprovalController extends Controller
 {
@@ -50,9 +51,43 @@ class PromotionApprovalController extends Controller
                 'updated_at' => now()
             ]);
 
+        app(NotificationService::class)->notifyPromotionDispensasiKeputusan([$id], $status, auth()->user()->name);
+
         return redirect()
             ->route('ketua.promotion.approval.index')
             ->with('success', 'Status pengajuan berhasil diperbarui: ' . $status);
+    }
+
+    public function bulkUpdate(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer',
+            'action' => 'required|in:approve,reject',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $status = $validated['action'] === 'approve' ? 'DISETUJUI' : 'DITOLAK';
+
+        DB::table('izin_naik_kelas_khusus')
+            ->whereIn('id', $validated['ids'])
+            ->where('status', 'MENUNGGU')
+            ->update([
+                'status' => $status,
+                'disetujui_oleh' => auth()->id(),
+                'tanggal_persetujuan' => now(),
+                'catatan_ketua' => $validated['catatan'] ?? null,
+                'updated_at' => now(),
+            ]);
+
+        app(NotificationService::class)->notifyPromotionDispensasiKeputusan($validated['ids'], $status, auth()->user()->name);
+
+        $count = count($validated['ids']);
+        $label = $status === 'DISETUJUI' ? 'disetujui' : 'ditolak';
+
+        return redirect()
+            ->route('ketua.promotion.approval.index')
+            ->with('success', "{$count} pengajuan dispensasi berhasil {$label}");
     }
 
     public function history(Request $request): View

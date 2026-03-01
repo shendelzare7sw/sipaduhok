@@ -119,10 +119,61 @@
             border-radius: 8px;
             margin-bottom: 20px
         }
+
+        @media (max-width: 768px) {
+            .card-header {
+                padding: 16px;
+            }
+
+            .card-body {
+                padding: 16px;
+            }
+
+            .instructions {
+                padding: 14px;
+            }
+
+            .instructions ol {
+                padding-left: 16px;
+                font-size: 13px;
+            }
+
+            .upload-area {
+                padding: 24px 16px;
+            }
+
+            .upload-area div[style*="font-size:48px"] {
+                font-size: 36px !important;
+            }
+
+            .file-selected {
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .file-selected div[style*="display:flex"] {
+                min-width: 0;
+            }
+
+            .file-selected strong {
+                word-break: break-all;
+                font-size: 13px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            div[style*="display:flex;gap:12px"] {
+                flex-direction: column !important;
+            }
+        }
     </style>
 
     <div style="max-width:800px;margin:0 auto;padding:0 1rem">
-        <div style="max-width:800px;margin:0 auto;padding:0 1rem">
             <div class="instructions">
                 <h6><i class="fas fa-info-circle"></i> Petunjuk Import Siswa</h6>
                 <ol>
@@ -173,7 +224,6 @@
                     </form>
                 </div>
             </div>
-        </div>
 
         <script>
             const fi = document.getElementById('fileInput'), fs = document.getElementById('fileSelected'), fn = document.getElementById('fileName'), fz = document.getElementById('fileSize'), sb = document.getElementById('submitBtn');

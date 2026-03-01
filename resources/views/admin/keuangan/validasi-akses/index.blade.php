@@ -211,8 +211,8 @@
                         <button type="button" class="btn btn-success btn-sm shadow-sm fw-bold" onclick="bulkValidasiUjian()">
                             <i class="fas fa-check-double me-1"></i> Validasi Ujian
                         </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm fw-bold" onclick="bulkValidasiRapor()" title="Hanya siswa yang sudah di-approve Ketua yang bisa divalidasi">
-                            <i class="fas fa-lock me-1"></i> Validasi Rapor <small class="opacity-75">(Perlu Ketua)</small>
+                        <button type="button" id="btn-bulk-rapor" class="btn btn-outline-secondary btn-sm shadow-sm fw-bold" onclick="bulkValidasiRapor()" title="Belum ada siswa yang di-approve Ketua">
+                            <i class="fas fa-lock me-1" id="btn-bulk-rapor-icon"></i> Validasi Rapor <small class="opacity-75" id="btn-bulk-rapor-label">(Perlu Ketua)</small>
                         </button>
                         <button type="button" class="btn btn-warning btn-sm shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#dispensasiModal">
                             <i class="fas fa-hand-holding-heart me-1"></i> Ajukan Dispensasi
@@ -549,10 +549,34 @@
             confirmModal.hide();
         });
 
+        function updateBtnValidasiRapor() {
+            const checked = document.querySelectorAll('.siswa-checkbox:checked');
+            const hasEligible = Array.from(checked).some(cb => cb.dataset.ketuaApproved === '1');
+            const btn = document.getElementById('btn-bulk-rapor');
+            const icon = document.getElementById('btn-bulk-rapor-icon');
+            const label = document.getElementById('btn-bulk-rapor-label');
+            if (hasEligible) {
+                btn.className = 'btn btn-info btn-sm shadow-sm fw-bold text-white';
+                btn.title = 'Validasi akses rapor siswa yang sudah di-approve Ketua';
+                icon.className = 'fas fa-file-alt me-1';
+                label.style.display = 'none';
+            } else {
+                btn.className = 'btn btn-outline-secondary btn-sm shadow-sm fw-bold';
+                btn.title = 'Belum ada siswa yang di-approve Ketua';
+                icon.className = 'fas fa-lock me-1';
+                label.style.display = '';
+            }
+        }
+
+        document.querySelectorAll('.siswa-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateBtnValidasiRapor);
+        });
+
         function toggleSelectAll() {
             const selectAll = document.getElementById('select-all');
             const checkboxes = document.querySelectorAll('.siswa-checkbox');
             checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateBtnValidasiRapor();
         }
 
         function bulkValidasiUjian() {

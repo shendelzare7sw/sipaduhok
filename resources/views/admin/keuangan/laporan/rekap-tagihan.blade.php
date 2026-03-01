@@ -106,6 +106,53 @@
             font-family: 'Nunito', sans-serif;
             font-weight: 700;
         }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-number {
+                font-size: 16px;
+            }
+
+            .stat-title {
+                font-size: 11px;
+            }
+
+            .stat-icon-bg {
+                font-size: 40px;
+                right: 12px;
+            }
+
+            .table thead th {
+                font-size: 10px;
+                padding: 8px 6px;
+            }
+
+            .table td {
+                font-size: 12px;
+                padding: 8px 6px;
+            }
+
+            .currency-font {
+                font-size: 12px;
+            }
+
+            .card-body.py-3 .row {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .card-body.py-3 .col-auto {
+                text-align: left;
+            }
+
+            .card-body.py-3 .btn {
+                width: 100%;
+            }
+        }
     </style>
 @endsection
 

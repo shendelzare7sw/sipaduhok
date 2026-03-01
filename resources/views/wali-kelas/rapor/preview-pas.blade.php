@@ -18,7 +18,7 @@
             max-width: 900px;
             margin: 0 auto;
             background: white;
-            padding: 40px;
+            padding: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             position: relative;
         }
@@ -99,6 +99,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            table-layout: fixed;
         }
 
         table.grade-table th,
@@ -238,17 +239,28 @@
         /* Print Styles */
         @media print {
             @page {
-                margin: 0.5cm;
+                margin: 10mm;
+                size: A4 portrait;
             }
 
             body {
                 padding: 0;
                 background: white;
+                font-size: 10pt;
             }
 
             .rapor-wrapper {
                 box-shadow: none;
-                padding: 20px;
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            table.grade-table {
+                font-size: 9pt;
+            }
+
+            table th, table td {
+                padding: 3px 4px;
             }
 
             .btn-print {

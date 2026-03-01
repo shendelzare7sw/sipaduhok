@@ -41,14 +41,16 @@ class SoalUjianImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
                 break;
 
             case 'pilihan_ganda_kompleks':
+                $kunciJawabanArr = array_map('strtoupper', array_map('trim', explode(',', $row['jawaban_benar'] ?? '')));
                 $pilihanJawaban = [
                     'A' => $row['pilihan_a'] ?? '',
                     'B' => $row['pilihan_b'] ?? '',
                     'C' => $row['pilihan_c'] ?? '',
                     'D' => $row['pilihan_d'] ?? '',
                     'E' => $row['pilihan_e'] ?? '',
+                    'jawaban_benar' => $kunciJawabanArr,
                 ];
-                $kunciJawaban = array_map('trim', explode(',', $row['jawaban_benar'] ?? ''));
+                $kunciJawaban = $kunciJawabanArr;
                 break;
 
             case 'benar_salah':
@@ -64,6 +66,7 @@ class SoalUjianImport implements ToModel, WithHeadingRow, WithValidation, SkipsE
             case 'isian_singkat':
                 $kunciJawaban = trim($row['jawaban_benar'] ?? '');
                 $jawabanBenar = $kunciJawaban;
+                $pilihanJawaban = ['jawaban_benar' => [$kunciJawaban]];
                 break;
 
             case 'uraian':

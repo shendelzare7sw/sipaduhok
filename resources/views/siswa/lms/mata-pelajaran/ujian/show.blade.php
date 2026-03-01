@@ -78,7 +78,7 @@
                         @if($ujian->tampilkan_nilai)
                             @if($ujianSiswa->nilai !== null)
                                 <div class="my-4">
-                                    <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai, 1) }}</h1>
+                                    <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai, 1) }}/100</h1>
                                     <span class="text-muted">Nilai Akhir</span>
                                 </div>
                             @else
@@ -430,15 +430,53 @@
                                                     </label>
                                                 @endforeach
                                             @endif
+
+                                        @elseif($soal->tipe_soal === 'pilihan_ganda_kompleks')
+                                            @php
+                                                $pilihan = is_array($soal->pilihan_jawaban)
+                                                    ? $soal->pilihan_jawaban
+                                                    : json_decode($soal->pilihan_jawaban, true);
+                                            @endphp
+                                            <small class="text-muted mb-2 d-block"><i class="fas fa-info-circle me-1"></i>Pilih semua jawaban yang benar</small>
+                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="">
+                                            @if(is_array($pilihan))
+                                                @foreach($pilihan as $key => $value)
+                                                    @if($key !== 'jawaban_benar')
+                                                        <label class="option-item">
+                                                            <input type="checkbox" class="kompleks-cb" data-soal-id="{{ $soal->id }}" data-index="{{ $index }}" value="{{ $key }}"
+                                                                onchange="updateKompleks({{ $soal->id }}, {{ $index }})" style="margin-right: 10px; margin-top: 3px; width: 18px; height: 18px;">
+                                                            <span><strong>{{ $key }}.</strong> {{ $value }}</span>
+                                                        </label>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+
                                         @elseif($soal->tipe_soal === 'benar_salah')
-                                            <label class="option-item">
-                                                <input type="radio" name="jawaban[{{ $soal->id }}]" value="benar" onchange="selectOption({{ $index }}, 'benar')">
-                                                <span><strong>BENAR</strong></span>
-                                            </label>
-                                            <label class="option-item">
-                                                <input type="radio" name="jawaban[{{ $soal->id }}]" value="salah" onchange="selectOption({{ $index }}, 'salah')">
-                                                <span><strong>SALAH</strong></span>
-                                            </label>
+                                            @php
+                                                $pilihanData = is_array($soal->pilihan_jawaban)
+                                                    ? $soal->pilihan_jawaban
+                                                    : json_decode($soal->pilihan_jawaban, true);
+                                                $pernyataanList = $pilihanData['pernyataan'] ?? [];
+                                            @endphp
+                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="">
+                                            @foreach($pernyataanList as $pIdx => $item)
+                                                <div class="mb-3 p-3 border rounded bg-light">
+                                                    <p class="mb-2 fw-bold">{{ $item['text'] ?? $item['pernyataan'] ?? '' }}</p>
+                                                    <div class="d-flex gap-3">
+                                                        <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
+                                                            <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="true"
+                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;">
+                                                            <span><strong>BENAR</strong></span>
+                                                        </label>
+                                                        <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
+                                                            <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="false"
+                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;">
+                                                            <span><strong>SALAH</strong></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+
                                         @else
                                             <textarea name="jawaban[{{ $soal->id }}]" rows="6" class="form-control"
                                                 placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, 'text')"></textarea>
@@ -653,6 +691,29 @@
             doubtState[currentIndex] = !doubtState[currentIndex];
             updateNavColor(currentIndex);
             updateUI();
+        }
+
+        function updateKompleks(soalId, index) {
+            const checkboxes = document.querySelectorAll(`.kompleks-cb[data-soal-id="${soalId}"]:checked`);
+            const selected = Array.from(checkboxes).map(cb => cb.value);
+            document.getElementById(`kompleks-hidden-${soalId}`).value = JSON.stringify(selected);
+            selectOption(index, selected.length > 0 ? 'checked' : '');
+        }
+
+        function updateBenarSalah(soalId, totalPernyataan, index) {
+            const answers = [];
+            let answeredCount = 0;
+            for (let i = 0; i < totalPernyataan; i++) {
+                const radio = document.querySelector(`input[name="bs_${soalId}_${i}"]:checked`);
+                if (radio) {
+                    answers.push(radio.value === 'true');
+                    answeredCount++;
+                } else {
+                    answers.push(null);
+                }
+            }
+            document.getElementById(`bs-hidden-${soalId}`).value = JSON.stringify(answers);
+            selectOption(index, answeredCount > 0 ? 'answered' : '');
         }
 
         function updateNavColor(index) {

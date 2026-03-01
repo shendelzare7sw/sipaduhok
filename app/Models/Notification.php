@@ -115,6 +115,21 @@ class Notification extends Model
         return $query->whereDate('created_at', today());
     }
 
+    /**
+     * Normalize link to relative path so old absolute URLs
+     * (e.g. http://sipaduhok.test/...) work correctly in production.
+     */
+    public function getLinkAttribute($value)
+    {
+        if ($value && filter_var($value, FILTER_VALIDATE_URL)) {
+            $path  = parse_url($value, PHP_URL_PATH) ?? '/';
+            $query = parse_url($value, PHP_URL_QUERY);
+            return $path . ($query ? '?' . $query : '');
+        }
+
+        return $value;
+    }
+
     // Helpers
     public function markAsRead()
     {

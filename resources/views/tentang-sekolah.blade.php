@@ -235,6 +235,7 @@
 
     <x-footer></x-footer>
 
+    @vite(['resources/js/navbar.js'])
 </body>
 
 </html>
