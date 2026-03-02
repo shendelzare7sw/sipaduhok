@@ -377,7 +377,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
 
-
     
     function filterGuruByCabang() {
                 const kelasSelect = document.getElementById('kelasSelect');
@@ -614,7 +613,7 @@ function updateSelectedKelasUI(data) {
     const container = document.querySelector('.kelas-display');
     const textPlaceholder = document.getElementById('selectedKelasText');
     const chipsContainer = document.getElementById('selectedKelasChips');
-    
+
     if (data.length === 0) {
         textPlaceholder.style.display = 'block';
         chipsContainer.style.display = 'none';
@@ -623,7 +622,7 @@ function updateSelectedKelasUI(data) {
         textPlaceholder.style.display = 'none';
         chipsContainer.style.display = 'flex';
         chipsContainer.innerHTML = '';
-        
+
         data.forEach(item => {
             const chip = document.createElement('div');
             chip.className = 'badge bg-primary d-flex align-items-center p-2';

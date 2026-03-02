@@ -111,6 +111,30 @@ class MataPelajaranController extends Controller
         }
     }
 
+    public function print(Request $request)
+    {
+        $jenjangFilter = $request->input('jenjang');
+
+        if ($jenjangFilter && !is_array($jenjangFilter)) {
+            $jenjangFilter = [$jenjangFilter];
+        }
+
+        $query = MataPelajaran::query()->orderBy('jenjang')->orderBy('nama_mapel');
+
+        if (!empty($jenjangFilter)) {
+            $query->whereIn('jenjang', $jenjangFilter);
+        }
+
+        $mataPelajaranList = $query->get();
+
+        $stats = MataPelajaran::selectRaw('jenjang, count(*) as total')
+            ->groupBy('jenjang')
+            ->orderBy('jenjang')
+            ->pluck('total', 'jenjang');
+
+        return view('waka.mata-pelajaran.print', compact('mataPelajaranList', 'stats', 'jenjangFilter'));
+    }
+
     public function import()
     {
         return view('waka.mata-pelajaran.import');

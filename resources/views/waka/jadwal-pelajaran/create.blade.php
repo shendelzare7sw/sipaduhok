@@ -659,6 +659,7 @@
             const selectedOptions = Array.from(kelasSelect.selectedOptions);
 
             if (selectedOptions.length === 0) {
+                // No classes selected - show single mode, reset
                 singleSection.style.display = '';
                 multiContainer.style.display = 'none';
                 isMultiJenjang.value = '0';
@@ -681,6 +682,7 @@
             const jenjangKeys = Object.keys(jenjangMap);
 
             if (jenjangKeys.length <= 1) {
+                // Single jenjang - use normal single mapel dropdown
                 singleSection.style.display = '';
                 multiContainer.style.display = 'none';
                 isMultiJenjang.value = '0';
@@ -688,6 +690,7 @@
                 mapelSelect.setAttribute('name', 'mata_pelajaran_id');
                 multiSections.innerHTML = '';
 
+                // Filter mapel options by this jenjang
                 const jenjang = jenjangKeys[0] || null;
                 mapelSelect.value = '';
                 Array.from(mapelSelect.options).forEach(option => {
@@ -696,6 +699,7 @@
                     option.style.display = (jenjang && mapelJenjang !== jenjang) ? 'none' : 'block';
                 });
             } else {
+                // Multi jenjang - show per-jenjang dropdowns
                 singleSection.style.display = 'none';
                 multiContainer.style.display = '';
                 isMultiJenjang.value = '1';

@@ -356,6 +356,7 @@
 
         /* ── Mobile Responsive: Table Card Layout ── */
         @media (max-width: 767.98px) {
+            /* Header action buttons: scroll horizontal on mobile */
             .btn-scroll-mobile {
                 overflow-x: auto;
                 flex-wrap: nowrap !important;
@@ -365,6 +366,7 @@
             .btn-scroll-mobile::-webkit-scrollbar { height: 3px; }
             .btn-scroll-mobile::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 
+            /* Filter section: stack on mobile */
             .filter-section {
                 flex-direction: column !important;
                 align-items: stretch !important;
@@ -374,6 +376,7 @@
                 width: 100% !important;
             }
 
+            /* Table → Card per row */
             .table-card-mobile thead { display: none; }
             .table-card-mobile tbody tr {
                 display: block;
@@ -456,6 +459,8 @@
                 justify-content: flex-end;
                 padding: 10px 14px;
             }
+            /* Kelas chips wrap on mobile */
+            .kelas-chip { white-space: nowrap; }
             /* Mobile select-all bar */
             .mobile-select-bar { display: flex; align-items: center; gap: 8px; }
             /* Bulk action bar wraps nicely on mobile */
@@ -532,14 +537,14 @@
                 <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#duplicateModal">
                     <i class="fas fa-copy me-1"></i> Duplikasi Jadwal
                 </button>
-                <a href="{{ route('waka.jadwal-pelajaran.export-pdf', request()->query()) }}" class="btn btn-danger btn-sm"
-                    target="_blank">
+                <button type="button" class="btn btn-danger btn-sm"
+                    onclick="window.open('{{ route('waka.jadwal-pelajaran.export-pdf', request()->query()) }}', '_blank')">
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
-                </a>
-                <a href="{{ route('waka.jadwal-pelajaran.export-excel', request()->query()) }}"
-                    class="btn btn-success btn-sm">
+                </button>
+                <button type="button" class="btn btn-success btn-sm"
+                    onclick="window.location.href='{{ route('waka.jadwal-pelajaran.export-excel', request()->query()) }}'">
                     <i class="fas fa-file-excel me-1"></i> Export Excel
-                </a>
+                </button>
                 <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
                     <i class="fas fa-print me-1"></i> Cetak Jadwal Kelas
                 </button>
@@ -1267,7 +1272,7 @@
             // Create and submit form
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ route("waka.jadwal-pelajaran.bulk-update-status") }}';
+            form.action = '{{ route("admin.jadwal-pelajaran.bulk-update-status") }}';
 
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -1344,10 +1349,10 @@
             const tahunAjaranParam = "?tahun_ajaran_id={{ request('tahun_ajaran_id', $currentTahunAjaran->id) }}";
 
             if (type === 'excel') {
-                // Endpoint Export Excel: /waka/jadwal-pelajaran/kelas/{id}/export-excel
+                // Endpoint Export Excel: /admin/jadwal-pelajaran/kelas/{id}/export-excel
                 url = "{{ url('waka/jadwal-pelajaran/kelas') }}/" + kelasId + "/export-excel" + tahunAjaranParam;
             } else {
-                // Endpoint Export PDF: /waka/jadwal-pelajaran/kelas/{id}/print
+                // Endpoint Export PDF: /admin/jadwal-pelajaran/kelas/{id}/print
                 url = "{{ url('waka/jadwal-pelajaran/kelas') }}/" + kelasId + "/print" + tahunAjaranParam;
             }
             

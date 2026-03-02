@@ -244,13 +244,13 @@ class KetuaController extends Controller
         $query = Siswa::with(['cabang', 'kelas.tahunAjaran']);
 
         if ($request->filled('kelas_id'))
-            $query->where('kelas_id', $request->kelas_id);
+            $query->where('siswa.kelas_id', $request->kelas_id);
         if ($request->filled('cabang_id'))
-            $query->where('cabang_id', $request->cabang_id);
+            $query->where('siswa.cabang_id', $request->cabang_id);
         if ($request->filled('jenjang'))
             $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
 
-        $query->where('status', $request->status ?? 'aktif');
+        $query->where('siswa.status', $request->status ?? 'aktif');
 
         $sortBy = $request->sort_by ?? 'nama';
         if ($sortBy == 'kelas') {
@@ -260,9 +260,9 @@ class KetuaController extends Controller
                 ->orderBy('siswa.nama_lengkap')
                 ->select('siswa.*');
         } elseif ($sortBy == 'cabang') {
-            $query->orderBy('cabang_id')->orderBy('nama_lengkap');
+            $query->orderBy('siswa.cabang_id')->orderBy('siswa.nama_lengkap');
         } else {
-            $query->orderBy('nama_lengkap');
+            $query->orderBy('siswa.nama_lengkap');
         }
 
         $siswaList = $query->get();

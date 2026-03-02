@@ -7,6 +7,7 @@ use App\Models\TahunAjaran;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\TenagaPendidik;
+use App\Models\GuruPengajarKelas;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -18,6 +19,7 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
     private $importedCount = 0;
     private $kelasList;
     private $mapelList;
+    private $mapelModels;
     private $guruList;
     private $tahunAjaranId;
 
@@ -30,17 +32,19 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
     public function __construct($tahunAjaranId = null)
     {
         $this->tahunAjaranId = $tahunAjaranId ?? TahunAjaran::where('is_active', true)->first()?->id;
-        
+
         // Load classes with cabang info
-        $this->kelasList = Kelas::with('cabang')->get()->map(function($kelas) {
+        $this->kelasList = Kelas::with('cabang')->get()->map(function ($kelas) {
             return [
                 'id' => $kelas->id,
                 'nama_kelas' => strtolower(trim($kelas->nama_kelas)),
                 'nama_cabang' => strtolower(trim($kelas->cabang->nama_cabang ?? '')),
+                'jenjang' => $kelas->jenjang,
             ];
         });
 
         $this->mapelList = MataPelajaran::pluck('id', 'nama_mapel')->toArray();
+        $this->mapelModels = MataPelajaran::all()->keyBy('id');
         $this->guruList = TenagaPendidik::pluck('id', 'nama_lengkap')->toArray();
     }
 
@@ -69,24 +73,26 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
             $namaCabang = isset($row['nama_cabang']) ? trim($row['nama_cabang']) : null;
             $kelasNames = array_map('trim', explode(',', $row['nama_kelas']));
             $kelasIds = [];
+            $kelasModels = [];
             $missingClassesInRow = [];
 
             foreach ($kelasNames as $kName) {
-                $foundId = $this->findKelas($kName, $namaCabang);
-                if ($foundId) {
-                    $kelasIds[] = $foundId;
+                $found = $this->findKelas($kName, $namaCabang);
+                if ($found) {
+                    $kelasIds[] = $found['id'];
+                    $kelasModels[] = $found;
                 } else {
                     $missingClassesInRow[] = $kName;
                 }
             }
-            
+
             if (!empty($missingClassesInRow)) {
                 $cabangInfo = $namaCabang ? " (Cabang: {$namaCabang})" : "";
                 foreach ($missingClassesInRow as $missing) {
-                     $fullName = $missing . $cabangInfo;
-                     if (!in_array($fullName, $this->missingKelas)) {
-                         $this->missingKelas[] = $fullName;
-                     }
+                    $fullName = $missing . $cabangInfo;
+                    if (!in_array($fullName, $this->missingKelas)) {
+                        $this->missingKelas[] = $fullName;
+                    }
                 }
                 $this->warnings[] = "Baris {$rowNumber}: Kelas tidak ditemukan: " . implode(', ', $missingClassesInRow) . $cabangInfo;
                 $this->skippedCount++;
@@ -94,18 +100,6 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
             }
 
             if (empty($kelasIds)) {
-                $this->skippedCount++;
-                continue;
-            }
-
-            // Lookup mata pelajaran
-            $mapelId = $this->findMapel($row['nama_mapel']);
-            if (!$mapelId) {
-                $mapelName = trim($row['nama_mapel']);
-                if (!in_array($mapelName, $this->missingMapel)) {
-                    $this->missingMapel[] = $mapelName;
-                }
-                $this->warnings[] = "Baris {$rowNumber}: Mata Pelajaran '{$mapelName}' tidak ditemukan";
                 $this->skippedCount++;
                 continue;
             }
@@ -119,53 +113,109 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
                     if (!in_array($guruName, $this->missingGuru)) {
                         $this->missingGuru[] = $guruName;
                     }
-                    // Don't skip - just note the warning
                     $this->warnings[] = "Baris {$rowNumber}: Guru '{$guruName}' tidak ditemukan, jadwal dibuat dengan status kosong";
                 }
             }
 
-            // Check duplicate: check if ANY of the classes already has this schedule
-            // Logic: Find schedules with same TA, Hari, Jam Mulai, that share ANY class from $kelasIds
-            $exists = JadwalPelajaran::where('tahun_ajaran_id', $this->tahunAjaranId)
-                ->where('hari', $hari)
-                ->where('jam_mulai', $row['jam_mulai'])
-                ->whereHas('kelas', function($q) use ($kelasIds) {
-                    $q->whereIn('kelas.id', $kelasIds);
-                })
-                ->exists();
+            // Group kelas by jenjang for multi-jenjang support
+            $kelasGrouped = collect($kelasModels)->groupBy('jenjang');
 
-            if ($exists) {
-                // Determine which class caused duplicate for better warning?
-                // For now just skip as per original logic
-                $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: Jadwal duplikat untuk kelas/waktu tersebut.";
-                continue;
-            }
+            foreach ($kelasGrouped as $jenjang => $kelasGroup) {
+                $groupKelasIds = $kelasGroup->pluck('id')->toArray();
 
-            try {
-                // Create Jadwal (without single kelas_id)
-                $jadwal = JadwalPelajaran::create([
-                    'tahun_ajaran_id' => $this->tahunAjaranId,
-                    'kelas_id' => $kelasIds[0] ?? null, // Backward compatibility
-                    'mata_pelajaran_id' => $mapelId,
-                    'guru_id' => $guruId,
-                    'hari' => $hari,
-                    'jam_mulai' => $row['jam_mulai'],
-                    'jam_selesai' => $row['jam_selesai'],
-                    'status' => $guruId ? 'aktif' : 'kosong',
-                    'keterangan' => $row['keterangan'] ?? null,
-                    'updated_by' => Auth::id(),
-                ]);
+                // Find appropriate mapel for this jenjang group
+                $mapelId = $this->findMapelForJenjang($row['nama_mapel'], $jenjang);
+                if (!$mapelId) {
+                    $mapelName = trim($row['nama_mapel']);
+                    if (!in_array($mapelName, $this->missingMapel)) {
+                        $this->missingMapel[] = $mapelName;
+                    }
+                    $this->warnings[] = "Baris {$rowNumber}: Mata Pelajaran '{$mapelName}' tidak ditemukan" .
+                        (count($kelasGrouped) > 1 ? " untuk jenjang {$jenjang}" : "");
+                    $this->skippedCount++;
+                    continue;
+                }
 
-                // Attach to pivot table
-                $jadwal->kelas()->sync($kelasIds);
+                // Check duplicate: check if ANY of the group classes already has this schedule
+                $exists = JadwalPelajaran::where('tahun_ajaran_id', $this->tahunAjaranId)
+                    ->where('hari', $hari)
+                    ->where('jam_mulai', $row['jam_mulai'])
+                    ->where('mata_pelajaran_id', $mapelId)
+                    ->whereHas('kelas', function ($q) use ($groupKelasIds) {
+                        $q->whereIn('kelas.id', $groupKelasIds);
+                    })
+                    ->exists();
 
-                $this->importedCount++;
-            } catch (\Exception $e) {
-                $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
+                if ($exists) {
+                    $this->skippedCount++;
+                    $kelasNames = $kelasGroup->pluck('nama_kelas')->map(fn($n) => ucfirst($n))->join(', ');
+                    $this->warnings[] = "Baris {$rowNumber}: Jadwal duplikat untuk kelas {$kelasNames} pada waktu tersebut.";
+                    continue;
+                }
+
+                try {
+                    $jadwal = JadwalPelajaran::create([
+                        'tahun_ajaran_id' => $this->tahunAjaranId,
+                        'kelas_id' => $groupKelasIds[0],
+                        'mata_pelajaran_id' => $mapelId,
+                        'guru_id' => $guruId,
+                        'hari' => $hari,
+                        'jam_mulai' => $row['jam_mulai'],
+                        'jam_selesai' => $row['jam_selesai'],
+                        'status' => $guruId ? 'aktif' : 'kosong',
+                        'keterangan' => $row['keterangan'] ?? null,
+                        'updated_by' => Auth::id(),
+                    ]);
+
+                    // Attach all classes in this jenjang group
+                    $jadwal->kelas()->sync($groupKelasIds);
+
+                    // Auto-sync guru pengajar
+                    if ($guruId) {
+                        foreach ($groupKelasIds as $kelasId) {
+                            GuruPengajarKelas::firstOrCreate([
+                                'tenaga_pendidik_id' => $guruId,
+                                'kelas_id' => $kelasId,
+                                'mata_pelajaran_id' => $mapelId,
+                            ]);
+                        }
+                    }
+
+                    $this->importedCount++;
+                } catch (\Exception $e) {
+                    $this->skippedCount++;
+                    $this->warnings[] = "Baris {$rowNumber}: Error - " . $e->getMessage();
+                }
             }
         }
+    }
+
+    /**
+     * Find mapel that matches the name AND is compatible with the given jenjang.
+     * Priority: exact jenjang match > universal (no jenjang) > any match
+     */
+    private function findMapelForJenjang($name, $jenjang)
+    {
+        $name = trim($name);
+        $nameLower = strtolower($name);
+
+        $exactJenjangMatch = null;
+        $universalMatch = null;
+        $anyMatch = null;
+
+        foreach ($this->mapelModels as $mapel) {
+            if (strtolower(trim($mapel->nama_mapel)) === $nameLower) {
+                $anyMatch = $mapel->id;
+
+                if (!$mapel->jenjang) {
+                    $universalMatch = $mapel->id;
+                } elseif (strcasecmp($mapel->jenjang, $jenjang) === 0) {
+                    $exactJenjangMatch = $mapel->id;
+                }
+            }
+        }
+
+        return $exactJenjangMatch ?? $universalMatch ?? $anyMatch;
     }
 
     private function findKelas($name, $cabangName = null)
@@ -175,31 +225,13 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
 
         foreach ($this->kelasList as $kelas) {
             if ($kelas['nama_kelas'] === $name) {
-                // If cabang specified, match it. If not, maybe verify if only 1 exists?
-                // For now, if cabang specified, MUST match.
                 if ($cabangName) {
                     if ($kelas['nama_cabang'] === $cabangName) {
-                        return $kelas['id'];
+                        return $kelas;
                     }
                 } else {
-                    // If no branch specified, return first match (backward compatibility/risk of wrong branch)
-                    // Ideal: User must specify branch if duplicates.
-                    return $kelas['id'];
+                    return $kelas;
                 }
-            }
-        }
-        return null;
-    }
-
-    private function findMapel($name)
-    {
-        $name = trim($name);
-        if (isset($this->mapelList[$name])) {
-            return $this->mapelList[$name];
-        }
-        foreach ($this->mapelList as $n => $id) {
-            if (strtolower(trim($n)) === strtolower($name)) {
-                return $id;
             }
         }
         return null;

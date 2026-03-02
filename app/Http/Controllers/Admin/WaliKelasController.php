@@ -235,13 +235,16 @@ class WaliKelasController extends Controller
         ];
 
         // Get other wali kelas options for reassignment (hanya role wali_kelas)
-        $waliKelasOptions = TenagaPendidik::whereHas('user.roleRelation', function ($q) {
-            $q->where('name', 'wali_kelas');
-        })->whereHas('user', function ($q) {
-            $q->where('is_active', true);
-        })->orderBy('nama_lengkap')->get();
+        $waliKelasOptions = TenagaPendidik::with(['user.cabang', 'waliKelasAssignments.kelas'])
+            ->whereHas('user.roleRelation', function ($q) {
+                $q->where('name', 'wali_kelas');
+            })->whereHas('user', function ($q) {
+                $q->where('is_active', true);
+            })->orderBy('nama_lengkap')->get();
 
-        return view('admin.wali-kelas.show', compact('kelas', 'stats', 'waliKelasOptions'));
+        $cabangs = \App\Models\Cabang::orderBy('nama_cabang')->get();
+
+        return view('admin.wali-kelas.show', compact('kelas', 'stats', 'waliKelasOptions', 'cabangs'));
     }
 
     /**

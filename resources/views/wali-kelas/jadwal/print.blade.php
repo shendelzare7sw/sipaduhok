@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadwal Pelajaran - {{ $kelas->nama_kelas }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
             margin: 0;
@@ -166,11 +167,21 @@
             padding-top: 5px;
         }
 
+        .print-actions {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+            padding: 10px 0;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 16px;
+        }
+
         .print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             background: #165fac;
             color: white;
             border: none;
@@ -179,47 +190,82 @@
             font-size: 14px;
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 9999;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .print-button:hover {
             background: #0f4a8a;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .back-button {
+            padding: 10px 20px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-button:hover {
+            background: #4b5563;
+            color: white;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 576px) {
+            body { padding: 10px; }
+            .header { margin-bottom: 16px; padding-bottom: 12px; }
+            .header h1 { font-size: 18px; }
+            .header-school { padding: 0 0 0 60px; flex-direction: row; }
+            .school-logo-img { height: 50px; }
+            .school-name { font-size: 13px; }
+            .school-sub { font-size: 10px; }
+            .school-address { font-size: 9px; }
+            .info-box { flex-direction: column; gap: 8px; padding: 10px; }
+            .info-box div { flex: unset; }
+            .day-header { font-size: 14px; padding: 8px 12px; }
+            table th, table td { padding: 6px 4px; font-size: 11px; }
+            table th:first-child { width: 30px !important; }
+            table th:nth-child(2) { width: 70px !important; }
+            .day-section { margin-bottom: 16px; }
+            .footer { margin-top: 20px; }
+            .signature-box { min-width: 150px; font-size: 12px; }
+            .signature-line { margin-top: 40px; }
+            .print-actions { flex-direction: row; gap: 6px; }
+            .print-button, .back-button { padding: 8px 14px; font-size: 13px; flex: 1; justify-content: center; }
         }
 
         @media print {
-            body {
-                padding: 10px;
-            }
-
-            .day-section {
-                page-break-inside: avoid;
-            }
-
-            /* Hide print button and any navigation elements */
-            .no-print, .print-button {
-                display: none !important;
-            }
-
-            /* Hide any layout elements */
+            body { padding: 10px; }
+            .day-section { page-break-inside: avoid; }
+            .no-print, .print-actions { display: none !important; }
             nav, header, aside, .navbar, .sidebar, .topbar, .footer-app,
             .app-menu, .layout-wrapper, .layout-container, .content-wrapper {
                 display: none !important;
             }
-
-            @page {
-                margin: 15mm;
-            }
+            @page { margin: 15mm; }
         }
     </style>
 </head>
 <body>
-    <!-- Tombol Print Manual -->
-    <button class="print-button no-print" onclick="window.print()">
-        <i class="fas fa-print"></i> Cetak / Simpan PDF
-    </button>
+    <!-- Tombol Print & Back -->
+    <div class="print-actions no-print">
+        <a href="javascript:history.back()" class="back-button">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+        <button class="print-button" onclick="window.print()">
+            <i class="bi bi-printer"></i> Cetak / Simpan PDF
+        </button>
+    </div>
 
     <div class="header">
         @php

@@ -179,6 +179,20 @@
             color: #d1d5db;
             margin-bottom: 16px;
         }
+
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 768px) {
+            .card-header { flex-direction: column !important; align-items: stretch !important; }
+            .card-header h5 { font-size: 16px; margin-bottom: 12px; }
+            .filter-group, .card-header form { flex-direction: column !important; width: 100%; }
+            .filter-group input, .filter-group select, .card-header form input, .card-header form select { width: 100% !important; }
+            .card-body { padding: 16px; }
+            .table th, .table td { padding: 10px 8px; font-size: 12px; }
+            .progress-circle { width: 48px; height: 48px; font-size: 12px; }
+            .stat-mini-inline { gap: 2px; }
+            .stat-mini-row { padding: 4px 8px; }
+        }
     </style>
 @endsection
 

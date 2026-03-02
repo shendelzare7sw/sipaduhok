@@ -349,6 +349,28 @@
             color: #92400e;
         }
 
+        .parent-checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .parent-checkbox-grid .form-group { margin-bottom: 0; }
+
+        .parent-checkbox-grid label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 10px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
         @media (max-width: 767.98px) {
             .header-card {
                 padding: 20px;
@@ -366,6 +388,9 @@
             .header-actions .btn {
                 flex: 1;
                 justify-content: center;
+            }
+            .parent-checkbox-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -773,27 +798,23 @@
                                     </div>
 
                                     {{-- Checkboxes --}}
-                                    <div
-                                        style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label
-                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                    <div class="parent-checkbox-grid">
+                                        <div class="form-group">
+                                            <label>
                                                 <input type="checkbox" name="is_primary" value="1">
                                                 <span style="font-size: 13px;"><i class="fas fa-star"
                                                         style="color: #f59e0b;"></i> Penanggung Jawab Utama</span>
                                             </label>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label
-                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                        <div class="form-group">
+                                            <label>
                                                 <input type="checkbox" name="is_financial_responsible" value="1" checked>
                                                 <span style="font-size: 13px;"><i class="fas fa-wallet"
                                                         style="color: #10b981;"></i> Penanggung Jawab Keuangan</span>
                                             </label>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label
-                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                        <div class="form-group">
+                                            <label>
                                                 <input type="checkbox" name="can_access_academic" value="1" checked>
                                                 <span style="font-size: 13px;"><i class="fas fa-book"
                                                         style="color: #3b82f6;"></i> Akses Data Akademik</span>
@@ -890,27 +911,23 @@
                                     </div>
 
                                     {{-- Checkboxes --}}
-                                    <div
-                                        style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label
-                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                    <div class="parent-checkbox-grid">
+                                        <div class="form-group">
+                                            <label>
                                                 <input type="checkbox" name="is_primary" value="1">
                                                 <span style="font-size: 13px;"><i class="fas fa-star"
                                                         style="color: #f59e0b;"></i> Penanggung Jawab Utama</span>
                                             </label>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label
-                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                        <div class="form-group">
+                                            <label>
                                                 <input type="checkbox" name="is_financial_responsible" value="1" checked>
                                                 <span style="font-size: 13px;"><i class="fas fa-wallet"
                                                         style="color: #10b981;"></i> Penanggung Jawab Keuangan</span>
                                             </label>
                                         </div>
-                                        <div class="form-group" style="margin-bottom: 0;">
-                                            <label
-                                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+                                        <div class="form-group">
+                                            <label>
                                                 <input type="checkbox" name="can_access_academic" value="1" checked>
                                                 <span style="font-size: 13px;"><i class="fas fa-book"
                                                         style="color: #3b82f6;"></i> Akses Data Akademik</span>

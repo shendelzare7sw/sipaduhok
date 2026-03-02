@@ -167,6 +167,42 @@
             font-size: 12px;
             font-weight: 600;
         }
+
+        /* Mobile Responsive */
+        @media (max-width: 576px) {
+            .stat-card { padding: 16px; }
+            .stat-number { font-size: 22px; }
+            .stat-title { font-size: 10px; }
+            .stat-icon-bg { font-size: 40px; right: 10px; }
+
+            .catatan-item { padding: 14px; }
+            .catatan-item .d-flex.justify-content-between.align-items-start {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .catatan-title { font-size: 15px; }
+            .catatan-meta { flex-wrap: wrap; gap: 8px; font-size: 11px; }
+
+            .badge-pill-custom {
+                font-size: 9px;
+                padding: 3px 10px;
+                white-space: nowrap;
+                display: inline-block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .catatan-item .d-flex.justify-content-between.align-items-center {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start !important;
+            }
+
+            .read-box { font-size: 11px; padding: 5px 10px; }
+
+            .card-header.d-flex { flex-direction: column; gap: 10px; align-items: flex-start !important; }
+        }
     </style>
 @endsection
 

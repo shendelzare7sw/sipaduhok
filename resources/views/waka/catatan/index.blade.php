@@ -8,6 +8,28 @@
     @include('waka.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    <style>
+        @media (max-width: 576px) {
+            .card-header.d-flex {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start !important;
+            }
+            .card-header .btn { width: 100%; }
+            .card-body .d-flex.justify-content-between.align-items-start {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .card-body .d-flex.gap-3 {
+                flex-wrap: wrap;
+                gap: 6px !important;
+            }
+            .card-title { font-size: 15px; }
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
 

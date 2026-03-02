@@ -9,6 +9,22 @@
 @endsection
 
 @section('content')
+    <style>
+        @media (max-width: 767.98px) {
+            .table-card-mobile thead { display: none; }
+            .table-card-mobile tbody tr {
+                display: block; background: #fff; border-radius: 10px;
+                box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 14px; margin-bottom: 10px;
+            }
+            .table-card-mobile tbody td {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 6px 0; border: none; font-size: 13px;
+            }
+            .table-card-mobile tbody td::before {
+                content: attr(data-label); font-weight: 600; color: #6b7280; margin-right: 12px; white-space: nowrap;
+            }
+        }
+    </style>
 <div class="row">
     <div class="col-xl-4">
         {{-- Info Card --}}
@@ -142,7 +158,7 @@
             <div class="card-body">
                 @if($mataPelajaran->jadwalPelajaran->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-card-mobile">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -156,22 +172,22 @@
                         <tbody>
                             @foreach($mataPelajaran->jadwalPelajaran->sortBy('hari') as $index => $jadwal)
                             <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>
+                                <td data-label="No">{{ $index + 1 }}</td>
+                                <td data-label="Kelas">
                                     <strong>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</strong>
                                     <br>
                                     <small class="text-muted">{{ $jadwal->kelas->map(fn($k) => $k->cabang->nama_cabang ?? '-')->unique()->join(', ') }}</small>
                                 </td>
-                                <td>
+                                <td data-label="Hari">
                                     <span class="badge bg-primary">{{ $jadwal->hari }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Waktu">
                                     <small class="font-monospace">
                                         {{ \Carbon\Carbon::parse($jadwal->jam_mulai)->format('H:i') }} -
                                         {{ \Carbon\Carbon::parse($jadwal->jam_selesai)->format('H:i') }}
                                     </small>
                                 </td>
-                                <td>
+                                <td data-label="Guru">
                                     @if($jadwal->guru)
                                         <i class="fas fa-user text-primary me-1"></i>
                                         {{ $jadwal->guru->nama_lengkap }}
@@ -179,7 +195,7 @@
                                         <span class="text-muted">Belum ditentukan</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     @if($jadwal->status == 'aktif')
                                         <span class="badge bg-success">Aktif</span>
                                     @elseif($jadwal->status == 'kosong')

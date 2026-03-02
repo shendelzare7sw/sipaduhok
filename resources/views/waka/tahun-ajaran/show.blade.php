@@ -38,6 +38,11 @@
 .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 12px; }
 .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 12px; }
 
+@media (max-width: 767.98px) {
+    .col-md-8, .col-md-4 { flex: 0 0 100%; max-width: 100%; }
+    .semester-grid { grid-template-columns: 1fr !important; }
+}
+
 /* Utilities */
 .d-flex { display: flex !important; }
 .justify-content-between { justify-content: space-between !important; }
@@ -294,6 +299,58 @@
                 </div>
             </div>
 
+            {{-- Card: Periode Semester --}}
+            <div class="card">
+                <div class="card-header" style="background: #f0fdf4; border-bottom: 1px solid #bbf7d0;">
+                    <h5 class="mb-0" style="color: #166534;"><i class="fas fa-calendar-alt text-success" style="margin-right: 8px;"></i> Periode Semester</h5>
+                </div>
+                <div class="card-body">
+                    @php
+                        $periods = $tahunAjaran->getSemesterPeriods();
+                        $currentSemester = \App\Models\TahunAjaran::getCurrentSemester();
+                    @endphp
+                    
+                    <div class="semester-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        {{-- Semester Ganjil --}}
+                        <div style="background: #fef3c7; border-radius: 8px; padding: 16px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fas fa-sun" style="color: #d97706;"></i>
+                                <strong style="color: #92400e;">Semester Ganjil</strong>
+                                @if($tahunAjaran->is_active && $currentSemester == 'ganjil')
+                                    <span class="badge bg-success" style="font-size: 10px;">Aktif</span>
+                                @endif
+                            </div>
+                            <div style="font-size: 13px; color: #78350f;">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ $periods['ganjil']['start']->format('d M Y') }} - {{ $periods['ganjil']['end']->format('d M Y') }}
+                            </div>
+                        </div>
+                        
+                        {{-- Semester Genap --}}
+                        <div style="background: #dbeafe; border-radius: 8px; padding: 16px; border-left: 4px solid #3b82f6;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <i class="fas fa-snowflake" style="color: #2563eb;"></i>
+                                <strong style="color: #1e40af;">Semester Genap</strong>
+                                @if($tahunAjaran->is_active && $currentSemester == 'genap')
+                                    <span class="badge bg-success" style="font-size: 10px;">Aktif</span>
+                                @endif
+                            </div>
+                            <div style="font-size: 13px; color: #1e3a8a;">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ $periods['genap']['start']->format('d M Y') }} - {{ $periods['genap']['end']->format('d M Y') }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if(!$tahunAjaran->tanggal_mulai_genap)
+                        <div style="margin-top: 12px; font-size: 12px; color: #6b7280; background: #f3f4f6; padding: 8px 12px; border-radius: 6px;">
+                            <i class="fas fa-info-circle me-1"></i> Periode semester menggunakan perhitungan otomatis (Juli-Des = Ganjil, Jan-Jun = Genap).
+                            <a href="{{ route('waka.tahun-ajaran.edit', $tahunAjaran->id) }}" style="color: #16a34a;">Atur periode kustom →</a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             {{-- Card 2: Data Kelas --}}
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -393,7 +450,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                <form action="{{ route('waka.tahun-ajaran.toggle-active', $tahunAjaran->id) }}" method="POST">
+                <form action="{{ route('waka.tahun-ajaran.activate', $tahunAjaran->id) }}" method="POST">
                     @csrf
                     <button type="submit" class="btn btn-success">Ya, Aktifkan</button>
                 </form>

@@ -72,6 +72,10 @@
     padding: 12px; /* Adjusted padding for nested grid */
 }
 
+@media (max-width: 767.98px) {
+    .col-md-8, .col-md-4, .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+}
+
 /* Utilities */
 .d-flex { display: flex !important; }
 .justify-content-between { justify-content: space-between !important; }

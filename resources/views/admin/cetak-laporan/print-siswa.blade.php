@@ -1,12 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <title>Daftar Siswa {{ $kelas ? '- ' . $kelas->nama_kelas : '' }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.4; }
-        .container { max-width: 210mm; margin: 0 auto; padding: 10mm; }
+        .container { max-width: 100%; margin: 0 auto; padding: 10mm; }
         .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 15px; }
         .header h1 { font-size: 14pt; font-weight: bold; margin-bottom: 3px; }
         .header h2 { font-size: 12pt; margin-bottom: 8px; }
@@ -27,17 +29,17 @@
         .footer-right { text-align: center; }
         .signature-line { margin-top: 50px; border-bottom: 1px solid #000; width: 180px; margin-left: auto; margin-right: auto; }
         .print-date { font-size: 9pt; color: #666; }
-        .btn-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; }
+        .btn-actions { position: sticky; top: 0; z-index: 100; background: #f8f9fa; padding: 10px 15px; display: flex; justify-content: flex-end; gap: 8px; border-bottom: 1px solid #e5e7eb; }
         .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; text-decoration: none; }
         .btn-print { background: #3b82f6; color: white; }
         .btn-back { background: #6b7280; color: white; }
-        @media print { .no-print { display: none !important; } .container { padding: 0; } }
+        @media (max-width: 768px) { body { font-size: 9pt; } .container { padding: 5mm; } table { font-size: 8pt; } table th, table td { padding: 3px 5px; } .header h1 { font-size: 12pt; } .header h2 { font-size: 10pt; } .btn-actions { padding: 8px 10px; } .btn { padding: 8px 14px; font-size: 12px; } .footer { flex-direction: column; gap: 15px; } } @media print { .no-print { display: none !important; } .container { padding: 0; } }
     </style>
 </head>
 <body>
     <div class="btn-actions no-print">
-        <a href="{{ route('admin.cetak-laporan.index') }}" class="btn btn-back">← Kembali</a>
-        <button onclick="window.print()" class="btn btn-print">🖨️ Cetak</button>
+        <a href="{{ route('admin.cetak-laporan.index') }}" class="btn btn-back"><i class="bi bi-arrow-left"></i> Kembali</a>
+        <button onclick="window.print()" class="btn btn-print"><i class="bi bi-printer"></i> Cetak</button>
     </div>
 
     <div class="container">

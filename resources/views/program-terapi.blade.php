@@ -29,6 +29,16 @@
         $alurHeader = $alurContent['header'] ?? [];
         $alurItems = $alurContent['items'] ?? [];
 
+        // Fallback defaults when DB items are empty
+        if (empty($alurItems)) {
+            $alurItems = [
+                ['title' => 'Konsultasi Awal', 'description' => 'Diskusi dengan orang tua mengenai kondisi dan kebutuhan anak'],
+                ['title' => 'Asesmen', 'description' => 'Evaluasi menyeluruh untuk menentukan jenis terapi yang tepat'],
+                ['title' => 'Sesi Terapi', 'description' => 'Pelaksanaan terapi sesuai program yang telah dirancang'],
+                ['title' => 'Evaluasi & Laporan', 'description' => 'Monitoring berkala dan laporan perkembangan untuk orang tua'],
+            ];
+        }
+
         // Color mapping
         $colorMap = [
             'orange' => ['border' => '#d45930', 'bg' => '#d45930', 'text' => '#d45930'],
@@ -201,21 +211,32 @@
     </section>
 
     <!-- Alur Terapi -->
-    <section class="py-20 bg-gradient-to-r from-[#165fac] to-[#287f3b]">
+    <section class="py-16 md:py-20 bg-gradient-to-r from-[#165fac] to-[#287f3b]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">{{ $alurHeader['title'] ?? 'Alur Layanan Terapi' }}</h2>
-                <p class="text-white/80 max-w-2xl mx-auto">{{ $alurHeader['description'] ?? 'Proses terapi yang terstruktur untuk hasil optimal' }}</p>
+            <div class="text-center mb-10 md:mb-16">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 md:mb-4">{{ $alurHeader['title'] ?? 'Alur Layanan Terapi' }}</h2>
+                <p class="text-white/80 max-w-2xl mx-auto text-sm sm:text-base">{{ $alurHeader['description'] ?? 'Proses terapi yang terstruktur untuk hasil optimal' }}</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
                 @foreach($alurItems as $index => $step)
-                <div class="text-center">
-                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-[#165fac]">{{ $index + 1 }}</span>
+                <div class="relative text-center group">
+                    {{-- Connecting arrow (hidden on mobile, visible on lg+) --}}
+                    @if($index < count($alurItems) - 1)
+                    <div class="hidden lg:block absolute top-10 left-[60%] w-[80%] z-0">
+                        <svg class="w-full h-6 text-white/30" fill="none" viewBox="0 0 200 24" preserveAspectRatio="none">
+                            <path d="M0 12 H180 L170 4 M180 12 L170 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">{{ $step['title'] ?? '' }}</h3>
-                    <p class="text-white/80 text-sm">{{ $step['description'] ?? '' }}</p>
+                    @endif
+
+                    {{-- Step circle --}}
+                    <div class="relative z-10 w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <span class="text-xl sm:text-2xl font-bold text-[#165fac]">{{ $index + 1 }}</span>
+                    </div>
+
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">{{ $step['title'] ?? '' }}</h3>
+                    <p class="text-white/80 text-xs sm:text-sm leading-relaxed px-2">{{ $step['description'] ?? '' }}</p>
                 </div>
                 @endforeach
             </div>

@@ -105,30 +105,26 @@
 
         .progress-bar-fill {
             height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .progress-text {
+            position: absolute;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: 600;
-            color: white;
-            transition: width 0.3s ease;
+            color: #374151;
+            z-index: 1;
         }
 
-        .progress-100 {
-            background: #10b981;
-        }
-
-        .progress-75 {
-            background: #3b82f6;
-        }
-
-        .progress-50 {
-            background: #f59e0b;
-        }
-
-        .progress-25 {
-            background: #ef4444;
-        }
+        .progress-100 { background: #10b981; }
+        .progress-75 { background: #3b82f6; }
+        .progress-50 { background: #f59e0b; }
+        .progress-25 { background: #ef4444; }
 
         .empty-state {
             text-align: center;
@@ -140,6 +136,18 @@
             font-size: 48px;
             color: #d1d5db;
             margin-bottom: 16px;
+        }
+
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 768px) {
+            .card-header { flex-direction: column !important; align-items: stretch !important; }
+            .card-header h5 { font-size: 16px; margin-bottom: 12px; }
+            .filter-group, .card-header form { flex-direction: column !important; width: 100%; }
+            .filter-group input, .filter-group select, .card-header form input, .card-header form select { width: 100% !important; }
+            .card-body { padding: 16px; }
+            .table th, .table td { padding: 10px 8px; font-size: 12px; }
+            .progress-bar-container { height: 20px; }
         }
     </style>
 @endsection
@@ -198,9 +206,8 @@
                                                 @elseif($wali->progress_rapor >= 75) progress-75
                                                 @elseif($wali->progress_rapor >= 50) progress-50
                                                 @else progress-25
-                                                @endif" style="width: {{ $wali->progress_rapor }}%">
-                                                {{ number_format($wali->progress_rapor, 1) }}%
-                                            </div>
+                                                @endif" style="width: {{ $wali->progress_rapor }}%"></div>
+                                            <span class="progress-text">{{ number_format($wali->progress_rapor, 1) }}%</span>
                                         </div>
                                         <small style="color: #6b7280; margin-top: 4px; display: block;">
                                             @if($wali->progress_rapor == 100)

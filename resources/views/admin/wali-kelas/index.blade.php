@@ -501,7 +501,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                     <div class="stat-number">{{ $stats['totalKelas'] }}</div>
                     <div class="stat-desc">Kelas terdaftar</div>
                 </div>
-                <div class="stat-icon-bg"><i class="fas fa-books"></i></div>
+                <div class="stat-icon-bg"><i class="fas fa-chalkboard"></i></div>
             </div>
         </div>
         

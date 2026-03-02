@@ -537,14 +537,14 @@
                 <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#duplicateModal">
                     <i class="fas fa-copy me-1"></i> Duplikasi Jadwal
                 </button>
-                <a href="{{ route('admin.jadwal-pelajaran.export-pdf', request()->query()) }}" class="btn btn-danger btn-sm"
-                    target="_blank">
+                <button type="button" class="btn btn-danger btn-sm"
+                    onclick="window.open('{{ route('admin.jadwal-pelajaran.export-pdf', request()->query()) }}', '_blank')">
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
-                </a>
-                <a href="{{ route('admin.jadwal-pelajaran.export-excel', request()->query()) }}"
-                    class="btn btn-success btn-sm">
+                </button>
+                <button type="button" class="btn btn-success btn-sm"
+                    onclick="window.location.href='{{ route('admin.jadwal-pelajaran.export-excel', request()->query()) }}'">
                     <i class="fas fa-file-excel me-1"></i> Export Excel
-                </a>
+                </button>
                 <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
                     <i class="fas fa-print me-1"></i> Cetak Jadwal Kelas
                 </button>

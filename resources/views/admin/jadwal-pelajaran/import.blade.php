@@ -138,14 +138,13 @@
                     <h6><i class="fas fa-info-circle"></i> Petunjuk Import Jadwal Pelajaran</h6>
                     <ol>
                         <li>Pilih tahun ajaran target untuk import</li>
-                        <li>Download template Excel dan hapus baris contoh sebelum mengisi data</li>
-                        <li><strong>WAJIB:</strong> nama_kelas, nama_mapel, hari, jam_mulai, jam_selesai harus diisi</li>
-                        <li><strong>OPSIONAL:</strong> nama_guru (jika kosong → jadwal dibuat dengan status "kosong")</li>
-                        <li><span style="color:#dc2626">Jika kelas/mapel tidak ditemukan di database → baris akan
-                                dilewati</span>
-                        </li>
-                        <li><span style="color:#d97706">Jika guru tidak ditemukan → jadwal tetap dibuat dengan status
-                                "kosong"</span></li>
+                        <li>Download template Excel dan <strong>hapus baris contoh</strong> (berwarna kuning) sebelum mengisi data</li>
+                        <li><strong>WAJIB:</strong> nama_cabang, nama_kelas, nama_mapel, hari, jam_mulai, jam_selesai</li>
+                        <li><strong>OPSIONAL:</strong> nama_guru (jika kosong → jadwal dibuat dengan status "kosong"), keterangan</li>
+                        <li><strong>MULTI-KELAS:</strong> Pisahkan nama kelas dengan koma untuk kelas gabungan (contoh: <code>X IPA 1, X IPA 2</code>)</li>
+                        <li><strong>BEDA JENJANG:</strong> Jika kelas gabungan beda jenjang, sistem otomatis memisah jadwal per jenjang dengan mapel yang sesuai</li>
+                        <li><span style="color:#dc2626">Jika kelas/mapel tidak ditemukan di database → baris akan dilewati</span></li>
+                        <li><span style="color:#d97706">Jika guru tidak ditemukan → jadwal tetap dibuat dengan status "kosong"</span></li>
                     </ol>
                 </div>
 

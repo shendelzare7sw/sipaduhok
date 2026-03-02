@@ -135,6 +135,21 @@
             color: #d1d5db;
             margin-bottom: 16px;
         }
+
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        @media (max-width: 768px) {
+            .card-header { flex-direction: column !important; align-items: stretch !important; }
+            .card-header h5 { font-size: 16px; margin-bottom: 12px; }
+            .filter-group, .card-header form { flex-direction: column !important; width: 100%; }
+            .filter-group input, .filter-group select, .card-header form input, .card-header form select { width: 100% !important; }
+            .card-body { padding: 16px; }
+            .card-header { padding: 16px; }
+            .table th, .table td { padding: 10px 8px; font-size: 12px; }
+            .stats-mini { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-mini-value { font-size: 24px; }
+            .stat-mini-label { font-size: 11px; }
+        }
     </style>
 @endsection
 
@@ -180,7 +195,7 @@
                         <option value="ketua_pkbm" {{ request('role_tp') == 'ketua_pkbm' ? 'selected' : '' }}>Ketua PKBM</option>
                         <option value="sekretaris" {{ request('role_tp') == 'sekretaris' ? 'selected' : '' }}>Sekretaris</option>
                         <option value="bendahara" {{ request('role_tp') == 'bendahara' ? 'selected' : '' }}>Bendahara</option>
-                        <option value="waka" {{ request('role_tp') == 'waka' ? 'selected' : '' }}>Waka</option>
+                        <option value="wakil_kepala_sekolah" {{ request('role_tp') == 'wakil_kepala_sekolah' ? 'selected' : '' }}>Wakil Kepala Sekolah</option>
                         <option value="wali_kelas" {{ request('role_tp') == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
                         <option value="guru_pengajar" {{ request('role_tp') == 'guru_pengajar' ? 'selected' : '' }}>Guru Pengajar</option>
                     </select>

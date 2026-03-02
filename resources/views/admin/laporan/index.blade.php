@@ -205,28 +205,27 @@
                 <h4 class="report-card-title">Daftar Siswa</h4>
             </div>
             <div class="report-card-body">
-                <p class="report-card-desc">Cetak daftar siswa berdasarkan kelas, cabang, atau keseluruhan. Dapat diurutkan per abjad, kelas, atau lokasi.</p>
-                <form action="{{ route('admin.laporan.siswa') }}" method="GET" target="_blank" class="report-form">
-                    <div class="form-group">
-                        <label>Kelas</label>
-                        <select name="kelas_id">
-                            <option value="">Semua Kelas</option>
-                            @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
-                                <optgroup label="{{ $jenjang }}">
-                                    @foreach($kelasGroup as $k)
-                                        <option value="{{ $k->id }}">{{ $k->nama_kelas }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
-                        </select>
-                    </div>
+                <p class="report-card-desc">Cetak daftar siswa berdasarkan cabang, jenjang, kelas. Dapat diurutkan per abjad, kelas, atau lokasi.</p>
+                <form action="{{ route('admin.laporan.siswa') }}" method="GET" target="_blank" class="report-form" id="formSiswa">
                     <div class="form-group">
                         <label>Cabang</label>
-                        <select name="cabang_id">
+                        <select name="cabang_id" id="siswa_cabang">
                             <option value="">Semua Cabang</option>
                             @foreach($cabangs as $c)
                                 <option value="{{ $c->id }}">{{ $c->nama_cabang }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group" id="siswa_jenjang_group" style="display:none;">
+                        <label>Jenjang</label>
+                        <select name="jenjang" id="siswa_jenjang">
+                            <option value="">Semua Jenjang</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="siswa_kelas_group" style="display:none;">
+                        <label>Kelas</label>
+                        <select name="kelas_id" id="siswa_kelas">
+                            <option value="">Semua Kelas</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -418,4 +417,58 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    @php
+        $kelasJson = $kelasList->map(function($k) {
+            return ['id' => $k->id, 'nama_kelas' => $k->nama_kelas, 'jenjang' => $k->jenjang, 'cabang_id' => $k->cabang_id];
+        })->values();
+    @endphp
+    const kelasData = @json($kelasJson);
+
+    const cabangSelect = document.getElementById('siswa_cabang');
+    const jenjangGroup = document.getElementById('siswa_jenjang_group');
+    const jenjangSelect = document.getElementById('siswa_jenjang');
+    const kelasGroup = document.getElementById('siswa_kelas_group');
+    const kelasSelect = document.getElementById('siswa_kelas');
+
+    cabangSelect.addEventListener('change', function() {
+        const cabangId = this.value;
+        jenjangSelect.innerHTML = '<option value="">Semua Jenjang</option>';
+        kelasSelect.innerHTML = '<option value="">Semua Kelas</option>';
+
+        if (cabangId) {
+            const jenjangs = [...new Set(kelasData.filter(k => k.cabang_id == cabangId).map(k => k.jenjang))];
+            jenjangs.sort();
+            jenjangs.forEach(j => {
+                jenjangSelect.innerHTML += `<option value="${j}">${j}</option>`;
+            });
+            jenjangGroup.style.display = 'flex';
+        } else {
+            jenjangGroup.style.display = 'none';
+            kelasGroup.style.display = 'none';
+        }
+    });
+
+    jenjangSelect.addEventListener('change', function() {
+        const cabangId = cabangSelect.value;
+        const jenjang = this.value;
+        kelasSelect.innerHTML = '<option value="">Semua Kelas</option>';
+
+        if (jenjang) {
+            const filtered = kelasData.filter(k => k.cabang_id == cabangId && k.jenjang == jenjang);
+            filtered.forEach(k => {
+                kelasSelect.innerHTML += `<option value="${k.id}">${k.nama_kelas}</option>`;
+            });
+            kelasGroup.style.display = 'flex';
+        } else {
+            kelasGroup.style.display = 'none';
+        }
+    });
+});
+</script>
+@endpush
 @endsection
+

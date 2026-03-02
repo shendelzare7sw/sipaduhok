@@ -194,17 +194,32 @@
             display: none !important;
         }
 
-        .menu-inner {
-            position: relative !important;
-            z-index: 1 !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-        }
-
-        /* Ensure sidebar menu stays on top and visible */
+        /* ==========================================
+           SIDEBAR SCROLL FIX - Flexbox layout
+           Makes menu-inner fill remaining height after
+           app-brand header so it can scroll properly
+           on all screen sizes.
+           ========================================== */
         .layout-menu {
             z-index: 1045 !important;
             background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .layout-menu .app-brand {
+            flex-shrink: 0; /* Brand header never shrinks */
+        }
+
+        .menu-inner {
+            position: relative !important;
+            z-index: 1 !important;
+            flex: 1 1 auto !important;        /* Fill remaining height */
+            min-height: 0 !important;          /* Critical: allow flex child to shrink & scroll */
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding-bottom: 2rem !important;   /* Space so last item isn't cut off */
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
         }
 
         /* Menu Header Styling */
@@ -358,11 +373,13 @@
 
             /* Hide menu off-screen by default */
             .layout-menu {
-                display: block !important;        /* Cegah display:none dari Sneat JS */
+                display: flex !important;         /* Flex column for scroll fix */
+                flex-direction: column !important;
                 position: fixed !important;
                 top: 0;
                 left: 0;
                 height: 100vh;
+                height: 100dvh;                   /* Dynamic viewport height (avoids mobile browser chrome) */
                 width: 260px;
                 z-index: 1100;
                 transform: translate3d(-100%, 0, 0) !important;
@@ -434,6 +451,24 @@
 
             .layout-menu-toggle-sidebar i {
                 color: #fff !important;
+            }
+
+            /* === MOBILE SIDEBAR SCROLL FIX === */
+            .layout-menu .menu-inner {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch;
+                max-height: none !important;
+                height: auto !important;
+                padding-bottom: 3rem !important;
+            }
+
+            /* Ensure app-brand doesn't grow */
+            .layout-menu .app-brand {
+                flex-shrink: 0 !important;
+                flex-grow: 0 !important;
             }
 
             /* Page title responsive */

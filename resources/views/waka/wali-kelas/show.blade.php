@@ -496,7 +496,7 @@
         <div class="header-content">
             <div class="header-top">
                 <div class="header-info">
-                    <div class="header-icon"><i class="fas fa-books"></i></div>
+                    <div class="header-icon"><i class="fas fa-chalkboard"></i></div>
                     <div class="header-text">
                         <h1>Kelas {{ $kelas->nama_kelas }}</h1>
                         <div class="header-meta">
@@ -565,23 +565,57 @@
                 @endif
 
                 <div class="assign-form">
-                    <form action="{{ route('waka.wali-kelas.assign', $kelas) }}" method="POST">
-                        @csrf
-                        <label for="wali_kelas_id">
-                            {{ $kelas->waliKelas ? 'Ganti Wali Kelas' : 'Tunjuk Wali Kelas' }}
-                        </label>
-                        <select name="wali_kelas_id" id="wali_kelas_id">
-                            <option value="">-- Pilih Wali Kelas --</option>
-                            @foreach($waliKelasOptions as $wk)
-                                <option value="{{ $wk->id }}" {{ $kelas->wali_kelas_id == $wk->id ? 'selected' : '' }}>
-                                    {{ $wk->nama_lengkap }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Simpan
-                        </button>
-                    </form>
+                    <button type="button" id="toggleAssignBtn" onclick="toggleAssignForm()" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-user-edit"></i> {{ $kelas->waliKelas ? 'Ganti Wali Kelas' : 'Tunjuk Wali Kelas' }}
+                    </button>
+
+                    <div id="assignFormPanel" style="display: none; margin-top: 16px;">
+                        <form action="{{ route('waka.wali-kelas.assign', $kelas) }}" method="POST" id="assignForm">
+                            @csrf
+
+                            <div style="margin-bottom: 12px;">
+                                <div style="position: relative;">
+                                    <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9ca3af;"></i>
+                                    <input type="text" id="searchWali" placeholder="Cari nama guru..." style="width: 100%; padding: 10px 12px 10px 36px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px;">
+                                </div>
+                            </div>
+
+                            <div id="waliList" style="max-height: 250px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px;">
+                                @foreach($waliKelasOptions as $wk)
+                                    @php $assignedKelas = $wk->waliKelasAssignments ?? collect(); @endphp
+                                    <label class="wali-option"
+                                           data-name="{{ strtolower($wk->nama_lengkap) }}"
+                                           data-cabang="{{ $wk->user->cabang_id ?? '' }}"
+                                           style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; margin-bottom: 2px; transition: background .15s;">
+                                        <input type="radio" name="wali_kelas_id" value="{{ $wk->id }}" style="cursor: pointer; flex-shrink: 0;"
+                                            {{ $kelas->wali_kelas_id == $wk->id ? 'checked' : '' }}>
+                                        <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; flex-shrink: 0;">
+                                            {{ strtoupper(substr($wk->nama_lengkap, 0, 2)) }}
+                                        </div>
+                                        <div style="flex: 1; min-width: 0;">
+                                            <div style="font-weight: 600; font-size: 13px; color: #111827;">{{ $wk->nama_lengkap }}</div>
+                                            <div style="font-size: 11px; color: #6b7280;">{{ $wk->user->cabang->nama_cabang ?? '-' }}</div>
+                                            @if($assignedKelas->count() > 0)
+                                                <div style="font-size: 10px; color: #6366f1; margin-top: 2px;">
+                                                    <i class="fas fa-chalkboard-teacher"></i>
+                                                    {{ $assignedKelas->map(fn($a) => $a->kelas->nama_kelas ?? '')->filter()->join(', ') }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                                <button type="button" onclick="toggleAssignForm()" class="btn" style="flex: 1; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db;">
+                                    <i class="fas fa-times"></i> Batal
+                                </button>
+                                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                    <i class="fas fa-save"></i> Simpan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -669,4 +703,42 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleAssignForm() {
+    const panel = document.getElementById('assignFormPanel');
+    const btn = document.getElementById('toggleAssignBtn');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        btn.style.display = 'none';
+    } else {
+        panel.style.display = 'none';
+        btn.style.display = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchWali');
+    if (!searchInput) return;
+
+    function filterWali() {
+        const term = searchInput.value.toLowerCase();
+        document.querySelectorAll('.wali-option').forEach(el => {
+            const name = el.getAttribute('data-name');
+            el.style.display = (!term || name.includes(term)) ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterWali);
+
+    // Highlight selected option
+    document.querySelectorAll('.wali-option').forEach(label => {
+        label.addEventListener('click', function() {
+            document.querySelectorAll('.wali-option').forEach(l => l.style.background = '');
+            this.style.background = '#f5f3ff';
+        });
+        if (label.querySelector('input:checked')) label.style.background = '#f5f3ff';
+    });
+});
+</script>
 @endsection

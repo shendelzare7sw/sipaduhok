@@ -152,6 +152,28 @@
     color: #d1d5db;
     margin-bottom: 16px;
 }
+
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 768px) {
+    .card-header { flex-direction: column !important; align-items: stretch !important; }
+    .card-header h5 { font-size: 16px; margin-bottom: 12px; }
+    .filter-group { flex-direction: column !important; width: 100%; }
+    .filter-group input, .filter-group select { width: 100% !important; }
+    .card-body { padding: 16px; }
+    .table th, .table td { padding: 10px 6px; font-size: 12px; white-space: nowrap; }
+    .status-box { padding: 5px 6px; font-size: 10px; white-space: normal; word-break: break-word; }
+}
+
+@media (max-width: 480px) {
+    .card-body { padding: 10px; }
+    .table th, .table td { padding: 8px 4px; font-size: 11px; }
+    .table th { font-size: 10px; letter-spacing: 0; }
+    .table td strong { font-size: 13px !important; }
+    .status-box { padding: 4px 5px; font-size: 9px; }
+    .progress-mini { width: 60px; }
+    .badge { font-size: 10px; padding: 3px 6px; }
+}
 </style>
 @endsection
 

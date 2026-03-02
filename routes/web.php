@@ -664,6 +664,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('mata-pelajaran/import', [WakaMataPelajaranController::class, 'importStore'])->name('mata-pelajaran.import.store');
         Route::get('mata-pelajaran/template', [WakaMataPelajaranController::class, 'downloadTemplate'])->name('mata-pelajaran.template');
         Route::get('mata-pelajaran/suggest-kode', [WakaMataPelajaranController::class, 'suggestKodeMapel'])->name('mata-pelajaran.suggest-kode');
+        Route::get('mata-pelajaran/print', [WakaMataPelajaranController::class, 'print'])->name('mata-pelajaran.print');
         Route::resource('mata-pelajaran', WakaMataPelajaranController::class);
 
         // Kelas

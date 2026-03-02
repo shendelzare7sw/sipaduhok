@@ -206,7 +206,7 @@
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                    <form action="{{ route('waka.tahun-ajaran.toggle-active', $tahunAjaran->id) }}" method="POST" style="display: inline;">
+                    <form action="{{ route('waka.tahun-ajaran.activate', $tahunAjaran->id) }}" method="POST" style="display: inline;">
                         @csrf
                         <button type="submit" class="btn btn-success btn-sm px-4 shadow">Ya, Aktifkan</button>
                     </form>

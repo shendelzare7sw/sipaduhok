@@ -38,6 +38,11 @@
 .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 12px; }
 .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 12px; }
 
+@media (max-width: 767.98px) {
+    .col-md-8, .col-md-4 { flex: 0 0 100%; max-width: 100%; }
+    .semester-grid { grid-template-columns: 1fr !important; }
+}
+
 /* Utilities */
 .d-flex { display: flex !important; }
 .justify-content-between { justify-content: space-between !important; }
@@ -305,7 +310,7 @@
                         $currentSemester = \App\Models\TahunAjaran::getCurrentSemester();
                     @endphp
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="semester-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         {{-- Semester Ganjil --}}
                         <div style="background: #fef3c7; border-radius: 8px; padding: 16px; border-left: 4px solid #f59e0b;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">

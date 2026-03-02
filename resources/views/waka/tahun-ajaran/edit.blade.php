@@ -39,6 +39,10 @@
 .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 12px; }
 .col-md-6 { flex: 0 0 50%; max-width: 50%; padding: 12px; }
 
+@media (max-width: 767.98px) {
+    .col-md-8, .col-md-4, .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+}
+
 /* Form Elements */
 .form-label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: #374151; }
 .form-control {
@@ -141,6 +145,35 @@
                                         <small style="color: #dc3545;">{{ $message }}</small>
                                     @enderror
                                 </div>
+                            </div>
+                        </div>
+
+                        <hr style="border-top: 1px solid #e5e7eb; margin: 16px 0;">
+
+                        {{-- Pengaturan Semester --}}
+                        <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <i class="fas fa-calendar-alt" style="color: #16a34a;"></i>
+                                <strong style="color: #166534;">Pengaturan Periode Semester</strong>
+                            </div>
+                            <p class="text-muted" style="font-size: 13px; margin-bottom: 12px;">
+                                Atur kapan semester genap dimulai. Semester ganjil: Tanggal Mulai → sebelum tanggal ini. Semester genap: Tanggal ini → Tanggal Selesai.
+                            </p>
+                            <div class="mb-0">
+                                <label class="form-label">
+                                    <i class="fas fa-play-circle" style="color: #16a34a; margin-right: 4px;"></i>
+                                    Tanggal Mulai Semester Genap
+                                </label>
+                                <input type="date" 
+                                       class="form-control @error('tanggal_mulai_genap') is-invalid @enderror" 
+                                       name="tanggal_mulai_genap" 
+                                       value="{{ old('tanggal_mulai_genap', $tahunAjaran->tanggal_mulai_genap ? $tahunAjaran->tanggal_mulai_genap->format('Y-m-d') : '') }}">
+                                @error('tanggal_mulai_genap')
+                                    <small style="color: #dc3545;">{{ $message }}</small>
+                                @enderror
+                                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 12px;">
+                                    Biasanya Januari atau Februari. Kosongkan untuk menggunakan perhitungan otomatis (Juli-Des = Ganjil, Jan-Jun = Genap).
+                                </small>
                             </div>
                         </div>
 

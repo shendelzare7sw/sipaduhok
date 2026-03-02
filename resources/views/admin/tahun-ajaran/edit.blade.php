@@ -39,6 +39,10 @@
 .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 12px; }
 .col-md-6 { flex: 0 0 50%; max-width: 50%; padding: 12px; }
 
+@media (max-width: 767.98px) {
+    .col-md-8, .col-md-4, .col-md-6 { flex: 0 0 100%; max-width: 100%; }
+}
+
 /* Form Elements */
 .form-label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: #374151; }
 .form-control {
