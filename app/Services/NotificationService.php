@@ -6,6 +6,8 @@ use App\Models\Notification;
 use App\Models\User;
 use App\Models\Siswa;
 use App\Models\Pembayaran;
+use App\Models\TenagaPendidik;
+use App\Models\ForumReply;
 use App\Events\NotificationCreated;
 
 class NotificationService
@@ -136,47 +138,93 @@ class NotificationService
     }
 
     /**
-     * Notify guru about new forum question
+     * Notify all siswa in a kelas about a new forum from guru
      */
-    public function notifyForumQuestion($forumDiskusi)
+    public function notifyForumNew($forumDiskusi)
     {
-        // Get guru for this mapel and kelas
-        $guruPengajarList = \App\Models\GuruPengajarKelas::where('kelas_id', $forumDiskusi->kelas_id)
-            ->where('mata_pelajaran_id', $forumDiskusi->mata_pelajaran_id)
-            ->with('tenagaPendidik.user')
+        $siswaList = Siswa::where('kelas_id', $forumDiskusi->kelas_id)
+            ->whereNotNull('user_id')
             ->get();
 
-        foreach ($guruPengajarList as $gpk) {
-            if ($gpk->tenagaPendidik && $gpk->tenagaPendidik->user_id) {
-                $this->create(
-                    $gpk->tenagaPendidik->user_id,
-                    Notification::TIPE_FORUM,
-                    'Pertanyaan Baru dari Siswa',
-                    $forumDiskusi->judul,
-                    route('guru.lms.forum.show', [$forumDiskusi->kelas_id, $forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
-                    ['forum_id' => $forumDiskusi->id, 'topik' => $forumDiskusi->topik]
-                );
-            }
+        foreach ($siswaList as $siswa) {
+            $this->create(
+                $siswa->user_id,
+                Notification::TIPE_FORUM,
+                'Diskusi Baru dari Guru',
+                $forumDiskusi->judul,
+                route('siswa.lms.mapel.forum.show', [$forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
+                ['forum_id' => $forumDiskusi->id]
+            );
         }
     }
 
     /**
-     * Notify siswa about forum reply from teacher
+     * Notify the right party when a forum reply is posted.
+     *
+     * - Guru replies (nested)     → notify only the student being replied to.
+     * - Guru replies (top-level)  → notify all students who have participated.
+     * - Siswa replies (anything)  → notify only the guru (forum creator),
+     *                               with the guru-side link. No other students.
      */
     public function notifyForumReply($forumReply)
     {
         $forumDiskusi = $forumReply->forumDiskusi;
+        $replierIsTeacher = TenagaPendidik::where('user_id', $forumReply->user_id)->exists();
 
-        // Notify the original poster
-        if ($forumDiskusi->user_id !== $forumReply->user_id) {
-            $this->create(
-                $forumDiskusi->user_id,
-                Notification::TIPE_FORUM,
-                'Balasan pada Diskusi Anda',
-                'Guru telah menjawab pertanyaan Anda',
-                route('siswa.lms.mapel.forum.show', [$forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
-                ['forum_id' => $forumDiskusi->id]
-            );
+        if ($replierIsTeacher) {
+            // ── Guru membalas ──────────────────────────────────────────────
+            if ($forumReply->parent_id) {
+                // Balasan ke reply tertentu → notifikasi author reply itu jika siswa
+                $parent = $forumReply->parent;
+                if ($parent && $parent->user_id !== $forumReply->user_id) {
+                    $parentIsTeacher = TenagaPendidik::where('user_id', $parent->user_id)->exists();
+                    if (!$parentIsTeacher) {
+                        $this->create(
+                            $parent->user_id,
+                            Notification::TIPE_FORUM,
+                            'Guru Menjawab Balasan Anda',
+                            'Di diskusi "' . $forumDiskusi->judul . '"',
+                            route('siswa.lms.mapel.forum.show', [$forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
+                            ['forum_id' => $forumDiskusi->id]
+                        );
+                    }
+                }
+            } else {
+                // Balasan top-level → notifikasi semua siswa yang pernah ikut thread ini
+                $participantIds = ForumReply::where('forum_diskusi_id', $forumDiskusi->id)
+                    ->where('id', '!=', $forumReply->id)
+                    ->where('user_id', '!=', $forumReply->user_id)
+                    ->pluck('user_id')
+                    ->unique();
+
+                foreach ($participantIds as $userId) {
+                    $isTeacher = TenagaPendidik::where('user_id', $userId)->exists();
+                    if (!$isTeacher) {
+                        $this->create(
+                            $userId,
+                            Notification::TIPE_FORUM,
+                            'Guru Membalas di Diskusi',
+                            'Di diskusi "' . $forumDiskusi->judul . '"',
+                            route('siswa.lms.mapel.forum.show', [$forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
+                            ['forum_id' => $forumDiskusi->id]
+                        );
+                    }
+                }
+            }
+        } else {
+            // ── Siswa membalas ─────────────────────────────────────────────
+            // Hanya notifikasi guru (pemilik forum) dengan link sisi guru.
+            // Siswa lain TIDAK dinotifikasi agar tidak bercampur.
+            if ($forumDiskusi->user_id !== $forumReply->user_id) {
+                $this->create(
+                    $forumDiskusi->user_id,
+                    Notification::TIPE_FORUM,
+                    'Siswa Membalas Diskusi',
+                    ($forumReply->user->name ?? 'Siswa') . ' di "' . $forumDiskusi->judul . '"',
+                    route('guru.lms.forum.show', [$forumDiskusi->kelas_id, $forumDiskusi->mata_pelajaran_id, $forumDiskusi->id]),
+                    ['forum_id' => $forumDiskusi->id]
+                );
+            }
         }
     }
 

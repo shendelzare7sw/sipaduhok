@@ -360,7 +360,8 @@ class NilaiController extends Controller
                 'mataPelajaranList',
                 'allNilaiData',
                 'wali',
-                'cabang'
+                'cabang',
+                'semester'
             ));
         }
     }
@@ -426,17 +427,18 @@ class NilaiController extends Controller
             'kelas',
             'mataPelajaranList',
             'nilaiData',
-            'cabang'
+            'cabang',
+            'semester'
         ));
     }
 
     /**
      * Edit nilai siswa
      */
-    public function edit($siswaId)
+    public function edit(Request $request, $siswaId)
     {
         $wali = $this->getTenagaPendidik();
-        
+
         if (!$wali) {
             return redirect()->route('wali.dashboard')
                 ->with('error', 'Data tenaga pendidik tidak ditemukan.');
@@ -447,26 +449,29 @@ class NilaiController extends Controller
         }
 
         $kelas = $this->getSelectedKelas($wali);
-        
+
         if (!$kelas) {
             return redirect()->route('wali.nilai.index')
                 ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
         $kelasList = $this->getKelasWali($wali);
-        
+
         $siswa = Siswa::where('id', $siswaId)
             ->where('kelas_id', $kelas->id)
             ->firstOrFail();
-        
+
         // Use active tahun ajaran to match Guru's input
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $currentSemester = Nilai::getCurrentSemester();
-        
+        $semester = in_array($request->get('semester'), ['ganjil', 'genap'])
+            ? $request->get('semester')
+            : $currentSemester;
+
         // Get mapel IDs that actually have grades for this student/class in this active year
         $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
             ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
-            ->where('semester', $currentSemester)
+            ->where('semester', $semester)
             ->pluck('mata_pelajaran_id')
             ->unique()
             ->toArray();
@@ -482,16 +487,18 @@ class NilaiController extends Controller
         $nilaiData = Nilai::where('siswa_id', $siswaId)
             ->where('kelas_id', $kelas->id)
             ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
-            ->where('semester', $currentSemester)
+            ->where('semester', $semester)
             ->get()
             ->keyBy('mata_pelajaran_id');
-        
+
         return view('wali-kelas.nilai.edit', compact(
             'siswa',
             'kelas',
             'kelasList',
             'mataPelajaranList',
-            'nilaiData'
+            'nilaiData',
+            'semester',
+            'currentSemester'
         ));
     }
     
@@ -557,14 +564,17 @@ class NilaiController extends Controller
 
             $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
             $currentSemester = Nilai::getCurrentSemester();
-            
+            $semester = in_array($request->input('semester'), ['ganjil', 'genap'])
+                ? $request->input('semester')
+                : $currentSemester;
+
             $nilai = Nilai::updateOrCreate(
                 [
                     'siswa_id' => $siswa->id,
                     'mata_pelajaran_id' => $nilaiInput['mata_pelajaran_id'],
                     'kelas_id' => $kelas->id,
                     'tahun_ajaran_id' => $tahunAjaranAktif?->id,
-                    'semester' => $currentSemester,
+                    'semester' => $semester,
                 ],
                 $dataToUpdate
             );
@@ -657,10 +667,13 @@ class NilaiController extends Controller
 
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $currentSemester  = Nilai::getCurrentSemester();
+        $semester = in_array($request->get('semester'), ['ganjil', 'genap'])
+            ? $request->get('semester')
+            : $currentSemester;
 
         $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
             ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
-            ->where('semester', $currentSemester)
+            ->where('semester', $semester)
             ->pluck('mata_pelajaran_id')
             ->unique()
             ->toArray();
@@ -677,10 +690,10 @@ class NilaiController extends Controller
 
         $isKelasAkhir = $this->isKelasAkhir($kelas->nama_kelas);
 
-        $fileName = 'Template_Nilai_' . \Str::slug($siswa->nama_lengkap) . '_' . $kelas->nama_kelas . '.xlsx';
+        $fileName = 'Template_Nilai_' . \Str::slug($siswa->nama_lengkap) . '_' . $kelas->nama_kelas . '_' . $semester . '.xlsx';
 
         return Excel::download(
-            new NilaiPerSiswaTemplateExport($mataPelajaranList, $siswa, $kelas, $currentSemester, $isKelasAkhir),
+            new NilaiPerSiswaTemplateExport($mataPelajaranList, $siswa, $kelas, $semester, $isKelasAkhir),
             $fileName
         );
     }
@@ -718,10 +731,13 @@ class NilaiController extends Controller
 
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $currentSemester  = Nilai::getCurrentSemester();
+        $semester = in_array($request->input('semester'), ['ganjil', 'genap'])
+            ? $request->input('semester')
+            : $currentSemester;
 
         $existingNilaiMapelIds = Nilai::where('kelas_id', $kelas->id)
             ->where('tahun_ajaran_id', $tahunAjaranAktif?->id)
-            ->where('semester', $currentSemester)
+            ->where('semester', $semester)
             ->pluck('mata_pelajaran_id')
             ->unique()
             ->toArray();
@@ -740,7 +756,7 @@ class NilaiController extends Controller
                 $siswa->id,
                 $kelas->id,
                 $tahunAjaranAktif->id,
-                $currentSemester,
+                $semester,
                 $wali->id,
                 $mapelCollection
             );

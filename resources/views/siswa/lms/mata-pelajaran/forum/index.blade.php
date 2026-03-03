@@ -132,13 +132,10 @@
     </nav>
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
         <h4 style="color: var(--primary); margin: 0;">
             <i class="fas fa-comments me-2"></i>Forum Diskusi
         </h4>
-        <a href="{{ route('siswa.lms.mapel.forum.create', $mataPelajaran->id) }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Buat Pertanyaan
-        </a>
     </div>
 
     <!-- Forum List -->
@@ -181,10 +178,7 @@
             <div style="text-align: center; padding: 60px 20px; color: #9ca3af;">
                 <i class="fas fa-comments fa-3x mb-3" style="opacity: 0.3;"></i>
                 <h5>Belum Ada Diskusi</h5>
-                <p>Jadilah yang pertama bertanya!</p>
-                <a href="{{ route('siswa.lms.mapel.forum.create', $mataPelajaran->id) }}" class="btn btn-primary mt-2">
-                    <i class="fas fa-plus me-2"></i>Buat Pertanyaan
-                </a>
+                <p>Guru belum memulai diskusi untuk mata pelajaran ini.</p>
             </div>
         @endforelse
     </div>

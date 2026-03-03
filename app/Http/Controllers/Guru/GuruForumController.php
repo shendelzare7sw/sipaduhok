@@ -18,12 +18,12 @@ use App\Services\NotificationService;
 
 class GuruForumController extends Controller
 {
-    // private $notificationService;
+    private $notificationService;
 
-    // public function __construct(NotificationService $notificationService)
-    // {
-    //     $this->notificationService = $notificationService;
-    // }
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
 
     /**
      * Tampilkan daftar diskusi forum
@@ -110,14 +110,16 @@ class GuruForumController extends Controller
         ];
 
         // Buat untuk kelas utama
-        ForumDiskusi::create(array_merge($forumData, ['kelas_id' => $kelasId]));
+        $forum = ForumDiskusi::create(array_merge($forumData, ['kelas_id' => $kelasId]));
+        $this->notificationService->notifyForumNew($forum);
 
         // Duplikasi ke kelas tambahan
         $kelasTambahan = $request->input('kelas_tambahan', []);
         $jumlahDuplikasi = 0;
         foreach ($kelasTambahan as $kelasLainId) {
             if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
-                ForumDiskusi::create(array_merge($forumData, ['kelas_id' => $kelasLainId]));
+                $forumDuplikat = ForumDiskusi::create(array_merge($forumData, ['kelas_id' => $kelasLainId]));
+                $this->notificationService->notifyForumNew($forumDuplikat);
                 $jumlahDuplikasi++;
             }
         }
@@ -193,8 +195,7 @@ class GuruForumController extends Controller
         ]);
 
         // Notify siswa about reply
-        $notificationService = app(NotificationService::class);
-        $notificationService->notifyForumReply($reply);
+        $this->notificationService->notifyForumReply($reply);
 
         return back()->with('success', 'Balasan berhasil dikirim');
     }

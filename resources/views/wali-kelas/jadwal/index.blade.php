@@ -35,6 +35,14 @@
         font-weight: 700;
         display: inline-block;
     }
+    @media (max-width: 576px) {
+        .header-hari { padding: 10px 14px; }
+        .header-hari h5 { font-size: 14px; }
+        .jam-badge { font-size: 11px; padding: 3px 7px; }
+        .table-jadwal th, .table-jadwal td { font-size: 11px; padding: 6px 6px; }
+        .card-body .row .col-auto { width: 100%; margin-top: 10px; }
+        .card-body .row .col-auto .btn { width: 100%; }
+    }
 </style>
 @endsection
 

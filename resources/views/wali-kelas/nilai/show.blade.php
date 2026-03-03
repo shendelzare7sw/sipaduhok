@@ -87,7 +87,7 @@
             <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
         <div class="d-flex gap-2">
-            <a href="{{ route('wali.nilai.edit', $siswa->id) }}" class="btn btn-primary btn-sm fw-bold shadow-sm">
+            <a href="{{ route('wali.nilai.edit', $siswa->id) }}?semester={{ $semester }}" class="btn btn-primary btn-sm fw-bold shadow-sm">
                 <i class="fas fa-edit me-1"></i> Edit Nilai
             </a>
             <a href="{{ route('wali.nilai.print-siswa', [$siswa->id, 'semester' => request('semester', '')]) }}" target="_blank" class="btn btn-outline-secondary btn-sm fw-bold">

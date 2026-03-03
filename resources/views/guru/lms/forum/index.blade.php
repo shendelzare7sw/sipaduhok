@@ -8,13 +8,33 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+<style>
+    .forum-list-item { padding: 16px !important; }
+    .forum-list-item .forum-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 10px; gap: 8px; flex-wrap: wrap;
+    }
+    .forum-list-item .forum-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .forum-list-item .forum-meta-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .forum-list-item h5 { font-size: 15px; margin-bottom: 6px; }
+    .forum-list-item p { font-size: 13px; margin-bottom: 10px; line-height: 1.5; }
+    .forum-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    @media (max-width: 576px) {
+        .forum-list-item { padding: 14px !important; }
+        .forum-list-item h5 { font-size: 14px; }
+        .forum-meta-right small { display: none; }
+    }
+</style>
+@endpush
+
 @section('content')
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card-custom">
                 <div class="card-header-custom d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold"><i class="fas fa-comments me-2"></i>Daftar Diskusi Kelas</h6>
-                    <a href="{{ route('guru.lms.forum.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('guru.lms.forum.create', [$kelas->id, $mapel->id]) }}" class="btn btn-success btn-sm">
                         <i class="fas fa-plus me-1"></i>Buat Diskusi
                     </a>
                 </div>
@@ -23,12 +43,13 @@
                         <div class="list-group list-group-flush">
                             @foreach($forums as $forum)
                                 <a href="{{ route('guru.lms.forum.show', [$kelas->id, $mapel->id, $forum->id]) }}"
-                                    class="list-group-item list-group-item-action p-4 {{ $forum->is_pinned ? 'bg-light' : '' }}">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div class="d-flex align-items-center gap-2">
+                                    class="list-group-item list-group-item-action forum-list-item {{ $forum->is_pinned ? 'bg-light' : '' }}">
+
+                                    {{-- Header: badges kiri, waktu+dropdown kanan --}}
+                                    <div class="forum-header">
+                                        <div class="forum-badges">
                                             @if($forum->is_pinned)
-                                                <span class="badge bg-warning text-dark"><i
-                                                        class="fas fa-thumbtack me-1"></i>Pinned</span>
+                                                <span class="badge bg-warning text-dark"><i class="fas fa-thumbtack me-1"></i>Pinned</span>
                                             @endif
                                             @if($forum->is_closed)
                                                 <span class="badge bg-secondary"><i class="fas fa-lock me-1"></i>Closed</span>
@@ -37,10 +58,11 @@
                                                 {{ ucfirst($forum->topik) }}
                                             </span>
                                         </div>
-                                        <div class="d-flex align-items-center gap-2">
+                                        <div class="forum-meta-right">
                                             <small class="text-muted">{{ $forum->created_at->diffForHumans() }}</small>
                                             <div class="dropdown d-inline-block">
-                                                <button class="btn btn-sm btn-link text-muted p-0 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <button class="btn btn-sm btn-link text-muted p-0 px-1" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="fas fa-ellipsis-v"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -67,38 +89,32 @@
                                         </div>
                                     </div>
 
-                                    <h5 class="fw-bold text-dark mb-2">
-                                        {{ $forum->judul }}
-                                    </h5>
+                                    <h5 class="fw-bold text-dark">{{ $forum->judul }}</h5>
 
-                                    <p class="text-muted mb-3" style="font-size: 14px; line-height: 1.6;">
-                                        {{ Str::limit(strip_tags($forum->isi), 150) }}
-                                    </p>
+                                    <p class="text-muted">{{ Str::limit(strip_tags($forum->isi), 130) }}</p>
 
-                                    <div class="d-flex align-items-center justify-content-between">
+                                    <div class="forum-footer">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="d-flex align-items-center gap-2">
-                                                <div class="avatar-circle-sm {{ $forum->isFromTeacher() ? 'bg-success' : 'bg-primary' }} text-white"
-                                                    style="width: 24px; height: 24px; font-size: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                <div class="{{ $forum->isFromTeacher() ? 'bg-success' : 'bg-primary' }} text-white"
+                                                    style="width:22px; height:22px; font-size:10px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                                     {{ substr($forum->user->name ?? 'U', 0, 1) }}
                                                 </div>
                                                 <small class="fw-semibold text-secondary">
                                                     {{ $forum->user->name ?? 'Unknown' }}
                                                     @if($forum->isFromTeacher())
-                                                        <span class="badge bg-success ms-1" style="font-size: 8px;">Guru</span>
+                                                        <span class="badge bg-success ms-1" style="font-size:8px;">Guru</span>
                                                     @endif
                                                 </small>
                                             </div>
-
-                                            <div class="d-flex align-items-center gap-2 text-muted small">
-                                                <i class="fas fa-comment-alt"></i>
+                                            <small class="text-muted">
+                                                <i class="fas fa-comment-alt me-1"></i>
                                                 {{ $forum->replies_count ?? $forum->replies()->count() }} Balasan
-                                            </div>
+                                            </small>
                                         </div>
-
-                                        <div class="text-primary small fw-bold">
-                                            Lihat Diskusi <i class="fas fa-arrow-right ms-1"></i>
-                                        </div>
+                                        <small class="text-success fw-bold">
+                                            Lihat <i class="fas fa-arrow-right ms-1"></i>
+                                        </small>
                                     </div>
                                 </a>
                             @endforeach
@@ -119,7 +135,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
@@ -148,7 +164,7 @@
 
     <!-- Sync Confirmation Modal -->
     <div class="modal fade" id="syncForumModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="syncForumTitle">Konfirmasi Aksi</h5>

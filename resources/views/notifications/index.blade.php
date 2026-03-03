@@ -140,6 +140,38 @@
 .notif-empty p { font-size: 15px; }
 .notif-pagination { margin-top: 12px; display: flex; justify-content: center; }
 
+/* =====================================================================
+   Modal centering — use flex on modal itself for rock-solid centering
+   regardless of layout CSS overrides on .modal-dialog margin.
+   ===================================================================== */
+
+/* When Bootstrap shows the modal, override display:block with flex     */
+/* so the dialog is centred by flex, not by margin:auto (which some     */
+/* layout files override to margin:0.5rem).                              */
+#bulkDeleteModal {
+    position: fixed !important;
+    inset: 0 !important;
+}
+/* These apply whenever the modal element is visible (show + hide animation phases) */
+#bulkDeleteModal.modal-flex {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+/* Remove Bootstrap's min-height centering trick — flex container handles it */
+#bulkDeleteModal .modal-dialog.modal-dialog-centered {
+    min-height: 0 !important;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+@php
+    $isLmsLayout = in_array($layout, ['layouts.lms', 'layouts.lms-guru']);
+@endphp
+
 /* Mobile responsive */
 @media (max-width: 767.98px) {
     .notif-toolbar { flex-wrap: wrap; gap: 8px; }
@@ -160,6 +192,7 @@
     .filter-btn { padding: 6px 10px; font-size: 12px; }
 }
 </style>
+
 
 <div class="container-fluid py-3">
 <div class="notif-container">
@@ -357,6 +390,71 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Move modal to <body> so it uses the full viewport as stacking context
+    const m = document.getElementById('bulkDeleteModal');
+    if (m && m.parentElement !== document.body) document.body.appendChild(m);
+
+    /**
+     * Flex display management via JS events (not CSS .show class):
+     *
+     * Why JS instead of `#bulkDeleteModal.show { display:flex }` CSS?
+     *   Bootstrap removes the .show class BEFORE the fade-out animation
+     *   completes. The instant .show is gone, the CSS flex rule stops
+     *   applying, and Bootstrap's inline `display:block` shows briefly
+     *   without flex-centering — causing a visible flicker/jump.
+     *
+     * Solution: add class .modal-flex on show-start, remove ONLY after
+     *   fully hidden (hidden.bs.modal). This keeps flex active through
+     *   the entire enter AND exit animation.
+     */
+    m.addEventListener('show.bs.modal', function () {
+        m.classList.add('modal-flex');
+@if($isLmsLayout)
+        updateLmsPadding();
+@endif
+    });
+
+    m.addEventListener('hidden.bs.modal', function () {
+        m.classList.remove('modal-flex');
+@if($isLmsLayout)
+        m.style.paddingLeft = '';
+@endif
+    });
+
+@if($isLmsLayout)
+    /**
+     * LMS desktop: sidebar takes `sidebarWidth` px on the left.
+     * By setting padding-left = sidebarWidth on the flex modal container,
+     * justify-content:center centres within the remaining space (content area).
+     *
+     * Mobile (≤8px) / sidebar-collapsed: no padding → centres to full viewport
+     *   = content area (sidebar is hidden).
+     */
+    function updateLmsPadding() {
+        const isMobile  = window.innerWidth <= 768;
+        const collapsed = document.body.classList.contains('sidebar-collapsed');
+        if (isMobile || collapsed) {
+            m.style.paddingLeft = '';
+        } else {
+            const sw = parseFloat(
+                getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')
+            ) || 280;
+            m.style.paddingLeft = sw + 'px';
+        }
+    }
+
+    const bodyObserver = new MutationObserver(function () {
+        if (m.classList.contains('modal-flex')) updateLmsPadding();
+    });
+    bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    window.addEventListener('resize', function () {
+        if (m.classList.contains('modal-flex')) updateLmsPadding();
+    });
+@endif
+});
+
 let searchTimer;
 function debounceSubmit() {
     clearTimeout(searchTimer);

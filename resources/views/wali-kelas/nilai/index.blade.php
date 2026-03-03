@@ -239,7 +239,7 @@
                                     @endif
 
                                     <td class="text-center align-middle">
-                                        <a href="{{ route('wali.nilai.show', $siswa->id) }}" class="btn btn-info btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="Lihat Profil Nilai">
+                                        <a href="{{ route('wali.nilai.show', $siswa->id) }}?semester={{ $semester }}" class="btn btn-info btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="Lihat Profil Nilai">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>

@@ -466,4 +466,192 @@ class PresensiController extends Controller
 
         return response()->file($path);
     }
+
+    /**
+     * Download template Excel untuk import presensi
+     */
+    public function downloadTemplate(Request $request)
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        if (!$tenagaPendidik) abort(403);
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        if (!$kelas) abort(403, 'Kelas tidak ditemukan.');
+
+        $tanggal = $request->get('tanggal', now()->toDateString());
+
+        $siswaList = Siswa::where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get();
+
+        // Build CSV (Excel-compatible) in memory
+        $rows = [];
+        // Header info rows
+        $rows[] = ['TEMPLATE IMPORT PRESENSI'];
+        $rows[] = ['Kelas', $kelas->nama_kelas];
+        $rows[] = ['Tanggal', $tanggal];
+        $rows[] = [''];
+        // Column headers
+        $rows[] = ['No', 'NIS', 'Nama Siswa', 'Status', 'Keterangan'];
+        $rows[] = ['', '', '', '(hadir/sakit/izin/alpha)', '(opsional)'];
+
+        foreach ($siswaList as $idx => $siswa) {
+            $rows[] = [
+                $idx + 1,
+                $siswa->nis,
+                $siswa->nama_lengkap,
+                'hadir',   // default
+                '',
+            ];
+        }
+
+        // Stream as CSV (Excel opens it natively)
+        $filename = 'template_presensi_' . $kelas->nama_kelas . '_' . $tanggal . '.csv';
+        $filename = preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $filename);
+
+        $callback = function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            foreach ($rows as $row) {
+                fputcsv($handle, $row);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Import presensi dari file Excel / CSV
+     */
+    public function importExcel(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file_excel' => 'required|file|mimes:csv,txt,xlsx,xls|max:2048',
+            'tanggal'    => 'required|date',
+            'kelas_id'   => 'required|exists:kelas,id',
+        ]);
+
+        $tenagaPendidik = $this->getTenagaPendidik();
+        if (!$tenagaPendidik) abort(403);
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        if (!$kelas || $kelas->id != $request->kelas_id) {
+            return back()->withErrors(['file_excel' => 'Kelas tidak valid.']);
+        }
+
+        // Build NIS → Siswa map for the class
+        $siswaMap = Siswa::where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->get()
+            ->keyBy('nis');
+
+        $validStatus = ['hadir', 'sakit', 'izin', 'alpha'];
+        $imported = 0;
+        $skipped  = 0;
+        $errors   = [];
+
+        $file     = $request->file('file_excel');
+        $ext      = strtolower($file->getClientOriginalExtension());
+
+        // Parse file → array of rows
+        $allRows = [];
+        if (in_array($ext, ['csv', 'txt'])) {
+            // UTF-8 BOM-safe CSV parsing
+            $handle = fopen($file->getRealPath(), 'r');
+            // Strip BOM if present
+            $bom = fread($handle, 3);
+            if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
+                rewind($handle);
+            }
+            while (($row = fgetcsv($handle)) !== false) {
+                $allRows[] = $row;
+            }
+            fclose($handle);
+        } else {
+            // xlsx/xls — use PhpSpreadsheet via maatwebsite/excel helper
+            try {
+                $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($file->getRealPath());
+                $reader->setReadDataOnly(true);
+                $spreadsheet = $reader->load($file->getRealPath());
+                $sheet = $spreadsheet->getActiveSheet();
+                foreach ($sheet->toArray(null, true, true, false) as $row) {
+                    $allRows[] = $row;
+                }
+            } catch (\Exception $e) {
+                return back()->withErrors(['file_excel' => 'Gagal membaca file Excel: ' . $e->getMessage()]);
+            }
+        }
+
+        // Find data rows: skip until we find the header row (No | NIS | Nama Siswa | Status ...)
+        $dataStarted = false;
+        foreach ($allRows as $rowIdx => $row) {
+            $row = array_map('trim', array_map('strval', $row));
+
+            // Detect header row by NIS keyword
+            if (!$dataStarted) {
+                if (isset($row[1]) && strtolower($row[1]) === 'nis') {
+                    $dataStarted = true;
+                    // skip the next row (description row "(hadir/sakit/...)")
+                    continue;
+                }
+                // Skip the description row directly after header
+                if ($dataStarted) continue;
+                continue;
+            }
+
+            // Skip "description" row that starts with empty No
+            if (empty($row[0]) || !is_numeric($row[0])) continue;
+
+            $nis         = $row[1] ?? '';
+            $statusRaw   = strtolower($row[3] ?? 'hadir');
+            $keterangan  = $row[4] ?? null;
+
+            if (empty($nis)) { $skipped++; continue; }
+
+            $siswa = $siswaMap->get($nis);
+            if (!$siswa) {
+                $skipped++;
+                $errors[] = "NIS {$nis} tidak ditemukan di kelas ini.";
+                continue;
+            }
+
+            if (!in_array($statusRaw, $validStatus)) {
+                $skipped++;
+                $errors[] = "NIS {$nis}: status '{$statusRaw}' tidak valid (hadir/sakit/izin/alpha).";
+                continue;
+            }
+
+            Presensi::updateOrCreate(
+                [
+                    'siswa_id' => $siswa->id,
+                    'kelas_id' => $kelas->id,
+                    'tanggal'  => $request->tanggal,
+                ],
+                [
+                    'status'      => $statusRaw,
+                    'keterangan'  => $keterangan ?: null,
+                    'diinput_oleh' => auth()->id(),
+                ]
+            );
+            $imported++;
+        }
+
+        $msg = "Import selesai: {$imported} data berhasil diimpor.";
+        if ($skipped) $msg .= " {$skipped} baris dilewati.";
+
+        if (!empty($errors)) {
+            return redirect()->route('wali.presensi.index', ['tanggal' => $request->tanggal])
+                ->with('warning', $msg)
+                ->with('import_errors', array_slice($errors, 0, 5));
+        }
+
+        return redirect()->route('wali.presensi.index', ['tanggal' => $request->tanggal])
+            ->with('success', $msg);
+    }
 }

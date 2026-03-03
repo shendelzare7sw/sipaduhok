@@ -990,6 +990,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/print-rekap', [PresensiController::class, 'printRekap'])->name('print-rekap');
             Route::get('/riwayat', [PresensiController::class, 'riwayat'])->name('riwayat');
             Route::put('/riwayat/{id}', [PresensiController::class, 'updateRiwayat'])->name('riwayat.update');
+            // Import Excel
+            Route::get('/download-template', [PresensiController::class, 'downloadTemplate'])->name('download-template');
+            Route::post('/import-excel', [PresensiController::class, 'importExcel'])->name('import-excel');
         });
 
         // Promotion Prediction

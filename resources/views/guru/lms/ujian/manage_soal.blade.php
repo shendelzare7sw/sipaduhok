@@ -184,7 +184,7 @@
 
     <!-- Sync Confirmation Modal -->
     <div class="modal fade" id="syncConfirmModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="syncModalTitle">Konfirmasi Aksi</h5>
@@ -219,7 +219,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteQuestionModal" tabindex="-1" aria-labelledby="deleteQuestionModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteQuestionModalLabel">Konfirmasi Hapus</h5>
@@ -238,7 +238,7 @@
 
     <!-- Import Soal Modal -->
     <div class="modal fade" id="importSoalModal" tabindex="-1" aria-labelledby="importSoalModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.soal.import' : 'guru.lms.ujian.soal.import', [$kelas->id, $mapel->id, $ujian->id]) }}"
                     method="POST" enctype="multipart/form-data">

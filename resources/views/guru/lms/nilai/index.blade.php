@@ -457,7 +457,7 @@
     </div>
     <!-- Recalculate Confirmation Modal -->
     <div class="modal fade" id="recalculateModal" tabindex="-1" aria-labelledby="recalculateModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="recalculateModalLabel">Konfirmasi Hitung Ulang</h5>
@@ -476,7 +476,7 @@
 
     <!-- Import Excel Modal -->
     <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form action="{{ route('guru.lms.nilai.import-excel', [$kelas->id, $mapel->id]) }}" method="POST" enctype="multipart/form-data" id="importForm">
                     @csrf

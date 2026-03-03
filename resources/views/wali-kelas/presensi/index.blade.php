@@ -15,14 +15,28 @@
     .table-rekap thead th { vertical-align: middle; text-align: center; font-size: 11px; text-transform: uppercase; }
     .bg-hadir { background-color: #f6fff9 !important; }
     .bg-sakit { background-color: #fffdf0 !important; }
-    .bg-izin { background-color: #f0f7ff !important; }
+    .bg-izin  { background-color: #f0f7ff !important; }
     .bg-alpha { background-color: #fff5f5 !important; }
-    
-    /* Style untuk memperjelas pilihan di select */
     select option.text-success { color: #1cc88a; }
     select option.text-warning { color: #f6c23e; }
     select option.text-primary { color: #4e73df; }
-    select option.text-danger { color: #e74a3b; }
+    select option.text-danger  { color: #e74a3b; }
+
+    /* ── Responsive button grid for header actions ─────── */
+    .presensi-btn-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2-col on mobile */
+        gap: 8px;
+        width: 100%;
+    }
+    @media (min-width: 576px) {
+        .presensi-btn-grid {
+            display: flex;           /* single row on sm+ */
+            flex-wrap: nowrap;
+            gap: 8px;
+            width: auto;
+        }
+    }
 </style>
 @endsection
 
@@ -35,22 +49,39 @@
         </div>
     @endif
 
+    @if(session('warning'))
+        <div class="alert alert-warning shadow-sm border-start border-warning border-4 alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle me-2"></i><strong>Perhatian:</strong> {{ session('warning') }}
+            @if(session('import_errors'))
+                <ul class="mt-2 mb-0 small">
+                    @foreach(session('import_errors') as $ie)
+                        <li>{{ $ie }}</li>
+                    @endforeach
+                </ul>
+            @endif
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     {{-- HEADER ACTIONS --}}
     @if($kelas)
     <div class="card shadow mb-4 text-center text-sm-start">
         <div class="card-body py-3">
-            <div class="row align-items-center">
-                <div class="col-sm mb-3 mb-sm-0">
-                    <h5 class="m-0 fw-bold text-primary">Presensi Kelas {{ $kelas->nama_kelas }}</h5>
-                </div>
-                <div class="col-sm-auto">
-                    <a href="{{ route('wali.presensi.validasi-izin') }}" class="btn btn-warning btn-sm shadow-sm fw-bold text-white mb-2 mb-sm-0">
+            <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-sm-between gap-2">
+                <h5 class="m-0 fw-bold text-primary">Presensi Kelas {{ $kelas->nama_kelas }}</h5>
+                {{-- Button grid: 2-col on mobile, single row on sm+ --}}
+                <div class="presensi-btn-grid">
+                    <a href="{{ route('wali.presensi.validasi-izin') }}" class="btn btn-warning btn-sm fw-bold text-white">
                         <i class="fas fa-check-circle me-1"></i> Validasi Izin
                     </a>
-                    <a href="{{ route('wali.presensi.print-rekap', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-secondary btn-sm shadow-sm ms-sm-2 fw-bold mb-2 mb-sm-0">
+                    <button type="button" class="btn btn-success btn-sm fw-bold"
+                        data-bs-toggle="modal" data-bs-target="#importPresensiModal">
+                        <i class="fas fa-file-excel me-1"></i> Import Excel
+                    </button>
+                    <a href="{{ route('wali.presensi.print-rekap', ['bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-secondary btn-sm fw-bold">
                         <i class="fas fa-print me-1"></i> Cetak Rekap
                     </a>
-                    <a href="{{ route('wali.presensi.riwayat') }}" class="btn btn-info btn-sm shadow-sm ms-sm-2 fw-bold text-white mb-2 mb-sm-0">
+                    <a href="{{ route('wali.presensi.riwayat') }}" class="btn btn-info btn-sm fw-bold text-white">
                         <i class="fas fa-history me-1"></i> Riwayat & Edit
                     </a>
                 </div>
@@ -250,12 +281,93 @@
 @section('scripts')
 <script>
     function submitPresensi() {
-        // Tutup modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('konfirmasiSimpanModal'));
         modal.hide();
-
-        // Submit form
         document.getElementById('formPresensi').submit();
     }
+
+    // Sync tanggal filter → import modal tanggal field
+    document.addEventListener('DOMContentLoaded', function () {
+        const filterTanggal = document.querySelector('input[name="tanggal"]');
+        const importTanggal = document.getElementById('importTanggal');
+        if (filterTanggal && importTanggal) {
+            importTanggal.value = filterTanggal.value;
+            filterTanggal.addEventListener('change', function () {
+                importTanggal.value = this.value;
+            });
+        }
+    });
 </script>
 @endsection
+
+{{-- MODAL IMPORT EXCEL --}}
+<div class="modal fade" id="importPresensiModal" tabindex="-1" aria-labelledby="importPresensiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold" id="importPresensiModalLabel">
+                    <i class="fas fa-file-excel me-2"></i>Import Presensi dari Excel
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('wali.presensi.import-excel') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="kelas_id" value="{{ $kelas->id ?? '' }}">
+                <div class="modal-body">
+
+                    {{-- Petunjuk --}}
+                    <div class="alert alert-info py-2 small mb-3">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        <strong>Petunjuk import:</strong>
+                        <ol class="mt-1 mb-0 ps-3">
+                            <li>Download template di bawah — template sudah berisi daftar nama & NIS siswa.</li>
+                            <li>Isi kolom <strong>Status</strong> dengan: <code>hadir</code>, <code>sakit</code>, <code>izin</code>, atau <code>alpha</code>.</li>
+                            <li>Kolom <strong>Keterangan</strong> bersifat opsional.</li>
+                            <li><strong>Jangan ubah</strong> kolom NIS — digunakan untuk mencocokkan data.</li>
+                            <li>Simpan file lalu upload di sini.</li>
+                        </ol>
+                    </div>
+
+                    {{-- Tanggal --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">TANGGAL PRESENSI</label>
+                        <input type="date" name="tanggal" id="importTanggal" class="form-control"
+                               value="{{ $tanggal }}" required>
+                    </div>
+
+                    {{-- Download Template --}}
+                    <div class="mb-3">
+                        <a id="btnDownloadTemplate"
+                           href="{{ route('wali.presensi.download-template', ['tanggal' => $tanggal]) }}"
+                           class="btn btn-outline-success btn-sm w-100 fw-bold">
+                            <i class="fas fa-download me-1"></i> Download Template Excel
+                        </a>
+                        <div class="text-muted small mt-1 text-center">
+                            Template berisi daftar siswa kelas {{ $kelas->nama_kelas ?? '' }} siap diisi.
+                        </div>
+                    </div>
+
+                    {{-- File Upload --}}
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small">UPLOAD FILE EXCEL / CSV</label>
+                        <input type="file" name="file_excel" class="form-control"
+                               accept=".csv,.xlsx,.xls" required>
+                        @error('file_excel')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                        <div class="text-muted small mt-1">Format: .csv, .xlsx, atau .xls (maks. 2 MB)</div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-success btn-sm fw-bold">
+                        <i class="fas fa-upload me-1"></i> Import Sekarang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

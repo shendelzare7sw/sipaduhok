@@ -29,28 +29,12 @@
     padding: 4px 3px;
 }
 
-/* ─── Sticky columns ─────────────────────────────────── */
 .sticky-no {
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: white;
     min-width: 36px;
-    box-shadow: 1px 0 0 #dee2e6;
 }
 .sticky-mapel {
-    position: sticky;
-    left: 36px;
-    z-index: 3;
-    background: white;
     min-width: 160px;
     max-width: 180px;
-    box-shadow: 2px 0 4px rgba(0,0,0,.08);
-}
-thead .sticky-no,
-thead .sticky-mapel {
-    z-index: 4;
-    background: #f8f9fc;
 }
 
 /* ─── Group header colours ───────────────────────────── */
@@ -115,6 +99,7 @@ thead .sticky-mapel {
 .scroll-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    position: relative; /* needed so sticky is relative to this container */
 }
 
 /* ─── Mobile: shrink mapel column ───────────────────── */
@@ -138,11 +123,17 @@ thead .sticky-mapel {
 
     {{-- ── Top bar: back + import buttons ── --}}
     <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3 no-print">
-        <a href="{{ route('wali.nilai.index') }}" class="btn btn-light btn-sm border fw-semibold">
-            <i class="bx bx-arrow-back me-1"></i> Kembali ke Daftar Nilai
-        </a>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a href="{{ route('wali.nilai.index') }}?semester={{ $semester }}" class="btn btn-light btn-sm border fw-semibold">
+                <i class="bx bx-arrow-back me-1"></i> Kembali ke Daftar Nilai
+            </a>
+            <span class="badge {{ $semester === 'ganjil' ? 'bg-label-warning' : 'bg-label-info' }} fw-semibold px-3 py-2" style="font-size:12px;">
+                <i class="bx bx-calendar me-1"></i> Semester {{ ucfirst($semester) }}
+                @if($semester === $currentSemester) <span class="ms-1 text-success">(Aktif)</span> @endif
+            </span>
+        </div>
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ route('wali.nilai.download-template', $siswa->id) }}"
+            <a href="{{ route('wali.nilai.download-template', $siswa->id) }}?semester={{ $semester }}"
                class="btn btn-outline-secondary btn-sm">
                 <i class="bx bx-download me-1"></i> Template Excel
             </a>
@@ -213,6 +204,7 @@ thead .sticky-mapel {
     <form action="{{ route('wali.nilai.update', $siswa->id) }}" method="POST" id="nilaiForm">
         @csrf
         @method('PUT')
+        <input type="hidden" name="semester" value="{{ $semester }}">
 
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center py-2">
@@ -235,8 +227,8 @@ thead .sticky-mapel {
                                 <th colspan="6" class="text-center th-tugas">Tugas</th>
                                 <th colspan="6" class="text-center th-latihan">Latihan</th>
                                 <th colspan="6" class="text-center th-uh">Ulangan Harian</th>
-                                <th class="text-center" rowspan="2" style="min-width:62px;">PTS</th>
-                                <th class="text-center" rowspan="2" style="min-width:62px;">PAS</th>
+                                <th class="text-center" rowspan="2" style="min-width:80px;">PTS</th>
+                                <th class="text-center" rowspan="2" style="min-width:80px;">PAS</th>
                                 <th class="text-center nilai-akhir-cell" rowspan="2" style="min-width:72px;">Nilai Akhir</th>
                                 @if($isKelasAkhir)
                                 <th colspan="5" class="text-center th-akhir">Tingkat Akhir</th>
@@ -245,7 +237,7 @@ thead .sticky-mapel {
                             <tr>
                                 {{-- Tugas --}}
                                 @for($i=1;$i<=5;$i++)
-                                <th class="text-center th-tugas" style="min-width:62px;">T{{ $i }}</th>
+                                <th class="text-center th-tugas" style="min-width:80px;">T{{ $i }}</th>
                                 @endfor
                                 <th class="text-center th-tugas rata-cell">Rata</th>
                                 {{-- Latihan --}}
@@ -273,7 +265,7 @@ thead .sticky-mapel {
                             @php $nilai = $nilaiData[$mapel->id] ?? null; @endphp
                             <tr>
                                 {{-- No --}}
-                                <td class="sticky-no text-center text-muted">{{ $idx + 1 }}</td>
+                                <td class="sticky-no text-center text-muted">{{ $loop->iteration }}</td>
 
                                 {{-- Mata Pelajaran --}}
                                 <td class="sticky-mapel">
@@ -444,11 +436,13 @@ thead .sticky-mapel {
             </div>
             <form action="{{ route('wali.nilai.import', $siswa->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="semester" value="{{ $semester }}">
                 <div class="modal-body">
                     <div class="alert alert-info py-2 small mb-3">
                         <i class="bx bx-info-circle me-1"></i>
                         Download <strong>Template Excel</strong> terlebih dahulu, isi nilai, lalu upload di sini.<br>
-                        <strong>Jangan ubah</strong> kolom <code>kode_mapel</code> pada template.
+                        <strong>Jangan ubah</strong> kolom <code>kode_mapel</code> pada template.<br>
+                        Nilai akan diimport ke <strong>Semester {{ ucfirst($semester) }}</strong>.
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">File Excel (.xlsx / .xls)</label>

@@ -12,10 +12,10 @@
     <style>
         .forum-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
             transition: all 0.2s;
             border-left: 4px solid transparent;
             text-decoration: none;
@@ -24,10 +24,15 @@
         }
 
         .forum-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateX(4px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transform: translateX(3px);
             text-decoration: none;
             color: inherit;
+        }
+
+        @media (max-width: 576px) {
+            .forum-card { padding: 14px; border-radius: 8px; }
+            .forum-title { font-size: 14px; }
         }
 
         .forum-card.pinned {

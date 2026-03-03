@@ -338,9 +338,9 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            /* Modals: full width on small screens */
+            /* Modals: keep auto margin for horizontal centering */
             .modal-dialog {
-                margin: 0.5rem;
+                margin: 0.5rem auto;
             }
         }
 
@@ -508,24 +508,27 @@
     <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="logoutModalLabel">
-                        <i class="fas fa-sign-out-alt me-2"></i>Konfirmasi Logout
-                    </h5>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width:36px;height:36px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="fas fa-sign-out-alt" style="color:#dc2626;font-size:16px;"></i>
+                        </div>
+                        <h5 class="modal-title mb-0 fw-bold" id="logoutModalLabel" style="font-size:16px;">Konfirmasi Logout</h5>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    Apakah Anda yakin ingin keluar dari sistem LMS? <br>
+                <div class="modal-body px-4 py-3">
+                    <p class="mb-1" style="font-size:14px;">Apakah Anda yakin ingin keluar dari sistem LMS?</p>
                     <small class="text-muted">Anda perlu login kembali untuk mengakses panel Guru.</small>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2 flex-nowrap">
+                    <button type="button" class="btn btn-light btn-sm fw-semibold flex-fill" data-bs-dismiss="modal" style="border:1px solid #e5e7eb;">
                         <i class="fas fa-times me-1"></i> Batal
                     </button>
-                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    <form action="{{ route('logout') }}" method="POST" class="flex-fill d-flex">
                         @csrf
-                        <button type="submit" class="btn btn-danger">
+                        <button type="submit" class="btn btn-danger btn-sm fw-semibold flex-fill">
                             <i class="fas fa-sign-out-alt me-1"></i> Ya, Logout
                         </button>
                     </form>

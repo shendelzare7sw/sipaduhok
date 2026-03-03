@@ -4,23 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor PAS - {{ $rapor->siswa->nama_lengkap }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @include('partials.anti-screenshot')
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11pt;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             position: relative;
+            overflow-x: hidden;
         }
 
         .rapor-wrapper {
-            max-width: 900px;
+            width: 900px;
             margin: 0 auto;
             background: white;
             padding: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             position: relative;
+            transform-origin: top left;
         }
 
         /* Watermark as background */
@@ -215,25 +218,54 @@
             margin-top: 40px;
         }
 
-        /* Print Button */
+        /* Print/Action bar */
+        .print-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(4px);
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 16px;
+        }
         .btn-print {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+            padding: 9px 18px;
             background: #2563eb;
             color: white;
             border: none;
-            padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 1000;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
+        .btn-print:hover { background: #1e40af; }
+        .btn-back {
+            padding: 9px 18px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-back:hover { background: #4b5563; color: white; }
 
-        .btn-print:hover {
-            background: #1e40af;
+        /* Mobile: handled by JS scale — no reflow needed */
+        @media (max-width: 900px) {
+            body { background: #e5e7eb; }
         }
 
         /* Print Styles */
@@ -251,8 +283,9 @@
 
             .rapor-wrapper {
                 box-shadow: none;
-                padding: 10px;
-                max-width: 100%;
+                padding: 20px;
+                width: 100% !important;
+                transform: none !important;
             }
 
             table.grade-table {
@@ -264,6 +297,9 @@
             }
 
             .btn-print {
+                display: none;
+            }
+            .print-bar {
                 display: none;
             }
 
@@ -295,9 +331,14 @@
     </style>
 </head>
 <body>
-    <button class="btn-print" onclick="window.print()">
-        🖨️ Cetak Rapor
-    </button>
+    <div class="print-bar no-print">
+        <a href="javascript:history.back()" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+        <button class="btn-print" onclick="window.print()">
+            <i class="bi bi-printer-fill"></i> Cetak Rapor
+        </button>
+    </div>
 
     <div class="rapor-wrapper{{ $rapor->jenis_rapor === 'akhir_semester' ? ' with-watermark' : '' }}">
         <!-- Title -->
@@ -540,5 +581,52 @@
             </p>
         </div>
     </div>
+
+    <script>
+    (function() {
+        function fitToScreen() {
+            const wrapper = document.querySelector('.rapor-wrapper');
+            if (!wrapper) return;
+
+            // Reset scale first to measure TRUE content width
+            wrapper.style.transform = 'none';
+            wrapper.style.transformOrigin = '';
+
+            // Use visualViewport for accurate mobile width (excludes OS UI)
+            const vw = (window.visualViewport ? window.visualViewport.width : null)
+                    || document.documentElement.clientWidth
+                    || window.innerWidth;
+
+            // Measure actual rendered content width
+            const docWidth = wrapper.scrollWidth;
+
+            if (vw < docWidth) {
+                // Subtract 2px safety buffer so right edge is never clipped
+                const scale = (vw - 2) / docWidth;
+                wrapper.style.transform = 'scale(' + scale + ')';
+                wrapper.style.transformOrigin = 'top left';
+                wrapper.style.marginLeft = '0';
+                wrapper.style.marginRight = '0';
+                // Set body height to scaled height so scroll works correctly
+                document.body.style.height = Math.ceil(wrapper.scrollHeight * scale) + 'px';
+            } else {
+                document.body.style.height = '';
+            }
+        }
+
+        // Run after fonts/images are loaded for accurate scrollWidth
+        window.addEventListener('load', fitToScreen);
+        window.addEventListener('resize', fitToScreen);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', fitToScreen);
+        }
+
+        window.addEventListener('beforeprint', function() {
+            const wrapper = document.querySelector('.rapor-wrapper');
+            if (wrapper) { wrapper.style.transform = 'none'; wrapper.style.width = ''; }
+        });
+        window.addEventListener('afterprint', fitToScreen);
+    })();
+    </script>
 </body>
 </html>

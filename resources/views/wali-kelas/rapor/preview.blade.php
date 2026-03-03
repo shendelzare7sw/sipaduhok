@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor {{ $rapor->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }} - {{ $rapor->siswa->nama_lengkap }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -11,17 +12,19 @@
             font-family: Arial, Helvetica, sans-serif;
             font-size: 11pt;
             line-height: 1.4;
-            padding: 20px;
+            padding: 0;
             background: #f5f5f5;
+            overflow-x: hidden;
         }
 
         .rapor-wrapper {
-            max-width: 900px;
+            width: 900px;
             margin: 0 auto;
             background: white;
             padding: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             position: relative;
+            transform-origin: top left;
         }
 
         /* Watermark as background - More reliable for large images */
@@ -165,24 +168,54 @@
             background-color: rgba(209, 236, 241, 0.7);
         }
 
-        /* Print Button */
+        /* Print/Action bar */
+        .print-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(4px);
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 16px;
+        }
         .btn-print {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
+            padding: 9px 18px;
             background: #1e3a8a;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            z-index: 1000;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
+        .btn-print:hover { background: #1e40af; }
+        .btn-back {
+            padding: 9px 18px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-back:hover { background: #4b5563; color: white; }
 
-        .btn-print:hover {
-            background: #1e40af;
+        /* Mobile: handled by JS scale — no reflow needed */
+        @media (max-width: 900px) {
+            body { background: #e5e7eb; }
         }
 
         /* Print Styles */
@@ -213,9 +246,14 @@
                 padding: 3px 4px;
             }
 
-            .btn-print {
-                display: none;
+            .rapor-wrapper {
+                box-shadow: none;
+                padding: 20px;
+                width: 100% !important;
+                transform: none !important;
             }
+
+            .btn-print, .print-bar { display: none !important; }
 
             /* Force watermark to print */
             .rapor-wrapper.with-watermark::before {
@@ -271,9 +309,14 @@
     </style>
 </head>
 <body>
-    <button class="btn-print" onclick="window.print()">
-        🖨️ Cetak Rapor
-    </button>
+    <div class="print-bar no-print">
+        <a href="javascript:history.back()" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+        <button class="btn-print" onclick="window.print()">
+            <i class="bi bi-printer-fill"></i> Cetak Rapor
+        </button>
+    </div>
 
     <!-- Watermark implemented via CSS background -->
 
@@ -506,5 +549,38 @@
             </p>
         </div>
     </div>
+
+    <script>
+    (function() {
+        const DOC_WIDTH = 900;
+
+        function fitToScreen() {
+            const wrapper = document.querySelector('.rapor-wrapper');
+            if (!wrapper) return;
+            const vw = Math.min(window.innerWidth, document.documentElement.clientWidth);
+            if (vw < DOC_WIDTH) {
+                const scale = vw / DOC_WIDTH;
+                wrapper.style.transform = 'scale(' + scale + ')';
+                wrapper.style.transformOrigin = 'top left';
+                wrapper.style.marginLeft = '0';
+                wrapper.style.marginRight = '0';
+                document.body.style.height = Math.ceil(wrapper.scrollHeight * scale) + 'px';
+            } else {
+                wrapper.style.transform = '';
+                wrapper.style.transformOrigin = '';
+                document.body.style.height = '';
+            }
+        }
+
+        window.addEventListener('load', fitToScreen);
+        window.addEventListener('resize', fitToScreen);
+
+        window.addEventListener('beforeprint', function() {
+            const wrapper = document.querySelector('.rapor-wrapper');
+            if (wrapper) { wrapper.style.transform = 'none'; wrapper.style.width = ''; }
+        });
+        window.addEventListener('afterprint', fitToScreen);
+    })();
+    </script>
 </body>
 </html>
