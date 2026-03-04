@@ -28,10 +28,10 @@
     </ul>
 
     <!-- Admin WA Configuration -->
-    <div class="card mb-4 bg-light border-0">
+    <div class="card mb-4">
         <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
             <div>
-                <h6 class="mb-1"><i class="bx bxl-whatsapp text-success me-1"></i> Nomor Bantuan Administrator</h6>
+                <h6 class="mb-1 text-primary"><i class="bx bxl-whatsapp text-success me-1"></i> Nomor Bantuan Administrator</h6>
                 <p class="mb-0 text-muted small">Nomor ini akan ditampilkan di halaman Login bagi user yang butuh bantuan manual.</p>
             </div>
             <form action="{{ route('admin.recovery-tickets.update-admin-wa') }}" method="POST" class="d-flex gap-2 align-items-center">
