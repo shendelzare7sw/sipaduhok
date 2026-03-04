@@ -95,33 +95,36 @@
                             <!-- Username or Email Input -->
                             <div>
                                 <label for="login" class="block text-sm font-semibold text-gray-700 mb-2">Username atau Email</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <div class="relative flex items-center w-full border-2 border-gray-200 rounded-xl focus-within:border-[#165fac] bg-white transition-colors @error('login') border-red-500 @enderror">
+                                    <input type="text" id="login" name="login" value="{{ old('login') }}"
+                                        class="peer w-full py-3.5 pr-4 pl-12 focus:pl-12 focus:sm:pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
+                                        placeholder="nama@email.com atau username" required autofocus>
+                                    
+                                    <div class="absolute left-4 flex items-center pointer-events-none text-gray-400 transition-all duration-200 peer-focus:text-[#165fac] peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:-translate-x-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                                             <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                                         </svg>
                                     </div>
-                                    <input type="text" id="login" name="login" value="{{ old('login') }}"
-                                        class="input-field w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none @error('login') input-error @enderror"
-                                        placeholder="nama@email.com atau username" required autofocus>
                                 </div>
                             </div>
 
                             <!-- Password Input -->
                             <div>
                                 <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <div class="relative flex items-center w-full border-2 border-gray-200 rounded-xl focus-within:border-[#165fac] bg-white transition-colors @error('password') border-red-500 @enderror">
+                                    <input type="password" id="password" name="password"
+                                        class="peer w-full py-3.5 pr-12 pl-12 focus:pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
+                                        placeholder="••••••••" required>
+                                    
+                                    <div class="absolute left-4 flex items-center pointer-events-none text-gray-400 transition-all duration-200 peer-focus:text-[#165fac] peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:-translate-x-2">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
                                         </svg>
                                     </div>
-                                    <input type="password" id="password" name="password"
-                                        class="input-field w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none @error('password') input-error @enderror"
-                                        placeholder="••••••••" required>
-                                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
-                                        <button type="button" onclick="togglePassword()" class="password-toggle text-gray-400">
+
+                                    <div class="absolute right-4 flex items-center">
+                                        <button type="button" onclick="togglePassword()" class="password-toggle text-gray-400 hover:text-gray-600 transition-colors">
                                             <svg id="eyeOpen" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
                                                 <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
@@ -139,15 +142,16 @@
                             <div>
                                 <label for="captcha" class="block text-sm font-semibold text-gray-700 mb-2">Kode Keamanan</label>
                                 <div class="flex flex-row items-center gap-3">
-                                    <div class="relative flex-1 group">
-                                        <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center pointer-events-none text-gray-400 group-focus-within:text-[#165fac] transition-colors">
+                                    <div class="relative flex-1 flex items-center border-2 border-gray-200 rounded-xl focus-within:border-[#165fac] focus-within:ring-4 focus-within:ring-blue-500/10 bg-white transition-all @error('captcha') border-red-500 @enderror">
+                                        <input type="text" id="captcha" name="captcha"
+                                            class="peer w-full py-3 pr-4 pl-12 focus:pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
+                                            placeholder="Masukkan kode di samping" required autocomplete="off">
+                                        
+                                        <div class="absolute left-4 flex items-center pointer-events-none text-gray-400 transition-all duration-200 peer-focus:text-[#165fac] peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:-translate-x-2">
                                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                             </svg>
                                         </div>
-                                        <input type="text" id="captcha" name="captcha"
-                                            class="input-field w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none focus:ring-4 focus:ring-blue-500/10 @error('captcha') border-red-500 @enderror transition-all"
-                                            placeholder="Masukkan kode di samping" required autocomplete="off">
                                     </div>
                                     <div class="flex items-center gap-2 w-auto h-[52px]">
                                         <div class="bg-gray-100 p-1 rounded-xl border-2 border-transparent h-full flex items-center justify-center shadow-inner overflow-hidden w-28 sm:w-36">
