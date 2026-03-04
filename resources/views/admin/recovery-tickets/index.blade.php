@@ -74,7 +74,7 @@
                             <th>Tanggal</th>
                             <th>User Peminta</th>
                             <th>Kendala</th>
-                            <th>Email Pribadi</th>
+                            <th>Email</th>
                             <th>Status API</th>
                             <th>Aksi Admin</th>
                         </tr>
@@ -152,8 +152,8 @@
                                             </div>
                                             <form action="{{ route('admin.recovery-tickets.resend', $ticket) }}" method="POST">
                                                 @csrf
-                                                <div class="modal-body">
-                                                    <p>Email pemulihan akan dikirim ulang ke <strong>{{ $ticket->user->personal_email }}</strong>.</p>
+                                                <div class="modal-body pt-3 px-4 pb-2">
+                                                    <p class="text-wrap text-break mb-3">Email pemulihan akan dikirim ulang ke <br><strong>{{ $ticket->user->personal_email }}</strong>.</p>
                                                     <div class="alert alert-info text-wrap" style="word-break: break-word;">
                                                         <i class="bx bx-info-circle"></i> Ini akan mengirimkan ulang link reset password ke email tersebut. Link lama yang belum kedaluwarsa tetap akan valid.
                                                     </div>
