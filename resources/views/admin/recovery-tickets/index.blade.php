@@ -128,14 +128,24 @@
                                             <i class="bx bx-refresh"></i> Kirim Ulang
                                         </button>
                                     @endif
-                                    
-                                    <button type="button" class="btn btn-sm btn-outline-success mx-1" onclick="confirmTicketAction('{{ route('admin.recovery-tickets.resolve', $ticket) }}', 'resolve', '{{ addslashes($ticket->user->name) }}')">
-                                        <i class="bx bx-check"></i> Selesai
-                                    </button>
+                                    @if($ticket->status == 'sent')
+                                        {{-- Only show Archive for Auto-Sent tickets (no confirmation needed) --}}
+                                        <form action="{{ route('admin.recovery-tickets.resolve', $ticket) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bx bx-archive-in"></i> Tutup Tiket
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Selesai and Tolak buttons for manual intervention tickets --}}
+                                        <button type="button" class="btn btn-sm btn-outline-success mx-1" onclick="confirmTicketAction('{{ route('admin.recovery-tickets.resolve', $ticket) }}', 'resolve', '{{ addslashes($ticket->user->name) }}')">
+                                            <i class="bx bx-check"></i> Selesai
+                                        </button>
 
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmTicketAction('{{ route('admin.recovery-tickets.reject', $ticket) }}', 'reject', '{{ addslashes($ticket->user->name) }}')">
-                                        <i class="bx bx-x"></i> Tolak
-                                    </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmTicketAction('{{ route('admin.recovery-tickets.reject', $ticket) }}', 'reject', '{{ addslashes($ticket->user->name) }}')">
+                                            <i class="bx bx-x"></i> Tolak
+                                        </button>
+                                    @endif
                                     
                                     @if($ticket->token_reset)
                                         <button class="btn btn-sm btn-icon btn-outline-info ms-1" title="Copy Link Reset" 

@@ -65,9 +65,16 @@ class ProfileController extends Controller
 
         // Validasi berbeda sesuai role
         $validated = $request->validate([
+            'personal_email' => 'nullable|email|max:255',
             'no_telepon' => 'nullable|string|max:20',
             'alamat' => 'nullable|string|max:500',
         ]);
+
+        // Simpan email pribadi langsung ke model User
+        $user->update([
+            'personal_email' => $validated['personal_email']
+        ]);
+
 
         switch ($roleName) {
             case 'siswa':

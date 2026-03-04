@@ -173,6 +173,19 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
+                                        <label for="personal_email" class="form-label">Email Pribadi</label>
+                                        <div class="input-group input-group-merge">
+                                            <span class="input-group-text"><i class="bx bx-envelope"></i></span>
+                                            <input type="email" name="personal_email" id="personal_email"
+                                                class="form-control @error('personal_email') is-invalid @enderror"
+                                                value="{{ old('personal_email', $user->personal_email ?? '') }}"
+                                                placeholder="budi@gmail.com">
+                                        </div>
+                                        <small class="text-muted" style="font-size: 0.70rem;">Penting untuk pemulihan akun</small>
+                                        @error('personal_email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Jenis Kelamin</label>
                                         <input type="text" class="form-control bg-light"
                                             value="{{ ($profileData->jenis_kelamin ?? '') == 'L' ? 'Laki-laki' : 'Perempuan' }}"
