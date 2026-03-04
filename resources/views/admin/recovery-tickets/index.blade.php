@@ -58,7 +58,7 @@
                 <span class="fw-semibold text-primary small" id="bulkCount">0 dipilih</span>
                 <div class="ms-auto d-flex gap-2 flex-wrap">
                     <button type="button" class="btn btn-sm btn-success" onclick="bulkAction('resolve')">
-                        <i class="bx bx-check me-1"></i> Setujui Terpilih
+                        <i class="bx bx-check-double me-1"></i> Tutup/Selesaikan Terpilih
                     </button>
                     <button type="button" class="btn btn-sm btn-danger" onclick="bulkAction('reject')">
                         <i class="bx bx-x me-1"></i> Tolak Terpilih

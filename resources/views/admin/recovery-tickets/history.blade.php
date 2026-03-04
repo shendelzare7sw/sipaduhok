@@ -42,9 +42,9 @@
                             <th>Tanggal Permintaan</th>
                             <th>User</th>
                             <th>Kendala</th>
-                            <th>Nomor WA</th>
+                            <th>Pemulihan Via</th>
                             <th>Status</th>
-                            <th>Diselesaikan</th>
+                            <th>Waktu Tutup</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
@@ -66,7 +66,9 @@
                                 @endif
                             </td>
                             <td>
-                                @if($ticket->target_phone)
+                                @if($ticket->user->personal_email)
+                                    <span class="text-muted"><i class="bx bx-envelope text-primary"></i> {{ $ticket->user->personal_email }}</span>
+                                @elseif($ticket->target_phone)
                                     <span class="text-muted"><i class="bx bxl-whatsapp text-success"></i> {{ $ticket->target_phone }}</span>
                                 @else
                                     <span class="text-muted small">-</span>
@@ -74,7 +76,7 @@
                             </td>
                             <td>
                                 @if($ticket->status == 'resolved')
-                                    <span class="badge bg-success"><i class="bx bx-check me-1"></i> Selesai</span>
+                                    <span class="badge bg-success"><i class="bx bx-check-double me-1"></i> Selesai/Ditutup</span>
                                 @elseif($ticket->status == 'rejected')
                                     <span class="badge bg-secondary"><i class="bx bx-x me-1"></i> Ditolak</span>
                                 @endif
