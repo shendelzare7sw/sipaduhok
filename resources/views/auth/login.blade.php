@@ -31,7 +31,7 @@
                     
                     <!-- Left Side - Logo Section -->
                     <div class="hidden lg:flex flex-col justify-center items-center p-12 text-white relative overflow-hidden bg-[#165fac] min-h-[600px] shadow-inner"
-                         style="background-image: linear-gradient(to bottom right, rgba(22, 95, 172, 0.85), rgba(14, 75, 138, 0.95)), url('{{ asset('img/logo/hok-watermark.png') }}'); background-size: cover, 100% auto; background-position: center, center; background-repeat: no-repeat;">
+                         style="background-image: linear-gradient(to bottom right, rgba(22, 95, 172, 0.85), rgba(14, 75, 138, 0.95)), url('{{ asset('img/logo/hok-watermark.png') }}'); background-size: cover, 140% auto; background-position: center, center; background-repeat: no-repeat;">
                         
                         <div class="absolute top-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                         <div class="absolute bottom-10 left-10 w-60 h-60 bg-yellow-300/10 rounded-full blur-3xl"></div>
