@@ -26,11 +26,12 @@
     <div class="animated-bg">
         <div class="login-container">
             <!-- Main Container -->
-            <div class="glass-effect rounded-3xl shadow-2xl overflow-hidden slide-in">
+            <div class="glass-effect w-full max-w-5xl mx-auto rounded-3xl shadow-2xl overflow-hidden slide-in">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     
                     <!-- Left Side - Logo Section -->
-                    <div class="hidden lg:flex flex-col justify-center items-center p-12 text-white relative overflow-hidden bg-gradient-to-br from-[#165fac] to-[#0e4b8a] min-h-[600px]">
+                    <div class="hidden lg:flex flex-col justify-center items-center p-12 text-white relative overflow-hidden bg-[#165fac] min-h-[600px] shadow-inner"
+                         style="background-image: linear-gradient(to bottom right, rgba(22, 95, 172, 0.85), rgba(14, 75, 138, 0.95)), url('{{ asset('img/logo/hok-watermark.png') }}'); background-size: cover, 100% auto; background-position: center, center; background-repeat: no-repeat;">
                         
                         <div class="absolute top-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
                         <div class="absolute bottom-10 left-10 w-60 h-60 bg-yellow-300/10 rounded-full blur-3xl"></div>
@@ -49,7 +50,7 @@
                     </div>
 
                     <!-- Right Side - Login Form -->
-                    <div class="p-8 md:p-12 bg-white min-h-[600px] flex flex-col justify-center">
+                    <div class="p-8 md:p-10 lg:px-14 bg-white min-h-[600px] flex flex-col justify-center">
 
                         <!-- Back to Home Link -->
                         <a href="/" class="inline-flex items-center gap-2 text-[#165fac] font-semibold mb-8 hover:text-[#287f3b] transition text-sm">
@@ -70,8 +71,8 @@
                         </div>
                         
                         <!-- Form Header -->
-                        <div class="mb-8">
-                            <h2 class="text-3xl font-bold text-gray-800 mb-2">Login Dashboard</h2>
+                        <div class="mb-5">
+                            <h2 class="text-3xl font-bold text-gray-800 mb-1">Login Dashboard</h2>
                             <p class="text-gray-600">Login Akun untuk melanjutkan</p>
                         </div>
 
