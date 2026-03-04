@@ -57,11 +57,8 @@
             <div class="bulk-toolbar d-none mb-3 p-2 rounded d-flex align-items-center flex-wrap gap-2" id="bulkToolbar" style="background: #eff6ff; border: 1px solid #bfdbfe;">
                 <span class="fw-semibold text-primary small" id="bulkCount">0 dipilih</span>
                 <div class="ms-auto d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn btn-sm btn-success" onclick="bulkAction('resolve')">
-                        <i class="bx bx-check-double me-1"></i> Tutup/Selesaikan Terpilih
-                    </button>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="bulkAction('reject')">
-                        <i class="bx bx-x me-1"></i> Tolak Terpilih
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="bulkAction('resolve')">
+                        <i class="bx bx-archive-in me-1"></i> Arsipkan/Tutup Terpilih
                     </button>
                 </div>
             </div>
@@ -122,33 +119,22 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="btn-group">
-                                    @if(in_array($ticket->status, ['pending_admin', 'failed']))
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if($ticket->user->personal_email)
                                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resendModal{{ $ticket->id }}">
                                             <i class="bx bx-refresh"></i> Kirim Ulang
                                         </button>
                                     @endif
-                                    @if($ticket->status == 'sent')
-                                        {{-- Only show Archive for Auto-Sent tickets (no confirmation needed) --}}
-                                        <form action="{{ route('admin.recovery-tickets.resolve', $ticket) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                                <i class="bx bx-archive-in"></i> Tutup Tiket
-                                            </button>
-                                        </form>
-                                    @else
-                                        {{-- Selesai and Tolak buttons for manual intervention tickets --}}
-                                        <button type="button" class="btn btn-sm btn-outline-success mx-1" onclick="confirmTicketAction('{{ route('admin.recovery-tickets.resolve', $ticket) }}', 'resolve', '{{ addslashes($ticket->user->name) }}')">
-                                            <i class="bx bx-check"></i> Selesai
+                                    
+                                    <form action="{{ route('admin.recovery-tickets.resolve', $ticket) }}" method="POST" class="d-inline m-0 p-0">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bx bx-archive-in"></i> Tutup Tiket
                                         </button>
-
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmTicketAction('{{ route('admin.recovery-tickets.reject', $ticket) }}', 'reject', '{{ addslashes($ticket->user->name) }}')">
-                                            <i class="bx bx-x"></i> Tolak
-                                        </button>
-                                    @endif
+                                    </form>
                                     
                                     @if($ticket->token_reset)
-                                        <button class="btn btn-sm btn-icon btn-outline-info ms-1" title="Copy Link Reset" 
+                                        <button class="btn btn-sm btn-icon btn-outline-info" title="Copy Link Reset" 
                                             onclick="copyToClipboard('{{ route('password.reset.ticket', $ticket->token_reset) }}')">
                                             <i class="bx bx-copy"></i>
                                         </button>
@@ -156,7 +142,7 @@
                                 </div>
 
                                 <!-- Modal Resend -->
-                                @if(in_array($ticket->status, ['pending_admin', 'failed']))
+                                @if($ticket->user->personal_email)
                                 <div class="modal fade" id="resendModal{{ $ticket->id }}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered" role="document">
                                         <div class="modal-content">
@@ -167,16 +153,14 @@
                                             <form action="{{ route('admin.recovery-tickets.resend', $ticket) }}" method="POST">
                                                 @csrf
                                                 <div class="modal-body">
-                                                    <p>Email pemulihan akan dikirim ulang ke <strong>{{ $ticket->user->personal_email ?? 'N/A' }}</strong>.</p>
-                                                    @if(empty($ticket->user->personal_email))
-                                                        <div class="alert alert-warning">
-                                                            <i class="bx bx-error-circle"></i> User ini belum memiliki Email Pribadi. Silakan tambahkan melalui halaman edit user terlebih dahulu.
-                                                        </div>
-                                                    @endif
+                                                    <p>Email pemulihan akan dikirim ulang ke <strong>{{ $ticket->user->personal_email }}</strong>.</p>
+                                                    <div class="alert alert-info text-wrap" style="word-break: break-word;">
+                                                        <i class="bx bx-info-circle"></i> Ini akan mengirimkan ulang link reset password ke email tersebut. Link lama yang belum kedaluwarsa tetap akan valid.
+                                                    </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary" {{ empty($ticket->user->personal_email) ? 'disabled' : '' }}><i class="bx bx-send"></i> Kirim Email</button>
+                                                    <button type="submit" class="btn btn-primary"><i class="bx bx-send"></i> Kirim Email</button>
                                                 </div>
                                             </form>
                                         </div>
