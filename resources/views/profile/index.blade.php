@@ -3,6 +3,7 @@
 @extends('layouts.sneat')
 
 @section('title', 'Profil Saya')
+@section('page-title', 'Profil Saya')
 
 @section('sidebar-menu')
     @php

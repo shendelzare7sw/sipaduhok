@@ -60,6 +60,20 @@ Compatible dengan Sneat Bootstrap 5 Template
     </ul>
 </li>
 
+<!-- Recovery Tickets (Auto-WA) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.recovery-tickets') ? 'active' : '' }}">
+    <a href="{{ route('admin.recovery-tickets.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-life-ring"></i>
+        <div>Tiket Pemulihan Akun</div>
+        @php
+            $pendingTickets = \App\Models\RecoveryTicket::whereIn('status', ['pending_admin', 'failed'])->count();
+        @endphp
+        @if($pendingTickets > 0)
+            <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingTickets }}</span>
+        @endif
+    </a>
+</li>
+
 <!-- Pengaturan LMS -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.lms-settings') ? 'active' : '' }}">
     <a href="{{ route('admin.lms-settings.index') }}" class="menu-link">

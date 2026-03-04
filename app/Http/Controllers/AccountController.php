@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Services\EmailRecoveryService;
 
 class AccountController extends Controller
 {
@@ -35,9 +36,11 @@ class AccountController extends Controller
         // Conditional Email Rules
         if ($user->isAdmin()) {
             $rules['email'] = 'required|email|unique:users,email,' . $user->id;
+            $rules['personal_email'] = 'nullable|email';
         } else {
             // Non-admin validates valid string for local part
             $rules['email_local'] = 'required|string|max:64|regex:/^[a-zA-Z0-9.]+$/';
+            $rules['personal_email'] = 'nullable|email';
         }
 
         $validated = $request->validate($rules);
@@ -46,6 +49,7 @@ class AccountController extends Controller
         $updateData = [
             'name' => $validated['name'],
             'username' => $validated['username'],
+            'personal_email' => $validated['personal_email'] ?? null,
         ];
 
         // Process Email
@@ -112,5 +116,47 @@ class AccountController extends Controller
 
         // Redirect ke login dengan pesan sukses
         return redirect()->route('login')->with('success', 'Password berhasil diubah! Silakan login dengan password baru Anda.');
+    }
+
+    /**
+     * Ubah Pengaturan Keamanan (Hanya untuk Admin/Ketua PKBM)
+     */
+    public function updateSecurity(Request $request)
+    {
+        $user = Auth::user();
+
+        // Hanya Admin / Ketua PKBM yang boleh update PIN
+        if (!$user->isAdmin() && !$user->isKetuaPKBM()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        $validated = $request->validate([
+            'current_password' => 'required',
+            'security_question' => 'required|string|max:255',
+            'security_answer'   => 'required|string|max:255',
+            'security_pin'      => 'required|string|digits:6|confirmed',
+        ], [
+            'security_pin.confirmed' => 'Konfirmasi PIN Keamanan tidak cocok.',
+        ]);
+
+        // Cek Otoritas dengan password lama
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            return back()->withErrors(['current_password_security' => 'Password saat ini tidak sesuai. Anda tidak diizinkan mengubah pengaturan keamanan keamanan.']);
+        }
+
+        // Update keamanan
+        $user->update([
+            'security_question' => $validated['security_question'],
+            'security_answer'   => Hash::make(strtolower(trim($validated['security_answer']))),
+            'security_pin'      => Hash::make($validated['security_pin']),
+        ]);
+
+        // Kirim Notifikasi ke Email Pribadi Admin (jika ada)
+        if ($user->personal_email) {
+            $emailService = new EmailRecoveryService();
+            $emailService->sendSecurityUpdateNotification($user, $validated['security_question']);
+        }
+
+        return back()->with('success', 'Pertanyaan Keamanan dan PIN berhasil diperbarui!');
     }
 }

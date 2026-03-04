@@ -27,6 +27,11 @@ class LoginRequest extends FormRequest
         return [
             'login' => ['required', 'string'],
             'password' => ['required', 'string'],
+            'captcha' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (strtolower($value) !== strtolower(session('captcha'))) {
+                    $fail('Kode keamanan tidak valid.');
+                }
+            }],
         ];
     }
 

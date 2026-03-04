@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
-    @vite(['resources/css/pages/login.css'])
+    @vite(['resources/css/pages/login.css', 'resources/js/pages/login.js', 'resources/js/pages/auth.js'])
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -61,7 +61,7 @@
 
                         <!-- Mobile Logo -->
                         <div class="lg:hidden text-center mb-8">
-                            <div class="w-16 h-16 mx-auto bg-gradient-to-br from-[#165fac] to-[#287f3b] rounded-2xl shadow-xl flex items-center justify-center mb-3">
+                            <div class="mobile-logo-container w-16 h-16 mx-auto bg-gradient-to-br from-[#165fac] to-[#287f3b] rounded-2xl shadow-xl flex items-center justify-center mb-3 transform hover:rotate-12 transition-transform duration-300">
                                 <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
                                 </svg>
@@ -135,31 +135,88 @@
                                 </div>
                             </div>
 
-                            <!-- Remember Me Checkbox -->
-                            <div class="flex items-center">
-                                <input type="checkbox" name="remember" id="remember" class="w-4 h-4 rounded border-gray-300 text-[#165fac] focus:ring-[#165fac]">
-                                <label for="remember" class="ml-2 text-sm text-gray-700">Ingat saya</label>
+                            <!-- CAPTCHA Input -->
+                            <div>
+                                <label for="captcha" class="block text-sm font-semibold text-gray-700 mb-2">Kode Keamanan</label>
+                                <div class="flex flex-row items-center gap-3">
+                                    <div class="relative flex-1 group">
+                                        <div class="absolute inset-y-0 left-0 w-12 flex items-center justify-center pointer-events-none text-gray-400 group-focus-within:text-[#165fac] transition-colors">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <input type="text" id="captcha" name="captcha"
+                                            class="input-field w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none focus:ring-4 focus:ring-blue-500/10 @error('captcha') border-red-500 @enderror transition-all"
+                                            placeholder="Masukkan kode di samping" required autocomplete="off">
+                                    </div>
+                                    <div class="flex items-center gap-2 w-auto h-[52px]">
+                                        <div class="bg-gray-100 p-1 rounded-xl border-2 border-transparent h-full flex items-center justify-center shadow-inner overflow-hidden w-28 sm:w-36">
+                                            <img id="captchaImage" src="{{ route('captcha') }}" alt="CAPTCHA" class="h-10 w-full object-contain mix-blend-multiply">
+                                        </div>
+                                        <button type="button" onclick="refreshCaptcha()" class="h-full px-2 sm:px-3 flex items-center justify-center text-gray-500 hover:text-[#165fac] hover:bg-gray-100 rounded-xl border border-transparent hover:border-gray-200 transition-all shrink-0 bg-transparent" title="Refresh CAPTCHA">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                @error('captcha')
+                                    <p class="text-red-500 text-sm mt-1.5 font-medium flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
+
+                            <!-- Remember Me and Forgot Password -->
+                            <div class="flex items-center justify-between mt-6">
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="remember" id="remember" class="w-4 h-4 rounded border-gray-300 text-[#165fac] focus:ring-[#165fac]">
+                                    <label for="remember" class="ml-2 text-sm text-gray-700">Ingat saya</label>
+                                </div>
+                                <div class="text-sm">
+                                    <a href="{{ route('user.recovery') }}" class="font-semibold text-[#165fac] hover:text-[#0d3a6b]">
+                                        Lupa Akun / Password?
+                                    </a>
+                                </div>
                             </div>
 
                             <!-- Submit Button -->
-                            <button type="submit" 
-                                class="btn-primary w-full bg-gradient-to-r from-[#165fac] via-[#287f3b] to-[#d45930] text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center justify-center gap-2">
-                                <span>Masuk ke Dashboard</span>
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                                </svg>
-                            </button>
+                            <div class="mt-6">
+                                <button type="submit" 
+                                    class="w-full bg-gradient-to-r from-[#165fac] via-[#287f3b] to-[#d45930] hover:from-[#d45930] hover:via-[#287f3b] hover:to-[#165fac] bg-[length:200%_auto] text-white font-bold py-4 rounded-xl shadow-[0_10px_20px_-10px_rgba(22,95,172,0.5)] hover:shadow-[0_10px_20px_-10px_rgba(212,89,48,0.5)] transition-all duration-500 transform hover:-translate-y-1 flex items-center justify-center gap-2 group hover:bg-right">
+                                    <span>Masuk ke Dashboard</span>
+                                    <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </form>
                     </div>
+
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="text-center text-white/80 text-sm mt-6">
-                <p>&copy; 2026 PKBM House Of Knowledge. All rights reserved.</p>
+            <div class="text-center text-white/80 text-sm mt-6 flex flex-col items-center gap-2">
+                <p class="text-white/90 hover:text-white transition group flex items-center gap-1 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    @php
+                        $adminWa = \App\Models\AppSetting::where('key', 'admin_wa_number')->value('value');
+                    @endphp
+                    Butuh bantuan? 
+                    @if($adminWa)
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $adminWa) }}" target="_blank" class="font-bold underline decoration-white/50 hover:decoration-white underline-offset-4 text-white">
+                            Hubungi Administrator
+                        </a>
+                    @else
+                        <span class="font-bold underline decoration-white/50 group-hover:decoration-white underline-offset-4">Hubungi Administrator</span>
+                    @endif
+                </p>
+                <p class="opacity-70">&copy; 2026 PKBM House Of Knowledge. All rights reserved.</p>
             </div>
         </div>
     </div>
-    @vite(['resources/js/pages/login.js'])
+    
 </body>
 </html>

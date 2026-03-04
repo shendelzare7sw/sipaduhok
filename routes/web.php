@@ -126,10 +126,64 @@ Route::get('/berita', [BeritaController::class, 'index'])->name('berita');
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
+    
+    // Captcha Routes
+    Route::get('/captcha', [\App\Http\Controllers\CaptchaController::class, 'generate'])->name('captcha');
+    Route::get('/captcha/refresh', [\App\Http\Controllers\CaptchaController::class, 'refresh'])->name('captcha.refresh');
+
+    // Admin Recovery Routes
+    Route::get('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'showLinkRequestForm'])->name('admin.recovery');
+    Route::post('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'reset'])->name('admin.recovery.reset');
+
+    // Public User Recovery Routes (Phase 3)
+    Route::get('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'index'])->name('user.recovery');
+    Route::post('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'store'])->name('user.recovery.store');
+    
+    // Recovery Password Reset via Link
+    Route::get('/recovery/reset/{token}', function ($token) {
+        $ticket = \App\Models\RecoveryTicket::where('token_reset', $token)
+            ->whereIn('status', ['sent', 'processing'])
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$ticket) {
+            return redirect()->route('login')->with('error', 'Tautan reset password ini tidak valid, kedaluwarsa, atau sudah pernah digunakan.');
+        }
+
+        return view('auth.reset-password-ticket', ['token' => $token]);
+    })->name('password.reset.ticket');
+
+    Route::post('/recovery/reset', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'token' => 'required',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $ticket = \App\Models\RecoveryTicket::where('token_reset', $request->token)
+            ->whereIn('status', ['sent', 'processing'])
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$ticket) {
+            return redirect()->route('login')->with('error', 'Tautan reset sudah tidak valid atau kedaluwarsa.');
+        }
+
+        $user = $ticket->user;
+        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        $user->save();
+
+        $ticket->update(['status' => 'resolved', 'token_reset' => null]);
+
+        return redirect()->route('login')->with('success', 'Password Anda berhasil diubah! Silakan login dengan password baru Anda.');
+    })->name('password.reset.ticket.submit');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+
+    // Admin Security Setup Routes (forced after login if not set)
+    Route::get('/admin/security-setup', [\App\Http\Controllers\Auth\AdminSecuritySetupController::class, 'showSetupForm'])->name('admin.security.setup');
+    Route::post('/admin/security-setup', [\App\Http\Controllers\Auth\AdminSecuritySetupController::class, 'store'])->name('admin.security.setup.store');
 });
 
 /*
@@ -210,6 +264,18 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [AiSettingController::class, 'index'])->name('index');
             Route::put('/', [AiSettingController::class, 'update'])->name('update');
             Route::post('/test', [AiSettingController::class, 'testConnection'])->name('test');
+        });
+
+        // Manajemen Tiket Pemulihan Akun (Phase 3)
+        Route::prefix('recovery-tickets')->name('recovery-tickets.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'index'])->name('index');
+            Route::post('/{ticket}/resend', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'resend'])->name('resend');
+            Route::post('/{ticket}/resolve', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'resolve'])->name('resolve');
+            Route::post('/{ticket}/reject', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'reject'])->name('reject');
+            Route::post('/bulk-resolve', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'bulkResolve'])->name('bulk-resolve');
+            Route::post('/bulk-reject', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'bulkReject'])->name('bulk-reject');
+            Route::post('/admin-wa', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'updateAdminWa'])->name('update-admin-wa');
+            Route::get('/history', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'history'])->name('history');
         });
     });
 
@@ -1408,6 +1474,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/settings', [App\Http\Controllers\AccountController::class, 'settings'])->name('settings');
         Route::put('/settings', [App\Http\Controllers\AccountController::class, 'updateSettings'])->name('update-settings');
         Route::put('/change-password', [App\Http\Controllers\AccountController::class, 'changePassword'])->name('change-password');
+        Route::put('/security', [App\Http\Controllers\AccountController::class, 'updateSecurity'])->name('update-security');
     });
 
     Route::prefix('profile')->name('profile.')->group(function () {

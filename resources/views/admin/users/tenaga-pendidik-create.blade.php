@@ -254,6 +254,11 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="form-label">Email Pribadi <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
+                <input type="email" name="personal_email" class="form-control" value="{{ old('personal_email') }}" placeholder="contoh: nama@gmail.com">
+                @error('personal_email') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
             <div class="row">
                 <div class="col">
                     <div class="form-group">

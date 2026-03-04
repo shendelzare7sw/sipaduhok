@@ -639,6 +639,15 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Email Pribadi <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
+                    <input type="email" class="form-control" name="personal_email" value="{{ old('personal_email') }}"
+                        placeholder="contoh: nama@gmail.com">
+                    @error('personal_email')
+                        <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <label for="address" class="form-label">
                         Alamat
                     </label>

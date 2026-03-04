@@ -13,9 +13,13 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'personal_email',
         'foto_profil',
         'username',
         'password',
+        'security_question',
+        'security_answer',
+        'security_pin',
         'phone',
         'avatar',
         'role', // keep for backward compatibility during migration
@@ -26,6 +30,8 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+        'security_answer',
+        'security_pin',
         'remember_token',
     ];
 

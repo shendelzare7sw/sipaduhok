@@ -350,6 +350,12 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Email Pribadi <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
+                <input type="email" name="personal_email" class="form-control"
+                    value="{{ old('personal_email', $siswa->user->personal_email) }}" placeholder="contoh: nama@gmail.com">
+                @error('personal_email') <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div> @enderror
+            </div>
+            <div class="form-group">
                 <label class="form-label">Password <small class="text-muted">(Kosongkan jika tidak ingin
                         diubah)</small></label>
                 <div style="position: relative;">

@@ -131,6 +131,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'personal_email' => 'nullable|email|max:255',
             'username' => 'required|string|unique:users,username|max:50',
             'password' => 'required|string|min:8',
             'role' => 'required|in:ketua_pkbm,wakil_kepala_sekolah,sekretaris,bendahara,wali_kelas,guru_pengajar',
@@ -147,11 +148,12 @@ class UserController extends Controller
         $user = User::create([
             'name' => $validated['nama_lengkap'],
             'email' => $validated['email'],
+            'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'cabang_id' => $validated['cabang_id'],
-            'phone' => $validated['telepon'], // Added phone to user table
+            'phone' => $validated['telepon'],
             'is_active' => true,
         ]);
 
@@ -228,6 +230,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'personal_email' => 'nullable|email|max:255',
             'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($userId)],
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:ketua_pkbm,wakil_kepala_sekolah,sekretaris,bendahara,wali_kelas,guru_pengajar',
@@ -245,11 +248,12 @@ class UserController extends Controller
         $userData = [
             'name' => $validated['nama_lengkap'],
             'email' => $validated['email'],
+            'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
             'role' => $validated['role'],
             'cabang_id' => $validated['cabang_id'],
             'is_active' => $validated['is_active'],
-            'phone' => $validated['telepon'], // Update phone in User table too
+            'phone' => $validated['telepon'],
         ];
 
         if (!empty($validated['password'])) {
@@ -430,6 +434,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email',
+            'personal_email' => 'nullable|email|max:255',
             'username' => 'required|string|unique:users,username|max:50',
             'password' => 'required|string|min:8',
             'cabang_id' => 'required|exists:cabang,id',
@@ -465,6 +470,7 @@ class UserController extends Controller
         $user = User::create([
             'name' => $validated['nama_lengkap'],
             'email' => $validated['email'] ?? $validated['username'] . '@siswa.sipaduhok.sch.id',
+            'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'role' => 'siswa',
@@ -560,6 +566,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
             'email' => ['nullable', 'email', Rule::unique('users', 'email')->ignore($siswa->user_id)],
+            'personal_email' => 'nullable|email|max:255',
             'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($siswa->user_id)],
             'password' => 'nullable|string|min:8',
             'cabang_id' => 'required|exists:cabang,id',
@@ -594,21 +601,12 @@ class UserController extends Controller
 
         // 1. Deteksi Perubahan Status Siswa
         if ($validated['status'] !== $siswa->status) {
-            // Case A: Status berubah jadi Non-Aktif (Pindah/Keluar) -> Otomatis Matikan Akun
-            // 'Lulus' diizinkan tetap aktif (untuk akses Rapor/Alumni Dashboard)
             if (in_array($validated['status'], ['pindah', 'keluar'])) {
                 $validated['is_active'] = 0;
-            }
-            // Case B: Status berubah jadi Aktif (Re-admission) -> Otomatis Hidupkan Akun
-            elseif ($validated['status'] === 'aktif') {
+            } elseif ($validated['status'] === 'aktif') {
                 $validated['is_active'] = 1;
             }
-        }
-        // 2. Deteksi Perubahan Status Akun (Tanpa Perubahan Status Siswa)
-        else {
-            // Case C: Status bukan Aktif DAN bukan Lulus, tapi Admin memaksakan Akun AKTIF
-            // -> Otomatis kembalikan Status Siswa jadi 'aktif' (Re-admission via Account Status)
-            // 'Lulus' boleh aktif, jadi dikecualikan dari auto-revert ini.
+        } else {
             if ($validated['status'] !== 'aktif' && $validated['status'] !== 'lulus' && $validated['is_active'] == '1') {
                 $validated['status'] = 'aktif';
             }
@@ -617,6 +615,7 @@ class UserController extends Controller
         $userData = [
             'name' => $validated['nama_lengkap'],
             'email' => $validated['email'] ?? $siswa->user->email,
+            'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
             'cabang_id' => $validated['cabang_id'],
             'is_active' => $validated['is_active'],
@@ -878,6 +877,7 @@ class UserController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email',
+            'personal_email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'siswa_ids' => 'nullable|array',
@@ -892,6 +892,7 @@ class UserController extends Controller
             'password' => Hash::make($validated['password']),
             'name' => $validated['name'],
             'email' => $validated['email'] ?? null,
+            'personal_email' => $validated['personal_email'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'role' => 'orang_tua',
             'is_active' => true,
@@ -966,6 +967,7 @@ class UserController extends Controller
                 'email',
                 Rule::unique('users', 'email')->ignore($orangTua->id)
             ],
+            'personal_email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:8',
             'is_active' => 'required|boolean',
@@ -979,6 +981,7 @@ class UserController extends Controller
         $orangTua->name = $validated['name'];
         $orangTua->username = $validated['username'];
         $orangTua->email = $validated['email'];
+        $orangTua->personal_email = $validated['personal_email'] ?? null;
         $orangTua->phone = $validated['phone'];
         $orangTua->is_active = $validated['is_active'];
 

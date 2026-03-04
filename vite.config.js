@@ -38,6 +38,7 @@ export default defineConfig({
                 'resources/js/pages/kontak.js',
                 'resources/js/pages/ppdb.js',
                 'resources/js/pages/login.js',
+                'resources/js/pages/auth.js',
                 'resources/js/pages/program-sd-sma.js',
                 'resources/js/pages/profil-guru.js',
             ],

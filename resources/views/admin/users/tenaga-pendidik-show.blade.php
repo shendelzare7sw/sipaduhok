@@ -112,6 +112,10 @@ Detail Tenaga Pendidik - {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                     <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9; word-break: break-word;">{{ $tenagaPendidik->user->email }}</td>
                 </tr>
                 <tr>
+                    <td style="padding: 12px 0; color: #64748b; padding-right: 8px; border-bottom: 1px solid #f1f5f9;">Email Pribadi</td>
+                    <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9; word-break: break-word;">{{ $tenagaPendidik->user->personal_email ?? '-' }}</td>
+                </tr>
+                <tr>
                     <td style="padding: 12px 0; color: #64748b; padding-right: 8px; border-bottom: 1px solid #f1f5f9;">No. Telepon</td>
                     <td style="padding: 12px 0; font-weight: 500; border-bottom: 1px solid #f1f5f9; word-break: break-word;">{{ $tenagaPendidik->telepon ?? '-' }}</td>
                 </tr>

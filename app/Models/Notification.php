@@ -43,6 +43,7 @@ class Notification extends Model
     const TIPE_SISTEM = 'sistem';
     const TIPE_KELAS = 'kelas';
     const TIPE_KENAIKAN = 'kenaikan';
+    const TIPE_RECOVERY = 'recovery';
 
     // Icon mapping
     public static function getIcon($tipe)
@@ -62,6 +63,7 @@ class Notification extends Model
             self::TIPE_SISTEM => 'fas fa-cog',
             self::TIPE_KELAS => 'fas fa-users',
             self::TIPE_KENAIKAN => 'fas fa-level-up-alt',
+            self::TIPE_RECOVERY => 'fas fa-life-ring',
             default => 'fas fa-bell',
         };
     }
@@ -84,6 +86,7 @@ class Notification extends Model
             self::TIPE_SISTEM => 'secondary',
             self::TIPE_KELAS => 'info',
             self::TIPE_KENAIKAN => 'success',
+            self::TIPE_RECOVERY => 'danger',
             default => 'secondary',
         };
     }

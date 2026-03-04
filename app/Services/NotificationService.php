@@ -1265,4 +1265,41 @@ class NotificationService
             ['ujian_id' => $ujian->id, 'nilai' => $ujianSiswa->nilai, 'tipe' => $ujian->tipe_ujian]
         );
     }
+    
+    /**
+     * Notify Admin about new Recovery Ticket that needs intervention
+     */
+    public function notifyAdminTicketPemulihan($ticket)
+    {
+        $admins = User::where('role', 'admin')->get();
+        $userName = $ticket->user->name ?? 'User';
+        
+        foreach ($admins as $admin) {
+            $this->create(
+                $admin->id,
+                Notification::TIPE_RECOVERY,
+                'Tiket Pemulihan: ' . $userName,
+                'User membutuhkan bantuan pemulihan akun.',
+                route('admin.recovery-tickets.index'),
+                ['ticket_id' => $ticket->id]
+            );
+        }
+    }
+
+    /**
+     * Notify User about their ticket resolution (if they get access and login later)
+     */
+    public function notifyUserTicketResolved($ticket)
+    {
+        if ($ticket->user_id) {
+            $this->create(
+                $ticket->user_id,
+                Notification::TIPE_RECOVERY,
+                'Pemulihan Berhasil',
+                'Status tiket pemulihan Anda telah diselesaikan oleh Admin.',
+                null,
+                ['ticket_id' => $ticket->id]
+            );
+        }
+    }
 }

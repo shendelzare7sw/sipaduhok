@@ -121,6 +121,10 @@ Detail Orang Tua - {{ $orangTua->name ?? 'N/A' }}
                             <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ $orangTua->email ?? '-' }}</td>
                         </tr>
                         <tr>
+                            <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">Email Pribadi</td>
+                            <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">{{ $orangTua->personal_email ?? '-' }}</td>
+                        </tr>
+                        <tr>
                             <td style="padding: 10px 0; color: #64748b; padding-right: 8px;">No. Telepon/WA</td>
                             <td style="padding: 10px 0; font-weight: 500; word-break: break-word;">
                                 @if($orangTua->phone)

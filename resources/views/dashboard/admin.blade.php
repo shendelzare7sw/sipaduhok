@@ -598,6 +598,14 @@
                         </span>
                         <i class="fas fa-chevron-right text-muted"></i>
                     </a>
+                    <a href="{{ route('admin.recovery-tickets.index') }}" class="quick-menu-item">
+                        <span>
+                            <i class="fas fa-life-ring text-danger me-2"></i>
+                            <span class="d-none d-sm-inline">Tiket Pemulihan</span>
+                            <span class="d-inline d-sm-none">Pemulihan</span>
+                        </span>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </a>
                 </div>
             </div>
 
