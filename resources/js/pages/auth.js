@@ -4,10 +4,10 @@
  */
 
 // --- 1. Admin Recovery Page Logic (admin-recovery.blade.php / reset-password-ticket.blade.php) ---
-window.togglePasswordVisibility = function(inputId) {
+window.togglePasswordVisibility = function (inputId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById('eye-icon-' + inputId);
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />';
@@ -18,14 +18,14 @@ window.togglePasswordVisibility = function(inputId) {
 };
 
 // --- 2. User Recovery Logic (user-recovery.blade.php) ---
-window.updatePlaceholder = function() {
+window.updatePlaceholder = function () {
     const tipe = document.getElementById('tipe_recovery');
     const input = document.getElementById('identifier');
     const helpText = document.getElementById('identifierHelp');
-    
-    if(!tipe || !input || !helpText) return;
 
-    switch(tipe.value) {
+    if (!tipe || !input || !helpText) return;
+
+    switch (tipe.value) {
         case 'lupa_username':
             input.placeholder = "NISN (Siswa) / NIP / No. HP Aktif";
             helpText.innerText = "Masukkan Nomor Induk atau Nomor HP yang Anda daftarkan.";
@@ -43,35 +43,35 @@ window.updatePlaceholder = function() {
 };
 
 // --- 3. Login Page Logic (login.blade.php) ---
-window.refreshCaptcha = function() {
+window.refreshCaptcha = function () {
     const captchaImage = document.getElementById('captchaImage');
-    if(captchaImage) {
+    if (captchaImage) {
         captchaImage.src = '/captcha?' + Math.random();
     }
 };
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Hidden trigger logic for admin recovery
     let logoClickCount = 0;
     let logoClickTimer;
-    
+
     const logos = document.querySelectorAll('.logo-container, .mobile-logo-container');
-    
+
     logos.forEach(targetElement => {
-        targetElement.addEventListener('click', function(e) {
+        targetElement.addEventListener('click', function (e) {
             logoClickCount++;
-            
+
             clearTimeout(logoClickTimer);
-            
+
             // Reset count after 2 seconds of inactivity
             logoClickTimer = setTimeout(() => {
                 logoClickCount = 0;
             }, 2000);
-            
+
             // 5 clicks = magical redirect
             if (logoClickCount === 5) {
                 logoClickCount = 0;
-                window.location.href = "/auth/recovery/secret"; // Uses hardcoded route fallback just in case blade injection fails. Usually window.admin_recovery_route is set in blade.
+                window.location.href = "/admin-recovery"; // Fallback if window.admin_recovery_route is not set
             }
         });
     });
