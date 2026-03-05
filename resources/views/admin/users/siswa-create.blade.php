@@ -243,7 +243,7 @@
                 flex-direction: column-reverse;
             }
 
-            .btn {
+            .form-actions .btn {
                 width: 100%;
             }
 

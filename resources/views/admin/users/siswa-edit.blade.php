@@ -262,7 +262,7 @@
                 flex-direction: column-reverse;
             }
 
-            .btn {
+            .form-actions .btn {
                 width: 100%;
             }
 
@@ -777,8 +777,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
         </div>
 
         {{-- Confirmation Modal --}}
