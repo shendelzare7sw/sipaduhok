@@ -1,3 +1,80 @@
+# Blokir Bot crawling/SEO tools agresif untuk hemat resouce server (Homeserver)
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: Ezooms
+Disallow: /
+
+# Blokir Bot AI Populer untuk Melindungi Konten & Resource
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+# Optimasi Bot Mesin Pencari Utama (Google & Bing)
+User-agent: Googlebot
+Disallow: /admin
+Disallow: /ketua
+Disallow: /waka
+Disallow: /bendahara
+Disallow: /sekretaris
+Disallow: /guru
+Disallow: /siswa
+Disallow: /orang-tua
+Allow: /
+
+User-agent: bingbot
+Disallow: /admin
+Disallow: /ketua
+Disallow: /waka
+Disallow: /bendahara
+Disallow: /sekretaris
+Disallow: /guru
+Disallow: /siswa
+Disallow: /orang-tua
+Allow: /
+
+# Aturan Default untuk Semua Bot Lainnya
 User-agent: *
 Disallow: /admin
 Disallow: /ketua
@@ -7,4 +84,7 @@ Disallow: /sekretaris
 Disallow: /guru
 Disallow: /siswa
 Disallow: /orang-tua
+Allow: /
+
+# Sitemap Link
 Sitemap: https://sipaduhok.my.id/sitemap.xml
