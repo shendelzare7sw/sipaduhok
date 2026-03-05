@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PPDB - PKBM House Of Knowledge</title>
+    <x-seo-meta title="PPDB - PKBM House Of Knowledge" description="Penerimaan Peserta Didik Baru (PPDB) PKBM House Of Knowledge. Daftar sekarang untuk masa depan pendidikan yang lebih baik."></x-seo-meta>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tentang Sekolah - PKBM House Of Knowledge</title>
+    <x-seo-meta title="Tentang Sekolah - PKBM House Of Knowledge" description="Pelajari profil lengkap PKBM House Of Knowledge, visi misi, sejarah, dan komitmen kami dalam memberikan pendidikan berkualitas untuk semua." keywords="tentang PKBM, profil sekolah, visi misi, sejarah pendidikan"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
@@ -157,7 +157,7 @@
                 @foreach($historyItems as $index => $item)
                     <div class="flex flex-col md:flex-row{{ $index % 2 != 0 ? '-reverse' : '' }} items-center gap-8">
                         <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12' }}">
-                            <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 {{ $index % 2 == 0 ? 'md:border-l-0 md:border-r-4' : '' }}" 
+                            <div class="bg-gray-50 rounded-2xl p-6 shadow-lg border-l-4 {{ $index % 2 == 0 ? 'md:border-l-0 md:border-r-4' : '' }}"
                                  style="border-color: {{ $item['color'] ?? '#165fac' }}">
                                 <span class="inline-block text-white px-4 py-1 rounded-full text-sm font-bold mb-3"
                                       style="background-color: {{ $item['color'] ?? '#165fac' }}">
@@ -167,7 +167,7 @@
                                 <p class="text-gray-600">{{ $item['description'] ?? '' }}</p>
                             </div>
                         </div>
-                        
+
                         <div class="hidden md:flex w-8 h-8 rounded-full items-center justify-center z-10"
                              style="background-color: {{ $item['color'] ?? '#165fac' }}">
                             <div class="w-3 h-3 bg-white rounded-full"></div>
@@ -200,7 +200,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($whyItems as $item)
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background-color: {{ $item['icon_color'] ?? '#165fac' }}1A;"> 
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background-color: {{ $item['icon_color'] ?? '#165fac' }}1A;">
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                              <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
                          @else

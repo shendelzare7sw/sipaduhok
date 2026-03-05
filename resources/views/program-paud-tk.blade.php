@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendidikan PAUD - TK - PKBM House Of Knowledge</title>
+    <x-seo-meta title="Pendidikan PAUD - TK - PKBM House Of Knowledge" description="Program PAUD dan Taman Kanak-kanak di PKBM House Of Knowledge menggunakan kurikulum modern dengan metode pembelajaran yang menyenangkan dan mendukung perkembangan anak." keywords="PAUD, TK, taman kanak-kanak, pendidikan anak usia dini, program PAUD Tangerang"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 

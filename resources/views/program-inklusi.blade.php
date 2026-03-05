@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Program Inklusi - PKBM House Of Knowledge</title>
+    <x-seo-meta title="Program Inklusi - PKBM House Of Knowledge" description="Program pendidikan inklusif PKBM House Of Knowledge memberikan akses pendidikan berkualitas untuk anak-anak berkebutuhan khusus dengan dukungan terapi dan bimbingan khusus." keywords="pendidikan inklusi, anak berkebutuhan khusus, ABK, sekolah inklusi, pendidikan khusus"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
@@ -101,7 +101,7 @@
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800">
                     {{ $servicesHeader['title'] ?? 'Jenis Kebutuhan yang Kami Layani' }}</h2>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($servicesItems as $index => $item)
                     @php
@@ -115,7 +115,7 @@
 
                     <div class="card-hover bg-gray-50 rounded-2xl p-8 border-t-4"
                         style="border-color: {{ $styles['border'] }}">
-                        
+
                         <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
                              style="background-color: {{ $styles['bg'] }}1A;">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
@@ -186,7 +186,7 @@
                 </a>
                 <a href="{{ url($ctaContent['button_link_2'] ?? '/kontak') }}"
                     class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-full hover:bg-white hover:text-[#d45930] transition"
-                   onmouseover="this.style.color='{{ $ctaContent['background_gradient_start'] ?? '#d45930' }}'" 
+                   onmouseover="this.style.color='{{ $ctaContent['background_gradient_start'] ?? '#d45930' }}'"
                    onmouseout="this.style.color='white'">
                     {{ $ctaContent['button_text_2'] ?? 'Konsultasi Gratis' }}
                 </a>

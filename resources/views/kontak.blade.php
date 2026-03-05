@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kontak - PKBM House Of Knowledge</title>
+    <x-seo-meta title="Kontak - PKBM House Of Knowledge" description="Hubungi PKBM House Of Knowledge. Temukan lokasi cabang, alamat email, dan nomor telepon kami."></x-seo-meta>
 
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>

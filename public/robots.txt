@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /ketua
+Disallow: /waka
+Disallow: /bendahara
+Disallow: /sekretaris
+Disallow: /guru
+Disallow: /siswa
+Disallow: /orang-tua
+Sitemap: https://sipaduhok.my.id/sitemap.xml

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Program Terapi - PKBM House Of Knowledge</title>
+    <x-seo-meta title="Program Terapi - PKBM House Of Knowledge" description="Program terapi komprehensif PKBM House Of Knowledge mencakup terapi wicara, terapi kognitif, dan konseling untuk mendukung perkembangan holistik setiap anak." keywords="terapi anak, terapi wicara, terapi kognitif, layanan konseling pendidikan, program khusus"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
@@ -170,7 +170,7 @@
                         }
                         // Match by title, or fallback to default
                         $config = $therapyConfig[$item['title']] ?? ['icon_path' => $defaultIcon];
-                        
+
                         // Parse features (pipe separated)
                         $features = isset($item['features']) ? explode('|', $item['features']) : [];
                     @endphp
@@ -179,7 +179,7 @@
                         <div class="h-48 flex items-center justify-center relative">
                             <!-- Helper div for background opacity -->
                              <div class="absolute inset-0 opacity-10" style="background-color: {{ $hexColor }}"></div>
-                             
+
                             <svg class="w-20 h-20 relative z-10" style="color: {{ $hexColor }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="{{ $config['icon_path'] }}" />
@@ -188,7 +188,7 @@
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] ?? 'Program Terapi' }}</h3>
                             <p class="text-gray-600 text-sm mb-4">{{ $item['description'] ?? '' }}</p>
-                            
+
                             @if(!empty($features))
                                 <ul class="text-sm text-gray-600 space-y-2">
                                     @foreach($features as $feature)

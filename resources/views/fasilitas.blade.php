@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PKBM House Of Knowledge - Fasilitas</title>
+    <x-seo-meta title="Fasilitas - PKBM House Of Knowledge" description="Fasilitas lengkap dan modern di PKBM House Of Knowledge mendukung proses pembelajaran optimal dengan ruang kelas nyaman, laboratorium, dan area bermain interaktif." keywords="fasilitas sekolah, sarana pendidikan, ruang kelas, laboratorium, fasilitas lengkap"></x-seo-meta>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
@@ -42,7 +42,7 @@
 
     <!-- ==================== HERO SECTION ==================== -->
     <section class="relative min-h-screen flex items-center" style="
-            background-image: url('{{ asset($heroContent['background_image'] ?? 'img/bg-fasilitas.jpg') }}'); 
+            background-image: url('{{ asset($heroContent['background_image'] ?? 'img/bg-fasilitas.jpg') }}');
             background-size: cover;
             background-position: center;
         ">

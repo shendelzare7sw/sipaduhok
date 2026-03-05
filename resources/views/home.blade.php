@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PKBM House Of Knowledge - Beranda</title>
+    <x-seo-meta title="Beranda - PKBM House Of Knowledge" description="PKBM House Of Knowledge adalah lembaga pendidikan non-formal terpercaya di Tangerang Selatan yang menyediakan program PAUD, SD, SMP, SMA, inklusi, dan terapi." keywords="PKBM House Of Knowledge, pendidikan non-formal, PPDB, sekolah alternatif, pendidikan inklusi"></x-seo-meta>
 
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,10 +20,10 @@
     <x-navbar></x-navbar>
 
     <!-- ==================== HERO SECTION ==================== -->
-    @php 
+    @php
         $hero = $page->getSection('hero');
-        $heroContent = $hero->content ?? []; 
-        
+        $heroContent = $hero->content ?? [];
+
         $statsSection = $page->getSection('stats');
         $statsItems = $statsSection->content ?? [];
 
@@ -39,7 +39,7 @@
         $gallerySection = $galeriPage ? $galeriPage->getSection('gallery_items') : null;
         $galleryContent = $gallerySection->content ?? [];
         $galleryHeader = ['badge' => 'Galeri Kami', 'title' => 'Galeri', 'description' => 'Berisi Kegiatan Siswa Dan Siswi']; // Fallback header
-        
+
         // Ambil data item, balik urutannya (terbaru di awal), dan batasi maksimal 6
         $allGalleryItems = $galleryContent['items'] ?? [];
         $galleryItems = array_slice(array_reverse($allGalleryItems), 0, 6);
@@ -145,11 +145,11 @@
                 @php
                     $isHex = isset($stat['icon_color']) && substr($stat['icon_color'], 0, 1) === '#';
                     $themeColor = $stat['icon_color'] ?? 'primary';
-                    
+
                     // Fallback for classes
                     $bgClass = $isHex ? '' : 'bg-' . $themeColor . '/10';
                     $textClass = $isHex ? '' : 'text-' . $themeColor;
-                    
+
                     // Inline styles for Hex
                     $bgStyle = $isHex ? "background-color: {$themeColor}1A;" : ""; // 10% opacity
                     $textStyle = $isHex ? "color: $themeColor;" : "";
@@ -193,7 +193,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Logic moved to top php block --}}
-            
+
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
                     {{ $programHeader['badge'] ?? 'Program Kami' }}
@@ -219,14 +219,14 @@
                     $bgIconClass = $isHex ? '' : 'bg-' . $shadeColor . '-50';
                     $groupHoverIconBgClass = $isHex ? '' : 'group-hover:bg-' . $themeColor;
                     $iconColorClass = $isHex ? '' : 'text-' . $themeColor;
-                    
+
                     // Inline styles
                     $cardStyle = $isHex ? "border-top-color: $themeColor;" : "";
                     $iconBgStyle = $isHex ? "background-color: {$themeColor}10;" : ""; // ~6% opacity
                     $iconStyle = $isHex ? "color: $themeColor;" : "";
                 @endphp
                 <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 {{ $borderClass }} group" style="{{ $cardStyle }}">
-                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center {{ $bgIconClass }} {{ $groupHoverIconBgClass }} transition-colors duration-300" 
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center {{ $bgIconClass }} {{ $groupHoverIconBgClass }} transition-colors duration-300"
                          style="{{ $iconBgStyle }} {{ $isHex ? 'border: 1px solid '.$themeColor.'20;' : '' }}">
                         {{-- Icon placeholder --}}
                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
@@ -441,7 +441,7 @@
                 @php
                     $inputColor = $item['color'] ?? 'orange';
                     $isHex = str_starts_with($inputColor, '#');
-                    
+
                     if (!$isHex) {
                         $colorMap = $colorClasses[$inputColor] ?? $colorClasses['orange'];
                         $borderColorClass = $colorMap['border'];
@@ -460,16 +460,16 @@
                         $iconBgClass = '';
                         $textColorClass = '';
                         $iconHoverBgClass = '';
-                        
+
                         $cardStyle = "border-bottom-color: $themeColor;";
                         $bgStyle = "background-color: {$themeColor}10;";
                         $iconBgStyle = "background-color: {$themeColor}20; color: $themeColor;";
                         $textStyle = "color: $themeColor;";
                     }
                 @endphp
-                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 {{ $borderColorClass }} group relative overflow-hidden" 
+                <div class="card-hover bg-white rounded-2xl shadow-xl p-8 border-b-4 {{ $borderColorClass }} group relative overflow-hidden"
                      style="{{ $cardStyle }}">
-                    
+
                     {{-- Decorative Background Circle --}}
                     <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 {{ $bgShadeClass }}"
                          style="{{ $bgStyle }}"></div>

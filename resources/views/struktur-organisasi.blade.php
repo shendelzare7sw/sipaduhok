@@ -8,7 +8,7 @@
         $heroSection = $page->getSection('hero');
         $heroContent = $heroSection->content ?? [];
     @endphp
-    <title>{{ $heroContent['title'] ?? 'Struktur Organisasi' }} - PKBM House Of Knowledge</title>
+    <x-seo-meta title="{{ $heroContent['title'] ?? 'Struktur Organisasi' }} - PKBM House Of Knowledge" description="Struktur organisasi dan manajemen PKBM House Of Knowledge yang profesional dalam mendukung operasional pendidikan berkualitas sehari-hari." keywords="struktur organisasi, manajemen sekolah, tim profesional, hierarki pendidikan"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 

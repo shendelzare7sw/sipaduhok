@@ -87,6 +87,9 @@ use App\Http\Controllers\Siswa\LmsUjianController;
 // Midtrans Webhook (must be outside auth middleware)
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'notification'])->name('midtrans.notification');
 
+// Sitemap
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
 // Homepage
 Route::get('/', [\App\Http\Controllers\LandingPageController::class, 'home'])->name('home');
 
