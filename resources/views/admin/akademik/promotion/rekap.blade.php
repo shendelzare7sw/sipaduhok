@@ -135,6 +135,9 @@
         padding: 10px 14px !important; background: #f9fafb;
     }
     .desktop-only-cell { display: none !important; }
+    
+    .mobile-text-end { text-align: right; }
+    .mobile-text-start { text-align: left; }
 
     /* Mobile select all */
     .mobile-select-all { display: flex !important; }
@@ -386,27 +389,39 @@
                             @endphp
                             <tr>
                                 <td class="mobile-card-head">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span>{{ $data->nama_lengkap }}</span>
-                                        <span class="badge bg-{{ $badge }} mobile-only-cell">{{ str_replace('_', ' ', $data->status_kelulusan) }}</span>
+                                    <div class="d-flex justify-content-between align-items-start gap-2" style="width: 100%;">
+                                        <div class="d-flex align-items-center gap-2" style="flex: 1; min-width: 0;">
+                                            <span class="text-wrap text-break lh-sm">{{ $data->nama_lengkap }}</span>
+                                        </div>
+                                        <div class="mobile-only-cell flex-shrink-0 ms-auto">
+                                            <span class="badge bg-{{ $badge }}">{{ str_replace('_', ' ', $data->status_kelulusan) }}</span>
+                                        </div>
                                     </div>
                                 </td>
-                                <td data-label="Kelas Asal">{{ $data->kelas_asal }}</td>
-                                <td data-label="Kelas Tujuan">{{ $data->kelas_tujuan ?? '-' }}</td>
+                                <td data-label="Kelas Asal">
+                                    <div class="mobile-text-end">{{ $data->kelas_asal }}</div>
+                                </td>
+                                <td data-label="Kelas Tujuan">
+                                    <div class="mobile-text-end">{{ $data->kelas_tujuan ?? '-' }}</div>
+                                </td>
                                 <td data-label="Status Bayar">
-                                    @if($data->status_pembayaran == 'LUNAS')
-                                        <span class="badge bg-success">Lunas</span>
-                                    @else
-                                        <span class="badge bg-danger">Belum Lunas</span>
-                                        @if($data->izin_khusus_ketua)
-                                            <span class="badge bg-warning" title="Dispensasi Ketua">Override</span>
+                                    <div class="mobile-text-end">
+                                        @if($data->status_pembayaran == 'LUNAS')
+                                            <span class="badge bg-success">Lunas</span>
+                                        @else
+                                            <span class="badge bg-danger mb-1">Belum Lunas</span>
+                                            @if($data->izin_khusus_ketua)
+                                                <br><span class="badge bg-warning" title="Dispensasi Ketua">Override</span>
+                                            @endif
                                         @endif
-                                    @endif
+                                    </div>
                                 </td>
                                 <td data-label="Akademik">
-                                    {{ $data->persentase_nilai_tuntas }}% Tuntas
-                                    <br>
-                                    <small class="text-muted">{{ $data->jumlah_mapel_tuntas }}/{{ $data->total_mapel }} Mapel</small>
+                                    <div class="mobile-text-end">
+                                        {{ $data->persentase_nilai_tuntas }}% Tuntas
+                                        <br>
+                                        <small class="text-muted">{{ $data->jumlah_mapel_tuntas }}/{{ $data->total_mapel }} Mapel</small>
+                                    </div>
                                 </td>
                                 <td data-label="Hasil Akhir" class="desktop-only-cell">
                                     <span class="badge bg-{{ $badge }}">{{ str_replace('_', ' ', $data->status_kelulusan) }}</span>
@@ -640,14 +655,14 @@
                                         @endif
                                     </td>
                                     <td class="mobile-card-head">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>
+                                        <div class="d-flex justify-content-between align-items-start gap-2" style="width: 100%;">
+                                            <div class="d-flex align-items-center gap-2" style="flex: 1; min-width: 0;">
                                                 @if(!$sim['result']['eligible'])
-                                                <input type="checkbox" class="simCheck mobile-only-cell me-2" value="{{ $sim['siswa']->id }}">
+                                                <input type="checkbox" class="simCheck mobile-only-cell flex-shrink-0" value="{{ $sim['siswa']->id }}" style="margin-top: 2px;">
                                                 @endif
-                                                {{ $sim['siswa']->nama_lengkap }}
-                                            </span>
-                                            <span class="mobile-only-cell">
+                                                <span class="text-wrap text-break lh-sm" style="flex: 1;">{{ $sim['siswa']->nama_lengkap }}</span>
+                                            </div>
+                                            <div class="mobile-only-cell flex-shrink-0 ms-auto">
                                                 @if($sim['result']['eligible'])
                                                     @if(preg_match('/(9|IX|12|XII)/', strtoupper($sim['siswa']->kelas->nama_kelas ?? '')))
                                                         <span class="text-info fw-bold"><i class="fas fa-graduation-cap"></i></span>
@@ -657,27 +672,33 @@
                                                 @else
                                                     <span class="text-danger fw-bold"><i class="fas fa-times-circle"></i></span>
                                                 @endif
-                                            </span>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td data-label="Kelas">{{ $sim['siswa']->kelas->nama_kelas ?? '-' }}</td>
+                                    <td data-label="Kelas">
+                                        <div class="mobile-text-end">{{ $sim['siswa']->kelas->nama_kelas ?? '-' }}</div>
+                                    </td>
                                     <td data-label="Keuangan">
-                                        @if($sim['result']['financial']['status'] == 'LUNAS')
-                                            <span class="badge bg-success">Lunas</span>
-                                        @else
-                                            <span class="badge bg-danger">Tunggakan: Rp {{ number_format($sim['result']['financial']['unpaid_amount'], 0, ',', '.') }}</span>
-                                            @if($sim['result']['financial']['is_dispensasi'])
-                                                <span class="badge bg-warning">Dispensasi OK</span>
+                                        <div class="mobile-text-end">
+                                            @if($sim['result']['financial']['status'] == 'LUNAS')
+                                                <span class="badge bg-success">Lunas</span>
+                                            @else
+                                                <span class="badge bg-danger mb-1 text-wrap text-break lh-base" style="max-width: 100%; white-space: normal; text-align: left;">Tunggakan: Rp {{ number_format($sim['result']['financial']['unpaid_amount'], 0, ',', '.') }}</span>
+                                                @if($sim['result']['financial']['is_dispensasi'])
+                                                    <br><span class="badge bg-warning">Dispensasi OK</span>
+                                                @endif
                                             @endif
-                                        @endif
+                                        </div>
                                     </td>
                                     <td data-label="Akademik">
-                                        @if($sim['result']['academic']['is_tuntas'])
-                                            <span class="badge bg-success">Aman ({{ $sim['result']['academic']['percentage'] }}%)</span>
-                                        @else
-                                            <span class="badge bg-danger">Rawan ({{ $sim['result']['academic']['percentage'] }}%)</span>
-                                            <br><small>Hanya {{ $sim['result']['academic']['tuntas_count'] }} mapel tuntas</small>
-                                        @endif
+                                        <div class="mobile-text-end">
+                                            @if($sim['result']['academic']['is_tuntas'])
+                                                <span class="badge bg-success">Aman ({{ $sim['result']['academic']['percentage'] }}%)</span>
+                                            @else
+                                                <span class="badge bg-danger mb-1">Rawan ({{ $sim['result']['academic']['percentage'] }}%)</span>
+                                                <br><small class="text-muted lh-1">Hanya {{ $sim['result']['academic']['tuntas_count'] }} mapel tuntas</small>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="desktop-only-cell">
                                         @if($sim['result']['eligible'])
@@ -782,26 +803,34 @@
                                         @endif
                                     </td>
                                     <td data-label="Dibuat Oleh">
-                                        <div>{{ $schedule->creator->name ?? '-' }}</div>
-                                        @if($schedule->creator)
-                                            <small class="text-muted">
-                                                {{ $schedule->creator->role === 'wakil_kepala_sekolah' ? 'Wakil Kepala Sekolah' : ucfirst($schedule->creator->role) }}
-                                            </small>
-                                        @endif
+                                        <div class="mobile-text-end">
+                                            <div>{{ $schedule->creator->name ?? '-' }}</div>
+                                            @if($schedule->creator)
+                                                <small class="text-muted">
+                                                    {{ $schedule->creator->role === 'wakil_kepala_sekolah' ? 'Wakil Kepala Sekolah' : ucfirst($schedule->creator->role) }}
+                                                </small>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td data-label="Statistik">
-                                        @if($schedule->status == 'COMPLETED')
-                                            <small>
-                                                Proses: {{ $schedule->students_processed }}<br>
-                                                Naik: {{ $schedule->students_promoted }}<br>
-                                                Lulus: {{ $schedule->students_graduated }}<br>
-                                                Gagal: {{ $schedule->students_failed }}
-                                            </small>
-                                        @else
-                                            -
-                                        @endif
+                                        <div class="mobile-text-end">
+                                            @if($schedule->status == 'COMPLETED')
+                                                <small>
+                                                    Proses: {{ $schedule->students_processed }}<br>
+                                                    Naik: {{ $schedule->students_promoted }}<br>
+                                                    Lulus: {{ $schedule->students_graduated }}<br>
+                                                    Gagal: {{ $schedule->students_failed }}
+                                                </small>
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
                                     </td>
-                                    <td data-label="Log"><small class="text-muted">{{ Str::limit($schedule->execution_log, 50) }}</small></td>
+                                    <td data-label="Log">
+                                        <div class="mobile-text-end">
+                                            <small class="text-muted">{{ Str::limit($schedule->execution_log, 50) }}</small>
+                                        </div>
+                                    </td>
                                     <td class="mobile-card-actions">
                                         @if($schedule->status == 'PENDING')
                                             <button type="button" class="btn btn-sm btn-danger"

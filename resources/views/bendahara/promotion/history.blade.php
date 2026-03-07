@@ -7,6 +7,48 @@
     @include('bendahara.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+<style>
+/* Responsive Styles - Mobile Only */
+@media (max-width: 768px) {
+    .table-responsive.text-nowrap {
+        white-space: normal !important;
+        overflow-x: visible !important;
+    }
+    .table-card-mobile { white-space: normal !important; }
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block; border: 1px solid #e5e7eb; border-radius: 12px;
+        margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff; position: relative;
+    }
+    .table-card-mobile tbody td {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px; border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important; text-align: right;
+        white-space: normal !important; word-break: break-word;
+    }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label); font-weight: 700; font-size: 10px;
+        text-transform: uppercase; color: #9ca3af; letter-spacing: 0.5px;
+        text-align: left; flex-shrink: 0; margin-right: 12px;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700; font-size: 15px; padding: 14px !important;
+        border-bottom: 2px solid #e0e7ff !important; display: block !important;
+        text-align: left;
+    }
+    .mobile-text-end { text-align: right; }
+    .desktop-only-cell { display: none !important; }
+    .force-d-flex-mobile { display: flex !important; }
+}
+@media (min-width: 769px) {
+    .mobile-only-cell { display: none !important; }
+}
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -63,12 +105,12 @@
                         </div>
                     </form>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                    <div class="table-responsive text-nowrap">
+                        <table class="table table-hover table-card-mobile align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Tanggal Pengajuan</th>
                                     <th>Siswa</th>
+                                    <th>Tanggal Pengajuan</th>
                                     <th>Kelas</th>
                                     <th>Status</th>
                                     <th>Diajukan Oleh</th>
@@ -80,28 +122,55 @@
                             <tbody>
                                 @forelse($history as $item)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d F Y') }}</td>
-                                    <td class="fw-bold">{{ $item->nama_siswa }}</td>
-                                    <td>{{ $item->nama_kelas }}</td>
-                                    <td>
-                                        @if($item->status == 'DISETUJUI')
-                                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disetujui</span>
-                                        @elseif($item->status == 'DITOLAK')
-                                            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ditolak</span>
-                                        @else
-                                            <span class="badge bg-secondary">{{ $item->status }}</span>
-                                        @endif
+                                    <td class="mobile-card-head">
+                                        <div class="d-flex justify-content-between align-items-center gap-2" style="width: 100%;">
+                                            <span class="text-wrap text-break lh-sm fw-semibold" style="flex: 1;">{{ $item->nama_siswa }}</span>
+                                            <span class="mobile-only-cell flex-shrink-0 ms-auto">
+                                                @if($item->status == 'DISETUJUI')
+                                                    <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                                @elseif($item->status == 'DITOLAK')
+                                                    <span class="text-danger"><i class="bi bi-x-circle-fill"></i></span>
+                                                @else
+                                                    <span class="text-secondary"><i class="bi bi-clock-fill"></i></span>
+                                                @endif
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td>{{ $item->pengaju }}</td>
-                                    <td>{{ $item->penyetuju ?? '-' }}</td>
-                                    <td>
-                                        @if($item->tanggal_persetujuan)
-                                            {{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->locale('id')->translatedFormat('d F Y') }}
-                                        @else
-                                            -
-                                        @endif
+                                    <td data-label="Tgl Pengajuan" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end">{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d F Y') }}</div>
                                     </td>
-                                    <td>{{ $item->catatan_ketua ?? '-' }}</td>
+                                    <td data-label="Kelas" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end">{{ $item->nama_kelas }}</div>
+                                    </td>
+                                    <td data-label="Status" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end">
+                                            @if($item->status == 'DISETUJUI')
+                                                <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Disetujui</span>
+                                            @elseif($item->status == 'DITOLAK')
+                                                <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Ditolak</span>
+                                            @else
+                                                <span class="badge bg-secondary">{{ $item->status }}</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td data-label="Diajukan Oleh" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end">{{ $item->pengaju }}</div>
+                                    </td>
+                                    <td data-label="Disetujui Oleh" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end">{{ $item->penyetuju ?? '-' }}</div>
+                                    </td>
+                                    <td data-label="Tgl Keputusan" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end">
+                                            @if($item->tanggal_persetujuan)
+                                                {{ \Carbon\Carbon::parse($item->tanggal_persetujuan)->locale('id')->translatedFormat('d F Y') }}
+                                            @else
+                                                -
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td data-label="Catatan" class="force-d-flex-mobile">
+                                        <div class="mobile-text-end text-wrap text-break lh-sm">{{ $item->catatan_ketua ?? '-' }}</div>
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
