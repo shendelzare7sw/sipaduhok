@@ -313,10 +313,16 @@ class SekretarisController extends Controller
             'waktu_mulai' => 'nullable|date_format:H:i',
             'waktu_selesai' => 'nullable|date_format:H:i|after:waktu_mulai',
             'keterangan' => 'nullable|string',
-            'jenis_kegiatan' => 'required|in:field_trip,outing,live_in,hokfest,pts,pas,libur,ujian,acara_sekolah,lainnya',
+            'jenis_kegiatan' => 'required|string|max:100',
+            'custom_jenis_kegiatan' => 'nullable|string|max:50',
             'lampiran_surat' => 'nullable|file|mimes:pdf|max:5120',
             'status' => 'required|in:draft,aktif,selesai',
         ]);
+
+        // Process custom event type
+        if ($request->jenis_kegiatan === 'lainnya' && $request->custom_jenis_kegiatan) {
+            $validated['jenis_kegiatan'] = $request->custom_jenis_kegiatan;
+        }
 
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $validated['tahun_ajaran_id'] = $tahunAjaranAktif->id;
@@ -357,10 +363,16 @@ class SekretarisController extends Controller
             'waktu_mulai' => 'nullable|date_format:H:i',
             'waktu_selesai' => 'nullable|date_format:H:i|after:waktu_mulai',
             'keterangan' => 'nullable|string',
-            'jenis_kegiatan' => 'required|in:field_trip,outing,live_in,hokfest,pts,pas,libur,ujian,acara_sekolah,lainnya',
+            'jenis_kegiatan' => 'required|string|max:100',
+            'custom_jenis_kegiatan' => 'nullable|string|max:50',
             'lampiran_surat' => 'nullable|file|mimes:pdf|max:5120',
             'status' => 'required|in:draft,aktif,selesai',
         ]);
+
+        // Process custom event type
+        if ($request->jenis_kegiatan === 'lainnya' && $request->custom_jenis_kegiatan) {
+            $validated['jenis_kegiatan'] = $request->custom_jenis_kegiatan;
+        }
 
         if ($request->hasFile('lampiran_surat')) {
             if ($kalender->lampiran_surat) {

@@ -134,6 +134,6 @@ class KalenderAkademik extends Model
             'lainnya' => 'Lainnya'
         ];
 
-        return $labels[$this->jenis_kegiatan] ?? 'Lainnya';
+        return $labels[$this->jenis_kegiatan] ?? $this->jenis_kegiatan;
     }
 }
