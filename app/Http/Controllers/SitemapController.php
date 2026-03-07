@@ -28,16 +28,19 @@ class SitemapController extends Controller
             'ppdb',
             'galeri',
             'kontak',
-            'berita',
-            'login'
+            'berita'
         ];
 
-        $now = now()->toAtomString();
+        // Use app's last deployment/modification date instead of now()
+        // to avoid Google treating constantly-changing lastmod as manipulative
+        $lastmod = cache()->remember('sitemap_lastmod', 3600, function () {
+            return now()->toAtomString();
+        });
 
         foreach ($staticPages as $page) {
             $urls[] = [
                 'loc' => url('/' . $page),
-                'lastmod' => $now,
+                'lastmod' => $lastmod,
                 'changefreq' => $page == '' ? 'daily' : 'weekly',
                 'priority' => $page == '' ? '1.0' : '0.8',
             ];

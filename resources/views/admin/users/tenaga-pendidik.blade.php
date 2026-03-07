@@ -536,6 +536,97 @@
             /* Make "Tambah" text shorter on mobile if needed or hide icon */
             /* Removed CSS hack in favor of HTML classes */
         }
+
+        /* Mobile Card Pattern */
+        @media (max-width: 767.98px) {
+            .table-card-mobile thead { display: none; }
+            .table-card-mobile tbody tr {
+                display: block;
+                border: 1px solid #e5e7eb;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                overflow: hidden;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+                background: #fff;
+            }
+            .table-card-mobile tbody tr:hover td {
+                background: transparent;
+            }
+            .table-card-mobile tbody td {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 14px;
+                border: none !important;
+                border-bottom: 1px solid #f3f4f6 !important;
+            }
+            .table-card-mobile tbody td:last-child {
+                border-bottom: none !important;
+            }
+            .table-card-mobile tbody td[data-label]::before {
+                content: attr(data-label);
+                font-weight: 700;
+                font-size: 10px;
+                text-transform: uppercase;
+                color: #9ca3af;
+                letter-spacing: 0.5px;
+                flex-shrink: 0;
+                margin-right: 12px;
+            }
+            .table-card-mobile .mobile-card-head {
+                background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+                font-weight: 700;
+                font-size: 15px;
+                color: #1e293b;
+                padding: 14px 40px 14px 14px !important;
+                border-bottom: 2px solid #e0e7ff !important;
+            }
+            .table-card-mobile .mobile-card-head::before {
+                display: none !important;
+            }
+            .table-card-mobile .mobile-card-actions {
+                justify-content: center !important;
+                padding: 12px 14px !important;
+                background: #f9fafb;
+            }
+            .table-card-mobile .mobile-card-actions::before {
+                display: none !important;
+            }
+            .table-card-mobile .mobile-hide {
+                display: none !important;
+            }
+            .table-card-mobile tbody tr {
+                position: relative;
+            }
+            .table-card-mobile .mobile-card-checkbox {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                padding: 0 !important;
+                border: none !important;
+                border-bottom: none !important;
+                background: transparent !important;
+                z-index: 2;
+                display: block !important;
+            }
+            .table-card-mobile .mobile-card-checkbox::before {
+                display: none !important;
+            }
+            .mobile-select-all-bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px 14px;
+                background: #f8fafc;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                margin-bottom: 12px;
+                font-size: 13px;
+                color: #475569;
+                font-weight: 600;
+            }
+            .mobile-select-all-bar .form-check-input { margin: 0; }
+        }
     </style>
 
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
@@ -678,8 +769,13 @@
                 </div>
             </div>
 
+            <div class="d-md-none mobile-select-all-bar">
+                <input type="checkbox" id="selectAllMobile" class="form-check-input">
+                <label for="selectAllMobile" style="margin: 0; cursor: pointer;">Pilih Semua</label>
+            </div>
+
             <div style="overflow-x: auto;">
-                <table class="table" style="width: 100%; border-collapse: collapse;">
+                <table class="table table-card-mobile" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr>
                             <th style="width: 40px;" class="text-center">
@@ -697,27 +793,27 @@
                     <tbody>
                         @forelse($tenagaPendidik as $index => $tp)
                             <tr>
-                                <td class="text-center">
+                                <td class="text-center mobile-card-checkbox">
                                     <input type="checkbox" name="ids[]" class="form-check-input select-item" value="{{ $tp->id }}">
                                 </td>
-                                <td style="text-align: center; font-weight: 600; color: #64748b;">
+                                <td style="text-align: center; font-weight: 600; color: #64748b;" class="mobile-hide">
                                     {{ $tenagaPendidik->firstItem() + $index }}</td>
-                                <td>
+                                <td class="mobile-card-head">
                                     <div style="font-weight: 600; color: #111827;">{{ $tp->name }}</div>
                                     <small style="color: #64748b;">
                                         <i class="fas fa-phone" style="font-size: 10px;"></i>
                                         {{ $tp->tenagaPendidik->telepon ?? $tp->phone ?? '-' }}
                                     </small>
                                 </td>
-                                <td>
+                                <td data-label="NIP">
                                     <span
                                         style="font-family: 'Courier New', monospace; color: #475569;">{{ $tp->tenagaPendidik->nip ?? '-' }}</span>
                                 </td>
-                                <td>
+                                <td data-label="Role">
                                     <span class="badge badge-role">{{ ucwords(str_replace('_', ' ', $tp->role)) }}</span>
                                 </td>
-                                <td style="color: #475569;">{{ $tp->email }}</td>
-                                <td>
+                                <td data-label="Email" style="color: #475569;">{{ $tp->email }}</td>
+                                <td data-label="Status">
                                     @if($tp->is_active)
                                         <span class="badge badge-active">
                                             <i class="fas fa-check-circle" style="font-size: 10px;"></i>
@@ -730,7 +826,7 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="mobile-card-actions">
                                     <div style="display: flex; justify-content: center; gap: 6px;">
                                         {{-- View Button --}}
                                         <a href="{{ route('admin.users.show-tenaga-pendidik', $tp->id) }}"
@@ -864,6 +960,7 @@
         // Bulk Selection Logic
         document.addEventListener('DOMContentLoaded', function() {
             const selectAll = document.getElementById('selectAll');
+            const selectAllMobile = document.getElementById('selectAllMobile');
             const selectItems = document.querySelectorAll('.select-item');
             const bulkDeleteForm = document.getElementById('bulkDeleteForm');
             const bulkDeleteIds = document.getElementById('bulkDeleteIds');
@@ -877,19 +974,25 @@
                 }
             }
 
+            function syncSelectAll(checked) {
+                selectItems.forEach(item => { item.checked = checked; });
+                if(selectAll) selectAll.checked = checked;
+                if(selectAllMobile) selectAllMobile.checked = checked;
+                updateBulkDeleteButton();
+            }
+
             if(selectAll) {
-                selectAll.addEventListener('change', function() {
-                    selectItems.forEach(item => {
-                        item.checked = this.checked;
-                    });
-                    updateBulkDeleteButton();
-                });
+                selectAll.addEventListener('change', function() { syncSelectAll(this.checked); });
+            }
+            if(selectAllMobile) {
+                selectAllMobile.addEventListener('change', function() { syncSelectAll(this.checked); });
             }
 
             selectItems.forEach(item => {
                 item.addEventListener('change', function() {
                     const allChecked = document.querySelectorAll('.select-item:checked').length === selectItems.length;
                     if(selectAll) selectAll.checked = allChecked;
+                    if(selectAllMobile) selectAllMobile.checked = allChecked;
                     updateBulkDeleteButton();
                 });
             });

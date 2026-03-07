@@ -28,18 +28,29 @@
     </ul>
 
     <!-- Admin WA Configuration -->
-    <div class="card mb-4">
-        <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-            <div>
-                <h6 class="mb-1 text-primary"><i class="bx bxl-whatsapp text-success me-1"></i> Nomor Bantuan Administrator</h6>
-                <p class="mb-0 text-muted small">Nomor ini akan ditampilkan di halaman Login bagi user yang butuh bantuan manual.</p>
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: #dcfce7;">
+                    <i class="bx bxl-whatsapp fs-3" style="color: #16a34a;"></i>
+                </div>
+                <div>
+                    <h5 class="mb-1 fw-bold">Nomor WhatsApp Bantuan</h5>
+                    <p class="mb-0 text-muted">Nomor ini ditampilkan di halaman Login sebagai kontak bantuan bagi user yang tidak bisa recovery mandiri (misal: email & telepon belum terdaftar).</p>
+                </div>
             </div>
-            <form action="{{ route('admin.recovery-tickets.update-admin-wa') }}" method="POST" class="d-flex gap-2 align-items-center">
+            <form action="{{ route('admin.recovery-tickets.update-admin-wa') }}" method="POST">
                 @csrf
-                <div class="input-group input-group-sm mb-0" style="max-width: 300px;">
-                    <span class="input-group-text bg-white">+62</span>
-                    <input type="text" name="admin_wa_number" class="form-control" placeholder="812345678" value="{{ ltrim($adminWa, '620') }}" required>
-                    <button class="btn btn-primary" type="submit"><i class="bx bx-save"></i> Simpan</button>
+                <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+                    <label class="fw-semibold text-nowrap mb-0">Nomor Admin:</label>
+                    <div class="input-group" style="max-width: 360px;">
+                        <span class="input-group-text fw-semibold bg-light">+62</span>
+                        <input type="text" name="admin_wa_number" class="form-control form-control-lg" placeholder="8123456789" value="{{ ltrim($adminWa, '620') }}" required
+                            style="font-size: 1.1rem; letter-spacing: 0.5px;">
+                    </div>
+                    <button class="btn btn-primary px-4" type="submit">
+                        <i class="bx bx-save me-1"></i> Simpan
+                    </button>
                 </div>
             </form>
         </div>
@@ -63,8 +74,13 @@
                 </div>
             </div>
 
+            <div class="d-md-none mobile-select-all-bar">
+                <input type="checkbox" id="selectAllMobile" class="form-check-input" onchange="toggleSelectAll(this)">
+                <label for="selectAllMobile" style="margin: 0; cursor: pointer;">Pilih Semua</label>
+            </div>
+
             <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
+                <table class="table table-hover table-card-mobile">
                     <thead>
                         <tr>
                             <th style="width: 40px;">
@@ -82,16 +98,21 @@
                     <tbody class="table-border-bottom-0">
                         @forelse($tickets as $key => $ticket)
                         <tr>
-                            <td>
+                            <td class="mobile-card-checkbox">
                                 <input type="checkbox" class="form-check-input ticket-check" data-id="{{ $ticket->id }}" onchange="updateBulkToolbar()">
                             </td>
-                            <td>{{ $tickets->firstItem() + $key }}</td>
-                            <td>{{ $ticket->created_at->format('d M Y H:i') }}</td>
-                            <td>
+                            <td class="mobile-hide">{{ $tickets->firstItem() + $key }}</td>
+                            <td class="desktop-only-cell">{{ $ticket->created_at->format('d M Y H:i') }}</td>
+                            <td class="desktop-only-cell">
                                 <strong>{{ $ticket->user->name }}</strong><br>
                                 <span class="badge bg-label-info">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role)) }}</span>
                             </td>
-                            <td>
+                            <td class="mobile-only-cell mobile-card-head">
+                                <strong>{{ $ticket->user->name }}</strong>
+                                <span class="badge bg-label-info ms-1">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role)) }}</span>
+                                <br><small class="text-muted"><i class="bx bx-time-five"></i> {{ $ticket->created_at->format('d M Y H:i') }}</small>
+                            </td>
+                            <td data-label="Kendala">
                                 @if($ticket->tipe_recovery == 'lupa_username')
                                     <span class="badge bg-label-secondary"><i class="bx bx-user me-1"></i> Lupa Username</span>
                                 @elseif($ticket->tipe_recovery == 'lupa_password')
@@ -100,14 +121,14 @@
                                     <span class="badge bg-label-danger"><i class="bx bx-error-circle me-1"></i> Lupa Keduanya</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Email">
                                 @if($ticket->user->personal_email)
                                     <a href="mailto:{{ $ticket->user->personal_email }}" class="text-primary"><i class="bx bx-envelope"></i> {{ $ticket->user->personal_email }}</a>
                                 @else
                                     <span class="text-danger small"><i class="bx bx-x"></i> Belum diisi</span>
                                 @endif
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 @if($ticket->status == 'sent')
                                     <span class="badge bg-success">Terkirim Otomatis</span>
                                 @elseif($ticket->status == 'processing')
@@ -118,7 +139,7 @@
                                     <span class="badge bg-danger">Gagal Email</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="mobile-card-actions">
                                 <div class="d-flex flex-wrap gap-2">
                                     @if($ticket->user->personal_email)
                                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resendModal{{ $ticket->id }}">
@@ -144,23 +165,29 @@
                                 <!-- Modal Resend -->
                                 @if($ticket->user->personal_email)
                                 <div class="modal fade" id="resendModal{{ $ticket->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Kirim Ulang Email Pemulihan</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
+                                    <div class="modal-dialog modal-dialog-centered modal-sm mx-auto" role="document" style="max-width: 440px; padding: 0 15px;">
+                                        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
                                             <form action="{{ route('admin.recovery-tickets.resend', $ticket) }}" method="POST">
                                                 @csrf
+                                                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                                                    <h5 class="modal-title fw-bold">
+                                                        <i class="bx bx-send text-primary me-2"></i>Kirim Ulang Email
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="margin-top: -10px; margin-right: -5px;"></button>
+                                                </div>
                                                 <div class="modal-body pt-3 px-4 pb-2">
-                                                    <p class="text-wrap text-break mb-3">Email pemulihan akan dikirim ulang ke <br><strong>{{ $ticket->user->personal_email }}</strong>.</p>
-                                                    <div class="alert alert-info text-wrap" style="word-break: break-word;">
-                                                        <i class="bx bx-info-circle"></i> Ini akan mengirimkan ulang link reset password ke email tersebut. Link lama yang belum kedaluwarsa tetap akan valid.
+                                                    <p class="text-wrap text-break mb-3" style="font-size: 0.95rem; line-height: 1.5; color: #6b7280;">
+                                                        Email pemulihan akan dikirim ulang ke:<br>
+                                                        <strong style="color: #111827;">{{ $ticket->user->personal_email }}</strong>
+                                                    </p>
+                                                    <div class="alert alert-info text-wrap d-flex align-items-start gap-2 mb-0" style="word-break: break-word; border-radius: 8px; font-size: 0.875rem;">
+                                                        <i class="bx bx-info-circle fs-5 flex-shrink-0" style="margin-top: 1px;"></i>
+                                                        <span>Link reset password baru akan dikirim. Link lama yang belum kedaluwarsa tetap valid.</span>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer">
+                                                <div class="modal-footer border-0 pb-4 px-4 d-flex justify-content-end gap-2 pt-2">
                                                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary"><i class="bx bx-send"></i> Kirim Email</button>
+                                                    <button type="submit" class="btn btn-primary"><i class="bx bx-send me-1"></i> Kirim Email</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -172,7 +199,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="10" class="text-center py-5">
                                 <i class="bx bx-check-circle text-success mb-3" style="font-size: 5rem;"></i>
                                 <h6 class="text-muted">Semua tiket sudah ditangani. Tidak ada antrean baru.</h6>
                             </td>
@@ -197,6 +224,94 @@
     0% { box-shadow: 0 0 0 0 rgba(255, 62, 29, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(255, 62, 29, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 62, 29, 0); }
+}
+
+/* Mobile Card Pattern */
+@media (max-width: 767.98px) {
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+        position: relative;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        white-space: normal;
+        text-align: right;
+    }
+    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        padding: 14px 40px 14px 14px !important;
+        border-bottom: 2px solid #e0e7ff !important;
+        display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head::before { display: none !important; }
+    .table-card-mobile .mobile-card-actions {
+        justify-content: center !important;
+        padding: 12px 14px !important;
+        background: #f9fafb;
+        flex-wrap: wrap;
+    }
+    .table-card-mobile .mobile-card-actions::before { display: none !important; }
+    .table-card-mobile .mobile-card-actions .d-flex { justify-content: center; }
+    .table-card-mobile .mobile-hide { display: none !important; }
+    .table-card-mobile .mobile-card-checkbox {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 0 !important;
+        border: none !important;
+        border-bottom: none !important;
+        background: transparent !important;
+        z-index: 2;
+        display: block !important;
+    }
+    .table-card-mobile .mobile-card-checkbox::before { display: none !important; }
+    .mobile-select-all-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #475569;
+        font-weight: 600;
+    }
+    .mobile-select-all-bar .form-check-input { margin: 0; }
+    .desktop-only-cell { display: none !important; }
+}
+@media (min-width: 768px) {
+    .mobile-only-cell { display: none !important; }
 }
 </style>
 
@@ -281,6 +396,11 @@ function confirmTicketAction(url, type, username) {
 // === Bulk select logic ===
 function toggleSelectAll(cb) {
     document.querySelectorAll('.ticket-check').forEach(el => { el.checked = cb.checked; });
+    // Sync both select-all checkboxes
+    const selectAllCb = document.getElementById('selectAllCb');
+    const selectAllMobile = document.getElementById('selectAllMobile');
+    if (selectAllCb) selectAllCb.checked = cb.checked;
+    if (selectAllMobile) selectAllMobile.checked = cb.checked;
     updateBulkToolbar();
 }
 
@@ -289,6 +409,17 @@ function updateBulkToolbar() {
     const toolbar = document.getElementById('bulkToolbar');
     const countEl = document.getElementById('bulkCount');
 
+    const allChecks = document.querySelectorAll('.ticket-check');
+    const allChecked = checked.length === allChecks.length && allChecks.length > 0;
+    const noneChecked = checked.length === 0;
+    const selectAllCb = document.getElementById('selectAllCb');
+    const selectAllMobile = document.getElementById('selectAllMobile');
+    // Only uncheck select-all when no items selected; don't auto-check it
+    if (noneChecked) {
+        if (selectAllCb) selectAllCb.checked = false;
+        if (selectAllMobile) selectAllMobile.checked = false;
+    }
+
     if (checked.length > 0) {
         toolbar.classList.remove('d-none');
         toolbar.classList.add('d-flex');
@@ -296,7 +427,6 @@ function updateBulkToolbar() {
     } else {
         toolbar.classList.add('d-none');
         toolbar.classList.remove('d-flex');
-        document.getElementById('selectAllCb').checked = false;
     }
 }
 

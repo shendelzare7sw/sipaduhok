@@ -410,16 +410,79 @@
         flex: 0 0 100%;
         max-width: 100%;
     }
-    
+
     .stat-number {
         font-size: 36px;
     }
-    
+
     .card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
+}
+
+/* Mobile Card Pattern */
+@media (max-width: 767.98px) {
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+        position: relative;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        white-space: normal;
+        text-align: right;
+    }
+    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        padding: 14px !important;
+        border-bottom: 2px solid #e0e7ff !important;
+        display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head::before { display: none !important; }
+    .table-card-mobile .mobile-hide { display: none !important; }
+    .desktop-only-cell { display: none !important; }
+    .mobile-only-cell { display: flex !important; }
+    .mobile-card-actions {
+        display: flex !important;
+        justify-content: flex-end;
+        gap: 6px;
+        padding: 10px 14px !important;
+        background: #f9fafb;
+    }
+    .mobile-card-actions::before { display: none !important; }
+}
+@media (min-width: 768px) {
+    .mobile-only-cell { display: none !important; }
 }
 </style>
 
@@ -508,7 +571,7 @@
                 <div class="card-body p-0">
                     @if($tenagaPendidik->count() > 0)
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-card-mobile">
                                 <thead>
                                     <tr>
                                         <th>Nama Lengkap</th>
@@ -522,33 +585,45 @@
                                 <tbody>
                                     @foreach($tenagaPendidik as $tp)
                                     <tr>
-                                        <td>
+                                        {{-- Desktop: Nama --}}
+                                        <td class="desktop-only-cell">
                                             <div style="font-weight: 600; font-size: 15px;">{{ $tp->nama_lengkap }}</div>
                                             <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $tp->created_at->diffForHumans() }}</small>
                                         </td>
-                                        <td style="font-size: 14px;">{{ $tp->nip ?? '-' }}</td>
-                                        <td style="font-size: 14px;">{{ $tp->user->email }}</td>
-                                        <td>
+                                        {{-- Mobile: Card Head --}}
+                                        <td class="mobile-only-cell mobile-card-head">
+                                            <div style="font-weight: 600; font-size: 15px;">{{ $tp->nama_lengkap }}</div>
+                                            <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+                                                <span class="badge badge-info" style="font-size: 10px;">{{ ucwords(str_replace('_', ' ', $tp->user->role)) }}</span>
+                                                @if($tp->user->is_active)
+                                                    <span class="badge badge-success" style="font-size: 10px;">Aktif</span>
+                                                @else
+                                                    <span class="badge badge-warning" style="font-size: 10px;">Non-Aktif</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td data-label="NIP" style="font-size: 14px;">{{ $tp->nip ?? '-' }}</td>
+                                        <td data-label="Email" style="font-size: 14px;">{{ $tp->user->email }}</td>
+                                        {{-- Desktop: Role --}}
+                                        <td class="desktop-only-cell">
                                             <span class="badge badge-info">{{ ucwords(str_replace('_', ' ', $tp->user->role)) }}</span>
                                         </td>
-                                        <td>
+                                        {{-- Desktop: Status --}}
+                                        <td class="desktop-only-cell">
                                             @if($tp->user->is_active)
                                                 <span class="badge badge-success">Aktif</span>
                                             @else
                                                 <span class="badge badge-warning">Non-Aktif</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: center;">
+                                        <td class="mobile-card-actions" style="text-align: center;">
                                             <div style="display: flex; gap: 5px; justify-content: center;">
-                                                {{-- Tombol Detail --}}
                                                 <a href="{{ route('admin.users.show-tenaga-pendidik', $tp->id) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                {{-- Tombol Edit --}}
                                                 <a href="{{ route('admin.users.edit-tenaga-pendidik', $tp->id) }}" class="btn btn-icon btn-light-warning" title="Edit Data">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                {{-- Tombol Delete --}}
                                                 <button type="button" class="btn btn-icon btn-light-danger" title="Hapus Data" onclick="confirmDeleteTenagaPendidik({{ $tp->id }}, '{{ addslashes($tp->nama_lengkap) }}', '{{ addslashes($tp->user->email) }}', '{{ addslashes(ucwords(str_replace('_', ' ', $tp->user->role))) }}')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -592,7 +667,7 @@
                 <div class="card-body p-0">
                     @if($siswa->count() > 0)
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-card-mobile">
                                 <thead>
                                     <tr>
                                         <th>Nama Lengkap</th>
@@ -606,37 +681,51 @@
                                 <tbody>
                                     @foreach($siswa as $s)
                                     <tr>
-                                        <td>
+                                        {{-- Desktop: Nama --}}
+                                        <td class="desktop-only-cell">
                                             <div style="font-weight: 600; font-size: 15px;">{{ $s->nama_lengkap }}</div>
                                             <small style="color: #6b7280; font-size: 12px;">{{ $s->user->email ?? 'No Email' }}</small>
                                         </td>
-                                        <td><span style="font-weight: 500; font-size: 14px;">{{ $s->nis }}</span></td>
-                                        <td><span style="color: #6b7280; font-size: 14px;">{{ $s->nisn }}</span></td>
-                                        <td>
+                                        {{-- Mobile: Card Head --}}
+                                        <td class="mobile-only-cell mobile-card-head">
+                                            <div style="font-weight: 600; font-size: 15px;">{{ $s->nama_lengkap }}</div>
+                                            <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+                                                @if($s->kelas)
+                                                    <span class="badge badge-info" style="font-size: 10px;">{{ $s->kelas->nama_kelas }}</span>
+                                                @endif
+                                                @if($s->status === 'aktif')
+                                                    <span class="badge badge-success" style="font-size: 10px;">Aktif</span>
+                                                @else
+                                                    <span class="badge badge-warning" style="font-size: 10px;">{{ ucfirst($s->status) }}</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td data-label="NIS"><span style="font-weight: 500; font-size: 14px;">{{ $s->nis }}</span></td>
+                                        <td data-label="NISN"><span style="color: #6b7280; font-size: 14px;">{{ $s->nisn }}</span></td>
+                                        {{-- Desktop: Kelas --}}
+                                        <td class="desktop-only-cell">
                                             @if($s->kelas)
                                                 <span class="badge badge-info">{{ $s->kelas->nama_kelas }}</span>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        {{-- Desktop: Status --}}
+                                        <td class="desktop-only-cell">
                                             @if($s->status === 'aktif')
                                                 <span class="badge badge-success">Aktif</span>
                                             @else
                                                 <span class="badge badge-warning">{{ ucfirst($s->status) }}</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: center;">
+                                        <td class="mobile-card-actions" style="text-align: center;">
                                             <div style="display: flex; gap: 5px; justify-content: center;">
-                                                {{-- Tombol Detail --}}
                                                 <a href="{{ route('admin.users.show-siswa', $s->id) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                {{-- Tombol Edit --}}
                                                 <a href="{{ route('admin.users.edit-siswa', $s->id) }}" class="btn btn-icon btn-light-warning" title="Edit Data">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                {{-- Tombol Delete --}}
                                                 <button type="button" class="btn btn-icon btn-light-danger" title="Hapus Data" onclick="confirmDeleteSiswa({{ $s->id }}, '{{ addslashes($s->nama_lengkap) }}', '{{ $s->nis }}', '{{ $s->nisn }}', '{{ $s->kelas ? addslashes($s->kelas->nama_kelas) : '' }}')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -680,7 +769,7 @@
                 <div class="card-body p-0">
                     @if($orangTua->count() > 0)
                         <div class="table-responsive">
-                            <table class="table">
+                            <table class="table table-card-mobile">
                                 <thead>
                                     <tr>
                                         <th>Nama Lengkap</th>
@@ -694,15 +783,27 @@
                                 <tbody>
                                     @foreach($orangTua as $ortu)
                                     <tr>
-                                        <td>
+                                        {{-- Desktop: Nama --}}
+                                        <td class="desktop-only-cell">
                                             <div style="font-weight: 600; font-size: 15px;">{{ $ortu->name }}</div>
                                             <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $ortu->created_at->diffForHumans() }}</small>
                                         </td>
-                                        <td style="font-family: 'Courier New', monospace; font-size: 14px;">{{ $ortu->username }}</td>
-                                        <td style="font-size: 14px;">{{ $ortu->email }}</td>
-                                        <td>
+                                        {{-- Mobile: Card Head --}}
+                                        <td class="mobile-only-cell mobile-card-head">
+                                            <div style="font-weight: 600; font-size: 15px;">{{ $ortu->name }}</div>
+                                            <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                                                @if($ortu->is_active)
+                                                    <span class="badge badge-success" style="font-size: 10px;">Aktif</span>
+                                                @else
+                                                    <span class="badge badge-warning" style="font-size: 10px;">Non-Aktif</span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td data-label="Username" style="font-family: 'Courier New', monospace; font-size: 14px;">{{ $ortu->username }}</td>
+                                        <td data-label="Email" style="font-size: 14px;">{{ $ortu->email }}</td>
+                                        <td data-label="Anak (Siswa)">
                                             @if($ortu->studentParents && $ortu->studentParents->count() > 0)
-                                                <div style="display: flex; flex-direction: column; gap: 2px;">
+                                                <div style="display: flex; flex-direction: column; gap: 2px; text-align: right;">
                                                     @foreach($ortu->studentParents->take(2) as $sp)
                                                         <span style="font-size: 13px; color: #475569;">
                                                             <i class="fas fa-user-graduate" style="color: #3b82f6; font-size: 11px;"></i>
@@ -719,14 +820,15 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td>
+                                        {{-- Desktop: Status --}}
+                                        <td class="desktop-only-cell">
                                             @if($ortu->is_active)
                                                 <span class="badge badge-success">Aktif</span>
                                             @else
                                                 <span class="badge badge-warning">Non-Aktif</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: center;">
+                                        <td class="mobile-card-actions" style="text-align: center;">
                                             <a href="{{ route('admin.users.orang-tua') }}" class="btn btn-icon btn-light-primary" title="Kelola">
                                                 <i class="fas fa-cog"></i>
                                             </a>

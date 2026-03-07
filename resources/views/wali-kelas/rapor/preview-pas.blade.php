@@ -263,6 +263,40 @@
         }
         .btn-back:hover { background: #4b5563; color: white; }
 
+        .btn-zoom {
+            padding: 7px 12px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            transition: all 0.2s;
+        }
+        .btn-zoom:hover { background: #e5e7eb; }
+        .zoom-level {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 45px;
+            text-align: center;
+            user-select: none;
+        }
+        .zoom-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 2px 4px;
+        }
+
         /* Mobile: handled by JS scale — no reflow needed */
         @media (max-width: 900px) {
             body { background: #e5e7eb; }
@@ -332,9 +366,15 @@
 </head>
 <body>
     <div class="print-bar no-print">
-        <a href="javascript:history.back()" class="btn-back">
+        <a href="#" onclick="event.preventDefault(); if(document.referrer && window.history.length > 1) { window.history.back(); } else { window.close(); }" class="btn-back">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
+        <div class="zoom-controls">
+            <button class="btn-zoom" onclick="zoomOut()" title="Perkecil"><i class="bi bi-dash"></i></button>
+            <span class="zoom-level" id="zoomLevel">100%</span>
+            <button class="btn-zoom" onclick="zoomIn()" title="Perbesar"><i class="bi bi-plus"></i></button>
+            <button class="btn-zoom" onclick="zoomReset()" title="Reset" style="font-size: 12px;">Fit</button>
+        </div>
         <button class="btn-print" onclick="window.print()">
             <i class="bi bi-printer-fill"></i> Cetak Rapor
         </button>
@@ -584,48 +624,78 @@
 
     <script>
     (function() {
+        var currentScale = 1;
+        var fitScale = 1;
+        var manualZoom = false;
+
+        function getViewportWidth() {
+            return (window.visualViewport ? window.visualViewport.width : null)
+                || document.documentElement.clientWidth
+                || window.innerWidth;
+        }
+
+        function applyScale(scale) {
+            var wrapper = document.querySelector('.rapor-wrapper');
+            if (!wrapper) return;
+            currentScale = scale;
+            wrapper.style.transform = 'scale(' + scale + ')';
+            wrapper.style.transformOrigin = 'top left';
+            document.body.style.height = Math.ceil(wrapper.scrollHeight * scale) + 'px';
+            var label = document.getElementById('zoomLevel');
+            if (label) label.textContent = Math.round(scale * 100) + '%';
+        }
+
         function fitToScreen() {
-            const wrapper = document.querySelector('.rapor-wrapper');
+            var wrapper = document.querySelector('.rapor-wrapper');
             if (!wrapper) return;
 
-            // Reset scale first to measure TRUE content width
             wrapper.style.transform = 'none';
             wrapper.style.transformOrigin = '';
 
-            // Use visualViewport for accurate mobile width (excludes OS UI)
-            const vw = (window.visualViewport ? window.visualViewport.width : null)
-                    || document.documentElement.clientWidth
-                    || window.innerWidth;
-
-            // Measure actual rendered content width
-            const docWidth = wrapper.scrollWidth;
+            var vw = getViewportWidth();
+            var docWidth = wrapper.scrollWidth;
 
             if (vw < docWidth) {
-                // Subtract 2px safety buffer so right edge is never clipped
-                const scale = (vw - 2) / docWidth;
-                wrapper.style.transform = 'scale(' + scale + ')';
-                wrapper.style.transformOrigin = 'top left';
-                wrapper.style.marginLeft = '0';
-                wrapper.style.marginRight = '0';
-                // Set body height to scaled height so scroll works correctly
-                document.body.style.height = Math.ceil(wrapper.scrollHeight * scale) + 'px';
+                fitScale = (vw - 2) / docWidth;
             } else {
-                document.body.style.height = '';
+                fitScale = 1;
+            }
+
+            if (!manualZoom) {
+                applyScale(fitScale);
             }
         }
 
-        // Run after fonts/images are loaded for accurate scrollWidth
+        window.zoomIn = function() {
+            manualZoom = true;
+            applyScale(Math.min(currentScale + 0.1, 2));
+        };
+        window.zoomOut = function() {
+            manualZoom = true;
+            applyScale(Math.max(currentScale - 0.1, 0.3));
+        };
+        window.zoomReset = function() {
+            manualZoom = false;
+            fitToScreen();
+        };
+
         window.addEventListener('load', fitToScreen);
-        window.addEventListener('resize', fitToScreen);
+        window.addEventListener('resize', function() {
+            if (!manualZoom) fitToScreen();
+        });
         if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', fitToScreen);
+            window.visualViewport.addEventListener('resize', function() {
+                if (!manualZoom) fitToScreen();
+            });
         }
 
         window.addEventListener('beforeprint', function() {
-            const wrapper = document.querySelector('.rapor-wrapper');
+            var wrapper = document.querySelector('.rapor-wrapper');
             if (wrapper) { wrapper.style.transform = 'none'; wrapper.style.width = ''; }
         });
-        window.addEventListener('afterprint', fitToScreen);
+        window.addEventListener('afterprint', function() {
+            if (manualZoom) { applyScale(currentScale); } else { fitToScreen(); }
+        });
     })();
     </script>
 </body>

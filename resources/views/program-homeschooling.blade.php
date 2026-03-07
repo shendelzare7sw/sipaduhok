@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homeschooling - PKBM House Of Knowledge</title>
+    <x-seo-meta title="Program Homeschooling - PKBM House Of Knowledge" description="Program Homeschooling PKBM House Of Knowledge menawarkan pembelajaran fleksibel dan personal untuk siswa yang membutuhkan pendekatan pendidikan alternatif." keywords="homeschooling, pendidikan alternatif, belajar di rumah, program homeschooling, PKBM homeschooling"></x-seo-meta>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 

@@ -100,6 +100,57 @@
         flex-direction: column !important;
         gap: 10px;
     }
+
+    /* Mobile Card Pattern for Tables */
+    .table-responsive.text-nowrap {
+        white-space: normal !important;
+        overflow-x: visible !important;
+    }
+    .table-card-mobile { white-space: normal !important; }
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block; border: 1px solid #e5e7eb; border-radius: 12px;
+        margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff; position: relative;
+    }
+    .table-card-mobile tbody td {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px; border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important; text-align: right;
+        white-space: normal !important; word-break: break-word;
+    }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label); font-weight: 700; font-size: 10px;
+        text-transform: uppercase; color: #9ca3af; letter-spacing: 0.5px;
+        text-align: left; flex-shrink: 0; margin-right: 12px;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700; font-size: 15px; padding: 14px !important;
+        border-bottom: 2px solid #e0e7ff !important; display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-actions {
+        display: flex !important; justify-content: flex-end;
+        padding: 10px 14px !important; background: #f9fafb;
+    }
+    .desktop-only-cell { display: none !important; }
+
+    /* Mobile select all */
+    .mobile-select-all { display: flex !important; }
+
+    /* Promote button area */
+    .sim-footer-area {
+        flex-direction: column !important;
+        gap: 12px;
+        align-items: stretch !important;
+    }
+    .sim-footer-area > div { text-align: center; }
+    .sim-footer-area nav { justify-content: center; }
+}
+@media (min-width: 769px) {
+    .mobile-only-cell { display: none !important; }
+    .mobile-select-all { display: none !important; }
 }
 </style>
 @endsection
@@ -310,7 +361,7 @@
                     </div>
                 </div>
                 <div class="table-responsive text-nowrap">
-                    <table class="table table-striped">
+                    <table class="table table-striped table-card-mobile">
                         <thead>
                             <tr>
                                 <th>Nama Siswa</th>
@@ -323,11 +374,26 @@
                         </thead>
                         <tbody>
                             @forelse($students as $data)
+                            @php
+                                $badge = match($data->status_kelulusan) {
+                                    'NAIK_KELAS' => 'success',
+                                    'LULUS' => 'info',
+                                    'LULUS_TUNGGAKAN' => 'primary',
+                                    'NAIK_KELAS_TUNGGAKAN' => 'warning',
+                                    'TIDAK_NAIK_KELAS' => 'danger',
+                                    default => 'secondary'
+                                };
+                            @endphp
                             <tr>
-                                <td>{{ $data->nama_lengkap }}</td>
-                                <td>{{ $data->kelas_asal }}</td>
-                                <td>{{ $data->kelas_tujuan ?? '-' }}</td>
-                                <td>
+                                <td class="mobile-card-head">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ $data->nama_lengkap }}</span>
+                                        <span class="badge bg-{{ $badge }} mobile-only-cell">{{ str_replace('_', ' ', $data->status_kelulusan) }}</span>
+                                    </div>
+                                </td>
+                                <td data-label="Kelas Asal">{{ $data->kelas_asal }}</td>
+                                <td data-label="Kelas Tujuan">{{ $data->kelas_tujuan ?? '-' }}</td>
+                                <td data-label="Status Bayar">
                                     @if($data->status_pembayaran == 'LUNAS')
                                         <span class="badge bg-success">Lunas</span>
                                     @else
@@ -337,22 +403,12 @@
                                         @endif
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Akademik">
                                     {{ $data->persentase_nilai_tuntas }}% Tuntas
                                     <br>
                                     <small class="text-muted">{{ $data->jumlah_mapel_tuntas }}/{{ $data->total_mapel }} Mapel</small>
                                 </td>
-                                <td>
-                                    @php
-                                        $badge = match($data->status_kelulusan) {
-                                            'NAIK_KELAS' => 'success',
-                                            'LULUS' => 'info',
-                                            'LULUS_TUNGGAKAN' => 'primary',
-                                            'NAIK_KELAS_TUNGGAKAN' => 'warning',
-                                            'TIDAK_NAIK_KELAS' => 'danger',
-                                            default => 'secondary'
-                                        };
-                                    @endphp
+                                <td data-label="Hasil Akhir" class="desktop-only-cell">
                                     <span class="badge bg-{{ $badge }}">{{ str_replace('_', ' ', $data->status_kelulusan) }}</span>
                                 </td>
                             </tr>
@@ -371,9 +427,9 @@
                             @endforelse
                         </tbody>
                     </table>
-                    <div class="p-3">
-                        {{ $students->withQueryString()->links() }}
-                    </div>
+                </div>
+                <div class="p-3">
+                    {{ $students->withQueryString()->links() }}
                 </div>
             </div>
         </div>
@@ -539,11 +595,18 @@
                         </div>
                     @endif
 
-                     <div class="alert alert-info">
+                    <div class="alert alert-info">
                         <i class="fas fa-info-circle me-1"></i> Data di bawah ini adalah <strong>SIMULASI REAL-TIME</strong> berdasarkan data keuangan dan nilai saat ini.
                     </div>
+
+                    {{-- Mobile Select All --}}
+                    <div class="mobile-select-all mb-2 align-items-center gap-2 px-2">
+                        <input type="checkbox" id="selectAllSimMobile" onclick="toggleAllCheckboxes(this, 'simCheck')">
+                        <label for="selectAllSimMobile" class="form-label mb-0 small fw-bold">Pilih Semua</label>
+                    </div>
+
                     <div class="table-responsive text-nowrap">
-                        <table class="table table-hover">
+                        <table class="table table-hover table-card-mobile">
                             <thead>
                                 <tr>
                                     <th style="width: 30px;"><input type="checkbox" id="selectAllSim" onclick="toggleAllCheckboxes(this, 'simCheck')"></th>
@@ -557,14 +620,34 @@
                             <tbody>
                                 @foreach($simulationData as $sim)
                                 <tr>
-                                    <td>
+                                    <td class="desktop-only-cell">
                                         @if(!$sim['result']['eligible'])
-                                        <input type="checkbox" class="simCheck" name="siswa_ids[]" value="{{ $sim['siswa']->id }}" form="promoteSelectedForm">
+                                        <input type="checkbox" class="simCheck" value="{{ $sim['siswa']->id }}">
                                         @endif
                                     </td>
-                                    <td>{{ $sim['siswa']->nama_lengkap }}</td>
-                                    <td>{{ $sim['siswa']->kelas->nama_kelas ?? '-' }}</td>
-                                    <td>
+                                    <td class="mobile-card-head">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span>
+                                                @if(!$sim['result']['eligible'])
+                                                <input type="checkbox" class="simCheck mobile-only-cell me-2" value="{{ $sim['siswa']->id }}">
+                                                @endif
+                                                {{ $sim['siswa']->nama_lengkap }}
+                                            </span>
+                                            <span class="mobile-only-cell">
+                                                @if($sim['result']['eligible'])
+                                                    @if(preg_match('/(9|IX|12|XII)/', strtoupper($sim['siswa']->kelas->nama_kelas ?? '')))
+                                                        <span class="text-info fw-bold"><i class="fas fa-graduation-cap"></i></span>
+                                                    @else
+                                                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i></span>
+                                                    @endif
+                                                @else
+                                                    <span class="text-danger fw-bold"><i class="fas fa-times-circle"></i></span>
+                                                @endif
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td data-label="Kelas">{{ $sim['siswa']->kelas->nama_kelas ?? '-' }}</td>
+                                    <td data-label="Keuangan">
                                         @if($sim['result']['financial']['status'] == 'LUNAS')
                                             <span class="badge bg-success">Lunas</span>
                                         @else
@@ -574,7 +657,7 @@
                                             @endif
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Akademik">
                                         @if($sim['result']['academic']['is_tuntas'])
                                             <span class="badge bg-success">Aman ({{ $sim['result']['academic']['percentage'] }}%)</span>
                                         @else
@@ -582,7 +665,7 @@
                                             <br><small>Hanya {{ $sim['result']['academic']['tuntas_count'] }} mapel tuntas</small>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="desktop-only-cell">
                                         @if($sim['result']['eligible'])
                                             @if(preg_match('/(9|IX|12|XII)/', strtoupper($sim['siswa']->kelas->nama_kelas ?? '')))
                                                 <span class="text-info fw-bold"><i class="fas fa-graduation-cap"></i> Siap Lulus</span>
@@ -597,24 +680,30 @@
                                 @endforeach
                             </tbody>
                         </table>
-                        
-                        {{-- Bulk Promote Selected Form --}}
-                        @php
-                            $routePrefix = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik' : 'waka';
-                        @endphp
-                        <form id="promoteSelectedForm" action="{{ route($routePrefix . '.promotion.promote-selected') }}" method="POST" class="d-none">
-                            @csrf
-                            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
-                        </form>
-                        
-                        <div class="p-3 d-flex justify-content-between align-items-center">
-                            <div>
-                                <button type="button" id="promoteSelectedTrigger" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#promoteSelectedModal" disabled>
-                                    <i class="fas fa-arrow-up me-1"></i> Naikkan Terpilih
-                                </button>
-                            </div>
-                           {{ $activeStudentsLinks->appends(['tab' => 'simulation'])->withQueryString()->links() }}
+                    </div>
+
+                    {{-- Bulk Promote Selected Form --}}
+                    @php
+                        $routePrefix = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik' : 'waka';
+                    @endphp
+                    <form id="promoteSelectedForm" action="{{ route($routePrefix . '.promotion.promote-selected') }}" method="POST" class="d-none">
+                        @csrf
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
+                        <input type="hidden" name="select_all" id="selectAllFlag" value="0">
+                        {{-- Retain current filters to be passed when select_all is true --}}
+                        <input type="hidden" name="cabang_id" value="{{ $cabangId }}">
+                        <input type="hidden" name="jenjang" value="{{ $jenjangFilter }}">
+                        <input type="hidden" name="kelas_id" value="{{ $kelasId }}">
+                        <input type="hidden" name="search" value="{{ $search }}">
+                    </form>
+
+                    <div class="p-3 d-flex justify-content-between align-items-center sim-footer-area">
+                        <div>
+                            <button type="button" id="promoteSelectedTrigger" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#promoteSelectedModal" disabled>
+                                <i class="fas fa-arrow-up me-1"></i> Naikkan Terpilih
+                            </button>
                         </div>
+                        {{ $activeStudentsLinks->appends(['tab' => 'simulation'])->withQueryString()->links() }}
                     </div>
                 </div>
             </div>
@@ -635,7 +724,7 @@
                     </div>
                     
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
+                        <table class="table table-bordered table-striped table-card-mobile">
                             <thead>
                                 <tr>
                                     <th>Jadwal Eksekusi</th>
@@ -649,8 +738,23 @@
                             <tbody>
                                 @forelse ($schedules as $schedule)
                                 <tr>
-                                    <td>{{ $schedule->scheduled_at->format('d/m/y H:i') }}</td>
-                                    <td>
+                                    <td class="mobile-card-head">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-calendar-alt me-1"></i> {{ $schedule->scheduled_at->format('d/m/y H:i') }}</span>
+                                            @if($schedule->status == 'PENDING')
+                                                <span class="badge bg-warning">Menunggu</span>
+                                            @elseif($schedule->status == 'RUNNING')
+                                                <span class="badge bg-info">Sedang Berjalan</span>
+                                            @elseif($schedule->status == 'COMPLETED')
+                                                <span class="badge bg-success">Selesai</span>
+                                            @elseif($schedule->status == 'FAILED')
+                                                <span class="badge bg-danger">Gagal</span>
+                                            @else
+                                                <span class="badge bg-secondary">Batal</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="desktop-only-cell">
                                         @if($schedule->status == 'PENDING')
                                             <span class="badge bg-warning">Menunggu</span>
                                         @elseif($schedule->status == 'RUNNING')
@@ -663,7 +767,7 @@
                                             <span class="badge bg-secondary">Batal</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Dibuat Oleh">
                                         <div>{{ $schedule->creator->name ?? '-' }}</div>
                                         @if($schedule->creator)
                                             <small class="text-muted">
@@ -671,7 +775,7 @@
                                             </small>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td data-label="Statistik">
                                         @if($schedule->status == 'COMPLETED')
                                             <small>
                                                 Proses: {{ $schedule->students_processed }}<br>
@@ -683,11 +787,11 @@
                                             -
                                         @endif
                                     </td>
-                                    <td><small class="text-muted">{{ Str::limit($schedule->execution_log, 50) }}</small></td>
-                                    <td>
+                                    <td data-label="Log"><small class="text-muted">{{ Str::limit($schedule->execution_log, 50) }}</small></td>
+                                    <td class="mobile-card-actions">
                                         @if($schedule->status == 'PENDING')
-                                            <button type="button" class="btn btn-sm btn-danger" 
-                                                data-bs-toggle="modal" 
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#cancelScheduleModal"
                                                 data-url="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.cancel-schedule' : 'waka.promotion.cancel-schedule', $schedule->id) }}"
                                                 data-date="{{ $schedule->scheduled_at->format('d/m/y H:i') }}">
@@ -811,6 +915,7 @@
                     </div>
                     
                     <p>Anda akan menaikkan <strong id="selectedCount" class="text-success fs-4">0</strong> siswa terpilih.</p>
+                    <p id="selectAllWarning" class="text-warning fw-bold d-none mb-2"><i class="fas fa-exclamation-triangle me-1"></i>Mode Pilih Semua Data diaktifkan.</p>
                     
                     <div class="alert alert-info">
                         <small><i class="fas fa-info-circle me-1"></i> <strong>Konteks Tahun: {{ $tahun->nama_tahun_ajaran }}</strong><br>
@@ -821,7 +926,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-success" onclick="document.getElementById('promoteSelectedForm').submit()">
+                    <button type="button" class="btn btn-success" id="confirmPromoteBtn">
                         <i class="fas fa-check me-1"></i> Ya, Naikkan Siswa
                     </button>
                 </div>
@@ -833,22 +938,79 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+var triggerBtn;
+function updateButtonState() {
+    if (!triggerBtn) triggerBtn = document.querySelector('#promoteSelectedTrigger');
+    var count = document.querySelectorAll('.simCheck:checked').length;
+    var isSelectAll = document.getElementById('selectAllFlag') && document.getElementById('selectAllFlag').value === '1';
+    if(triggerBtn) triggerBtn.disabled = (count === 0 && !isSelectAll);
+}
+
 function toggleAllCheckboxes(source, className) {
     const checkboxes = document.querySelectorAll('.' + className);
     checkboxes.forEach(function(checkbox) {
         checkbox.checked = source.checked;
     });
+    
+    // Sync both select all checkboxes (mobile and desktop)
+    var mobileCb = document.getElementById('selectAllSimMobile');
+    var desktopCb = document.getElementById('selectAllSim');
+    if (mobileCb && mobileCb !== source) mobileCb.checked = source.checked;
+    if (desktopCb && desktopCb !== source) desktopCb.checked = source.checked;
+
+    // Set select all flag directly when header checkbox is toggled
+    let flagInput = document.getElementById('selectAllFlag');
+    if (flagInput) {
+        flagInput.value = source.checked ? '1' : '0';
+    }
+
+    updateButtonState();
 }
 
 // Update Modal Count
 document.addEventListener('DOMContentLoaded', function() {
+    // Uncheck selectAllFlag if user manually unchecks a single item
+    document.querySelectorAll('.simCheck').forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (!this.checked) {
+                let flagInput = document.getElementById('selectAllFlag');
+                if (flagInput) flagInput.value = '0';
+                
+                // also uncheck header checkboxes
+                var mobileCb = document.getElementById('selectAllSimMobile');
+                var desktopCb = document.getElementById('selectAllSim');
+                if (mobileCb) mobileCb.checked = false;
+                if (desktopCb) desktopCb.checked = false;
+            }
+            updateButtonState();
+        });
+    });
+
     var promoteBtn = document.querySelector('[data-bs-target="#promoteSelectedModal"]');
     if (promoteBtn) {
         promoteBtn.addEventListener('click', function() {
-            var checkedBoxes = document.querySelectorAll('.simCheck:checked');
-            document.getElementById('selectedCount').textContent = checkedBoxes.length;
+            var isSelectAll = document.getElementById('selectAllFlag') && document.getElementById('selectAllFlag').value === '1';
+            var totalData = {{ isset($totalIneligibleGlobal) ? $totalIneligibleGlobal : 0 }};
+            var uniqueIds = new Set();
+            document.querySelectorAll('.simCheck:checked').forEach(function(cb) { uniqueIds.add(cb.value); });
             
-            if (checkedBoxes.length === 0) {
+            if (isSelectAll) {
+                document.getElementById('selectedCount').textContent = totalData;
+                var warningEl = document.getElementById('selectAllWarning');
+                if (warningEl) {
+                    warningEl.classList.remove('d-none');
+                    warningEl.classList.add('d-block');
+                }
+            } else {
+                document.getElementById('selectedCount').textContent = uniqueIds.size;
+                var warningEl = document.getElementById('selectAllWarning');
+                if (warningEl) {
+                    warningEl.classList.remove('d-block');
+                    warningEl.classList.add('d-none');
+                }
+            }
+
+            if (uniqueIds.size === 0 && !isSelectAll) {
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -861,19 +1023,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
-    // Optional: Real-time disable/enable button
+
+    // Real-time disable/enable button
     var checkboxes = document.querySelectorAll('.simCheck');
-    var triggerBtn = document.querySelector('#promoteSelectedTrigger');
-    
-    function updateButtonState() {
-        var count = document.querySelectorAll('.simCheck:checked').length;
-        if(triggerBtn) triggerBtn.disabled = count === 0;
-    }
-    
+
     checkboxes.forEach(cb => cb.addEventListener('change', updateButtonState));
     // Initial State
     updateButtonState();
+
+    // Before form submit: copy mobile checkbox values as siswa_ids[]
+    var promoteForm = document.getElementById('promoteSelectedForm');
+    if (promoteForm) {
+        /* Remove default submit intercept as we only submit via modal button */
+        // Also intercept the modal button that triggers submit
+        var modalSubmitBtn = document.getElementById('confirmPromoteBtn');
+        if (modalSubmitBtn) {
+            modalSubmitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Remove old dynamic inputs
+                promoteForm.querySelectorAll('.dynamic-siswa-id').forEach(el => el.remove());
+                
+                // If not select all, gather checkboxes
+                if (document.getElementById('selectAllFlag').value === '0') {
+                    // Collect unique checked values
+                    var ids = new Set();
+                    document.querySelectorAll('.simCheck:checked').forEach(function(cb) {
+                        ids.add(cb.value);
+                    });
+                    ids.forEach(function(id) {
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'siswa_ids[]';
+                        input.value = id;
+                        input.className = 'dynamic-siswa-id';
+                        promoteForm.appendChild(input);
+                    });
+                }
+                promoteForm.submit();
+            });
+        }
+    }
 
     // Existing Cancel Modal Script
     var cancelModal = document.getElementById('cancelScheduleModal');

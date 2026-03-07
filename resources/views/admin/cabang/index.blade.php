@@ -622,19 +622,88 @@
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .filter-section {
         width: 100%;
     }
-    
+
     .search-box input {
         width: 100%;
     }
-    
+
     .stats-mini {
         flex-direction: column;
         gap: 8px;
     }
+}
+
+/* Mobile Card Pattern */
+@media (max-width: 767.98px) {
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+        position: relative;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        white-space: normal;
+        text-align: right;
+    }
+    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        padding: 14px !important;
+        border-bottom: 2px solid #e0e7ff !important;
+        display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head::before { display: none !important; }
+    .table-card-mobile .mobile-card-head .location-info { gap: 2px; }
+    .table-card-mobile .mobile-card-head .location-name { font-size: 15px; }
+    .table-card-mobile .mobile-hide { display: none !important; }
+    .desktop-only-cell { display: none !important; }
+    .mobile-only-cell { display: flex !important; }
+    .mobile-card-actions {
+        display: flex !important;
+        justify-content: flex-end;
+        gap: 6px;
+        padding: 10px 14px !important;
+        background: #f9fafb;
+    }
+    .mobile-card-actions::before { display: none !important; }
+    .table-card-mobile .stats-mini {
+        flex-direction: row;
+        gap: 16px;
+    }
+}
+@media (min-width: 768px) {
+    .mobile-only-cell { display: none !important; }
 }
 </style>
 
@@ -729,7 +798,7 @@
             {{-- Table --}}
             @if($cabangs->count() > 0)
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table-card-mobile">
                         <thead>
                             <tr>
                                 <th>Cabang</th>
@@ -743,23 +812,38 @@
                         <tbody>
                             @foreach($cabangs as $cabang)
                             <tr>
-                                <td>
+                                {{-- Desktop: Cabang --}}
+                                <td class="desktop-only-cell">
                                     <div class="location-info">
                                         <span class="location-name">{{ $cabang->nama_cabang }}</span>
                                         <span class="location-code">{{ $cabang->kode_cabang }}</span>
                                     </div>
                                 </td>
-                                <td>
+                                {{-- Mobile: Card Head --}}
+                                <td class="mobile-only-cell mobile-card-head">
+                                    <div class="location-info">
+                                        <span class="location-name">{{ $cabang->nama_cabang }}</span>
+                                        <span>
+                                            <span class="location-code">{{ $cabang->kode_cabang }}</span>
+                                            @if($cabang->is_active)
+                                                <span class="badge badge-success" style="margin-left: 6px; font-size: 10px;">Aktif</span>
+                                            @else
+                                                <span class="badge badge-danger" style="margin-left: 6px; font-size: 10px;">Non-Aktif</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </td>
+                                <td data-label="Alamat">
                                     <div class="location-address">{{ Str::limit($cabang->alamat, 80) }}</div>
                                 </td>
-                                <td>
+                                <td data-label="Telepon">
                                     @if($cabang->telepon)
                                         <span style="color: #374151;">{{ $cabang->telepon }}</span>
                                     @else
                                         <span style="color: #9ca3af;">-</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td data-label="Data Terkait">
                                     <div class="stats-mini">
                                         <div class="stats-mini-item" title="Jumlah Siswa">
                                             <i class="fas fa-user-graduate" style="color: #3b82f6;"></i>
@@ -775,7 +859,8 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                {{-- Desktop: Status --}}
+                                <td class="desktop-only-cell">
                                     @if($cabang->is_active)
                                         <span class="badge badge-success">
                                             <i class="fas fa-check-circle"></i> Aktif
@@ -786,7 +871,7 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="mobile-card-actions">
                                     <div class="action-buttons">
                                         <a href="{{ route('admin.cabang.show', $cabang) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
                                             <i class="fas fa-eye"></i>

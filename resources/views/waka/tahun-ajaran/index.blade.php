@@ -10,6 +10,70 @@
 @endsection
 
 @section('content')
+<style>
+/* Mobile Card Pattern */
+@media (max-width: 767.98px) {
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+        position: relative;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        white-space: normal;
+        text-align: right;
+    }
+    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        padding: 14px !important;
+        border-bottom: 2px solid #e0e7ff !important;
+        display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head::before { display: none !important; }
+    .table-card-mobile .mobile-hide { display: none !important; }
+    .desktop-only-cell { display: none !important; }
+    .mobile-card-actions {
+        display: flex !important;
+        justify-content: flex-end;
+        gap: 6px;
+        padding: 10px 14px !important;
+        background: #f9fafb;
+    }
+    .mobile-card-actions::before { display: none !important; }
+    .mobile-card-actions .btn-group { box-shadow: none !important; }
+}
+@media (min-width: 768px) {
+    .mobile-only-cell { display: none !important; }
+}
+</style>
 <div class="container-fluid px-0">
 
     {{-- 1. RINGKASAN STATISTIK (DITAMBAHKAN UNTUK MEMPERCANTIK) --}}
@@ -117,7 +181,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0 table-card-mobile">
                     <thead class="bg-light text-primary small font-weight-bold">
                         <tr>
                             <th class="text-center" width="50">NO</th>
@@ -131,11 +195,22 @@
                     <tbody>
                         @forelse($tahunAjarans as $index => $tahunAjaran)
                         <tr>
-                            <td class="text-center align-middle font-weight-bold">{{ $tahunAjarans->firstItem() + $index }}</td>
-                            <td class="align-middle text-dark font-weight-bold">{{ $tahunAjaran->nama_tahun_ajaran }}</td>
-                            <td class="text-center align-middle small">{{ \Carbon\Carbon::parse($tahunAjaran->tanggal_mulai)->format('d M Y') }}</td>
-                            <td class="text-center align-middle small">{{ \Carbon\Carbon::parse($tahunAjaran->tanggal_selesai)->format('d M Y') }}</td>
-                            <td class="text-center align-middle">
+                            <td class="text-center align-middle font-weight-bold mobile-hide">{{ $tahunAjarans->firstItem() + $index }}</td>
+                            {{-- Desktop: Tahun Ajaran --}}
+                            <td class="align-middle text-dark font-weight-bold desktop-only-cell">{{ $tahunAjaran->nama_tahun_ajaran }}</td>
+                            {{-- Mobile: Card Head --}}
+                            <td class="mobile-only-cell mobile-card-head">
+                                <strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong>
+                                @if($tahunAjaran->is_active)
+                                    <span class="badge badge-success ms-1" style="font-size: 10px;">AKTIF</span>
+                                @else
+                                    <span class="badge badge-secondary ms-1" style="font-size: 10px;">TIDAK AKTIF</span>
+                                @endif
+                            </td>
+                            <td class="text-center align-middle small" data-label="Tanggal Mulai">{{ \Carbon\Carbon::parse($tahunAjaran->tanggal_mulai)->format('d M Y') }}</td>
+                            <td class="text-center align-middle small" data-label="Tanggal Selesai">{{ \Carbon\Carbon::parse($tahunAjaran->tanggal_selesai)->format('d M Y') }}</td>
+                            {{-- Desktop: Status --}}
+                            <td class="text-center align-middle desktop-only-cell">
                                 @if($tahunAjaran->is_active)
                                     <span class="badge badge-success px-3 py-2 shadow-sm">
                                         <i class="fas fa-check-circle mr-1"></i> AKTIF
@@ -146,11 +221,11 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="text-center align-middle">
+                            <td class="text-center align-middle mobile-card-actions">
                                 <div class="btn-group shadow-sm">
                                     <a href="{{ route('waka.tahun-ajaran.show', $tahunAjaran->id) }}" class="btn btn-info btn-sm" title="Detail"><i class="fas fa-eye"></i></a>
                                     <a href="{{ route('waka.tahun-ajaran.edit', $tahunAjaran->id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
-                                    
+
                                     @if(!$tahunAjaran->is_active)
                                     <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#activateModal{{ $tahunAjaran->id }}" title="Aktifkan">
                                         <i class="fas fa-power-off"></i>

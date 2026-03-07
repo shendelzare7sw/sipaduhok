@@ -141,7 +141,7 @@
                     </button>
                     
                     <p class="text-xs text-center text-gray-500 mt-4">
-                        Jika Anda lupa jawaban atau PIN, Anda **wajib** menghubungi Developer Utama (Sysadmin) untuk mereset akun via akses server langsung.
+                        Jika Anda lupa jawaban atau PIN, Anda <strong>wajib</strong> menghubungi Developer Utama (Sysadmin) untuk mereset akun via akses server langsung.
                     </p>
                     <div class="text-right mt-2">
                         <a href="https://wa.me/6282113100791" target="_blank" class="text-xs font-semibold text-orange-500 hover:text-orange-600 underline">

@@ -67,11 +67,7 @@
         "telephone": "+62-858-1125-8534",
         "contactType": "customer service"
       },
-      "sameAs": [
-        "https://www.facebook.com/",
-        "https://www.instagram.com/",
-        "https://www.youtube.com/"
-      ]
+      "sameAs": []
     },
     {
       "@type": "EducationalOrganization",
@@ -85,15 +81,7 @@
       "@id": "{{ config('app.url') }}#website",
       "url": "{{ config('app.url') }}",
       "name": "PKBM House Of Knowledge",
-      "description": "{{ $description }}",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "{{ config('app.url') }}/search?q={search_term_string}"
-        },
-        "query-input": "required name=search_term_string"
-      }
+      "description": "{{ $description }}"
     }
   ]
 }

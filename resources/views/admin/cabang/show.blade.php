@@ -524,6 +524,62 @@
     border-color: #3b82f6;
     color: white;
 }
+
+/* Mobile Card Pattern for Tables */
+@media (max-width: 767.98px) {
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+        position: relative;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        white-space: normal;
+        text-align: right;
+    }
+    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        padding: 14px !important;
+        border-bottom: 2px solid #e0e7ff !important;
+        display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head::before { display: none !important; }
+    .table-card-mobile .mobile-hide { display: none !important; }
+    .desktop-only-cell { display: none !important; }
+    .mobile-only-cell { display: flex !important; }
+    .table-card-mobile .user-info { text-align: left; }
+}
+@media (min-width: 768px) {
+    .mobile-only-cell { display: none !important; }
+}
 </style>
 
 <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
@@ -640,7 +696,7 @@
             <div class="card-body">
                 @if($users->count() > 0)
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-card-mobile">
                             <thead>
                                 <tr>
                                     <th>Nama</th>
@@ -650,7 +706,7 @@
                             <tbody>
                                 @foreach($users->take(5) as $user)
                                 <tr>
-                                    <td>
+                                    <td class="mobile-card-head">
                                         <div class="user-info">
                                             <div class="user-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
                                             <div>
@@ -659,7 +715,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Role">
                                         <span class="badge badge-purple">{{ ucwords(str_replace('_', ' ', $user->role)) }}</span>
                                     </td>
                                 </tr>
@@ -700,7 +756,7 @@
             <div class="tab-content active" id="tab-kelas">
                 @if($kelas->count() > 0)
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-card-mobile">
                             <thead>
                                 <tr>
                                     <th>Kode Kelas</th>
@@ -714,12 +770,22 @@
                             <tbody>
                                 @foreach($kelas as $k)
                                 <tr>
-                                    <td><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $k->kode_kelas }}</code></td>
-                                    <td><strong>{{ $k->nama_kelas }}</strong></td>
-                                    <td><span class="badge badge-info">{{ $k->jenjang }}</span></td>
-                                    <td>{{ $k->tahunAjaran->nama_tahun_ajaran ?? '-' }}</td>
-                                    <td>{{ $k->waliKelas->nama_lengkap ?? '-' }}</td>
-                                    <td>{{ $k->kuota_siswa }} siswa</td>
+                                    {{-- Desktop: Kode --}}
+                                    <td class="desktop-only-cell"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $k->kode_kelas }}</code></td>
+                                    {{-- Desktop: Nama --}}
+                                    <td class="desktop-only-cell"><strong>{{ $k->nama_kelas }}</strong></td>
+                                    {{-- Mobile: Card Head --}}
+                                    <td class="mobile-only-cell mobile-card-head">
+                                        <strong>{{ $k->nama_kelas }}</strong>
+                                        <span style="display: flex; gap: 6px; align-items: center; margin-top: 4px;">
+                                            <code style="background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; font-size: 11px;">{{ $k->kode_kelas }}</code>
+                                            <span class="badge badge-info" style="font-size: 10px;">{{ $k->jenjang }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="desktop-only-cell"><span class="badge badge-info">{{ $k->jenjang }}</span></td>
+                                    <td data-label="Tahun Ajaran">{{ $k->tahunAjaran->nama_tahun_ajaran ?? '-' }}</td>
+                                    <td data-label="Wali Kelas">{{ $k->waliKelas->nama_lengkap ?? '-' }}</td>
+                                    <td data-label="Kuota">{{ $k->kuota_siswa }} siswa</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -737,7 +803,7 @@
             <div class="tab-content" id="tab-siswa">
                 @if($siswa->count() > 0)
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table table-card-mobile">
                             <thead>
                                 <tr>
                                     <th>NIS</th>
@@ -750,8 +816,10 @@
                             <tbody>
                                 @foreach($siswa as $s)
                                 <tr>
-                                    <td><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $s->nis }}</code></td>
-                                    <td>
+                                    {{-- Desktop: NIS --}}
+                                    <td class="desktop-only-cell"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">{{ $s->nis }}</code></td>
+                                    {{-- Desktop: Nama --}}
+                                    <td class="desktop-only-cell">
                                         <div class="user-info">
                                             <div class="user-avatar" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
                                                 {{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}
@@ -762,9 +830,21 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ $s->kelas->nama_kelas ?? '-' }}</td>
-                                    <td>{{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                                    <td>
+                                    {{-- Mobile: Card Head --}}
+                                    <td class="mobile-only-cell mobile-card-head">
+                                        <div class="user-info">
+                                            <div class="user-avatar" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                                {{ strtoupper(substr($s->nama_lengkap, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <div class="user-name">{{ $s->nama_lengkap }}</div>
+                                                <div class="user-email">NIS: {{ $s->nis }} | NISN: {{ $s->nisn }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td data-label="Kelas">{{ $s->kelas->nama_kelas ?? '-' }}</td>
+                                    <td data-label="Jenis Kelamin">{{ $s->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
+                                    <td data-label="Status">
                                         <span class="badge badge-success">{{ ucfirst($s->status) }}</span>
                                     </td>
                                 </tr>

@@ -214,6 +214,40 @@
         }
         .btn-back:hover { background: #4b5563; color: white; }
 
+        .btn-zoom {
+            padding: 7px 12px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            transition: all 0.2s;
+        }
+        .btn-zoom:hover { background: #e5e7eb; }
+        .zoom-level {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            min-width: 45px;
+            text-align: center;
+            user-select: none;
+        }
+        .zoom-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 2px 4px;
+        }
+
         /* Mobile: handled by JS scale — no reflow needed */
         @media (max-width: 900px) {
             body { padding: 0; background: #e5e7eb; }
@@ -310,9 +344,15 @@
 </head>
 <body>
     <div class="print-bar no-print">
-        <a href="javascript:history.back()" class="btn-back">
+        <a href="#" onclick="event.preventDefault(); if(document.referrer && window.history.length > 1) { window.history.back(); } else { window.close(); }" class="btn-back">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
+        <div class="zoom-controls">
+            <button class="btn-zoom" onclick="zoomOut()" title="Perkecil"><i class="bi bi-dash"></i></button>
+            <span class="zoom-level" id="zoomLevel">100%</span>
+            <button class="btn-zoom" onclick="zoomIn()" title="Perbesar"><i class="bi bi-plus"></i></button>
+            <button class="btn-zoom" onclick="zoomReset()" title="Reset" style="font-size: 12px;">Fit</button>
+        </div>
         <button class="btn-print" onclick="window.print()">
             <i class="bi bi-printer-fill"></i> Cetak Rapor
         </button>
@@ -556,41 +596,66 @@
 
     <script>
     (function() {
-        const DOC_WIDTH = 900; // natural document width px
+        var DOC_WIDTH = 900;
+        var currentScale = 1;
+        var fitScale = 1;
+        var manualZoom = false;
+
+        function applyScale(scale) {
+            var wrapper = document.querySelector('.rapor-wrapper');
+            if (!wrapper) return;
+            currentScale = scale;
+            wrapper.style.transform = 'scale(' + scale + ')';
+            wrapper.style.transformOrigin = 'top left';
+            wrapper.style.marginLeft = '0';
+            wrapper.style.marginRight = '0';
+            document.body.style.height = Math.ceil(wrapper.scrollHeight * scale) + 'px';
+            var label = document.getElementById('zoomLevel');
+            if (label) label.textContent = Math.round(scale * 100) + '%';
+        }
 
         function fitToScreen() {
-            const wrapper = document.querySelector('.rapor-wrapper');
+            var wrapper = document.querySelector('.rapor-wrapper');
             if (!wrapper) return;
 
-            const vw = Math.min(window.innerWidth, document.documentElement.clientWidth);
+            var vw = Math.min(window.innerWidth, document.documentElement.clientWidth);
 
             if (vw < DOC_WIDTH) {
-                const scale = vw / DOC_WIDTH;
-                wrapper.style.transform = 'scale(' + scale + ')';
-                wrapper.style.transformOrigin = 'top left';
-                wrapper.style.marginLeft = '0';
-                wrapper.style.marginRight = '0';
-                // Adjust body height so scrolling works correctly
-                document.body.style.height = Math.ceil(wrapper.scrollHeight * scale) + 'px';
+                fitScale = vw / DOC_WIDTH;
             } else {
-                wrapper.style.transform = '';
-                wrapper.style.transformOrigin = '';
-                document.body.style.height = '';
+                fitScale = 1;
+            }
+
+            if (!manualZoom) {
+                applyScale(fitScale);
             }
         }
 
-        window.addEventListener('load', fitToScreen);
-        window.addEventListener('resize', fitToScreen);
+        window.zoomIn = function() {
+            manualZoom = true;
+            applyScale(Math.min(currentScale + 0.1, 2));
+        };
+        window.zoomOut = function() {
+            manualZoom = true;
+            applyScale(Math.max(currentScale - 0.1, 0.3));
+        };
+        window.zoomReset = function() {
+            manualZoom = false;
+            fitToScreen();
+        };
 
-        // Reset on print
-        window.addEventListener('beforeprint', function() {
-            const wrapper = document.querySelector('.rapor-wrapper');
-            if (wrapper) {
-                wrapper.style.transform = 'none';
-                wrapper.style.width = '';
-            }
+        window.addEventListener('load', fitToScreen);
+        window.addEventListener('resize', function() {
+            if (!manualZoom) fitToScreen();
         });
-        window.addEventListener('afterprint', fitToScreen);
+
+        window.addEventListener('beforeprint', function() {
+            var wrapper = document.querySelector('.rapor-wrapper');
+            if (wrapper) { wrapper.style.transform = 'none'; wrapper.style.width = ''; }
+        });
+        window.addEventListener('afterprint', function() {
+            if (manualZoom) { applyScale(currentScale); } else { fitToScreen(); }
+        });
     })();
     </script>
 </body>

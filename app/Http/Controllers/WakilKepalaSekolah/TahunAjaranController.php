@@ -82,7 +82,7 @@ class TahunAjaranController extends Controller
 
     public function show(TahunAjaran $tahunAjaran)
     {
-        $tahunAjaran->load('kelas');
+        $tahunAjaran->load('kelas.cabang');
         return view('waka.tahun-ajaran.show', compact('tahunAjaran'));
     }
 

@@ -136,11 +136,13 @@ Route::middleware('guest')->group(function () {
 
     // Admin Recovery Routes
     Route::get('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'showLinkRequestForm'])->name('admin.recovery');
-    Route::post('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'reset'])->name('admin.recovery.reset');
+    Route::post('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'reset'])->name('admin.recovery.reset')
+        ->middleware('throttle:5,1');
 
     // Public User Recovery Routes (Phase 3)
     Route::get('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'index'])->name('user.recovery');
-    Route::post('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'store'])->name('user.recovery.store');
+    Route::post('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'store'])->name('user.recovery.store')
+        ->middleware('throttle:5,1');
     
     // Recovery Password Reset via Link
     Route::get('/recovery/reset/{token}', function ($token) {
@@ -162,23 +164,26 @@ Route::middleware('guest')->group(function () {
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $ticket = \App\Models\RecoveryTicket::where('token_reset', $request->token)
-            ->whereIn('status', ['sent', 'processing'])
-            ->where('expires_at', '>', now())
-            ->first();
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            $ticket = \App\Models\RecoveryTicket::where('token_reset', $request->token)
+                ->whereIn('status', ['sent', 'processing'])
+                ->where('expires_at', '>', now())
+                ->lockForUpdate()
+                ->first();
 
-        if (!$ticket) {
-            return redirect()->route('login')->with('error', 'Tautan reset sudah tidak valid atau kedaluwarsa.');
-        }
+            if (!$ticket) {
+                return redirect()->route('login')->with('error', 'Tautan reset sudah tidak valid atau kedaluwarsa.');
+            }
 
-        $user = $ticket->user;
-        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
-        $user->save();
+            $user = $ticket->user;
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $user->save();
 
-        $ticket->update(['status' => 'resolved', 'token_reset' => null]);
+            $ticket->update(['status' => 'resolved', 'token_reset' => null]);
 
-        return redirect()->route('login')->with('success', 'Password Anda berhasil diubah! Silakan login dengan password baru Anda.');
-    })->name('password.reset.ticket.submit');
+            return redirect()->route('login')->with('success', 'Password Anda berhasil diubah! Silakan login dengan password baru Anda.');
+        });
+    })->name('password.reset.ticket.submit')->middleware('throttle:5,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -726,6 +731,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/{tahunAjaran}', [WakaTahunAjaranController::class, 'update'])->name('update');
             Route::delete('/{tahunAjaran}', [WakaTahunAjaranController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/toggle-active', [WakaTahunAjaranController::class, 'toggleActive'])->name('toggle-active');
+            Route::post('/{id}/activate', [WakaTahunAjaranController::class, 'toggleActive'])->name('activate');
         });
 
         // Mata Pelajaran

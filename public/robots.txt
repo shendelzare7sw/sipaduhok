@@ -61,6 +61,9 @@ Disallow: /sekretaris
 Disallow: /guru
 Disallow: /siswa
 Disallow: /orang-tua
+Disallow: /login
+Disallow: /recovery
+Disallow: /admin-recovery
 Allow: /
 
 User-agent: bingbot
@@ -72,6 +75,9 @@ Disallow: /sekretaris
 Disallow: /guru
 Disallow: /siswa
 Disallow: /orang-tua
+Disallow: /login
+Disallow: /recovery
+Disallow: /admin-recovery
 Allow: /
 
 # Aturan Default untuk Semua Bot Lainnya
@@ -84,6 +90,9 @@ Disallow: /sekretaris
 Disallow: /guru
 Disallow: /siswa
 Disallow: /orang-tua
+Disallow: /login
+Disallow: /recovery
+Disallow: /admin-recovery
 Allow: /
 
 # Sitemap Link

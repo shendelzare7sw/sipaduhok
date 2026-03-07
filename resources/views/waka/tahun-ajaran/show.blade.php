@@ -365,7 +365,7 @@
                                     <tr>
                                         <th style="padding: 12px 20px; text-align: left; border-bottom: 1px solid #e5e7eb;">Nama Kelas</th>
                                         <th style="padding: 12px 20px; text-align: left; border-bottom: 1px solid #e5e7eb;">Tingkat</th>
-                                        <th style="padding: 12px 20px; text-align: left; border-bottom: 1px solid #e5e7eb;">Program</th>
+                                        <th style="padding: 12px 20px; text-align: left; border-bottom: 1px solid #e5e7eb;">Cabang</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -374,10 +374,8 @@
                                         <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6;">
                                             <strong>{{ $kelas->nama_kelas }}</strong>
                                         </td>
-                                        <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6;">{{ $kelas->tingkat }}</td>
-                                        <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6;">
-                                            <span class="badge bg-success">{{ $kelas->program }}</span>
-                                        </td>
+                                        <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6;">{{ $kelas->jenjang ?? '-' }}</td>
+                                        <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6;">{{ $kelas->cabang->nama_cabang ?? '-' }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -440,7 +438,7 @@
         <div class="modal-content" style="background: white; border-radius: 12px; border: none;">
             <div class="modal-header">
                 <h5 class="modal-title">Konfirmasi Aktifkan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="background: none; border: none; font-size: 20px;">×</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 Aktifkan tahun ajaran <strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong>?
@@ -465,7 +463,7 @@
         <div class="modal-content" style="background: white; border-radius: 12px; border: none;">
             <div class="modal-header">
                 <h5 class="modal-title">Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" style="background: none; border: none; font-size: 20px;">×</button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 Apakah Anda yakin ingin menghapus tahun ajaran <strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong>?

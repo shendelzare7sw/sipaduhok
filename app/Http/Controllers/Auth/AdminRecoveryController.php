@@ -37,14 +37,16 @@ class AdminRecoveryController extends Controller
                     ->first();
 
         // Check if user exists and has admin/ketua privileges
+        // Use same error message for all failure cases to prevent user enumeration
+        $genericError = 'Verifikasi gagal. Periksa kembali identitas dan kredensial keamanan Anda.';
+
         if (!$user) {
-            return back()->withInput()->withErrors(['identifier' => 'Akun tidak ditemukan.']);
+            return back()->withInput()->withErrors(['identifier' => $genericError]);
         }
 
         if (!$user->isAdmin() && !$user->isKetuaPKBM()) {
-            // Security measure: pretend it failed randomly or just say unauthorized
             Log::warning("Unauthorized recovery attempt for non-admin user: {$user->email}");
-            return back()->withErrors(['identifier' => 'Akun ini tidak memiliki akses ke fitur ini.']);
+            return back()->withInput()->withErrors(['identifier' => $genericError]);
         }
 
         // Check if security questions are set up

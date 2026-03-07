@@ -38,7 +38,7 @@ class UserRecoveryController extends Controller
         $user = $this->findUserByIdentifier($identifier);
 
         if (!$user) {
-            return back()->with('error', 'Identitas tidak ditemukan dalam sistem. Coba periksa kembali NISN, NIP, Username, atau Email Anda.');
+            return back()->with('error', 'Identitas tidak ditemukan dalam sistem. Coba periksa kembali NISN, NIP, No. HP, Email Pribadi, atau Username Anda.');
         }
 
         if ($user->isAdmin() || $user->isKetuaPKBM()) {
@@ -94,12 +94,17 @@ class UserRecoveryController extends Controller
 
     private function findUserByIdentifier(string $ident): ?User
     {
-        $user = User::where('username', $ident)->orWhere('email', $ident)->orWhere('personal_email', $ident)->first();
+        $user = User::where('username', $ident)->orWhere('email', $ident)->orWhere('personal_email', $ident)->orWhere('phone', $ident)->first();
         if ($user) return $user;
 
         $siswa = Siswa::where('nisn', $ident)->orWhere('nis', $ident)->first();
         if ($siswa && $siswa->user_id) {
             return User::find($siswa->user_id);
+        }
+
+        $tenaga = \App\Models\TenagaPendidik::where('nip', $ident)->orWhere('telepon', $ident)->first();
+        if ($tenaga && $tenaga->user_id) {
+            return User::find($tenaga->user_id);
         }
 
         return null;
