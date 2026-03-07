@@ -220,30 +220,32 @@ class RaporController extends Controller
      */
     private function generateRaporSiswa($siswa, $kelas, $semester, $jenisRapor)
     {
-        // Hitung presensi
-        $bulanAwal = $semester == 'ganjil' ? 7 : 1;
-        $bulanAkhir = $semester == 'ganjil' ? 12 : 6;
+        // Hitung presensi menggunakan periode semester dari TahunAjaran
+        $tahunAjaran = TahunAjaran::find($kelas->tahun_ajaran_id);
+        $jumlahSakit = 0;
+        $jumlahIzin = 0;
+        $jumlahAlpha = 0;
 
-        $jumlahSakit = Presensi::where('siswa_id', $siswa->id)
-            ->where('kelas_id', $kelas->id)
-            ->whereMonth('tanggal', '>=', $bulanAwal)
-            ->whereMonth('tanggal', '<=', $bulanAkhir)
-            ->where('status', 'sakit')
-            ->count();
+        if ($tahunAjaran) {
+            $periods = $tahunAjaran->getSemesterPeriods();
+            $period = $periods[$semester] ?? null;
 
-        $jumlahIzin = Presensi::where('siswa_id', $siswa->id)
-            ->where('kelas_id', $kelas->id)
-            ->whereMonth('tanggal', '>=', $bulanAwal)
-            ->whereMonth('tanggal', '<=', $bulanAkhir)
-            ->where('status', 'izin')
-            ->count();
+            if ($period) {
+                $presensi = Presensi::where('siswa_id', $siswa->id)
+                    ->where('kelas_id', $kelas->id)
+                    ->whereBetween('tanggal', [$period['start'], $period['end']])
+                    ->selectRaw('
+                        SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as total_sakit,
+                        SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as total_izin,
+                        SUM(CASE WHEN status = "alpha" THEN 1 ELSE 0 END) as total_alpha
+                    ')
+                    ->first();
 
-        $jumlahAlpha = Presensi::where('siswa_id', $siswa->id)
-            ->where('kelas_id', $kelas->id)
-            ->whereMonth('tanggal', '>=', $bulanAwal)
-            ->whereMonth('tanggal', '<=', $bulanAkhir)
-            ->where('status', 'alpha')
-            ->count();
+                $jumlahSakit = $presensi->total_sakit ?? 0;
+                $jumlahIzin = $presensi->total_izin ?? 0;
+                $jumlahAlpha = $presensi->total_alpha ?? 0;
+            }
+        }
 
         // Buat rapor
         $rapor = Rapor::create([
@@ -278,7 +280,7 @@ class RaporController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
         $kelasList = $this->getKelasWali($tenagaPendidik);
 
-        $rapor = Rapor::with(['siswa', 'kelas', 'raporNilai.mataPelajaran', 'raporNilai.nilai'])->findOrFail($raporId);
+        $rapor = Rapor::with(['siswa', 'kelas', 'raporNilai.mataPelajaran', 'raporNilai.nilai', 'kegiatanEkstra'])->findOrFail($raporId);
 
         // Pastikan rapor ini milik kelas wali kelas
         if ($rapor->kelas_id != $kelas->id) {
@@ -286,10 +288,19 @@ class RaporController extends Controller
                 ->with('error', 'Rapor tidak ditemukan.');
         }
 
+        // Auto-fill kehadiran dari presensi agar langsung tampil data terbaru
+        $rapor->hitungKehadiranOtomatis();
+
+        // If no kegiatan ekstra yet, use defaults
+        $kegiatanEkstra = $rapor->kegiatanEkstra->isNotEmpty()
+            ? $rapor->kegiatanEkstra
+            : collect(RaporKegiatanEkstra::getDefaultKegiatan())->map(fn($nama) => new RaporKegiatanEkstra(['kegiatan_nama' => $nama, 'predikat' => null, 'keterangan' => null]));
+
         return view('wali-kelas.rapor.edit', [
             'rapor' => $rapor,
             'kelas' => $kelas,
             'kelasList' => $kelasList,
+            'kegiatanEkstra' => $kegiatanEkstra,
         ]);
     }
 
@@ -495,6 +506,9 @@ class RaporController extends Controller
             'kegiatanEkstra', // For ekstrakurikuler activities
         ])->findOrFail($raporId);
 
+        // Auto-fill kehadiran dari presensi agar selalu data terbaru
+        $rapor->hitungKehadiranOtomatis();
+
         // Route to different templates based on jenis_rapor
         if ($rapor->jenis_rapor === 'tengah_semester') {
             return view('wali-kelas.rapor.preview-pts', compact('rapor'));
@@ -590,10 +604,19 @@ class RaporController extends Controller
     /**
      * NEW: Auto-fill kehadiran from presensi table
      */
-    public function autoFillKehadiran($raporId): RedirectResponse
+    public function autoFillKehadiran(Request $request, $raporId)
     {
         $rapor = Rapor::findOrFail($raporId);
         $rapor->hitungKehadiranOtomatis();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'sakit' => $rapor->jumlah_sakit,
+                'izin' => $rapor->jumlah_izin,
+                'alpha' => $rapor->jumlah_alpha,
+            ]);
+        }
 
         return back()->with('success', 'Kehadiran berhasil di-auto-fill dari data presensi!');
     }
@@ -789,7 +812,7 @@ class RaporController extends Controller
      */
     public function exportExcel($raporId)
     {
-        $rapor = Rapor::with(['siswa', 'kelas.tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])
+        $rapor = Rapor::with(['siswa', 'kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'raporNilai.nilai', 'kegiatanEkstra'])
             ->findOrFail($raporId);
 
         $filename = "Rapor_{$rapor->siswa->nama_lengkap}_{$rapor->getPeriodeLabel()}.xlsx";

@@ -153,17 +153,20 @@ class Rapor extends Model
             return $this;
         }
 
-        // Determine date range based on semester
-        $startDate = $this->semester === 'ganjil'
-            ? $tahunAjaran->tanggal_mulai
-            : date('Y-m-d', strtotime($tahunAjaran->tanggal_mulai . ' +6 months'));
+        // Use proper semester periods from TahunAjaran
+        $periods = $tahunAjaran->getSemesterPeriods();
+        $period = $periods[$this->semester] ?? null;
 
-        $endDate = $this->semester === 'ganjil'
-            ? date('Y-m-d', strtotime($tahunAjaran->tanggal_mulai . ' +6 months'))
-            : $tahunAjaran->tanggal_selesai;
+        if (!$period) {
+            return $this;
+        }
+
+        $startDate = $period['start'];
+        $endDate = $period['end'];
 
         // Count from presensi table
         $presensi = Presensi::where('siswa_id', $this->siswa_id)
+            ->where('kelas_id', $this->kelas_id)
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->selectRaw('
                 SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as total_sakit,

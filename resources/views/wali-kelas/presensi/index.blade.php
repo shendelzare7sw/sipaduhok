@@ -99,13 +99,21 @@
         <div class="card-body">
             <form action="{{ route('wali.presensi.index') }}" method="GET">
                 <div class="row align-items-end">
-                    <div class="col-md-3 mb-3 mb-md-0">
+                    <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">TANGGAL PRESENSI</label>
                         <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" onchange="this.form.submit()">
                     </div>
-                    <div class="col-md-3 mb-3 mb-md-0">
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <label class="small fw-bold">SEMESTER</label>
+                        <select name="semester" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua (Per Bulan)</option>
+                            <option value="ganjil" {{ ($semester ?? '') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
+                            <option value="genap" {{ ($semester ?? '') == 'genap' ? 'selected' : '' }}>Genap</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">LIHAT BULAN</label>
-                        <select name="bulan" class="form-select" onchange="this.form.submit()">
+                        <select name="bulan" class="form-select" onchange="this.form.submit()" {{ ($semester ?? '') ? 'disabled' : '' }}>
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create(now()->year, $m, 1)->locale('id')->isoFormat('MMMM') }}
@@ -113,15 +121,15 @@
                             @endfor
                         </select>
                     </div>
-                    <div class="col-md-3 mb-3 mb-md-0">
+                    <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">TAHUN</label>
-                        <select name="tahun" class="form-select" onchange="this.form.submit()">
+                        <select name="tahun" class="form-select" onchange="this.form.submit()" {{ ($semester ?? '') ? 'disabled' : '' }}>
                             @for($y = now()->year - 2; $y <= now()->year + 1; $y++)
                                 <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4 col-lg-2">
                         <a href="{{ route('wali.presensi.index') }}" class="btn btn-light w-100 border fw-bold text-primary">
                             <i class="fas fa-sync-alt me-1"></i> Reset Filter
                         </a>
@@ -170,16 +178,16 @@
                                     <td class="align-middle">
                                         <select name="presensi[{{ $index }}][status]" class="form-select status-select text-center shadow-sm" required>
                                             <option value="hadir" {{ $status == 'hadir' ? 'selected' : '' }} class="text-success fw-bold">
-                                                &#10004; Hadir
+                                                Hadir
                                             </option>
                                             <option value="sakit" {{ $status == 'sakit' ? 'selected' : '' }} class="text-warning fw-bold">
-                                                &#129308; Sakit
+                                                Sakit
                                             </option>
                                             <option value="izin" {{ $status == 'izin' ? 'selected' : '' }} class="text-primary fw-bold">
-                                                &#128221; Izin
+                                                Izin
                                             </option>
                                             <option value="alpha" {{ $status == 'alpha' ? 'selected' : '' }} class="text-danger fw-bold">
-                                                &#10006; Alpha
+                                                Alpha
                                             </option>
                                         </select>
                                     </td>
@@ -205,7 +213,12 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-white border-bottom-0">
             <h6 class="m-0 fw-bold text-gray-800">
-                <i class="fas fa-book-open me-2 text-info"></i>Rekapitulasi: {{ \Carbon\Carbon::create($tahun, $bulan, 1)->locale('id')->isoFormat('MMMM YYYY') }}
+                <i class="fas fa-book-open me-2 text-info"></i>Rekapitulasi:
+                @if($semester ?? false)
+                    Semester {{ ucfirst($semester) }} — {{ $tahunAjaran->nama_tahun_ajaran ?? '' }}
+                @else
+                    {{ \Carbon\Carbon::create($tahun, $bulan, 1)->locale('id')->isoFormat('MMMM YYYY') }}
+                @endif
             </h6>
         </div>
         <div class="card-body p-0 text-center">

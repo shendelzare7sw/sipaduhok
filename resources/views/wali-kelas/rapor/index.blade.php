@@ -206,6 +206,9 @@
                                             <a href="{{ route('wali.rapor.preview', $rapor->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank" title="Preview Rapor">
                                                 <i class="fas fa-eye"></i> Preview
                                             </a>
+                                            <a href="{{ route('wali.rapor.export-excel', $rapor->id) }}" class="btn btn-success btn-sm shadow-sm" title="Export ke Excel">
+                                                <i class="fas fa-file-excel"></i> Excel
+                                            </a>
 
                                             @if($status == 'draft')
                                                 {{-- Kirim / Batalkan Kirim ke Ketua --}}

@@ -161,6 +161,17 @@
             margin-top: 24px;
         }
 
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         .file-input {
             display: none;
         }

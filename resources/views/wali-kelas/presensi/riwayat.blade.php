@@ -98,7 +98,7 @@
                     @forelse($riwayat as $item)
                     <tr>
                         <td class="ps-4 align-middle fw-bold">
-                            {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                            {{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('j F Y') }}
                         </td>
                         <td class="align-middle">
                             <div class="fw-bold">{{ $item->siswa->nama_lengkap ?? '-' }}</div>
@@ -159,7 +159,7 @@
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <p class="mb-1">Siswa: <strong>{{ $item->siswa->nama_lengkap }}</strong></p>
-                                            <p class="mb-0">Tanggal: <strong>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</strong></p>
+                                            <p class="mb-0">Tanggal: <strong>{{ \Carbon\Carbon::parse($item->tanggal)->locale('id')->translatedFormat('j F Y') }}</strong></p>
                                         </div>
                                         <hr>
                                         <div class="mb-3">
@@ -173,7 +173,14 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Validasi (Jika Sakit/Izin)</label>
-                                            <select name="status_validasi" class="form-select">
+                                            <select name="status_validasi" class="form-select" onchange="
+                                                let statusSelect = this.closest('.modal-body').querySelector('select[name=status]');
+                                                if (this.value === 'ditolak') {
+                                                    statusSelect.value = 'alpha';
+                                                } else if (this.value === 'disetujui' && statusSelect.value === 'alpha') {
+                                                    statusSelect.value = 'izin';
+                                                }
+                                            ">
                                                 <option value="" {{ is_null($item->status_validasi) ? 'selected' : '' }}>- Belum Tervalidasi -</option>
                                                 <option value="pending" {{ $item->status_validasi == 'pending' ? 'selected' : '' }}>Pending</option>
                                                 <option value="disetujui" {{ $item->status_validasi == 'disetujui' ? 'selected' : '' }}>Setujui (Sakit/Izin)</option>

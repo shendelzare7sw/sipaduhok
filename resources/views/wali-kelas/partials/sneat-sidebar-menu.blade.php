@@ -95,6 +95,12 @@
                 <div>Validasi Izin</div>
             </a>
         </li>
+        <li class="menu-item {{ $currentRoute == 'wali.presensi.rekap-harian' || $currentRoute == 'wali.presensi.show-harian' ? 'active' : '' }}">
+            <a href="{{ route('wali.presensi.rekap-harian') }}" class="menu-link">
+                <i class="fas fa-calendar-day me-2" style="font-size: 10px;"></i>
+                <div>Rekap Harian</div>
+            </a>
+        </li>
         <li class="menu-item {{ $currentRoute == 'wali.presensi.riwayat' ? 'active' : '' }}">
             <a href="{{ route('wali.presensi.riwayat') }}" class="menu-link">
                 <i class="fas fa-history me-2" style="font-size: 10px;"></i>

@@ -155,6 +155,31 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
     .form-row {
         grid-template-columns: 1fr;
     }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions-left,
+    .form-actions-right {
+        width: 100%;
+    }
+
+    .form-actions-left {
+        order: 2;
+    }
+
+    .form-actions-right {
+        order: 1;
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
 }
 
 .form-group {

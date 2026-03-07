@@ -354,6 +354,61 @@ textarea.form-control {
     .stats-summary {
         grid-template-columns: 1fr;
     }
+
+    .card-header {
+        padding: 16px 20px;
+    }
+
+    .card-body {
+        padding: 16px 20px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions-left,
+    .form-actions-right {
+        width: 100%;
+    }
+
+    .form-actions-left {
+        order: 2;
+    }
+
+    .form-actions-right {
+        order: 1;
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .breadcrumb {
+        font-size: 12px;
+        flex-wrap: wrap;
+    }
+
+    .current-data-badge {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .warning-box {
+        padding: 12px 16px;
+    }
+
+    .warning-box h6 {
+        font-size: 13px;
+    }
+
+    .warning-box p {
+        font-size: 12px;
+    }
 }
 
 .stats-item {

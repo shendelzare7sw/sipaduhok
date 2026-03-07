@@ -491,6 +491,19 @@
     }
 
     @media (max-width: 768px) {
+        .container-fluid.px-4 {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+        .card > .card-body {
+            padding: 12px 8px;
+        }
+
+        .card > .card-header {
+            padding: 12px 8px;
+        }
+
         .calendar-header {
             flex-direction: column;
             align-items: flex-start;
@@ -501,11 +514,16 @@
         }
 
         .calendar-container {
-            padding: 16px;
+            padding: 10px;
         }
 
         .calendar-title {
             font-size: 18px;
+        }
+
+        .calendar-page-header {
+            font-size: 15px;
+            margin-bottom: 12px;
         }
 
         .calendar-table th {
@@ -536,11 +554,104 @@
             height: 0 !important;
             min-height: 0 !important;
         }
+
+        /* Tabs: prevent overflow */
+        .nav-tabs {
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-tabs .nav-item { flex-shrink: 0; }
+        .nav-tabs .nav-link {
+            padding: 10px 14px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        /* Card header responsive */
+        .card-header.d-flex {
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+        .card-header .btn-group {
+            width: 100%;
+        }
+        .card-header .btn-group .btn,
+        .card-header .btn-group .dropdown {
+            flex: 1;
+        }
+        .card-header .btn-group .dropdown .btn {
+            width: 100%;
+        }
+
+        /* Detail table mobile card pattern */
+        #list-view .table thead { display: none; }
+        #list-view .table tbody tr {
+            display: block;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            background: #fff;
+        }
+        #list-view .table tbody td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border: none !important;
+            border-bottom: 1px solid #f3f4f6 !important;
+            text-align: right;
+        }
+        #list-view .table tbody td:first-child {
+            display: none;
+        }
+        #list-view .table tbody td:nth-child(2) {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+            font-weight: 700;
+            font-size: 14px;
+            padding: 14px !important;
+            border-bottom: 2px solid #e0e7ff !important;
+            display: block !important;
+            text-align: left;
+        }
+        #list-view .table tbody td:nth-child(3)::before { content: 'Jenis'; }
+        #list-view .table tbody td:nth-child(4)::before { content: 'Tanggal'; }
+        #list-view .table tbody td:nth-child(5)::before { content: 'Status'; }
+        #list-view .table tbody td:nth-child(6)::before { content: 'Aksi'; }
+        #list-view .table tbody td:nth-child(n+3)::before {
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            letter-spacing: 0.5px;
+            text-align: left;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        #list-view .table tbody td:last-child {
+            background: #f9fafb;
+            justify-content: flex-end;
+        }
+
+        /* Stats cards: 2 columns */
+        .row > .col-xl-3 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
     }
 
     @media (max-width: 576px) {
+        .container-fluid.px-4 {
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+        }
+
         .calendar-container {
-            padding: 12px;
+            padding: 6px;
         }
 
         .calendar-title {
@@ -584,8 +695,13 @@
     }
 
     @media (max-width: 480px) {
+        .container-fluid.px-4 {
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
+
         .calendar-container {
-            padding: 8px;
+            padding: 4px;
         }
 
         .calendar-section {
@@ -636,7 +752,6 @@
 
 @section('content')
 <div class="container-fluid px-4">
-<div class="container-fluid px-0">
 
     {{-- STATS CARDS --}}
     <div class="row">
@@ -883,7 +998,6 @@
         </div>
     </div>
 </div>
-
 
 {{-- MODAL: KONFIRMASI HAPUS --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

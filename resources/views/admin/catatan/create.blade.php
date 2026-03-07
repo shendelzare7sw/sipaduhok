@@ -126,6 +126,17 @@ textarea.form-control {
     border-top: 1px solid #e5e7eb;
 }
 
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
 .radio-group {
     display: flex;
     gap: 16px;

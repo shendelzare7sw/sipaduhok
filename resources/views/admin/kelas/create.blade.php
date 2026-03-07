@@ -139,6 +139,15 @@
     .form-row, .form-row.three {
         grid-template-columns: 1fr;
     }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .form-group {

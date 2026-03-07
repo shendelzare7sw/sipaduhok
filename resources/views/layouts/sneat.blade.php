@@ -1080,6 +1080,8 @@
     @if(auth()->check() && canAccessChatbot(auth()->user()->role))
         @include('components.ai-chatbot')
     @endif
+
+    @stack('modals')
 </body>
 
 </html>

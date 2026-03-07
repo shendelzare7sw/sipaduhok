@@ -605,6 +605,20 @@
                         <label for="selectAllSimMobile" class="form-label mb-0 small fw-bold">Pilih Semua</label>
                     </div>
 
+                    {{-- Select All Across Pages Banner --}}
+                    @if($activeStudentsLinks->lastPage() > 1)
+                    <div id="selectAllBanner" class="alert alert-warning py-2 px-3 mb-2 d-none">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <span id="bannerText">Semua <strong>{{ $activeStudentsLinks->count() }}</strong> siswa di halaman ini dipilih.</span>
+                        <a href="javascript:void(0)" id="selectAllPagesLink" class="fw-bold ms-1" onclick="enableSelectAllPages()">
+                            Pilih semua <strong>{{ $totalActiveGlobal ?? $activeStudentsLinks->total() }}</strong> siswa di semua halaman
+                        </a>
+                        <a href="javascript:void(0)" id="clearSelectAllLink" class="fw-bold ms-1 d-none" onclick="clearSelectAllPages()">
+                            Batalkan pilih semua halaman
+                        </a>
+                    </div>
+                    @endif
+
                     <div class="table-responsive text-nowrap">
                         <table class="table table-hover table-card-mobile">
                             <thead>
@@ -951,19 +965,51 @@ function toggleAllCheckboxes(source, className) {
     checkboxes.forEach(function(checkbox) {
         checkbox.checked = source.checked;
     });
-    
+
     // Sync both select all checkboxes (mobile and desktop)
     var mobileCb = document.getElementById('selectAllSimMobile');
     var desktopCb = document.getElementById('selectAllSim');
     if (mobileCb && mobileCb !== source) mobileCb.checked = source.checked;
     if (desktopCb && desktopCb !== source) desktopCb.checked = source.checked;
 
-    // Set select all flag directly when header checkbox is toggled
-    let flagInput = document.getElementById('selectAllFlag');
-    if (flagInput) {
-        flagInput.value = source.checked ? '1' : '0';
+    // Show/hide the "select all across pages" banner
+    var banner = document.getElementById('selectAllBanner');
+    if (banner) {
+        if (source.checked) {
+            banner.classList.remove('d-none');
+            // Reset to page-only state
+            document.getElementById('selectAllPagesLink').classList.remove('d-none');
+            document.getElementById('clearSelectAllLink').classList.add('d-none');
+            document.getElementById('bannerText').innerHTML = 'Semua <strong>' + checkboxes.length + '</strong> siswa di halaman ini dipilih.';
+        } else {
+            banner.classList.add('d-none');
+        }
     }
 
+    // Reset select_all flag when toggling page checkboxes
+    let flagInput = document.getElementById('selectAllFlag');
+    if (flagInput) {
+        flagInput.value = '0';
+    }
+
+    updateButtonState();
+}
+
+function enableSelectAllPages() {
+    document.getElementById('selectAllFlag').value = '1';
+    var totalData = {{ isset($totalActiveGlobal) ? $totalActiveGlobal : 0 }};
+    document.getElementById('bannerText').innerHTML = 'Semua <strong>' + totalData + '</strong> siswa di semua halaman dipilih.';
+    document.getElementById('selectAllPagesLink').classList.add('d-none');
+    document.getElementById('clearSelectAllLink').classList.remove('d-none');
+    updateButtonState();
+}
+
+function clearSelectAllPages() {
+    document.getElementById('selectAllFlag').value = '0';
+    var checkboxes = document.querySelectorAll('.simCheck');
+    document.getElementById('bannerText').innerHTML = 'Semua <strong>' + checkboxes.length + '</strong> siswa di halaman ini dipilih.';
+    document.getElementById('selectAllPagesLink').classList.remove('d-none');
+    document.getElementById('clearSelectAllLink').classList.add('d-none');
     updateButtonState();
 }
 
@@ -975,12 +1021,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!this.checked) {
                 let flagInput = document.getElementById('selectAllFlag');
                 if (flagInput) flagInput.value = '0';
-                
+
                 // also uncheck header checkboxes
                 var mobileCb = document.getElementById('selectAllSimMobile');
                 var desktopCb = document.getElementById('selectAllSim');
                 if (mobileCb) mobileCb.checked = false;
                 if (desktopCb) desktopCb.checked = false;
+
+                // hide banner
+                var banner = document.getElementById('selectAllBanner');
+                if (banner) banner.classList.add('d-none');
             }
             updateButtonState();
         });
@@ -990,7 +1040,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (promoteBtn) {
         promoteBtn.addEventListener('click', function() {
             var isSelectAll = document.getElementById('selectAllFlag') && document.getElementById('selectAllFlag').value === '1';
-            var totalData = {{ isset($totalIneligibleGlobal) ? $totalIneligibleGlobal : 0 }};
+            var totalData = {{ isset($totalActiveGlobal) ? $totalActiveGlobal : 0 }};
             var uniqueIds = new Set();
             document.querySelectorAll('.simCheck:checked').forEach(function(cb) { uniqueIds.add(cb.value); });
             

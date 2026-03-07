@@ -155,11 +155,13 @@ class PromotionReportController extends Controller
             if ($jenjangFilter) $simQuery->whereHas('kelas', fn($q) => $q->where('jenjang', $jenjangFilter));
             if ($kelasId) $simQuery->where('kelas_id', $kelasId);
 
+            // Clone query before paginate (paginate modifies the builder with limit/offset)
+            $allStudentsQuery = clone $simQuery;
+
             $activeStudents = $simQuery->paginate(20, ['*'], 'sim_page');
 
             $simulationData = [];
             $promotionService = app(\App\Services\PromotionService::class);
-            $totalIneligibleCount = 0; // Local counter for current page
 
             foreach ($activeStudents as $siswa) {
                 $check = $promotionService->checkEligibility($siswa, $selectedYear->id);
@@ -168,29 +170,10 @@ class PromotionReportController extends Controller
                     'result' => $check
                 ];
             }
-            
-            // To get accurate "Select All" count across all pages, we must compute it
-            // However, iterating ALL active students is heavy. We can instead pass the total
-            // students, and maybe the frontend says "Semua X data".
-            // Since the user is complaining about the exact count of *ineligible* students across pages:
-            // We can calculate total ineligible students across the ENTIRE query if select All is a feature.
-            // Since this could be slow, an alternative is to just show "Semua X siswa dari total Y aktif"
-            // Let's calculate total ineligible students by executing the check on all if needed,
-            // OR just display a generic "Pilih Semua Siswa Tertunda" without an exact number.
-            // But to give exact numbers, we must evaluate them.
-            // Since $simQuery->get() might be 500-1000 students, calculating eligibility for all on EVERY page load is expensive.
-            // A fair compromise is to just say "Semua data yang tidak memenuhi syarat" or similar.
-            // But wait, the user specifically highlighted "Anda akan menaikkan 14 siswa terpilih".
-            // So we can change the frontend JS to say "Semua data tertunda terpilih" or load the exact count via AJAX.
-            // For now, let's just pass a flag so frontend doesn't show an exact wrong number.
-            // Or better yet, calculate it. 1000 students takes maybe 1s to evaluate. Let's do it for accuracy.
-            $allActiveStudents = $simQuery->get();
-            $totalIneligibleGlobal = 0;
-            foreach ($allActiveStudents as $s) {
-                if (!$promotionService->checkEligibility($s, $selectedYear->id)['eligible']) {
-                    $totalIneligibleGlobal++;
-                }
-            }
+
+            // Count total active students across ALL pages for "Select All" feature
+            $totalActiveGlobal = $allStudentsQuery->count();
+            $totalIneligibleGlobal = $totalActiveGlobal;
         }
 
         // --- 3. TA Validation for Promotion ---
@@ -223,6 +206,7 @@ class PromotionReportController extends Controller
             'students' => $students,
             'simulationData' => $simulationData, 
             'activeStudentsLinks' => $activeStudents,
+            'totalActiveGlobal' => $totalActiveGlobal ?? 0,
             'totalIneligibleGlobal' => $totalIneligibleGlobal ?? 0,
             'tahun' => $selectedYear, // Displayed Year
             'activeYear' => $activeYear, // Actual Active Year (for checks)

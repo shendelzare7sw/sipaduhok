@@ -1063,6 +1063,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/preview-bukti/{id}', [PresensiController::class, 'previewBukti'])->name('preview-bukti');
             Route::post('/validasi-izin/{id}', [PresensiController::class, 'prosesValidasiIzin'])->name('proses-validasi-izin');
             Route::get('/print-rekap', [PresensiController::class, 'printRekap'])->name('print-rekap');
+            Route::get('/rekap-harian', [PresensiController::class, 'rekapHarian'])->name('rekap-harian');
+            Route::get('/show-harian', [PresensiController::class, 'showHarian'])->name('show-harian');
             Route::get('/riwayat', [PresensiController::class, 'riwayat'])->name('riwayat');
             Route::put('/riwayat/{id}', [PresensiController::class, 'updateRiwayat'])->name('riwayat.update');
             // Import Excel

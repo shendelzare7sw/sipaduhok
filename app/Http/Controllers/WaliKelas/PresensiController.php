@@ -11,6 +11,7 @@ use App\Models\TenagaPendidik;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Presensi;
+use App\Models\TahunAjaran;
 use Carbon\Carbon;
 
 class PresensiController extends Controller
@@ -68,6 +69,10 @@ class PresensiController extends Controller
         $tanggal = $request->get('tanggal', now()->toDateString());
         $bulan = $request->get('bulan', now()->month);
         $tahun = $request->get('tahun', now()->year);
+        $semester = $request->get('semester'); // ganjil, genap, or null
+
+        // Get active tahun ajaran for semester periods
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
 
         // Get siswa di kelas
         $siswaList = Siswa::where('kelas_id', $kelas->id)
@@ -86,34 +91,37 @@ class PresensiController extends Controller
             $presensiData[$siswa->id] = $presensi;
         }
 
-        // Rekap presensi bulan ini
+        // Rekap presensi: per semester atau per bulan
         $rekapBulan = [];
+        $semesterPeriod = null;
+
+        if ($semester && $tahunAjaran) {
+            $periods = $tahunAjaran->getSemesterPeriods();
+            $semesterPeriod = $periods[$semester] ?? null;
+        }
+
         foreach ($siswaList as $siswa) {
+            $query = Presensi::where('siswa_id', $siswa->id)
+                ->where('kelas_id', $kelas->id);
+
+            if ($semesterPeriod) {
+                $query->whereBetween('tanggal', [$semesterPeriod['start'], $semesterPeriod['end']]);
+            } else {
+                $query->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun);
+            }
+
+            $counts = (clone $query)->selectRaw('
+                SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
+                SUM(CASE WHEN status = "alpha" THEN 1 ELSE 0 END) as alpha
+            ')->first();
+
             $rekapBulan[$siswa->id] = [
-                'hadir' => Presensi::where('siswa_id', $siswa->id)
-                    ->where('kelas_id', $kelas->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'hadir')
-                    ->count(),
-                'sakit' => Presensi::where('siswa_id', $siswa->id)
-                    ->where('kelas_id', $kelas->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'sakit')
-                    ->count(),
-                'izin' => Presensi::where('siswa_id', $siswa->id)
-                    ->where('kelas_id', $kelas->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'izin')
-                    ->count(),
-                'alpha' => Presensi::where('siswa_id', $siswa->id)
-                    ->where('kelas_id', $kelas->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'alpha')
-                    ->count(),
+                'hadir' => $counts->hadir ?? 0,
+                'sakit' => $counts->sakit ?? 0,
+                'izin'  => $counts->izin ?? 0,
+                'alpha' => $counts->alpha ?? 0,
             ];
         }
 
@@ -126,6 +134,8 @@ class PresensiController extends Controller
             'tanggal' => $tanggal,
             'bulan' => $bulan,
             'tahun' => $tahun,
+            'semester' => $semester,
+            'tahunAjaran' => $tahunAjaran,
         ]);
     }
 
@@ -317,13 +327,8 @@ class PresensiController extends Controller
             ->get();
 
         // Query Presensi
-    // Exclude 'pending' validation items (they should be handled in Validation page first)
-    $query = Presensi::with('siswa')
-        ->where('kelas_id', $kelas->id)
-        ->where(function($q) {
-            $q->whereNull('status_validasi')
-              ->orWhere('status_validasi', '!=', 'pending');
-        });
+        $query = Presensi::with('siswa')
+            ->where('kelas_id', $kelas->id);
 
         // Filter Siswa
         if ($request->filled('siswa_id')) {
@@ -373,10 +378,20 @@ class PresensiController extends Controller
             'status_validasi' => 'nullable|in:pending,disetujui,ditolak',
         ]);
 
+        $statusToSave = $validated['status'];
+        $statusValidasi = $validated['status_validasi'] ?? null;
+
+        // Auto-adjust status based on validasi jika frontend terlewat
+        if ($statusValidasi === 'ditolak') {
+            $statusToSave = 'alpha';
+        } elseif ($statusValidasi === 'disetujui' && $statusToSave === 'alpha') {
+            $statusToSave = 'izin';
+        }
+
         $presensi->update([
-            'status' => $validated['status'],
+            'status' => $statusToSave,
             'keterangan' => $validated['keterangan'],
-            'status_validasi' => $validated['status_validasi'] ?? null,
+            'status_validasi' => $statusValidasi,
             'diinput_oleh' => auth()->id(),
         ]);
 
@@ -406,6 +421,14 @@ class PresensiController extends Controller
 
         $bulan = (int) $request->get('bulan', now()->month);
         $tahun = (int) $request->get('tahun', now()->year);
+        $semester = $request->get('semester');
+
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        $semesterPeriod = null;
+        if ($semester && $tahunAjaran) {
+            $periods = $tahunAjaran->getSemesterPeriods();
+            $semesterPeriod = $periods[$semester] ?? null;
+        }
 
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')
@@ -414,28 +437,28 @@ class PresensiController extends Controller
 
         $rekapPresensi = [];
         foreach ($siswaList as $siswa) {
+            $query = Presensi::where('siswa_id', $siswa->id)
+                ->where('kelas_id', $kelas->id);
+
+            if ($semesterPeriod) {
+                $query->whereBetween('tanggal', [$semesterPeriod['start'], $semesterPeriod['end']]);
+            } else {
+                $query->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun);
+            }
+
+            $counts = (clone $query)->selectRaw('
+                SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
+                SUM(CASE WHEN status = "alpha" THEN 1 ELSE 0 END) as alpha
+            ')->first();
+
             $rekapPresensi[$siswa->id] = [
                 'siswa' => $siswa,
-                'hadir' => Presensi::where('siswa_id', $siswa->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'hadir')
-                    ->count(),
-                'sakit' => Presensi::where('siswa_id', $siswa->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'sakit')
-                    ->count(),
-                'izin' => Presensi::where('siswa_id', $siswa->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'izin')
-                    ->count(),
-                'alpha' => Presensi::where('siswa_id', $siswa->id)
-                    ->whereMonth('tanggal', $bulan)
-                    ->whereYear('tanggal', $tahun)
-                    ->where('status', 'alpha')
-                    ->count(),
+                'hadir' => $counts->hadir ?? 0,
+                'sakit' => $counts->sakit ?? 0,
+                'izin'  => $counts->izin ?? 0,
+                'alpha' => $counts->alpha ?? 0,
             ];
         }
 
@@ -445,8 +468,106 @@ class PresensiController extends Controller
             'rekapBulan' => $rekapPresensi,
             'bulan' => $bulan,
             'tahun' => $tahun,
+            'semester' => $semester,
         ]);
     }
+    /**
+     * Rekap Harian - list all dates that have presensi entries, with detail preview.
+     */
+    public function rekapHarian(Request $request): View|RedirectResponse
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        if (!$tenagaPendidik) abort(403, 'Data tenaga pendidik tidak ditemukan.');
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        if (!$kelas) abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+
+        $bulan = (int) $request->get('bulan', now()->month);
+        $tahun = (int) $request->get('tahun', now()->year);
+        $semester = $request->get('semester');
+
+        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        $semesterPeriod = null;
+        if ($semester && $tahunAjaran) {
+            $periods = $tahunAjaran->getSemesterPeriods();
+            $semesterPeriod = $periods[$semester] ?? null;
+        }
+
+        // Get distinct dates that have presensi records for this class
+        $query = Presensi::where('kelas_id', $kelas->id);
+
+        if ($semesterPeriod) {
+            $query->whereBetween('tanggal', [$semesterPeriod['start'], $semesterPeriod['end']]);
+        } else {
+            $query->whereMonth('tanggal', $bulan)->whereYear('tanggal', $tahun);
+        }
+
+        $dates = $query->selectRaw('DATE(tanggal) as tanggal, COUNT(*) as total_siswa,
+                SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
+                SUM(CASE WHEN status = "alpha" THEN 1 ELSE 0 END) as alpha')
+            ->groupByRaw('DATE(tanggal)')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        return view('wali-kelas.presensi.rekap-harian', [
+            'kelas' => $kelas,
+            'dates' => $dates,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
+            'semester' => $semester,
+            'tahunAjaran' => $tahunAjaran,
+        ]);
+    }
+
+    /**
+     * Show/preview detail presensi for a specific date.
+     */
+    public function showHarian(Request $request): View|RedirectResponse
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        if (!$tenagaPendidik) abort(403);
+
+        if ($this->needsKelasSelection($tenagaPendidik)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        if (!$kelas) abort(403);
+
+        $tanggal = $request->get('tanggal', now()->toDateString());
+
+        $siswaList = Siswa::where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get();
+
+        $presensiData = Presensi::where('kelas_id', $kelas->id)
+            ->whereDate('tanggal', $tanggal)
+            ->get()
+            ->keyBy('siswa_id');
+
+        $summary = [
+            'hadir' => $presensiData->where('status', 'hadir')->count(),
+            'sakit' => $presensiData->where('status', 'sakit')->count(),
+            'izin'  => $presensiData->where('status', 'izin')->count(),
+            'alpha' => $presensiData->where('status', 'alpha')->count(),
+        ];
+
+        return view('wali-kelas.presensi.show-harian', [
+            'kelas' => $kelas,
+            'siswaList' => $siswaList,
+            'presensiData' => $presensiData,
+            'tanggal' => $tanggal,
+            'summary' => $summary,
+        ]);
+    }
+
     /**
      * Preview bukti file with inline disposition
      */

@@ -115,10 +115,13 @@
 
         {{-- Data Kehadiran --}}
         <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-white border-bottom">
+            <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="m-0 fw-bold text-primary">
                     <i class="fas fa-calendar-check me-2"></i>Data Kehadiran
                 </h6>
+                <button type="button" class="btn btn-outline-info btn-sm" id="btnSyncKehadiran" title="Sinkron otomatis dari data presensi">
+                    <i class="fas fa-sync-alt me-1"></i>Sinkron dari Presensi
+                </button>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -154,6 +157,65 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Kegiatan Ekstra --}}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-running me-2"></i>Kegiatan Ekstrakurikuler
+                </h6>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="addKegiatanRow()">
+                    <i class="fas fa-plus me-1"></i>Tambah Kegiatan
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="kegiatanTable">
+                        <thead>
+                            <tr>
+                                <th width="40" class="text-center">No</th>
+                                <th>Nama Kegiatan</th>
+                                <th width="120" class="text-center">Predikat</th>
+                                <th>Keterangan</th>
+                                <th width="50" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kegiatanBody">
+                            @foreach($kegiatanEkstra as $index => $kegiatan)
+                                <tr>
+                                    <td class="text-center align-middle kegiatan-no">{{ $index + 1 }}</td>
+                                    <td>
+                                        <input type="text" name="kegiatan_ekstra[{{ $index }}][kegiatan_nama]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old("kegiatan_ekstra.{$index}.kegiatan_nama", $kegiatan->kegiatan_nama) }}"
+                                               placeholder="Nama kegiatan...">
+                                    </td>
+                                    <td>
+                                        <select name="kegiatan_ekstra[{{ $index }}][predikat]" class="form-select form-select-sm">
+                                            <option value="">-</option>
+                                            <option value="A" {{ ($kegiatan->predikat ?? '') === 'A' ? 'selected' : '' }}>A</option>
+                                            <option value="B" {{ ($kegiatan->predikat ?? '') === 'B' ? 'selected' : '' }}>B</option>
+                                            <option value="C" {{ ($kegiatan->predikat ?? '') === 'C' ? 'selected' : '' }}>C</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="kegiatan_ekstra[{{ $index }}][keterangan]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old("kegiatan_ekstra.{$index}.keterangan", $kegiatan->keterangan) }}"
+                                               placeholder="Keterangan...">
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeKegiatanRow(this)" title="Hapus">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -363,6 +425,67 @@
             const row = this.closest('tr');
             row.classList.toggle('row-hidden', !this.checked);
         });
+    });
+
+    // ── Kegiatan Ekstra ──────────────────────────────────────
+    let kegiatanIndex = document.querySelectorAll('#kegiatanBody tr').length;
+
+    function addKegiatanRow() {
+        const tbody = document.getElementById('kegiatanBody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="text-center align-middle kegiatan-no">${kegiatanIndex + 1}</td>
+            <td><input type="text" name="kegiatan_ekstra[${kegiatanIndex}][kegiatan_nama]" class="form-control form-control-sm" placeholder="Nama kegiatan..."></td>
+            <td><select name="kegiatan_ekstra[${kegiatanIndex}][predikat]" class="form-select form-select-sm"><option value="">-</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></td>
+            <td><input type="text" name="kegiatan_ekstra[${kegiatanIndex}][keterangan]" class="form-control form-control-sm" placeholder="Keterangan..."></td>
+            <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeKegiatanRow(this)"><i class="fas fa-trash-alt"></i></button></td>
+        `;
+        tbody.appendChild(row);
+        kegiatanIndex++;
+    }
+
+    function removeKegiatanRow(btn) {
+        btn.closest('tr').remove();
+        document.querySelectorAll('#kegiatanBody .kegiatan-no').forEach((el, i) => el.textContent = i + 1);
+    }
+
+    // ── Sync Kehadiran dari Presensi ─────────────────────────
+    document.getElementById('btnSyncKehadiran').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sinkronisasi...';
+
+        fetch('{{ route("wali.rapor.kehadiran-auto", $rapor->id) }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector('input[name="jumlah_sakit"]').value = data.sakit;
+                document.querySelector('input[name="jumlah_izin"]').value = data.izin;
+                document.querySelector('input[name="jumlah_alpha"]').value = data.alpha;
+                document.getElementById('totalKetidakhadiran').textContent = data.sakit + data.izin + data.alpha;
+                btn.innerHTML = '<i class="fas fa-check me-1"></i>Berhasil!';
+                btn.classList.replace('btn-outline-info', 'btn-outline-success');
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Sinkron dari Presensi';
+                    btn.classList.replace('btn-outline-success', 'btn-outline-info');
+                }, 2000);
+            }
+        })
+        .catch(() => {
+            btn.innerHTML = '<i class="fas fa-times me-1"></i>Gagal';
+            btn.classList.replace('btn-outline-info', 'btn-outline-danger');
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Sinkron dari Presensi';
+                btn.classList.replace('btn-outline-danger', 'btn-outline-info');
+            }, 2000);
+        })
+        .finally(() => btn.disabled = false);
     });
 </script>
 @endsection

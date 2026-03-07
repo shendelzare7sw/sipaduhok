@@ -42,6 +42,7 @@
         </a>
 
         <!-- PDF Modal -->
+        @push('modals')
         <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
             <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content" style="height: 90vh;">
@@ -63,6 +64,7 @@
                 </div>
             </div>
         </div>
+        @endpush
 
     @elseif($isImage)
         <!-- Image Modal Trigger -->
@@ -79,6 +81,7 @@
         </a>
 
         <!-- Image Modal -->
+        @push('modals')
         <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
@@ -100,6 +103,7 @@
                 </div>
             </div>
         </div>
+        @endpush
 
     @else
         <!-- Direct Download -->
