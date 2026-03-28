@@ -13,6 +13,7 @@
     .student-avatar {
         width: 60px;
         height: 60px;
+        flex-shrink: 0;
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         border-radius: 50%;
         display: flex;
@@ -22,6 +23,49 @@
         font-size: 24px;
         font-weight: 600;
         box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+        .table-responsive {
+            border: none !important;
+        }
+        .table-responsive table {
+            border-collapse: separate;
+            border-spacing: 0 1rem;
+        }
+        .table-responsive thead {
+            display: none;
+        }
+        .table-responsive tbody tr {
+            display: block;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .table-responsive tbody td {
+            display: block;
+            text-align: left !important;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table-responsive tbody td:last-child {
+            border-bottom: none;
+        }
+        .table-responsive tbody td::before {
+            content: attr(data-label);
+            display: block;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .input-group, .form-control, .form-select {
+            max-width: 100% !important;
+        }
     }
 </style>
 @endsection
@@ -95,14 +139,14 @@
                         <tbody>
                             @foreach($jenisTagihan as $key => $label)
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
-                                    <td class="align-middle">
+                                    <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $loop->iteration }}</td>
+                                    <td class="align-middle" data-label="Jenis Tagihan">
                                         <strong>{{ $label }}</strong>
                                         @if($key === 'spp')
                                             <br><small class="text-muted">Tagihan bulanan</small>
                                         @endif
                                     </td>
-                                    <td class="align-middle">
+                                    <td class="align-middle" data-label="Tahun Ajaran">
                                         <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm">
                                             @foreach($allYears as $thn)
                                                 <option value="{{ $thn->id }}" {{ ($tahunAjaran->id == $thn->id) ? 'selected' : '' }}>
@@ -111,7 +155,7 @@
                                             @endforeach
                                         </select>
                                     </td>
-                                    <td class="align-middle">
+                                    <td class="align-middle" data-label="Jumlah (Rp)">
                                         <div class="input-group input-group-sm" style="max-width: 250px;">
                                             <span class="input-group-text bg-white">Rp</span>
                                             @php
@@ -127,7 +171,7 @@
                                             <small class="text-danger">{{ $message }}</small>
                                         @enderror
                                     </td>
-                                    <td class="align-middle">
+                                    <td class="align-middle" data-label="Jatuh Tempo">
                                         <input type="date"
                                                name="tanggal_jatuh_tempo[{{ $key }}]"
                                                class="form-control form-control-sm"

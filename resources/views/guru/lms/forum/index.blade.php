@@ -134,94 +134,119 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Apakah Anda yakin ingin menghapus diskusi ini?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <div class="form-check mb-3 text-start">
-                            <input class="form-check-input" type="checkbox" name="hapus_terkait" value="1" id="hapusTerkaitCheck">
-                            <label class="form-check-label small text-danger" for="hapusTerkaitCheck">
+
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(url) {
+            Swal.fire({
+                title: 'Konfirmasi Hapus',
+                html: `
+                    <div class="text-start">
+                        <p class="mb-3">Apakah Anda yakin ingin menghapus diskusi ini?</p>
+                        <div class="form-check">
+                            <input class="form-check-input border border-secondary" type="checkbox" id="swal-hapus-terkait" value="1">
+                            <label class="form-check-label text-danger small" for="swal-hapus-terkait">
                                 Hapus juga diskusi ini dari kelas lain? (Jika ada duplikat)
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-danger w-100">Hapus</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sync Confirmation Modal -->
-    <div class="modal fade" id="syncForumModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="syncForumTitle">Konfirmasi Aksi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Apakah Anda yakin ingin melakukan tindakan ini?</p>
-                    <div class="alert alert-info py-2 mb-0">
-                        <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox" id="syncForumCheck" checked>
-                            <label class="form-check-label fw-bold" for="syncForumCheck">
-                                Terapkan juga ke kelas lain?
-                            </label>
-                        </div>
-                        <small class="d-block mt-1 text-muted">
-                            Aksi akan diterapkan pada diskusi dengan judul yang sama di kelas yang Anda ampu (jika ada).
-                        </small>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="syncForumForm" method="POST">
-                        @csrf
-                        {{-- Method PUT/PATCH/POST handled by route mostly, but toggle is usually POST --}}
-                        <input type="hidden" name="sync_kelas" id="syncForumInput" value="1">
-                        <button type="submit" class="btn btn-primary">Ya, Lanjutkan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    return document.getElementById('swal-hapus-terkait').checked;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.style.display = 'none';
+                    
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
 
-    @push('scripts')
-    <script>
-        function confirmDelete(url) {
-            document.getElementById('deleteForm').action = url;
-            document.getElementById('hapusTerkaitCheck').checked = false;
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'DELETE';
+                    form.appendChild(method);
+
+                    if (result.value) {
+                        const hapusTerkait = document.createElement('input');
+                        hapusTerkait.type = 'hidden';
+                        hapusTerkait.name = 'hapus_terkait';
+                        hapusTerkait.value = '1';
+                        form.appendChild(hapusTerkait);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
 
         function confirmSyncForum(url, title) {
-            document.getElementById('syncForumForm').action = url;
-            document.getElementById('syncForumTitle').innerText = title;
-            
-            // Default checked
-            document.getElementById('syncForumCheck').checked = true;
-            document.getElementById('syncForumInput').value = '1';
+            Swal.fire({
+                title: title,
+                html: `
+                    <div class="text-start">
+                        <p class="mb-3">Apakah Anda yakin ingin melakukan tindakan ini?</p>
+                        <div class="alert alert-info py-2 mb-0">
+                            <div class="form-check mb-0">
+                                <input class="form-check-input border border-primary border-2" type="checkbox" id="swal-sync-forum" checked>
+                                <label class="form-check-label fw-bold text-primary" for="swal-sync-forum">
+                                    Terapkan juga ke kelas lain?
+                                </label>
+                            </div>
+                            <small class="d-block mt-1 text-muted">
+                                Aksi akan diterapkan pada diskusi dengan judul yang sama di kelas yang Anda ampu (jika ada).
+                            </small>
+                        </div>
+                    </div>
+                `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Lanjutkan',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    return document.getElementById('swal-sync-forum').checked;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.style.display = 'none';
+                    
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
 
-            var modal = new bootstrap.Modal(document.getElementById('syncForumModal'));
-            modal.show();
+                    const syncKelas = document.createElement('input');
+                    syncKelas.type = 'hidden';
+                    syncKelas.name = 'sync_kelas';
+                    syncKelas.value = result.value ? '1' : '0';
+                    form.appendChild(syncKelas);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
         }
-
-        // Handle checkbox change in modal
-        document.getElementById('syncForumCheck').addEventListener('change', function() {
-            document.getElementById('syncForumInput').value = this.checked ? '1' : '0';
-        });
     </script>
     @endpush
 @endsection

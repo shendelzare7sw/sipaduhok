@@ -11,359 +11,178 @@
 
 @push('styles')
     <style>
-        /* Soft UI Theme for Forum */
         .forum-container {
             max-width: 100%;
-            margin: 0 auto;
-            background: linear-gradient(135deg, #f8f9fa 0%, #f5f6f8 100%);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
         }
 
         .post {
             border: 1px solid #e8eaed;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
+            padding: 18px;
+            margin-bottom: 14px;
             background: white;
             position: relative;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
         }
 
-        .post:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
+        .post:hover { box-shadow: 0 3px 10px rgba(0,0,0,.09); }
 
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+        .post-header { display: flex; align-items: center; margin-bottom: 12px; }
 
         .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            margin-right: 15px;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-            overflow: hidden;
-            border: 3px solid transparent;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: #16a34a;
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 15px; margin-right: 12px; flex-shrink: 0;
+            overflow: hidden; text-transform: uppercase;
         }
+        .avatar.teacher { background: #16a34a; }
+        .avatar.student { background: #0ea5e9; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
-        .avatar.teacher {
-            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-            box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-            border-color: #4caf50;
-        }
-
-        .avatar.student {
-            background: linear-gradient(135deg, #00a8e8 0%, #0088b8 100%);
-            box-shadow: 0 2px 8px rgba(0, 168, 232, 0.3);
-            border-color: #00a8e8;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .post-info {
-            flex-grow: 1;
-        }
-
-        .author-name {
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-right: 10px;
-            font-size: 15px;
-        }
+        .post-info { flex-grow: 1; min-width: 0; }
+        .author-name { font-weight: 600; color: #1a1a1a; font-size: 14px; }
 
         .badge-role {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 8px;
-            letter-spacing: 0.5px;
+            display: inline-block; padding: 2px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; margin-left: 6px;
         }
+        .badge-siswa { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge-guru  { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 
-        .badge-siswa {
-            background: linear-gradient(135deg, #e0f2f7 0%, #d4ebf7 100%);
-            color: #0088b8;
-            border: 1px solid rgba(0, 136, 184, 0.2);
-        }
-
-        .badge-guru {
-            background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
-            color: #2e7d32;
-            border: 1px solid rgba(76, 175, 80, 0.2);
-        }
-
-        .post-date {
-            color: #999;
-            font-size: 13px;
-            margin-top: 4px;
-        }
+        .post-date { color: #999; font-size: 12px; margin-top: 3px; }
 
         .post-content {
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 15px;
-            padding-left: 63px;
-            line-height: 1.6;
+            color: #333; font-size: 14px; margin-bottom: 12px;
+            padding-left: 56px; line-height: 1.6;
         }
-
-        .attachments-container {
-            padding-left: 63px;
-        }
+        .attachments-container { padding-left: 56px; }
 
         .reply-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            position: absolute; top: 18px; right: 16px;
+            background: #16a34a; color: white; border: none;
+            padding: 6px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 13px; font-weight: 600;
+            display: flex; align-items: center; gap: 5px;
+            transition: background 0.2s;
         }
+        .reply-btn:hover { background: #15803d; }
 
-        .reply-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .reply-level-1 { margin-left: 40px; }
-        .reply-level-2 { margin-left: 80px; }
-        .reply-level-3 { margin-left: 120px; }
-        .reply-level-4 { margin-left: 160px; }
-        .reply-level-5 { margin-left: 200px; }
-
-        @media (max-width: 768px) {
-            .reply-level-1 { margin-left: 15px; }
-            .reply-level-2 { margin-left: 30px; }
-            .reply-level-3 { margin-left: 45px; }
-            .reply-level-4 { margin-left: 60px; }
-            .reply-level-5 { margin-left: 75px; }
-        }
+        .reply-level-1 { margin-left: 36px; }
+        .reply-level-2 { margin-left: 72px; }
+        .reply-level-3 { margin-left: 108px; }
+        .reply-level-4 { margin-left: 144px; }
+        .reply-level-5 { margin-left: 180px; }
 
         .reply-form {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f7 100%);
-            border-radius: 8px;
-            border: 1px solid #e8eaed;
+            display: none; margin-top: 14px; padding: 14px;
+            background: #f8f9fa; border-radius: 8px; border: 1px solid #e8eaed;
         }
-
-        .reply-form.active {
-            display: block;
-        }
+        .reply-form.active { display: block; }
 
         .reply-form textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
-            margin-bottom: 10px;
-            transition: all 0.2s ease;
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;
+            font-family: inherit; font-size: 14px; resize: vertical;
+            min-height: 80px; margin-bottom: 10px;
         }
-
         .reply-form textarea:focus {
-            border-color: #667eea;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #16a34a; outline: none;
+            box-shadow: 0 0 0 3px rgba(22,163,74,.12);
         }
 
         .attach-btn {
-            background: white;
-            border: 1px solid #ddd;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            margin-bottom: 10px;
-            color: #666;
+            background: white; border: 1px solid #ddd; padding: 7px 12px;
+            border-radius: 6px; cursor: pointer; font-size: 13px;
+            display: inline-flex; align-items: center; gap: 5px;
+            transition: all 0.2s; margin-bottom: 10px; color: #555;
         }
-
-        .attach-btn:hover {
-            background: #f5f7fa;
-            border-color: #667eea;
-            color: #667eea;
-        }
-
-        .attach-btn.active {
-            background: linear-gradient(135deg, #e8ecff 0%, #f0f3ff 100%);
-            border-color: #667eea;
-            color: #667eea;
+        .attach-btn:hover, .attach-btn.active {
+            border-color: #16a34a; color: #16a34a; background: #f0fdf4;
         }
 
         .file-upload-area {
-            display: none;
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
+            display: none; border: 2px dashed #ddd; border-radius: 8px;
+            padding: 18px; text-align: center; margin-bottom: 10px;
+            cursor: pointer; transition: all 0.2s; background: #fafafa;
         }
-
-        .file-upload-area:hover {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #f0f3ff 0%, #e8ecff 100%);
-        }
-
-        .file-upload-area.show {
-            display: block;
-        }
+        .file-upload-area:hover { border-color: #16a34a; background: #f0fdf4; }
+        .file-upload-area.show { display: block; }
 
         .action-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 5px;
-            opacity: 0.5;
-            transition: all 0.2s ease;
-            color: #666;
+            background: none; border: none; cursor: pointer;
+            font-size: 1rem; padding: 4px; opacity: 0.45;
+            transition: opacity 0.2s; color: #555;
         }
+        .action-icon:hover { opacity: 1; }
 
-        .action-icon:hover {
-            opacity: 1;
-        }
-
-        .action-icon.text-danger:hover {
-            color: #dc3545;
-        }
-
-        .action-icon.text-primary:hover {
-            color: #667eea;
-        }
-
-        /* Filter and Search Bar Soft Style */
         .search-filter-bar {
-            background: white;
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #e8eaed;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            background: white; padding: 14px; border-radius: 10px;
+            margin-bottom: 18px; border: 1px solid #e8eaed;
+            box-shadow: 0 1px 4px rgba(0,0,0,.05);
         }
-
         .search-filter-bar input,
         .search-filter-bar select {
-            background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
-            border: 1px solid #e8eaed !important;
-            border-radius: 6px;
-            padding: 10px 12px;
-            font-size: 14px;
-            transition: all 0.2s ease;
+            background: #f9fafb; border: 1px solid #e8eaed !important;
+            border-radius: 6px; padding: 9px 12px; font-size: 14px;
         }
-
         .search-filter-bar input:focus,
         .search-filter-bar select:focus {
-            border-color: #667eea !important;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #16a34a !important; outline: none;
+            box-shadow: 0 0 0 3px rgba(22,163,74,.12);
         }
-
         .search-filter-bar button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            background: #16a34a; color: white; border: none;
+            border-radius: 6px; padding: 9px 18px;
+            cursor: pointer; font-size: 13px; font-weight: 600;
+            transition: background 0.2s;
         }
+        .search-filter-bar button:hover { background: #15803d; }
 
-        .search-filter-bar button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
+        #searchResults { color: #666; font-size: 13px; margin-top: 8px; }
 
-        #searchResults {
-            color: #666;
-            font-size: 13px;
-            margin-top: 8px;
-        }
-
-        .highlight {
-            animation: highlightFade 2s ease-out;
-        }
+        .hidden { display: none !important; }
 
         @keyframes highlightFade {
-            0% {
-                background-color: #fff3cd;
-            }
-            100% {
-                background-color: white;
-            }
+            0%   { background-color: #fef9c3; }
+            100% { background-color: white; }
         }
+        .highlight { animation: highlightFade 2s ease-out; }
 
         @media (max-width: 768px) {
-            .reply-node {
-                margin-left: 20px;
-                padding-left: 15px;
-            }
+            .forum-container { padding: 12px; }
+            .post { padding: 14px; }
+            .post-content, .attachments-container { padding-left: 0; }
+            .reply-btn { position: static; margin-top: 10px; }
+            .reply-level-1 { margin-left: 14px; }
+            .reply-level-2 { margin-left: 28px; }
+            .reply-level-3 { margin-left: 40px; }
+            .reply-level-4 { margin-left: 52px; }
+            .reply-level-5 { margin-left: 60px; }
+            .search-filter-bar { padding: 12px; }
+        }
 
-            .post-content {
-                padding-left: 0;
-            }
-
-            .reply-btn {
-                position: static;
-                margin-top: 10px;
-            }
-
-            .attachments-container {
-                padding-left: 0;
-            }
+        @media (max-width: 480px) {
+            .reply-level-1 { margin-left: 8px; }
+            .reply-level-2 { margin-left: 12px; }
+            .reply-level-3 { margin-left: 16px; }
+            .reply-level-4 { margin-left: 18px; }
+            .reply-level-5 { margin-left: 20px; }
         }
     </style>
 @endpush
 
 @section('content')
     <div class="container-fluid">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}">Dashboard</a></li>
+        <nav aria-label="breadcrumb" style="background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #e8eaed; box-shadow: 0 1px 4px rgba(0,0,0,.05); margin-bottom: 16px;">
+            <ol class="breadcrumb mb-0" style="font-size: 14px;">
+                <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}" style="color: #16a34a; text-decoration: none;"><i class="fas fa-home me-1"></i>Dashboard</a></li>
                 <li class="breadcrumb-item"><a
-                        href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}">{{ $mataPelajaran->nama_mapel }}</a>
+                        href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" style="color: #16a34a; text-decoration: none;">{{ $mataPelajaran->nama_mapel }}</a>
                 </li>
-                <li class="breadcrumb-item active" aria-current="page">{{ $diskusi->judul }}</li>
+                <li class="breadcrumb-item active" aria-current="page" style="color: #666;">{{ $diskusi->judul }}</li>
             </ol>
         </nav>
 
@@ -417,7 +236,7 @@
                                     <span class="badge-role badge-siswa">Siswa</span>
                                 @endif
                             </div>
-                            <div class="post-date">{{ $diskusi->created_at->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}
+                            <div class="post-date">{{ $diskusi->created_at->locale('id')->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}
                             </div>
                         </div>
                     </div>
@@ -476,7 +295,44 @@
 @endsection
 
 @push('scripts')
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function confirmDeleteReply(url) {
+            Swal.fire({
+                title: 'Hapus Balasan?',
+                text: "Balasan yang dihapus tidak dapat dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = url;
+                    form.style.display = 'none';
+
+                    const csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = '{{ csrf_token() }}';
+                    form.appendChild(csrf);
+
+                    const method = document.createElement('input');
+                    method.type = 'hidden';
+                    method.name = '_method';
+                    method.value = 'DELETE';
+                    form.appendChild(method);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
         function toggleReplyForm(id) {
             const form = document.getElementById(id);
             if (form) {
@@ -517,7 +373,6 @@
             const uploadArea = event.target.closest('.file-upload-area');
             if (!uploadArea) return;
 
-            // Remove existing preview
             const existingPreview = uploadArea.querySelector('.file-preview');
             if (existingPreview) existingPreview.remove();
 
@@ -536,7 +391,6 @@
                         previewDiv.innerHTML = `
                             <video controls class="w-100 rounded border" style="max-height: 200px;">
                                 <source src="${e.target.result}" type="${file.type}">
-                                Browser Anda tidak mendukung preview video.
                             </video>
                              <p class="small text-muted mt-1">${file.name}</p>
                         `;

@@ -27,7 +27,7 @@
                 @endif
             </div>
             <div class="post-date">
-                {{ $reply->created_at->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}
+                {{ $reply->created_at->locale('id')->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}
             </div>
         </div>
     </div>

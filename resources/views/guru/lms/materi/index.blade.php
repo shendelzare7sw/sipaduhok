@@ -10,21 +10,21 @@
 
 @section('content')
     <div class="card-custom mb-4">
-        <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-md-items-center gap-3">
                 <div>
-                    <h4 class="mb-0"><i class="fas fa-book me-2"></i>Daftar Materi</h4>
+                    <h4 class="mb-0 fs-5 fs-md-4"><i class="fas fa-book me-2"></i>Daftar Materi</h4>
                     <p class="text-muted small mb-0">Kelola materi pembelajaran untuk kelas ini</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <form action="" method="GET" class="d-flex gap-2">
+                <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+                    <form action="" method="GET" class="d-flex gap-2 flex-grow-1">
                         <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ request('tanggal') }}" onchange="this.form.submit()">
                         @if(request('tanggal'))
                             <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary" title="Reset Filter"><i class="fas fa-times"></i></a>
                         @endif
                     </form>
-                    <a href="{{ route('guru.lms.materi.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus-circle me-1"></i>Tambah Materi
+                    <a href="{{ route('guru.lms.materi.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary btn-sm w-100 w-sm-auto">
+                        <i class="fas fa-plus-circle me-1"></i><span class="d-sm-inline">Tambah Materi</span>
                     </a>
                 </div>
             </div>
@@ -42,20 +42,20 @@
         <div class="timeline-container">
             @foreach($groupedMateri as $date => $materis)
                 <div class="position-relative mb-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary text-white rounded-pill px-3 py-1 small fw-bold shadow-sm">
+                    <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
+                        <div class="bg-primary text-white rounded-pill px-2 px-sm-3 py-1 small fw-bold shadow-sm" style="white-space: nowrap;">
                             {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}
                         </div>
-                        <div class="flex-grow-1 ms-3 border-bottom"></div>
+                        <div class="flex-grow-1 d-none d-sm-block border-bottom"></div>
                     </div>
 
-                    <div class="row g-4">
+                    <div class="row g-2 g-md-4">
                         @foreach($materis as $materi)
-                        <div class="col-md-6 col-lg-4">
+                        <div class="col-12 col-sm-6 col-lg-4">
                             <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                                <div class="card-body d-flex flex-column p-4">
+                                <div class="card-body d-flex flex-column p-3 p-md-4">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-start gap-2 gap-md-3 flex-shrink-1 min-w-0">
                                             @php
                                                 $iconClass = match($materi->tipe_file) {
                                                     'pdf' => 'fa-file-pdf text-danger',
@@ -66,31 +66,31 @@
                                                     default => 'fa-file'
                                                 };
                                             @endphp
-                                            <i class="fas {{ $iconClass }} fa-2x me-3"></i>
-                                            <div>
-                                                <h6 class="fw-bold mb-0 text-dark">{{ $materi->judul_materi }}</h6>
-                                                <div class="d-flex align-items-center gap-2 mt-1">
-                                                    <span class="badge bg-light text-dark border">{{ strtoupper($materi->tipe_file) }}</span>
-                                                    <small class="text-muted" style="font-size: 0.8rem;">
+                                            <i class="fas {{ $iconClass }} fa-lg fa-md-2x flex-shrink-0 mt-1"></i>
+                                            <div class="min-w-0">
+                                                <h6 class="fw-bold mb-0 text-dark text-truncate fs-6" title="{{ $materi->judul_materi }}">{{ $materi->judul_materi }}</h6>
+                                                <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">{{ strtoupper($materi->tipe_file) }}</span>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
                                                         <i class="far fa-clock me-1"></i> {{ $materi->created_at->format('H:i') }}
                                                     </small>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <p class="text-muted small mb-4 flex-grow-1" style="line-height: 1.6;">
-                                        {{ Str::limit($materi->deskripsi, 120, '...') }}
+
+                                    <p class="text-muted small mb-3 mb-md-4 flex-grow-1" style="line-height: 1.6; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        {{ $materi->deskripsi ?? '' }}
                                     </p>
-                                    
-                                    <div class="d-flex justify-content-end gap-2 mt-auto pt-3 border-top">
-                                        <a href="{{ route('guru.lms.materi.edit', [$kelas->id, $mapel->id, $materi->id]) }}" 
-                                           class="btn btn-sm btn-outline-warning px-3 rounded-pill">
-                                            <i class="fas fa-edit me-1"></i> Edit
+
+                                    <div class="d-flex justify-content-end gap-2 mt-auto pt-2 pt-md-3 border-top">
+                                        <a href="{{ route('guru.lms.materi.edit', [$kelas->id, $mapel->id, $materi->id]) }}"
+                                           class="btn btn-sm btn-outline-warning px-2 px-md-3 rounded-pill">
+                                            <i class="fas fa-edit me-md-1"></i> <span class="d-none d-sm-inline">Edit</span>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger px-3 rounded-pill" 
+                                        <button type="button" class="btn btn-sm btn-outline-danger px-2 px-md-3 rounded-pill"
                                             onclick="confirmDelete('{{ route('guru.lms.materi.destroy', [$kelas->id, $mapel->id, $materi->id]) }}')">
-                                            <i class="fas fa-trash me-1"></i> Hapus
+                                            <i class="fas fa-trash me-md-1"></i> <span class="d-none d-sm-inline">Hapus</span>
                                         </button>
                                     </div>
                                 </div>
@@ -118,10 +118,56 @@
     <style>
         .hover-shadow:hover {
             transform: translateY(-5px);
-            box_shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
         }
         .transition-all {
             transition: all 0.3s ease;
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 767.98px) {
+            .card-body {
+                padding: 0.75rem !important;
+            }
+
+            .btn-sm {
+                padding: 0.35rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .badge {
+                font-size: 0.65rem !important;
+            }
+
+            .small {
+                font-size: 0.75rem !important;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .w-md-auto {
+                width: auto !important;
+            }
+
+            .w-sm-auto {
+                width: auto !important;
+            }
+
+            .flex-md-row {
+                flex-direction: row;
+            }
+
+            .align-md-items-center {
+                align-items: center;
+            }
+
+            .fs-md-4 {
+                font-size: 1.5rem !important;
+            }
+
+            .w-md-auto {
+                width: auto !important;
+            }
         }
     </style>
 
@@ -160,7 +206,7 @@
             document.getElementById('deleteForm').action = url;
             // Reset state
             document.getElementById('hapusTerkaitCheck').checked = false;
-            
+
             var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
             deleteModal.show();
         }

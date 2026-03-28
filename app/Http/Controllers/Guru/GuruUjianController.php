@@ -127,6 +127,7 @@ class GuruUjianController extends Controller
             'tanggal_selesai' => $validated['tanggal_selesai'],
             'durasi_menit' => $validated['durasi_menit'],
             'is_active' => false,
+            'bisa_diulang' => $isLatihan && $request->has('bisa_diulang') ? true : false,
         ];
 
         // Buat untuk kelas utama
@@ -246,6 +247,10 @@ class GuruUjianController extends Controller
         // Prevent changing tipe_ujian when updating from latihan route
         if ($isLatihan) {
             $validated['tipe_ujian'] = 'latihan';
+            $validated['bisa_diulang'] = $request->has('bisa_diulang') ? true : false;
+        } else {
+            // For regular exams, reset bisa_diulang to false just in case
+            $validated['bisa_diulang'] = false;
         }
 
         $ujian->update($validated);
@@ -268,6 +273,7 @@ class GuruUjianController extends Controller
                 'tanggal_selesai' => $ujian->tanggal_selesai,
                 'durasi_menit' => $ujian->durasi_menit,
                 'is_active' => $ujian->is_active,
+                'bisa_diulang' => $ujian->bisa_diulang,
             ];
 
             foreach ($kelasTambahan as $kelasLainId) {
@@ -678,6 +684,7 @@ class GuruUjianController extends Controller
                     $kunciJawaban = $data['kunci_jawaban_kompleks'] ?? []; // Array
                     // Store jawaban_benar inside pilihan_jawaban for model checkPilihanGandaKompleks()
                     $pilihanJawaban['jawaban_benar'] = array_map('strtoupper', $kunciJawaban);
+                    $kunciJawaban = json_encode($kunciJawaban);
                     break;
 
                 case 'benar_salah':

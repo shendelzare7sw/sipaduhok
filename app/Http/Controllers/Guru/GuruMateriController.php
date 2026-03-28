@@ -87,17 +87,36 @@ class GuruMateriController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $validated = $request->validate([
-            'judul_materi' => 'required|string|max:255',
-            'kategori' => 'required|in:materi,modul_ajar',
-            'deskripsi' => 'nullable|string',
-            'file_materi' => 'nullable|file|max:51200', // 50MB
-            'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
-        ]);
+        // Conditional validation based on tipe_file
+        $tipeFile = $request->input('tipe_file');
+
+        if ($tipeFile === 'link') {
+            $validated = $request->validate([
+                'judul_materi' => 'required|string|max:255',
+                'kategori' => 'required|in:materi,modul_ajar',
+                'deskripsi' => 'nullable|string',
+                'url_materi' => 'required|url',
+                'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+            ]);
+        } else {
+            $validated = $request->validate([
+                'judul_materi' => 'required|string|max:255',
+                'kategori' => 'required|in:materi,modul_ajar',
+                'deskripsi' => 'nullable|string',
+                'file_materi' => 'required|file|max:51200', // 50MB
+                'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+            ]);
+        }
 
         $filePath = null;
-        if ($request->hasFile('file_materi')) {
-            $filePath = $request->file('file_materi')->store('materi', 'public');
+        $urlMateri = null;
+
+        if ($tipeFile === 'link') {
+            $urlMateri = $validated['url_materi'];
+        } else {
+            if ($request->hasFile('file_materi')) {
+                $filePath = $request->file('file_materi')->store('materi', 'public');
+            }
         }
 
         $materiData = [
@@ -107,6 +126,7 @@ class GuruMateriController extends Controller
             'kategori' => $validated['kategori'],
             'deskripsi' => $validated['deskripsi'],
             'file_materi' => $filePath,
+            'url_materi' => $urlMateri,
             'tipe_file' => $validated['tipe_file'],
             'tanggal_upload' => now(),
         ];
@@ -155,7 +175,7 @@ class GuruMateriController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-    
+
         // Kelas lain yang guru ini ajar mapel yang sama
         $kelasLain = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
             ->where('mata_pelajaran_id', $mapelId)
@@ -195,19 +215,33 @@ class GuruMateriController extends Controller
         // Capture original state for matching in other classes
         $originalFile = $materi->file_materi;
         $originalTitle = $materi->judul_materi;
+        $tipeFile = $request->input('tipe_file');
 
-        $validated = $request->validate([
-            'judul_materi' => 'required|string|max:255',
-            'kategori' => 'required|in:materi,modul_ajar',
-            'deskripsi' => 'nullable|string',
-            'file_materi' => 'nullable|file|max:51200',
-            'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
-            'tanggal_upload' => 'required|date',
-        ]);
+        // Conditional validation based on tipe_file
+        if ($tipeFile === 'link') {
+            $validated = $request->validate([
+                'judul_materi' => 'required|string|max:255',
+                'kategori' => 'required|in:materi,modul_ajar',
+                'deskripsi' => 'nullable|string',
+                'url_materi' => 'required|url',
+                'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+                'tanggal_upload' => 'required|date',
+            ]);
+        } else {
+            $validated = $request->validate([
+                'judul_materi' => 'required|string|max:255',
+                'kategori' => 'required|in:materi,modul_ajar',
+                'deskripsi' => 'nullable|string',
+                'file_materi' => 'nullable|file|max:51200',
+                'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+                'tanggal_upload' => 'required|date',
+            ]);
+        }
 
-        if ($request->hasFile('file_materi')) {
-            // SAFE FILE DELETE LOGIC
-            // Cek apakah file lama digunakan oleh materi lain?
+        if ($tipeFile === 'link') {
+            // Link type: store URL, clear file
+            $validated['file_materi'] = null;
+            // SAFE FILE DELETE LOGIC for previous file if exists
             if ($materi->file_materi) {
                 $isFileUsedElsewhere = Materi::where('file_materi', $materi->file_materi)
                     ->where('id', '!=', $materi->id)
@@ -217,17 +251,37 @@ class GuruMateriController extends Controller
                     Storage::disk('public')->delete($materi->file_materi);
                 }
             }
+        } else {
+            // File type: handle file upload if provided
+            if ($request->hasFile('file_materi')) {
+                // SAFE FILE DELETE LOGIC
+                // Cek apakah file lama digunakan oleh materi lain?
+                if ($materi->file_materi) {
+                    $isFileUsedElsewhere = Materi::where('file_materi', $materi->file_materi)
+                        ->where('id', '!=', $materi->id)
+                        ->exists();
 
-            $validated['file_materi'] = $request->file('file_materi')->store('materi', 'public');
+                    if (!$isFileUsedElsewhere) {
+                        Storage::disk('public')->delete($materi->file_materi);
+                    }
+                }
+
+                $validated['file_materi'] = $request->file('file_materi')->store('materi', 'public');
+            } else {
+                // Keep existing file if no new file is uploaded
+                $validated['file_materi'] = $materi->file_materi;
+            }
+            // Clear URL for file types
+            $validated['url_materi'] = null;
         }
 
         $materi->update($validated);
-        
+
         // DUPLICATE / SYNC LOGIC (Add/Update to linked classes)
         $kelasTambahan = $request->input('kelas_tambahan', []);
         $jumlahDuplikasi = 0;
         $jumlahUpdate = 0;
-        
+
         if (!empty($kelasTambahan)) {
             // Data untuk duplikasi/sync
             $syncData = [
@@ -237,6 +291,7 @@ class GuruMateriController extends Controller
                 'kategori' => $materi->kategori,
                 'deskripsi' => $materi->deskripsi,
                 'file_materi' => $materi->file_materi, // New/Current File Path
+                'url_materi' => $materi->url_materi, // New/Current URL
                 'tipe_file' => $materi->tipe_file,
                 'tanggal_upload' => $materi->tanggal_upload,
             ];
@@ -248,14 +303,14 @@ class GuruMateriController extends Controller
                     $query = Materi::where('kelas_id', $kelasLainId)
                         ->where('guru_id', $tenagaPendidik->id)
                         ->where('mata_pelajaran_id', $mapelId);
-                    
+
                     $existing = null;
-                    
+
                     if ($originalFile) {
                         // First try finding by file path
                         $existing = (clone $query)->where('file_materi', $originalFile)->first();
                     }
-                    
+
                     if (!$existing) {
                         // If not found by file (or no file), try by Title
                         $existing = (clone $query)->where('judul_materi', $originalTitle)->first();
@@ -310,7 +365,7 @@ class GuruMateriController extends Controller
                 ->where('tipe_file', $materi->tipe_file)
                 ->where('id', '!=', $materi->id) // Exclude current
                 ->get();
-            
+
             foreach($relatedMateris as $rel) {
                 $idsToDelete[] = $rel->id;
             }
@@ -318,14 +373,14 @@ class GuruMateriController extends Controller
 
         // Process Deletion
         $materisToDelete = Materi::whereIn('id', $idsToDelete)->get();
-        
+
         foreach ($materisToDelete as $m) {
             if ($m->file_materi) {
                 // SAFE DELETE: Cek apakah file digunakan oleh materi yang TIDAK akan dihapus
                 $usageCount = Materi::where('file_materi', $m->file_materi)
                     ->whereNotIn('id', $idsToDelete) // Check usage outside of the deletionlist
                     ->count();
-                
+
                 if ($usageCount === 0) {
                     $filesToDelete[] = $m->file_materi;
                 }

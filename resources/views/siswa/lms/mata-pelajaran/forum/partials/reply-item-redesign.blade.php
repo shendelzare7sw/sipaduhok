@@ -27,7 +27,7 @@
                 @endif
             </div>
             <div class="post-date">
-                {{ $reply->created_at->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}
+                {{ $reply->created_at->locale('id')->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}
             </div>
         </div>
     </div>
@@ -52,12 +52,10 @@
                 <button class="action-icon text-primary" onclick="toggleReplyForm('edit-form-{{ $uniqueId }}')" title="Edit">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
-                <form
-                    action="{{ route('siswa.lms.mapel.forum.reply.destroy', [$mataPelajaran->id, $diskusi->id, $reply->id]) }}"
-                    method="POST" onsubmit="return confirm('Hapus balasan ini?')" style="margin: 0;">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="action-icon text-danger" title="Hapus"><i class="fas fa-trash"></i></button>
-                </form>
+                <button type="button" class="action-icon text-danger" title="Hapus"
+                    onclick="confirmDeleteReply('{{ route('siswa.lms.mapel.forum.reply.destroy', [$mataPelajaran->id, $diskusi->id, $reply->id]) }}')">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         @endif
     </div>

@@ -140,6 +140,7 @@ textarea.form-control {
 .radio-group {
     display: flex;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
 .radio-option {
@@ -151,6 +152,8 @@ textarea.form-control {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s;
+    flex: 1;
+    min-width: 140px;
 }
 
 .radio-option:hover {

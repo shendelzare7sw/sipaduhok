@@ -74,7 +74,31 @@ document.addEventListener('DOMContentLoaded', function () {
             // 5 clicks = magical redirect
             if (logoClickCount === 5) {
                 logoClickCount = 0;
-                window.location.href = "/admin-recovery"; // Fallback if window.admin_recovery_route is not set
+
+                // Fetch CSRF token from the meta tag if available
+                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') :
+                    (document.querySelector('input[name="_token"]') ? document.querySelector('input[name="_token"]').value : '');
+
+                // Send AJAX request to unlock the route
+                fetch('/admin-recovery/unlock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({})
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = "/admin-recovery";
+                        } else {
+                            console.error('Failed to unlock admin recovery.');
+                        }
+                    })
+                    .catch(error => console.error('Error unlocking admin recovery:', error));
             }
         });
     });

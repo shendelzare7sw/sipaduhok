@@ -626,12 +626,10 @@ class PembayaranController extends Controller
         ];
 
         // Get primary parent name for signature
-        $primaryParent = $pembayaran->siswa->studentParents()
-            ->where('is_primary', true)
-            ->with('parent')
-            ->first();
+        // Using orangTua relationship which maps to the User model of parents
+        $parent = $pembayaran->siswa->orangTua->first();
 
-        $parentName = $primaryParent ? $primaryParent->parent->name : '(..........................)';
+        $parentName = $parent ? $parent->name : '......................';
 
         // Get jenis tagihan mapping
         $jenisTagihan = config('sipaduhok.jenis_tagihan', [

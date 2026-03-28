@@ -345,12 +345,12 @@
                 <div class="signature-box">
                     <p>Penerima,</p>
                     <div class="signature-line"></div>
-                    <p>({{ $pembayaran->validator->nama_lengkap ?? 'Bendahara' }})</p>
+                    <p style="white-space: nowrap;">({{ $pembayaran->validator->nama_lengkap ?? 'Bendahara' }})</p>
                 </div>
                 <div class="signature-box">
                     <p>Pembayar,</p>
                     <div class="signature-line"></div>
-                    <p>({{ $parentName }})</p>
+                    <p style="white-space: nowrap;">({{ $parentName }})</p>
                 </div>
             </div>
 

@@ -8,6 +8,28 @@
     @include('bendahara.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+<style>
+    @media (max-width: 768px) {
+        .tagihan-item .d-flex.align-items-center.justify-content-between.flex-wrap > div {
+            width: 100%;
+        }
+        .tagihan-item .d-flex.align-items-center.justify-content-between.flex-wrap > div[style*="width: 160px"] {
+            width: 100% !important;
+            margin-top: 8px;
+        }
+        .card-body .d-flex.justify-content-between.align-items-center {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 15px;
+        }
+        .card-body .d-flex.justify-content-between.align-items-center > a {
+            width: 100%;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
 <div class="container-fluid px-0">

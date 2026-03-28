@@ -38,6 +38,7 @@ class Ujian extends Model
         'durasi_menit',
         'is_active',
         'tampilkan_nilai',
+        'bisa_diulang',
     ];
 
     protected $casts = [
@@ -46,6 +47,7 @@ class Ujian extends Model
         'durasi_menit' => 'integer',
         'is_active' => 'boolean',
         'tampilkan_nilai' => 'boolean',
+        'bisa_diulang' => 'boolean',
     ];
 
     /**

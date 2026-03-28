@@ -120,6 +120,18 @@
                     @enderror
                 </div>
 
+                @if($tipeUjian === 'latihan')
+                <div class="mb-3 p-3 border rounded bg-light">
+                    <div class="form-check form-switch mb-1">
+                        <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" {{ old('bisa_diulang') ? 'checked' : '' }}>
+                        <label class="form-check-label fw-bold text-primary" for="bisaDiulang">Bisa Dikerjakan Ulang</label>
+                    </div>
+                    <small class="text-muted d-block mt-1">
+                        <i class="fas fa-info-circle me-1"></i> Jika diaktifkan, siswa dapat mereset dan mengulang latihan ini berkali-kali. Cocok untuk Try Out/Latihan bebas.
+                    </small>
+                </div>
+                @endif
+
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Catatan:</strong> Setelah {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} dibuat, Anda dapat menambahkan soal di halaman edit.

@@ -18,7 +18,7 @@
                 <span class="author-name">{{ $reply->user->name ?? 'User' }}</span>
                 <span class="badge-role {{ $badgeClass }}">{{ $roleName }}</span>
             </div>
-            <div class="post-date">{{ $reply->created_at->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}</div>
+            <div class="post-date">{{ $reply->created_at->locale('id')->translatedFormat('l, d F Y \p\u\k\u\l H:i') }}</div>
         </div>
     </div>
 

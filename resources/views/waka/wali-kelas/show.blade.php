@@ -255,11 +255,18 @@
     font-size: 28px;
 }
 
+.wali-info {
+    flex: 1;
+    min-width: 0;
+}
+
 .wali-info h3 {
     font-size: 20px;
     font-weight: 600;
     color: #111827;
     margin-bottom: 8px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .wali-info p {
@@ -267,13 +274,21 @@
     color: #6b7280;
     margin: 4px 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
+}
+
+.wali-info p span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .wali-info p i {
     color: #8b5cf6;
     width: 16px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    text-align: center;
 }
 
 .empty-wali {
@@ -442,6 +457,22 @@
     .header-actions { width: 100%; }
     .header-actions .btn { flex: 1; justify-content: center; }
 
+    .wali-kelas-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+        gap: 16px;
+    }
+    .wali-info {
+        width: 100%;
+    }
+    .wali-info h3 {
+        font-size: 18px;
+    }
+    .wali-info p {
+        justify-content: center;
+    }
+
     .table-card-mobile thead { display: none; }
     .table-card-mobile tbody tr {
         display: block;
@@ -551,9 +582,9 @@
                         <div class="wali-avatar">{{ strtoupper(substr($kelas->waliKelas->nama_lengkap, 0, 1)) }}</div>
                         <div class="wali-info">
                             <h3>{{ $kelas->waliKelas->nama_lengkap }}</h3>
-                            <p><i class="fas fa-id-badge"></i> NIP: {{ $kelas->waliKelas->nip ?? '-' }}</p>
-                            <p><i class="fas fa-phone"></i> {{ $kelas->waliKelas->telepon ?? '-' }}</p>
-                            <p><i class="fas fa-envelope"></i> {{ $kelas->waliKelas->user->email ?? '-' }}</p>
+                            <p><i class="fas fa-id-badge"></i> <span>NIP: {{ $kelas->waliKelas->nip ?? '-' }}</span></p>
+                            <p><i class="fas fa-phone"></i> <span>{{ $kelas->waliKelas->telepon ?? '-' }}</span></p>
+                            <p><i class="fas fa-envelope"></i> <span>{{ $kelas->waliKelas->user->email ?? '-' }}</span></p>
                         </div>
                     </div>
                 @else

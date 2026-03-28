@@ -20,7 +20,7 @@
             <i class="fas fa-edit me-2"></i>Edit Materi
         </div>
         <div class="p-4">
-            <form action="{{ route('guru.lms.materi.update', [$kelas->id, $mapel->id, $materi->id]) }}" 
+            <form action="{{ route('guru.lms.materi.update', [$kelas->id, $mapel->id, $materi->id]) }}"
                   method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Judul Materi <span class="text-danger">*</span></label>
-                        <input type="text" name="judul_materi" class="form-control @error('judul_materi') is-invalid @enderror" 
+                        <input type="text" name="judul_materi" class="form-control @error('judul_materi') is-invalid @enderror"
                                value="{{ old('judul_materi', $materi->judul_materi) }}" required>
                         @error('judul_materi')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -55,7 +55,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tipe File <span class="text-danger">*</span></label>
-                        <select name="tipe_file" class="form-control" required>
+                        <select name="tipe_file" id="tipeFile" class="form-control" required onchange="toggleFileInput()">
                             <option value="pdf" {{ $materi->tipe_file == 'pdf' ? 'selected' : '' }}>PDF</option>
                             <option value="video" {{ $materi->tipe_file == 'video' ? 'selected' : '' }}>Video</option>
                             <option value="ppt" {{ $materi->tipe_file == 'ppt' ? 'selected' : '' }}>PowerPoint</option>
@@ -66,19 +66,33 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tanggal Upload <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_upload" class="form-control" 
+                        <input type="date" name="tanggal_upload" class="form-control"
                                value="{{ old('tanggal_upload', $materi->tanggal_upload->format('Y-m-d')) }}" required>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">File Materi (Kosongkan jika tidak ingin mengubah)</label>
-                    @if($materi->file_materi)
+                <div id="fileInputContainer" class="mb-3">
+                    <label class="form-label">File Materi <span class="text-danger" id="fileRequired">*</span></label>
+                    @if($materi->file_materi && $materi->tipe_file != 'link')
                         <div class="alert alert-info mb-2">
                             File saat ini: <strong>{{ basename($materi->file_materi) }}</strong>
                         </div>
                     @endif
-                    <input type="file" name="file_materi" class="form-control">
+                    <input type="file" name="file_materi" id="fileMateri" class="form-control @error('file_materi') is-invalid @enderror">
+                    <small class="text-muted">Kosongkan jika tidak ingin mengubah atau jika menggunakan tipe Link URL</small>
+                    @error('file_materi')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div id="linkInputContainer" class="mb-3" style="display: none;">
+                    <label class="form-label">URL Link <span class="text-danger">*</span></label>
+                    <input type="url" name="url_materi" id="urlMateri" class="form-control"
+                           value="{{ old('url_materi', $materi->url_materi ?? '') }}" placeholder="https://example.com">
+                    <small class="text-muted">Contoh: https://youtu.be/... atau link dokumentasi lainnya</small>
+                    @error('url_materi')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 @include('guru.partials.multi-kelas-selector')
@@ -87,10 +101,48 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i>Update Materi
                     </button>
-                    <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}" 
+                    <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}"
                        class="btn btn-secondary">Batal</a>
                 </div>
             </form>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function toggleFileInput() {
+            const tipeFile = document.getElementById('tipeFile').value;
+            const fileInputContainer = document.getElementById('fileInputContainer');
+            const linkInputContainer = document.getElementById('linkInputContainer');
+            const fileMateri = document.getElementById('fileMateri');
+            const urlMateri = document.getElementById('urlMateri');
+            const fileRequired = document.getElementById('fileRequired');
+
+            if (tipeFile === 'link') {
+                // Sembunyikan file input, tampilkan link input
+                fileInputContainer.style.display = 'none';
+                linkInputContainer.style.display = 'block';
+
+                // Set required
+                fileMateri.removeAttribute('required');
+                urlMateri.setAttribute('required', 'required');
+                fileRequired.textContent = '';
+            } else {
+                // Tampilkan file input, sembunyikan link input
+                fileInputContainer.style.display = 'block';
+                linkInputContainer.style.display = 'none';
+
+                // Set required
+                fileMateri.removeAttribute('required');
+                urlMateri.removeAttribute('required');
+                fileRequired.textContent = '*';
+            }
+        }
+
+        // Trigger toggle on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleFileInput();
+        });
+    </script>
+    @endpush
 @endsection

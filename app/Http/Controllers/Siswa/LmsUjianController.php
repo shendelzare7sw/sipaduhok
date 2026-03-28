@@ -266,4 +266,47 @@ class LmsUjianController extends Controller
             ->with('success', $msg);
     }
 
+    /**
+     * Kerjakan Ulang Latihan
+     */
+    public function retake(Request $request, $mapelId, $ujianId)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return back()->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        $ujian = Ujian::where('id', $ujianId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
+
+        // Cek apakah diperbolehkan diulang
+        if (!$ujian->bisa_diulang) {
+            return back()->with('error', 'Latihan ini tidak dapat diulang.');
+        }
+
+        // Cek apakah aktif dan waktu cocok
+        if (!$ujian->is_active) {
+            return back()->with('error', 'Latihan ini ditarik oleh guru.');
+        }
+        if (!$ujian->isOngoing()) {
+            return back()->with('error', 'Latihan belum dimulai atau sudah berakhir.');
+        }
+
+        $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
+            ->where('siswa_id', $siswa->id)
+            ->first();
+
+        if ($ujianSiswa) {
+            // Hapus jawaban dan riwayat
+            JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)->delete();
+            $ujianSiswa->delete();
+        }
+
+        return redirect()->route('siswa.lms.mapel.ujian.show', [$mapelId, $ujianId])
+            ->with('success', 'Riwayat nilai dihapus. Silakan kerjakan ulang!');
+    }
 }

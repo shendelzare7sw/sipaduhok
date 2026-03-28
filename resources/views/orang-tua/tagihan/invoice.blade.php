@@ -226,14 +226,46 @@
         .status-pending { background: rgba(255, 171, 0, 0.15); color: var(--warning); }
         .status-failed { background: rgba(255, 62, 29, 0.15); color: var(--danger); }
 
+        @page {
+            size: A4;
+            margin: 10mm 15mm;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body { padding: 15px 10px; }
+            .invoice-container { padding: 20px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; }
+            .invoice-details { text-align: left; width: 100%; }
+            .meta-row { justify-content: flex-start; }
+            .meta-label { text-align: left; width: 90px; }
+            .meta-value { text-align: left; width: auto; flex: 1; }
+            .info-grid { grid-template-columns: 1fr; gap: 20px; }
+            .info-box { text-align: left !important; }
+            .table-container { overflow-x: auto; margin-bottom: 20px; }
+            .total-section { justify-content: flex-start; width: 100%; }
+            .total-box { width: 100%; }
+            .watermark { font-size: 4rem; padding: 10px 20px; border-width: 5px; }
+            
+            /* Buttons */
+            .action-buttons {
+                display: flex; flex-direction: column; gap: 10px; text-align: center;
+            }
+            .action-buttons button { margin-left: 0 !important; width: 100%; }
+        }
+
         @media print {
             body { 
                 background: white; 
                 padding: 0;
+                margin: 0;
             }
             .invoice-container {
                 box-shadow: none;
                 padding: 0;
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
             }
             .no-print {
                 display: none !important;
@@ -241,13 +273,14 @@
             .watermark {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                color-adjust: exact;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="no-print" style="max-width: 800px; margin: 0 auto 20px; text-align: right;">
+    <div class="no-print action-buttons" style="max-width: 800px; margin: 0 auto 20px; text-align: right;">
         <button onclick="window.print()" style="padding: 10px 20px; background: #696cff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
             <svg style="width:16px;height:16px;vertical-align:middle;margin-right:5px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
             Cetak Invoice

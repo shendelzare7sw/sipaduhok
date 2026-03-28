@@ -11,10 +11,23 @@ use Illuminate\Support\Facades\Log;
 class AdminRecoveryController extends Controller
 {
     /**
+     * Unlock admin recovery route via Easter Egg
+     */
+    public function unlock(Request $request)
+    {
+        $request->session()->put('admin_recovery_unlocked', true);
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Show the admin recovery form.
      */
     public function showLinkRequestForm()
     {
+        if (!session('admin_recovery_unlocked')) {
+            return redirect()->route('login')->with('error', 'Halaman pemulihan admin telah dinonaktifkan.');
+        }
+
         return view('auth.admin-recovery');
     }
 
@@ -23,6 +36,10 @@ class AdminRecoveryController extends Controller
      */
     public function reset(Request $request)
     {
+        if (!session('admin_recovery_unlocked')) {
+            return redirect()->route('login')->with('error', 'Fitur pemulihan admin telah dinonaktifkan.');
+        }
+
         $request->validate([
             'identifier' => 'required|string',
             'security_question' => 'required|string',
@@ -74,6 +91,9 @@ class AdminRecoveryController extends Controller
         $user->save();
 
         Log::info("Admin password reset successful via Security Question for user: {$user->email}");
+
+        // Lock the admin recovery route again
+        $request->session()->forget('admin_recovery_unlocked');
 
         return redirect()->route('login')->with('status', 'Password berhasil direset. Silakan login dengan password baru.');
     }

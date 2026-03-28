@@ -20,7 +20,7 @@
                     <small class="text-muted"><i class="fas fa-reply"></i> membalas</small>
                 @endif
             </div>
-            <div class="post-date">{{ $reply->created_at->translatedFormat('l, d F Y pukul H:i') }}</div>
+            <div class="post-date">{{ $reply->created_at->locale('id')->translatedFormat('l, d F Y pukul H:i') }}</div>
         </div>
     </div>
 

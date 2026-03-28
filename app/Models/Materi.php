@@ -19,6 +19,7 @@ class Materi extends Model
         'kategori',
         'deskripsi',
         'file_materi',
+        'url_materi',
         'tipe_file',
         'tanggal_upload',
     ];

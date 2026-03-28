@@ -63,6 +63,32 @@
             width: 2px;
             background: #e5e7eb;
         }
+
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            .table-responsive { border: none; }
+            .table thead { display: none; }
+            .table tbody tr {
+                display: block; margin-bottom: 1rem; background: #fff;
+                border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); padding: 10px; border: 1px solid #e5e7eb;
+            }
+            .table tbody td {
+                display: flex; justify-content: space-between; align-items: center;
+                border: none; padding: 8px 0; border-bottom: 1px dashed #e5e7eb; text-align: right;
+            }
+            .table tbody td > div { text-align: right; }
+            .table tbody td:last-child {
+                border-bottom: none; justify-content: center; gap: 10px; padding-top: 15px;
+            }
+            .table tbody td::before {
+                content: attr(data-label); font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; margin-right: 15px; text-align: left;
+            }
+            
+            /* Make timeline responsive */
+            .timeline-dot { left: -20px; }
+            .timeline-line { left: -15px; }
+            .card-body .position-relative { padding-left: 20px !important; }
+        }
     </style>
 @endsection
 
@@ -175,7 +201,7 @@
                                 <tbody>
                                     @foreach($pembayaran as $bayar)
                                         <tr>
-                                            <td class="align-middle">
+                                            <td data-label="KODE" class="align-middle text-start text-md-center">
                                                 <code class="small">{{ $bayar->kode_pembayaran }}</code>
                                                 @if($bayar->order_id && $bayar->group_transactions_count > 1)
                                                     <div class="mt-1">
@@ -185,17 +211,17 @@
                                                     </div>
                                                 @endif
                                             </td>
-                                            <td class="align-middle">{{ $bayar->tanggal_bayar->format('d/m/Y') }}</td>
-                                            <td class="align-middle">
+                                            <td data-label="TANGGAL" class="align-middle text-end text-md-start">{{ $bayar->tanggal_bayar->format('d/m/Y') }}</td>
+                                            <td data-label="JENIS TAGIHAN" class="align-middle text-end text-md-start">
                                                 @if($bayar->tagihan)
                                                     <strong>{{ $jenisTagihan[$bayar->tagihan->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan)) }}</strong>
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td class="align-middle text-end fw-bold">Rp
+                                            <td data-label="JUMLAH" class="align-middle text-end fw-bold">Rp
                                                 {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
-                                            <td class="align-middle text-center">
+                                            <td data-label="METODE" class="align-middle text-end text-md-center">
                                                 @if($bayar->metode_pembayaran === 'tunai')
                                                     <span class="badge bg-info"><i class="fas fa-money-bill"></i> Tunai</span>
                                                 @elseif($bayar->metode_pembayaran === 'transfer')
@@ -204,7 +230,7 @@
                                                     <span class="badge bg-success"><i class="fas fa-credit-card"></i> Midtrans</span>
                                                 @endif
                                             </td>
-                                            <td class="align-middle text-center">
+                                            <td data-label="STATUS" class="align-middle text-end text-md-center">
                                                 @if($bayar->status_validasi === 'disetujui')
                                                     <span class="badge bg-success shadow-sm"><i class="fas fa-check-circle"></i>
                                                         Disetujui</span>
@@ -224,7 +250,7 @@
                                                     <span class="badge bg-warning shadow-sm"><i class="fas fa-clock"></i> Menunggu Validasi</span>
                                                 @endif
                                             </td>
-                                            <td class="align-middle">
+                                            <td data-label="DIVALIDASI" class="align-middle text-end text-md-start">
                                                 @if($bayar->tanggal_validasi)
                                                     <small>
                                                         {{ $bayar->tanggal_validasi->format('d/m/Y H:i') }}<br>
@@ -234,7 +260,7 @@
                                                     <span class="text-muted">-</span>
                                                 @endif
                                             </td>
-                                            <td class="align-middle text-center">
+                                            <td data-label="AKSI" class="text-center align-middle">
                                                 <a href="{{ route('admin.keuangan.pembayaran.show', $bayar->id) }}"
                                                     class="btn btn-sm btn-info shadow-sm" title="Detail">
                                                     <i class="fas fa-eye"></i>

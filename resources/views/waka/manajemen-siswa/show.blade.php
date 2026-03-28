@@ -358,6 +358,13 @@
 
         .parent-checkbox-grid .form-group { margin-bottom: 0; }
 
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
         .parent-checkbox-grid label {
             display: flex;
             align-items: center;
@@ -368,7 +375,7 @@
             border: 1px solid #e5e7eb;
             border-radius: 8px;
             font-size: 13px;
-            white-space: nowrap;
+            white-space: normal;
         }
 
         @media (max-width: 767.98px) {
@@ -390,6 +397,9 @@
                 justify-content: center;
             }
             .parent-checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid-2 {
                 grid-template-columns: 1fr;
             }
         }
@@ -579,17 +589,17 @@
                                 @foreach($siswa->orangTua as $parent)
                                     <div class="info-item"
                                         style="grid-column: 1 / -1; padding: 16px; background: #f9fafb; border-radius: 8px; margin-bottom: 12px;">
-                                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                                            <div style="flex: 1;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px;">
+                                            <div style="flex: 1; min-width: 0;">
                                                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
                                                     <div
-                                                        style="width: 40px; height: 40px; background: {{ $parent->pivot->relationship === 'ayah_kandung' ? '#3b82f6' : ($parent->pivot->relationship === 'ibu_kandung' ? '#ec4899' : '#6b7280') }}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                                        style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0; background: {{ $parent->pivot->relationship === 'ayah_kandung' ? '#3b82f6' : ($parent->pivot->relationship === 'ibu_kandung' ? '#ec4899' : '#6b7280') }}; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
                                                         {{ strtoupper(substr($parent->name, 0, 1)) }}
                                                     </div>
-                                                    <div>
-                                                        <div style="font-weight: 600; font-size: 16px;">{{ $parent->name }}</div>
-                                                        <div style="font-size: 13px; color: #6b7280;">
-                                                            <i class="fas fa-envelope"></i> {{ $parent->email }}
+                                                    <div style="min-width: 0; flex: 1;">
+                                                        <div style="font-weight: 600; font-size: 16px; word-break: break-word; overflow-wrap: anywhere;">{{ $parent->name }}</div>
+                                                        <div style="font-size: 13px; color: #6b7280; display: flex; align-items: flex-start; gap: 6px;">
+                                                            <i class="fas fa-envelope" style="margin-top: 3px; flex-shrink: 0;"></i> <span style="word-break: break-word; overflow-wrap: anywhere;">{{ $parent->email }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -618,7 +628,7 @@
                                                 </div>
                                             </div>
                                             <form action="{{ route('waka.manajemen-siswa.detach-parent', [$siswa, $parent]) }}"
-                                                method="POST" id="detachParentForm{{ $parent->id }}">
+                                                method="POST" id="detachParentForm{{ $parent->id }}" style="flex-shrink: 0;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="button" class="btn btn-sm"
@@ -692,8 +702,7 @@
                                     @csrf
 
                                     {{-- Search and Filter --}}
-                                    <div
-                                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                    <div class="form-grid-2">
                                         <div class="form-group" style="margin-bottom: 0;">
                                             <label class="form-label"><i class="fas fa-search" style="color: #9ca3af;"></i>
                                                 Cari
@@ -732,25 +741,25 @@
                                                     data-status="{{ $hasChildren ? 'has_children' : 'available' }}"
                                                     style="display: {{ $isAlreadyLinked ? 'none' : 'flex' }}; align-items: center; padding: 12px; margin-bottom: 8px; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                                                     <input type="radio" name="parent_id" value="{{ $p->id }}"
-                                                        style="margin-right: 12px;" {{ $isAlreadyLinked ? 'disabled' : '' }}
+                                                        style="margin-right: 12px; flex-shrink: 0;" {{ $isAlreadyLinked ? 'disabled' : '' }}
                                                         required>
-                                                    <div style="flex: 1;">
+                                                    <div style="flex: 1; min-width: 0;">
                                                         <div
-                                                            style="font-weight: 600; color: #111827; display: flex; align-items: center; gap: 8px;">
-                                                            <i class="fas fa-user" style="color: #f59e0b;"></i>
-                                                            {{ $p->name }}
+                                                            style="font-weight: 600; color: #111827; display: flex; align-items: flex-start; gap: 8px;">
+                                                            <i class="fas fa-user" style="color: #f59e0b; margin-top: 4px; flex-shrink: 0;"></i>
+                                                            <span style="word-break: break-word; overflow-wrap: anywhere;">{{ $p->name }}</span>
                                                             @if(!$hasChildren)
                                                                 <span
-                                                                    style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">BARU</span>
+                                                                    style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; flex-shrink: 0;">BARU</span>
                                                             @endif
                                                         </div>
-                                                        <small style="color: #64748b;">
+                                                        <small style="color: #64748b; display: block; word-break: break-word; overflow-wrap: anywhere; margin-top: 4px;">
                                                             {{ $p->email }}
                                                             @if($hasChildren)
-                                                                • <strong>Anak:</strong>
+                                                                <br><strong>Anak:</strong>
                                                                 {{ $p->studentParents->take(3)->pluck('siswa.nama_lengkap')->join(', ') }}{{ $p->studentParents->count() > 3 ? '...' : '' }}
                                                             @else
-                                                                • <em>Belum memiliki anak terdaftar</em>
+                                                                <br><em>Belum memiliki anak terdaftar</em>
                                                             @endif
                                                         </small>
                                                     </div>
@@ -843,7 +852,7 @@
                                     @csrf
                                     <input type="hidden" name="create_new_parent" value="1">
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div class="form-grid-2">
                                         <div class="form-group">
                                             <label class="form-label">Nama Lengkap <span
                                                     style="color: #ef4444;">*</span></label>
@@ -858,7 +867,7 @@
                                         </div>
                                     </div>
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div class="form-grid-2">
                                         <div class="form-group">
                                             <label class="form-label">Email <span style="color: #ef4444;">*</span></label>
                                             <input type="email" name="new_parent_email" class="form-control"
@@ -880,7 +889,7 @@
                                         </div>
                                     </div>
 
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div class="form-grid-2">
                                         <div class="form-group">
                                             <label class="form-label">No. Telepon/WA</label>
                                             <input type="text" name="new_parent_phone" class="form-control"

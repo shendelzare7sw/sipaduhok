@@ -177,28 +177,28 @@
                                                     $isPartial = $item->sisa_tagihan < $item->jumlah;
                                                 @endphp
                                                 <tr>
-                                                    <td class="text-center">
+                                                    <td data-label="PILIH" class="text-start text-md-center">
                                                         <input type="checkbox" class="form-check-input item-checkbox group-arrears-{{ $tahunId }}"
                                                             value="{{ $item->id }}" data-amount="{{ $item->sisa_tagihan }}"
                                                             data-label="{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }} ({{ $tahunLabel }})"
                                                             data-is-spp="{{ $isSpp ? 'true' : 'false' }}">
                                                     </td>
-                                                    <td>
+                                                    <td data-label="KETERANGAN">
                                                         <div class="fw-bold text-danger">
                                                             {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
                                                         </div>
                                                         <small class="text-muted">Dispensasi: {{ $item->status == 'cicilan' ? 'Cicilan' : 'Belum Lunas' }}</small>
                                                     </td>
-                                                    <td class="text-nowrap">
+                                                    <td data-label="JATUH TEMPO" class="text-end text-md-start text-nowrap">
                                                         <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
                                                     </td>
-                                                    <td class="text-end">
+                                                    <td data-label="TAGIHAN" class="text-end">
                                                         <span class="fw-bold text-danger">Rp {{ number_format($item->sisa_tagihan, 0, ',', '.') }}</span>
                                                         @if($isPartial)
                                                             <div class="small text-muted text-decoration-line-through">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</div>
                                                         @endif
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td data-label="STATUS" class="text-end text-md-center">
                                                         <span class="badge bg-danger">Tunggakan</span>
                                                     </td>
                                                 </tr>
@@ -241,7 +241,7 @@
                                                 $isPartial = (!$isPaid && $item->sisa_tagihan < $item->jumlah);
                                             @endphp
                                             <tr class="{{ $isPaid ? 'table-light text-muted' : '' }}">
-                                                <td class="text-center">
+                                                <td data-label="PILIH" class="text-start text-md-center">
                                                     @if(!$isPaid)
                                                         <input type="checkbox" class="form-check-input item-checkbox group-{{ $jenis }}"
                                                             value="{{ $item->id }}" data-amount="{{ $item->sisa_tagihan }}"
@@ -251,19 +251,19 @@
                                                         <i class="fas fa-check text-success"></i>
                                                     @endif
                                                 </td>
-                                                <td>
+                                                <td data-label="KETERANGAN">
                                                     <div class="fw-bold">
                                                         {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
                                                     </div>
                                                 </td>
-                                                <td class="text-nowrap">
+                                                <td data-label="JATUH TEMPO" class="text-end text-md-start text-nowrap">
                                                     <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
                                                     @if(\Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->isPast() && !$isPaid)
                                                         <span class="badge bg-label-danger text-danger"
                                                             style="font-size: 0.7rem;">Terlambat</span>
                                                     @endif
                                                 </td>
-                                                <td class="text-end">
+                                                <td data-label="TAGIHAN" class="text-end">
                                                     @if($isPaid)
                                                         <span class="fw-bold text-success">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</span>
                                                     @else
@@ -273,7 +273,7 @@
                                                         @endif
                                                     @endif
                                                 </td>
-                                                <td class="text-center">
+                                                <td data-label="STATUS" class="text-end text-md-center">
                                                     @if($isPaid)
                                                         <span class="badge bg-success">Lunas</span>
                                                     @else
@@ -549,17 +549,17 @@
                                         $remainingTime = $expiredAt->diffForHumans(now(), ['parts' => 2]);
                                     @endphp
                                     <tr>
-                                        <td class="text-nowrap">
+                                        <td data-label="TANGGAL" class="text-end text-md-start text-nowrap">
                                             {{ \Carbon\Carbon::parse($bayar->tanggal_bayar)->format('d M Y H:i') }}
                                         </td>
-                                        <td>
+                                        <td data-label="TAGIHAN">
                                             <div class="fw-semibold">
                                                 {{ $bayar->tagihan->keterangan ?: ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan ?? '-')) }}
                                             </div>
                                             <small class="text-muted">ID: #{{ $bayar->kode_pembayaran }}</small>
                                         </td>
-                                        <td class="text-end fw-bold">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
-                                        <td>
+                                        <td data-label="JUMLAH" class="text-end fw-bold">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
+                                        <td data-label="METODE" class="text-end text-md-start">
                                             @if($bayar->metode_pembayaran == 'tunai')
                                                 <span class="badge bg-label-secondary"><i class="fas fa-money-bill-wave me-1"></i> Tunai</span>
                                             @elseif($bayar->metode_pembayaran == 'transfer')
@@ -568,7 +568,7 @@
                                                 <span class="badge bg-label-primary"><i class="fas fa-credit-card me-1"></i> Digital</span>
                                             @endif
                                         </td>
-                                        <td class="text-center">
+                                        <td data-label="STATUS" class="text-end text-md-center">
                                             @if($bayar->status_validasi == 'disetujui')
                                                 <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Lunas</span>
                                             @elseif($bayar->status_validasi == 'ditolak')
@@ -585,12 +585,12 @@
                                                 <span class="badge bg-warning"><i class="fas fa-clock me-1"></i>Validasi</span>
                                             @endif
                                         </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
+                                        <td data-label="AKSI" class="text-center">
+                                            <div class="d-flex justify-content-center justify-content-md-center gap-2" style="width: 100%;">
                                                 @if($canContinue)
                                                     <form action="{{ route('orang-tua.pembayaran.continue', $bayar->id) }}" method="POST">
                                                         @csrf
-                                                        <button type="submit" class="btn btn-sm btn-primary" title="Lanjutkan Pembayaran">
+                                                        <button type="submit" class="btn btn-sm btn-primary" title="Lanjutkan Pembayaran" style="width: 100%;">
                                                             <i class="fas fa-credit-card"></i> Pay
                                                         </button>
                                                     </form>
@@ -601,7 +601,7 @@
                                                     <a href="{{ route('orang-tua.pembayaran.invoice', $bayar->id) }}" 
                                                        target="_blank" 
                                                        class="btn btn-sm btn-outline-secondary" 
-                                                       title="Lihat Invoice">
+                                                       title="Lihat Invoice" style="width: 100%;">
                                                         <i class="fas fa-file-invoice"></i> Invoice
                                                     </a>
                                                 @endif
@@ -639,6 +639,31 @@
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
             color: #adb5bd;
+        }
+
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            .table-responsive { border: none; }
+            .table thead { display: none; }
+            .table tbody tr {
+                display: block; margin-bottom: 1rem; background: #fff;
+                border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); padding: 10px; border: 1px solid #e5e7eb;
+            }
+            .table tbody td {
+                display: flex; justify-content: space-between; align-items: center;
+                border: none; padding: 8px 0; border-bottom: 1px dashed #e5e7eb; text-align: right;
+            }
+            .table tbody td > div { text-align: right; }
+            .table tbody td:last-child {
+                border-bottom: none; justify-content: center; gap: 10px; padding-top: 15px;
+            }
+            .table tbody td::before {
+                content: attr(data-label); font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; margin-right: 15px; text-align: left; flex-shrink: 0; width: 40%;
+            }
+            
+            /* Bulk Payment Footer Adjustments */
+            #bulkPaymentFooter h4 { font-size: 1.25rem; }
+            #bulkPaymentFooter .btn { padding: 8px 16px; font-size: 0.9rem; }
         }
 
         /* Offset footer agar tidak tertutup sidebar di desktop */

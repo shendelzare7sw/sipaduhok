@@ -31,6 +31,22 @@
         color: white;
         border: none;
     }
+    
+    @media (max-width: 768px) {
+        .info-table, .info-table tbody, .info-table tr, .info-table td {
+            display: block; width: 100%;
+        }
+        .info-table td:first-child {
+            width: 100% !important; font-weight: bold; padding-bottom: 2px; border-bottom: none;
+        }
+        .info-table td:last-child {
+            padding-top: 2px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6; text-align: left;
+        }
+        .info-table tr:last-child td:last-child { border-bottom: none; }
+        .student-avatar { flex-shrink: 0; }
+        .card-header { padding: 15px; }
+        .d-flex.gap-3.align-items-start { align-items: center !important; }
+    }
 </style>
 @endsection
 

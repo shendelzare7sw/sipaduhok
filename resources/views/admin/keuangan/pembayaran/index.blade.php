@@ -253,6 +253,49 @@
             .search-input {
                 width: 100% !important;
             }
+
+            .table-responsive {
+                border: none;
+            }
+            .table thead {
+                display: none;
+            }
+            .table tbody tr {
+                display: block;
+                margin-bottom: 1rem;
+                background: #fff;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                padding: 10px;
+                border: 1px solid #e5e7eb;
+            }
+            .table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: none;
+                padding: 8px 0;
+                border-bottom: 1px dashed #e5e7eb;
+                text-align: right;
+            }
+            .table tbody td > div {
+                text-align: right;
+            }
+            .table tbody td:last-child {
+                border-bottom: none;
+                justify-content: center;
+                gap: 10px;
+                padding-top: 15px;
+            }
+            .table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #64748b;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                margin-right: 15px;
+                text-align: left;
+            }
         }
     </style>
 @endsection
@@ -413,9 +456,9 @@
                                 <tbody>
                                     @foreach($pembayaranList as $index => $pembayaran)
                                         <tr>
-                                            <td class="text-center align-middle fw-bold text-gray-600">
+                                            <td data-label="NO" class="text-center align-middle fw-bold text-gray-600">
                                                 {{ $pembayaranList->firstItem() + $index }}</td>
-                                            <td class="align-middle">
+                                            <td data-label="KODE" class="align-middle text-start text-md-center">
                                                 <code class="fw-bold text-primary small">{{ $pembayaran->kode_pembayaran }}</code>
                                                 @if($pembayaran->order_id && $pembayaran->group_transactions_count > 1)
                                                     <div class="mt-1">
@@ -429,19 +472,17 @@
                                                     </div>
                                                 @endif
                                             </td>
-                                            <td class="align-middle">
-                                                <div class="fw-bold text-gray-900">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}
-                                                </div>
-                                                <small
-                                                    class="text-muted fw-bold text-uppercase">{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }}</small>
+                                            <td data-label="IDENTITAS SISWA" class="align-middle text-end text-md-start">
+                                                <div class="fw-bold text-gray-900">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</div>
+                                                <small class="text-muted fw-bold text-uppercase">{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }}</small>
                                             </td>
-                                            <td class="align-middle small fw-bold text-muted">
+                                            <td data-label="JENIS TAGIHAN" class="align-middle small fw-bold text-muted text-end text-md-start">
                                                 {{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan ?? '-')) }}
                                             </td>
-                                            <td class="align-middle currency-font text-dark text-end">
+                                            <td data-label="JUMLAH" class="align-middle currency-font text-dark text-end">
                                                 Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}
                                             </td>
-                                            <td class="align-middle text-center">
+                                            <td data-label="METODE" class="align-middle text-end text-md-center">
                                                 @if($pembayaran->metode_pembayaran === 'tunai')
                                                     <span class="badge bg-primary badge-custom shadow-sm">TUNAI</span>
                                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
@@ -450,10 +491,10 @@
                                                     <span class="badge bg-info badge-custom shadow-sm">MIDTRANS</span>
                                                 @endif
                                             </td>
-                                            <td class="align-middle small fw-bold">
+                                            <td data-label="TANGGAL" class="align-middle small fw-bold text-end text-md-start">
                                                 {{ $pembayaran->tanggal_bayar ? $pembayaran->tanggal_bayar->format('d/m/Y') : '-' }}
                                             </td>
-                                            <td class="align-middle text-center">
+                                            <td data-label="STATUS" class="align-middle text-end text-md-center">
                                                 @if($pembayaran->status_validasi === 'pending')
                                                     @if($pembayaran->metode_pembayaran === 'midtrans')
                                                         @php
@@ -478,7 +519,7 @@
                                                             class="fas fa-times-circle me-1"></i> DITOLAK</span>
                                                 @endif
                                             </td>
-                                            <td class="text-center align-middle">
+                                            <td data-label="AKSI" class="text-center align-middle">
                                                 <a href="{{ route('admin.keuangan.pembayaran.show', $pembayaran->id) }}"
                                                     class="btn btn-info btn-sm rounded-circle shadow-sm" title="Validasi / Detail">
                                                     <i class="fas fa-eye"></i>

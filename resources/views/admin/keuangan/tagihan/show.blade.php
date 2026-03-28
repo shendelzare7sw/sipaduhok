@@ -15,6 +15,67 @@
     .stat-box { padding: 16px; border-radius: 8px; }
     .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
     .stat-value { font-size: 20px; font-weight: 700; }
+    
+    @media (max-width: 768px) {
+        .table-responsive {
+            border: none !important;
+        }
+        .table-responsive table {
+            border-collapse: separate;
+            border-spacing: 0 1rem;
+        }
+        .table-responsive thead {
+            display: none;
+        }
+        .table-responsive tbody tr {
+            display: block;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .table-responsive tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: right !important;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .table-responsive tfoot tr {
+            display: block;
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        .table-responsive tfoot td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0;
+            border: none;
+        }
+        .table-responsive tbody td:last-child {
+            border-bottom: none;
+        }
+        .table-responsive tbody td::before {
+            content: attr(data-label);
+            display: block;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-right: 1rem;
+            text-align: left;
+        }
+        .action-buttons-wrapper .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            justify-content: center;
+        }
+    }
 </style>
 @endsection
 
@@ -91,7 +152,7 @@
     </div>
 
     {{-- Action Buttons --}}
-    <div class="d-flex flex-wrap gap-2 mb-4">
+    <div class="d-flex flex-wrap gap-2 mb-4 action-buttons-wrapper">
         <a href="{{ route('admin.keuangan.tagihan.edit', $siswa->id) }}" class="btn btn-warning shadow-sm">
             <i class="fas fa-edit me-1"></i> Edit Tagihan
         </a>
@@ -137,13 +198,13 @@
                         <tbody>
                             @foreach($tagihan as $index => $item)
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
-                                    <td class="align-middle">
+                                    <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $index + 1 }}</td>
+                                    <td class="align-middle" data-label="Jenis Tagihan">
                                         <strong>{{ $jenisTagihan[$item->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}</strong>
                                     </td>
-                                    <td class="align-middle text-end fw-bold">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                                    <td class="align-middle text-center">{{ $item->tanggal_jatuh_tempo ? $item->tanggal_jatuh_tempo->format('d/m/Y') : '-' }}</td>
-                                    <td class="align-middle text-center">
+                                    <td class="align-middle text-end fw-bold" data-label="Jumlah">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</td>
+                                    <td class="align-middle text-center" data-label="Jatuh Tempo">{{ $item->tanggal_jatuh_tempo ? $item->tanggal_jatuh_tempo->format('d/m/Y') : '-' }}</td>
+                                    <td class="align-middle text-center" data-label="Status">
                                         @if($item->status === 'sudah_bayar')
                                             <span class="badge bg-success shadow-sm">Lunas</span>
                                         @elseif($item->status === 'terlambat')
@@ -157,9 +218,10 @@
                         </tbody>
                         <tfoot class="table-light">
                             <tr>
-                                <td colspan="2" class="fw-bold">Total</td>
-                                <td class="fw-bold text-end">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</td>
-                                <td colspan="2"></td>
+                                <td colspan="2" class="fw-bold d-none d-md-table-cell">Total</td>
+                                <div class="d-md-none fw-bold mb-2">Total Semua Tagihan</div>
+                                <td class="fw-bold text-end text-primary" style="font-size: 1.1rem;">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</td>
+                                <td colspan="2" class="d-none d-md-table-cell"></td>
                             </tr>
                         </tfoot>
                     </table>

@@ -135,6 +135,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/captcha/refresh', [\App\Http\Controllers\CaptchaController::class, 'refresh'])->name('captcha.refresh');
 
     // Admin Recovery Routes
+    Route::post('/admin-recovery/unlock', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'unlock'])->name('admin.recovery.unlock');
     Route::get('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'showLinkRequestForm'])->name('admin.recovery');
     Route::post('/admin-recovery', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'reset'])->name('admin.recovery.reset')
         ->middleware('throttle:5,1');
@@ -1408,6 +1409,7 @@ Route::middleware(['auth'])->group(function () {
                     Route::get('/{ujianId}', [LmsUjianController::class, 'show'])->name('show');
                     Route::post('/{ujianId}/mulai', [LmsUjianController::class, 'mulai'])->name('mulai');
                     Route::post('/{ujianId}/submit', [LmsUjianController::class, 'submit'])->name('submit');
+                    Route::post('/{ujianId}/retake', [LmsUjianController::class, 'retake'])->name('retake');
                 });
 
                 // Forum Diskusi

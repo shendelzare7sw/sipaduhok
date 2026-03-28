@@ -629,6 +629,9 @@
                         }
                     }
                     let keys = data.kunci_jawaban || [];
+                    if (typeof keys === 'string') {
+                        try { keys = JSON.parse(keys); } catch(e) { keys = []; }
+                    }
                     if (Array.isArray(keys)) {
                         keys.forEach(k => {
                             let cb = el.querySelector(`input[name="soal[${index}][kunci_jawaban_kompleks][]"][value="${k}"]`);

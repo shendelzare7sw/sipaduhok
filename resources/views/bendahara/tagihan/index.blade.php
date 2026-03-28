@@ -244,6 +244,65 @@
             padding: 4px 8px;
             font-size: 11px;
         }
+
+        .table-responsive {
+            border: none !important;
+        }
+        .table-responsive table {
+            border-collapse: separate;
+            border-spacing: 0 1rem;
+        }
+        .table-responsive thead {
+            display: none;
+        }
+        .table-responsive tbody tr {
+            display: block;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+        .table-responsive tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: right !important;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .table-responsive tbody td:last-child {
+            border-bottom: none;
+            display: block;
+        }
+        .table-responsive tbody td::before {
+            content: attr(data-label);
+            display: block;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-right: 1rem;
+            text-align: left;
+        }
+        .table-responsive tbody td .student-name {
+            text-align: right;
+            font-size: 14px;
+        }
+        .table-responsive tbody td .student-nisn {
+            display: block;
+            text-align: right;
+        }
+        .table-responsive tbody td .btn-group {
+            display: flex;
+            width: 100%;
+            gap: 4px;
+        }
+        .table-responsive tbody td .btn-group .btn {
+            flex: 1;
+            border-radius: 6px !important;
+        }
     }
 </style>
 @endsection
@@ -404,30 +463,32 @@
                         <tbody>
                             @foreach($siswaList as $index => $siswa)
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $siswaList->firstItem() + $index }}</td>
-                                    <td class="align-middle">
-                                        <span class="student-name">{{ $siswa->nama_lengkap }}</span>
-                                        <span class="student-nisn">Siswa Aktif</span>
+                                    <td class="text-center align-middle fw-bold text-gray-600" data-label="NO">{{ $siswaList->firstItem() + $index }}</td>
+                                    <td class="align-middle" data-label="IDENTITAS SISWA">
+                                        <div style="text-align: right;">
+                                            <span class="student-name">{{ $siswa->nama_lengkap }}</span>
+                                            <span class="student-nisn">Siswa Aktif</span>
+                                        </div>
                                     </td>
-                                    <td class="text-center align-middle fw-bold text-gray-800">{{ $siswa->nisn }}</td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-center align-middle fw-bold text-gray-800" data-label="NISN">{{ $siswa->nisn }}</td>
+                                    <td class="text-center align-middle" data-label="KELAS">
                                         <span class="badge bg-primary px-2 py-1 fw-bold text-uppercase" style="font-size: 10px;">
                                             {{ $siswa->kelas->nama_kelas ?? '-' }}
                                         </span>
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-center align-middle" data-label="CABANG">
                                         <span class="cabang-badge">{{ $siswa->cabang->kode_cabang ?? '-' }}</span>
                                     </td>
-                                    <td class="align-middle currency-font text-dark">
+                                    <td class="align-middle currency-font text-dark" data-label="TOTAL TAGIHAN">
                                         Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}
                                     </td>
-                                    <td class="align-middle currency-font text-success">
+                                    <td class="align-middle currency-font text-success" data-label="SUDAH BAYAR">
                                         Rp {{ number_format($siswa->tagihan_lunas, 0, ',', '.') }}
                                     </td>
-                                    <td class="align-middle currency-font {{ $siswa->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}">
+                                    <td class="align-middle currency-font {{ $siswa->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}" data-label="SISA">
                                         Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-center align-middle" data-label="STATUS">
                                         @if($siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0)
                                             <span class="badge bg-success badge-status shadow-sm"><i class="fas fa-check-circle"></i> LUNAS</span>
                                         @elseif($siswa->total_tagihan == 0)
@@ -436,7 +497,7 @@
                                             <span class="badge bg-danger badge-status shadow-sm"><i class="fas fa-times-circle"></i> BELUM LUNAS</span>
                                         @endif
                                     </td>
-                                    <td class="text-center align-middle">
+                                    <td class="text-center align-middle" data-label="AKSI">
                                         <div class="btn-group shadow-sm">
                                             <a href="{{ route('bendahara.tagihan.show', $siswa->id) }}" class="btn btn-sm btn-info" title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
