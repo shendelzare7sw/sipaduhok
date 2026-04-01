@@ -57,8 +57,9 @@
                                         class="btn btn-primary btn-sm">
                                         <i class="fas fa-external-link-alt me-1"></i> Mulai Meeting
                                     </a>
-                                    <button class="btn btn-outline-secondary btn-sm"
-                                        onclick="copyLink('{{ $meeting->link_meeting }}')">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                        data-link="{{ $meeting->link_meeting }}"
+                                        onclick="copyLink(this)">
                                         <i class="far fa-copy me-1"></i> Copy Link
                                     </button>
                                 </div>
@@ -108,11 +109,75 @@
 
     @push('scripts')
     <script>
-        function copyLink(link) {
-            navigator.clipboard.writeText(link).then(() => {
-                // You might want to use a toast or sweetalert here normally
-                alert('Link meeting berhasil disalin!');
-            });
+        function copyLink(btnElement) {
+            const link = btnElement.getAttribute('data-link');
+            
+            if (!link) {
+                alert('Link tidak ditemukan');
+                return;
+            }
+            
+            // Simpan state original
+            const originalHtml = btnElement.innerHTML;
+            const originalClass = btnElement.className;
+            
+            // Try using modern Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(link).then(() => {
+                    showSuccessNotification(btnElement, originalHtml, originalClass);
+                }).catch(err => {
+                    console.warn('Clipboard API failed, using fallback:', err);
+                    fallbackCopyToClipboard(link, btnElement, originalHtml, originalClass);
+                });
+            } else {
+                // Fallback untuk browser lama atau HTTP
+                fallbackCopyToClipboard(link, btnElement, originalHtml, originalClass);
+            }
+        }
+
+        function fallbackCopyToClipboard(link, btnElement, originalHtml, originalClass) {
+            const textarea = document.createElement('textarea');
+            textarea.value = link;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            
+            try {
+                textarea.select();
+                document.execCommand('copy');
+                showSuccessNotification(btnElement, originalHtml, originalClass);
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('Gagal menyalin link ke clipboard');
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        function showSuccessNotification(btnElement, originalHtml, originalClass) {
+            // Update button UI
+            btnElement.innerHTML = '<i class="fas fa-check me-1"></i> Tersalin!';
+            btnElement.className = 'btn btn-success btn-sm text-white';
+            
+            // Reset button setelah 2 detik
+            setTimeout(() => {
+                btnElement.innerHTML = originalHtml;
+                btnElement.className = originalClass;
+            }, 2000);
+
+            // Try SweetAlert jika tersedia
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'success',
+                    title: 'Link Meeting Tersalin!',
+                    text: 'Link telah disalin ke clipboard Anda.',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            }
         }
 
         function confirmDelete(url) {
@@ -122,6 +187,7 @@
             deleteModal.show();
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @endpush
 
     <!-- Delete Confirmation Modal -->
