@@ -198,7 +198,7 @@
                         <tbody>
                             @foreach($tagihan as $index => $item)
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $index + 1 }}</td>
+                                    <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $loop->iteration }}</td>
                                     <td class="align-middle" data-label="Jenis Tagihan">
                                         <strong>{{ $jenisTagihan[$item->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}</strong>
                                     </td>

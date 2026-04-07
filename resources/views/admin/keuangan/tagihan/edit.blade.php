@@ -8,6 +8,9 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+{{-- SweetAlert2 --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 @section('styles')
 <style>
     .student-avatar {
@@ -66,6 +69,21 @@
         .input-group, .form-control, .form-select {
             max-width: 100% !important;
         }
+    }
+    
+    /* SweetAlert Styling */
+    .swal2-popup {
+        font-family: 'Public Sans', sans-serif;
+        border-radius: 1rem;
+    }
+    
+    .swal2-title {
+        font-size: 1.5rem;
+        color: #566a7f;
+    }
+    
+    .swal2-html-container {
+        color: #697a8d;
     }
 </style>
 @endsection
@@ -134,20 +152,38 @@
                                 <th style="min-width: 180px;">Tahun Ajaran</th>
                                 <th style="min-width: 200px;">Jumlah (Rp)</th>
                                 <th style="min-width: 150px;">Jatuh Tempo</th>
+                                <th style="min-width: 80px;" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($jenisTagihan as $key => $label)
-                                <tr>
+                                @php
+                                    // Cari tagihan record untuk item ini
+                                    $tagihanRecord = $allTagihan->firstWhere('jenis_tagihan', $key);
+                                    // Cek apakah ini tipe custom (tidak ada di standard list)
+                                    $isCustom = !in_array($key, $standardJenisTagihan);
+                                    // Cek apakah sudah ada pembayaran
+                                    $hasPembayaran = $tagihanRecord && $tagihanRecord->pembayaran()->where('status_validasi', 'disetujui')->exists();
+                                    // PROTEKSI: Hanya lock jika ada pembayaran dari orang tua
+                                    // Rp 0 (setting admin) tetap bisa diedit
+                                    $isReadOnly = $hasPembayaran;
+                                    $canDelete = $tagihanRecord && !$hasPembayaran && ($isCustom || $tagihanRecord->status === 'belum_bayar');
+                                @endphp
+                                <tr class="{{ $isReadOnly ? 'table-light opacity-75' : '' }}">
                                     <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $loop->iteration }}</td>
                                     <td class="align-middle" data-label="Jenis Tagihan">
                                         <strong>{{ $label }}</strong>
+                                        @if($isReadOnly)
+                                            <br><small class="badge bg-success">✓ Sudah Dibayar Orang Tua</small>
+                                        @elseif($isCustom && $tagihanRecord)
+                                            <br><small class="badge bg-success">Custom</small>
+                                        @endif
                                         @if($key === 'spp')
                                             <br><small class="text-muted">Tagihan bulanan</small>
                                         @endif
                                     </td>
                                     <td class="align-middle" data-label="Tahun Ajaran">
-                                        <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm">
+                                        <select name="tahun_ajaran_id[{{ $key }}]" class="form-select form-select-sm" {{ $isReadOnly ? 'disabled' : '' }}>
                                             @foreach($allYears as $thn)
                                                 <option value="{{ $thn->id }}" {{ ($tahunAjaran->id == $thn->id) ? 'selected' : '' }}>
                                                     {{ $thn->nama_tahun_ajaran }}
@@ -165,7 +201,8 @@
                                                    name="tagihan[{{ $key }}]"
                                                    class="form-control currency-input"
                                                    value="{{ number_format(old('tagihan.'.$key, $rawValue), 0, ',', '.') }}"
-                                                   placeholder="0">
+                                                   placeholder="0"
+                                                   {{ $isReadOnly ? 'disabled' : '' }}>
                                         </div>
                                         @error('tagihan.'.$key)
                                             <small class="text-danger">{{ $message }}</small>
@@ -176,7 +213,20 @@
                                                name="tanggal_jatuh_tempo[{{ $key }}]"
                                                class="form-control form-control-sm"
                                                value="{{ old('tanggal_jatuh_tempo.'.$key, now()->addMonth()->format('Y-m-d')) }}"
-                                               style="max-width: 200px;">
+                                               style="max-width: 200px;"
+                                               {{ $isReadOnly ? 'disabled' : '' }}>
+                                    </td>
+                                    <td class="align-middle text-center" data-label="Aksi">
+                                        @if($canDelete && $tagihanRecord)
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-danger delete-tagihan-btn"
+                                                    data-tagihan-id="{{ $tagihanRecord->id }}"
+                                                    data-tagihan-label="{{ $label }}"
+                                                    data-delete-url="{{ route('admin.keuangan.tagihan.destroy-item', $tagihanRecord->id) }}"
+                                                    title="Hapus tagihan">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -211,7 +261,8 @@
             <div>
                 <strong>Catatan:</strong>
                 <ul class="mb-0 mt-2">
-                    <li>Tagihan yang sudah memiliki pembayaran tidak dapat dihapus, hanya dapat diubah nominalnya.</li>
+                    <li>Tagihan yang sudah dibayar oleh orang tua tidak dapat diedit atau dihapus untuk menjaga integritas data transaksi.</li>
+                    <li>Tagihan dengan nominal Rp 0 (setting admin) tetap dapat diedit kapan saja untuk fleksibilitas perubahan.</li>
                     <li>Perubahan tagihan akan mempengaruhi status pembayaran siswa.</li>
                     <li>Tahun ajaran: <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong></li>
                 </ul>
@@ -224,6 +275,7 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const currencyInputs = document.querySelectorAll('.currency-input');
@@ -258,6 +310,64 @@
                 e.preventDefault();
                 const pastedText = (e.clipboardData || window.clipboardData).getData('text');
                 this.value = formatCurrency(pastedText);
+            });
+        });
+
+        // Handle delete tagihan with SweetAlert
+        document.querySelectorAll('.delete-tagihan-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const tagihanLabel = this.getAttribute('data-tagihan-label');
+                const tagihanId = this.getAttribute('data-tagihan-id');
+                const deleteUrl = this.getAttribute('data-delete-url');
+
+                Swal.fire({
+                    title: 'Hapus Tagihan?',
+                    html: `Apakah Anda yakin ingin menghapus tagihan <strong>${tagihanLabel}</strong>?<br><small class="text-muted">Aksi ini tidak dapat dibatalkan.</small>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus',
+                    cancelButtonText: 'Batal',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit DELETE request via fetch
+                        fetch(deleteUrl, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                Swal.fire({
+                                    title: 'Terhapus!',
+                                    text: 'Tagihan berhasil dihapus.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                return response.json().then(data => {
+                                    throw new Error(data.error || 'Gagal menghapus tagihan');
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: error.message || 'Terjadi kesalahan saat menghapus tagihan',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        });
+                    }
+                });
             });
         });
     });

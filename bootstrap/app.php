@@ -44,4 +44,35 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
+    })
+    ->withSchedule(function ($schedule) {
+        // Google Sheets Sync Scheduler
+        
+        // Tier 1: Daily sync at 00:30 (6 modules)
+        // Modules: siswa, guru, kelas, jadwal_pelajaran, presensi, nilai
+        $tier1Modules = ['siswa', 'guru', 'kelas', 'jadwal_pelajaran', 'presensi', 'nilai'];
+        foreach ($tier1Modules as $module) {
+            $schedule->job(\App\Jobs\SyncModuleToSheet::class, 'default', [
+                'module' => $module,
+                'direction' => 'push'
+            ])
+                ->dailyAt('00:30')
+                ->name('google-sheets-sync-' . $module . '-daily')
+                ->onOneServer()
+                ->withoutOverlapping(600);
+        }
+        
+        // Tier 2: Weekly sync on Sunday at 01:00 (4 modules)
+        // Modules: tagihan, pembayaran, siswa_belum_lunas, rekap_keuangan
+        $tier2Modules = ['tagihan', 'pembayaran', 'siswa_belum_lunas', 'rekap_keuangan'];
+        foreach ($tier2Modules as $module) {
+            $schedule->job(\App\Jobs\SyncModuleToSheet::class, 'default', [
+                'module' => $module,
+                'direction' => 'push'
+            ])
+                ->weeklyOn(0, '01:00')  // 0 = Sunday
+                ->name('google-sheets-sync-' . $module . '-weekly')
+                ->onOneServer()
+                ->withoutOverlapping(600);
+        }
     })->create();

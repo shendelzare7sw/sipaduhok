@@ -32,6 +32,7 @@
             font-weight: 600;
         }
 
+        /* Desktop Table Styles */
         .siswa-table thead th {
             background: #f8f9fc;
             color: #4e73df;
@@ -54,17 +55,244 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+            accent-color: #4e73df;
         }
 
         .selected-count-badge {
             font-size: 14px;
             padding: 8px 16px;
+            white-space: nowrap;
         }
 
         .filter-section input:focus,
         .filter-section select:focus {
             border-color: #4e73df;
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 992px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .col-lg-7,
+            .col-lg-5 {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Card Headers Responsive */
+            .card-header {
+                flex-wrap: wrap !important;
+            }
+
+            .card-header > div {
+                width: 100%;
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* Filter Section Mobile */
+            .filter-section {
+                padding: 12px 8px !important;
+            }
+
+            .filter-section .row {
+                flex-direction: column !important;
+            }
+
+            .filter-section .col-md-4 {
+                width: 100% !important;
+                max-width: 100%;
+            }
+
+            /* Table Responsive */
+            .table-responsive {
+                border: none !important;
+            }
+
+            .table-responsive table {
+                border-collapse: separate;
+                border-spacing: 0 1rem;
+            }
+
+            .siswa-table thead {
+                display: none;
+            }
+
+            .siswa-table tbody tr {
+                display: block;
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                margin-bottom: 1rem;
+                padding: 0;
+            }
+
+            .siswa-table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+                padding: 0.75rem 1rem;
+                border-bottom: 1px dashed #e2e8f0;
+            }
+
+            .siswa-table tbody td:first-child {
+                padding: 0.75rem;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            .siswa-table tbody td:last-child {
+                border-bottom: none;
+            }
+
+            .siswa-table tbody td::before {
+                content: attr(data-label);
+                display: block;
+                font-weight: 700;
+                font-size: 0.75rem;
+                color: #64748b;
+                text-transform: uppercase;
+                margin-right: 1rem;
+                text-align: left;
+                white-space: nowrap;
+            }
+
+            .siswa-table tbody td:first-child::before {
+                content: '';
+                display: none;
+            }
+
+            /* Select All Row Mobile */
+            .select-all-row {
+                display: none;
+                background: #f8f9fc;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .select-all-row.mobile-visible {
+                display: flex;
+            }
+
+            .select-all-row input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+
+            .select-all-row label {
+                margin: 0;
+                cursor: pointer;
+                font-weight: 600;
+                color: #4e73df;
+                user-select: none;
+            }
+
+            .siswa-table tbody td strong {
+                text-align: right;
+            }
+
+            .siswa-table tbody td .badge {
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            /* Counter Badge Mobile */
+            .selected-count-badge {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                background: #4e73df !important;
+                color: white;
+            }
+
+            /* Counter Section Mobile */
+            .border-bottom.d-flex {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px;
+            }
+
+            .border-bottom.d-flex span:first-child {
+                font-size: 12px;
+            }
+
+            /* Action Buttons Mobile */
+            .d-flex.gap-2 {
+                flex-wrap: wrap;
+            }
+
+            .d-flex.gap-2 .btn {
+                flex: 1 1 auto;
+                min-width: 120px;
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+
+            /* Alert Responsive */
+            .alert {
+                font-size: 13px;
+            }
+
+            .alert ul li {
+                margin-bottom: 4px;
+            }
+
+            /* Input Group Mobile */
+            .input-group {
+                width: 100%;
+            }
+
+            .form-select,
+            .form-control {
+                font-size: 14px;
+            }
+
+            /* Textarea Responsive */
+            textarea.form-control {
+                resize: vertical;
+                min-height: 100px;
+            }
+        }
+
+        /* Extra Small Devices */
+        @media (max-width: 480px) {
+            .siswa-table tbody td {
+                padding: 0.6rem 0.8rem;
+                font-size: 12px;
+            }
+
+            .siswa-table tbody td::before {
+                font-size: 0.7rem;
+                margin-right: 0.5rem;
+            }
+
+            .d-flex.gap-2 .btn {
+                min-width: 100px;
+                font-size: 12px;
+                padding: 7px 10px;
+            }
+
+            .selected-count-badge {
+                font-size: 11px !important;
+                padding: 4px 8px !important;
+            }
+
+            .card-header h6 {
+                font-size: 14px;
+            }
         }
     </style>
 @endsection
@@ -99,7 +327,7 @@
                     {{-- Left Column - Student Selection --}}
                     <div class="col-lg-7 mb-4">
                         <div class="card shadow">
-                            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center gap-3 flex-wrap">
                                 <h6 class="m-0 fw-bold text-primary">
                                     <i class="fas fa-users me-2"></i>Pilih Siswa
                                 </h6>
@@ -135,20 +363,27 @@
                                     </div>
                                 </div>
 
-                                {{-- Student Table --}}
-                                <div style="max-height: 500px; overflow-y: auto;">
+                                {{-- Student Table (Responsive) --}}
+                                {{-- Select All Row (Mobile) --}}
+                                <div class="select-all-row">
+                                    <input type="checkbox" id="selectAll" class="siswa-checkbox form-check-input"
+                                        onclick="toggleSelectAll()" style="margin: 0;">
+                                    <label for="selectAll" class="form-check-label">Pilih Semua Siswa</label>
+                                </div>
+
+                                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                                     <table class="table table-hover mb-0 siswa-table">
                                         <thead>
                                             <tr>
-                                                <th width="40">
+                                                <th width="40" class="text-center">
                                                     <input type="checkbox" id="selectAll" class="siswa-checkbox"
                                                         onclick="toggleSelectAll()">
                                                 </th>
-                                                <th width="50">NO</th>
+                                                <th width="50" class="text-center">NO</th>
                                                 <th class="text-start">NAMA SISWA</th>
-                                                <th>NISN</th>
-                                                <th>KELAS</th>
-                                                <th>CABANG</th>
+                                                <th class="text-center">NISN</th>
+                                                <th class="text-center">KELAS</th>
+                                                <th class="text-center">CABANG</th>
                                             </tr>
                                         </thead>
                                         <tbody id="siswaTableBody">
@@ -156,20 +391,20 @@
                                                 <tr class="siswa-row" data-cabang="{{ $siswa->cabang_id }}"
                                                     data-kelas="{{ $siswa->kelas_id }}"
                                                     data-search="{{ strtolower($siswa->nama_lengkap . ' ' . $siswa->nisn) }}">
-                                                    <td class="text-center">
+                                                    <td class="text-center" data-label="">
                                                         <input type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}"
                                                             class="siswa-checkbox" onchange="updateSelectedCount()">
                                                     </td>
-                                                    <td class="text-center">{{ $index + 1 }}</td>
-                                                    <td>
+                                                    <td class="text-center" data-label="NO">{{ $index + 1 }}</td>
+                                                    <td data-label="NAMA SISWA">
                                                         <strong>{{ $siswa->nama_lengkap }}</strong>
                                                     </td>
-                                                    <td class="text-center">{{ $siswa->nisn }}</td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" data-label="NISN">{{ $siswa->nisn }}</td>
+                                                    <td class="text-center" data-label="KELAS">
                                                         <span
                                                             class="badge bg-info">{{ $siswa->kelas->nama_kelas ?? '-' }}</span>
                                                     </td>
-                                                    <td class="text-center">
+                                                    <td class="text-center" data-label="CABANG">
                                                         <small
                                                             class="text-muted">{{ $siswa->cabang->nama_cabang ?? '-' }}</small>
                                                     </td>
@@ -366,6 +601,37 @@
             document.getElementById('previewCount').textContent = checked;
         }
 
+        // Show/hide Select All row on mobile
+        function updateSelectAllRowVisibility() {
+            const selectAllRow = document.querySelector('.select-all-row');
+            if (window.innerWidth <= 768) {
+                selectAllRow.classList.add('mobile-visible');
+            } else {
+                selectAllRow.classList.remove('mobile-visible');
+            }
+        }
+
+        // Sync Select All checkboxes
+        function syncSelectAllCheckboxes(checked) {
+            const allSelectAll = document.querySelectorAll('#selectAll');
+            allSelectAll.forEach(cb => cb.checked = checked);
+        }
+
+        // Event listeners for Select All row
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSelectAllRowVisibility();
+            
+            const selectAllCheckboxes = document.querySelectorAll('#selectAll');
+            selectAllCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    syncSelectAllCheckboxes(this.checked);
+                    toggleSelectAll();
+                });
+            });
+        });
+
+        window.addEventListener('resize', updateSelectAllRowVisibility);
+
         function submitForm() {
             const checked = document.querySelectorAll('.siswa-checkbox:checked:not(#selectAll)');
 
@@ -420,10 +686,14 @@
             // Custom SweetAlert Confirmation
             Swal.fire({
                 title: 'Konfirmasi Tagihan',
-                html: `Anda akan membuat tagihan "<strong>${jenisTagihan}</strong>"<br>
-                           dengan nominal <strong>Rp ${jumlah}</strong><br>
-                           untuk <strong>${checked.length}</strong> siswa.<br><br>
-                           <small class="text-muted">Proses ini tidak dapat dibatalkan secara otomatis.</small>`,
+                html: `<div class="text-center mt-3">
+                           <p class="mb-2">Anda akan membuat tagihan "<strong>${jenisTagihan}</strong>"</p>
+                           <p class="mb-2">dengan nominal <strong class="text-primary fs-5">Rp ${jumlah}</strong></p>
+                           <p class="mb-3">untuk <strong class="text-success">${checked.length}</strong> siswa.</p>
+                           <div class="alert alert-warning py-2 mb-0 mt-4" style="font-size: 0.85rem;">
+                               <i class="fas fa-exclamation-triangle me-1"></i> Proses ini akan langsung tersimpan.
+                           </div>
+                       </div>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: '<i class="fas fa-save me-1"></i> Ya, Simpan',

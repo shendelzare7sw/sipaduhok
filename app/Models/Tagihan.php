@@ -47,6 +47,12 @@ class Tagihan extends Model
      */
     public function updateStatusBayar()
     {
+        // Jika jumlah = 0, tandai sebagai sudah bayar (lunas)
+        if ($this->jumlah == 0) {
+            $this->update(['status' => 'sudah_bayar']);
+            return $this;
+        }
+
         // Hitung total pembayaran yang sudah disetujui
         $totalDibayar = $this->pembayaran()
             ->where('status_validasi', 'disetujui')

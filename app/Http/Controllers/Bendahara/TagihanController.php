@@ -248,6 +248,7 @@ class TagihanController extends Controller
             'allTagihan' => $allTagihan,
             'tahunAjaran' => $tahunAjaranAktif,
             'jenisTagihan' => $jenisTagihanWithExisting,
+            'standardJenisTagihan' => array_keys($this->jenisTagihan), // Pass standard keys for identification
             'allYears' => $allYears,
         ]);
     }
@@ -303,15 +304,27 @@ class TagihanController extends Controller
                     ->first();
 
                 if ($tagihan) {
+                    // PROTEKSI: Hanya lock editing jika sudah ada pembayaran dari orang tua
+                    // Rp 0 (setting admin) tetap bisa diedit untuk fleksibilitas
+                    $hasPembayaran = $tagihan->pembayaran()
+                        ->where('status_validasi', 'disetujui')
+                        ->exists();
+                    
+                    if ($hasPembayaran) {
+                        continue; // Skip editing - sudah dibayar orang tua, jaga integritas data
+                    }
+                    
                     // Update jika ada (bisa pindah tahun)
                     $tagihan->update([
                         'jumlah' => $jumlah ?? 0,
                         'tanggal_jatuh_tempo' => $jatuhTempo ?? now()->addMonth(),
                         'tahun_ajaran_id' => $targetYearId,
                     ]);
+                    // Update status based on new amount
+                    $tagihan->updateStatusBayar();
                 } else {
                     // Buat baru jika belum ada
-                    Tagihan::create([
+                    $newTagihan = Tagihan::create([
                         'siswa_id' => $siswaId,
                         'tahun_ajaran_id' => $targetYearId,
                         'jenis_tagihan' => $key,
@@ -319,6 +332,8 @@ class TagihanController extends Controller
                         'tanggal_jatuh_tempo' => $jatuhTempo ?? now()->addMonth(),
                         'status' => 'belum_bayar',
                     ]);
+                    // Update status based on amount
+                    $newTagihan->updateStatusBayar();
                 }
             }
 
@@ -464,6 +479,9 @@ class TagihanController extends Controller
 
             DB::beginTransaction();
             try {
+                $totalCreated = 0;
+                $totalSkipped = 0;
+                
                 foreach ($siswaList as $siswa) {
                     // Process default tagihan
                     foreach ($this->jenisTagihan as $key => $label) {
@@ -471,18 +489,29 @@ class TagihanController extends Controller
                         $jatuhTempo = $request->input("tanggal_jatuh_tempo.{$key}");
 
                         if ($jumlah > 0 && $jatuhTempo) {
-                            Tagihan::updateOrCreate(
-                                [
-                                    'siswa_id' => $siswa->id,
-                                    'tahun_ajaran_id' => $tahunAjaranAktif->id,
-                                    'jenis_tagihan' => $key,
-                                ],
-                                [
-                                    'jumlah' => $jumlah,
-                                    'tanggal_jatuh_tempo' => $jatuhTempo,
-                                    'status' => 'belum_bayar',
-                                ]
-                            );
+                            // CEK APAKAH SISWA SUDAH PUNYA TAGIHAN JENIS INI
+                            $existingTagihan = Tagihan::where('siswa_id', $siswa->id)
+                                ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                                ->where('jenis_tagihan', $key)
+                                ->first();
+                            
+                            if ($existingTagihan) {
+                                // Skip siswa ini untuk jenis tagihan ini
+                                $totalSkipped++;
+                                continue;
+                            }
+                            
+                            // Tidak ada duplikasi, create baru
+                            $tagihanItem = Tagihan::create([
+                                'siswa_id' => $siswa->id,
+                                'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                                'jenis_tagihan' => $key,
+                                'jumlah' => $jumlah,
+                                'tanggal_jatuh_tempo' => $jatuhTempo,
+                                'status' => 'belum_bayar',
+                            ]);
+                            $tagihanItem->updateStatusBayar();
+                            $totalCreated++;
                         }
                     }
 
@@ -499,26 +528,44 @@ class TagihanController extends Controller
                             // Create slug from jenis nama
                             $jenisSlug = str()->slug($jenisNama);
 
-                            Tagihan::updateOrCreate(
-                                [
-                                    'siswa_id' => $siswa->id,
-                                    'tahun_ajaran_id' => $tahunAjaranAktif->id,
-                                    'jenis_tagihan' => $jenisSlug,
-                                ],
-                                [
-                                    'jumlah' => $jumlahCustom,
-                                    'tanggal_jatuh_tempo' => $jatuhTempoCustom,
-                                    'status' => 'belum_bayar',
-                                    'keterangan' => $jenisNama, // Store original name in keterangan
-                                ]
-                            );
+                            // CEK APAKAH SISWA SUDAH PUNYA CUSTOM TAGIHAN INI
+                            $existingCustom = Tagihan::where('siswa_id', $siswa->id)
+                                ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                                ->where('jenis_tagihan', $jenisSlug)
+                                ->first();
+                            
+                            if ($existingCustom) {
+                                // Skip siswa ini untuk custom tagihan ini
+                                $totalSkipped++;
+                                continue;
+                            }
+                            
+                            // Tidak ada duplikasi, create baru
+                            $tagihanCustom = Tagihan::create([
+                                'siswa_id' => $siswa->id,
+                                'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                                'jenis_tagihan' => $jenisSlug,
+                                'jumlah' => $jumlahCustom,
+                                'tanggal_jatuh_tempo' => $jatuhTempoCustom,
+                                'status' => 'belum_bayar',
+                                'keterangan' => $jenisNama,
+                            ]);
+                            $tagihanCustom->updateStatusBayar();
+                            $totalCreated++;
                         }
                     }
                 }
 
                 DB::commit();
+                
+                $message = "Tagihan berhasil dibuat untuk {$totalCreated} data";
+                if ($totalSkipped > 0) {
+                    $message .= " ({$totalSkipped} data dilewati karena siswa sudah memiliki tagihan jenis tersebut)";
+                }
+                $message .= " dari {$kelasCount} kelas.";
+                
                 return redirect()->route($this->getRoutePrefix() . '.index')
-                    ->with('success', "Tagihan berhasil dibuat untuk {$siswaList->count()} siswa dari {$kelasCount} kelas.");
+                    ->with('success', $message);
             } catch (\Exception $e) {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -591,8 +638,23 @@ class TagihanController extends Controller
             DB::beginTransaction();
 
             $count = 0;
+            $skipped = 0;
             $createdTagihan = [];
+            
             foreach ($request->siswa_ids as $siswaId) {
+                // CEK APAKAH SISWA SUDAH PUNYA CUSTOM TAGIHAN JENIS INI
+                $existing = Tagihan::where('siswa_id', $siswaId)
+                    ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                    ->where('jenis_tagihan', $jenisTagihanSlug)
+                    ->first();
+                
+                if ($existing) {
+                    // Skip siswa ini, sudah punya tagihan jenis ini
+                    $skipped++;
+                    continue;
+                }
+                
+                // Tidak ada duplikasi, create baru
                 $tagihan = Tagihan::create([
                     'siswa_id' => $siswaId,
                     'tahun_ajaran_id' => $tahunAjaranAktif->id,
@@ -602,6 +664,8 @@ class TagihanController extends Controller
                     'status' => 'belum_bayar',
                     'keterangan' => $request->keterangan ?: $request->jenis_tagihan,
                 ]);
+                // Update status based on amount
+                $tagihan->updateStatusBayar();
                 $createdTagihan[] = $tagihan;
                 $count++;
             }
@@ -614,8 +678,14 @@ class TagihanController extends Controller
                 app(\App\Services\NotificationService::class)->notifyTagihanBaru($tagihan);
             }
 
+            $message = "Tagihan custom berhasil ditambahkan untuk {$count} siswa";
+            if ($skipped > 0) {
+                $message .= " ({$skipped} siswa dilewati karena sudah memiliki tagihan '{$request->jenis_tagihan}')";
+            }
+            $message .= ".";
+            
             return redirect()->route($this->getRoutePrefix() . '.index')
-                ->with('success', "Tagihan custom berhasil ditambahkan untuk {$count} siswa.");
+                ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menambahkan tagihan: ' . $e->getMessage());
@@ -629,20 +699,47 @@ class TagihanController extends Controller
     public function destroyItem($tagihanId)
     {
         try {
+            // $tagihan is automatically injected via route model binding if correctly configured,
+            // but we fetch it manually to avoid "Attempt to read property status on string" error
             $tagihan = Tagihan::findOrFail($tagihanId);
-
-            // Cek apakah sudah ada pembayaran
-            if ($tagihan->status === 'sudah_bayar' || $tagihan->status === 'cicilan') {
-                return redirect()->back()->with('error', 'Tagihan yang sudah memiliki pembayaran tidak dapat dihapus.');
+            
+            // PROTEKSI: Hanya lock deletion jika sudah ada pembayaran dari orang tua
+            // Rp 0 (setting admin) tetap bisa dihapus
+            $hasPembayaran = $tagihan->pembayaran()
+                ->where('status_validasi', 'disetujui')
+                ->exists();
+            
+            if ($hasPembayaran) {
+                $message = 'Tagihan yang sudah dibayar oleh orang tua tidak dapat dihapus untuk menjaga integritas data transaksi.';
+                
+                // Return JSON for AJAX requests
+                if (request()->expectsJson()) {
+                    return response()->json(['error' => $message], 403);
+                }
+                
+                return redirect()->back()->with('error', $message);
             }
 
             $siswaId = $tagihan->siswa_id;
+            $tagihanLabel = $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan));
             $tagihan->delete();
+
+            // Return JSON for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Tagihan berhasil dihapus.']);
+            }
 
             return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
                 ->with('success', 'Tagihan berhasil dihapus.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menghapus tagihan: ' . $e->getMessage());
+            $errorMessage = 'Gagal menghapus tagihan: ' . $e->getMessage();
+            
+            // Return JSON for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json(['error' => $errorMessage], 500);
+            }
+            
+            return redirect()->back()->with('error', $errorMessage);
         }
     }
 
@@ -745,10 +842,14 @@ class TagihanController extends Controller
         DB::beginTransaction();
         try {
             $totalCreated = 0;
+            $totalSkipped = 0;
             $bulanMulai = $request->bulan_mulai;
 
             // Tentukan jumlah bulan yang akan digenerate
             $jumlahBulanGenerate = $request->tipe_spp === 'setahun' ? 12 : $request->jumlah_bulan;
+            
+            // Tentukan apakah ini operasi BULK (multiple siswa) atau INDIVIDUAL (single siswa)
+            $isBulkOperation = $siswaList->count() > 1;
 
             foreach ($siswaList as $siswa) {
                 // Generate SPP sesuai jumlah bulan
@@ -758,21 +859,51 @@ class TagihanController extends Controller
 
                     // Hitung tanggal jatuh tempo
                     $tanggalJatuhTempo = date('Y-m-d', strtotime("$tahunSPP-$bulanIndex-{$request->tanggal_jatuh_tempo}"));
+                    
+                    $sppKey = 'spp_' . strtolower($namaBulan[$bulanIndex]);
 
-                    // Buat atau update tagihan SPP
-                    $tagihan = Tagihan::updateOrCreate(
-                        [
+                    if ($isBulkOperation) {
+                        // BULK OPERATION: Skip jika sudah ada
+                        $existingSpp = Tagihan::where('siswa_id', $siswa->id)
+                            ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
+                            ->where('jenis_tagihan', $sppKey)
+                            ->first();
+                        
+                        if ($existingSpp) {
+                            $totalSkipped++;
+                            continue;
+                        }
+                        
+                        // Create new SPP
+                        $tagihan = Tagihan::create([
                             'siswa_id' => $siswa->id,
                             'tahun_ajaran_id' => $tahunAjaranAktif->id,
-                            'jenis_tagihan' => 'spp_' . strtolower($namaBulan[$bulanIndex]),
-                        ],
-                        [
+                            'jenis_tagihan' => $sppKey,
                             'jumlah' => $request->jumlah_spp,
                             'tanggal_jatuh_tempo' => $tanggalJatuhTempo,
                             'status' => 'belum_bayar',
                             'keterangan' => 'SPP ' . $namaBulan[$bulanIndex] . ' ' . $tahunSPP,
-                        ]
-                    );
+                        ]);
+                        $tagihan->updateStatusBayar();
+                    } else {
+                        // INDIVIDUAL OPERATION: Boleh timpa existing (update)
+                        $tagihan = Tagihan::firstOrNew([
+                            'siswa_id' => $siswa->id,
+                            'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                            'jenis_tagihan' => $sppKey,
+                        ]);
+
+                        $tagihan->jumlah = $request->jumlah_spp;
+                        $tagihan->tanggal_jatuh_tempo = $tanggalJatuhTempo;
+                        $tagihan->keterangan = 'SPP ' . $namaBulan[$bulanIndex] . ' ' . $tahunSPP;
+                        
+                        if (!$tagihan->exists) {
+                            $tagihan->status = 'belum_bayar'; // Hanya diset default jika memang data baru
+                        }
+                        
+                        $tagihan->save();
+                        $tagihan->updateStatusBayar();
+                    }
 
                     $totalCreated++;
                 }
@@ -780,8 +911,16 @@ class TagihanController extends Controller
 
             DB::commit();
             $tipeSppText = $request->tipe_spp === 'setahun' ? '(SPP Setahun)' : "(SPP {$jumlahBulanGenerate} Bulan)";
+            
+            // Pesan disesuaikan berdasarkan ada tidaknya skipped
+            if ($totalSkipped > 0) {
+                $successMessage = "Berhasil generate tagihan SPP {$tipeSppText}. Dibuat: $totalCreated, Dilewati: $totalSkipped (sudah ada).";
+            } else {
+                $successMessage = "Berhasil generate $totalCreated tagihan SPP {$tipeSppText} untuk {$siswaList->count()} siswa.";
+            }
+            
             return redirect()->route($this->getRoutePrefix() . '.index')
-                ->with('success', "Berhasil generate $totalCreated tagihan SPP {$tipeSppText} untuk {$siswaList->count()} siswa.");
+                ->with('success', $successMessage);
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal generate SPP: ' . $e->getMessage());
@@ -857,20 +996,23 @@ class TagihanController extends Controller
 
                 foreach ($sourceTagihan as $tagihan) {
                     if ($request->replace_existing) {
-                        // Replace existing - update or create
-                        Tagihan::updateOrCreate(
-                            [
-                                'siswa_id' => $targetSiswaId,
-                                'tahun_ajaran_id' => $tahunAjaranAktif->id,
-                                'jenis_tagihan' => $tagihan->jenis_tagihan,
-                            ],
-                            [
-                                'jumlah' => $tagihan->jumlah,
-                                'tanggal_jatuh_tempo' => $tagihan->tanggal_jatuh_tempo,
-                                'status' => 'belum_bayar',
-                                'keterangan' => $tagihan->keterangan,
-                            ]
-                        );
+                        // Replace existing - update without overriding payment status forcefully
+                        $targetTagihan = Tagihan::firstOrNew([
+                            'siswa_id' => $targetSiswaId,
+                            'tahun_ajaran_id' => $tahunAjaranAktif->id,
+                            'jenis_tagihan' => $tagihan->jenis_tagihan,
+                        ]);
+
+                        $targetTagihan->jumlah = $tagihan->jumlah;
+                        $targetTagihan->tanggal_jatuh_tempo = $tagihan->tanggal_jatuh_tempo;
+                        $targetTagihan->keterangan = $tagihan->keterangan;
+                        
+                        if (!$targetTagihan->exists) {
+                            $targetTagihan->status = 'belum_bayar';
+                        }
+                        
+                        $targetTagihan->save();
+                        $targetTagihan->updateStatusBayar();
                         $totalDuplicated++;
                     } else {
                         // Skip if exists - hanya create yang belum ada
