@@ -528,6 +528,7 @@ class UserController extends Controller
                 'username' => $request->parent_username,
                 'password' => Hash::make($request->parent_password),
                 'phone' => $request->parent_phone,
+                'cabang_id' => $validated['cabang_id'],
                 'role' => 'orang_tua',
                 'is_active' => true,
             ]);
@@ -716,6 +717,7 @@ class UserController extends Controller
                 'username' => $request->add_new_parent_username,
                 'password' => Hash::make($request->add_new_parent_password),
                 'phone' => $request->add_new_parent_phone,
+                'cabang_id' => $siswa->cabang_id,
                 'role' => 'orang_tua',
                 'is_active' => true,
             ]);
@@ -894,6 +896,7 @@ class UserController extends Controller
             'email' => $validated['email'] ?? null,
             'personal_email' => $validated['personal_email'] ?? null,
             'phone' => $validated['phone'] ?? null,
+            'cabang_id' => 1,
             'role' => 'orang_tua',
             'is_active' => true,
         ]);

@@ -284,6 +284,7 @@ class ManajemenSiswaController extends Controller
             'username' => $validated['new_parent_username'],
             'email' => $validated['new_parent_email'],
             'password' => bcrypt($validated['new_parent_password']),
+            'cabang_id' => $siswa->cabang_id,
             'is_active' => true,
         ];
 

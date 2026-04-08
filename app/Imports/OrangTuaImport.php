@@ -54,6 +54,17 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
 
             DB::beginTransaction();
             try {
+                // Get cabang_id from first siswa if available
+                $cabangId = 1; // default
+                if (!empty($row['nis_anak'])) {
+                    $nisArray = explode(',', $row['nis_anak']);
+                    $firstNis = trim($nisArray[0]);
+                    $firstSiswa = Siswa::where('nis', $firstNis)->first();
+                    if ($firstSiswa) {
+                        $cabangId = $firstSiswa->cabang_id;
+                    }
+                }
+
                 // Create user account
                 $user = User::create([
                     'name' => $row['nama'],
@@ -61,6 +72,7 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
                     'username' => $username,
                     'password' => Hash::make('password'),
                     'phone' => $row['telepon'] ?? null,
+                    'cabang_id' => $cabangId,
                     'role' => 'orang_tua',
                     'is_active' => true,
                 ]);
