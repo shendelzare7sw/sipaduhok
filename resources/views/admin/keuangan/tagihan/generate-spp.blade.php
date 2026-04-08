@@ -64,65 +64,162 @@
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
 
-        /* Mobile Responsive Styles */
+        /* ===== Radio Card Selector Styles ===== */
+        .radio-card-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .radio-card-group .radio-card {
+            position: relative;
+            flex: 1 1 0;
+            min-width: 130px;
+        }
+
+        .radio-card-group .radio-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-card-group .radio-card .radio-card-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+            user-select: none;
+        }
+
+        .radio-card-group .radio-card .radio-card-label:hover {
+            border-color: #a0b4f0;
+            background: #f8faff;
+        }
+
+        .radio-card-group .radio-card input[type="radio"]:checked + .radio-card-label {
+            border-color: #4e73df;
+            background: #eef2ff;
+            box-shadow: 0 0 0 1px #4e73df;
+        }
+
+        .radio-card-group .radio-card .radio-card-indicator {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .radio-card-group .radio-card input[type="radio"]:checked + .radio-card-label .radio-card-indicator {
+            border-color: #4e73df;
+            background: #4e73df;
+        }
+
+        .radio-card-group .radio-card input[type="radio"]:checked + .radio-card-label .radio-card-indicator::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .radio-card-group .radio-card .radio-card-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .radio-card-group .radio-card .radio-card-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.3;
+        }
+
+        .radio-card-group .radio-card .radio-card-desc {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        .radio-card-group .radio-card input[type="radio"]:checked + .radio-card-label .radio-card-title {
+            color: #4e73df;
+        }
+
+        /* SPP Type specific (success color) */
+        .radio-card-group.spp-type-group .radio-card input[type="radio"]:checked + .radio-card-label {
+            border-color: #28a745;
+            background: #f0fdf4;
+            box-shadow: 0 0 0 1px #28a745;
+        }
+
+        .radio-card-group.spp-type-group .radio-card input[type="radio"]:checked + .radio-card-label .radio-card-indicator {
+            border-color: #28a745;
+            background: #28a745;
+        }
+
+        .radio-card-group.spp-type-group .radio-card input[type="radio"]:checked + .radio-card-label .radio-card-title {
+            color: #28a745;
+        }
+
+        .radio-card-group.spp-type-group .radio-card .radio-card-label:hover {
+            border-color: #81c995;
+            background: #f8fdf9;
+        }
+
+        /* ===== Mobile Responsive Styles ===== */
         @media (max-width: 992px) {
-            .row {
+            .generate-spp-page .row {
                 flex-direction: column;
             }
 
-            .col-lg-7,
-            .col-lg-5 {
+            .generate-spp-page .col-lg-7,
+            .generate-spp-page .col-lg-5 {
                 width: 100%;
                 max-width: 100%;
             }
         }
 
         @media (max-width: 768px) {
-            /* Card Headers Responsive */
-            .card-header {
-                flex-wrap: wrap !important;
-            }
-
-            .card-header > div {
-                width: 100%;
-                display: flex !important;
-                flex-direction: column;
-                justify-content: space-between;
-                align-items: flex-start;
+            /* Target Card Header */
+            .target-card-header {
+                flex-direction: column !important;
+                align-items: stretch !important;
                 gap: 12px;
             }
 
-            .card-header .d-flex {
+            .target-card-header h6 {
+                margin-bottom: 4px !important;
+            }
+
+            .radio-card-group {
                 width: 100%;
-                flex-direction: column !important;
-                gap: 12px !important;
-                align-items: flex-start;
             }
 
-            .card-header h6 {
-                width: 100%;
-                margin-bottom: 8px !important;
+            .radio-card-group .radio-card {
+                min-width: 0;
             }
 
-            /* Tab/Radio buttons responsive */
-            .d-flex.gap-3.flex-wrap {
-                flex-direction: column !important;
-                align-items: flex-start;
+            .radio-card-group .radio-card .radio-card-label {
+                padding: 10px 14px;
             }
 
-            .form-check {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                padding: 10px 0;
+            .radio-card-group .radio-card .radio-card-title {
+                font-size: 13px;
             }
 
-            .form-check-label {
-                margin-bottom: 0 !important;
-                margin-left: 8px;
-                font-weight: 500;
-                cursor: pointer;
-                user-select: none;
+            .radio-card-group .radio-card .radio-card-desc {
+                font-size: 11px;
             }
 
             /* Filter Section Mobile */
@@ -134,7 +231,7 @@
                 flex-direction: column !important;
             }
 
-            .filter-section .col-md-4 {
+            .filter-section .col-md-3 {
                 width: 100% !important;
                 max-width: 100%;
             }
@@ -247,101 +344,70 @@
             }
 
             /* Counter Section Mobile */
-            .border-bottom.d-flex {
+            .spp-counter-section {
                 flex-direction: column !important;
                 align-items: stretch !important;
                 gap: 8px;
             }
 
-            .border-bottom.d-flex span:first-child {
+            .spp-counter-section span:first-child {
                 font-size: 12px;
             }
 
             /* Action Buttons Mobile */
-            .d-flex.gap-2 {
+            .spp-action-buttons {
                 flex-wrap: wrap;
             }
 
-            .d-flex.gap-2 .btn {
+            .spp-action-buttons .btn {
                 flex: 1 1 auto;
                 min-width: 120px;
                 font-size: 13px;
                 padding: 8px 12px;
             }
 
-            /* Form Controls Mobile */
-            .form-check {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                width: 100%;
-                text-align: left;
-                padding: 8px 0;
-            }
-
-            .form-check-label {
-                margin-bottom: 0;
-                margin-left: 8px;
-            }
-
-            .form-check-label div {
-                font-size: 11px;
-            }
-
             /* Form Labels and Inputs */
-            .form-label {
+            .generate-spp-page .form-label {
                 font-size: 14px !important;
                 margin-bottom: 8px !important;
             }
 
-            .form-select,
-            .form-control {
+            .generate-spp-page .form-select,
+            .generate-spp-page .form-control {
                 font-size: 14px;
                 padding: 8px 10px;
             }
 
-            .input-group {
+            .generate-spp-page .input-group {
                 width: 100%;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
             }
 
-            .input-group-text {
+            .generate-spp-page .input-group-text {
                 flex-shrink: 0;
             }
 
             /* Alert Responsive */
-            .alert {
+            .generate-spp-page .alert {
                 font-size: 13px;
             }
 
-            .alert ul li {
+            .generate-spp-page .alert ul li {
                 margin-bottom: 4px;
             }
 
-            /* Button Group */
-            .d-flex.gap-2 {
-                flex-wrap: wrap;
-            }
-
-            .d-flex.gap-2 .btn {
-                flex: 1 1 auto;
-                min-width: 120px;
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-
             /* Info Box Mobile */
-            .alert-warning {
+            .generate-spp-page .alert-warning {
                 padding: 12px;
                 margin-bottom: 12px;
             }
 
-            .alert-warning ul {
+            .generate-spp-page .alert-warning ul {
                 padding-left: 18px;
                 margin: 8px 0 0 0;
             }
 
-            .alert-warning li {
+            .generate-spp-page .alert-warning li {
                 padding: 4px 0;
             }
 
@@ -351,7 +417,7 @@
                 padding: 8px !important;
             }
 
-            .form-check {
+            .kelas-checkbox-item {
                 margin-bottom: 10px;
             }
 
@@ -378,7 +444,7 @@
                 margin-right: 0.5rem;
             }
 
-            .d-flex.gap-2 .btn {
+            .spp-action-buttons .btn {
                 min-width: 100px;
                 font-size: 12px;
                 padding: 7px 10px;
@@ -389,15 +455,30 @@
                 padding: 4px 8px !important;
             }
 
-            .card-header h6 {
-                font-size: 14px;
+            .radio-card-group .radio-card .radio-card-label {
+                padding: 8px 12px;
+                gap: 8px;
+            }
+
+            .radio-card-group .radio-card .radio-card-title {
+                font-size: 12px;
+            }
+
+            .radio-card-group .radio-card .radio-card-desc {
+                font-size: 10px;
+            }
+
+            .radio-card-group .radio-card .radio-card-indicator {
+                width: 18px;
+                height: 18px;
+                min-width: 18px;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+    <div class="generate-spp-page" style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
         <div class="container-fluid px-0">
 
             {{-- Breadcrumb --}}
@@ -427,20 +508,30 @@
                     <div class="col-lg-7 mb-4">
                         <div class="card shadow">
                             <div class="card-header py-3 bg-white">
-                                <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                                    <h6 class="m-0 fw-bold text-primary">
+                                <div class="d-flex justify-content-between align-items-center gap-3 target-card-header">
+                                    <h6 class="m-0 fw-bold text-primary" style="white-space: nowrap;">
                                         <i class="fas fa-users me-2"></i>Pilih Target
                                     </h6>
-                                    <div class="d-flex gap-3 flex-wrap">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="target_type" id="target_kelas"
+                                    <div class="radio-card-group">
+                                        <div class="radio-card">
+                                            <input type="radio" name="target_type" id="target_kelas"
                                                 value="kelas" checked onchange="toggleTargetType()">
-                                            <label class="form-check-label fw-bold" for="target_kelas">Per Kelas</label>
+                                            <label class="radio-card-label" for="target_kelas">
+                                                <span class="radio-card-indicator"></span>
+                                                <span class="radio-card-text">
+                                                    <span class="radio-card-title">Per Kelas</span>
+                                                </span>
+                                            </label>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="target_type" id="target_siswa"
+                                        <div class="radio-card">
+                                            <input type="radio" name="target_type" id="target_siswa"
                                                 value="siswa" onchange="toggleTargetType()">
-                                            <label class="form-check-label fw-bold" for="target_siswa">Pilih Siswa</label>
+                                            <label class="radio-card-label" for="target_siswa">
+                                                <span class="radio-card-indicator"></span>
+                                                <span class="radio-card-text">
+                                                    <span class="radio-card-title">Pilih Siswa</span>
+                                                </span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -511,27 +602,42 @@
                                 {{-- Siswa Selection (Hidden by default) --}}
                                 <div id="siswaSelection" style="display: none;">
                                     {{-- Filter --}}
-                                    <div class="p-3 bg-light border-bottom">
+                                    <div class="p-3 bg-light border-bottom filter-section">
                                         <div class="row g-2">
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-bold mb-1">Cabang <span class="text-danger">*</span></label>
                                                 <select id="filterCabang" class="form-select form-select-sm">
-                                                    <option value="">Semua Cabang</option>
+                                                    <option value="">-- Pilih Cabang --</option>
                                                     @foreach($kelasList->pluck('cabang')->unique('id')->filter() as $cabang)
                                                         <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
-                                                <select id="filterKelas" class="form-select form-select-sm">
-                                                    <option value="">Semua Kelas</option>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-bold mb-1">Jenjang</label>
+                                                <select id="filterJenjang" class="form-select form-select-sm" disabled>
+                                                    <option value="">-- Pilih Jenjang --</option>
+                                                    @php
+                                                        $jenjangSiswaList = $kelasList->pluck('jenjang')->unique()->sort();
+                                                    @endphp
+                                                    @foreach($jenjangSiswaList as $jenjang)
+                                                        <option value="{{ $jenjang }}">{{ $jenjang }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-bold mb-1">Kelas</label>
+                                                <select id="filterKelas" class="form-select form-select-sm" disabled>
+                                                    <option value="">-- Pilih Kelas --</option>
                                                     @foreach($kelasList as $kelas)
-                                                        <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}">
+                                                        <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}" data-jenjang="{{ $kelas->jenjang }}">
                                                             {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-bold mb-1">Cari Siswa</label>
                                                 <input type="text" id="searchSiswa" class="form-control form-control-sm"
                                                     placeholder="Cari nama/NISN...">
                                             </div>
@@ -540,7 +646,7 @@
 
                                     {{-- Student Counter --}}
                                     <div
-                                        class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center gap-2">
+                                        class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center gap-2 spp-counter-section">
                                         <span class="text-muted small">Centang siswa untuk generate SPP</span>
                                         <span class="badge bg-success selected-count-badge" id="selectedCount">0 siswa
                                             dipilih</span>
@@ -573,6 +679,7 @@
                                                 @foreach($siswaList as $index => $siswa)
                                                     <tr class="siswa-row" data-cabang="{{ $siswa->cabang_id }}"
                                                         data-kelas="{{ $siswa->kelas_id }}"
+                                                        data-jenjang="{{ $siswa->kelas->jenjang ?? '' }}"
                                                         data-search="{{ strtolower($siswa->nama_lengkap . ' ' . $siswa->nisn) }}">
                                                         <td class="text-center" data-label="">
                                                             <input type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}"
@@ -621,22 +728,28 @@
                                     <label class="form-label fw-bold mb-3">
                                         Tipe Generate SPP <span class="text-danger">*</span>
                                     </label>
-                                    <div class="d-flex gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="tipe_spp" id="spp_setahun"
+                                    <div class="radio-card-group spp-type-group">
+                                        <div class="radio-card">
+                                            <input type="radio" name="tipe_spp" id="spp_setahun"
                                                 value="setahun" checked onchange="toggleTipeSpp()">
-                                            <label class="form-check-label fw-bold" for="spp_setahun">
-                                                <i class="fas fa-calendar-check text-success me-1"></i>SPP Setahun
+                                            <label class="radio-card-label" for="spp_setahun">
+                                                <span class="radio-card-indicator"></span>
+                                                <span class="radio-card-text">
+                                                    <span class="radio-card-title"><i class="fas fa-calendar-check text-success me-1"></i>SPP Setahun</span>
+                                                    <span class="radio-card-desc">Generate 12 bulan SPP</span>
+                                                </span>
                                             </label>
-                                            <div><small class="text-muted">Generate 12 bulan SPP</small></div>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="tipe_spp" id="spp_sebagian"
+                                        <div class="radio-card">
+                                            <input type="radio" name="tipe_spp" id="spp_sebagian"
                                                 value="sebagian" onchange="toggleTipeSpp()">
-                                            <label class="form-check-label fw-bold" for="spp_sebagian">
-                                                <i class="fas fa-calendar-alt text-warning me-1"></i>SPP Sebagian
+                                            <label class="radio-card-label" for="spp_sebagian">
+                                                <span class="radio-card-indicator"></span>
+                                                <span class="radio-card-text">
+                                                    <span class="radio-card-title"><i class="fas fa-calendar-alt text-warning me-1"></i>SPP Sebagian</span>
+                                                    <span class="radio-card-desc">Untuk siswa baru</span>
+                                                </span>
                                             </label>
-                                            <div><small class="text-muted">Untuk siswa baru</small></div>
                                         </div>
                                     </div>
                                 </div>
@@ -720,7 +833,7 @@
                                 </div>
 
                                 {{-- Action Buttons --}}
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 spp-action-buttons">
                                     <a href="{{ route('admin.keuangan.tagihan.index') }}" class="btn btn-secondary flex-fill">
                                         <i class="fas fa-times me-1"></i> Batal
                                     </a>
@@ -750,12 +863,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const filterCabang = document.getElementById('filterCabang');
+            const filterJenjang = document.getElementById('filterJenjang');
             const filterKelas = document.getElementById('filterKelas');
             const searchInput = document.getElementById('searchSiswa');
 
-            // Filter function
+            // Filter function - applies all active filters to siswa rows
             function filterSiswa() {
                 const cabangId = filterCabang.value;
+                const jenjangVal = filterJenjang.value;
                 const kelasId = filterKelas.value;
                 const searchTerm = searchInput.value.toLowerCase();
                 const rows = document.querySelectorAll('.siswa-row');
@@ -763,11 +878,13 @@
                 rows.forEach(row => {
                     const rowCabang = row.getAttribute('data-cabang');
                     const rowKelas = row.getAttribute('data-kelas');
+                    const rowJenjang = row.getAttribute('data-jenjang');
                     const rowSearch = row.getAttribute('data-search');
 
                     let show = true;
 
                     if (cabangId && rowCabang !== cabangId) show = false;
+                    if (jenjangVal && rowJenjang !== jenjangVal) show = false;
                     if (kelasId && rowKelas !== kelasId) show = false;
                     if (searchTerm && !rowSearch.includes(searchTerm)) show = false;
 
@@ -775,22 +892,78 @@
                 });
             }
 
+            // Cascading: Cabang → Jenjang → Kelas
             filterCabang.addEventListener('change', function () {
                 const selectedCabang = this.value;
-                const kelasOptions = filterKelas.querySelectorAll('option');
 
-                kelasOptions.forEach(option => {
-                    if (option.value === '') {
-                        option.style.display = '';
-                        return;
-                    }
+                // Reset jenjang & kelas
+                filterJenjang.value = '';
+                filterKelas.value = '';
 
-                    const kelasCabang = option.getAttribute('data-cabang');
-                    option.style.display = (!selectedCabang || kelasCabang === selectedCabang) ? '' : 'none';
-                });
+                if (selectedCabang) {
+                    // Enable jenjang, filter its options by cabang
+                    filterJenjang.disabled = false;
+                    const kelasOptions = filterKelas.querySelectorAll('option');
+                    // Collect unique jenjang values for this cabang
+                    const availableJenjang = new Set();
+                    kelasOptions.forEach(option => {
+                        if (option.value === '') return;
+                        if (option.getAttribute('data-cabang') === selectedCabang) {
+                            availableJenjang.add(option.getAttribute('data-jenjang'));
+                        }
+                    });
 
-                if (filterKelas.selectedOptions[0]?.style.display === 'none') {
-                    filterKelas.value = '';
+                    // Show/hide jenjang options
+                    const jenjangOptions = filterJenjang.querySelectorAll('option');
+                    jenjangOptions.forEach(option => {
+                        if (option.value === '') {
+                            option.style.display = '';
+                            return;
+                        }
+                        option.style.display = availableJenjang.has(option.value) ? '' : 'none';
+                    });
+
+                    // Disable kelas until jenjang picked (or show all kelas for cabang)
+                    filterKelas.disabled = false;
+                    kelasOptions.forEach(option => {
+                        if (option.value === '') {
+                            option.style.display = '';
+                            return;
+                        }
+                        const kelasCabang = option.getAttribute('data-cabang');
+                        option.style.display = (kelasCabang === selectedCabang) ? '' : 'none';
+                    });
+                } else {
+                    // Disable jenjang & kelas
+                    filterJenjang.disabled = true;
+                    filterKelas.disabled = true;
+                }
+
+                filterSiswa();
+            });
+
+            // Jenjang change → filter kelas options
+            filterJenjang.addEventListener('change', function () {
+                const selectedCabang = filterCabang.value;
+                const selectedJenjang = this.value;
+
+                // Reset kelas
+                filterKelas.value = '';
+
+                if (selectedCabang) {
+                    filterKelas.disabled = false;
+                    const kelasOptions = filterKelas.querySelectorAll('option');
+                    kelasOptions.forEach(option => {
+                        if (option.value === '') {
+                            option.style.display = '';
+                            return;
+                        }
+                        const kelasCabang = option.getAttribute('data-cabang');
+                        const kelasJenjang = option.getAttribute('data-jenjang');
+                        let show = kelasCabang === selectedCabang;
+                        if (selectedJenjang) show = show && kelasJenjang === selectedJenjang;
+                        option.style.display = show ? '' : 'none';
+                    });
                 }
 
                 filterSiswa();
@@ -798,8 +971,6 @@
 
             filterKelas.addEventListener('change', filterSiswa);
             searchInput.addEventListener('input', filterSiswa);
-
-            // Confirm button handler (removed as we use inline onClick/Swal callback)
         });
 
         function toggleTargetType() {

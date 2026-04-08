@@ -106,7 +106,7 @@
                 flex-direction: column !important;
             }
 
-            .filter-section .col-md-4 {
+            .filter-section .col-md-3 {
                 width: 100% !important;
                 max-width: 100%;
             }
@@ -338,25 +338,40 @@
                                 {{-- Filter Section --}}
                                 <div class="p-3 bg-light border-bottom filter-section">
                                     <div class="row g-2">
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold mb-1">Cabang <span class="text-danger">*</span></label>
                                             <select id="filterCabang" class="form-select form-select-sm">
-                                                <option value="">Semua Cabang</option>
+                                                <option value="">-- Pilih Cabang --</option>
                                                 @foreach($cabangList as $cabang)
                                                     <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
-                                            <select id="filterKelas" class="form-select form-select-sm">
-                                                <option value="">Semua Kelas</option>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold mb-1">Jenjang</label>
+                                            <select id="filterJenjang" class="form-select form-select-sm" disabled>
+                                                <option value="">-- Pilih Jenjang --</option>
+                                                @php
+                                                    $jenjangCustomList = $kelasList->pluck('jenjang')->unique()->sort();
+                                                @endphp
+                                                @foreach($jenjangCustomList as $jenjang)
+                                                    <option value="{{ $jenjang }}">{{ $jenjang }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold mb-1">Kelas</label>
+                                            <select id="filterKelas" class="form-select form-select-sm" disabled>
+                                                <option value="">-- Pilih Kelas --</option>
                                                 @foreach($kelasList as $kelas)
-                                                    <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}">
+                                                    <option value="{{ $kelas->id }}" data-cabang="{{ $kelas->cabang_id }}" data-jenjang="{{ $kelas->jenjang }}">
                                                         {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }})
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold mb-1">Cari Siswa</label>
                                             <input type="text" id="searchSiswa" class="form-control form-control-sm"
                                                 placeholder="Cari nama/NISN...">
                                         </div>
@@ -390,6 +405,7 @@
                                             @foreach($siswaList as $index => $siswa)
                                                 <tr class="siswa-row" data-cabang="{{ $siswa->cabang_id }}"
                                                     data-kelas="{{ $siswa->kelas_id }}"
+                                                    data-jenjang="{{ $siswa->kelas->jenjang ?? '' }}"
                                                     data-search="{{ strtolower($siswa->nama_lengkap . ' ' . $siswa->nisn) }}">
                                                     <td class="text-center" data-label="">
                                                         <input type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}"
@@ -534,12 +550,14 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const filterCabang = document.getElementById('filterCabang');
+            const filterJenjang = document.getElementById('filterJenjang');
             const filterKelas = document.getElementById('filterKelas');
             const searchInput = document.getElementById('searchSiswa');
 
-            // Filter function
+            // Filter function - applies all active filters to siswa rows
             function filterSiswa() {
                 const cabangId = filterCabang.value;
+                const jenjangVal = filterJenjang.value;
                 const kelasId = filterKelas.value;
                 const searchTerm = searchInput.value.toLowerCase();
                 const rows = document.querySelectorAll('.siswa-row');
@@ -547,11 +565,13 @@
                 rows.forEach(row => {
                     const rowCabang = row.getAttribute('data-cabang');
                     const rowKelas = row.getAttribute('data-kelas');
+                    const rowJenjang = row.getAttribute('data-jenjang');
                     const rowSearch = row.getAttribute('data-search');
 
                     let show = true;
 
                     if (cabangId && rowCabang !== cabangId) show = false;
+                    if (jenjangVal && rowJenjang !== jenjangVal) show = false;
                     if (kelasId && rowKelas !== kelasId) show = false;
                     if (searchTerm && !rowSearch.includes(searchTerm)) show = false;
 
@@ -559,23 +579,78 @@
                 });
             }
 
-            // Filter kelas based on cabang
+            // Cascading: Cabang → Jenjang → Kelas
             filterCabang.addEventListener('change', function () {
                 const selectedCabang = this.value;
-                const kelasOptions = filterKelas.querySelectorAll('option');
 
-                kelasOptions.forEach(option => {
-                    if (option.value === '') {
-                        option.style.display = '';
-                        return;
-                    }
+                // Reset jenjang & kelas
+                filterJenjang.value = '';
+                filterKelas.value = '';
 
-                    const kelasCabang = option.getAttribute('data-cabang');
-                    option.style.display = (!selectedCabang || kelasCabang === selectedCabang) ? '' : 'none';
-                });
+                if (selectedCabang) {
+                    // Enable jenjang, filter its options by cabang
+                    filterJenjang.disabled = false;
+                    const kelasOptions = filterKelas.querySelectorAll('option');
+                    // Collect unique jenjang values for this cabang
+                    const availableJenjang = new Set();
+                    kelasOptions.forEach(option => {
+                        if (option.value === '') return;
+                        if (option.getAttribute('data-cabang') === selectedCabang) {
+                            availableJenjang.add(option.getAttribute('data-jenjang'));
+                        }
+                    });
 
-                if (filterKelas.selectedOptions[0]?.style.display === 'none') {
-                    filterKelas.value = '';
+                    // Show/hide jenjang options
+                    const jenjangOptions = filterJenjang.querySelectorAll('option');
+                    jenjangOptions.forEach(option => {
+                        if (option.value === '') {
+                            option.style.display = '';
+                            return;
+                        }
+                        option.style.display = availableJenjang.has(option.value) ? '' : 'none';
+                    });
+
+                    // Show all kelas for this cabang
+                    filterKelas.disabled = false;
+                    kelasOptions.forEach(option => {
+                        if (option.value === '') {
+                            option.style.display = '';
+                            return;
+                        }
+                        const kelasCabang = option.getAttribute('data-cabang');
+                        option.style.display = (kelasCabang === selectedCabang) ? '' : 'none';
+                    });
+                } else {
+                    // Disable jenjang & kelas
+                    filterJenjang.disabled = true;
+                    filterKelas.disabled = true;
+                }
+
+                filterSiswa();
+            });
+
+            // Jenjang change → filter kelas options
+            filterJenjang.addEventListener('change', function () {
+                const selectedCabang = filterCabang.value;
+                const selectedJenjang = this.value;
+
+                // Reset kelas
+                filterKelas.value = '';
+
+                if (selectedCabang) {
+                    filterKelas.disabled = false;
+                    const kelasOptions = filterKelas.querySelectorAll('option');
+                    kelasOptions.forEach(option => {
+                        if (option.value === '') {
+                            option.style.display = '';
+                            return;
+                        }
+                        const kelasCabang = option.getAttribute('data-cabang');
+                        const kelasJenjang = option.getAttribute('data-jenjang');
+                        let show = kelasCabang === selectedCabang;
+                        if (selectedJenjang) show = show && kelasJenjang === selectedJenjang;
+                        option.style.display = show ? '' : 'none';
+                    });
                 }
 
                 filterSiswa();
@@ -583,8 +658,6 @@
 
             filterKelas.addEventListener('change', filterSiswa);
             searchInput.addEventListener('input', filterSiswa);
-
-            // Confirm button handler (Removed - specific logic moved to SwAl callback)
         });
 
         function toggleSelectAll() {
