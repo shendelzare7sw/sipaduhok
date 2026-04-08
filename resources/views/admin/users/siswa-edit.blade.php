@@ -458,11 +458,11 @@
                 Informasi Akademik
             </h5>
 
-            <div class="row">
-                <div class="col">
+            <div class="row" style="flex-direction: column; gap: 16px;">
+                <div>
                     <div class="form-group">
                         <label class="form-label">Cabang <span style="color: #ef4444;">*</span></label>
-                        <select name="cabang_id" id="cabangSelectEdit" class="form-control" required onchange="loadKelasOptionsEdit()">
+                        <select name="cabang_id" id="cabangSelectEdit" class="form-control" required>
                             <option value="">-- Pilih Cabang --</option>
                             @foreach($cabangList as $cabang)
                                 <option value="{{ $cabang->id }}" {{ old('cabang_id', $siswa->cabang_id) == $cabang->id ? 'selected' : '' }}>
@@ -475,12 +475,33 @@
                         @enderror
                     </div>
                 </div>
-                <div class="col" id="kelasWrapperEdit">
+
+                <div>
                     <div class="form-group">
                         <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>
-                        <select name="kelas_id" id="kelasSelectEdit" class="form-control" required>
+                        
+                        {{-- Hidden Select for Form Submission --}}
+                        <select name="kelas_id" id="kelasSelectEdit" class="d-none" required>
                             <option value="">-- Pilih Kelas --</option>
+                            @foreach($kelasList as $kls)
+                                <option value="{{ $kls->id }}" 
+                                    data-jenjang="{{ $kls->jenjang }}" 
+                                    data-cabang-id="{{ $kls->cabang_id }}"
+                                    {{ old('kelas_id', $siswa->kelas_id) == $kls->id ? 'selected' : '' }}>
+                                    {{ $kls->nama_kelas }}
+                                </option>
+                            @endforeach
                         </select>
+
+                        {{-- Trigger Box --}}
+                        <div class="kelas-display-edit" onclick="openKelasModalEdit()"
+                             style="cursor: pointer; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: white; min-height: 50px; transition: all 0.2s;">
+                            <div id="selectedKelasTextEdit" class="text-muted" style="font-style: italic;">
+                                <i class="fas fa-school me-2"></i> Klik untuk memilih kelas...
+                            </div>
+                            <div id="selectedKelasChipsEdit" class="d-flex flex-wrap gap-2 mt-1" style="display: none !important;">
+                            </div>
+                        </div>
                         @error('kelas_id')
                             <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
                         @enderror
@@ -880,48 +901,100 @@
         </div>
 
         <script>
-            // Kelas data grouped by cabang_id (for dynamic filtering)
-            const allKelasDataEdit = @json($kelasList->groupBy('cabang_id'));
-            const currentKelasId = @json(old('kelas_id', $siswa->kelas_id));
-            const currentCabangId = @json(old('cabang_id', $siswa->cabang_id));
+            // Kelas Modal Picker for Edit Form
+            const currentKelasEdit = @json(old('kelas_id', $siswa->kelas_id));
+            const allKelasList = @json($kelasList);
 
-            function loadKelasOptionsEdit() {
-                const cabangId = document.getElementById('cabangSelectEdit').value;
-                const kelasWrapper = document.getElementById('kelasWrapperEdit');
+            // Open Kelas Modal for Edit
+            function openKelasModalEdit() {
                 const kelasSelect = document.getElementById('kelasSelectEdit');
+                const selectedValue = kelasSelect.value;
 
-                // Clear existing options
-                kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                // Reset checkboxes
+                document.querySelectorAll('.kelas-checkbox-edit').forEach(cb => {
+                    cb.checked = (cb.value === selectedValue) && selectedValue !== '';
+                });
 
-                if (!cabangId) {
-                    kelasWrapper.style.display = 'none';
-                    return;
-                }
-
-                const kelasList = allKelasDataEdit[cabangId] || [];
-
-                if (kelasList.length === 0) {
-                    kelasSelect.innerHTML = '<option value="">-- Tidak ada kelas tersedia --</option>';
-                } else {
-                    kelasList.forEach(function(kelas) {
-                        const option = document.createElement('option');
-                        option.value = kelas.id;
-                        option.textContent = kelas.nama_kelas + ' (' + kelas.jenjang + ')';
-                        // Select current kelas only if it belongs to the selected cabang
-                        if (currentKelasId && kelas.id == currentKelasId && kelas.cabang_id == cabangId) {
-                            option.selected = true;
-                        }
-                        kelasSelect.appendChild(option);
-                    });
-                }
-
-                kelasWrapper.style.display = 'block';
+                updateTempSelectionEdit();
+                const modal = new bootstrap.Modal(document.getElementById('kelasModalEdit'));
+                modal.show();
             }
 
-            // On page load: populate kelas based on current cabang
+            // Update temp selection display
+            function updateTempSelectionEdit() {
+                // Just for consistency - radio buttons are single selection
+            }
+
+            // Filter Kelas List for Edit
+            function filterKelasListEdit() {
+                const cabangFilter = document.getElementById('filterCabangEdit').value || document.getElementById('cabangSelectEdit').value;
+                const jenjangFilter = document.getElementById('filterJenjangEdit').value;
+                const searchText = document.getElementById('searchKelasEdit').value.toLowerCase();
+
+                document.querySelectorAll('.kelas-item-edit').forEach(item => {
+                    const itemCabang = item.getAttribute('data-cabang-id');
+                    const itemJenjang = item.getAttribute('data-jenjang');
+                    const itemName = item.getAttribute('data-name');
+
+                    let visible = true;
+                    if (cabangFilter && itemCabang !== cabangFilter) visible = false;
+                    if (jenjangFilter && itemJenjang !== jenjangFilter) visible = false;
+                    if (searchText && !itemName.toLowerCase().includes(searchText)) visible = false;
+
+                    item.style.display = visible ? 'block' : 'none';
+                });
+            }
+
+            // Confirm Kelas Selection for Edit
+            function confirmKelasSelectionEdit() {
+                const checkbox = document.querySelector('.kelas-checkbox-edit:checked');
+                const select = document.getElementById('kelasSelectEdit');
+
+                if (checkbox) {
+                    select.value = checkbox.value;
+                    updateSelectedKelasUIEdit([{
+                        id: checkbox.value,
+                        name: checkbox.getAttribute('data-name'),
+                        jenjang: checkbox.getAttribute('data-jenjang')
+                    }]);
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('kelasModalEdit')).hide();
+            }
+
+            // Update UI with selected kelas chips for Edit
+            function updateSelectedKelasUIEdit(data) {
+                const textPlaceholder = document.getElementById('selectedKelasTextEdit');
+                const chipsContainer = document.getElementById('selectedKelasChipsEdit');
+
+                if (data.length === 0) {
+                    textPlaceholder.style.display = 'block';
+                    chipsContainer.innerHTML = '';
+                    chipsContainer.style.display = 'none';
+                } else {
+                    textPlaceholder.style.display = 'none';
+                    chipsContainer.innerHTML = data.map(item => `
+                        <span class="badge bg-purple" style="font-size: 12px; padding: 6px 12px;">
+                            <i class="fas fa-check me-1"></i>
+                            ${item.name}
+                            <small style="margin-left: 4px; opacity: 0.8;">(${item.jenjang})</small>
+                        </span>
+                    `).join('');
+                    chipsContainer.style.display = 'flex';
+                }
+            }
+
+            // Initialize kelas display on page load for Edit
             document.addEventListener('DOMContentLoaded', function() {
-                if (currentCabangId) {
-                    loadKelasOptionsEdit();
+                if (currentKelasEdit) {
+                    const selectedKelas = allKelasList.find(k => k.id == currentKelasEdit);
+                    if (selectedKelas) {
+                        updateSelectedKelasUIEdit([{
+                            id: selectedKelas.id,
+                            name: selectedKelas.nama_kelas,
+                            jenjang: selectedKelas.jenjang
+                        }]);
+                    }
                 }
             });
 
@@ -1084,6 +1157,75 @@
                 }
             }
         </script>
+
+        {{-- Kelas Modal for Edit --}}
+        <div class="modal fade" id="kelasModalEdit" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-school me-2"></i>Pilih Kelas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        {{-- Filter Section --}}
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label"><small>Filter Cabang</small></label>
+                                <select id="filterCabangEdit" class="form-control form-control-sm" onchange="filterKelasListEdit()">
+                                    <option value="">Semua Cabang</option>
+                                    @foreach($cabangList as $cabang)
+                                        <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><small>Filter Jenjang</small></label>
+                                <select id="filterJenjangEdit" class="form-control form-control-sm" onchange="filterKelasListEdit()">
+                                    <option value="">Semua Jenjang</option>
+                                    <option value="KB">KB</option>
+                                    <option value="TKA">TKA</option>
+                                    <option value="TKB">TKB</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP">SMP</option>
+                                    <option value="SMA">SMA</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><small>Cari Kelas</small></label>
+                                <input type="text" id="searchKelasEdit" class="form-control form-control-sm" 
+                                       placeholder="Ketik nama kelas..." oninput="filterKelasListEdit()">
+                            </div>
+                        </div>
+
+                        {{-- Kelas List --}}
+                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
+                            @foreach($kelasList as $kls)
+                                <div class="kelas-item-edit d-flex align-items-center p-2" 
+                                     data-cabang-id="{{ $kls->cabang_id }}" 
+                                     data-jenjang="{{ $kls->jenjang }}"
+                                     data-name="{{ $kls->nama_kelas }}">
+                                    <input type="radio" class="kelas-checkbox-edit" name="kelas_selected_edit" 
+                                           value="{{ $kls->id }}" 
+                                           data-name="{{ $kls->nama_kelas }}"
+                                           data-jenjang="{{ $kls->jenjang }}"
+                                           id="kelas_edit_{{ $kls->id }}">
+                                    <label class="ms-2 mb-0 flex-grow-1" for="kelas_edit_{{ $kls->id }}" style="cursor: pointer;">
+                                        <strong>{{ $kls->nama_kelas }}</strong>
+                                        <small class="text-muted d-block">{{ $kls->jenjang }}</small>
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary" onclick="confirmKelasSelectionEdit()">
+                            <i class="fas fa-check me-1"></i>Konfirmasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {{-- Hidden Fields for Other Data --}}
 

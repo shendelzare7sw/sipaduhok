@@ -365,11 +365,11 @@
                 2. Informasi Akademik
             </h5>
 
-            <div class="row">
-                <div class="col">
+            <div class="row" style="flex-direction: column; gap: 16px;">
+                <div>
                     <div class="form-group">
                         <label class="form-label">Cabang <span style="color: #ef4444;">*</span></label>
-                        <select name="cabang_id" id="cabangSelect" class="form-control" required onchange="loadKelasOptions()">
+                        <select name="cabang_id" id="cabangSelect" class="form-control" required>
                             <option value="">-- Pilih Cabang --</option>
                             @foreach($cabangList as $cabang)
                                 <option value="{{ $cabang->id }}" {{ old('cabang_id') == $cabang->id ? 'selected' : '' }}>{{ $cabang->nama_cabang }}</option>
@@ -380,12 +380,33 @@
                         @enderror
                     </div>
                 </div>
-                <div class="col" id="kelasWrapper" style="{{ old('cabang_id') ? '' : 'display: none;' }}">
+
+                <div>
                     <div class="form-group">
                         <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>
-                        <select name="kelas_id" id="kelasSelect" class="form-control">
+                        
+                        {{-- Hidden Select for Form Submission --}}
+                        <select name="kelas_id" id="kelasSelect" class="d-none" required>
                             <option value="">-- Pilih Kelas --</option>
+                            @foreach($kelasList as $kls)
+                                <option value="{{ $kls->id }}" 
+                                    data-jenjang="{{ $kls->jenjang }}" 
+                                    data-cabang-id="{{ $kls->cabang_id }}"
+                                    {{ old('kelas_id') == $kls->id ? 'selected' : '' }}>
+                                    {{ $kls->nama_kelas }}
+                                </option>
+                            @endforeach
                         </select>
+
+                        {{-- Trigger Box --}}
+                        <div class="kelas-display" onclick="openKelasModal()"
+                             style="cursor: pointer; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; background: white; min-height: 50px; transition: all 0.2s;">
+                            <div id="selectedKelasText" class="text-muted" style="font-style: italic;">
+                                <i class="fas fa-school me-2"></i> Klik untuk memilih kelas...
+                            </div>
+                            <div id="selectedKelasChips" class="d-flex flex-wrap gap-2 mt-1" style="display: none !important;">
+                            </div>
+                        </div>
                         @error('kelas_id')
                             <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
                         @enderror
@@ -705,51 +726,124 @@
         </div>
 
         <script>
-            // Kelas data grouped by cabang_id
-            const allKelasData = @json($kelasList->groupBy('cabang_id'));
+            // Kelas data for modal
+            const allKelasData = @json($kelasList);
+            const cabangList = @json($cabangList);
             const oldKelasId = @json(old('kelas_id'));
             const oldCabangId = @json(old('cabang_id'));
 
-            function loadKelasOptions() {
-                const cabangId = document.getElementById('cabangSelect').value;
-                const kelasWrapper = document.getElementById('kelasWrapper');
-                const kelasSelect = document.getElementById('kelasSelect');
-
-                // Clear existing options
-                kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-
-                if (!cabangId) {
-                    kelasWrapper.style.display = 'none';
-                    return;
-                }
-
-                const kelasList = allKelasData[cabangId] || [];
-
-                if (kelasList.length === 0) {
-                    kelasSelect.innerHTML = '<option value="">-- Tidak ada kelas tersedia --</option>';
-                } else {
-                    kelasList.forEach(function(kelas) {
-                        const option = document.createElement('option');
-                        option.value = kelas.id;
-                        option.textContent = kelas.nama_kelas + ' (' + kelas.jenjang + ')';
-                        if (oldKelasId && kelas.id == oldKelasId) {
-                            option.selected = true;
-                        }
-                        kelasSelect.appendChild(option);
-                    });
-                }
-
-                kelasWrapper.style.display = 'block';
-            }
-
-            // Initialize on page load if old cabang value exists (validation error repopulation)
             document.addEventListener('DOMContentLoaded', function() {
-                if (oldCabangId) {
-                    loadKelasOptions();
+                // Initialize dan update UI jika ada old values
+                if (oldKelasId) {
+                    const selectedOption = document.querySelector(`option[value="${oldKelasId}"]`);
+                    if (selectedOption) {
+                        updateSelectedKelasUI([{
+                            id: oldKelasId,
+                            name: selectedOption.text.trim(),
+                            jenjang: selectedOption.getAttribute('data-jenjang')
+                        }]);
+                    }
                 }
+
+                // Cabang select untuk filter
+                document.getElementById('cabangSelect').addEventListener('change', function() {
+                    // Clear kelas select jika cabang berubah
+                    document.getElementById('kelasSelect').value = '';
+                    updateSelectedKelasUI([]);
+                });
             });
 
-            // Toggle password visibility
+            // Modal Picker Functions
+            function openKelasModal() {
+                const kelasSelect = document.getElementById('kelasSelect');
+                const selectedValue = kelasSelect.value;
+                
+                // Sync checkbox dengan current select value
+                document.querySelectorAll('.kelas-checkbox').forEach(cb => {
+                    cb.checked = (cb.value === selectedValue) && selectedValue !== '';
+                });
+                
+                updateTempSelection();
+                
+                const modal = new bootstrap.Modal(document.getElementById('kelasModal'));
+                modal.show();
+            }
+
+            function filterKelasList() {
+                const cabangFilter = document.getElementById('filterCabang').value || document.getElementById('cabangSelect').value;
+                const jenjangFilter = document.getElementById('filterJenjang').value;
+                const searchText = document.getElementById('searchKelas').value.toLowerCase();
+                
+                document.querySelectorAll('.kelas-item').forEach(item => {
+                    const itemCabang = item.getAttribute('data-cabang-id');
+                    const itemJenjang = item.getAttribute('data-jenjang');
+                    const itemName = item.getAttribute('data-name');
+                    
+                    let visible = true;
+                    
+                    if (cabangFilter && itemCabang !== cabangFilter) visible = false;
+                    if (jenjangFilter && itemJenjang !== jenjangFilter) visible = false;
+                    if (searchText && !itemName.toLowerCase().includes(searchText)) visible = false;
+                    
+                    item.style.display = visible ? 'block' : 'none';
+                });
+            }
+
+            function updateTempSelection() {
+                const count = document.querySelectorAll('.kelas-checkbox:checked').length;
+                document.getElementById('selectedCount').textContent = count;
+            }
+
+            function confirmKelasSelection() {
+                const checkbox = document.querySelector('.kelas-checkbox:checked');
+                const select = document.getElementById('kelasSelect');
+                
+                if (checkbox) {
+                    // Set select value
+                    select.value = checkbox.value;
+                    
+                    // Update UI
+                    updateSelectedKelasUI([{
+                        id: checkbox.value,
+                        name: checkbox.getAttribute('data-name'),
+                        jenjang: checkbox.getAttribute('data-jenjang')
+                    }]);
+                } else {
+                    select.value = '';
+                    updateSelectedKelasUI([]);
+                }
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('kelasModal')).hide();
+            }
+
+            function updateSelectedKelasUI(data) {
+                const textPlaceholder = document.getElementById('selectedKelasText');
+                const chipsContainer = document.getElementById('selectedKelasChips');
+
+                if (data.length === 0) {
+                    textPlaceholder.style.display = 'block';
+                    chipsContainer.innerHTML = '';
+                    chipsContainer.style.display = 'none';
+                } else {
+                    textPlaceholder.style.display = 'none';
+                    chipsContainer.innerHTML = '';
+
+                    data.forEach(item => {
+                        const chip = document.createElement('div');
+                        chip.className = 'badge bg-primary d-flex align-items-center p-2';
+                        chip.style.cssText = 'font-size: 12px; max-width: 100%;';
+                        chip.innerHTML = `
+                            <i class="fas fa-school me-2"></i>
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</span>
+                            <span class="ms-2 badge bg-white text-primary" style="font-size: 10px; white-space: nowrap;">${item.jenjang}</span>
+                        `;
+                        chipsContainer.appendChild(chip);
+                    });
+                    chipsContainer.style.display = 'flex';
+                }
+            }
+
             function togglePassword(fieldId, iconId) {
                 const field = document.getElementById(fieldId);
                 const icon = document.getElementById(iconId);
@@ -775,7 +869,6 @@
 
                 if (option === 'existing') {
                     existingForm.style.display = 'block';
-                    // Reset search when opening
                     document.getElementById('searchParent').value = '';
                     filterParentList();
                 } else if (option === 'new') {
@@ -783,7 +876,6 @@
                 }
             }
 
-            // Search functionality for parent list
             document.addEventListener('DOMContentLoaded', function () {
                 const searchInput = document.getElementById('searchParent');
                 const filterStatus = document.getElementById('filterParentStatus');
@@ -809,10 +901,7 @@
                     const username = option.getAttribute('data-username');
                     const status = option.getAttribute('data-status');
 
-                    // Search match
                     const matchSearch = searchTerm === '' || name.includes(searchTerm) || username.includes(searchTerm);
-
-                    // Status filter match
                     const matchStatus = statusFilter === '' || status === statusFilter;
 
                     if (matchSearch && matchStatus) {
@@ -823,12 +912,10 @@
                     }
                 });
 
-                // Update count
                 if (parentCount) {
                     parentCount.textContent = visibleCount;
                 }
 
-                // Show/hide no results message
                 if (visibleCount === 0) {
                     noParentFound.style.display = 'block';
                 } else {
@@ -836,7 +923,6 @@
                 }
             }
 
-            // Toggle for existing parent relationship
             function toggleExistingRelationship() {
                 const selectValue = document.getElementById('existing_relationship').value;
                 const otherField = document.getElementById('existingRelationshipOtherField');
@@ -848,7 +934,6 @@
                 }
             }
 
-            // Toggle for new parent relationship
             function toggleNewRelationship() {
                 const selectValue = document.getElementById('new_relationship').value;
                 const otherField = document.getElementById('newRelationshipOtherField');
@@ -860,6 +945,80 @@
                 }
             }
         </script>
+
+        {{-- Modal Pilih Kelas --}}
+        <div class="modal fade" id="kelasModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content" style="border-radius: 16px; border: none;">
+                    <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding: 24px;">
+                        <h5 class="modal-title" style="font-weight: 600; color: #111827;">
+                            <i class="fas fa-school" style="color: #8b5cf6; margin-right: 10px;"></i>
+                            Pilih Kelas
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="padding: 24px;">
+                        {{-- Filter Section --}}
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label" style="font-weight: 600; color: #374151; font-size: 12px; text-transform: uppercase;">
+                                    <i class="fas fa-building me-1"></i>Cabang
+                                </label>
+                                <select id="filterCabang" class="form-select" onchange="filterKelasList()">
+                                    <option value="">-- Semua Cabang --</option>
+                                    @foreach($cabangList as $cabang)
+                                        <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" style="font-weight: 600; color: #374151; font-size: 12px; text-transform: uppercase;">
+                                    <i class="fas fa-layer-group me-1"></i>Jenjang
+                                </label>
+                                <select id="filterJenjang" class="form-select" onchange="filterKelasList()">
+                                    <option value="">-- Semua Jenjang --</option>
+                                    <option value="KB">KB</option>
+                                    <option value="TKA">TKA</option>
+                                    <option value="TKB">TKB</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP">SMP</option>
+                                    <option value="SMA">SMA</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" style="font-weight: 600; color: #374151; font-size: 12px; text-transform: uppercase;">
+                                    <i class="fas fa-search me-1"></i>Cari
+                                </label>
+                                <input type="text" id="searchKelas" class="form-control" placeholder="Nama kelas..." onkeyup="filterKelasList()">
+                            </div>
+                        </div>
+
+                        {{-- Kelas List --}}
+                        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px;">
+                            @foreach($kelasList as $kls)
+                                <label class="kelas-item" data-name="{{ strtolower($kls->nama_kelas) }}" data-jenjang="{{ $kls->jenjang }}" data-cabang-id="{{ $kls->cabang_id }}"
+                                    style="display: flex; align-items: center; padding: 12px; margin-bottom: 8px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                                    <input type="radio" class="kelas-checkbox" name="kelas_radio" value="{{ $kls->id }}" data-name="{{ $kls->nama_kelas }}" data-jenjang="{{ $kls->jenjang }}" style="margin-right: 12px;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: #111827;">{{ $kls->nama_kelas }}</div>
+                                        <small style="color: #64748b;">
+                                            <i class="fas fa-layer-group me-1"></i>{{ $kls->jenjang }} 
+                                            • 
+                                            <i class="fas fa-building me-1"></i>{{ $kls->cabang->nama_cabang ?? '-' }}
+                                        </small>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 16px 24px;">
+                        <span class="text-muted" style="font-size: 12px;">Dipilih: <strong><span id="selectedCount">0</span></strong></span>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="confirmKelasSelection()">Pilih Kelas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {{-- Form Actions --}}
         <div class="form-actions">
