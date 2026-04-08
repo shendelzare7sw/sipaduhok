@@ -420,7 +420,13 @@ class UserController extends Controller
     public function createSiswa()
     {
         $cabangList = Cabang::where('is_active', true)->get();
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
+        // Get user's cabang to filter kelas
+        $userCabangId = auth()->user()->cabang_id;
+        $kelasList = Kelas::when($userCabangId, fn($q) => $q->where('cabang_id', $userCabangId))
+            ->distinct('id')
+            ->orderBy('jenjang')
+            ->orderBy('nama_kelas')
+            ->get();
         $orangTuaList = User::where('role', 'orang_tua')
             ->with(['studentParents.siswa'])
             ->orderBy('name')
@@ -437,7 +443,6 @@ class UserController extends Controller
             'personal_email' => 'nullable|email|max:255',
             'username' => 'required|string|unique:users,username|max:50',
             'password' => 'required|string|min:8',
-            'cabang_id' => 'required|exists:cabang,id',
             'kelas_id' => 'required|exists:kelas,id',
             'nisn' => 'required|string|max:20',
             'nis' => 'required|string|max:20',
@@ -467,6 +472,9 @@ class UserController extends Controller
             'can_access_academic' => 'nullable|boolean',
         ]);
 
+        // Get cabang from kelas relationship
+        $kelas = Kelas::findOrFail($validated['kelas_id']);
+        
         $user = User::create([
             'name' => $validated['nama_lengkap'],
             'email' => $validated['email'] ?? $validated['username'] . '@siswa.sipaduhok.sch.id',
@@ -474,13 +482,13 @@ class UserController extends Controller
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
             'role' => 'siswa',
-            'cabang_id' => $validated['cabang_id'],
+            'cabang_id' => $kelas->cabang_id,
             'is_active' => true,
         ]);
 
         $siswa = Siswa::create([
             'user_id' => $user->id,
-            'cabang_id' => $validated['cabang_id'],
+            'cabang_id' => $kelas->cabang_id,
             'kelas_id' => $validated['kelas_id'],
             'nisn' => $validated['nisn'],
             'nis' => $validated['nis'],
@@ -528,7 +536,7 @@ class UserController extends Controller
                 'username' => $request->parent_username,
                 'password' => Hash::make($request->parent_password),
                 'phone' => $request->parent_phone,
-                'cabang_id' => $validated['cabang_id'],
+                'cabang_id' => $kelas->cabang_id,
                 'role' => 'orang_tua',
                 'is_active' => true,
             ]);
@@ -551,7 +559,13 @@ class UserController extends Controller
     {
         $siswa = Siswa::with(['user', 'studentParents.parent'])->findOrFail($id);
         $cabangList = Cabang::where('is_active', true)->get();
-        $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get();
+        // Get user's cabang to filter kelas
+        $userCabangId = auth()->user()->cabang_id;
+        $kelasList = Kelas::when($userCabangId, fn($q) => $q->where('cabang_id', $userCabangId))
+            ->distinct('id')
+            ->orderBy('jenjang')
+            ->orderBy('nama_kelas')
+            ->get();
         $orangTuaList = User::where('role', 'orang_tua')
             ->with(['studentParents.siswa'])
             ->orderBy('name')
@@ -570,7 +584,6 @@ class UserController extends Controller
             'personal_email' => 'nullable|email|max:255',
             'username' => ['required', 'string', 'max:50', Rule::unique('users', 'username')->ignore($siswa->user_id)],
             'password' => 'nullable|string|min:8',
-            'cabang_id' => 'required|exists:cabang,id',
             'kelas_id' => 'required|exists:kelas,id',
             'nisn' => 'required|string|max:20',
             'nis' => 'required|string|max:20',
@@ -598,6 +611,9 @@ class UserController extends Controller
             'add_new_relationship_lainnya' => 'nullable|string|max:100',
         ]);
 
+        // Get cabang from kelas relationship
+        $kelas = Kelas::findOrFail($validated['kelas_id']);
+
         // Logic Sync Advanced (Bi-directional):
 
         // 1. Deteksi Perubahan Status Siswa
@@ -618,7 +634,7 @@ class UserController extends Controller
             'email' => $validated['email'] ?? $siswa->user->email,
             'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
-            'cabang_id' => $validated['cabang_id'],
+            'cabang_id' => $kelas->cabang_id,
             'is_active' => $validated['is_active'],
         ];
 
@@ -629,7 +645,7 @@ class UserController extends Controller
         $siswa->user->update($userData);
 
         $siswa->update([
-            'cabang_id' => $validated['cabang_id'],
+            'cabang_id' => $kelas->cabang_id,
             'kelas_id' => $validated['kelas_id'],
             'nisn' => $validated['nisn'],
             'nis' => $validated['nis'],

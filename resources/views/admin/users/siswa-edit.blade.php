@@ -412,11 +412,16 @@
                 <div class="col">
                     <div class="form-group">
                         <label class="form-label">Jenis Kelamin <span style="color: #ef4444;">*</span></label>
-                        <select name="jenis_kelamin" class="form-control" required>
-                            <option value="">-- Pilih Jenis Kelamin --</option>
-                            <option value="L" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="P" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
-                        </select>
+                        <div style="display: flex; gap: 20px; margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="jenis_kelamin" value="L" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'L' ? 'checked' : '' }} required style="cursor: pointer;">
+                                <span style="font-weight: 500; color: #475569;">Laki-laki</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="jenis_kelamin" value="P" {{ old('jenis_kelamin', $siswa->jenis_kelamin) == 'P' ? 'checked' : '' }} required style="cursor: pointer;">
+                                <span style="font-weight: 500; color: #475569;">Perempuan</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <div class="col">
@@ -459,23 +464,6 @@
             </h5>
 
             <div class="row" style="flex-direction: column; gap: 16px;">
-                <div>
-                    <div class="form-group">
-                        <label class="form-label">Cabang <span style="color: #ef4444;">*</span></label>
-                        <select name="cabang_id" id="cabangSelectEdit" class="form-control" required>
-                            <option value="">-- Pilih Cabang --</option>
-                            @foreach($cabangList as $cabang)
-                                <option value="{{ $cabang->id }}" {{ old('cabang_id', $siswa->cabang_id) == $cabang->id ? 'selected' : '' }}>
-                                    {{ $cabang->nama_cabang }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('cabang_id')
-                            <div class="text-danger" style="font-size: 13px; margin-top: 4px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
                 <div>
                     <div class="form-group">
                         <label class="form-label">Kelas <span style="color: #ef4444;">*</span></label>

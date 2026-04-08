@@ -86,15 +86,43 @@
             .card-header > div {
                 width: 100%;
                 display: flex !important;
+                flex-direction: column;
                 justify-content: space-between;
-                align-items: center;
-                gap: 8px;
+                align-items: flex-start;
+                gap: 12px;
             }
 
             .card-header .d-flex {
                 width: 100%;
-                flex-direction: row !important;
+                flex-direction: column !important;
                 gap: 12px !important;
+                align-items: flex-start;
+            }
+
+            .card-header h6 {
+                width: 100%;
+                margin-bottom: 8px !important;
+            }
+
+            /* Tab/Radio buttons responsive */
+            .d-flex.gap-3.flex-wrap {
+                flex-direction: column !important;
+                align-items: flex-start;
+            }
+
+            .form-check {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                padding: 10px 0;
+            }
+
+            .form-check-label {
+                margin-bottom: 0 !important;
+                margin-left: 8px;
+                font-weight: 500;
+                cursor: pointer;
+                user-select: none;
             }
 
             /* Filter Section Mobile */
@@ -245,9 +273,9 @@
             .form-check {
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                justify-content: flex-start;
                 width: 100%;
-                text-align: center;
+                text-align: left;
                 padding: 8px 0;
             }
 
@@ -260,6 +288,27 @@
                 font-size: 11px;
             }
 
+            /* Form Labels and Inputs */
+            .form-label {
+                font-size: 14px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .form-select,
+            .form-control {
+                font-size: 14px;
+                padding: 8px 10px;
+            }
+
+            .input-group {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .input-group-text {
+                flex-shrink: 0;
+            }
+
             /* Alert Responsive */
             .alert {
                 font-size: 13px;
@@ -269,14 +318,51 @@
                 margin-bottom: 4px;
             }
 
-            /* Input Group Mobile */
-            .input-group {
-                width: 100%;
+            /* Button Group */
+            .d-flex.gap-2 {
+                flex-wrap: wrap;
             }
 
-            .form-select,
-            .form-control {
-                font-size: 14px;
+            .d-flex.gap-2 .btn {
+                flex: 1 1 auto;
+                min-width: 120px;
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+
+            /* Info Box Mobile */
+            .alert-warning {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+
+            .alert-warning ul {
+                padding-left: 18px;
+                margin: 8px 0 0 0;
+            }
+
+            .alert-warning li {
+                padding: 4px 0;
+            }
+
+            /* Kelas Checkbox Container Mobile */
+            #kelasCheckboxContainer {
+                max-height: 300px !important;
+                padding: 8px !important;
+            }
+
+            .form-check {
+                margin-bottom: 10px;
+            }
+
+            .kelas-checkbox-item label {
+                font-size: 13px;
+                margin-bottom: 0;
+            }
+
+            .kelas-checkbox-item .badge {
+                font-size: 10px;
+                padding: 2px 6px;
             }
         }
 
@@ -363,17 +449,63 @@
 
                                 {{-- Kelas Selection --}}
                                 <div id="kelasSelection" class="p-4">
-                                    <label class="form-label fw-bold">Pilih Kelas</label>
-                                    <select name="target_id" id="kelas_id" class="form-select">
-                                        <option value="">-- Pilih Kelas --</option>
+                                    <label class="form-label fw-bold mb-3">Pilih Kelas</label>
+                                    
+                                    {{-- Filter Section --}}
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label small fw-bold">Filter Cabang</label>
+                                            <select id="filterCabangClass" class="form-select form-select-sm">
+                                                <option value="">Semua Cabang</option>
+                                                @foreach($kelasList->pluck('cabang')->unique('id')->filter() as $cabang)
+                                                    <option value="{{ $cabang->id }}">{{ $cabang->nama_cabang }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <label class="form-label small fw-bold">Filter Jenjang</label>
+                                            <select id="filterJenjangClass" class="form-select form-select-sm">
+                                                <option value="">Semua Jenjang</option>
+                                                @php
+                                                    $jenjangList = $kelasList->pluck('jenjang')->unique()->sort();
+                                                @endphp
+                                                @foreach($jenjangList as $jenjang)
+                                                    <option value="{{ $jenjang }}">{{ $jenjang }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {{-- Select All Checkbox --}}
+                                    <div class="mb-3 p-2 bg-light rounded">
+                                        <label class="form-check-label fw-bold" style="cursor: pointer;">
+                                            <input type="checkbox" id="selectAllClass" class="form-check-input" 
+                                                style="cursor: pointer;" onchange="toggleSelectAllKelas()">
+                                            <span id="selectAllText">Pilih Semua Kelas</span>
+                                        </label>
+                                    </div>
+
+                                    {{-- Kelas Checkboxes --}}
+                                    <div id="kelasCheckboxContainer" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px;">
                                         @foreach($kelasList as $kelas)
-                                            <option value="{{ $kelas->id }}">
-                                                {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) -
-                                                {{ $kelas->cabang->nama_cabang ?? '-' }}
-                                            </option>
+                                            <div class="form-check mb-2 kelas-checkbox-item" 
+                                                data-cabang="{{ $kelas->cabang_id }}" 
+                                                data-jenjang="{{ $kelas->jenjang }}">
+                                                <input class="form-check-input kelas-checkbox" type="checkbox" 
+                                                    name="kelas_ids[]" value="{{ $kelas->id }}" 
+                                                    id="kelas_{{ $kelas->id }}"
+                                                    onchange="updateSelectAllKelasUI()">
+                                                <label class="form-check-label" for="kelas_{{ $kelas->id }}" style="cursor: pointer;">
+                                                    <strong>{{ $kelas->nama_kelas }}</strong> 
+                                                    <span class="badge bg-secondary">{{ $kelas->jenjang }}</span>
+                                                    <small class="text-muted">{{ $kelas->cabang->nama_cabang ?? '-' }}</small>
+                                                </label>
+                                            </div>
                                         @endforeach
-                                    </select>
-                                    <small class="text-muted">SPP akan diterapkan ke semua siswa di kelas ini</small>
+                                    </div>
+                                    
+                                    {{-- Selected Count --}}
+                                    <small class="text-muted mt-2" id="kelasSelectedCount">0 kelas dipilih</small>
                                 </div>
 
                                 {{-- Siswa Selection (Hidden by default) --}}
@@ -748,6 +880,7 @@
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
             updateSelectAllRowVisibility();
+            initKelasFilters();
             
             const selectAllCheckboxes = document.querySelectorAll('#selectAll');
             selectAllCheckboxes.forEach(cb => {
@@ -760,6 +893,66 @@
 
         window.addEventListener('resize', updateSelectAllRowVisibility);
 
+        // Kelas Filter & Select All Functions
+        function initKelasFilters() {
+            const filterCabangClass = document.getElementById('filterCabangClass');
+            const filterJenjangClass = document.getElementById('filterJenjangClass');
+
+            filterCabangClass?.addEventListener('change', filterKelasItems);
+            filterJenjangClass?.addEventListener('change', filterKelasItems);
+        }
+
+        function filterKelasItems() {
+            const filterCabangClass = document.getElementById('filterCabangClass');
+            const filterJenjangClass = document.getElementById('filterJenjangClass');
+            const items = document.querySelectorAll('.kelas-checkbox-item');
+
+            const selectedCabang = filterCabangClass?.value;
+            const selectedJenjang = filterJenjangClass?.value;
+
+            items.forEach(item => {
+                const cabang = item.getAttribute('data-cabang');
+                const jenjang = item.getAttribute('data-jenjang');
+
+                let show = true;
+                if (selectedCabang && cabang !== selectedCabang) show = false;
+                if (selectedJenjang && jenjang !== selectedJenjang) show = false;
+
+                item.style.display = show ? '' : 'none';
+            });
+
+            updateSelectAllKelasUI();
+        }
+
+        function toggleSelectAllKelas() {
+            const selectAll = document.getElementById('selectAllClass');
+            const visibleCheckboxes = document.querySelectorAll('.kelas-checkbox-item:not([style*="display: none"]) .kelas-checkbox');
+
+            visibleCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelectedKelasCount();
+        }
+
+        function updateSelectAllKelasUI() {
+            const selectAll = document.getElementById('selectAllClass');
+            const visibleCheckboxes = document.querySelectorAll('.kelas-checkbox-item:not([style*="display: none"]) .kelas-checkbox');
+            const checkedCount = Array.from(visibleCheckboxes).filter(cb => cb.checked).length;
+
+            if (visibleCheckboxes.length === 0) {
+                selectAll.checked = false;
+                selectAll.disabled = true;
+            } else {
+                selectAll.disabled = false;
+                selectAll.checked = checkedCount === visibleCheckboxes.length && checkedCount > 0;
+            }
+
+            updateSelectedKelasCount();
+        }
+
+        function updateSelectedKelasCount() {
+            const checked = document.querySelectorAll('.kelas-checkbox:checked').length;
+            document.getElementById('kelasSelectedCount').textContent = checked + ' kelas dipilih';
+        }
+
         function confirmGenerate() {
             const targetType = document.querySelector('input[name="target_type"]:checked').value;
             const tipeSpp = document.querySelector('input[name="tipe_spp"]:checked').value;
@@ -769,18 +962,17 @@
             let targetCount = 0;
 
             if (targetType === 'kelas') {
-                const kelasSelect = document.getElementById('kelas_id');
-                if (!kelasSelect.value) {
+                const checkedKelas = document.querySelectorAll('.kelas-checkbox:checked');
+                if (checkedKelas.length === 0) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Pilih Kelas',
-                        text: 'Silakan pilih kelas terlebih dahulu!',
+                        text: 'Silakan pilih minimal satu kelas terlebih dahulu!',
                         confirmButtonColor: '#696cff'
                     });
                     return;
                 }
-                targetName = kelasSelect.options[kelasSelect.selectedIndex].text;
-                targetCount = 'seluruh siswa di ' + targetName;
+                targetCount = checkedKelas.length + ' kelas terpilih';
             } else {
                 const checked = document.querySelectorAll('.siswa-checkbox:checked:not(#selectAll)');
                 if (checked.length === 0) {
