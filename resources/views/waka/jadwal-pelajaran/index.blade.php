@@ -177,6 +177,8 @@
         .guru-avatar-sm {
             width: 32px;
             height: 32px;
+            min-width: 32px;
+            flex-shrink: 0;
             border-radius: 50%;
             background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
             color: white;
