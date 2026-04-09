@@ -260,10 +260,19 @@
 
             .form-actions {
                 flex-direction: column-reverse;
+                gap: 10px;
+                padding: 12px;
+                margin-left: -24px;
+                margin-right: -24px;
+                margin-bottom: 0;
+                padding-bottom: 20px;
             }
 
             .form-actions .btn {
                 width: 100%;
+                padding: 12px 16px;
+                font-size: 14px;
+                min-height: 44px;
             }
 
             .page-header {
@@ -277,6 +286,46 @@
             .student-badge {
                 width: 100%;
                 justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-actions {
+                flex-direction: column-reverse;
+                gap: 8px;
+                padding: 10px;
+                margin-left: -24px;
+                margin-right: -24px;
+                margin-bottom: 0;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+                padding: 12px 12px;
+                font-size: 13px;
+                min-height: 42px;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            .btn i {
+                font-size: 14px;
+            }
+
+            .card {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .page-header {
+                padding-bottom: 12px;
+                margin-bottom: 16px;
+            }
+
+            .student-badge {
+                width: 100%;
+                font-size: 12px;
+                padding: 6px 10px;
             }
         }
     </style>

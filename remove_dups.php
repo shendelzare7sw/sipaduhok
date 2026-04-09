@@ -1,0 +1,2 @@
+<?php
+// safe duplicate removal
