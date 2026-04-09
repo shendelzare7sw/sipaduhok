@@ -420,9 +420,10 @@ class UserController extends Controller
     public function createSiswa()
     {
         $cabangList = Cabang::where('is_active', true)->get();
-        // Get user's cabang to filter kelas
         $userCabangId = auth()->user()->cabang_id;
+        $tahunAjaranAktif = \App\Models\TahunAjaran::where('is_active', true)->first();
         $kelasList = Kelas::when($userCabangId, fn($q) => $q->where('cabang_id', $userCabangId))
+            ->when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->distinct('id')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
@@ -561,7 +562,9 @@ class UserController extends Controller
         $cabangList = Cabang::where('is_active', true)->get();
         // Get user's cabang to filter kelas
         $userCabangId = auth()->user()->cabang_id;
+        $tahunAjaranAktif = \App\Models\TahunAjaran::where('is_active', true)->first();
         $kelasList = Kelas::when($userCabangId, fn($q) => $q->where('cabang_id', $userCabangId))
+            ->when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->distinct('id')
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
