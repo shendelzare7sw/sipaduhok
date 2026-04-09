@@ -48,11 +48,18 @@ return new class extends Migration
     public function down(): void
     {
         // Restore dari backup jika diperlukan
-        DB::statement(<<<SQL
-            INSERT INTO kelas SELECT * FROM kelas_duplicate_backup;
-            DROP TABLE kelas_duplicate_backup;
-        SQL);
+        if (DB::getSchemaBuilder()->hasTable('kelas_duplicate_backup')) {
+            // Insert data kembali
+            DB::statement(<<<SQL
+                INSERT INTO kelas SELECT * FROM kelas_duplicate_backup;
+            SQL);
+            
+            // Drop backup table
+            DB::statement(<<<SQL
+                DROP TABLE kelas_duplicate_backup;
+            SQL);
 
-        echo "\n⚠ Duplikasi kelas telah di-restore dari backup\n";
+            echo "\n⚠ Duplikasi kelas telah di-restore dari backup\n";
+        }
     }
 };
