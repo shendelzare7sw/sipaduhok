@@ -18,16 +18,29 @@
     </style>
 
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" style="margin-bottom: 20px;">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}">Dashboard LMS</a></li>
-            <li class="breadcrumb-item"><a
-                    href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}">{{ $mataPelajaran->nama_mapel }}</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('siswa.lms.mapel.forum.index', $mataPelajaran->id) }}">Forum</a>
-            </li>
-            <li class="breadcrumb-item active">Buat Pertanyaan</li>
-        </ol>
-    </nav>
+    <div class="page-breadcrumb">
+        <div class="page-breadcrumb-item">
+            <a href="{{ route('siswa.lms.dashboard') }}">
+                <i class="fas fa-home"></i> Dashboard LMS
+            </a>
+        </div>
+        <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+        <div class="page-breadcrumb-item">
+            <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}">
+                <i class="fas fa-book"></i> {{ $mataPelajaran->nama_mapel }}
+            </a>
+        </div>
+        <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+        <div class="page-breadcrumb-item">
+            <a href="{{ route('siswa.lms.mapel.forum.index', $mataPelajaran->id) }}">
+                <i class="fas fa-comments"></i> Forum
+            </a>
+        </div>
+        <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+        <div class="page-breadcrumb-item active">
+            <i class="fas fa-edit"></i> Buat Pertanyaan
+        </div>
+    </div>
 
     <div class="form-card">
         <h4 style="color: var(--primary); margin-bottom: 24px;">

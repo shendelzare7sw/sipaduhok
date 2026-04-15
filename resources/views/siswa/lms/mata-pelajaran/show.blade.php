@@ -108,12 +108,17 @@
     </style>
 
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" style="margin-bottom: 20px;">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}">Dashboard LMS</a></li>
-            <li class="breadcrumb-item active">{{ $mataPelajaran->nama_mapel }}</li>
-        </ol>
-    </nav>
+    <div class="page-breadcrumb">
+        <div class="page-breadcrumb-item">
+            <a href="{{ route('siswa.lms.dashboard') }}">
+                <i class="fas fa-home"></i> Dashboard LMS
+            </a>
+        </div>
+        <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+        <div class="page-breadcrumb-item active">
+            <i class="fas fa-book"></i> {{ $mataPelajaran->nama_mapel }}
+        </div>
+    </div>
 
     <!-- Header Info -->
     <div class="section-card" style="background: linear-gradient(135deg, #165fac, #0d3f7a); color: white;">

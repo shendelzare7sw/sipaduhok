@@ -74,13 +74,23 @@
 </style>
 
 <!-- Breadcrumb -->
-<nav aria-label="breadcrumb" style="margin-bottom: 20px;">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}">Dashboard LMS</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('siswa.lms.mapel.show', $materi->mata_pelajaran_id) }}">{{ $materi->mataPelajaran->nama_mapel }}</a></li>
-        <li class="breadcrumb-item active">{{ $materi->judul_materi }}</li>
-    </ol>
-</nav>
+<div class="page-breadcrumb">
+    <div class="page-breadcrumb-item">
+        <a href="{{ route('siswa.lms.dashboard') }}">
+            <i class="fas fa-home"></i> Dashboard LMS
+        </a>
+    </div>
+    <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+    <div class="page-breadcrumb-item">
+        <a href="{{ route('siswa.lms.mapel.show', $materi->mata_pelajaran_id) }}">
+            <i class="fas fa-book"></i> {{ $materi->mataPelajaran->nama_mapel }}
+        </a>
+    </div>
+    <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+    <div class="page-breadcrumb-item active">
+        <i class="fas fa-file-alt"></i> {{ Str::limit($materi->judul_materi, 30) }}
+    </div>
+</div>
 
 <div class="materi-card">
     <!-- Header -->

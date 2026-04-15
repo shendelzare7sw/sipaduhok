@@ -253,6 +253,54 @@
             width: 100%;
         }
 
+        /* Custom Breadcrumb */
+        .page-breadcrumb {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 1px solid #f3f4f6;
+        }
+
+        .page-breadcrumb-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .page-breadcrumb-item a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-breadcrumb-item a:hover {
+            color: var(--primary);
+        }
+
+        .page-breadcrumb-separator {
+            color: #d1d5db;
+            margin: 0 10px;
+            font-size: 12px;
+        }
+
+        .page-breadcrumb-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .page-breadcrumb-item.active i {
+            margin-right: 6px;
+        }
+
         /* Card Custom - Menggunakan konsep dari Bendahara */
         .card-custom {
             background: white;

@@ -74,14 +74,23 @@
     </style>
 
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('siswa.lms.dashboard') }}">Dashboard LMS</a></li>
-            <li class="breadcrumb-item"><a
-                    href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}">{{ $mataPelajaran->nama_mapel }}</a></li>
-            <li class="breadcrumb-item active">Forum Diskusi</li>
-        </ol>
-    </nav>
+    <div class="page-breadcrumb">
+        <div class="page-breadcrumb-item">
+            <a href="{{ route('siswa.lms.dashboard') }}">
+                <i class="fas fa-home"></i> Dashboard LMS
+            </a>
+        </div>
+        <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+        <div class="page-breadcrumb-item">
+            <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}">
+                <i class="fas fa-book"></i> {{ $mataPelajaran->nama_mapel }}
+            </a>
+        </div>
+        <i class="fas fa-chevron-right page-breadcrumb-separator"></i>
+        <div class="page-breadcrumb-item active">
+            <i class="fas fa-comments"></i> Forum Diskusi
+        </div>
+    </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold mb-0"><i class="fas fa-comments me-2"></i>Forum Diskusi</h5>

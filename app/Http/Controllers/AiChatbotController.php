@@ -209,7 +209,6 @@ class AiChatbotController extends Controller
 
                 'admin' => [
                     'Cara kelola pengguna?',
-                    'Panduan sistem',
                 ],
 
                 'bendahara' => [
@@ -225,7 +224,6 @@ class AiChatbotController extends Controller
                 'wakil_kepala_sekolah' => [
                     'Monitoring akademik?',
                     'Laporan kinerja?',
-                    'Panduan sistem',
                 ],
 
                 'ketua' => [
@@ -250,7 +248,7 @@ class AiChatbotController extends Controller
                 ],
 
                 default => [
-                    'Panduan sistem',
+                    'Apa yang bisa dibantu?',
                 ],
             };
 
