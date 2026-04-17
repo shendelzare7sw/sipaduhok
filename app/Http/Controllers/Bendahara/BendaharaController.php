@@ -9,6 +9,7 @@ use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
+use Illuminate\Support\Facades\DB;
 
 class BendaharaController extends Controller
 {
@@ -37,11 +38,11 @@ class BendaharaController extends Controller
                 })
                 ->sum('jumlah_bayar'),
             
-            // Tagihan belum lunas
+            // Tagihan belum lunas (count distinct siswa)
             'tagihanBelumLunas' => Tagihan::where('status', 'belum_bayar')
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                })->count(),
+                })->distinct('siswa_id')->count('siswa_id'),
             
             // Pembayaran bulan ini
             'pembayaranBulanIni' => Pembayaran::where('status_validasi', 'disetujui')
@@ -56,40 +57,56 @@ class BendaharaController extends Controller
             'tagihanTerlambat' => Tagihan::where('status', 'terlambat')
                 ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                     return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                })->count(),
+                })->distinct('siswa_id')->count('siswa_id'),
         ];
         
-        // Menampilkan 5 Siswa dengan tagihan yang belum lunas (prioritas penagihan)
-        $siswaRecent = Siswa::with(['kelas', 'cabang'])
-            ->where('status', 'aktif')
-            ->whereHas('tagihan', function($q) use ($tahunAjaranAktif) {
-                $q->whereIn('status', ['belum_bayar', 'terlambat']);
-                if ($tahunAjaranAktif) {
-                    $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                }
-            })
-            ->take(5)
-            ->get()
-            ->map(function($siswa) use ($tahunAjaranAktif) {
-                $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                    ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
-                        return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-                    })
-                    ->get();
-
-                $totalTagihan = $tagihan->sum('jumlah');
-                // Sisa tagihan berdasarkan status tagihan (lebih robust)
-                $sisaTagihan = $tagihan->where('status', '!=', 'sudah_bayar')->sum('jumlah');
-                $totalBayar = $totalTagihan - $sisaTagihan;
-
-                $siswa->total_tagihan = $totalTagihan;
-                $siswa->total_bayar = $totalBayar;
-                $siswa->sisa_tagihan = $sisaTagihan;
-
-                return $siswa;
-            });
+        // ================================================================
+        // TAB 1: Pembayaran Menunggu Validasi (Prioritas Tindakan)
+        // ================================================================
+        $pendingPembayaran = Pembayaran::with(['siswa', 'siswa.kelas', 'tagihan'])
+            ->where('status_validasi', 'pending')
+            ->orderBy('created_at', 'asc') // Yang paling lama menunggu = prioritas
+            ->take(7)
+            ->get();
         
-        $data['siswaRecent'] = $siswaRecent;
+        // ================================================================
+        // TAB 2: Transaksi Terbaru (Kas Masuk Terakhir)
+        // ================================================================
+        $transaksiTerbaru = Pembayaran::with(['siswa', 'siswa.kelas', 'tagihan', 'validator'])
+            ->where('status_validasi', 'disetujui')
+            ->orderBy('tanggal_validasi', 'desc')
+            ->take(7)
+            ->get();
+
+        // ================================================================
+        // TAB 3: Dispensasi Kenaikan Kelas Menunggu
+        // ================================================================
+        $dispensasiPending = DB::table('izin_naik_kelas_khusus')
+            ->join('siswa', 'izin_naik_kelas_khusus.siswa_id', '=', 'siswa.id')
+            ->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->where('izin_naik_kelas_khusus.status', 'MENUNGGU')
+            ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
+                return $q->where('izin_naik_kelas_khusus.tahun_ajaran_id', $tahunAjaranAktif->id);
+            })
+            ->select(
+                'izin_naik_kelas_khusus.*',
+                'siswa.nama_lengkap',
+                'siswa.nisn',
+                'kelas.nama_kelas'
+            )
+            ->orderBy('izin_naik_kelas_khusus.created_at', 'asc')
+            ->take(5)
+            ->get();
+
+        // Kas masuk hari ini
+        $kasHariIni = Pembayaran::where('status_validasi', 'disetujui')
+            ->whereDate('tanggal_validasi', today())
+            ->sum('jumlah_bayar');
+
+        $data['pendingPembayaran'] = $pendingPembayaran;
+        $data['transaksiTerbaru'] = $transaksiTerbaru;
+        $data['dispensasiPending'] = $dispensasiPending;
+        $data['kasHariIni'] = $kasHariIni;
         $data['tahunAjaran'] = $tahunAjaranAktif;
         
         return view('dashboard.bendahara', $data);

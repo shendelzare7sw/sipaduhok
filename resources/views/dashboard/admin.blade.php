@@ -19,7 +19,7 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         height: 100%;
-        overflow: hidden;
+        overflow: visible;
     }
     
     .dashboard-card:hover {
@@ -245,6 +245,47 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.5rem;
+    }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 768px) {
+        .stat-value { font-size: 1.35rem; }
+        .stat-label { font-size: 0.75rem; }
+        .stat-widget { padding: 1.15rem; gap: 0.85rem; }
+        .stat-icon-wrapper { width: 40px; height: 40px; font-size: 1.1rem; }
+        .stat-footer { margin-top: 0.75rem; padding-top: 0.75rem; font-size: 0.75rem; }
+
+        .chart-container { height: 260px !important; padding: 0.75rem; }
+        .mini-chart-container { height: 180px; padding: 0.75rem; }
+
+        .card-header-clean { padding: 1rem 1.15rem; }
+        .card-title-clean { font-size: 0.9rem; }
+        .filter-select { font-size: 0.78rem; padding: 0.2rem 1.5rem 0.2rem 0.5rem; }
+
+        .quick-links-grid { grid-template-columns: repeat(2, 1fr); padding: 1rem; gap: 0.6rem; }
+        .quick-link-item { padding: 0.85rem 0.5rem; gap: 0.5rem; }
+        .quick-link-item i { font-size: 1.2rem; }
+        .quick-link-text { font-size: 0.75rem; }
+
+        .activity-feed { padding: 0.75rem 1.15rem; max-height: 240px; }
+        .activity-item { gap: 0.75rem; padding: 0.75rem 0; }
+        .activity-avatar { width: 34px; height: 34px; font-size: 0.78rem; }
+        .activity-title { font-size: 0.82rem; }
+        .activity-meta { font-size: 0.72rem; }
+
+        .dev-alert { flex-direction: column; gap: 0.75rem; align-items: flex-start; padding: 1rem; }
+        .dev-alert .btn { width: 100%; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+        .stat-value { font-size: 1.15rem; }
+        .stat-label { font-size: 0.68rem; }
+        .stat-icon-wrapper { width: 36px; height: 36px; font-size: 1rem; }
+
+        .chart-container { height: 220px !important; }
+        .mini-chart-container { height: 160px; }
+
+        .quick-links-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
     }
 </style>
 @endsection
