@@ -74,6 +74,13 @@ class DashboardController extends Controller
             'totalSiswa' => Siswa::where('status', 'aktif')->count(),
             'totalGuru' => TenagaPendidik::count(),
             'totalKelas' => Kelas::count(),
+            'pendingDispensasi' => \App\Models\PengajuanRaporKetua::where('status', 'menunggu')->count(),
+            'recent_logins' => User::whereNotNull('last_login_at')
+                ->where('role', '!=', 'admin') // exclude admin
+                ->with('roleRelation')
+                ->orderBy('last_login_at', 'desc')
+                ->take(5)
+                ->get(),
         ];
 
         return view('dashboard.ketua', $data);

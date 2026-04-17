@@ -1,8 +1,8 @@
 @extends('layouts.sneat')
 
 @section('title', 'Dashboard Bendahara')
-@section('page-title', 'Dashboard Bendahara')
-@section('page-subtitle', 'Kelola keuangan dan pembayaran siswa')
+@section('page-title', 'Overview Keuangan')
+@section('page-subtitle', 'Pantau aktivitas keuangan dan pembayaran siswa')
 
 @section('sidebar-menu')
     @include('bendahara.partials.sneat-sidebar-menu')
@@ -10,275 +10,428 @@
 
 @section('styles')
 <style>
-/* === STAT CARD STYLE === */
-.stat-card {
-    padding: 24px;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    height: 100%;
-    color: white;
-    border: none;
-}
+    /* Card Styling */
+    .dashboard-card {
+        background: var(--surface-color, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+    }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-}
+    .card-header-clean {
+        background: transparent;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.stat-content {
-    position: relative;
-    z-index: 2;
-}
+    .card-title-clean {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-main, #1e293b);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-.stat-title {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
+    .card-title-icon {
+        color: var(--primary-color, #4361ee);
+    }
 
-.stat-number {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    line-height: 1.2;
-}
+    /* Stat Cards */
+    .stat-widget {
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
 
-.stat-desc {
-    font-size: 13px;
-    opacity: 0.8;
-}
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: rgba(67, 97, 238, 0.08);
+        color: var(--primary-color, #4361ee);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
 
-.stat-icon-bg {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 70px;
-    opacity: 0.15;
-    z-index: 1;
-}
+    .stat-details {
+        flex-grow: 1;
+        overflow: hidden;
+    }
 
-/* Gradients */
-.bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.bg-gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.bg-gradient-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.bg-gradient-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-.bg-gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+    .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-main, #1e293b);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-/* Table Styling */
-.table thead th {
-    background-color: #f8f9fc;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    color: #4e73df;
-    border-bottom: 2px solid #e3e6f0;
-    vertical-align: middle;
-}
+    .stat-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted, #64748b);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-.currency-text {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-}
+    .stat-footer {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--border-color, #e2e8f0);
+        font-size: 0.8rem;
+        color: var(--secondary-color, #64748b);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Quick Links Grid */
+    .quick-links-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .quick-link-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--surface-color, #ffffff);
+        color: var(--text-main, #1e293b);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        text-align: center;
+        gap: 0.75rem;
+    }
+
+    .quick-link-item:hover {
+        background: var(--background-color, #f8fafc);
+        border-color: var(--primary-color, #4361ee);
+        color: var(--primary-color, #4361ee);
+    }
+
+    .quick-link-item i {
+        font-size: 1.5rem;
+        color: var(--secondary-color, #64748b);
+        transition: color 0.2s ease;
+    }
+
+    .quick-link-item:hover i {
+        color: var(--primary-color, #4361ee);
+    }
+
+    .quick-link-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    /* Table Styling */
+    .table thead th {
+        background-color: #f8fafc;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .currency-text {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+    }
+
+    /* Alerts */
+    .alert-card {
+        padding: 1.25rem;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    .alert-card-warning {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        border-left: 4px solid #f59e0b;
+    }
+    .alert-card-danger {
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        border-left: 4px solid #ef4444;
+    }
 </style>
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-<div class="container-fluid px-0">
 
-    {{-- STATS GRID (BARIS ATAS) --}}
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card bg-gradient-blue">
-                <div class="stat-content">
-                    <div class="stat-title">Total Tagihan</div>
-                    <div class="stat-number">Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-desc">TA: {{ $tahunAjaran->nama_tahun_ajaran ?? '2025/2026' }}</div>
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-4">
+        <!-- Total Tagihan -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <div class="stat-widget">
+                    <div class="stat-details">
+                        <div class="stat-value" title="Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}">Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}</div>
+                        <div class="stat-label">Total Tagihan</div>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #3b82f6; background: #eff6ff;">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
                 </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-file-invoice-dollar"></i>
+                <div class="stat-footer px-4 pb-3">
+                    <span>TA: {{ $tahunAjaran->nama_tahun_ajaran ?? '2025/2026' }}</span>
+                    <i class="fas fa-calendar-alt text-muted opacity-50"></i>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card bg-gradient-green">
-                <div class="stat-content">
-                    <div class="stat-title">Total Terbayar</div>
-                    <div class="stat-number">Rp {{ number_format($totalTerbayar ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-desc"><i class="fas fa-check-circle me-1"></i>Tervalidasi</div>
+        <!-- Total Terbayar -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <div class="stat-widget">
+                    <div class="stat-details">
+                        <div class="stat-value" title="Rp {{ number_format($totalTerbayar ?? 0, 0, ',', '.') }}">Rp {{ number_format($totalTerbayar ?? 0, 0, ',', '.') }}</div>
+                        <div class="stat-label">Total Terbayar</div>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #10b981; background: #ecfdf5;">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
                 </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-hand-holding-usd"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card bg-gradient-orange">
-                <div class="stat-content">
-                    <div class="stat-title">Bulan Ini</div>
-                    <div class="stat-number">Rp {{ number_format($pembayaranBulanIni ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-desc">{{ now()->translatedFormat('F Y') }}</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-calendar-check"></i>
+                <div class="stat-footer px-4 pb-3">
+                    <span class="text-success"><i class="fas fa-check-circle me-1"></i>Tervalidasi</span>
+                    <i class="fas fa-shield-alt text-muted opacity-50"></i>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="stat-card bg-gradient-red">
-                <div class="stat-content">
-                    <div class="stat-title">Menunggu Validasi</div>
-                    <div class="stat-number">{{ $pembayaranPending ?? 0 }}</div>
-                    <div class="stat-desc">Segera Konfirmasi</div>
+        <!-- Bulan Ini -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <div class="stat-widget">
+                    <div class="stat-details">
+                        <div class="stat-value" title="Rp {{ number_format($pembayaranBulanIni ?? 0, 0, ',', '.') }}">Rp {{ number_format($pembayaranBulanIni ?? 0, 0, ',', '.') }}</div>
+                        <div class="stat-label">Terbayar Bulan Ini</div>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #f59e0b; background: #fffbeb;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
                 </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-history"></i>
+                <div class="stat-footer px-4 pb-3">
+                    <span>{{ now()->translatedFormat('F Y') }}</span>
+                    <i class="fas fa-clock text-muted opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menunggu Validasi -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-card">
+                <div class="stat-widget">
+                    <div class="stat-details">
+                        <div class="stat-value">{{ number_format($pembayaranPending ?? 0) }}</div>
+                        <div class="stat-label">Menunggu Validasi</div>
+                    </div>
+                    <div class="stat-icon-wrapper" style="color: #8b5cf6; background: #f5f3ff;">
+                        <i class="fas fa-history"></i>
+                    </div>
+                </div>
+                <div class="stat-footer px-4 pb-3">
+                    <span class="text-warning">Segera Konfirmasi</span>
+                    <i class="fas fa-exclamation-circle text-muted opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- ALERTS / INFO CARDS (BARIS KEDUA) --}}
-    <div class="row mb-4">
-        <div class="col-md-6 mb-4 mb-md-0">
-            <div class="card border-start border-warning border-4 shadow py-2 h-100">
-                <div class="card-body">
-                    <div class="row gx-0 align-items-center">
-                        <div class="col me-2">
-                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Tagihan Belum Lunas</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ $tagihanBelumLunas ?? 0 }} Siswa</div>
+    <!-- Main Layout Grid -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Left Column (Data Siswa Table) -->
+        <div class="col-lg-8 d-flex flex-column gap-4">
+            
+            <div class="dashboard-card flex-grow-1">
+                <div class="card-header-clean">
+                    <h5 class="card-title-clean">
+                        <i class="fas fa-exclamation-triangle card-title-icon text-warning"></i> Prioritas Penagihan (Belum Lunas/Terlambat)
+                    </h5>
+                    <a href="{{ route('bendahara.tagihan.index') }}" class="btn btn-sm btn-outline-primary shadow-sm" style="font-weight: 500;">
+                        Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    @if(isset($siswaRecent) && $siswaRecent->isEmpty())
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+                            <p>Belum ada data siswa terbaru.</p>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-exclamation-circle fa-2x text-gray-300"></i>
+                    @else
+                        <div class="table-responsive text-nowrap">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center" width="50">NO</th>
+                                        <th>IDENTITAS SISWA</th>
+                                        <th>KELAS</th>
+                                        <th class="text-end">TOTAL TAGIHAN</th>
+                                        <th class="text-end">SISA</th>
+                                        <th class="text-center">STATUS</th>
+                                        <th class="text-center">AKSI</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($siswaRecent as $index => $siswa)
+                                        <tr>
+                                            <td class="text-center fw-medium text-muted">{{ $index + 1 }}</td>
+                                            <td>
+                                                <div class="fw-semibold text-dark">{{ $siswa->nama_lengkap }}</div>
+                                                <small class="text-muted">{{ $siswa->nisn }}</small>
+                                            </td>
+                                            <td class="fw-medium text-primary text-uppercase small">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
+                                            <td class="currency-text text-end">Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}</td>
+                                            <td class="currency-text text-end {{ $siswa->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}">
+                                                Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}
+                                            </td>
+                                            <td class="text-center">
+                                                @if($siswa->sisa_tagihan <= 0)
+                                                    <span class="badge bg-label-success px-2 py-1"><i class="fas fa-check me-1"></i> LUNAS</span>
+                                                @else
+                                                    <span class="badge bg-label-danger px-2 py-1"><i class="fas fa-times me-1"></i> BELUM LUNAS</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ route('bendahara.tagihan.show', $siswa->id) }}" class="btn btn-sm btn-icon btn-outline-info" title="Lihat Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
+                    @endif
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column (Links & Concerns) -->
+        <div class="col-lg-4 d-flex flex-column gap-4">
+            
+            <!-- Issues / Concerns -->
+            <div>
+                <div class="alert-card alert-card-warning shadow-sm">
+                    <div style="font-size: 2rem; color: #f59e0b;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div>
+                        <div class="text-uppercase" style="font-size: 0.75rem; font-weight: 700; color: #d97706; letter-spacing: 0.5px;">Tagihan Belum Lunas</div>
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #92400e;">{{ number_format($tagihanBelumLunas ?? 0) }} Siswa</div>
+                    </div>
+                </div>
+                
+                <div class="alert-card alert-card-danger shadow-sm mb-0">
+                    <div style="font-size: 2rem; color: #ef4444;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="flex-grow-1 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-uppercase" style="font-size: 0.75rem; font-weight: 700; color: #b91c1c; letter-spacing: 0.5px;">Tagihan Terlambat</div>
+                            <div style="font-size: 1.25rem; font-weight: 700; color: #7f1d1d;">{{ number_format($tagihanTerlambat ?? 0) }} Siswa</div>
+                        </div>
+                        <a href="{{ route('bendahara.laporan.belum-lunas') }}" class="btn btn-sm btn-danger px-2 py-1 rounded shadow-sm">Detail</a>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card border-start border-danger border-4 shadow py-2 h-100">
-                <div class="card-body">
-                    <div class="row gx-0 align-items-center">
-                        <div class="col me-2">
-                            <div class="text-xs fw-bold text-danger text-uppercase mb-1">Tagihan Terlambat</div>
-                            <div class="h5 mb-0 fw-bold text-gray-800">{{ $tagihanTerlambat ?? 0 }} Siswa</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-clock fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- QUICK ACTIONS --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white border-bottom">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-bolt me-2 text-warning"></i>Aksi Cepat Keuangan</h6>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-lg-3 col-md-6 mb-2">
-                    <a href="{{ route('bendahara.pembayaran.index', ['status' => 'pending']) }}" class="btn btn-warning w-100 shadow-sm fw-bold text-white py-2">
-                        <i class="fas fa-clock me-2"></i> Validasi ({{ $pembayaranPending ?? 0 }})
-                    </a>
+            <!-- Quick Links -->
+            <div class="dashboard-card flex-grow-1">
+                <div class="card-header-clean border-bottom">
+                    <h5 class="card-title-clean">
+                        <i class="fas fa-bolt card-title-icon text-warning"></i> Menu Akses Cepat
+                    </h5>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-2">
-                    <a href="{{ route('bendahara.tagihan.bulk-create') }}" class="btn btn-primary w-100 shadow-sm fw-bold py-2">
-                        <i class="fas fa-plus-circle me-2"></i> Buat Tagihan Massal
+                
+                <div class="quick-links-grid">
+                    <a href="{{ route('bendahara.pembayaran.index', ['status' => 'pending']) }}" class="quick-link-item">
+                        <div class="position-relative">
+                            <i class="fas fa-check-double text-primary"></i>
+                            @if(($pembayaranPending ?? 0) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm" style="font-size: 0.65rem; padding: 0.35em 0.55em; transform: translate(-30%, -30%) !important;">
+                                {{ $pembayaranPending > 99 ? '99+' : $pembayaranPending }}
+                            </span>
+                            @endif
+                        </div>
+                        <span class="quick-link-text">Validasi<br>Pembayaran</span>
                     </a>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-2">
-                    <a href="{{ route('bendahara.validasi-akses.index') }}" class="btn btn-success w-100 shadow-sm fw-bold py-2">
-                        <i class="fas fa-shield-alt me-2"></i> Validasi Akses
+                    <a href="{{ route('bendahara.tagihan.bulk-create') }}" class="quick-link-item">
+                        <i class="fas fa-plus-circle text-success"></i>
+                        <span class="quick-link-text">Buat Tagihan<br>Massal</span>
                     </a>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-2">
-                    <a href="{{ route('bendahara.laporan.index') }}" class="btn btn-info w-100 shadow-sm fw-bold py-2">
-                        <i class="fas fa-print me-2"></i> Cetak Laporan
+                    <a href="{{ route('bendahara.validasi-akses.index') }}" class="quick-link-item">
+                        <i class="fas fa-id-card text-warning"></i>
+                        <span class="quick-link-text">Validasi<br>Akses</span>
+                    </a>
+                    <a href="{{ route('bendahara.promotion.validation.index') }}" class="quick-link-item">
+                        <i class="fas fa-handshake text-secondary"></i>
+                        <span class="quick-link-text">Validasi<br>Dispensasi</span>
+                    </a>
+                    <a href="{{ route('bendahara.tagihan.index') }}" class="quick-link-item">
+                        <i class="fas fa-file-invoice-dollar text-primary"></i>
+                        <span class="quick-link-text">Kelola<br>Tagihan</span>
+                    </a>
+                    <a href="{{ route('bendahara.laporan.index') }}" class="quick-link-item">
+                        <i class="fas fa-print text-info"></i>
+                        <span class="quick-link-text">Cetak<br>Laporan</span>
                     </a>
                 </div>
             </div>
+
         </div>
     </div>
 
-    {{-- TABEL DATA SISWA --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-white d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 fw-bold text-primary"><i class="fas fa-users me-2"></i>Data Siswa & Ringkasan Tagihan</h6>
-            <a href="{{ route('bendahara.tagihan.index') }}" class="btn btn-sm btn-outline-primary fw-bold px-3">
-                Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-        </div>
-        <div class="card-body p-0">
-            @if(isset($siswaRecent) && $siswaRecent->isEmpty())
-                <div class="text-center py-5 text-muted">
-                    <i class="fas fa-inbox fa-3x text-gray-200 mb-3"></i>
-                    <p>Belum ada data siswa terbaru.</p>
-                </div>
-            @else
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-center" width="50">NO</th>
-                                <th>IDENTITAS SISWA</th>
-                                <th>KELAS</th>
-                                <th>TOTAL TAGIHAN</th>
-                                <th>SUDAH BAYAR</th>
-                                <th>SISA</th>
-                                <th class="text-center">STATUS</th>
-                                <th class="text-center">AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($siswaRecent as $index => $siswa)
-                                <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $index + 1 }}</td>
-                                    <td class="align-middle">
-                                        <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>
-                                        <small class="text-muted fw-bold">{{ $siswa->nisn }}</small>
-                                    </td>
-                                    <td class="align-middle fw-bold text-primary text-uppercase small">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                                    <td class="align-middle currency-text">Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}</td>
-                                    <td class="align-middle currency-text text-success">Rp {{ number_format($siswa->total_bayar, 0, ',', '.') }}</td>
-                                    <td class="align-middle currency-text {{ $siswa->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}">
-                                        Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        @if($siswa->sisa_tagihan <= 0)
-                                            <span class="badge bg-success px-3 py-2 shadow-sm fw-bold">
-                                                <i class="fas fa-check me-1"></i> LUNAS
-                                            </span>
-                                        @else
-                                            <span class="badge bg-danger px-3 py-2 shadow-sm fw-bold">
-                                                <i class="fas fa-times me-1"></i> BELUM LUNAS
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center align-middle">
-                                        <a href="{{ route('bendahara.tagihan.show', $siswa->id) }}" class="btn btn-info btn-sm rounded-circle shadow-sm p-2" title="Lihat Riwayat Tagihan">
-                                            <i class="fas fa-eye fa-fw"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
-</div>
+@endsection
+
+@section('scripts')
+<script>
+    // Initialize tooltips if needed
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 @endsection

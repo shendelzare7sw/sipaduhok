@@ -59,11 +59,16 @@ class BendaharaController extends Controller
                 })->count(),
         ];
         
-        // Data siswa terbaru dengan tagihan (10 data)
+        // Menampilkan 5 Siswa dengan tagihan yang belum lunas (prioritas penagihan)
         $siswaRecent = Siswa::with(['kelas', 'cabang'])
             ->where('status', 'aktif')
-            ->orderBy('nama_lengkap', 'asc')
-            ->take(10)
+            ->whereHas('tagihan', function($q) use ($tahunAjaranAktif) {
+                $q->whereIn('status', ['belum_bayar', 'terlambat']);
+                if ($tahunAjaranAktif) {
+                    $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
+                }
+            })
+            ->take(5)
             ->get()
             ->map(function($siswa) use ($tahunAjaranAktif) {
                 $tagihan = Tagihan::where('siswa_id', $siswa->id)

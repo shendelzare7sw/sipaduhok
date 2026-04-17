@@ -43,12 +43,20 @@
     <!-- Custom SIPADUHOK Styles -->
     <style>
         :root {
-            /* SIPADUHOK Brand Colors */
-            --bs-primary: #165fac;
-            --bs-primary-rgb: 22, 95, 172;
-            --primary-color: #165fac;
-            --primary-dark: #0d3a6b;
-            --primary-light: #4a8fd4;
+            /* SIPADUHOK Brand Colors (Modern UI) */
+            --bs-primary: #4361ee;
+            --bs-primary-rgb: 67, 97, 238;
+            --primary-color: #4361ee;
+            --primary-dark: #2b4162;
+            --primary-light: #4895ef;
+            
+            /* Global Surface Variables */
+            --secondary-color: #64748b;
+            --surface-color: #ffffff;
+            --background-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #94a3b8;
         }
         
         /* Override Sneat primary color dengan brand SIPADUHOK */
