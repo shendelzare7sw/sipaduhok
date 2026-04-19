@@ -11,886 +11,580 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
-@section('content')
+@section('styles')
 <style>
-/* Stats Cards */
-.stat-card {
-    padding: 24px;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    height: 100%;
-    color: white;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-content {
-    position: relative;
-    z-index: 2;
-}
-
-.stat-title {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
-
-.stat-number {
-    font-size: 38px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    line-height: 1.2;
-}
-
-.stat-desc {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-.stat-icon-bg {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 70px;
-    opacity: 0.15;
-    z-index: 1;
-}
-
-.bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.bg-gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.bg-gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.bg-gradient-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.bg-gradient-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-.bg-gradient-teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
-
-/* Grid System */
-.row { display: flex; flex-wrap: wrap; margin: -12px; }
-.col-md-3 { flex: 0 0 25%; max-width: 25%; padding: 12px; }
-.col-md-4 { flex: 0 0 33.333%; max-width: 33.333%; padding: 12px; }
-.col-12 { flex: 0 0 100%; max-width: 100%; padding: 12px; }
-
-@media (max-width: 992px) {
-    .col-md-3, .col-md-4 { flex: 0 0 50%; max-width: 50%; }
-}
-
-@media (max-width: 576px) {
-    .col-md-3, .col-md-4 { flex: 0 0 100%; max-width: 100%; }
-}
-
-/* Card */
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    margin-bottom: 24px;
-    border: none;
-}
-
-.card-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fff;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.card-header h5 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-}
-
-.card-body {
-    padding: 24px;
-}
-
-/* Filter Section */
-.filter-section {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.search-box {
-    position: relative;
-}
-
-.search-box input {
-    padding: 10px 16px 10px 42px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    width: 220px;
-    transition: all 0.3s;
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.search-box i {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-}
-
-.filter-select {
-    padding: 10px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-    min-width: 160px;
-    cursor: pointer;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-/* Table */
-.table-responsive {
-    overflow-x: auto;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table th {
-    text-align: left;
-    padding: 14px 16px;
-    background: #f9fafb;
-    color: #4b5563;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.table td {
-    padding: 16px;
-    border-bottom: 1px solid #f3f4f6;
-    color: #374151;
-    font-size: 14px;
-    vertical-align: middle;
-}
-
-.table tr:last-child td {
-    border-bottom: none;
-}
-
-.table tr:hover td {
-    background: #f9fafb;
-}
-
-/* Badges */
-.badge {
-    padding: 6px 12px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.badge-success { background: #dcfce7; color: #166534; }
-.badge-info { background: #e0f2fe; color: #075985; }
-.badge-warning { background: #fef3c7; color: #92400e; }
-.badge-purple { background: #f3e8ff; color: #7c3aed; }
-.badge-pink { background: #fce7f3; color: #be185d; }
-.badge-teal { background: #ccfbf1; color: #0d9488; }
-
-/* Jenjang Badges */
-.badge-kb { background: #fef3c7; color: #92400e; }
-.badge-tka { background: #fed7aa; color: #9a3412; }
-.badge-tkb { background: #fecaca; color: #991b1b; }
-.badge-sd { background: #dcfce7; color: #166534; }
-.badge-smp { background: #e0f2fe; color: #075985; }
-.badge-sma { background: #f3e8ff; color: #7c3aed; }
-
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.btn-outline {
-    background: white;
-    border: 1px solid #d1d5db;
-    color: #374151;
-}
-
-.btn-outline:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-}
-
-.btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border-radius: 8px;
-}
-
-.btn-light-primary { background: #eff6ff; color: #3b82f6; border: none; }
-.btn-light-primary:hover { background: #dbeafe; }
-
-.btn-light-warning { background: #fffbeb; color: #d97706; border: none; }
-.btn-light-warning:hover { background: #fef3c7; }
-
-.btn-light-danger { background: #fef2f2; color: #dc2626; border: none; }
-.btn-light-danger:hover { background: #fee2e2; }
-
-.btn-light-success { background: #f0fdf4; color: #16a34a; border: none; }
-.btn-light-success:hover { background: #dcfce7; }
-
-.btn-light-purple { background: #faf5ff; color: #7c3aed; border: none; }
-.btn-light-purple:hover { background: #f3e8ff; }
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-}
-
-/* Kelas Info */
-.kelas-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.kelas-nama {
-    font-weight: 600;
-    color: #111827;
-    font-size: 15px;
-}
-
-.kelas-kode {
-    font-size: 11px;
-    color: #6b7280;
-    font-family: 'Monaco', 'Consolas', monospace;
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    width: fit-content;
-}
-
-/* Wali Kelas */
-.wali-kelas-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.wali-avatar {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 12px;
-    flex-shrink: 0;
-}
-
-.wali-name {
-    font-weight: 500;
-    color: #111827;
-}
-
-/* Kuota Progress */
-.kuota-progress {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.kuota-bar {
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 4px;
-    overflow: hidden;
-    width: 100px;
-}
-
-.kuota-bar-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s;
-}
-
-.kuota-bar-fill.low { background: #10b981; }
-.kuota-bar-fill.medium { background: #f59e0b; }
-.kuota-bar-fill.high { background: #ef4444; }
-
-.kuota-text {
-    font-size: 12px;
-    color: #6b7280;
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #9ca3af;
-}
-
-.empty-state i {
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-.empty-state h3 {
-    font-size: 18px;
-    color: #6b7280;
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    font-size: 14px;
-    margin-bottom: 24px;
-}
-
-/* Pagination */
-.pagination-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.pagination-info {
-    font-size: 14px;
-    color: #6b7280;
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1050;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    align-items: center;
-    justify-content: center;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-dialog {
-    width: 90%;
-    max-width: 450px;
-    margin: auto;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-    overflow: hidden;
-}
-
-.modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);
-}
-
-.modal-header h5 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #dc2626;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.modal-body {
-    padding: 24px;
-    text-align: center;
-}
-
-.modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    background: #f9fafb;
-}
-
-.btn-close {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #9ca3af;
-    cursor: pointer;
-}
-
-.btn-secondary {
-    background: #6b7280;
-    color: white;
-    padding: 10px 20px;
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    padding: 10px 20px;
-}
-
-/* Print Button */
-.btn-print {
-    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-    color: white;
-}
-
-.btn-print:hover {
-    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-}
-
-/* ── Mobile Responsive ── */
-@media (max-width: 767.98px) {
-    /* Card header: wrap buttons */
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .card-header > div:last-child {
-        flex-wrap: wrap !important;
-        width: 100%;
-    }
-    .card-header > div:last-child .btn {
-        flex: 1 1 auto;
-        min-width: 120px;
-        justify-content: center;
-        font-size: 13px;
-        padding: 8px 12px;
+    /* Styling variables inherited from Sneat layout or custom */
+    :root {
+        --kls-primary: #4361ee;
+        --kls-success: #10b981;
+        --kls-warning: #f59e0b;
+        --kls-danger: #ef4444;
+        --kls-info: #06b6d4;
+        --kls-purple: #8b5cf6;
+        --kls-surface: #ffffff;
+        --kls-bg: #f8fafc;
+        --kls-border: #e2e8f0;
+        --kls-text: #1e293b;
+        --kls-muted: #64748b;
+        --kls-radius: 12px;
     }
 
-    /* Filter: stack vertically */
-    .filter-section {
-        flex-direction: column !important;
-        align-items: stretch !important;
-    }
-    .filter-section .search-box {
-        width: 100%;
-    }
-    .filter-section .search-box input {
-        width: 100% !important;
-    }
-    .filter-section .filter-select,
-    .filter-section .btn {
-        width: 100% !important;
-    }
-
-    /* Stat cards */
-    .stat-card { padding: 16px; }
-    .stat-number { font-size: 28px; }
-
-    /* Table → Card per row */
-    .table-card-mobile thead { display: none; }
-    .table-card-mobile tbody tr {
-        display: block;
-        position: relative;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        margin-bottom: 12px;
+    .kls-card {
+        background: var(--kls-surface);
+        border: 1px solid var(--kls-border);
+        border-radius: var(--kls-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        margin-bottom: 1.5rem;
         overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        background: #fff;
     }
-    .table-card-mobile tbody td {
+
+    .kls-card-header {
+        background: transparent;
+        border-bottom: 1px solid var(--kls-border);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .kls-card-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--kls-text);
+        margin: 0;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 10px 14px;
-        border: none !important;
-        border-bottom: 1px solid #f3f4f6 !important;
-        min-height: 44px;
-        font-size: 13px;
+        gap: 0.5rem;
     }
-    .table-card-mobile tbody td.mobile-card-head {
-        background: #f8fafc;
-        padding: 12px 14px;
-        border-bottom: 2px solid #e5e7eb !important;
-        justify-content: flex-start;
-        gap: 10px;
-        font-size: 14px;
+
+    /* Stat Cards */
+    .stat-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-widget {
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--kls-surface);
+        border: 1px solid var(--kls-border);
+        border-radius: var(--kls-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
+
+    .stat-widget:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .stat-details {
+        flex-grow: 1;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--kls-text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--kls-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-desc {
+        font-size: 0.7rem;
+        color: var(--kls-muted);
+        margin-top: 0.2rem;
+    }
+
+    /* Table Improvements */
+    .table-clean {
+        margin: 0;
+    }
+    
+    .table-clean th {
+        background: var(--kls-bg);
+        border-bottom: 1px solid var(--kls-border);
+        color: var(--kls-muted);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+    }
+
+    .table-clean td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--kls-border);
+        color: var(--kls-text);
+        font-size: 0.9rem;
+    }
+
+    .table-clean tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .table-clean tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge-jnj {
+        padding: 0.35em 0.6em;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    /* Jenjang badges */
+    .bg-jnj-kb { background: #fef3c7; color: #92400e; }
+    .bg-jnj-tka { background: #fed7aa; color: #9a3412; }
+    .bg-jnj-tkb { background: #fecaca; color: #991b1b; }
+    .bg-jnj-sd { background: #dcfce7; color: #166534; }
+    .bg-jnj-smp { background: #e0f2fe; color: #075985; }
+    .bg-jnj-sma { background: #f3e8ff; color: #7c3aed; }
+
+    .action-btns .btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+
+    /* Filters */
+    .filter-wrapper {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+        background: var(--kls-bg);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--kls-border);
+    }
+    
+    .search-box {
+        position: relative;
+        flex-grow: 1;
+        min-width: 200px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 0.45rem 1rem 0.45rem 2.2rem;
+        border: 1px solid var(--kls-border);
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+    .search-box i {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--kls-muted);
+    }
+
+    .filter-select {
+        min-width: 150px;
+        font-size: 0.85rem;
+        padding: 0.45rem 2rem 0.45rem 0.75rem;
+        border-color: var(--kls-border);
+        border-radius: 8px;
+    }
+
+    /* Kelas styles */
+    .kelas-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .kelas-nama {
+        font-weight: 600;
+        color: var(--kls-text);
+        font-size: 0.95rem;
+    }
+    .kelas-kode {
+        font-size: 0.75rem;
+        color: var(--kls-muted);
+        background: var(--kls-bg);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+        width: fit-content;
+        font-family: inherit;
+    }
+
+    /* Wali Kelas */
+    .wali-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+    .wali-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(139, 92, 246, 0.15);
+        color: var(--kls-purple);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
         font-weight: 600;
     }
-    .table-card-mobile tbody td[data-label]::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 10px;
-        text-transform: uppercase;
-        color: #9ca3af;
-        letter-spacing: 0.5px;
-        flex-shrink: 0;
-        padding-right: 10px;
-        min-width: 75px;
-    }
-    .table-card-mobile tbody td.mobile-card-full {
+
+    /* Kuota progress */
+    .kuota-progress {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
+        gap: 4px;
+        width: 120px;
     }
-    .table-card-mobile tbody td.mobile-card-full::before { min-width: unset; }
-    .table-card-mobile tbody td.mobile-card-actions {
-        border-bottom: none !important;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        gap: 6px;
-        padding: 10px 14px;
+    .kuota-bar {
+        height: 6px;
+        background: var(--kls-border);
+        border-radius: 4px;
+        overflow: hidden;
     }
-    /* Kuota bar: adapt on mobile */
-    .kuota-bar { width: 100%; max-width: 160px; }
-    /* Action buttons centered */
-    .action-buttons { justify-content: flex-end; }
-}
+    .kuota-fill {
+        height: 100%;
+        border-radius: 4px;
+    }
+    .kuota-text {
+        font-size: 0.75rem;
+        color: var(--kls-text);
+        text-align: right;
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    }
+
+    @media (max-width: 768px) {
+        .stat-row { grid-template-columns: 1fr; }
+        .kls-card-header { flex-direction: column; align-items: stretch; }
+        .filter-wrapper { flex-direction: column; align-items: stretch; }
+        
+        /* Actions in header mobile */
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .header-actions .btn { flex-grow: 1; justify-content: center; font-size: 0.8rem;}
+
+        /* Mobile Card Table */
+        .table-clean thead { display: none; }
+        .table-clean tbody tr {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid var(--kls-border);
+            padding: 0;
+            background: #fff;
+        }
+        .table-clean tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 1rem;
+        }
+        .table-clean tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--kls-muted);
+            text-transform: uppercase;
+        }
+        .table-clean tbody td.mobile-card-head {
+            background: var(--kls-bg);
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1rem;
+        }
+        .table-clean tbody td.mobile-card-head::before { display: none; }
+        .td-actions {
+            margin-top: 0;
+            padding: 1rem !important;
+            justify-content: space-between !important;
+            background: #f8fafc;
+            gap: 1rem;
+        }
+        .kuota-progress { width: 100%; align-items: flex-end; }
+        .wali-wrapper { justify-content: flex-end; }
+    }
 </style>
+@endsection
 
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-    {{-- Stats Section --}}
-    <div class="row" style="margin-bottom: 24px;">
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-blue">
-                <div class="stat-content">
-                    <div class="stat-title">Total Kelas</div>
-                    <div class="stat-number">{{ $stats['totalKelas'] }}</div>
-                    <div class="stat-desc">{{ $currentTahunAjaran ? $currentTahunAjaran->nama_tahun_ajaran : 'Semua Tahun' }}</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-chalkboard"></i>
-                </div>
+@section('content')
+
+    <!-- Stats Row -->
+    <div class="stat-row">
+        <!-- Total Kelas -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+                <i class="fas fa-chalkboard"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalKelas'] }}</div>
+                <div class="stat-label">Total Kelas</div>
+                <div class="stat-desc">{{ $currentTahunAjaran ? $currentTahunAjaran->nama_tahun_ajaran : 'Semua Tahun' }}</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-green">
-                <div class="stat-content">
-                    <div class="stat-title">Total Siswa</div>
-                    <div class="stat-number">{{ $stats['totalSiswa'] }}</div>
-                    <div class="stat-desc">Siswa aktif terdaftar</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
+
+        <!-- Total Siswa -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalSiswa'] }}</div>
+                <div class="stat-label">Siswa Terdaftar</div>
+                <div class="stat-desc">Di tahun akademik pilihan</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-purple">
-                <div class="stat-content">
-                    <div class="stat-title">Ada Wali Kelas</div>
-                    <div class="stat-number">{{ $stats['kelasWithWali'] }}</div>
-                    <div class="stat-desc">Kelas sudah ada wali</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-user-tie"></i>
-                </div>
+
+        <!-- Ada Wali -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['kelasWithWali'] }}</div>
+                <div class="stat-label">Terisi Wali Kelas</div>
+                <div class="stat-desc">Telah di-assign wali</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-orange">
-                <div class="stat-content">
-                    <div class="stat-title">Belum Ada Wali</div>
-                    <div class="stat-number">{{ $stats['kelasWithoutWali'] }}</div>
-                    <div class="stat-desc">Perlu ditunjuk wali</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-user-clock"></i>
-                </div>
+
+        <!-- Belum Ada Wali -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;">
+                <i class="fas fa-user-clock"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['kelasWithoutWali'] }}</div>
+                <div class="stat-label">Belum Ada Wali</div>
+                <div class="stat-desc text-warning">Perlu tindakan</div>
             </div>
         </div>
     </div>
 
-    {{-- Main Card --}}
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h5><i class="fas fa-chalkboard" style="color: #3b82f6; margin-right: 10px;"></i>Daftar Kelas</h5>
-                <small style="color: #6b7280;">Kelola data kelas per tahun ajaran</small>
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button type="button" class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#copyClassModal" style="background: #e0f2fe; border-color: #7dd3fc; color: #0284c7;">
-                    <i class="fas fa-copy"></i> Salin Data Kelas
+    <!-- Main Card -->
+    <div class="kls-card">
+        <div class="kls-card-header">
+            <h5 class="kls-card-title">
+                <i class="fas fa-list text-primary"></i> Daftar Kelas
+            </h5>
+            <div class="header-actions d-flex gap-2">
+                <button type="button" class="btn btn-info text-white d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#copyClassModal">
+                    <i class="fas fa-copy"></i> <span class="d-none d-sm-inline">Salin Data</span>
                 </button>
-                <a href="{{ route('admin.kelas.print', request()->query()) }}" class="btn btn-print" target="_blank">
-                    <i class="fas fa-print"></i> Cetak
+                <a href="{{ route('admin.kelas.print', request()->query()) }}" class="btn btn-secondary text-white d-flex align-items-center gap-1" target="_blank">
+                    <i class="fas fa-print"></i> <span class="d-none d-sm-inline">Cetak</span>
                 </a>
-                <a href="{{ route('admin.kelas.import') }}" class="btn btn-outline" style="background: #dcfce7; border-color: #86efac; color: #166534;">
-                    <i class="fas fa-file-import"></i> Import Excel
+                <a href="{{ route('admin.kelas.import') }}" class="btn btn-success text-white d-flex align-items-center gap-1">
+                    <i class="fas fa-file-import"></i> <span class="d-none d-sm-inline">Import Excel</span>
                 </a>
-                <a href="{{ route('admin.kelas.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Tambah Kelas
+                <a href="{{ route('admin.kelas.create') }}" class="btn btn-primary d-flex align-items-center gap-1">
+                    <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Kelas Baru</span>
                 </a>
             </div>
         </div>
-        
-        <div class="card-body">
-            {{-- Filter Section --}}
-            <form action="{{ route('admin.kelas.index') }}" method="GET">
-                <div class="filter-section">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" placeholder="Cari kelas..." value="{{ request('search') }}">
-                    </div>
-                    
-                    <select name="tahun_ajaran_id" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Tahun Ajaran</option>
-                        @foreach($tahunAjarans as $ta)
-                            <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
-                                {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
-                    
-                    <select name="jenjang" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Jenjang</option>
-                        @foreach($jenjangs as $j)
-                            <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                        @endforeach
-                    </select>
-                    
-                    <select name="cabang_id" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Cabang</option>
-                        @foreach($cabangs as $c)
-                            <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama_cabang }}</option>
-                        @endforeach
-                    </select>
-                    
-                    <button type="submit" class="btn btn-outline">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-                    
-                    @if(request()->hasAny(['search', 'jenjang', 'cabang_id']) || (request('tahun_ajaran_id') && request('tahun_ajaran_id') != $currentTahunAjaran?->id))
-                        <a href="{{ route('admin.kelas.index') }}" class="btn btn-outline">
-                            <i class="fas fa-times"></i> Reset
-                        </a>
-                    @endif
-                </div>
-            </form>
 
-            {{-- Table --}}
-            @if($kelas->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-card-mobile">
-                        <thead>
-                            <tr>
-                                <th>Kelas</th>
-                                <th>Jenjang</th>
-                                <th>Cabang</th>
-                                <th>Wali Kelas</th>
-                                <th>Siswa / Kuota</th>
-                                <th>Tahun Ajaran</th>
-                                <th style="text-align: center; width: 180px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($kelas as $k)
-                            <tr>
-                                <td class="mobile-card-head">
-                                    <div class="kelas-info">
-                                        <span class="kelas-nama">{{ $k->nama_kelas }}</span>
-                                        <span class="kelas-kode">{{ $k->kode_kelas }}</span>
-                                    </div>
-                                </td>
-                                <td data-label="Jenjang">
-                                    @php
-                                        $jenjangClass = [
-                                            'KB' => 'badge-kb',
-                                            'TKA' => 'badge-tka',
-                                            'TKB' => 'badge-tkb',
-                                            'SD' => 'badge-sd',
-                                            'SMP' => 'badge-smp',
-                                            'SMA' => 'badge-sma',
-                                        ][$k->jenjang] ?? 'badge-info';
-                                    @endphp
-                                    <span class="badge {{ $jenjangClass }}">{{ $k->jenjang }}</span>
-                                </td>
-                                <td data-label="Cabang">
-                                    <span style="color: #6b7280;">{{ $k->cabang->nama_cabang ?? '-' }}</span>
-                                </td>
-                                <td data-label="Wali Kelas" class="mobile-card-full">
-                                    @if($k->waliKelasAssignments->count() > 0)
-                                        @foreach($k->waliKelasAssignments as $assignment)
-                                            <div class="wali-kelas-info" style="margin-bottom: 4px;">
-                                                <div class="wali-avatar">{{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}</div>
-                                                <span class="wali-name">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <span class="badge badge-warning">
-                                            <i class="fas fa-exclamation-circle"></i> Belum ditunjuk
-                                        </span>
-                                    @endif
-                                </td>
-                                <td data-label="Siswa">
-                                    @php
-                                        $percentage = $k->kuota_siswa > 0 ? ($k->siswa_count / $k->kuota_siswa) * 100 : 0;
-                                        $barClass = $percentage < 50 ? 'low' : ($percentage < 80 ? 'medium' : 'high');
-                                    @endphp
-                                    <div class="kuota-progress">
-                                        <div class="kuota-bar">
-                                            <div class="kuota-bar-fill {{ $barClass }}" style="width: {{ min($percentage, 100) }}%"></div>
-                                        </div>
-                                        <span class="kuota-text">{{ $k->siswa_count }} / {{ $k->kuota_siswa }} siswa</span>
-                                    </div>
-                                </td>
-                                <td data-label="T. Ajaran">
-                                    <span class="badge badge-info">{{ $k->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
-                                </td>
-                                <td class="mobile-card-actions">
-                                    <div class="action-buttons">
-                                        <a href="{{ route('admin.kelas.show', $k) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.kelas.manage-siswa', $k) }}" class="btn btn-icon btn-light-success" title="Kelola Siswa">
-                                            <i class="fas fa-users"></i>
-                                        </a>
-                                        <a href="{{ route('admin.kelas.edit', $k) }}" class="btn btn-icon btn-light-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-icon btn-light-danger" title="Hapus" onclick="confirmDelete({{ $k->id }}, '{{ addslashes($k->nama_kelas) }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+        <!-- Filters Form -->
+        <form action="{{ route('admin.kelas.index') }}" method="GET" class="mb-0">
+            <div class="filter-wrapper">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Cari nama atau kode kelas..." value="{{ request('search') }}">
                 </div>
-
-                {{-- Pagination --}}
-                @if($kelas->hasPages())
-                    <div class="pagination-wrapper">
-                        <div class="pagination-info">
-                            Menampilkan {{ $kelas->firstItem() }} - {{ $kelas->lastItem() }} dari {{ $kelas->total() }} kelas
-                        </div>
-                        <div>
-                            {{ $kelas->withQueryString()->links() }}
-                        </div>
-                    </div>
-                @endif
-            @else
-                <div class="empty-state">
-                    <i class="fas fa-chalkboard"></i>
-                    <h3>Belum Ada Data Kelas</h3>
-                    <p>Silakan tambahkan data kelas untuk tahun ajaran ini.</p>
-                    <a href="{{ route('admin.kelas.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Tambah Kelas Pertama
+                
+                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Tahun Ajaran</option>
+                    @foreach($tahunAjarans as $ta)
+                        <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
+                            {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                
+                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Jenjang</option>
+                    @foreach($jenjangs as $j)
+                        <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                    @endforeach
+                </select>
+                
+                <select name="cabang_id" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Cabang</option>
+                    @foreach($cabangs as $c)
+                        <option value="{{ $c->id }}" {{ request('cabang_id') == $c->id ? 'selected' : '' }}>{{ $c->nama_cabang }}</option>
+                    @endforeach
+                </select>
+                
+                <button type="submit" class="btn btn-secondary btn-sm px-3" style="border-radius: 8px;">
+                    <i class="fas fa-filter me-1"></i> Filter
+                </button>
+                
+                @if(request()->hasAny(['search', 'jenjang', 'cabang_id']) || (request('tahun_ajaran_id') && request('tahun_ajaran_id') != $currentTahunAjaran?->id))
+                    <a href="{{ route('admin.kelas.index') }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                        <i class="fas fa-times"></i> Reset
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-clean">
+                <thead>
+                    <tr>
+                        <th width="280">Info Kelas</th>
+                        <th>Jenjang</th>
+                        <th>Wali Kelas</th>
+                        <th width="120">Kuota / Siswa</th>
+                        <th class="text-end" width="140">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($kelas as $k)
+                    <tr>
+                        <td class="mobile-card-head" data-label="Kelas">
+                            <div class="kelas-info">
+                                <span class="kelas-nama">{{ $k->nama_kelas }}</span>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="kelas-kode">{{ $k->kode_kelas }}</span>
+                                    <span class="text-muted" style="font-size: 0.75rem;"><i class="fas fa-building me-1"></i>{{ $k->cabang->nama_cabang ?? '-' }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Jenjang">
+                            @php
+                                $jenjangClass = [
+                                    'KB' => 'bg-jnj-kb', 'TKA' => 'bg-jnj-tka', 'TKB' => 'bg-jnj-tkb',
+                                    'SD' => 'bg-jnj-sd', 'SMP' => 'bg-jnj-smp', 'SMA' => 'bg-jnj-sma',
+                                ][$k->jenjang] ?? 'bg-light text-dark';
+                            @endphp
+                            <span class="badge {{ $jenjangClass }} badge-jnj">{{ $k->jenjang }}</span>
+                        </td>
+                        <td data-label="Wali Kelas">
+                            @if($k->waliKelasAssignments->count() > 0)
+                                <div class="d-flex flex-column gap-1">
+                                @foreach($k->waliKelasAssignments as $assignment)
+                                    <div class="wali-wrapper">
+                                        <div class="wali-avatar">{{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}</div>
+                                        <span style="font-size: 0.85rem;" class="fw-medium text-dark">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
+                                    </div>
+                                @endforeach
+                                </div>
+                            @else
+                                <span class="badge bg-label-warning px-2 py-1"><i class="fas fa-exclamation-circle me-1"></i> Belum ada</span>
+                            @endif
+                        </td>
+                        <td data-label="Kuota Siswa">
+                            @php
+                                $percentage = $k->kuota_siswa > 0 ? ($k->siswa_count / $k->kuota_siswa) * 100 : 0;
+                                $barColor = $percentage < 50 ? '#10b981' : ($percentage < 80 ? '#f59e0b' : '#ef4444');
+                            @endphp
+                            <div class="kuota-progress">
+                                <span class="kuota-text">
+                                    <span style="color: {{ $barColor }}">{{ $k->siswa_count }}</span> / {{ $k->kuota_siswa ?: '-' }}
+                                </span>
+                                <div class="kuota-bar">
+                                    <div class="kuota-fill" style="width: {{ min($percentage, 100) }}%; background: {{ $barColor }};"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="td-actions text-end" data-label="Aksi">
+                            <div class="d-flex justify-content-end gap-1 action-btns">
+                                <a href="{{ route('admin.kelas.show', $k->id) }}" class="btn btn-sm btn-info text-white" title="Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('admin.kelas.edit', $k->id) }}" class="btn btn-sm btn-warning text-white" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger text-white" onclick="confirmDelete({{ $k->id }}, '{{ addslashes($k->nama_kelas) }}')" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                                <i class="fas fa-chalkboard fs-1 mb-3" style="color: #e2e8f0;"></i>
+                                <h6 class="mb-1">Tidak Ada Data Kelas</h6>
+                                <p class="small mb-0">Belum ada kelas yang ditambahkan atau tidak ada hasil pencarian.</p>
+                                <a href="{{ route('admin.kelas.create') }}" class="btn btn-primary btn-sm mt-3 px-3 rounded-pill">
+                                    <i class="fas fa-plus me-1"></i> Tambah Kelas Baru
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        
+        @if($kelas->hasPages())
+        <div class="border-top p-3 d-flex justify-content-between align-items-center flex-wrap">
+            <span class="text-muted small">Menampilkan {{ $kelas->firstItem() ?? 0 }} - {{ $kelas->lastItem() ?? 0 }} dari total {{ $kelas->total() }}</span>
+            <div class="mt-2 mt-sm-0">
+                {{ $kelas->appends(request()->query())->links() }}
+            </div>
+        </div>
+        @endif
     </div>
+
 </div>
 
-{{-- Delete Modal (Single Reusable) --}}
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border: none; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); overflow: hidden;">
-            <button type="button" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.05); border: none; color: #6b7280; transition: all 0.2s; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; z-index: 10;" onmouseover="this.style.background='rgba(0,0,0,0.1)'; this.style.color='#1f2937'" onmouseout="this.style.background='rgba(0,0,0,0.05)'; this.style.color='#6b7280'">
-                <i class="fas fa-times" style="font-size: 16px;"></i>
-            </button>
-            <div class="modal-body" style="padding: 40px 30px 30px; text-align: center;">
-                <div style="width: 80px; height: 80px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 36px; color: #ef4444;"></i>
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-0 pb-4">
+                <div class="mb-3">
+                    <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-trash-alt fs-3 text-danger"></i>
+                    </div>
                 </div>
+                <h5 class="fw-bold mb-1">Hapus Kelas?</h5>
+                <p class="text-muted mb-4" style="font-size: 0.9rem;">Kelas <span id="deleteItemName" class="fw-bold text-dark"></span> akan dihapus permanen.</p>
                 
-                <h4 style="font-weight: 700; color: #111827; margin-bottom: 12px;">Konfirmasi Hapus</h4>
-                
-                <p style="color: #4b5563; font-size: 15px; margin-bottom: 24px; line-height: 1.6;">
-                    Apakah Anda yakin ingin menghapus kelas:<br>
-                    <strong style="color: #111827; font-size: 18px;" id="deleteKelasName"></strong>?
-                </p>
-                
-                <div style="background: #fef2f2; border: 1px dashed #fca5a5; border-radius: 12px; padding: 16px; margin-bottom: 28px; text-align: left; display: flex; align-items: flex-start; gap: 12px;">
-                    <i class="fas fa-exclamation-circle" style="color: #ef4444; font-size: 20px; margin-top: 2px;"></i>
-                    <p style="color: #b91c1c; font-size: 13px; margin: 0; line-height: 1.5; font-weight: 500;">
-                        Perhatian: Data kelas yang dihapus beserta seluruh data terkait di dalamnya tidak dapat dikembalikan.
-                    </p>
-                </div>
-                
-                <div style="display: flex; gap: 16px;">
-                    <button type="button" class="btn" data-bs-dismiss="modal" style="flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; background: #f1f5f9; color: #475569; border: none; transition: all 0.2s; justify-content: center;" onmouseover="this.style.background='#e2e8f0'; this.style.color='#1e293b'" onmouseout="this.style.background='#f1f5f9'; this.style.color='#475569'">
-                        Batal
-                    </button>
-                    <form id="deleteForm" method="POST" style="flex: 1; margin: 0;">
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger" style="width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; border: none; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); justify-content: center;">
-                            <i class="fas fa-trash me-2"></i> Ya, Hapus Kelas
-                        </button>
+                        <button type="submit" class="btn btn-danger px-4">Hapus</button>
                     </form>
                 </div>
             </div>
@@ -898,39 +592,25 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
     </div>
 </div>
 
-<script>
-function confirmDelete(id, name) {
-    // Set the kelas name in the modal
-    document.getElementById('deleteKelasName').textContent = name;
-
-    // Set the form action URL
-    const form = document.getElementById('deleteForm');
-    form.action = "{{ route('admin.kelas.index') }}/" + id;
-
-    // Show the modal using Bootstrap 5 API
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
-}
-</script>
-
-{{-- Copy Class Modal --}}
+<!-- Copy Class Modal -->
 <div class="modal fade" id="copyClassModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold text-white"><i class="fas fa-copy me-2"></i>Salin Data Kelas</h5>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary px-4 py-3">
+                <h5 class="modal-title text-white m-0 d-flex align-items-center gap-2"><i class="fas fa-copy"></i> Salin Data Kelas</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('admin.kelas.copy') }}" method="POST">
                 @csrf
-                <div class="modal-body text-start">
-                    <div class="alert alert-info mb-3">
-                        <small><i class="fas fa-info-circle me-1"></i> Fitur ini akan menyalin semua struktur kelas (Nama, Jenjang, Kuota) ke Tahun Ajaran baru. Data siswa tidak akan ikut disalin.</small>
+                <div class="modal-body px-4 py-4">
+                    <div class="alert alert-info py-2 px-3 mb-4 rounded border-0" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i> Menyalin kelas hanya akan menyalin data master kelas, tidak termasuk data siswa dan guru pengajar.
                     </div>
-
+                    
                     <div class="mb-3">
-                        <label class="form-label">Dari Tahun Ajaran (Sumber)</label>
-                        <select name="source_tahun_ajaran_id" class="form-select" required>
+                        <label class="form-label fw-bold text-dark">Dari Tahun Ajaran</label>
+                        <select name="from_tahun_ajaran_id" class="form-select form-select-lg" required>
+                            <option value="">Pilih Tahun Ajaran Asal...</option>
                             @foreach($tahunAjarans as $ta)
                                 <option value="{{ $ta->id }}">{{ $ta->nama_tahun_ajaran }}</option>
                             @endforeach
@@ -938,20 +618,36 @@ function confirmDelete(id, name) {
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Ke Tahun Ajaran (Target)</label>
-                        <select name="target_tahun_ajaran_id" class="form-select" required>
+                        <label class="form-label fw-bold text-dark">Ke Tahun Ajaran</label>
+                        <select name="to_tahun_ajaran_id" class="form-select form-select-lg" required>
+                            <option value="">Pilih Tahun Ajaran Tujuan...</option>
                             @foreach($tahunAjarans as $ta)
-                                <option value="{{ $ta->id }}">{{ $ta->nama_tahun_ajaran }}</option>
+                                <option value="{{ $ta->id }}" {{ $currentTahunAjaran && $currentTahunAjaran->id == $ta->id ? 'selected' : '' }}>
+                                    {{ $ta->nama_tahun_ajaran }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Proses Salin</button>
+                <div class="modal-footer px-4 py-3 bg-light border-top-0">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary px-4"><i class="fas fa-paste me-2"></i>Mulai Menyalin</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@endsection
+
+@section('scripts')
+<script>
+    function confirmDelete(id, name) {
+        document.getElementById('deleteItemName').textContent = name;
+        const form = document.getElementById('deleteForm');
+        form.action = "{{ route('admin.kelas.index') }}/" + id;
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+</script>
 @endsection

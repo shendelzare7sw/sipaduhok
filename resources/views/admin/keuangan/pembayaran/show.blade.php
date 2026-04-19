@@ -211,8 +211,31 @@
         </div>
     </div>
 
-    {{-- Form Validasi (jika masih pending) --}}
-    @if($pembayaran->status_validasi === 'pending')
+    {{-- Cek status kadaluarsa --}}
+    @php
+        $isKadaluarsa = $pembayaran->metode_pembayaran === 'midtrans' && $pembayaran->status_validasi === 'pending' && $pembayaran->created_at < now()->subHours(24);
+    @endphp
+
+    {{-- Info Kadaluarsa --}}
+    @if($isKadaluarsa)
+        <div class="card shadow mb-4" style="border-left: 4px solid #6b7280;">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-ban fa-2x text-secondary me-3"></i>
+                    <div>
+                        <h6 class="fw-bold text-secondary mb-1">Pembayaran Kadaluarsa</h6>
+                        <p class="mb-0 text-muted small">
+                            Sesi pembayaran Midtrans ini telah melewati batas waktu 24 jam dan tidak memerlukan validasi.
+                            Siswa perlu membuat transaksi pembayaran baru jika ingin melanjutkan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Form Validasi (jika masih pending dan belum kadaluarsa) --}}
+    @if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa)
         <div class="card shadow mb-4 validation-card">
             <div class="card-body">
                 <h5 class="mb-4 fw-bold">
@@ -280,7 +303,7 @@
 </div>
 </div>
 
-@if($pembayaran->status_validasi === 'pending')
+@if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa)
 {{-- Modal Setujui --}}
 <div class="modal fade" id="setujuiModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

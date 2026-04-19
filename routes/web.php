@@ -462,6 +462,10 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/api/tagihan-preview/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'getTagihanPreview'])->name('api.tagihan-preview');
 
                 Route::get('/cetak-laporan', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'cetakLaporan'])->name('cetak-laporan');
+
+                // Reset Tagihan (Admin Only - masa percobaan)
+                Route::post('/reset-tagihan', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'resetTagihan'])->name('reset-tagihan');
+
                 Route::get('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'show'])->name('show');
                 Route::get('/{siswa}/edit', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'edit'])->name('edit');
                 Route::put('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'update'])->name('update');

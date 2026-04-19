@@ -2,963 +2,487 @@
 
 @section('title', 'Manajemen Cabang')
 
-@section('page-title', 'Manajemen Cabang')
-@section('page-subtitle', 'Kelola data cabang/lokasi PKBM House of Knowledge')
+@section('page-title', 'Data Cabang')
+@section('page-subtitle', 'Kelola data lokasi dan cabang PKBM House of Knowledge')
 
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
-@section('content')
+@section('styles')
 <style>
-/* Stats Cards */
-.stat-card {
-    padding: 24px;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    height: 100%;
-    color: white;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-content {
-    position: relative;
-    z-index: 2;
-}
-
-.stat-title {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
-
-.stat-number {
-    font-size: 38px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    line-height: 1.2;
-}
-
-.stat-desc {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-.stat-icon-bg {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 70px;
-    opacity: 0.15;
-    z-index: 1;
-}
-
-.bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.bg-gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.bg-gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.bg-gradient-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.bg-gradient-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
-
-/* Grid System */
-.row { display: flex; flex-wrap: wrap; margin: -12px; }
-.col-md-3 { flex: 0 0 25%; max-width: 25%; padding: 12px; }
-.col-12 { flex: 0 0 100%; max-width: 100%; padding: 12px; }
-
-@media (max-width: 992px) {
-    .col-md-3 { flex: 0 0 50%; max-width: 50%; }
-}
-
-@media (max-width: 576px) {
-    .col-md-3 { flex: 0 0 100%; max-width: 100%; }
-}
-
-/* Card */
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    margin-bottom: 24px;
-    border: none;
-}
-
-.card-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fff;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.card-header h5 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-}
-
-.card-body {
-    padding: 24px;
-}
-
-/* Search & Filter */
-.filter-section {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-.search-box {
-    position: relative;
-}
-
-.search-box input {
-    padding: 10px 16px 10px 42px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    width: 280px;
-    transition: all 0.3s;
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.search-box i {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-}
-
-.filter-select {
-    padding: 10px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-    min-width: 150px;
-    cursor: pointer;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #3b82f6;
-}
-
-/* Table */
-.table-responsive {
-    overflow-x: auto;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table th {
-    text-align: left;
-    padding: 14px 16px;
-    background: #f9fafb;
-    color: #4b5563;
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.table td {
-    padding: 16px;
-    border-bottom: 1px solid #f3f4f6;
-    color: #374151;
-    font-size: 14px;
-    vertical-align: middle;
-}
-
-.table tr:last-child td {
-    border-bottom: none;
-}
-
-.table tr:hover td {
-    background: #f9fafb;
-}
-
-/* Badges */
-.badge {
-    padding: 6px 12px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.badge-success {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.badge-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.badge-info {
-    background: #e0f2fe;
-    color: #075985;
-}
-
-.badge-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-/* Buttons */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.btn-outline {
-    background: white;
-    border: 1px solid #d1d5db;
-    color: #374151;
-}
-
-.btn-outline:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-}
-
-.btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border-radius: 8px;
-}
-
-.btn-light-primary {
-    background: #eff6ff;
-    color: #3b82f6;
-    border: none;
-}
-
-.btn-light-primary:hover {
-    background: #dbeafe;
-}
-
-.btn-light-warning {
-    background: #fffbeb;
-    color: #d97706;
-    border: none;
-}
-
-.btn-light-warning:hover {
-    background: #fef3c7;
-}
-
-.btn-light-danger {
-    background: #fef2f2;
-    color: #dc2626;
-    border: none;
-}
-
-.btn-light-danger:hover {
-    background: #fee2e2;
-}
-
-.btn-light-success {
-    background: #f0fdf4;
-    color: #16a34a;
-    border: none;
-}
-
-.btn-light-success:hover {
-    background: #dcfce7;
-}
-
-/* Action Buttons */
-.action-buttons {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-}
-
-/* Location Info */
-.location-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.location-name {
-    font-weight: 600;
-    color: #111827;
-}
-
-.location-code {
-    font-size: 12px;
-    color: #6b7280;
-    font-family: 'Monaco', 'Consolas', monospace;
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    width: fit-content;
-}
-
-.location-address {
-    font-size: 13px;
-    color: #6b7280;
-    max-width: 300px;
-    line-height: 1.4;
-}
-
-/* Stats in Table */
-.stats-mini {
-    display: flex;
-    gap: 16px;
-}
-
-.stats-mini-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #6b7280;
-}
-
-.stats-mini-item i {
-    font-size: 14px;
-}
-
-.stats-mini-item .count {
-    font-weight: 600;
-    color: #111827;
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #9ca3af;
-}
-
-.empty-state i {
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-.empty-state h3 {
-    font-size: 18px;
-    color: #6b7280;
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    font-size: 14px;
-    margin-bottom: 24px;
-}
-
-/* Pagination */
-.pagination-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.pagination-info {
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.pagination {
-    display: flex;
-    gap: 4px;
-}
-
-.pagination .page-link {
-    padding: 8px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    color: #374151;
-    text-decoration: none;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-
-.pagination .page-link:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
-}
-
-.pagination .page-item.active .page-link {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: white;
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #d1d5db;
-    cursor: not-allowed;
-}
-
-/* Modal */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1055;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-dialog {
-    position: relative;
-    width: auto;
-    max-width: 500px;
-    margin: 1.75rem auto;
-    animation: slideDown 0.3s;
-}
-
-@keyframes slideDown {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.modal-content {
-    position: relative;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    padding: 0;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-    position: relative;
-}
-
-.modal-header.bg-danger {
-    background: #dc2626 !important;
-    border-bottom-color: rgba(255, 255, 255, 0.2);
-}
-
-.modal-header .modal-title {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-}
-
-.modal-header.bg-danger .modal-title {
-    color: white;
-}
-
-.modal-header .btn-close,
-.modal-header .btn-close-white {
-    background: transparent;
-    border: none;
-    font-size: 24px;
-    line-height: 1;
-    color: #6b7280;
-    cursor: pointer;
-    padding: 8px;
-    width: 40px;
-    height: 40px;
-    transition: all 0.2s;
-    margin: 0 !important;
-    opacity: 1;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 300;
-}
-
-.modal-header .btn-close-white {
-    color: #ffffff !important;
-    opacity: 1 !important;
-    filter: brightness(1.2);
-}
-
-.modal-header .btn-close:hover,
-.modal-header .btn-close-white:hover {
-    opacity: 0.8 !important;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-}
-
-.modal-body {
-    padding: 24px;
-    color: #374151;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.modal-body strong {
-    color: #111827;
-}
-
-.modal-body .text-muted {
-    color: #6b7280;
-    font-size: 13px;
-}
-
-.modal-footer {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 16px 24px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.modal-footer .btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-}
-
-.modal-footer .btn-secondary:hover {
-    background: #e5e7eb;
-}
-
-.modal-footer .btn-danger {
-    background: #dc2626;
-    color: white;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-}
-
-.modal-footer .btn-danger:hover {
-    background: #b91c1c;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
+    /* Styling variables inherited from Sneat layout or custom */
+    :root {
+        --cb-primary: #4361ee;
+        --cb-success: #10b981;
+        --cb-warning: #f59e0b;
+        --cb-danger: #ef4444;
+        --cb-info: #06b6d4;
+        --cb-purple: #8b5cf6;
+        --cb-surface: #ffffff;
+        --cb-bg: #f8fafc;
+        --cb-border: #e2e8f0;
+        --cb-text: #1e293b;
+        --cb-muted: #64748b;
+        --cb-radius: 12px;
     }
 
-    .filter-section {
-        width: 100%;
-    }
-
-    .search-box input {
-        width: 100%;
-    }
-
-    .stats-mini {
-        flex-direction: column;
-        gap: 8px;
-    }
-}
-
-/* Mobile Card Pattern */
-@media (max-width: 767.98px) {
-    .table-card-mobile thead { display: none; }
-    .table-card-mobile tbody tr {
-        display: block;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        margin-bottom: 12px;
+    .cb-card {
+        background: var(--cb-surface);
+        border: 1px solid var(--cb-border);
+        border-radius: var(--cb-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        margin-bottom: 1.5rem;
         overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        background: #fff;
-        position: relative;
     }
-    .table-card-mobile tbody tr:hover td { background: transparent; }
-    .table-card-mobile tbody td {
+
+    .cb-card-header {
+        background: transparent;
+        border-bottom: 1px solid var(--cb-border);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .cb-card-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--cb-text);
+        margin: 0;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 10px 14px;
-        border: none !important;
-        border-bottom: 1px solid #f3f4f6 !important;
-        white-space: normal;
-        text-align: right;
+        gap: 0.5rem;
     }
-    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
-    .table-card-mobile tbody td[data-label]::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 10px;
-        text-transform: uppercase;
-        color: #9ca3af;
-        letter-spacing: 0.5px;
-        flex-shrink: 0;
-        margin-right: 12px;
-        text-align: left;
-    }
-    .table-card-mobile .mobile-card-head {
-        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-        font-weight: 700;
-        font-size: 15px;
-        color: #1e293b;
-        padding: 14px !important;
-        border-bottom: 2px solid #e0e7ff !important;
-        display: block !important;
-        text-align: left;
-    }
-    .table-card-mobile .mobile-card-head::before { display: none !important; }
-    .table-card-mobile .mobile-card-head .location-info { gap: 2px; }
-    .table-card-mobile .mobile-card-head .location-name { font-size: 15px; }
-    .table-card-mobile .mobile-hide { display: none !important; }
-    .desktop-only-cell { display: none !important; }
-    .mobile-only-cell { display: flex !important; }
-    .mobile-card-actions {
-        display: flex !important;
-        justify-content: flex-end;
-        gap: 6px;
-        padding: 10px 14px !important;
-        background: #f9fafb;
-    }
-    .mobile-card-actions::before { display: none !important; }
-    .table-card-mobile .stats-mini {
-        flex-direction: row;
-        gap: 16px;
-    }
-}
-@media (min-width: 768px) {
-    .mobile-only-cell { display: none !important; }
-}
-</style>
 
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-    {{-- Stats Section --}}
-    <div class="row" style="margin-bottom: 24px;">
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-blue">
-                <div class="stat-content">
-                    <div class="stat-title">Total Cabang</div>
-                    <div class="stat-number">{{ $stats['totalCabang'] }}</div>
-                    <div class="stat-desc">Lokasi terdaftar</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-building"></i>
-                </div>
+    /* Stat Cards */
+    .stat-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-widget {
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--cb-surface);
+        border: 1px solid var(--cb-border);
+        border-radius: var(--cb-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
+
+    .stat-widget:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .stat-details {
+        flex-grow: 1;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cb-text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--cb-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Table Improvements */
+    .table-clean {
+        margin: 0;
+    }
+    
+    .table-clean th {
+        background: var(--cb-bg);
+        border-bottom: 1px solid var(--cb-border);
+        color: var(--cb-muted);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+    }
+
+    .table-clean td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--cb-border);
+        color: var(--cb-text);
+        font-size: 0.9rem;
+    }
+
+    .table-clean tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .table-clean tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge-status {
+        padding: 0.4em 0.8em;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    .action-btns .btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+
+    /* Filters */
+    .filter-wrapper {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+    .filter-select {
+        min-width: 150px;
+        font-size: 0.85rem;
+        padding: 0.4rem 2rem 0.4rem 0.75rem;
+        border-color: var(--cb-border);
+        border-radius: 8px;
+    }
+
+    /* Location styles */
+    .location-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .location-name {
+        font-weight: 600;
+        color: var(--cb-text);
+    }
+    .location-code {
+        font-size: 0.75rem;
+        color: var(--cb-muted);
+        background: var(--cb-bg);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+        width: fit-content;
+        font-family: inherit;
+    }
+    .stats-mini {
+        display: flex;
+        gap: 12px;
+    }
+    .stats-mini-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.85rem;
+        color: var(--cb-muted);
+    }
+    .stats-mini-item .count {
+        font-weight: 600;
+        color: var(--cb-text);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    }
+
+    @media (max-width: 768px) {
+        .stat-row { grid-template-columns: 1fr; }
+        .cb-card-header { flex-direction: column; align-items: stretch; }
+        .filter-wrapper { flex-wrap: wrap; }
+        .filter-select { flex-grow: 1; }
+        
+        /* Mobile Card Table */
+        .table-clean thead { display: none; }
+        .table-clean tbody tr {
+            display: block;
+            border-bottom: none;
+            padding: 1rem;
+            border-bottom: 1px solid var(--cb-border);
+        }
+        .table-clean tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border: none;
+        }
+        .table-clean tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--cb-muted);
+            text-transform: uppercase;
+        }
+        .td-actions {
+            margin-top: 1rem;
+            padding-top: 1rem !important;
+            border-top: 1px dashed var(--cb-border) !important;
+            justify-content: center !important;
+        }
+        .stats-mini { justify-content: flex-end; }
+        .location-info { align-items: flex-end; }
+    }
+</style>
+@endsection
+
+@section('content')
+
+    <!-- Stats Row -->
+    <div class="stat-row">
+        <!-- Total Cabang -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalCabang'] }}</div>
+                <div class="stat-label">Total Cabang</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-green">
-                <div class="stat-content">
-                    <div class="stat-title">Cabang Aktif</div>
-                    <div class="stat-number">{{ $stats['cabangAktif'] }}</div>
-                    <div class="stat-desc">Beroperasi normal</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-check-circle"></i>
-                </div>
+
+        <!-- Cabang Aktif -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['cabangAktif'] }}</div>
+                <div class="stat-label">Aktif Beroperasi</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-orange">
-                <div class="stat-content">
-                    <div class="stat-title">Cabang Non-Aktif</div>
-                    <div class="stat-number">{{ $stats['cabangNonAktif'] }}</div>
-                    <div class="stat-desc">Tidak beroperasi</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-pause-circle"></i>
-                </div>
+
+        <!-- Cabang Non-Aktif -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #fef2f2; color: #ef4444;">
+                <i class="fas fa-pause-circle"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['cabangNonAktif'] }}</div>
+                <div class="stat-label">Non-Aktif</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-purple">
-                <div class="stat-content">
-                    <div class="stat-title">Total Siswa</div>
-                    <div class="stat-number">{{ $stats['totalSiswaSemuaCabang'] }}</div>
-                    <div class="stat-desc">Di semua cabang</div>
-                </div>
-                <div class="stat-icon-bg">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
+
+        <!-- Total Siswa -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalSiswaSemuaCabang'] }}</div>
+                <div class="stat-label">Total Siswa</div>
             </div>
         </div>
     </div>
 
-    {{-- Main Card --}}
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h5><i class="fas fa-building" style="color: #3b82f6; margin-right: 10px;"></i>Daftar Cabang</h5>
-                <small style="color: #6b7280;">Kelola lokasi/cabang PKBM House of Knowledge</small>
-            </div>
-            <a href="{{ route('admin.cabang.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Tambah Cabang
-            </a>
+    <!-- Filter Badge -->
+    @if(request('status') || request('search'))
+    <div class="alert alert-primary d-flex justify-content-between align-items-center mb-4 border-0 shadow-sm" style="background: #eff6ff; color: #1e3a8a; border-radius: 10px;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fas fa-filter"></i>
+            <span>Menampilkan filter pencarian</span>
+            <span class="badge bg-primary ms-2 rounded-pill">{{ $cabangs->total() }} data</span>
         </div>
-        
-        <div class="card-body">
-            {{-- Filter Section --}}
-            <form action="{{ route('admin.cabang.index') }}" method="GET" style="margin-bottom: 24px;">
-                <div class="filter-section">
-                    <select name="status" class="filter-select" onchange="this.form.submit()">
+        <a href="{{ route('admin.cabang.index') }}" class="btn btn-sm btn-light text-primary fw-bold" style="border-radius: 6px;">
+            <i class="fas fa-times me-1"></i> Reset
+        </a>
+    </div>
+    @endif
+
+    <!-- Data Table Card -->
+    <div class="cb-card">
+        <div class="cb-card-header">
+            <h5 class="cb-card-title">
+                <i class="fas fa-list text-primary"></i> Daftar Cabang
+            </h5>
+            <div class="filter-wrapper">
+                <form action="{{ route('admin.cabang.index') }}" method="GET" class="d-flex gap-2 mb-0">
+                    <select class="form-select filter-select" name="status" onchange="this.form.submit()">
                         <option value="">Semua Status</option>
-                        <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Hanya Aktif</option>
                         <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
                     </select>
-                    <button type="submit" class="btn btn-outline">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-                    @if(request('search') || request('status'))
-                        <a href="{{ route('admin.cabang.index') }}" class="btn btn-outline">
-                            <i class="fas fa-times"></i> Reset
-                        </a>
-                    @endif
-                </div>
-            </form>
+                </form>
+                <a href="{{ route('admin.cabang.create') }}" class="btn btn-primary d-flex align-items-center gap-2" style="border-radius: 8px;">
+                    <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Cabang Baru</span>
+                </a>
+            </div>
+        </div>
 
-            {{-- Table --}}
-            @if($cabangs->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-card-mobile">
-                        <thead>
-                            <tr>
-                                <th>Cabang</th>
-                                <th>Alamat</th>
-                                <th>Telepon</th>
-                                <th>Data Terkait</th>
-                                <th>Status</th>
-                                <th style="text-align: center; width: 150px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($cabangs as $cabang)
-                            <tr>
-                                {{-- Desktop: Cabang --}}
-                                <td class="desktop-only-cell">
-                                    <div class="location-info">
-                                        <span class="location-name">{{ $cabang->nama_cabang }}</span>
-                                        <span class="location-code">{{ $cabang->kode_cabang }}</span>
-                                    </div>
-                                </td>
-                                {{-- Mobile: Card Head --}}
-                                <td class="mobile-only-cell mobile-card-head">
-                                    <div class="location-info">
-                                        <span class="location-name">{{ $cabang->nama_cabang }}</span>
-                                        <span>
-                                            <span class="location-code">{{ $cabang->kode_cabang }}</span>
-                                            @if($cabang->is_active)
-                                                <span class="badge badge-success" style="margin-left: 6px; font-size: 10px;">Aktif</span>
-                                            @else
-                                                <span class="badge badge-danger" style="margin-left: 6px; font-size: 10px;">Non-Aktif</span>
-                                            @endif
-                                        </span>
-                                    </div>
-                                </td>
-                                <td data-label="Alamat">
-                                    <div class="location-address">{{ Str::limit($cabang->alamat, 80) }}</div>
-                                </td>
-                                <td data-label="Telepon">
-                                    @if($cabang->telepon)
-                                        <span style="color: #374151;">{{ $cabang->telepon }}</span>
-                                    @else
-                                        <span style="color: #9ca3af;">-</span>
-                                    @endif
-                                </td>
-                                <td data-label="Data Terkait">
-                                    <div class="stats-mini">
-                                        <div class="stats-mini-item" title="Jumlah Siswa">
-                                            <i class="fas fa-user-graduate" style="color: #3b82f6;"></i>
-                                            <span class="count">{{ $cabang->siswa_count }}</span>
-                                        </div>
-                                        <div class="stats-mini-item" title="Jumlah Kelas">
-                                            <i class="fas fa-chalkboard" style="color: #10b981;"></i>
-                                            <span class="count">{{ $cabang->kelas_count }}</span>
-                                        </div>
-                                        <div class="stats-mini-item" title="Jumlah User">
-                                            <i class="fas fa-users" style="color: #8b5cf6;"></i>
-                                            <span class="count">{{ $cabang->users_count }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                {{-- Desktop: Status --}}
-                                <td class="desktop-only-cell">
-                                    @if($cabang->is_active)
-                                        <span class="badge badge-success">
-                                            <i class="fas fa-check-circle"></i> Aktif
-                                        </span>
-                                    @else
-                                        <span class="badge badge-danger">
-                                            <i class="fas fa-times-circle"></i> Non-Aktif
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="mobile-card-actions">
-                                    <div class="action-buttons">
-                                        <a href="{{ route('admin.cabang.show', $cabang) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.cabang.edit', $cabang) }}" class="btn btn-icon btn-light-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-icon btn-light-danger" title="Hapus" onclick="confirmDelete({{ $cabang->id }}, '{{ addslashes($cabang->nama_cabang) }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+        <div class="table-responsive">
+            <table class="table table-clean table-hover">
+                <thead>
+                    <tr>
+                        <th width="50" class="text-center">No</th>
+                        <th>Info Cabang</th>
+                        <th>Kontak & Alamat</th>
+                        <th>Statistik</th>
+                        <th class="text-center">Status</th>
+                        <th width="150" class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($cabangs as $index => $cabang)
+                    <tr>
+                        <td class="text-center text-muted" data-label="No">{{ $cabangs->firstItem() + $index }}</td>
+                        <td data-label="Cabang">
+                            <div class="location-info">
+                                <span class="location-name">{{ $cabang->nama_cabang }}</span>
+                                <span class="location-code">Kode: {{ $cabang->kode_cabang }}</span>
+                            </div>
+                        </td>
+                        <td data-label="Kontak">
+                            <div class="d-flex flex-column gap-1">
+                                @if($cabang->telepon)
+                                    <span class="text-dark small"><i class="fas fa-phone-alt text-muted me-1"></i> {{ $cabang->telepon }}</span>
+                                @else
+                                    <span class="text-muted small"><i class="fas fa-phone-alt text-muted me-1"></i> -</span>
+                                @endif
+                                <span class="text-muted" style="font-size: 0.8rem;">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ Str::limit($cabang->alamat, 40) }}
+                                </span>
+                            </div>
+                        </td>
+                        <td data-label="Data">
+                            <div class="stats-mini">
+                                <div class="stats-mini-item" title="Jumlah Siswa" data-bs-toggle="tooltip">
+                                    <i class="fas fa-user-graduate text-primary"></i>
+                                    <span class="count">{{ $cabang->siswa_count }}</span>
+                                </div>
+                                <div class="stats-mini-item" title="Jumlah Kelas" data-bs-toggle="tooltip">
+                                    <i class="fas fa-chalkboard text-success"></i>
+                                    <span class="count">{{ $cabang->kelas_count }}</span>
+                                </div>
+                                <div class="stats-mini-item" title="Jumlah User" data-bs-toggle="tooltip">
+                                    <i class="fas fa-users text-purple"></i>
+                                    <span class="count">{{ $cabang->users_count }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center" data-label="Status">
+                            @if($cabang->is_active)
+                                <span class="badge bg-label-success badge-status"><i class="fas fa-check-circle me-1"></i> Aktif</span>
+                            @else
+                                <span class="badge bg-label-secondary badge-status"><i class="fas fa-power-off me-1"></i> Non-Aktif</span>
+                            @endif
+                        </td>
+                        <td class="td-actions" data-label="Aksi">
+                            <div class="d-flex justify-content-center gap-1 action-btns">
+                                <a href="{{ route('admin.cabang.show', $cabang) }}" class="btn btn-sm btn-info text-white" title="Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('admin.cabang.edit', $cabang) }}" class="btn btn-sm btn-warning text-white" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
+                                <button type="button" class="btn btn-sm btn-danger text-white" onclick="confirmDelete({{ $cabang->id }}, '{{ addslashes($cabang->nama_cabang) }}')" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                                <i class="fas fa-building fs-1 mb-3" style="color: #e2e8f0;"></i>
+                                <h6 class="mb-1">Tidak Ada Data Cabang</h6>
+                                <p class="small mb-0">Belum ada cabang yang ditambahkan atau sesuai filter.</p>
+                                <a href="{{ route('admin.cabang.create') }}" class="btn btn-primary btn-sm mt-3">
+                                    <i class="fas fa-plus me-1"></i> Tambah Cabang
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        
+        @if($cabangs->hasPages())
+        <div class="border-top p-3 d-flex justify-content-between align-items-center flex-wrap">
+            <span class="text-muted small">Menampilkan {{ $cabangs->firstItem() ?? 0 }} - {{ $cabangs->lastItem() ?? 0 }} dari total {{ $cabangs->total() }}</span>
+            <div class="mt-2 mt-sm-0">
+                {{ $cabangs->appends(request()->query())->links() }}
+            </div>
+        </div>
+        @endif
+    </div>
 
-                {{-- Pagination --}}
-                @if($cabangs->hasPages())
-                    <div class="pagination-wrapper">
-                        <div class="pagination-info">
-                            Menampilkan {{ $cabangs->firstItem() }} - {{ $cabangs->lastItem() }} dari {{ $cabangs->total() }} data
-                        </div>
-                        <div class="pagination">
-                            {{ $cabangs->links() }}
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pt-0 pb-4">
+                    <div class="mb-3">
+                        <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <i class="fas fa-trash-alt fs-3 text-danger"></i>
                         </div>
                     </div>
-                @endif
-            @else
-                <div class="empty-state">
-                    <i class="fas fa-building"></i>
-                    <h3>Belum Ada Data Cabang</h3>
-                    <p>Silakan tambahkan data cabang untuk memulai.</p>
-                    <a href="{{ route('admin.cabang.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Tambah Cabang Pertama
-                    </a>
+                    <h5 class="fw-bold mb-1">Hapus Cabang?</h5>
+                    <p class="text-muted mb-4" style="font-size: 0.9rem;">Cabang <span id="deleteItemName" class="fw-bold text-dark"></span> akan dihapus permanen.</p>
+                    
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                        <form id="deleteForm" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger px-4">Hapus</button>
+                        </form>
+                    </div>
                 </div>
-            @endif
-        </div>
-    </div>
-</div>
-
-{{-- Delete Modal (Single Reusable) --}}
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Apakah Anda yakin ingin menghapus cabang:</p>
-                <p><strong style="color: #111827; font-size: 16px;" id="deleteCabangName"></strong></p>
-                <p class="text-muted" style="margin-top: 8px;">
-                    <i class="fas fa-exclamation-circle" style="color: #dc2626;"></i>
-                    <small>Data yang sudah dihapus tidak dapat dikembalikan.</small>
-                </p>
-            </div>
-            <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Batal
-                </button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Hapus
-                    </button>
-                </form>
             </div>
         </div>
     </div>
-</div>
 
+@endsection
+
+@section('scripts')
 <script>
-function confirmDelete(id, name) {
-    // Set the cabang name in the modal
-    document.getElementById('deleteCabangName').textContent = name;
-
-    // Set the form action URL
-    const form = document.getElementById('deleteForm');
-    form.action = "{{ route('admin.cabang.index') }}/" + id;
-
-    // Show the modal using Bootstrap 5 API
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
-}
+    function confirmDelete(id, name) {
+        document.getElementById('deleteItemName').textContent = name;
+        const form = document.getElementById('deleteForm');
+        form.action = "{{ route('admin.cabang.index') }}/" + id;
+        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        modal.show();
+    }
+    
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
 </script>
 @endsection

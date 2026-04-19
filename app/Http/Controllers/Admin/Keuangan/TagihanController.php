@@ -197,5 +197,52 @@ class TagihanController extends BendaharaTagihanController
 
         return $response;
     }
+
+    /**
+     * Reset tagihan siswa terpilih ke kondisi awal (KOSONG / Rp 0)
+     * HANYA untuk admin, digunakan selama masa percobaan sistem.
+     * Menghapus semua tagihan DAN pembayaran terkait untuk siswa terpilih.
+     */
+    public function resetTagihan(Request $request)
+    {
+        $request->validate([
+            'siswa_ids' => 'required|string',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+        ]);
+
+        $siswaIds = json_decode($request->siswa_ids, true);
+
+        if (empty($siswaIds) || !is_array($siswaIds)) {
+            return redirect()->back()->with('error', 'Tidak ada siswa yang dipilih.');
+        }
+
+        $tahunAjaranId = $request->tahun_ajaran_id;
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // Find all tagihan for selected students in the selected academic year
+            $tagihanIds = \App\Models\Tagihan::whereIn('siswa_id', $siswaIds)
+                ->where('tahun_ajaran_id', $tahunAjaranId)
+                ->pluck('id');
+
+            // Delete all pembayaran associated with these tagihan
+            $deletedPembayaran = \App\Models\Pembayaran::whereIn('tagihan_id', $tagihanIds)->count();
+            \App\Models\Pembayaran::whereIn('tagihan_id', $tagihanIds)->delete();
+
+            // Delete all tagihan for selected students
+            $deletedTagihan = \App\Models\Tagihan::whereIn('siswa_id', $siswaIds)
+                ->where('tahun_ajaran_id', $tahunAjaranId)
+                ->delete();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            $siswaCount = count($siswaIds);
+            return redirect()->route('admin.keuangan.tagihan.index', ['tahun_ajaran_id' => $tahunAjaranId])
+                ->with('success', "Reset berhasil! {$deletedTagihan} tagihan dan {$deletedPembayaran} pembayaran dari {$siswaCount} siswa telah dihapus. Status kembali ke \"KOSONG\".");
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal mereset tagihan: ' . $e->getMessage());
+        }
+    }
 }
 

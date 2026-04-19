@@ -11,764 +11,655 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
     @include('waka.partials.sneat-sidebar-menu')
 @endsection
 
-@section('content')
+@section('styles')
 <style>
-.stat-card {
-    padding: 24px;
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-    height: 100%;
-    color: white;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-content {
-    position: relative;
-    z-index: 2;
-}
-
-.stat-title {
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.9;
-    margin-bottom: 8px;
-}
-
-.stat-number {
-    font-size: 38px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    line-height: 1.2;
-}
-
-.stat-desc {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-.stat-icon-bg {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 70px;
-    opacity: 0.15;
-    z-index: 1;
-}
-
-.bg-gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.bg-gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.bg-gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.bg-gradient-orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-
-.row { display: flex; flex-wrap: wrap; margin: -12px; }
-.col-md-3 { flex: 0 0 25%; max-width: 25%; padding: 12px; }
-.col-12 { flex: 0 0 100%; max-width: 100%; padding: 12px; }
-
-@media (max-width: 992px) {
-    .col-md-3 { flex: 0 0 50%; max-width: 50%; }
-}
-
-@media (max-width: 576px) {
-    .col-md-3 { flex: 0 0 100%; max-width: 100%; }
-}
-
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    margin-bottom: 24px;
-    border: none;
-}
-
-.card-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fff;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.card-header h5 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-}
-
-.card-body {
-    padding: 24px;
-}
-
-.filter-section {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.search-box {
-    position: relative;
-}
-
-.search-box input {
-    padding: 10px 16px 10px 42px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    width: 220px;
-    max-width: 100%;
-    transition: all 0.3s;
-}
-
-.search-box input:focus {
-    outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.search-box i {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-}
-
-.filter-select {
-    padding: 10px 16px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-    min-width: 150px;
-    cursor: pointer;
-}
-
-.filter-select:focus {
-    outline: none;
-    border-color: #8b5cf6;
-}
-
-.table-responsive {
-    overflow-x: auto;
-}
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table th {
-    text-align: left;
-    padding: 14px 16px;
-    background: #f9fafb;
-    color: #4b5563;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.table td {
-    padding: 16px;
-    border-bottom: 1px solid #f3f4f6;
-    color: #374151;
-    font-size: 14px;
-    vertical-align: middle;
-}
-
-.table tr:hover td {
-    background: #f9fafb;
-}
-
-.badge {
-    padding: 6px 12px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.badge-success { background: #dcfce7; color: #166534; }
-.badge-warning { background: #fef3c7; color: #92400e; }
-.badge-info { background: #e0f2fe; color: #075985; }
-.badge-purple { background: #f3e8ff; color: #7c3aed; }
-
-.badge-paud { background: #fef3c7; color: #92400e; }
-.badge-sd { background: #dcfce7; color: #166534; }
-.badge-smp { background: #e0f2fe; color: #075985; }
-.badge-sma { background: #f3e8ff; color: #7c3aed; }
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-}
-
-.btn-outline {
-    background: white;
-    border: 1px solid #d1d5db;
-    color: #374151;
-}
-
-.btn-outline:hover {
-    background: #f9fafb;
-}
-
-.btn-sm {
-    padding: 8px 14px;
-    font-size: 13px;
-}
-
-.btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    border-radius: 8px;
-}
-
-.btn-light-primary { background: #eff6ff; color: #3b82f6; border: none; }
-.btn-light-primary:hover { background: #dbeafe; }
-
-.btn-light-purple { background: #faf5ff; color: #7c3aed; border: none; }
-.btn-light-purple:hover { background: #f3e8ff; }
-
-.btn-print {
-    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-    color: white;
-}
-
-.btn-print:hover {
-    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-}
-
-.kelas-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.kelas-nama {
-    font-weight: 600;
-    color: #111827;
-    font-size: 15px;
-}
-
-.kelas-kode {
-    font-size: 11px;
-    color: #6b7280;
-    font-family: 'Monaco', 'Consolas', monospace;
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 4px;
-    display: inline-block;
-    width: fit-content;
-}
-
-.wali-kelas-cell {
-    min-width: 250px;
-}
-
-.wali-kelas-select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-}
-
-.wali-kelas-select:focus {
-    outline: none;
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.wali-kelas-select.has-wali {
-    border-color: #10b981;
-    background: #f0fdf4;
-}
-
-.wali-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.wali-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.wali-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.wali-name {
-    font-weight: 600;
-    color: #111827;
-}
-
-.wali-role {
-    font-size: 12px;
-    color: #6b7280;
-}
-
-.status-unassigned {
-    color: #f59e0b;
-    font-style: italic;
-}
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #9ca3af;
-}
-
-.empty-state i {
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.5;
-}
-
-.empty-state h3 {
-    font-size: 18px;
-    color: #6b7280;
-    margin-bottom: 8px;
-}
-
-.pagination-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 0;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.pagination-info {
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-}
-
-/* Quick assign form */
-.quick-assign-form {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.quick-assign-form select {
-    flex: 1;
-}
-
-.quick-assign-form button {
-    flex-shrink: 0;
-}
-
-/* ── Mobile Responsive ── */
-@media (max-width: 767.98px) {
-    .search-box {
-        width: 100% !important;
+    /* Styling variables inherited from Sneat layout or custom */
+    :root {
+        --wk-primary: #4361ee;
+        --wk-success: #10b981;
+        --wk-warning: #f59e0b;
+        --wk-danger: #ef4444;
+        --wk-info: #06b6d4;
+        --wk-purple: #8b5cf6;
+        --wk-surface: #ffffff;
+        --wk-bg: #f8fafc;
+        --wk-border: #e2e8f0;
+        --wk-text: #1e293b;
+        --wk-muted: #64748b;
+        --wk-radius: 12px;
     }
-    .search-box input {
-        width: 100% !important;
-    }
-    .filter-section {
-        flex-direction: column !important;
-        align-items: stretch !important;
-    }
-    .filter-section .filter-select,
-    .filter-section .btn {
-        width: 100% !important;
-        min-width: unset !important;
-    }
-    /* Table → Card per row */
-    .table-card-mobile thead { display: none; }
-    .table-card-mobile tbody tr {
-        display: block;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        margin-bottom: 12px;
+
+    .wk-card {
+        background: var(--wk-surface);
+        border: 1px solid var(--wk-border);
+        border-radius: var(--wk-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        margin-bottom: 1.5rem;
         overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        background: #fff;
     }
-    .table-card-mobile tbody tr:hover td { background: transparent !important; }
-    .table-card-mobile tbody td {
+
+    .wk-card-header {
+        background: transparent;
+        border-bottom: 1px solid var(--wk-border);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .wk-card-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--wk-text);
+        margin: 0;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 10px 14px;
-        border: none !important;
-        border-bottom: 1px solid #f3f4f6 !important;
-        min-height: 44px;
-        font-size: 13px;
+        gap: 0.5rem;
     }
-    .table-card-mobile tbody td.mobile-card-head {
-        background: #f8fafc;
-        padding: 14px;
-        border-bottom: 2px solid #e5e7eb !important;
-        justify-content: flex-start;
-    }
-    .table-card-mobile tbody td[data-label]::before {
-        content: attr(data-label);
-        font-weight: 700;
-        font-size: 10px;
-        text-transform: uppercase;
-        color: #9ca3af;
-        letter-spacing: 0.5px;
-        flex-shrink: 0;
-        padding-right: 10px;
-        min-width: 65px;
-    }
-    .table-card-mobile tbody td.mobile-card-full {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
-    .table-card-mobile tbody td.mobile-card-full::before { min-width: unset; }
-    .table-card-mobile tbody td.mobile-card-actions {
-        border-bottom: none !important;
-        justify-content: flex-end;
-    }
-    .stat-number { font-size: 28px; }
-    .stat-card { padding: 16px; }
-    /* Stat grid: 2 columns on mobile */
-    .col-md-3 { flex: 0 0 50% !important; max-width: 50% !important; }
-}
-</style>
 
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-    {{-- Stats Section --}}
-    <div class="row" style="margin-bottom: 24px;">
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-blue">
-                <div class="stat-content">
-                    <div class="stat-title">Total Kelas</div>
-                    <div class="stat-number">{{ $stats['totalKelas'] }}</div>
-                    <div class="stat-desc">Kelas terdaftar</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-chalkboard"></i></div>
+    /* Stat Cards */
+    .stat-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-widget {
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--wk-surface);
+        border: 1px solid var(--wk-border);
+        border-radius: var(--wk-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
+
+    .stat-widget:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .stat-details {
+        flex-grow: 1;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--wk-text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--wk-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-desc {
+        font-size: 0.7rem;
+        color: var(--wk-muted);
+        margin-top: 0.2rem;
+    }
+
+    /* Table Improvements */
+    .table-clean {
+        margin: 0;
+    }
+    
+    .table-clean th {
+        background: var(--wk-bg);
+        border-bottom: 1px solid var(--wk-border);
+        color: var(--wk-muted);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.5rem;
+    }
+
+    .table-clean td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--wk-border);
+        color: var(--wk-text);
+        font-size: 0.9rem;
+    }
+
+    .table-clean tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    .table-clean tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge-jnj {
+        padding: 0.35em 0.6em;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+
+    /* Jenjang badges */
+    .bg-jnj-paud { background: #fef3c7; color: #92400e; }
+    .bg-jnj-sd { background: #dcfce7; color: #166534; }
+    .bg-jnj-smp { background: #e0f2fe; color: #075985; }
+    .bg-jnj-sma { background: #f3e8ff; color: #7c3aed; }
+
+    .action-btns .btn {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        border-radius: 6px;
+    }
+
+    /* Filters */
+    .filter-wrapper {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+        background: var(--wk-bg);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--wk-border);
+    }
+    
+    .search-box {
+        position: relative;
+        flex-grow: 1;
+        min-width: 200px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 0.45rem 1rem 0.45rem 2.2rem;
+        border: 1px solid var(--wk-border);
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+    .search-box i {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--wk-muted);
+    }
+
+    .filter-select {
+        min-width: 130px;
+        max-width: 160px;
+        font-size: 0.85rem;
+        padding: 0.45rem 2rem 0.45rem 0.75rem;
+        border-color: var(--wk-border);
+        border-radius: 8px;
+    }
+
+    /* Kelas & Wali styles */
+    .kelas-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .kelas-nama {
+        font-weight: 600;
+        color: var(--wk-text);
+        font-size: 0.95rem;
+    }
+    .kelas-kode {
+        font-size: 0.75rem;
+        color: var(--wk-muted);
+        background: var(--wk-bg);
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+        width: fit-content;
+        font-family: inherit;
+    }
+
+    .wali-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.35rem;
+    }
+    .wali-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(139, 92, 246, 0.15);
+        color: var(--wk-purple);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+    
+    .status-unassigned {
+        color: #f59e0b;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+
+    /* Modal override */
+    .modal-backdrop {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    .wali-option input[type="radio"]:checked {
+        accent-color: #8b5cf6;
+    }
+    .wali-option {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+    }
+    .wali-option:nth-child(even) {
+        background: #f8fafc;
+    }
+    .wali-option:hover {
+        background: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
+    }
+    .wali-option:has(input:checked) {
+        background: #eff6ff !important;
+        border-color: #3b82f6 !important;
+    }
+    #waliList::-webkit-scrollbar { width: 6px; }
+    #waliList::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    #waliList::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    
+    @media (max-width: 576px) {
+        .modal-footer {
+            flex-direction: column-reverse;
+            gap: 0.75rem !important;
+            padding: 1.5rem !important;
+        }
+        .modal-footer > .btn, 
+        .modal-footer > .d-flex,
+        .modal-footer > .d-flex > .btn {
+            width: 100% !important;
+            margin: 0 !important;
+        }
+        .modal-footer > .d-flex {
+            flex-direction: column-reverse;
+            gap: 0.75rem !important;
+        }
+        .btn-responsive {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 42px !important;
+            padding: 0.5rem 1.25rem !important;
+            white-space: nowrap !important;
+            font-size: 0.85rem !important;
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .filter-select { flex-grow: 1; max-width: unset; }
+    }
+
+    @media (max-width: 768px) {
+        .stat-row { grid-template-columns: 1fr; }
+        .wk-card-header { flex-direction: column; align-items: stretch; }
+        .filter-wrapper { flex-direction: column; align-items: stretch; }
+        .header-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .header-actions .btn { flex-grow: 1; justify-content: center; font-size: 0.8rem;}
+
+        /* Mobile Card Table */
+        .table-clean thead { display: none; }
+        .table-clean tbody tr {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid var(--wk-border);
+            padding: 0;
+            background: #fff;
+        }
+        .table-clean tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 1rem;
+        }
+        .table-clean tbody td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--wk-muted);
+            text-transform: uppercase;
+        }
+        .table-clean tbody td.mobile-card-head {
+            background: var(--wk-bg);
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 1rem;
+        }
+        .table-clean tbody td.mobile-card-head::before { display: none; }
+        .td-actions {
+            margin-top: 0;
+            padding: 1rem !important;
+            justify-content: space-between !important;
+            background: #f8fafc;
+            gap: 1rem;
+        }
+        .wali-wrapper { justify-content: flex-end; }
+        .td-wali-col { align-items: flex-end !important; }
+    }
+</style>
+@endsection
+
+@section('content')
+
+    <!-- Stats Row -->
+    <div class="stat-row">
+        <!-- Total Kelas -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+                <i class="fas fa-chalkboard"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalKelas'] }}</div>
+                <div class="stat-label">Total Kelas</div>
+                <div class="stat-desc">Kelas terdaftar</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-green">
-                <div class="stat-content">
-                    <div class="stat-title">Sudah Ada Wali</div>
-                    <div class="stat-number">{{ $stats['kelasWithWali'] }}</div>
-                    <div class="stat-desc">Kelas dengan wali</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-check-circle"></i></div>
+
+        <!-- Sudah Ada Wali -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['kelasWithWali'] }}</div>
+                <div class="stat-label">Sudah Ada Wali</div>
+                <div class="stat-desc">Kelas dengan wali</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-orange">
-                <div class="stat-content">
-                    <div class="stat-title">Belum Ada Wali</div>
-                    <div class="stat-number">{{ $stats['kelasWithoutWali'] }}</div>
-                    <div class="stat-desc">Perlu ditunjuk</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-hourglass-half"></i></div>
+
+        <!-- Belum Ada Wali -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['kelasWithoutWali'] }}</div>
+                <div class="stat-label">Belum Ada Wali</div>
+                <div class="stat-desc text-warning">Perlu ditunjuk</div>
             </div>
         </div>
-        
-        <div class="col-md-3">
-            <div class="stat-card bg-gradient-purple">
-                <div class="stat-content">
-                    <div class="stat-title">Total Wali Kelas</div>
-                    <div class="stat-number">{{ $stats['totalWaliKelas'] }}</div>
-                    <div class="stat-desc">Tenaga pendidik</div>
-                </div>
-                <div class="stat-icon-bg"><i class="fas fa-school"></i></div>
+
+        <!-- Total Wali Kelas -->
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+                <i class="fas fa-school"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalWaliKelas'] }}</div>
+                <div class="stat-label">Total Guru Aktif</div>
+                <div class="stat-desc">Tenaga pendidik</div>
             </div>
         </div>
     </div>
 
-    {{-- Main Card --}}
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h5><i class="fas fa-user-tie" style="color: #8b5cf6; margin-right: 10px;"></i>Penunjukan Wali Kelas</h5>
-                <small style="color: #6b7280;">Kelola penugasan wali kelas per kelas</small>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <a href="{{ route('waka.wali-kelas.print', request()->query()) }}" class="btn btn-print" target="_blank">
-                    <i class="fas fa-print"></i> Cetak
+    <!-- Main Card -->
+    <div class="wk-card">
+        <div class="wk-card-header">
+            <h5 class="wk-card-title">
+                <i class="fas fa-user-tie text-purple"></i> Penunjukan Wali Kelas
+            </h5>
+            <div class="header-actions d-flex gap-2">
+                <a href="{{ route('waka.wali-kelas.print', request()->query()) }}" class="btn btn-secondary text-white d-flex align-items-center gap-1" target="_blank">
+                    <i class="fas fa-print"></i> <span class="d-none d-sm-inline">Cetak</span>
                 </a>
             </div>
         </div>
-        
-        <div class="card-body">
-            {{-- Filter Section --}}
-            <form action="{{ route('waka.wali-kelas.index') }}" method="GET">
-                <div class="filter-section">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" name="search" placeholder="Cari kelas atau wali..." value="{{ request('search') }}">
-                    </div>
-                    
-                    <select name="tahun_ajaran_id" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Tahun Ajaran</option>
-                        @foreach($tahunAjarans as $ta)
-                            <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
-                                {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
-                    
-                    <select name="jenjang" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Jenjang</option>
-                        @foreach($jenjangs as $j)
-                            <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                        @endforeach
-                    </select>
-                    
-                    <select name="status" class="filter-select" onchange="this.form.submit()">
-                        <option value="">Semua Status</option>
-                        <option value="assigned" {{ request('status') == 'assigned' ? 'selected' : '' }}>Sudah Ada Wali</option>
-                        <option value="unassigned" {{ request('status') == 'unassigned' ? 'selected' : '' }}>Belum Ada Wali</option>
-                    </select>
-                    
-                    <button type="submit" class="btn btn-outline">
-                        <i class="fas fa-filter"></i> Filter
-                    </button>
-                    
-                    @if(request()->hasAny(['search', 'jenjang', 'status']))
-                        <a href="{{ route('waka.wali-kelas.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline">
-                            <i class="fas fa-times"></i> Reset
-                        </a>
-                    @endif
-                </div>
-            </form>
 
-            {{-- Table --}}
-            @if($kelasList->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-card-mobile">
-                        <thead>
-                            <tr>
-                                <th>Kelas</th>
-                                <th>Jenjang</th>
-                                <th>Cabang</th>
-                                <th>Jumlah Siswa</th>
-                                <th class="wali-kelas-cell">Wali Kelas</th>
-                                <th style="text-align: center; width: 100px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($kelasList as $kelas)
-                            <tr>
-                                <td class="mobile-card-head">
-                                    <div class="kelas-info">
-                                        <span class="kelas-nama">{{ $kelas->nama_kelas }}</span>
-                                        <span class="kelas-kode">{{ $kelas->kode_kelas }}</span>
-                                    </div>
-                                </td>
-                                <td data-label="Jenjang">
-                                    @php
-                                        $jenjangClass = [
-                                            'PAUD' => 'badge-paud',
-                                            'SD' => 'badge-sd',
-                                            'SMP' => 'badge-smp',
-                                            'SMA' => 'badge-sma',
-                                        ][$kelas->jenjang] ?? 'badge-info';
-                                    @endphp
-                                    <span class="badge {{ $jenjangClass }}">{{ $kelas->jenjang }}</span>
-                                </td>
-                                <td data-label="Cabang">{{ $kelas->cabang->nama_cabang ?? '-' }}</td>
-                                <td data-label="Siswa">
-                                    <span class="badge badge-info">{{ $kelas->siswa_count }} siswa</span>
-                                </td>
-                                <td data-label="Wali Kelas" class="wali-kelas-cell mobile-card-full">
-                                    @if($kelas->waliKelasAssignments->count() > 0)
-                                        @foreach($kelas->waliKelasAssignments as $assignment)
-                                            <div class="wali-info" style="margin-bottom: 4px;">
-                                                <div class="wali-avatar">{{ substr($assignment->tenagaPendidik->nama_lengkap, 0, 2) }}</div>
-                                                <div class="wali-details">
-                                                    <span class="wali-name">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
-                                                    <span class="wali-role">Wali Kelas</span>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <span class="status-unassigned">Belum ada wali kelas</span>
-                                    @endif
-                                </td>
-                                <td class="mobile-card-actions">
-                                    <div class="action-buttons">
-                                        <button type="button" class="btn btn-icon btn-light-purple" title="Assign Wali Kelas" onclick="openAssignModal({{ $kelas->id }}, '{{ $kelas->nama_kelas }}', {{ $kelas->wali_kelas_id ?? 'null' }})">
-                                            <i class="fas fa-user-tie"></i>
-                                        </button>
-                                        <a href="{{ route('waka.wali-kelas.show', $kelas) }}" class="btn btn-icon btn-light-primary" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+        <!-- Filters Form -->
+        <form action="{{ route('waka.wali-kelas.index') }}" method="GET" class="mb-0">
+            <div class="filter-wrapper">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Cari nama kelas atau wali..." value="{{ request('search') }}">
                 </div>
+                
+                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Tahun Ajaran</option>
+                    @foreach($tahunAjarans as $ta)
+                        <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
+                            {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                
+                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Jenjang</option>
+                    @foreach($jenjangs as $j)
+                        <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
+                    @endforeach
+                </select>
 
-                @if($kelasList->hasPages())
-                    <div class="pagination-wrapper">
-                        <div class="pagination-info">
-                            Menampilkan {{ $kelasList->firstItem() }} - {{ $kelasList->lastItem() }} dari {{ $kelasList->total() }} kelas
-                        </div>
-                        <div>
-                            {{ $kelasList->withQueryString()->links() }}
-                        </div>
-                    </div>
-                @endif
-            @else
-                <div class="empty-state">
-                    <i class="fas fa-user-tie"></i>
-                    <h3>Belum Ada Data Kelas</h3>
-                    <p>Silakan buat kelas terlebih dahulu di menu Data Kelas.</p>
-                    <a href="{{ route('waka.kelas.create') }}" class="btn btn-primary" style="margin-top: 16px;">
-                        <i class="fas fa-plus"></i> Tambah Kelas
+                <select name="status" class="form-select filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Status</option>
+                    <option value="assigned" {{ request('status') == 'assigned' ? 'selected' : '' }}>Sudah Ada Wali</option>
+                    <option value="unassigned" {{ request('status') == 'unassigned' ? 'selected' : '' }}>Belum Ada Wali</option>
+                </select>
+                
+                <button type="submit" class="btn btn-secondary btn-sm px-3" style="border-radius: 8px;">
+                    <i class="fas fa-filter me-1"></i> Filter
+                </button>
+                
+                @if(request()->hasAny(['search', 'jenjang', 'status']) || (request('tahun_ajaran_id') && request('tahun_ajaran_id') != $currentTahunAjaran?->id))
+                    <a href="{{ route('waka.wali-kelas.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                        <i class="fas fa-times"></i> Reset
                     </a>
-                </div>
-            @endif
+                @endif
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-clean">
+                <thead>
+                    <tr>
+                        <th width="280">Info Kelas</th>
+                        <th>Jenjang & Cabang</th>
+                        <th>Jumlah Siswa</th>
+                        <th>Penugasan Wali Kelas</th>
+                        <th class="text-end" width="120">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($kelasList as $kelas)
+                    <tr>
+                        <td class="mobile-card-head" data-label="Kelas">
+                            <div class="kelas-info">
+                                <span class="kelas-nama">{{ $kelas->nama_kelas }}</span>
+                                <span class="kelas-kode mt-1 px-2">{{ $kelas->kode_kelas }}</span>
+                            </div>
+                        </td>
+                        <td data-label="Lokasi">
+                            @php
+                                $jenjangClass = [
+                                    'PAUD' => 'bg-jnj-paud',
+                                    'SD' => 'bg-jnj-sd',
+                                    'SMP' => 'bg-jnj-smp',
+                                    'SMA' => 'bg-jnj-sma',
+                                ][$kelas->jenjang] ?? 'bg-light text-dark';
+                            @endphp
+                            <div class="d-flex flex-column align-items-start gap-1">
+                                <span class="badge {{ $jenjangClass }} badge-jnj">{{ $kelas->jenjang }}</span>
+                                <span class="text-muted" style="font-size: 0.8rem;"><i class="fas fa-building me-1"></i>{{ $kelas->cabang->nama_cabang ?? '-' }}</span>
+                            </div>
+                        </td>
+                        <td data-label="Jumlah Siswa">
+                            <span class="badge bg-label-info px-2 py-1">{{ $kelas->siswa_count }} siswa</span>
+                        </td>
+                        <td class="td-wali-col flex-column align-items-start" data-label="Wali Kelas">
+                            @if($kelas->waliKelasAssignments->count() > 0)
+                                <div class="d-flex flex-column gap-1">
+                                @foreach($kelas->waliKelasAssignments as $assignment)
+                                    <div class="wali-wrapper">
+                                        <div class="wali-avatar">{{ substr($assignment->tenagaPendidik->nama_lengkap, 0, 2) }}</div>
+                                        <div class="d-flex flex-column align-items-start line-height-sm">
+                                            <span style="font-size: 0.85rem;" class="fw-medium text-dark">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                                </div>
+                            @else
+                                <span class="status-unassigned"><i class="fas fa-exclamation-circle me-1"></i> Belum ada wali kelas</span>
+                            @endif
+                        </td>
+                        <td class="td-actions text-end" data-label="Aksi">
+                            <div class="d-flex justify-content-end gap-1 action-btns">
+                                <button type="button" class="btn btn-sm btn-purple text-white px-2 py-1 rounded" style="background-color: #8b5cf6;" title="Assign Wali Kelas" onclick="openAssignModal({{ $kelas->id }}, '{{ addslashes($kelas->nama_kelas) }}', {{ $kelas->waliKelasAssignments->first()->tenagaPendidik->id ?? 'null' }})">
+                                    <i class="fas fa-user-tie"></i>
+                                </button>
+                                <a href="{{ route('waka.wali-kelas.show', $kelas) }}" class="btn btn-sm btn-info text-white px-2 py-1 rounded" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                                <i class="fas fa-user-tie fs-1 mb-3" style="color: #e2e8f0;"></i>
+                                <h6 class="mb-1">Tidak Ada Data Kelas</h6>
+                                <p class="small mb-0">Silakan buat kelas terlebih dahulu di menu Data Kelas.</p>
+                                <a href="{{ route('waka.kelas.create') }}" class="btn btn-primary btn-sm mt-3 px-3 rounded-pill">
+                                    <i class="fas fa-plus me-1"></i> Tambah Kelas
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+        
+        @if($kelasList->hasPages())
+        <div class="border-top p-3 d-flex justify-content-between align-items-center flex-wrap">
+            <span class="text-muted small">Menampilkan {{ $kelasList->firstItem() ?? 0 }} - {{ $kelasList->lastItem() ?? 0 }} dari {{ $kelasList->total() }} kelas</span>
+            <div class="mt-2 mt-sm-0">
+                {{ $kelasList->withQueryString()->links() }}
+            </div>
+        </div>
+        @endif
     </div>
+
 </div>
 
 {{-- Modal Assign Wali Kelas --}}
 <div class="modal fade" id="assignModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: none;">
-            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding: 24px;">
-                <h5 class="modal-title" style="font-weight: 600; color: #111827;">
-                    <i class="fas fa-user-tie" style="color: #8b5cf6; margin-right: 10px;"></i>
-                    Assign Wali Kelas
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top">
+                <h5 class="modal-title fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                    <i class="fas fa-user-tie text-purple"></i> Assign Wali Kelas
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="assignForm" method="POST">
                 @csrf
-                <div class="modal-body" style="padding: 24px;">
+                <div class="modal-body px-4 py-4">
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600; color: #374151;">Kelas</label>
-                        <input type="text" id="kelasName" class="form-control" readonly style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 16px;">
+                        <label class="form-label fw-bold text-secondary small">Nama Kelas</label>
+                        <input type="text" id="kelasName" class="form-control bg-light text-dark fw-medium" readonly style="border: 1px dashed #cbd5e1; border-radius: 8px;">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600; color: #374151;">
-                            <i class="fas fa-search" style="color: #9ca3af; margin-right: 6px;"></i>
-                            Cari Wali Kelas
-                        </label>
-                        <input type="text" id="searchWali" class="form-control" placeholder="Ketik nama wali kelas..." style="border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px;">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label" style="font-weight: 600; color: #374151;">Pilih Wali Kelas</label>
-                        <div id="waliList" style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px;">
-                            @foreach($waliKelasOptions as $wk)
-                                @php
-                                    $assignedKelasList = $wk->waliKelasAssignments ?? collect();
-                                    $hasAssignments = $assignedKelasList->count() > 0;
-                                @endphp
-                                <div class="wali-option"
-                                     data-id="{{ $wk->id }}"
-                                     data-name="{{ strtolower($wk->nama_lengkap) }}"
-                                     data-cabang="{{ $wk->user->cabang_id ?? '' }}"
-                                     style="padding: 12px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px;">
-                                    <input type="radio" name="wali_kelas_id" value="{{ $wk->id }}" style="cursor: pointer;">
-                                    <div class="wali-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0;">
-                                        {{ substr($wk->nama_lengkap, 0, 2) }}
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <div style="font-weight: 600; color: #111827;">{{ $wk->nama_lengkap }}</div>
-                                        <div style="font-size: 12px; color: #6b7280;">{{ $wk->user->cabang->nama_cabang ?? '-' }}</div>
-                                        @if($hasAssignments)
-                                            <div style="font-size: 11px; color: #6366f1; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px;">
-                                                <i class="fas fa-chalkboard-teacher"></i>
-                                                @foreach($assignedKelasList as $assignment)
-                                                    <span style="background: #e0e7ff; padding: 2px 6px; border-radius: 4px;">{{ $assignment->kelas->nama_kelas }}</span>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <div style="padding: 12px; background: #e0f2fe; border-radius: 8px; border-left: 4px solid #0284c7;">
-                        <div style="display: flex; gap: 8px; align-items: start;">
-                            <i class="fas fa-info-circle" style="color: #0284c7; margin-top: 2px;"></i>
-                            <div style="font-size: 13px; color: #0369a1;">
-                                <strong>Multi-Kelas:</strong> Satu wali kelas bisa ditugaskan ke lebih dari satu kelas.
+                        <label class="form-label fw-bold text-secondary small">Pencarian Pendidik</label>
+                        <div class="d-flex gap-2">
+                            <div class="position-relative flex-grow-1">
+                                <i class="fas fa-search position-absolute text-muted" style="left: 12px; top: 50%; transform: translateY(-50%);"></i>
+                                <input type="text" id="searchWali" class="form-control" placeholder="Ketik nama wali kelas..." style="padding-left: 36px; border-radius: 8px;">
                             </div>
                         </div>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small">Pilih Wali Kelas (Pilih 1)</label>
+                        <div id="waliList" style="max-height: 280px; overflow-y: auto; border: 1px solid var(--wk-border); border-radius: 10px; padding: 6px; background: #fafafa;">
+                            @if(count($waliKelasOptions) > 0)
+                                @foreach($waliKelasOptions as $wk)
+                                    @php
+                                        $assignedKelasList = $wk->waliKelasAssignments ?? collect();
+                                        $hasAssignments = $assignedKelasList->count() > 0;
+                                    @endphp
+                                    <div class="wali-option d-flex align-items-center gap-3"
+                                         data-id="{{ $wk->id }}"
+                                         data-name="{{ strtolower($wk->nama_lengkap) }}"
+                                         style="padding: 12px 14px; border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: all 0.2s;">
+                                        
+                                        <input type="radio" name="wali_kelas_id" value="{{ $wk->id }}" style="cursor: pointer; transform: scale(1.2);">
+                                        
+                                        <div class="wali-avatar text-white" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #5b21b6); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0;">
+                                            {{ substr($wk->nama_lengkap, 0, 2) }}
+                                        </div>
+                                        
+                                        <div style="flex: 1; line-height: 1.2;">
+                                            <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ $wk->nama_lengkap }}</div>
+                                            
+                                            @if($hasAssignments)
+                                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                                    @foreach($assignedKelasList as $assignment)
+                                                        <span class="badge bg-label-primary px-2" style="font-size: 0.65rem;">Mengajar {{ $assignment->kelas->nama_kelas }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-center p-4 text-muted small">
+                                    Data tenaga pendidik belum tersedia.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 mb-0 border-0 d-flex align-items-start gap-2" style="font-size: 0.8rem; border-radius: 8px;">
+                        <i class="fas fa-info-circle text-info mt-1"></i>
+                        <div>
+                            <strong>Multi-Kelas:</strong> Satu wali kelas bisa ditugaskan ke lebih dari satu kelas, namun tidak disarankan terlalu banyak.
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px 24px; gap: 12px;">
-                    <button type="button" id="btnRemoveWali" class="btn" style="background: #fef2f2; color: #dc2626; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
-                        <i class="fas fa-times"></i> Hapus Wali Kelas
+                
+                <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center flex-wrap">
+                    <button type="button" id="btnRemoveWali" class="btn btn-danger fw-medium d-flex align-items-center justify-content-center btn-responsive" style="border-radius: 8px;">
+                        <span>Cabut Status Wali</span>
                     </button>
-                    <button type="button" class="btn" data-bs-dismiss="modal" style="background: #f3f4f6; color: #374151; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 500;">
-                        <i class="fas fa-save"></i> Simpan
-                    </button>
+                    
+                    <div class="d-flex gap-2 w-sm-auto">
+                        <button type="button" class="btn btn-secondary fw-medium btn-responsive" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
+                        <button type="submit" class="btn btn-purple text-white fw-medium d-flex align-items-center justify-content-center gap-2 btn-responsive" style="background-color: #8b5cf6; border-radius: 8px;">
+                            <i class="fas fa-save"></i> <span>Simpan Pilihan</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -776,43 +667,35 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
 </div>
 
 {{-- Modal Konfirmasi Hapus Wali Kelas --}}
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 16px; border: none;">
-            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding: 24px; background: #fef2f2;">
-                <h5 class="modal-title" style="font-weight: 600; color: #dc2626;">
-                    <i class="fas fa-exclamation-triangle" style="margin-right: 10px;"></i>
-                    Konfirmasi Hapus Wali Kelas
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="padding: 24px;">
-                <p style="color: #374151; margin-bottom: 16px;">
-                    Apakah Anda yakin ingin menghapus wali kelas dari kelas <strong id="deleteKelasName"></strong>?
-                </p>
-                <div style="padding: 12px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                    <div style="display: flex; gap: 8px; align-items: start;">
-                        <i class="fas fa-info-circle" style="color: #f59e0b; margin-top: 2px;"></i>
-                        <div style="font-size: 13px; color: #92400e;">
-                            Tindakan ini akan menghapus penugasan wali kelas. Kelas akan menjadi "Belum ada wali kelas".
-                        </div>
+            <div class="modal-body text-center pt-0 pb-4">
+                <div class="mb-3">
+                    <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="fas fa-user-times fs-3 text-danger"></i>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 20px 24px; gap: 12px;">
-                <button type="button" class="btn" data-bs-dismiss="modal" style="background: #f3f4f6; color: #374151; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 500;">
-                    Batal
-                </button>
-                <button type="button" id="confirmDeleteBtn" class="btn" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 500;">
-                    <i class="fas fa-trash"></i> Ya, Hapus Wali Kelas
-                </button>
+                <h5 class="fw-bold mb-2">Cabut Wali Kelas?</h5>
+                <p class="text-muted mb-3" style="font-size: 0.85rem;">Wali kelas dari <strong><span id="deleteKelasName"></span></strong> akan dicabut secara permanen. Kelas akan menjadi "Belum ada wali kelas".</p>
+                
+                <div class="d-flex justify-content-center gap-2 mt-4">
+                    <button type="button" class="btn btn-secondary fw-medium px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger fw-medium px-4 d-flex align-items-center gap-2" style="border-radius: 8px;">
+                        <i class="fas fa-trash"></i> Cabut
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-{{-- Modal konfirmasi reassign dihapus - sekarang dukung multi-kelas --}}
+@endsection
 
+@section('scripts')
 <script>
 let currentKelasId = null;
 let currentKelasName = '';
@@ -827,12 +710,20 @@ function openAssignModal(kelasId, kelasName, currentWaliId) {
     document.getElementById('searchWali').value = '';
 
     // Set current wali if exists
-    if (currentWaliId) {
+    if (currentWaliId && currentWaliId !== 'null') {
         const radio = document.querySelector(`input[name="wali_kelas_id"][value="${currentWaliId}"]`);
-        if (radio) radio.checked = true;
+        if (radio) {
+            radio.checked = true;
+            // scroll into view
+            radio.scrollIntoView({ block: "center", behavior: "smooth" });
+            document.getElementById('btnRemoveWali').style.display = 'inline-flex';
+        } else {
+            document.getElementById('btnRemoveWali').style.display = 'none';
+        }
     } else {
         // Uncheck all
         document.querySelectorAll('input[name="wali_kelas_id"]').forEach(r => r.checked = false);
+        document.getElementById('btnRemoveWali').style.display = 'none';
     }
 
     filterWaliList();
@@ -851,21 +742,23 @@ function filterWaliList() {
     waliOptions.forEach(option => {
         const name = option.getAttribute('data-name');
         const matchSearch = searchTerm === '' || name.includes(searchTerm);
-        option.style.display = matchSearch ? 'flex' : 'none';
+
+        option.classList.toggle('d-none', !matchSearch);
+        if (matchSearch) {
+            option.style.setProperty('display', 'flex', 'important');
+        } else {
+            option.style.setProperty('display', 'none', 'important');
+        }
     });
 }
 
-// Hover effect for wali options
+// Click effect for whole row
 document.querySelectorAll('.wali-option').forEach(option => {
-    option.addEventListener('mouseenter', function() {
-        this.style.background = '#f9fafb';
-    });
-    option.addEventListener('mouseleave', function() {
-        this.style.background = 'transparent';
-    });
-    option.addEventListener('click', function() {
-        const radio = this.querySelector('input[type="radio"]');
-        radio.checked = true;
+    option.addEventListener('click', function(e) {
+        if(e.target.tagName !== 'INPUT') {
+            const radio = this.querySelector('input[type="radio"]');
+            if(radio) radio.checked = true;
+        }
     });
 });
 
@@ -894,7 +787,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', function()
         confirmModal.hide();
     }
 
-    // Uncheck all radios
+    // Uncheck all radios to signal removal
     document.querySelectorAll('input[name="wali_kelas_id"]').forEach(r => r.checked = false);
 
     // Submit form
@@ -903,37 +796,4 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', function()
     }, 300);
 });
 </script>
-
-<style>
-.modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.wali-option input[type="radio"]:checked {
-    accent-color: #8b5cf6;
-}
-
-.wali-option:has(input:checked) {
-    background: #f3e8ff !important;
-    border: 1px solid #8b5cf6;
-}
-
-#waliList::-webkit-scrollbar {
-    width: 8px;
-}
-
-#waliList::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-#waliList::-webkit-scrollbar-thumb {
-    background: #d1d5db;
-    border-radius: 4px;
-}
-
-#waliList::-webkit-scrollbar-thumb:hover {
-    background: #9ca3af;
-}
-</style>
 @endsection

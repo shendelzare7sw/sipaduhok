@@ -77,6 +77,85 @@
             border: 1px solid #e2e8f0;
         }
 
+        /* Reset Toolbar */
+        .reset-toolbar {
+            position: fixed;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 90vw;
+        }
+
+        .reset-toolbar.show {
+            bottom: 30px;
+        }
+
+        .reset-toolbar .selected-count {
+            font-weight: 700;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .reset-toolbar .btn-reset {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .reset-toolbar .btn-reset:hover {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            transform: scale(1.05);
+        }
+
+        .reset-toolbar .btn-cancel-select {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .reset-toolbar .btn-cancel-select:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+
+        tr.selected-row {
+            background-color: #eff6ff !important;
+        }
+
         /* Buttons */
         .btn-secondary {
             background: white;
@@ -329,11 +408,7 @@
 
 @section('content')
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-        <div class="container-fluid px-0">
-
-
-
-            {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
+        <div class="container-fluid px-0">            {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
             @if(!empty($tunggakanSummary))
             <div class="alert alert-danger border-start border-danger border-4 shadow-sm mb-4">
                 <div class="d-flex align-items-start">
@@ -468,10 +543,19 @@
                             <h5>Data siswa tidak ditemukan</h5>
                         </div>
                     @else
+                        {{-- Mobile Select All (Only visible on small screens since thead is hidden) --}}
+                        <div class="d-md-none p-3 border-bottom d-flex align-items-center bg-light">
+                            <input type="checkbox" id="selectAllMobile" class="me-2" style="width: 18px; height: 18px; accent-color: #3b82f6;" title="Pilih Semua">
+                            <label for="selectAllMobile" class="fw-bold text-gray-700 mb-0" style="cursor: pointer;">Pilih Semua Siswa</label>
+                        </div>
+                        
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
                                 <thead>
                                     <tr>
+                                        <th class="checkbox-cell">
+                                            <input type="checkbox" id="selectAll" title="Pilih Semua">
+                                        </th>
                                         <th width="50">NO</th>
                                         <th class="text-start">IDENTITAS SISWA</th>
                                         <th>NISN</th>
@@ -486,7 +570,10 @@
                                 </thead>
                                 <tbody>
                                     @foreach($siswaList as $index => $siswa)
-                                        <tr>
+                                        <tr data-siswa-id="{{ $siswa->id }}" data-siswa-name="{{ $siswa->nama_lengkap }}">
+                                            <td class="checkbox-cell align-middle" data-label="PILIH UNTUK RESET">
+                                                <input type="checkbox" class="row-checkbox" value="{{ $siswa->id }}">
+                                            </td>
                                             <td class="text-center align-middle fw-bold text-gray-600" data-label="NO">
                                                 {{ $siswaList->firstItem() + $index }}</td>
                                             <td class="align-middle" data-label="IDENTITAS SISWA">
@@ -573,12 +660,74 @@
         </div>
     </div>
 
+    {{-- Floating Reset Toolbar --}}
+    <div class="reset-toolbar" id="resetToolbar">
+        <span class="selected-count">
+            <i class="fas fa-check-square me-1"></i>
+            <span id="selectedCount">0</span> siswa dipilih
+        </span>
+        <button type="button" class="btn-cancel-select" onclick="clearSelection()">
+            <i class="fas fa-times me-1"></i> Batal
+        </button>
+        <button type="button" class="btn-reset" data-bs-toggle="modal" data-bs-target="#resetTagihanModal">
+            <i class="fas fa-trash-restore me-1"></i> Reset Tagihan
+        </button>
+    </div>
+
+    {{-- Modal Konfirmasi Reset Tagihan --}}
+    <div class="modal fade" id="resetTagihanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white;">
+                    <h5 class="modal-title fw-bold text-white">
+                        <i class="fas fa-exclamation-triangle me-2"></i>PERINGATAN: Reset Tagihan
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3" style="animation: pulse 1.5s infinite;"></i>
+                        <h5 class="fw-bold text-danger mb-2">TINDAKAN BERBAHAYA!</h5>
+                    </div>
+
+                    <div class="card bg-light border mb-3">
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold small text-uppercase text-muted mb-2">
+                                <i class="fas fa-users me-1"></i> Siswa yang akan direset:
+                            </h6>
+                            <div id="resetSiswaList" class="small" style="max-height: 150px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batalkan
+                    </button>
+                    <form id="formResetTagihan" action="{{ route('admin.keuangan.tagihan.reset-tagihan') }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="siswa_ids" id="resetSiswaIds">
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ $selectedYear->id ?? '' }}">
+                        <button type="button" class="btn btn-danger fw-bold" id="btnExecReset" onclick="executeReset()">
+                            <i class="fas fa-trash-restore me-1"></i> Ya, Reset Sekarang
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+
     <script>
         // Search functionality
         const searchInput = document.getElementById('searchInput');
         const clearSearch = document.getElementById('clearSearch');
 
-        // Show/hide clear button
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 if (this.value.length > 0) {
@@ -589,13 +738,105 @@
             });
         }
 
-        // Clear search
         if (clearSearch) {
             clearSearch.addEventListener('click', function() {
                 searchInput.value = '';
                 clearSearch.classList.remove('show');
                 searchInput.focus();
             });
+        }
+
+        // === Multi-select & Reset Tagihan Logic ===
+        const selectAll = document.getElementById('selectAll');
+        const selectAllMobile = document.getElementById('selectAllMobile');
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        const resetToolbar = document.getElementById('resetToolbar');
+        const selectedCountEl = document.getElementById('selectedCount');
+
+        function updateToolbar() {
+            const checked = document.querySelectorAll('.row-checkbox:checked');
+            const count = checked.length;
+            selectedCountEl.textContent = count;
+
+            if (count > 0) {
+                resetToolbar.classList.add('show');
+            } else {
+                resetToolbar.classList.remove('show');
+            }
+
+            // Update select all state
+            const isAllSelected = checkboxes.length > 0 && checked.length === checkboxes.length;
+            const isIndeterminate = checked.length > 0 && checked.length < checkboxes.length;
+            
+            if (selectAll) {
+                selectAll.checked = isAllSelected;
+                selectAll.indeterminate = isIndeterminate;
+            }
+            if (selectAllMobile) {
+                selectAllMobile.checked = isAllSelected;
+                selectAllMobile.indeterminate = isIndeterminate;
+            }
+
+            // Highlight selected rows
+            checkboxes.forEach(cb => {
+                const row = cb.closest('tr');
+                if (row) {
+                    row.classList.toggle('selected-row', cb.checked);
+                }
+            });
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateToolbar();
+            });
+        }
+        
+        if (selectAllMobile) {
+            selectAllMobile.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateToolbar();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateToolbar);
+        });
+
+        function clearSelection() {
+            checkboxes.forEach(cb => cb.checked = false);
+            if (selectAll) selectAll.checked = false;
+            if (selectAllMobile) selectAllMobile.checked = false;
+            updateToolbar();
+        }
+
+        // Modal preparation
+        const resetModal = document.getElementById('resetTagihanModal');
+        if (resetModal) {
+            resetModal.addEventListener('show.bs.modal', function() {
+                const checked = document.querySelectorAll('.row-checkbox:checked');
+                const ids = [];
+                let listHtml = '';
+
+                checked.forEach((cb, i) => {
+                    ids.push(cb.value);
+                    const row = cb.closest('tr');
+                    const nameCell = row ? row.querySelector('.student-name') : null;
+                    const name = nameCell ? nameCell.textContent.trim() : 'Siswa #' + cb.value;
+                    listHtml += `<div class="d-flex align-items-center py-1 ${i > 0 ? 'border-top' : ''}">
+                        <i class="fas fa-user-minus text-danger me-2"></i>
+                        <span>${i + 1}. ${name}</span>
+                    </div>`;
+                });
+
+                document.getElementById('resetSiswaIds').value = JSON.stringify(ids);
+                document.getElementById('resetSiswaList').innerHTML = listHtml;
+            });
+        }
+
+        function executeReset() {
+            document.getElementById('formResetTagihan').submit();
         }
     </script>
 @endsection
