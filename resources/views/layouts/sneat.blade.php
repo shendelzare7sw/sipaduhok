@@ -1084,10 +1084,10 @@
     })();
     </script>
 
-    {{-- AI Chatbot Component - Role-based access control via admin settings --}}
-    @if(auth()->check() && canAccessChatbot(auth()->user()->role))
+    {{-- AI Chatbot + Sistem Helper — Dual Mode (all authenticated users) --}}
+    @auth
         @include('components.ai-chatbot')
-    @endif
+    @endauth
 
     @stack('modals')
 </body>

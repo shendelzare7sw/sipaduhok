@@ -3,7 +3,7 @@
 @section('title', 'Cetak Laporan')
 
 @section('page-title', 'Cetak Laporan')
-@section('page-subtitle', 'Cetak berbagai jenis laporan')
+@section('page-subtitle', 'Cetak berbagai jenis laporan data akademik')
 
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
@@ -11,203 +11,320 @@
 
 @section('styles')
 <style>
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 30px;
-}
+    :root {
+        --rpt-primary: #4361ee;
+        --rpt-success: #10b981;
+        --rpt-warning: #f59e0b;
+        --rpt-danger: #ef4444;
+        --rpt-info: #06b6d4;
+        --rpt-purple: #8b5cf6;
+        --rpt-teal: #14b8a6;
+        --rpt-pink: #ec4899;
+        --rpt-surface: #ffffff;
+        --rpt-bg: #f8fafc;
+        --rpt-border: #e2e8f0;
+        --rpt-text: #1e293b;
+        --rpt-muted: #64748b;
+        --rpt-radius: 12px;
+    }
 
-@media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 576px) { .stats-row { grid-template-columns: 1fr; } }
+    /* Stat Cards */
+    .stat-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
 
-.stat-mini {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
+    .stat-widget {
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        background: var(--rpt-surface);
+        border: 1px solid var(--rpt-border);
+        border-radius: var(--rpt-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
 
-.stat-mini-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-}
+    .stat-widget:hover { transform: translateY(-2px); }
 
-.stat-mini-icon.blue { background: #eff6ff; }
-.stat-mini-icon.green { background: #f0fdf4; }
-.stat-mini-icon.purple { background: #faf5ff; }
-.stat-mini-icon.orange { background: #fff7ed; }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
 
-.stat-mini-info h4 { font-size: 24px; font-weight: 700; color: #111827; margin: 0; }
-.stat-mini-info p { font-size: 13px; color: #6b7280; margin: 0; }
+    .stat-details { flex-grow: 1; }
 
-.report-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--rpt-text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
 
-@media (max-width: 992px) { .report-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 576px) { .report-grid { grid-template-columns: 1fr; } }
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--rpt-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-.report-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    overflow: hidden;
-    transition: all 0.3s;
-}
+    /* Section Title */
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .section-header h5 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--rpt-text);
+        margin: 0;
+    }
+    .section-header i {
+        color: var(--rpt-muted);
+        font-size: 1rem;
+    }
 
-.report-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-}
+    /* Report Grid */
+    .report-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
 
-.report-card-header {
-    padding: 24px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
+    /* Report Card */
+    .rpt-card {
+        background: var(--rpt-surface);
+        border: 1px solid var(--rpt-border);
+        border-radius: var(--rpt-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
 
-.report-card-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -30%;
-    width: 150px;
-    height: 150px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50%;
-}
+    .rpt-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
 
-.report-card-header.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.report-card-header.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.report-card-header.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.report-card-header.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.report-card-header.teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
-.report-card-header.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+    .rpt-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--rpt-border);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
 
-.report-card-icon { font-size: 32px; margin-bottom: 12px; position: relative; z-index: 1; }
-.report-card-title { font-size: 18px; font-weight: 600; margin: 0; position: relative; z-index: 1; color: white; }
+    .rpt-card-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
 
-.report-card-body { padding: 24px; }
-.report-card-desc { font-size: 14px; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
+    .rpt-card-info { flex-grow: 1; }
 
-.report-form { display: flex; flex-direction: column; gap: 12px; }
+    .rpt-card-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--rpt-text);
+        margin: 0;
+    }
 
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 12px; font-weight: 600; color: #374151; text-transform: uppercase; }
+    .rpt-card-subtitle {
+        font-size: 0.75rem;
+        color: var(--rpt-muted);
+        margin: 2px 0 0 0;
+    }
 
-.form-group select, .form-group input {
-    padding: 10px 14px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.2s;
-}
+    .rpt-card-body {
+        padding: 1.25rem 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
 
-.form-group select:focus, .form-group input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+    /* Form Styles */
+    .rpt-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        flex-grow: 1;
+    }
 
-.btn-print {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: white;
-    margin-top: 8px;
-}
+    .rpt-form-group { display: flex; flex-direction: column; gap: 0.35rem; }
 
-.btn-print.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.btn-print.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.btn-print.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.btn-print.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.btn-print.teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
-.btn-print.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+    .rpt-form-group label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--rpt-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-.btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .rpt-form-group select,
+    .rpt-form-group input {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--rpt-border);
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: var(--rpt-text);
+        background: var(--rpt-surface);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
 
-.section-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+    .rpt-form-group select:focus,
+    .rpt-form-group input:focus {
+        outline: none;
+        border-color: var(--rpt-primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    }
 
-.section-title i { color: #6b7280; }
+    .btn-rpt-print {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: white;
+        margin-top: auto;
+        width: 100%;
+    }
+
+    .btn-rpt-print:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        color: white;
+    }
+
+    /* Color Variants */
+    .bg-rpt-blue { background: #eff6ff; color: #3b82f6; }
+    .bg-rpt-green { background: #ecfdf5; color: #10b981; }
+    .bg-rpt-purple { background: #f5f3ff; color: #8b5cf6; }
+    .bg-rpt-orange { background: #fffbeb; color: #f59e0b; }
+    .bg-rpt-teal { background: #f0fdfa; color: #14b8a6; }
+    .bg-rpt-pink { background: #fdf2f8; color: #ec4899; }
+
+    .btn-rpt-blue { background: #3b82f6; }
+    .btn-rpt-blue:hover { background: #2563eb; }
+    .btn-rpt-green { background: #10b981; }
+    .btn-rpt-green:hover { background: #059669; }
+    .btn-rpt-purple { background: #8b5cf6; }
+    .btn-rpt-purple:hover { background: #7c3aed; }
+    .btn-rpt-orange { background: #f59e0b; }
+    .btn-rpt-orange:hover { background: #d97706; }
+    .btn-rpt-teal { background: #14b8a6; }
+    .btn-rpt-teal:hover { background: #0d9488; }
+    .btn-rpt-pink { background: #ec4899; }
+    .btn-rpt-pink:hover { background: #db2777; }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .report-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+        .stat-row { grid-template-columns: repeat(2, 1fr); }
+        .report-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 576px) {
+        .stat-row { grid-template-columns: 1fr; }
+    }
 </style>
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-    {{-- Quick Stats --}}
-    <div class="stats-row">
-        <div class="stat-mini">
-            <div class="stat-mini-icon blue"><i class="fas fa-graduation-cap"></i></div>
-            <div class="stat-mini-info">
-                <h4>{{ $stats['totalSiswa'] }}</h4>
-                <p>Siswa Aktif</p>
+
+    <!-- Stats Row -->
+    <div class="stat-row">
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalSiswa'] }}</div>
+                <div class="stat-label">Siswa Aktif</div>
             </div>
         </div>
-        <div class="stat-mini">
-            <div class="stat-mini-icon green"><i class="fas fa-school"></i></div>
-            <div class="stat-mini-info">
-                <h4>{{ $stats['totalGuru'] }}</h4>
-                <p>Tenaga Pendidik</p>
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalGuru'] }}</div>
+                <div class="stat-label">Tenaga Pendidik</div>
             </div>
         </div>
-        <div class="stat-mini">
-            <div class="stat-mini-icon purple"><i class="fas fa-door-open"></i></div>
-            <div class="stat-mini-info">
-                <h4>{{ $stats['totalKelas'] }}</h4>
-                <p>Kelas Aktif</p>
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+                <i class="fas fa-chalkboard"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalKelas'] }}</div>
+                <div class="stat-label">Kelas Aktif</div>
             </div>
         </div>
-        <div class="stat-mini">
-            <div class="stat-mini-icon orange"><i class="fas fa-school"></i></div>
-            <div class="stat-mini-info">
-                <h4>{{ $stats['totalCabang'] }}</h4>
-                <p>Cabang</p>
+        <div class="stat-widget">
+            <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="stat-details">
+                <div class="stat-value">{{ $stats['totalCabang'] }}</div>
+                <div class="stat-label">Cabang</div>
             </div>
         </div>
     </div>
 
-    <h3 class="section-title"><i class="fas fa-print"></i> Pilih Jenis Laporan</h3>
+    <!-- Section Title -->
+    <div class="section-header">
+        <i class="fas fa-print"></i>
+        <h5>Pilih Jenis Laporan</h5>
+    </div>
 
+    <!-- Report Grid -->
     <div class="report-grid">
+
         {{-- Laporan Siswa --}}
-        <div class="report-card">
-            <div class="report-card-header blue">
-                <div class="report-card-icon"><i class="fas fa-graduation-cap"></i></div>
-                <h4 class="report-card-title">Daftar Siswa</h4>
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon bg-rpt-blue">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Daftar Siswa</h6>
+                    <p class="rpt-card-subtitle">Cetak berdasarkan cabang, jenjang & kelas</p>
+                </div>
             </div>
-            <div class="report-card-body">
-                <p class="report-card-desc">Cetak daftar siswa berdasarkan cabang, jenjang, kelas. Dapat diurutkan per abjad, kelas, atau lokasi.</p>
-                <form action="{{ route('admin.laporan.siswa') }}" method="GET" target="_blank" class="report-form" id="formSiswa">
-                    <div class="form-group">
+            <div class="rpt-card-body">
+                <form action="{{ route('admin.laporan.siswa') }}" method="GET" target="_blank" class="rpt-form" id="formSiswa">
+                    <div class="rpt-form-group">
                         <label>Cabang</label>
                         <select name="cabang_id" id="siswa_cabang">
                             <option value="">Semua Cabang</option>
@@ -216,19 +333,19 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group" id="siswa_jenjang_group" style="display:none;">
+                    <div class="rpt-form-group" id="siswa_jenjang_group" style="display:none;">
                         <label>Jenjang</label>
                         <select name="jenjang" id="siswa_jenjang">
                             <option value="">Semua Jenjang</option>
                         </select>
                     </div>
-                    <div class="form-group" id="siswa_kelas_group" style="display:none;">
+                    <div class="rpt-form-group" id="siswa_kelas_group" style="display:none;">
                         <label>Kelas</label>
                         <select name="kelas_id" id="siswa_kelas">
                             <option value="">Semua Kelas</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="rpt-form-group">
                         <label>Urut Berdasarkan</label>
                         <select name="sort_by">
                             <option value="nama">Nama (Abjad)</option>
@@ -236,7 +353,7 @@
                             <option value="cabang">Per Cabang</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-print blue">
+                    <button type="submit" class="btn-rpt-print btn-rpt-blue">
                         <i class="fas fa-print"></i> Cetak Laporan
                     </button>
                 </form>
@@ -244,15 +361,19 @@
         </div>
 
         {{-- Laporan Tenaga Pendidik --}}
-        <div class="report-card">
-            <div class="report-card-header green">
-                <div class="report-card-icon"><i class="fas fa-school"></i></div>
-                <h4 class="report-card-title">Daftar Tenaga Pendidik</h4>
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon bg-rpt-green">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Daftar Tenaga Pendidik</h6>
+                    <p class="rpt-card-subtitle">Guru, wali kelas & staff lengkap</p>
+                </div>
             </div>
-            <div class="report-card-body">
-                <p class="report-card-desc">Cetak daftar tenaga pendidik (guru, wali kelas, staff) dengan data lengkap.</p>
-                <form action="{{ route('admin.laporan.tenaga-pendidik') }}" method="GET" target="_blank" class="report-form">
-                    <div class="form-group">
+            <div class="rpt-card-body">
+                <form action="{{ route('admin.laporan.tenaga-pendidik') }}" method="GET" target="_blank" class="rpt-form">
+                    <div class="rpt-form-group">
                         <label>Role</label>
                         <select name="role">
                             <option value="">Semua Role</option>
@@ -262,21 +383,21 @@
                             <option value="sekretaris">Sekretaris</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="rpt-form-group">
                         <label>Status</label>
                         <select name="status">
                             <option value="aktif">Aktif</option>
                             <option value="nonaktif">Non-Aktif</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="rpt-form-group">
                         <label>Urut Berdasarkan</label>
                         <select name="sort_by">
                             <option value="nama">Nama (Abjad)</option>
                             <option value="nip">NIP</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-print green">
+                    <button type="submit" class="btn-rpt-print btn-rpt-green">
                         <i class="fas fa-print"></i> Cetak Laporan
                     </button>
                 </form>
@@ -284,15 +405,19 @@
         </div>
 
         {{-- Laporan Kelas --}}
-        <div class="report-card">
-            <div class="report-card-header purple">
-                <div class="report-card-icon"><i class="fas fa-door-open"></i></div>
-                <h4 class="report-card-title">Daftar Kelas</h4>
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon bg-rpt-purple">
+                    <i class="fas fa-chalkboard"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Daftar Kelas</h6>
+                    <p class="rpt-card-subtitle">Info wali kelas, siswa & kuota</p>
+                </div>
             </div>
-            <div class="report-card-body">
-                <p class="report-card-desc">Cetak daftar kelas dengan informasi wali kelas, jumlah siswa, dan kuota.</p>
-                <form action="{{ route('admin.laporan.kelas') }}" method="GET" target="_blank" class="report-form">
-                    <div class="form-group">
+            <div class="rpt-card-body">
+                <form action="{{ route('admin.laporan.kelas') }}" method="GET" target="_blank" class="rpt-form">
+                    <div class="rpt-form-group">
                         <label>Tahun Ajaran</label>
                         <select name="tahun_ajaran_id">
                             @foreach($tahunAjarans as $ta)
@@ -302,7 +427,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="rpt-form-group">
                         <label>Jenjang</label>
                         <select name="jenjang">
                             <option value="">Semua Jenjang</option>
@@ -312,7 +437,7 @@
                             <option value="SMA">SMA</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="rpt-form-group">
                         <label>Cabang</label>
                         <select name="cabang_id">
                             <option value="">Semua Cabang</option>
@@ -321,7 +446,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn-print purple">
+                    <button type="submit" class="btn-rpt-print btn-rpt-purple">
                         <i class="fas fa-print"></i> Cetak Laporan
                     </button>
                 </form>
@@ -329,15 +454,19 @@
         </div>
 
         {{-- Laporan Wali Kelas --}}
-        <div class="report-card">
-            <div class="report-card-header orange">
-                <div class="report-card-icon"><i class="fas fa-user-tie"></i></div>
-                <h4 class="report-card-title">Daftar Wali Kelas</h4>
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon bg-rpt-orange">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Daftar Wali Kelas</h6>
+                    <p class="rpt-card-subtitle">Kelas yang diwalikan & jumlah siswa</p>
+                </div>
             </div>
-            <div class="report-card-body">
-                <p class="report-card-desc">Cetak daftar wali kelas beserta kelas yang diwalikan dan jumlah siswa.</p>
-                <form action="{{ route('admin.laporan.wali-kelas') }}" method="GET" target="_blank" class="report-form">
-                    <div class="form-group">
+            <div class="rpt-card-body">
+                <form action="{{ route('admin.laporan.wali-kelas') }}" method="GET" target="_blank" class="rpt-form">
+                    <div class="rpt-form-group">
                         <label>Tahun Ajaran</label>
                         <select name="tahun_ajaran_id">
                             @foreach($tahunAjarans as $ta)
@@ -347,7 +476,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="rpt-form-group">
                         <label>Jenjang</label>
                         <select name="jenjang">
                             <option value="">Semua Jenjang</option>
@@ -357,7 +486,7 @@
                             <option value="SMA">SMA</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-print orange">
+                    <button type="submit" class="btn-rpt-print btn-rpt-orange">
                         <i class="fas fa-print"></i> Cetak Laporan
                     </button>
                 </form>
@@ -365,15 +494,19 @@
         </div>
 
         {{-- Laporan Guru Pengajar --}}
-        <div class="report-card">
-            <div class="report-card-header teal">
-                <div class="report-card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                <h4 class="report-card-title">Daftar Guru Pengajar</h4>
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon bg-rpt-teal">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Daftar Guru Pengajar</h6>
+                    <p class="rpt-card-subtitle">Kelas & mata pelajaran yang diajar</p>
+                </div>
             </div>
-            <div class="report-card-body">
-                <p class="report-card-desc">Cetak daftar guru pengajar beserta kelas dan mata pelajaran yang diajar.</p>
-                <form action="{{ route('admin.laporan.guru-pengajar') }}" method="GET" target="_blank" class="report-form">
-                    <div class="form-group">
+            <div class="rpt-card-body">
+                <form action="{{ route('admin.laporan.guru-pengajar') }}" method="GET" target="_blank" class="rpt-form">
+                    <div class="rpt-form-group">
                         <label>Tahun Ajaran</label>
                         <select name="tahun_ajaran_id">
                             @foreach($tahunAjarans as $ta)
@@ -383,7 +516,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn-print teal">
+                    <button type="submit" class="btn-rpt-print btn-rpt-teal">
                         <i class="fas fa-print"></i> Cetak Laporan
                     </button>
                 </form>
@@ -391,15 +524,19 @@
         </div>
 
         {{-- Rekap Statistik --}}
-        <div class="report-card">
-            <div class="report-card-header pink">
-                <div class="report-card-icon"><i class="fas fa-chart-bar"></i></div>
-                <h4 class="report-card-title">Rekap Statistik</h4>
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon bg-rpt-pink">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Rekap Statistik</h6>
+                    <p class="rpt-card-subtitle">Statistik per cabang & jenjang</p>
+                </div>
             </div>
-            <div class="report-card-body">
-                <p class="report-card-desc">Cetak rekap statistik sekolah per cabang dan per jenjang pendidikan.</p>
-                <form action="{{ route('admin.laporan.rekap') }}" method="GET" target="_blank" class="report-form">
-                    <div class="form-group">
+            <div class="rpt-card-body">
+                <form action="{{ route('admin.laporan.rekap') }}" method="GET" target="_blank" class="rpt-form">
+                    <div class="rpt-form-group">
                         <label>Tahun Ajaran</label>
                         <select name="tahun_ajaran_id">
                             @foreach($tahunAjarans as $ta)
@@ -409,14 +546,14 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn-print pink">
+                    <button type="submit" class="btn-rpt-print btn-rpt-pink">
                         <i class="fas fa-print"></i> Cetak Laporan
                     </button>
                 </form>
             </div>
         </div>
+
     </div>
-</div>
 
 @push('scripts')
 <script>
@@ -471,4 +608,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 @endsection
-

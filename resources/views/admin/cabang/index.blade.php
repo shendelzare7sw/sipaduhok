@@ -244,7 +244,8 @@
             margin-top: 1rem;
             padding-top: 1rem !important;
             border-top: 1px dashed var(--cb-border) !important;
-            justify-content: center !important;
+            justify-content: space-between !important;
+            gap: 1rem;
         }
         .stats-mini { justify-content: flex-end; }
         .location-info { align-items: flex-end; }
@@ -393,8 +394,8 @@
                                 <span class="badge bg-label-secondary badge-status"><i class="fas fa-power-off me-1"></i> Non-Aktif</span>
                             @endif
                         </td>
-                        <td class="td-actions" data-label="Aksi">
-                            <div class="d-flex justify-content-center gap-1 action-btns">
+                        <td class="td-actions text-end" data-label="Aksi">
+                            <div class="d-flex justify-content-end gap-1 action-btns">
                                 <a href="{{ route('admin.cabang.show', $cabang) }}" class="btn btn-sm btn-info text-white" title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
