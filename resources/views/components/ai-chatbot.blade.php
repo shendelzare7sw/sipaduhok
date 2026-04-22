@@ -1699,6 +1699,9 @@ function replaceEmojis(text) {
 
 function normalizeQuery(text) {
     let q = text.toLowerCase().trim();
+    // Remove common punctuation to ensure clean word boundaries
+    q = q.replace(/[.,!?()[\]{}"':;]/g, ' ');
+    
     // Sort typo keys by length descending to match longer phrases first
     const sortedEntries = Object.entries(TYPO_MAP).sort((a, b) => b[0].length - a[0].length);
     for (const [typo, fix] of sortedEntries) {
@@ -1725,51 +1728,61 @@ function findSystemAnswer(query) {
     for (const entry of SYSTEM_KB) {
         if (!isEntryAllowedForRole(entry)) continue;
 
-        let score = 0;
+        let entryMaxScore = 0;
+
         for (const kw of entry.kw) {
+            let kwScore = 0;
             const nkw = kw.toLowerCase();
+            const kwWords = nkw.split(/\s+/);
 
             // Full keyword match in query
             if (q.includes(nkw)) {
-                score += nkw.length + 2;
-                if (q === nkw) score += 15;
+                kwScore += nkw.length + 2;
+                if (q === nkw) kwScore += 15;
             }
 
-            // Single word matching: each query word checked against each keyword word
-            const kwWords = nkw.split(' ');
+            // Single word matching: strict array includes, not substring
             let wordMatches = 0;
             for (const w of kwWords) {
-                if (w.length >= 3 && q.includes(w)) {
+                if (w.length >= 3 && qWords.includes(w)) {
                     wordMatches++;
-                    score += 1; // Each single word hit gives +1
+                    kwScore += 1; 
                 }
             }
-            if (wordMatches >= 2) score += wordMatches * 2;
+            if (wordMatches >= 2) kwScore += wordMatches * 2;
 
-            // Reverse check: query words appearing in keyword
+            // Reverse check: strict array includes
             for (const qw of qWords) {
-                if (qw.length >= 3 && nkw.includes(qw)) {
-                    score += 1;
+                if (qw.length >= 3 && kwWords.includes(qw)) {
+                    kwScore += 1;
                 }
+            }
+
+            if (kwScore > entryMaxScore) {
+                entryMaxScore = kwScore;
             }
         }
 
         // Also check title (without emoji) for partial matches
         const titleClean = entry.title.replace(/[^\w\s]/gi, '').toLowerCase().trim();
+        const titleWords = titleClean.split(/\s+/);
         for (const qw of qWords) {
-            if (qw.length >= 3 && titleClean.includes(qw)) {
-                score += 2;
+            if (qw.length >= 3 && titleWords.includes(qw)) {
+                entryMaxScore += 2;
             }
         }
 
-        if (score > bestScore) {
-            bestScore = score;
+        if (entryMaxScore > bestScore) {
+            bestScore = entryMaxScore;
             bestMatch = entry;
         }
 
         // Collect suggestions for partial matches (score 1-3)
-        if (score >= 1 && score < 4) {
-            suggestions.push({ entry, score });
+        if (entryMaxScore >= 1 && entryMaxScore < 4) {
+            // Check if entry already exists in suggestions to prevent duplicates
+            if (!suggestions.some(s => s.entry.title === entry.title)) {
+                suggestions.push({ entry, score: entryMaxScore });
+            }
         }
     }
 
