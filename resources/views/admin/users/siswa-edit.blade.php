@@ -670,7 +670,7 @@
                                 Cari Orang Tua
                             </label>
                             <input type="text" id="searchParent" class="form-control"
-                                placeholder="Ketik nama atau username orang tua...">
+                                placeholder="Ketik nama atau username orang tua..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
                         </div>
                     </div>
                     <div class="col">
@@ -964,7 +964,8 @@
 
             // Filter Kelas List for Edit
             function filterKelasListEdit() {
-                const cabangFilter = document.getElementById('filterCabangEdit').value || document.getElementById('cabangSelectEdit').value;
+                const cabangSelectEdit = document.getElementById('cabangSelectEdit');
+                const cabangFilter = document.getElementById('filterCabangEdit').value || (cabangSelectEdit ? cabangSelectEdit.value : '');
                 const jenjangFilter = document.getElementById('filterJenjangEdit').value;
                 const searchText = document.getElementById('searchKelasEdit').value.toLowerCase();
 
@@ -978,7 +979,13 @@
                     if (jenjangFilter && itemJenjang !== jenjangFilter) visible = false;
                     if (searchText && !itemName.toLowerCase().includes(searchText)) visible = false;
 
-                    item.style.display = visible ? 'block' : 'none';
+                    if (visible) {
+                        item.classList.remove('d-none');
+                        item.classList.add('d-flex');
+                    } else {
+                        item.classList.remove('d-flex');
+                        item.classList.add('d-none');
+                    }
                 });
             }
 
@@ -1230,7 +1237,7 @@
                             <div class="col-md-4">
                                 <label class="form-label"><small>Cari Kelas</small></label>
                                 <input type="text" id="searchKelasEdit" class="form-control form-control-sm" 
-                                       placeholder="Ketik nama kelas..." oninput="filterKelasListEdit()">
+                                       placeholder="Ketik nama kelas..." oninput="filterKelasListEdit()" onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
                             </div>
                         </div>
 

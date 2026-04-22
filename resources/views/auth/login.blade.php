@@ -93,6 +93,13 @@
                                 </div>
                             @endif
 
+                            @if (session('error'))
+                                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start gap-3">
+                                    <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>{{ session('error') }}</span>
+                                </div>
+                            @endif
+
                             <!-- Username or Email Input -->
                             <div>
                                 <label for="login" class="block text-sm font-semibold text-gray-700 mb-2">Username atau Email</label>
@@ -145,7 +152,7 @@
                                 <div class="flex flex-row items-center gap-3">
                                     <div class="relative flex-1 flex items-center border-2 border-gray-200 rounded-xl focus-within:border-[#165fac] focus-within:ring-4 focus-within:ring-blue-500/10 bg-white transition-all @error('captcha') border-red-500 @enderror">
                                         <input type="text" id="captcha" name="captcha"
-                                            class="peer w-full py-3 pr-4 pl-12 focus:pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
+                                            class="peer w-full py-4 pr-4 pl-12 focus:pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
                                             placeholder="Masukkan kode di samping" required autocomplete="off">
                                         
                                         <div class="absolute left-4 flex items-center pointer-events-none text-gray-400 transition-all duration-200 peer-focus:text-[#165fac] peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:-translate-x-2">
@@ -154,9 +161,9 @@
                                             </svg>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 w-auto h-[52px]">
-                                        <div class="bg-gray-100 p-1 rounded-xl border-2 border-transparent h-full flex items-center justify-center shadow-inner overflow-hidden w-28 sm:w-36">
-                                            <img id="captchaImage" src="{{ route('captcha') }}" alt="CAPTCHA" class="h-10 w-full object-contain mix-blend-multiply">
+                                    <div class="flex items-center gap-2 w-auto h-[60px]">
+                                        <div class="bg-gray-100 p-1 rounded-xl border-2 border-transparent h-full flex items-center justify-center shadow-inner overflow-hidden w-36 sm:w-44 relative">
+                                            <img id="captchaImage" src="{{ route('captcha') }}" alt="CAPTCHA" class="h-full w-full object-cover mix-blend-multiply scale-80 transition-transform duration-300">
                                         </div>
                                         <button type="button" onclick="refreshCaptcha()" class="h-full px-2 sm:px-3 flex items-center justify-center text-gray-500 hover:text-[#165fac] hover:bg-gray-100 rounded-xl border border-transparent hover:border-gray-200 transition-all shrink-0 bg-transparent" title="Refresh CAPTCHA">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

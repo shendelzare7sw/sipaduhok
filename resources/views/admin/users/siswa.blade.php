@@ -570,11 +570,11 @@
                 gap: 12px !important;
             }
 
-            .dropdown {
+            .filter-dropdown {
                 width: 100%;
             }
             
-            .dropdown-toggle {
+            .filter-dropdown .dropdown-toggle {
                 width: 100%;
                 justify-content: space-between;
                 display: flex;

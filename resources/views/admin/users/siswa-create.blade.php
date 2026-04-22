@@ -579,7 +579,7 @@
                                 Cari Orang Tua
                             </label>
                             <input type="text" id="searchParent" class="form-control"
-                                placeholder="Ketik nama atau username orang tua...">
+                                placeholder="Ketik nama atau username orang tua..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
                         </div>
                     </div>
                     <div class="col">
@@ -803,7 +803,8 @@
             }
 
             function filterKelasList() {
-                const cabangFilter = document.getElementById('filterCabang').value || document.getElementById('cabangSelect').value;
+                const cabangSelect = document.getElementById('cabangSelect');
+                const cabangFilter = document.getElementById('filterCabang').value || (cabangSelect ? cabangSelect.value : '');
                 const jenjangFilter = document.getElementById('filterJenjang').value;
                 const searchText = document.getElementById('searchKelas').value.toLowerCase();
                 
@@ -1022,7 +1023,7 @@
                                 <label class="form-label" style="font-weight: 600; color: #374151; font-size: 12px; text-transform: uppercase;">
                                     <i class="fas fa-search me-1"></i>Cari
                                 </label>
-                                <input type="text" id="searchKelas" class="form-control" placeholder="Nama kelas..." onkeyup="filterKelasList()">
+                                <input type="text" id="searchKelas" class="form-control" placeholder="Nama kelas..." onkeyup="filterKelasList()" onkeydown="if(event.key === 'Enter') { event.preventDefault(); return false; }">
                             </div>
                         </div>
 

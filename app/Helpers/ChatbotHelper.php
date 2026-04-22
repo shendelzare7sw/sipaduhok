@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AppSetting;
+use Illuminate\Support\Facades\Cache;
 
 if (!function_exists('canAccessChatbot')) {
     /**
@@ -16,28 +17,25 @@ if (!function_exists('canAccessChatbot')) {
             return true;
         }
 
-        // Get chatbot enabled roles from settings
-        $enabledRolesSetting = AppSetting::where('key', 'chatbot_enabled_roles')->first();
-
-        // If setting doesn't exist, use default values
-        if (!$enabledRolesSetting) {
-            // Default: Enable for all staff roles, disable for siswa and orang_tua
-            $defaultEnabledRoles = [
-                'ketua_pkbm' => true,
-                'wakil_kepala_sekolah' => true,
-                'sekretaris' => true,
-                'bendahara' => true,
-                'wali_kelas' => true,
-                'guru_pengajar' => true,
-                'siswa' => false,
-                'orang_tua' => false,
-            ];
-
-            return $defaultEnabledRoles[$role] ?? false;
-        }
-
-        // Parse JSON value
-        $enabledRoles = json_decode($enabledRolesSetting->value, true);
+        // Get from cache or fetch and cache
+        $enabledRoles = Cache::remember('chatbot_enabled_roles', 3600, function () {
+            $enabledRolesSetting = AppSetting::where('key', 'chatbot_enabled_roles')->first();
+            
+            if (!$enabledRolesSetting) {
+                return [
+                    'ketua_pkbm' => true,
+                    'wakil_kepala_sekolah' => true,
+                    'sekretaris' => true,
+                    'bendahara' => true,
+                    'wali_kelas' => true,
+                    'guru_pengajar' => true,
+                    'siswa' => false,
+                    'orang_tua' => false,
+                ];
+            }
+            
+            return json_decode($enabledRolesSetting->value, true);
+        });
 
         // Return role status (default false if not found)
         return $enabledRoles[$role] ?? false;

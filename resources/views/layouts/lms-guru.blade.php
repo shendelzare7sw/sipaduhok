@@ -539,10 +539,12 @@
 
     @stack('scripts')
 
-    {{-- AI Chatbot Component - Role-based access control via admin settings --}}
-    @if(auth()->check() && canAccessChatbot(auth()->user()->role))
-        @include('components.ai-chatbot')
-    @endif
+    {{-- AI Chatbot Integration (Role-based access) --}}
+    @auth
+        @if(canAccessChatbot(auth()->user()->role))
+            @include('components.ai-chatbot')
+        @endif
+    @endauth
 </body>
 
 </html>

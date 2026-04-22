@@ -31,10 +31,10 @@
                             </label>
                             <select class="form-select form-select-lg" name="ai_provider" id="ai_provider" style="border: 2px solid #3b82f6;">
                                 <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>
-                                    ⚡ Groq Cloud (Llama / Qwen / Mixtral - FREE)
+                                    Groq Cloud (Llama / Qwen / Mixtral - FREE)
                                 </option>
                                 <option value="gemini" {{ $provider == 'gemini' ? 'selected' : '' }}>
-                                    🤖 Google Gemini (2.5 Flash - FREE)
+                                    Google Gemini (2.5 Flash - FREE)
                                 </option>
                             </select>
                             <div class="alert alert-info mt-2 mb-0" style="font-size: 13px;">

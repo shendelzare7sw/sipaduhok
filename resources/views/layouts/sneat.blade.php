@@ -1084,9 +1084,11 @@
     })();
     </script>
 
-    {{-- AI Chatbot + Sistem Helper — Dual Mode (all authenticated users) --}}
+    {{-- AI Chatbot + Sistem Helper — Dual Mode (Role-based access) --}}
     @auth
-        @include('components.ai-chatbot')
+        @if(canAccessChatbot(auth()->user()->role))
+            @include('components.ai-chatbot')
+        @endif
     @endauth
 
     @stack('modals')

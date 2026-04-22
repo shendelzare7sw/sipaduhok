@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AppSetting;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class AiSettingController extends Controller
 {
@@ -83,6 +84,9 @@ class AiSettingController extends Controller
                 ['value' => $value]
             );
         }
+
+        // Clear cache so changes reflect immediately
+        Cache::forget('chatbot_enabled_roles');
 
         return redirect()->back()->with('success', 'Pengaturan AI berhasil disimpan.');
     }
