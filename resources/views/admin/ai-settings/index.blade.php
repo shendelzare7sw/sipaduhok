@@ -25,6 +25,18 @@
                         @csrf
                         @method('PUT')
 
+                        <div class="mb-4 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1"><i class="fas fa-magic me-2 text-primary"></i>Mode LLM (Generative AI)</h6>
+                                    <small class="text-muted">Izinkan Chatbot untuk menjawab pertanyaan umum di luar konteks sistem menggunakan AI Generatif (Llama/Gemini). Jika dimatikan, Chatbot hanya akan melayani pertanyaan seputar sistem saja.</small>
+                                </div>
+                                <div class="form-check form-switch form-switch-lg mb-0" style="padding-left: 3rem;">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="llm_mode_enabled" id="llm_mode_enabled" style="width: 3rem; height: 1.5rem;" {{ $llmModeEnabled ? 'checked' : '' }}>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             <label class="form-label fw-bold">
                                 <i class="fas fa-globe me-2 text-primary"></i>AI Provider (GLOBAL)

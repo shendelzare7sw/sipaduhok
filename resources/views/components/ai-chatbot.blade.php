@@ -1113,6 +1113,7 @@ const chatbotState = {
 
 // Current user role (injected from Blade)
 const USER_ROLE = '{{ auth()->user()->role ?? "guest" }}';
+const IS_LLM_MODE_ENABLED = {{ isLlmModeEnabled() ? 'true' : 'false' }};
 
 const SYSTEM_KB = [
     // ═══ DASHBOARD ═══
@@ -2398,6 +2399,27 @@ async function sendMessage(messageText = null) {
     }
 
     // ═══ No KB match → fallback to LLM API ═══
+    if (!IS_LLM_MODE_ENABLED) {
+        document.getElementById('modelSelector').style.display = 'none';
+        document.getElementById('systemModeBadge').style.display = 'inline-flex';
+        showTypingIndicator();
+        chatbotState.isWaitingResponse = true;
+        await new Promise(r => setTimeout(r, 400 + Math.random() * 500));
+        chatbotState.isWaitingResponse = false;
+        hideTypingIndicator();
+        
+        const noLlmResponse = '<div style="font-size:13.5px;line-height:1.6">'
+            + '<div style="font-weight:700;color:#f59e0b;margin-bottom:6px"><i class="fas fa-info-circle" style="margin-right:4px"></i> Di Luar Konteks Sistem</div>'
+            + '<div style="color:#475569;margin-bottom:8px">Maaf, Asisten Sistem saat ini diatur untuk hanya melayani pertanyaan seputar navigasi dan fitur SIPADUHOK.</div>'
+            + '<div style="color:#475569;">Untuk pertanyaan pengetahuan umum di luar sistem, fitur <strong>AI Generatif</strong> sedang dinonaktifkan oleh Administrator.</div>'
+            + '</div>';
+            
+        addMessage('assistant', noLlmResponse, null, true, true);
+        saveCurrentConversation();
+        scrollToBottom();
+        return;
+    }
+
     // LLM mode: show model selector, hide badge
     document.getElementById('modelSelector').style.display = '';
     document.getElementById('systemModeBadge').style.display = 'none';

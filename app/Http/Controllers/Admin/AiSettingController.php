@@ -35,6 +35,7 @@ class AiSettingController extends Controller
             'visionModel' => $settings['ai_vision_model'] ?? 'gemini-2.5-flash',
             'provider' => $settings['ai_provider'] ?? 'groq',
             'chatbotEnabledRoles' => $chatbotEnabledRoles,
+            'llmModeEnabled' => isLlmModeEnabled(),
         ]);
     }
 
@@ -76,6 +77,7 @@ class AiSettingController extends Controller
             'ai_vision_model' => $request->ai_vision_model,
             'ai_provider' => $request->ai_provider,
             'chatbot_enabled_roles' => json_encode($chatbotEnabledRoles),
+            'llm_mode_enabled' => $request->has('llm_mode_enabled') ? '1' : '0',
         ];
 
         foreach ($settings as $key => $value) {
@@ -87,6 +89,7 @@ class AiSettingController extends Controller
 
         // Clear cache so changes reflect immediately
         Cache::forget('chatbot_enabled_roles');
+        Cache::forget('llm_mode_enabled');
 
         return redirect()->back()->with('success', 'Pengaturan AI berhasil disimpan.');
     }

@@ -41,3 +41,18 @@ if (!function_exists('canAccessChatbot')) {
         return $enabledRoles[$role] ?? false;
     }
 }
+
+if (!function_exists('isLlmModeEnabled')) {
+    /**
+     * Check if LLM Mode (Generative AI) is enabled globally
+     *
+     * @return bool
+     */
+    function isLlmModeEnabled()
+    {
+        return Cache::remember('llm_mode_enabled', 3600, function () {
+            $setting = AppSetting::where('key', 'llm_mode_enabled')->first();
+            return $setting ? filter_var($setting->value, FILTER_VALIDATE_BOOLEAN) : true;
+        });
+    }
+}
