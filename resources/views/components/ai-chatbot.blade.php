@@ -68,8 +68,7 @@
                 <div class="message-content">
                     <div class="message-bubble">
                         <i class="far fa-hand-paper" style="color:#f59e0b"></i> Halo <strong>{{ auth()->user()->name ?? 'User' }}</strong>! Saya <strong>Asisten SIPADUHOK</strong>.<br>
-                        Tanyakan apa saja tentang sistem ini — saya tahu seluk-beluknya! <i class="fas fa-bullseye" style="color:#ef4444"></i><br>
-                        <small style="color:#64748b"><i class="fas fa-info-circle"></i> Pertanyaan di luar sistem akan dijawab oleh AI LLM otomatis.</small>
+                        Tanyakan apa saja tentang sistem ini — saya tahu seluk-beluknya! <i class="fas fa-bullseye" style="color:#ef4444"></i>
                     </div>
                 </div>
             </div>
@@ -2049,8 +2048,7 @@ function clearChatMessages() {
             <div class="message-content">
                 <div class="message-bubble">
                     <i class="far fa-hand-paper" style="color:#f59e0b"></i> Halo <strong>{{ auth()->user()->name ?? 'User' }}</strong>! Saya <strong>Asisten SIPADUHOK</strong>.<br>
-                    Tanyakan apa saja tentang sistem ini — saya tahu seluk-beluknya! <i class="fas fa-bullseye" style="color:#ef4444"></i><br>
-                    <small style="color:#64748b">Pertanyaan di luar sistem akan dijawab oleh AI LLM otomatis.</small>
+                    Tanyakan apa saja tentang sistem ini — saya tahu seluk-beluknya! <i class="fas fa-bullseye" style="color:#ef4444"></i>
                 </div>
             </div>
         </div>
