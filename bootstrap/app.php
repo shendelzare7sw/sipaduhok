@@ -44,7 +44,18 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            if ($request->is('recovery/reset/*') || $request->is('recovery')) {
+                return redirect()->back()->with('error', 'Sesi verifikasi telah berakhir demi keamanan. Halaman telah disegarkan otomatis, silakan coba lagi.');
+            }
             return redirect()->route('login')->with('error', 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan login kembali.');
+        });
+
+        // Handle other 419 cases if any
+        $exceptions->respond(function (\Illuminate\Http\Response|\Illuminate\Http\JsonResponse|\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {
+            if ($response->getStatusCode() === 419) {
+                return redirect()->back()->with('error', 'Sesi telah kedaluwarsa. Silakan muat ulang halaman dan coba lagi.');
+            }
+            return $response;
         });
     })
     ->withSchedule(function ($schedule) {

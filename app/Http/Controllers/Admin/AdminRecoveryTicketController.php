@@ -38,6 +38,14 @@ class AdminRecoveryTicketController extends Controller
             return back()->with('error', 'Gagal mengirim. User tidak memiliki Email Pribadi. Harap tambahkan Email Pribadi terlebih dahulu melalui halaman edit user.');
         }
 
+        // Refresh token and expiration for password reset tickets
+        if (in_array($ticket->tipe_recovery, ['lupa_password', 'lupa_keduanya'])) {
+            $ticket->update([
+                'token_reset' => \Illuminate\Support\Str::random(64),
+                'expires_at'  => \Carbon\Carbon::now()->addHours(24),
+            ]);
+        }
+
         $isSent = $this->emailService->sendTicketRecovery($ticket, $user);
 
         if ($isSent) {

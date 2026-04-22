@@ -148,7 +148,7 @@ Route::middleware('guest')->group(function () {
     // Recovery Password Reset via Link
     Route::get('/recovery/reset/{token}', function ($token) {
         $ticket = \App\Models\RecoveryTicket::where('token_reset', $token)
-            ->whereIn('status', ['sent', 'processing'])
+            ->whereNotIn('status', ['resolved', 'rejected', 'expired'])
             ->where('expires_at', '>', now())
             ->first();
 
@@ -167,7 +167,7 @@ Route::middleware('guest')->group(function () {
 
         return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
             $ticket = \App\Models\RecoveryTicket::where('token_reset', $request->token)
-                ->whereIn('status', ['sent', 'processing'])
+                ->whereNotIn('status', ['resolved', 'rejected', 'expired'])
                 ->where('expires_at', '>', now())
                 ->lockForUpdate()
                 ->first();
