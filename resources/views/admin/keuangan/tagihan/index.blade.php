@@ -408,7 +408,8 @@
 
 @section('content')
     <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-        <div class="container-fluid px-0">            {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
+        <div class="container-fluid px-0">
+            {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
             @if(!empty($tunggakanSummary))
             <div class="alert alert-danger border-start border-danger border-4 shadow-sm mb-4">
                 <div class="d-flex align-items-start">
