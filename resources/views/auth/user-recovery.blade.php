@@ -10,6 +10,21 @@
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
     @vite(['resources/css/pages/login.css', 'resources/js/pages/auth.js'])
+
+    <style>
+        /* Fix dropdown arrow spacing */
+        select.input-field {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.25rem center !important;
+            background-size: 1rem;
+            padding-right: 3.5rem !important;
+            cursor: pointer;
+        }
+    </style>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -44,7 +59,7 @@
                         </svg>
                     </div>
                     <h2 class="text-3xl font-bold text-gray-800 mb-2">Pemulihan Akun</h2>
-                    <p class="text-gray-600">Sistem akan membantu memulihkan akses Anda otomatis via Email Pribadi.</p>
+                    <p class="text-gray-600">Sistem akan membantu memulihkan akses Anda otomatis via Email.</p>
                 </div>
 
                 <!-- Recovery Form -->

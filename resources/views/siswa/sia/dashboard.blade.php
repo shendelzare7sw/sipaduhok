@@ -243,7 +243,7 @@
 
     /* LMS Banner */
     .lms-banner {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
         border-radius: var(--s-radius);
         padding: 1.25rem 1.5rem;
         color: white;
@@ -254,9 +254,29 @@
         flex-wrap: wrap;
     }
     .lms-banner-info { display: flex; align-items: center; gap: 1rem; }
-    .lms-banner-icon { font-size: 2rem; opacity: 0.7; }
-    .lms-banner h6 { font-weight: 700; margin-bottom: 0.15rem; }
-    .lms-banner p { font-size: 0.82rem; opacity: 0.8; margin: 0; }
+    .lms-banner-icon { font-size: 2rem; opacity: 0.85; }
+    .lms-banner h6 { font-weight: 700; margin-bottom: 0.15rem; font-size: 1.05rem; color: #ffffff; }
+    .lms-banner p { font-size: 0.82rem; opacity: 0.9; margin: 0; }
+    .lms-banner .btn-lms-enter {
+        background: #ffffff;
+        color: #047857;
+        font-weight: 700;
+        font-size: 0.82rem;
+        border: none;
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .lms-banner .btn-lms-enter:hover {
+        background: #f0fdf4;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        color: #047857;
+    }
 
     /* Empty State */
     .empty-state {
@@ -616,7 +636,7 @@
                             <p>Kerjakan tugas & materi online hari ini.</p>
                         </div>
                     </div>
-                    <a href="{{ route('siswa.lms.dashboard') }}" class="btn btn-light fw-bold text-success rounded-pill px-3 shadow-sm" style="font-size: 0.82rem; white-space: nowrap;">
+                    <a href="{{ route('siswa.lms.dashboard') }}" class="btn-lms-enter">
                         MASUK LMS
                     </a>
                 </div>
