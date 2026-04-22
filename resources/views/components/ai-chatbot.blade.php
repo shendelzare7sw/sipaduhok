@@ -1492,7 +1492,6 @@ const KB_ROLE_FILTER = {
     '🚪 Logout / Keluar': null,
     '🔔 Notifikasi': null,
     '🏠 Dashboard': null,
-    '🔓 Tiket Pemulihan Akun': null,
     // Cross-role (admin + other roles)
     '✅ Presensi Siswa': ['admin','wali_kelas'],
     '📝 Pengajuan Izin Siswa': ['admin','orang_tua'],
@@ -1572,7 +1571,7 @@ const KB_ROLE_FILTER = {
     '🏠 Dashboard Ketua PKBM': ['ketua_pkbm'],
     '✅ Approval Dispensasi': ['ketua_pkbm'],
     '✅ Validasi Rapor': ['ketua_pkbm'],
-    '📊 Monitoring SDM & Siswa': ['ketua_pkbm','waka'],
+    '📊 Monitoring SDM & Siswa': ['ketua_pkbm','wakil_kepala_sekolah'],
     '📄 Laporan & Kirim Catatan': ['ketua_pkbm'],
     // Sekretaris-specific entries
     '🏠 Dashboard Sekretaris': ['sekretaris'],
@@ -1580,12 +1579,12 @@ const KB_ROLE_FILTER = {
     '📢 Kelola Pengumuman & Flyer': ['sekretaris'],
     '📰 Kelola Berita / Artikel': ['sekretaris'],
     // Waka-specific entries
-    '🏠 Dashboard Waka': ['waka'],
-    '📚 Manajemen Akademik (Tahun Ajaran, Mapel, Kelas)': ['waka'],
-    '👥 Manajemen SDM & Siswa': ['waka'],
-    '📅 Kelola Jadwal Pelajaran': ['waka'],
-    '📈 Pengaturan KKM & Kenaikan Kelas': ['waka'],
-    '📊 Monitoring & Catatan': ['waka'],
+    '🏠 Dashboard Waka': ['wakil_kepala_sekolah'],
+    '📚 Manajemen Akademik (Tahun Ajaran, Mapel, Kelas)': ['wakil_kepala_sekolah'],
+    '👥 Manajemen SDM & Siswa': ['wakil_kepala_sekolah'],
+    '📅 Kelola Jadwal Pelajaran': ['wakil_kepala_sekolah'],
+    '📈 Pengaturan KKM & Kenaikan Kelas': ['wakil_kepala_sekolah'],
+    '📊 Monitoring & Catatan': ['wakil_kepala_sekolah'],
 };
 
 function isEntryAllowedForRole(entry) {
@@ -1596,37 +1595,71 @@ function isEntryAllowedForRole(entry) {
 }
 
 const TYPO_MAP = {
+    // ═══ Password & Login ═══
+    'pasword':'password','pword':'password','passwod':'password','passowrd':'password',
+    'paswodr':'password','passwrd':'password','paswrod':'password','psword':'password',
+    'passwordd':'password','passwor':'password','pasword':'password',
+    'lgoin':'login','lgin':'login','logn':'login','logiin':'login','logi':'login',
+    'mausk':'masuk','msuk':'masuk','masukk':'masuk',
+    // ═══ Keuangan ═══
     'pembayran':'pembayaran','pmbayaran':'pembayaran','bayran':'bayaran',
-    'presensei':'presensi','abesnsi':'absensi',
-    'rapot':'rapor','raport':'rapor','repor':'rapor',
-    'jadal':'jadwal','jadwl':'jadwal',
-    'ujiaan':'ujian','ujin':'ujian',
-    'tagiihan':'tagihan','tagian':'tagihan','tagihn':'tagihan',
-    'siwa':'siswa','sisw':'siswa',
-    'pelajran':'pelajaran','plajaran':'pelajaran',
-    'pengatuaran':'pengaturan','pengturan':'pengaturan',
-    'notifkasi':'notifikasi','keungan':'keuangan','kuangan':'keuangan',
-    'monitroing':'monitoring','dispenssi':'dispensasi','validsi':'validasi',
-    'laporaran':'laporan','guuru':'guru','kelsa':'kelas',
-    // Siswa/Guru specific typos
+    'tagiihan':'tagihan','tagian':'tagihan','tagihn':'tagihan','tgihan':'tagihan',
+    'keungan':'keuangan','kuangan':'keuangan','keuangn':'keuangan',
+    // ═══ Presensi & Absensi ═══
+    'presensei':'presensi','presnsi':'presensi','presenssi':'presensi',
+    'abesnsi':'absensi','abensi':'absensi','absesni':'absensi',
+    // ═══ Rapor ═══
+    'rapot':'rapor','raport':'rapor','repor':'rapor','rapoor':'rapor','rappor':'rapor',
+    // ═══ Jadwal ═══
+    'jadal':'jadwal','jadwl':'jadwal','jadwla':'jadwal','jadwaal':'jadwal',
+    // ═══ Ujian ═══
+    'ujiaan':'ujian','ujin':'ujian','ujain':'ujian','ujina':'ujian',
+    // ═══ Siswa & Guru ═══
+    'siwa':'siswa','sisw':'siswa','siswaa':'siswa',
+    'guuru':'guru','gurru':'guru',
+    'kelsa':'kelas','kellas':'kelas','kels':'kelas',
+    // ═══ Pelajaran & Mapel ═══
+    'pelajran':'pelajaran','plajaran':'pelajaran','pelajaraan':'pelajaran',
+    'mapeel':'mapel','maple':'mapel','mpel':'mapel',
+    // ═══ Pengaturan ═══
+    'pengatuaran':'pengaturan','pengturan':'pengaturan','pengatuaran':'pengaturan',
+    // ═══ Notifikasi & Monitoring ═══
+    'notifkasi':'notifikasi','notifksi':'notifikasi',
+    'monitroing':'monitoring','monitorng':'monitoring','monitoing':'monitoring',
+    // ═══ Dispensasi & Validasi ═══
+    'dispenssi':'dispensasi','dispen':'dispensasi','dipensasi':'dispensasi','dispesasi':'dispensasi',
+    'validsi':'validasi','valdasi':'validasi',
+    // ═══ Laporan ═══
+    'laporaran':'laporan','laporaan':'laporan','lapran':'laporan',
+    // ═══ Penilaian & Koreksi ═══
     'penilain':'penilaian','penilian':'penilaian','penlaian':'penilaian',
     'korkesi':'koreksi','koreski':'koreksi','korekis':'koreksi',
+    // ═══ Latihan & Tugas ═══
     'latian':'latihan','latihn':'latihan','latiahan':'latihan',
-    'materri':'materi','matrei':'materi','matreri':'materi',
     'tugass':'tugas','tugaas':'tugas','tgas':'tugas',
-    'dashbord':'dashboard','dashboad':'dashboard','dasbor':'dashboard',
+    // ═══ Materi & Modul ═══
+    'materri':'materi','matrei':'materi','matreri':'materi',
+    // ═══ Dashboard ═══
+    'dashbord':'dashboard','dashboad':'dashboard','dasbor':'dashboard','dashboar':'dashboard',
+    // ═══ Forum & Meeting ═══
     'forrum':'forum','frum':'forum',
     'meetinng':'meeting','metin':'meeting',
-    'kaleder':'kalender','kalander':'kalender',
-    'mapeel':'mapel','maple':'mapel',
-    // Bendahara/Ketua/Sekretaris/Waka typos
-    'pengumumn':'pengumuman','pngumuman':'pengumuman',
-    'dispen':'dispensasi','dipensasi':'dispensasi',
-    'monitroing':'monitoring','monitorng':'monitoring',
+    // ═══ Kalender ═══
+    'kaleder':'kalender','kalander':'kalender','kalener':'kalender',
+    // ═══ Role-specific typos ═══
+    'pengumumn':'pengumuman','pngumuman':'pengumuman','pengumuman':'pengumuman',
     'akademk':'akademik','akdemik':'akademik',
-    'berit':'berita',
+    'berit':'berita','brita':'berita',
     'wkala':'waka','wakil kepesek':'wakil kepsek',
-    'seketaris':'sekretaris','sekeretaris':'sekretaris'
+    'seketaris':'sekretaris','sekeretaris':'sekretaris','sekertaris':'sekretaris',
+    'bendahra':'bendahara','bndahara':'bendahara',
+    'kenaikan':'kenaikan','kenaikn':'kenaikan',
+    // ═══ Misc common ═══
+    'profill':'profil','proflie':'profil',
+    'settin':'setting','setitng':'setting',
+    'downlod':'download','donwload':'download',
+    'uploaad':'upload','uplod':'upload',
+    'proses':'proses','prses':'proses',
 };
 
 // ═══ Emoji → FontAwesome Icon Map ═══
@@ -1666,8 +1699,11 @@ function replaceEmojis(text) {
 
 function normalizeQuery(text) {
     let q = text.toLowerCase().trim();
-    for (const [typo, fix] of Object.entries(TYPO_MAP)) {
-        q = q.replace(new RegExp(typo, 'gi'), fix);
+    // Sort typo keys by length descending to match longer phrases first
+    const sortedEntries = Object.entries(TYPO_MAP).sort((a, b) => b[0].length - a[0].length);
+    for (const [typo, fix] of sortedEntries) {
+        // Use word boundary for all typos to prevent partial replacements
+        q = q.replace(new RegExp('\\b' + typo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), fix);
     }
     // Strip common filler words for better keyword matching
     const fillers = ['cara','bagaimana','gimana','dimana','dmn','apa itu','apakah','tolong','bisa','mohon','mau','ingin','saya','aku','menu','fitur','yang','dan','atau','di','ke','dari','untuk','dengan','ini','itu','nya'];
@@ -2151,7 +2187,7 @@ function loadQuickActions() {
             {i:'fa-image',t:'Flyer iklan'},{i:'fa-newspaper',t:'Kelola berita'},{i:'fa-file-excel',t:'Import excel'},
             {i:'fa-key',t:'Lupa password'},
         ],
-        waka: [
+        wakil_kepala_sekolah: [
             {i:'fa-home',t:'Dashboard waka'},{i:'fa-school',t:'Manajemen akademik'},{i:'fa-chalkboard-teacher',t:'Plotting guru'},
             {i:'fa-users',t:'Manajemen siswa'},{i:'fa-calendar-week',t:'Jadwal pelajaran'},{i:'fa-chart-line',t:'Pengaturan kkm'},
             {i:'fa-file-alt',t:'Rekap kenaikan'},{i:'fa-sticky-note',t:'Kirim catatan'},{i:'fa-key',t:'Lupa password'},
@@ -2360,7 +2396,17 @@ async function sendMessage(messageText = null) {
     if (response.success) {
         addMessage('assistant', response.response);
     } else {
-        addMessage('assistant', `<i class="fas fa-times-circle" style="color:#ef4444"></i> Error: ${response.error}`);
+        // Show user-friendly error message instead of raw JSON
+        let errorMsg = response.error || 'Terjadi kesalahan tidak diketahui.';
+        let friendlyMsg = '<div style="font-size:13.5px;line-height:1.6">'
+            + '<div style="font-weight:700;color:#ef4444;margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> AI sedang tidak tersedia</div>'
+            + '<div style="color:#475569;margin-bottom:8px">Server AI sedang mengalami gangguan. Silakan coba lagi dalam beberapa saat.</div>';
+        // If it's a 503/overload error, show specific advice
+        if (errorMsg.includes('503') || errorMsg.includes('UNAVAILABLE') || errorMsg.includes('high demand') || errorMsg.includes('overloaded')) {
+            friendlyMsg += '<div style="padding:8px 12px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;font-size:12px;color:#92400e"><i class="fas fa-info-circle" style="margin-right:4px"></i> Server AI sedang kelebihan beban. Coba lagi dalam 1-2 menit atau ganti model AI di pengaturan.</div>';
+        }
+        friendlyMsg += '</div>';
+        addMessage('assistant', friendlyMsg, null, true, true);
     }
     saveCurrentConversation();
     scrollToBottom();
