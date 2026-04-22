@@ -25,6 +25,13 @@
                         @csrf
                         @method('PUT')
 
+                        {{-- Hidden fields to preserve Chatbot Access Control settings --}}
+                        @foreach(['ketua_pkbm','wakil_kepala_sekolah','sekretaris','bendahara','wali_kelas','guru_pengajar','siswa','orang_tua'] as $role)
+                            @if($chatbotEnabledRoles[$role] ?? false)
+                                <input type="hidden" name="chatbot_{{ $role }}" value="on">
+                            @endif
+                        @endforeach
+
                         <div class="mb-4 pb-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
@@ -210,6 +217,9 @@
                         <input type="hidden" name="ai_model" value="{{ $model }}">
                         <input type="hidden" name="ai_vision_model" value="{{ $visionModel }}">
                         <input type="hidden" name="ai_provider" value="{{ $provider }}">
+                        @if($llmModeEnabled)
+                            <input type="hidden" name="llm_mode_enabled" value="on">
+                        @endif
 
                         <div class="row g-3">
                             {{-- Staff Roles (Left Column) --}}
