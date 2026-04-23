@@ -568,9 +568,9 @@
                                 </thead>
                                 <tbody>
                                     @forelse($siswaList ?? [] as $index => $siswa)
-                                        <tr data-siswa-id="{{ $siswa->id }}" data-siswa-name="{{ $siswa->nama_lengkap }}">
+                                        <tr data-siswa-id="{{ $siswa->id ?? '' }}" data-siswa-name="{{ $siswa->nama_lengkap ?? 'Siswa' | e('html', false) }}">
                                             <td class="checkbox-cell align-middle" data-label="PILIH UNTUK RESET">
-                                                <input type="checkbox" class="row-checkbox" value="{{ $siswa->id }}">
+                                                <input type="checkbox" class="row-checkbox" value="{{ $siswa->id ?? '' }}">
                                             </td>
                                             <td class="text-center align-middle fw-bold text-gray-600" data-label="NO">
                                                 {{ ($siswaList && method_exists($siswaList, 'firstItem')) ? $siswaList->firstItem() + $index : $index + 1 }}</td>

@@ -83,10 +83,10 @@ class TagihanController extends Controller
         }
 
         // Urutkan berdasarkan kelas (jenjang) kemudian abjad nama
-        // JOIN dengan kelas untuk mendapatkan jenjang
-        $siswaList = $query->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+        // Use LEFT JOIN to include students without class assignment
+        $siswaList = $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
             ->select('siswa.*')
-            ->orderBy('kelas.jenjang', 'asc')
+            ->orderByRaw('COALESCE(kelas.jenjang, 999) asc')  // NULL classes last
             ->orderBy('siswa.nama_lengkap', 'asc')
             ->orderBy('siswa.id', 'asc')  // For consistency across pagination
             ->paginate(15)
