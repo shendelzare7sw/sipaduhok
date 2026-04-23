@@ -465,7 +465,7 @@
                                         <label class="form-label small fw-bold">Tahun Ajaran</label>
                                         <select name="tahun_ajaran_id" class="form-select form-select-sm" onchange="this.form.submit()">
                                             @foreach($allTahunAjaran as $ta)
-                                                <option value="{{ $ta->id }}" {{ ($selectedYear->id ?? '') == $ta->id ? 'selected' : '' }}>
+                                                <option value="{{ $ta->id }}" {{ optional($selectedYear)->id == $ta->id ? 'selected' : '' }}>
                                                     {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
                                                 </option>
                                             @endforeach
@@ -479,7 +479,7 @@
                                             <option value="">Semua Kelas</option>
                                             @foreach($kelasList as $kelas)
                                                 <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
-                                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ $kelas->cabang->nama_cabang ?? 'Cabang tidak diketahui' }}
+                                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ optional($kelas->cabang)->nama_cabang ?? 'Cabang tidak diketahui' }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -587,11 +587,11 @@
                                             <td class="text-center align-middle" data-label="KELAS">
                                                 <span class="badge bg-primary px-2 py-1 fw-bold text-uppercase"
                                                     style="font-size: 10px;">
-                                                    {{ $siswa->kelas->nama_kelas ?? '-' }}
+                                                    {{ optional($siswa->kelas)->nama_kelas ?? '-' }}
                                                 </span>
                                             </td>
                                             <td class="text-center align-middle" data-label="CABANG">
-                                                <span class="cabang-badge">{{ $siswa->cabang->kode_cabang ?? '-' }}</span>
+                                                <span class="cabang-badge">{{ optional($siswa->cabang)->kode_cabang ?? '-' }}</span>
                                             </td>
                                             <td class="align-middle currency-font text-dark" data-label="TOTAL TAGIHAN">
                                                 Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}
@@ -707,7 +707,7 @@
                     <form id="formResetTagihan" action="{{ route('admin.keuangan.tagihan.reset-tagihan') }}" method="POST" class="d-inline">
                         @csrf
                         <input type="hidden" name="siswa_ids" id="resetSiswaIds">
-                        <input type="hidden" name="tahun_ajaran_id" value="{{ $selectedYear->id ?? '' }}">
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ optional($selectedYear)->id }}">
                         <button type="button" class="btn btn-danger fw-bold" id="btnExecReset" onclick="executeReset()">
                             <i class="fas fa-trash-restore me-1"></i> Ya, Reset Sekarang
                         </button>
