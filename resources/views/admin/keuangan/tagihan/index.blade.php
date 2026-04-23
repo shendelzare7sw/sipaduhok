@@ -446,6 +446,9 @@
                                 <i class="fas fa-list me-2"></i>Daftar Tagihan Siswa
                             </h6>
                             <small class="text-muted">{{ $siswaList ? $siswaList->total() : 0 }} siswa terdaftar</small>
+                        </div>
+                        <form id="filterForm" action="{{ route('admin.keuangan.tagihan.index') }}" method="GET" class="search-form">
+                            <div class="dropdown filter-dropdown">
                                 <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown"
                                     data-bs-toggle="dropdown" aria-expanded="false"
                                     data-bs-auto-close="outside" data-bs-display="static">
