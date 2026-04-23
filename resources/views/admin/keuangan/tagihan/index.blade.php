@@ -582,7 +582,7 @@
                                 </thead>
                                 <tbody>
                                     @forelse($siswaList ?? [] as $index => $siswa)
-                                        <tr data-siswa-id="{{ $siswa->id ?? '' }}" data-siswa-name="{{ $siswa->nama_lengkap ?? 'Siswa' | e('html', false) }}">
+                                        <tr data-siswa-id="{{ $siswa->id ?? '' }}" data-siswa-name="{{ $siswa->nama_lengkap ?? 'Siswa' }}">
                                             <td class="checkbox-cell align-middle" data-label="PILIH UNTUK RESET">
                                                 <input type="checkbox" class="row-checkbox" value="{{ $siswa->id ?? '' }}">
                                             </td>
@@ -664,7 +664,6 @@
     </div>
 
     {{-- Floating Reset Toolbar --}}
-    @if(Route::has('admin.keuangan.tagihan.reset-tagihan'))
     <div class="reset-toolbar" id="resetToolbar">
         <span class="selected-count">
             <i class="fas fa-check-square me-1"></i>
@@ -707,7 +706,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i> Batalkan
                     </button>
-                    <form id="formResetTagihan" action="{{ route('admin.keuangan.tagihan.reset-tagihan') }}" method="POST" class="d-inline">
+                    <form id="formResetTagihan" action="{{ url('admin/keuangan/tagihan/reset-tagihan') }}" method="POST" class="d-inline">
                         @csrf
                         <input type="hidden" name="siswa_ids" id="resetSiswaIds">
                         <input type="hidden" name="tahun_ajaran_id" value="{{ optional($selectedYear)->id }}">
@@ -719,7 +718,6 @@
             </div>
         </div>
     </div>
-    @endif
 
     <style>
         @keyframes pulse {
