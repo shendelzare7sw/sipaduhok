@@ -435,6 +435,17 @@
             </div>
             @endif
 
+            {{-- INFORMASI TAMBAHAN --}}
+            <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-4">
+                <div class="d-flex">
+                    <i class="fas fa-info-circle fa-lg me-2 mt-1"></i>
+                    <small class="fw-bold text-gray-800">
+                        Catatan: Total Tagihan mencakup seluruh kewajiban siswa di periode berjalan. Gunakan fitur "Buat
+                        Tagihan Massal" untuk efisiensi waktu jika tagihan per jenjang bersifat seragam.
+                    </small>
+                </div>
+            </div>
+
             {{-- TABEL UTAMA --}}
             <div class="card shadow mb-4">
                 <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -649,16 +660,6 @@
                 </div>
             </div>
 
-            {{-- INFORMASI TAMBAHAN --}}
-            <div class="alert alert-warning border-start border-warning border-4 shadow-sm mt-2">
-                <div class="d-flex">
-                    <i class="fas fa-info-circle fa-lg me-2 mt-1"></i>
-                    <small class="fw-bold text-gray-800">
-                        Catatan: Total Tagihan mencakup seluruh kewajiban siswa di periode berjalan. Gunakan fitur "Buat
-                        Tagihan Massal" untuk efisiensi waktu jika tagihan per jenjang bersifat seragam.
-                    </small>
-                </div>
-            </div>
         </div>
     </div>
 
