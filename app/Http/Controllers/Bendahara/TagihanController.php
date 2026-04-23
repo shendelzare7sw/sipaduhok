@@ -72,11 +72,19 @@ class TagihanController extends Controller
         }
 
         // Urutkan berdasarkan kelas (jenjang) kemudian abjad nama
-        $siswaList = $query->orderBy(
-            Kelas::select('jenjang')->whereColumn('kelas.id', 'siswa.kelas_id')
-        )->orderBy('nama_lengkap', 'asc')
+        // JOIN dengan kelas untuk mendapatkan jenjang
+        $siswaList = $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->select('siswa.*')
+            ->distinct('siswa.id')
+            ->orderBy('kelas.jenjang', 'asc')
+            ->orderBy('siswa.nama_lengkap', 'asc')
             ->paginate(15)
             ->appends($request->query());
+
+        // Reload relationships after pagination
+        $siswaList->getCollection()->each(function ($siswa) {
+            $siswa->load(['kelas', 'cabang']);
+        });
 
         // Hitung total tagihan per siswa berdasarkan tahun yang dipilih
         $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear) {
@@ -185,7 +193,7 @@ class TagihanController extends Controller
             ->whereIn('tagihan_id', $tagihanIds)
             ->where('status_validasi', 'disetujui')
             ->sum('jumlah_bayar');
-        
+
         $sisaTagihan = $totalTagihan - $tagihanLunas;
 
         // Inject sisa_tagihan to each item for view display if needed
@@ -239,7 +247,7 @@ class TagihanController extends Controller
                 $jenisTagihanWithExisting[$tagihan->jenis_tagihan] = $label;
             }
         }
-        
+
         $allYears = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
         return view('bendahara.tagihan.edit', [
@@ -267,7 +275,7 @@ class TagihanController extends Controller
         $siswa = Siswa::findOrFail($siswaId);
 
         // Sanitize currency inputs BEFORE validation
-        // This handles formatted inputs like "200.000" or "1.500.000" 
+        // This handles formatted inputs like "200.000" or "1.500.000"
         // and converts them to pure numbers (200000, 1500000)
         $tagihanInput = $request->input('tagihan', []);
         $sanitizedTagihan = [];
@@ -297,7 +305,7 @@ class TagihanController extends Controller
                 // Cek apakah tagihan sudah ada di TAHUN AKTIF (karena form edit load data tahun aktif)
                 // Jika user mengubah tahun, kita update record yang ada di tahun aktif ini ke tahun baru.
                 // Jika user membuat baru dengan tahun berbeda, create new.
-                
+
                 $tagihan = Tagihan::where('siswa_id', $siswaId)
                     ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
                     ->where('jenis_tagihan', $key)
@@ -309,11 +317,11 @@ class TagihanController extends Controller
                     $hasPembayaran = $tagihan->pembayaran()
                         ->where('status_validasi', 'disetujui')
                         ->exists();
-                    
+
                     if ($hasPembayaran) {
                         continue; // Skip editing - sudah dibayar orang tua, jaga integritas data
                     }
-                    
+
                     // Update jika ada (bisa pindah tahun)
                     $tagihan->update([
                         'jumlah' => $jumlah ?? 0,
@@ -481,7 +489,7 @@ class TagihanController extends Controller
             try {
                 $totalCreated = 0;
                 $totalSkipped = 0;
-                
+
                 foreach ($siswaList as $siswa) {
                     // Process default tagihan
                     foreach ($this->jenisTagihan as $key => $label) {
@@ -494,13 +502,13 @@ class TagihanController extends Controller
                                 ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
                                 ->where('jenis_tagihan', $key)
                                 ->first();
-                            
+
                             if ($existingTagihan) {
                                 // Skip siswa ini untuk jenis tagihan ini
                                 $totalSkipped++;
                                 continue;
                             }
-                            
+
                             // Tidak ada duplikasi, create baru
                             $tagihanItem = Tagihan::create([
                                 'siswa_id' => $siswa->id,
@@ -533,13 +541,13 @@ class TagihanController extends Controller
                                 ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
                                 ->where('jenis_tagihan', $jenisSlug)
                                 ->first();
-                            
+
                             if ($existingCustom) {
                                 // Skip siswa ini untuk custom tagihan ini
                                 $totalSkipped++;
                                 continue;
                             }
-                            
+
                             // Tidak ada duplikasi, create baru
                             $tagihanCustom = Tagihan::create([
                                 'siswa_id' => $siswa->id,
@@ -557,13 +565,13 @@ class TagihanController extends Controller
                 }
 
                 DB::commit();
-                
+
                 $message = "Tagihan berhasil dibuat untuk {$totalCreated} data";
                 if ($totalSkipped > 0) {
                     $message .= " ({$totalSkipped} data dilewati karena siswa sudah memiliki tagihan jenis tersebut)";
                 }
                 $message .= " dari {$kelasCount} kelas.";
-                
+
                 return redirect()->route($this->getRoutePrefix() . '.index')
                     ->with('success', $message);
             } catch (\Exception $e) {
@@ -640,20 +648,20 @@ class TagihanController extends Controller
             $count = 0;
             $skipped = 0;
             $createdTagihan = [];
-            
+
             foreach ($request->siswa_ids as $siswaId) {
                 // CEK APAKAH SISWA SUDAH PUNYA CUSTOM TAGIHAN JENIS INI
                 $existing = Tagihan::where('siswa_id', $siswaId)
                     ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
                     ->where('jenis_tagihan', $jenisTagihanSlug)
                     ->first();
-                
+
                 if ($existing) {
                     // Skip siswa ini, sudah punya tagihan jenis ini
                     $skipped++;
                     continue;
                 }
-                
+
                 // Tidak ada duplikasi, create baru
                 $tagihan = Tagihan::create([
                     'siswa_id' => $siswaId,
@@ -683,7 +691,7 @@ class TagihanController extends Controller
                 $message .= " ({$skipped} siswa dilewati karena sudah memiliki tagihan '{$request->jenis_tagihan}')";
             }
             $message .= ".";
-            
+
             return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', $message);
         } catch (\Exception $e) {
@@ -702,21 +710,21 @@ class TagihanController extends Controller
             // $tagihan is automatically injected via route model binding if correctly configured,
             // but we fetch it manually to avoid "Attempt to read property status on string" error
             $tagihan = Tagihan::findOrFail($tagihanId);
-            
+
             // PROTEKSI: Hanya lock deletion jika sudah ada pembayaran dari orang tua
             // Rp 0 (setting admin) tetap bisa dihapus
             $hasPembayaran = $tagihan->pembayaran()
                 ->where('status_validasi', 'disetujui')
                 ->exists();
-            
+
             if ($hasPembayaran) {
                 $message = 'Tagihan yang sudah dibayar oleh orang tua tidak dapat dihapus untuk menjaga integritas data transaksi.';
-                
+
                 // Return JSON for AJAX requests
                 if (request()->expectsJson()) {
                     return response()->json(['error' => $message], 403);
                 }
-                
+
                 return redirect()->back()->with('error', $message);
             }
 
@@ -733,12 +741,12 @@ class TagihanController extends Controller
                 ->with('success', 'Tagihan berhasil dihapus.');
         } catch (\Exception $e) {
             $errorMessage = 'Gagal menghapus tagihan: ' . $e->getMessage();
-            
+
             // Return JSON for AJAX requests
             if (request()->expectsJson()) {
                 return response()->json(['error' => $errorMessage], 500);
             }
-            
+
             return redirect()->back()->with('error', $errorMessage);
         }
     }
@@ -847,7 +855,7 @@ class TagihanController extends Controller
 
             // Tentukan jumlah bulan yang akan digenerate
             $jumlahBulanGenerate = $request->tipe_spp === 'setahun' ? 12 : $request->jumlah_bulan;
-            
+
             // Tentukan apakah ini operasi BULK (multiple siswa) atau INDIVIDUAL (single siswa)
             $isBulkOperation = $siswaList->count() > 1;
 
@@ -859,7 +867,7 @@ class TagihanController extends Controller
 
                     // Hitung tanggal jatuh tempo
                     $tanggalJatuhTempo = date('Y-m-d', strtotime("$tahunSPP-$bulanIndex-{$request->tanggal_jatuh_tempo}"));
-                    
+
                     $sppKey = 'spp_' . strtolower($namaBulan[$bulanIndex]);
 
                     if ($isBulkOperation) {
@@ -868,12 +876,12 @@ class TagihanController extends Controller
                             ->where('tahun_ajaran_id', $tahunAjaranAktif->id)
                             ->where('jenis_tagihan', $sppKey)
                             ->first();
-                        
+
                         if ($existingSpp) {
                             $totalSkipped++;
                             continue;
                         }
-                        
+
                         // Create new SPP
                         $tagihan = Tagihan::create([
                             'siswa_id' => $siswa->id,
@@ -896,11 +904,11 @@ class TagihanController extends Controller
                         $tagihan->jumlah = $request->jumlah_spp;
                         $tagihan->tanggal_jatuh_tempo = $tanggalJatuhTempo;
                         $tagihan->keterangan = 'SPP ' . $namaBulan[$bulanIndex] . ' ' . $tahunSPP;
-                        
+
                         if (!$tagihan->exists) {
                             $tagihan->status = 'belum_bayar'; // Hanya diset default jika memang data baru
                         }
-                        
+
                         $tagihan->save();
                         $tagihan->updateStatusBayar();
                     }
@@ -911,14 +919,14 @@ class TagihanController extends Controller
 
             DB::commit();
             $tipeSppText = $request->tipe_spp === 'setahun' ? '(SPP Setahun)' : "(SPP {$jumlahBulanGenerate} Bulan)";
-            
+
             // Pesan disesuaikan berdasarkan ada tidaknya skipped
             if ($totalSkipped > 0) {
                 $successMessage = "Berhasil generate tagihan SPP {$tipeSppText}. Dibuat: $totalCreated, Dilewati: $totalSkipped (sudah ada).";
             } else {
                 $successMessage = "Berhasil generate $totalCreated tagihan SPP {$tipeSppText} untuk {$siswaList->count()} siswa.";
             }
-            
+
             return redirect()->route($this->getRoutePrefix() . '.index')
                 ->with('success', $successMessage);
         } catch (\Exception $e) {
@@ -1006,11 +1014,11 @@ class TagihanController extends Controller
                         $targetTagihan->jumlah = $tagihan->jumlah;
                         $targetTagihan->tanggal_jatuh_tempo = $tagihan->tanggal_jatuh_tempo;
                         $targetTagihan->keterangan = $tagihan->keterangan;
-                        
+
                         if (!$targetTagihan->exists) {
                             $targetTagihan->status = 'belum_bayar';
                         }
-                        
+
                         $targetTagihan->save();
                         $targetTagihan->updateStatusBayar();
                         $totalDuplicated++;
