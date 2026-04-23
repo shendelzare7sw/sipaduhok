@@ -660,6 +660,7 @@
     </div>
 
     {{-- Floating Reset Toolbar --}}
+    @if(Route::has('admin.keuangan.tagihan.reset-tagihan'))
     <div class="reset-toolbar" id="resetToolbar">
         <span class="selected-count">
             <i class="fas fa-check-square me-1"></i>
@@ -714,6 +715,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <style>
         @keyframes pulse {
