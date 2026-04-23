@@ -58,8 +58,7 @@ class TagihanController extends Controller
 
         // Query siswa dengan filter
         // IMPORTANT: Include alumni (status='lulus') so their outstanding bills remain accessible
-        $query = Siswa::with(['kelas', 'cabang'])
-            ->whereIn('status', ['aktif', 'lulus']);
+        $query = Siswa::whereIn('status', ['aktif', 'lulus']);
 
         // Filter berdasarkan kelas
         if ($request->filled('kelas_id')) {
@@ -73,15 +72,15 @@ class TagihanController extends Controller
 
         // Urutkan berdasarkan kelas (jenjang) kemudian abjad nama
         // JOIN dengan kelas untuk mendapatkan jenjang
-        $siswaList = $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+        $siswaList = $query->join('kelas', 'siswa.kelas_id', '=', 'kelas.id')
             ->select('siswa.*')
-            ->distinct('siswa.id')
             ->orderBy('kelas.jenjang', 'asc')
             ->orderBy('siswa.nama_lengkap', 'asc')
+            ->orderBy('siswa.id', 'asc')  // For consistency across pagination
             ->paginate(15)
             ->appends($request->query());
 
-        // Reload relationships after pagination
+        // Load relationships for view
         $siswaList->getCollection()->each(function ($siswa) {
             $siswa->load(['kelas', 'cabang']);
         });
