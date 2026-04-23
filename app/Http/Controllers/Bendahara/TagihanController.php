@@ -45,13 +45,25 @@ class TagihanController extends Controller
         $allTahunAjaran = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
         // Allow year selection via dropdown (default = active year)
-        $selectedYearId = $request->get('tahun_ajaran_id', $tahunAjaranAktif->id ?? null);
-        $selectedYear = TahunAjaran::find($selectedYearId) ?? $tahunAjaranAktif;
+        $selectedYearId = $request->get('tahun_ajaran_id');
+        if ($selectedYearId) {
+            $selectedYear = TahunAjaran::find($selectedYearId);
+        } else {
+            $selectedYear = $tahunAjaranAktif;
+        }
+
+        // If still no year, use latest year
+        if (!$selectedYear) {
+            $selectedYear = $allTahunAjaran->first();
+        }
+
+        // If truly no year, abort
+        if (!$selectedYear) {
+            return redirect()->back()->with('error', 'Tidak ada data tahun ajaran. Silakan hubungi Admin.');
+        }
 
         $kelasList = Kelas::with('cabang')
-            ->when($selectedYear, function ($q) use ($selectedYear) {
-                return $q->where('tahun_ajaran_id', $selectedYear->id);
-            })
+            ->where('tahun_ajaran_id', $selectedYear->id)
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
