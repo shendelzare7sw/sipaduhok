@@ -445,13 +445,7 @@
                             <h6 class="mb-0 fw-bold text-primary">
                                 <i class="fas fa-list me-2"></i>Daftar Tagihan Siswa
                             </h6>
-                            <small class="text-muted">{{ $siswaList->total() }} siswa terdaftar</small>
-                        </div>
-
-                        {{-- Filter Form --}}
-                        <form action="{{ route('admin.keuangan.tagihan.index') }}" method="GET" id="filterForm" class="d-flex gap-2 align-items-center w-100-mobile">
-                            {{-- Filter Dropdown --}}
-                            <div class="dropdown filter-dropdown w-100-mobile">
+                            <small class="text-muted">{{ $siswaList ? $siswaList->total() : 0 }} siswa terdaftar</small>
                                 <button class="btn btn-secondary dropdown-toggle w-100-mobile d-flex justify-content-between align-items-center" type="button" id="filterDropdown"
                                     data-bs-toggle="dropdown" aria-expanded="false"
                                     data-bs-auto-close="outside" data-bs-display="static">
@@ -464,11 +458,13 @@
                                     <div class="mb-2">
                                         <label class="form-label small fw-bold">Tahun Ajaran</label>
                                         <select name="tahun_ajaran_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                                            @foreach($allTahunAjaran as $ta)
-                                                <option value="{{ $ta->id }}" {{ optional($selectedYear)->id == $ta->id ? 'selected' : '' }}>
-                                                    {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                                            @forelse($allTahunAjaran ?? [] as $ta)
+                                                <option value="{{ $ta->id ?? '' }}" {{ optional($selectedYear)->id == ($ta->id ?? null) ? 'selected' : '' }}>
+                                                    {{ $ta->nama_tahun_ajaran ?? 'Tahun Ajaran' }} {{ optional($ta)->is_active ? '(Aktif)' : '' }}
                                                 </option>
-                                            @endforeach
+                                            @empty
+                                                <option value="">Tidak ada tahun ajaran</option>
+                                            @endforelse
                                         </select>
                                     </div>
 
@@ -477,11 +473,12 @@
                                         <label class="form-label small fw-bold">Kelas</label>
                                         <select name="kelas_id" class="form-select form-select-sm">
                                             <option value="">Semua Kelas</option>
-                                            @foreach($kelasList as $kelas)
-                                                <option value="{{ $kelas->id }}" {{ ($filters['kelas_id'] ?? '') == $kelas->id ? 'selected' : '' }}>
-                                                    {{ $kelas->nama_kelas }} ({{ $kelas->jenjang }}) - {{ optional($kelas->cabang)->nama_cabang ?? 'Cabang tidak diketahui' }}
+                                            @forelse($kelasList ?? [] as $kelas)
+                                                <option value="{{ $kelas->id ?? '' }}" {{ (($filters ?? [])['kelas_id'] ?? '') == ($kelas->id ?? '') ? 'selected' : '' }}>
+                                                    {{ $kelas->nama_kelas ?? 'Kelas' }} ({{ $kelas->jenjang ?? '-' }}) - {{ optional($kelas->cabang)->nama_cabang ?? 'Cabang tidak diketahui' }}
                                                 </option>
-                                            @endforeach
+                                            @empty
+                                            @endforelse
                                         </select>
                                     </div>
 
@@ -496,9 +493,9 @@
                             <div class="search-input-wrapper w-100-mobile">
                                 <i class="fas fa-search search-icon"></i>
                                 <input type="text" name="search" id="searchInput" class="search-input"
-                                    placeholder="Cari nama/NISN..." value="{{ $filters['search'] ?? '' }}"
+                                    placeholder="Cari nama/NISN..." value="{{ ($filters ?? [])['search'] ?? '' }}"
                                     autocomplete="off">
-                                <button type="button" class="clear-search {{ ($filters['search'] ?? '') ? 'show' : '' }}"
+                                <button type="button" class="clear-search {{ (($filters ?? [])['search'] ?? '') ? 'show' : '' }}"
                                     id="clearSearch" title="Hapus pencarian">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -538,7 +535,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    @if($siswaList->isEmpty())
+                    @if(!$siswaList || $siswaList->isEmpty())
                         <div class="text-center py-5 text-muted opacity-50">
                             <i class="fas fa-folder-open fa-4x mb-3"></i>
                             <h5>Data siswa tidak ditemukan</h5>
@@ -570,13 +567,13 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($siswaList as $index => $siswa)
+                                    @forelse($siswaList ?? [] as $index => $siswa)
                                         <tr data-siswa-id="{{ $siswa->id }}" data-siswa-name="{{ $siswa->nama_lengkap }}">
                                             <td class="checkbox-cell align-middle" data-label="PILIH UNTUK RESET">
                                                 <input type="checkbox" class="row-checkbox" value="{{ $siswa->id }}">
                                             </td>
                                             <td class="text-center align-middle fw-bold text-gray-600" data-label="NO">
-                                                {{ $siswaList->firstItem() + $index }}</td>
+                                                {{ ($siswaList && method_exists($siswaList, 'firstItem')) ? $siswaList->firstItem() + $index : $index + 1 }}</td>
                                             <td class="align-middle" data-label="IDENTITAS SISWA">
                                                 <div style="text-align: right;">
                                                     <span class="student-name">{{ $siswa->nama_lengkap }}</span>
@@ -635,13 +632,14 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    @empty
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                         <div class="card-footer bg-light py-3 border-top">
                             <div class="d-flex justify-content-center">
-                                {{ $siswaList->withQueryString()->links() }}
+                                {{ $siswaList ? $siswaList->withQueryString()->links() : '' }}
                             </div>
                         </div>
                     @endif

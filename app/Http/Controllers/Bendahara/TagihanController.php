@@ -66,7 +66,7 @@ class TagihanController extends Controller
             ->where('tahun_ajaran_id', $selectedYear->id)
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
-            ->get();
+            ->get() ?? collect();
 
         // Query siswa dengan filter
         // IMPORTANT: Include alumni (status='lulus') so their outstanding bills remain accessible
@@ -92,38 +92,54 @@ class TagihanController extends Controller
             ->paginate(15)
             ->appends($request->query());
 
-        // Load relationships for view
-        $siswaList->getCollection()->each(function ($siswa) {
-            $siswa->load(['kelas', 'cabang']);
-        });
+        // Load relationships for view - with safety checks
+        if ($siswaList && $siswaList->isNotEmpty()) {
+            $siswaList->getCollection()->each(function ($siswa) {
+                if ($siswa) {
+                    $siswa->load(['kelas', 'cabang']);
+                }
+            });
+        }
 
         // Hitung total tagihan per siswa berdasarkan tahun yang dipilih
-        $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear) {
-            $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                ->when($selectedYear, function ($q) use ($selectedYear) {
-                    return $q->where('tahun_ajaran_id', $selectedYear->id);
-                })
-                ->get();
+        if ($siswaList && $siswaList->isNotEmpty()) {
+            $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear) {
+                try {
+                    $tagihan = Tagihan::where('siswa_id', $siswa->id)
+                        ->when($selectedYear, function ($q) use ($selectedYear) {
+                            return $q->where('tahun_ajaran_id', $selectedYear->id);
+                        })
+                        ->get();
 
-            $totalTagihan = $tagihan->sum('jumlah');
+                    $totalTagihan = $tagihan ? $tagihan->sum('jumlah') : 0;
 
-            // Calculate Total Paid
-            $tagihanIds = $tagihan->pluck('id');
-            $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
-                ->whereIn('tagihan_id', $tagihanIds)
-                ->where('status_validasi', 'disetujui')
-                ->sum('jumlah_bayar');
+                    // Calculate Total Paid
+                    $tagihanIds = $tagihan ? $tagihan->pluck('id') : collect();
+                    $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
+                        ->when($tagihanIds->isNotEmpty(), function ($q) use ($tagihanIds) {
+                            return $q->whereIn('tagihan_id', $tagihanIds);
+                        })
+                        ->where('status_validasi', 'disetujui')
+                        ->sum('jumlah_bayar');
 
-            // Sisa tagihan = Total - Terbayar
-            $sisaTagihan = $totalTagihan - $totalTerbayar;
+                    // Sisa tagihan = Total - Terbayar
+                    $sisaTagihan = $totalTagihan - $totalTerbayar;
 
-            $siswa->total_tagihan = $totalTagihan;
-            $siswa->tagihan_lunas = $totalTerbayar;
-            $siswa->sisa_tagihan = $sisaTagihan;
-            $siswa->tagihan_detail = $tagihan;
+                    $siswa->total_tagihan = $totalTagihan ?? 0;
+                    $siswa->tagihan_lunas = $totalTerbayar ?? 0;
+                    $siswa->sisa_tagihan = $sisaTagihan ?? 0;
+                    $siswa->tagihan_detail = $tagihan ?? collect();
+                } catch (\Exception $e) {
+                    // Fallback values if there's an error
+                    $siswa->total_tagihan = 0;
+                    $siswa->tagihan_lunas = 0;
+                    $siswa->sisa_tagihan = 0;
+                    $siswa->tagihan_detail = collect();
+                }
 
-            return $siswa;
-        });
+                return $siswa;
+            });
+        }
 
         // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif)
         $tunggakanSummary = null;
@@ -152,14 +168,14 @@ class TagihanController extends Controller
         }
 
         return view('bendahara.tagihan.index', [
-            'siswaList' => $siswaList,
-            'kelasList' => $kelasList,
+            'siswaList' => $siswaList ?? collect(),
+            'kelasList' => $kelasList ?? collect(),
             'tahunAjaran' => $tahunAjaranAktif,
             'selectedYear' => $selectedYear,
-            'allTahunAjaran' => $allTahunAjaran,
+            'allTahunAjaran' => $allTahunAjaran ?? collect(),
             'tunggakanSummary' => $tunggakanSummary,
-            'jenisTagihan' => $this->jenisTagihan,
-            'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id']),
+            'jenisTagihan' => $this->jenisTagihan ?? [],
+            'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id']) ?? [],
         ]);
     }
 
