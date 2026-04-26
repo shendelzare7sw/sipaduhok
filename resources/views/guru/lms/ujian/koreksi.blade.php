@@ -242,6 +242,15 @@
             font-size: 1.1rem;
             padding: 0.6rem 1rem;
         }
+        .btn-ai-loading {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.7); }
+        }
     </style>
     @endpush
 
@@ -272,10 +281,21 @@
 
                     processingButtons.add(soalId);
 
-                    // UI Loading State
+                    // UI Loading State with live timer
                     const originalContent = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengolah...';
-                    this.disabled = true;
+                    let seconds = 0;
+                    const btnRef = this;
+                    btnRef.disabled = true;
+                    btnRef.classList.add('btn-ai-loading');
+
+                    const updateTimer = () => {
+                        btnRef.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Menganalisis... <span class="badge bg-light text-dark ms-1">${seconds}s</span>`;
+                    };
+                    updateTimer();
+                    const timerInterval = setInterval(() => {
+                        seconds++;
+                        updateTimer();
+                    }, 1000);
 
                     // Determine route based on context
                     const isLatihan = {{ request()->routeIs('guru.lms.latihan.*') ? 'true' : 'false' }};
@@ -319,17 +339,19 @@
                             feedbackInput.classList.remove('bg-info', 'text-white', 'bg-opacity-10');
                         }, 2000);
 
-                        toastMsg.textContent = `Analisis selesai! Saran skor: ${data.score}`;
+                        toastMsg.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Analisis selesai dalam <strong>${seconds}s</strong>! Saran skor: <strong>${data.score}</strong>`;
                         toast.show();
                     })
                     .catch(error => {
                         console.error(error);
-                        toastMsg.textContent = "Gagal: " + error.message;
+                        toastMsg.innerHTML = `<i class="fas fa-exclamation-triangle text-danger me-1"></i> Gagal (${seconds}s): ${error.message}`;
                         toast.show();
                     })
                     .finally(() => {
-                        this.innerHTML = originalContent;
-                        this.disabled = false;
+                        clearInterval(timerInterval);
+                        btnRef.innerHTML = originalContent;
+                        btnRef.disabled = false;
+                        btnRef.classList.remove('btn-ai-loading');
                         processingButtons.delete(soalId);
                     });
                 });

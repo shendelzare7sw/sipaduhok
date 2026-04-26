@@ -152,6 +152,71 @@ class AiGradingService
         }
     }
 
+    /**
+     * Centralized method to clean AI response and extract JSON reliably.
+     * Handles: <think> blocks (Qwen3), markdown ```json blocks, extra text before/after JSON.
+     */
+    protected function cleanAndParseJson(string $content): array
+    {
+        Log::debug('AI Grading raw response: ' . substr($content, 0, 500));
+
+        // Step 1: Strip <think>...</think> blocks (Qwen3 reasoning model)
+        $cleaned = preg_replace('/<think>.*?<\/think>/s', '', $content);
+
+        // Step 2: Strip markdown code blocks
+        $cleaned = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $cleaned);
+
+        // Step 3: Trim whitespace
+        $cleaned = trim($cleaned);
+
+        // Step 4: Try direct json_decode
+        $result = json_decode($cleaned, true);
+        if (json_last_error() === JSON_ERROR_NONE && isset($result['score'])) {
+            return $result;
+        }
+
+        // Step 5: Try to extract JSON object by finding first { and last }
+        $firstBrace = strpos($cleaned, '{');
+        $lastBrace = strrpos($cleaned, '}');
+        if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+            $jsonStr = substr($cleaned, $firstBrace, $lastBrace - $firstBrace + 1);
+            $result = json_decode($jsonStr, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($result['score'])) {
+                return $result;
+            }
+        }
+
+        // Step 6: Also try on original content (in case cleaning was too aggressive)
+        $firstBrace = strpos($content, '{');
+        $lastBrace = strrpos($content, '}');
+        if ($firstBrace !== false && $lastBrace !== false && $lastBrace > $firstBrace) {
+            $jsonStr = substr($content, $firstBrace, $lastBrace - $firstBrace + 1);
+            $result = json_decode($jsonStr, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($result['score'])) {
+                return $result;
+            }
+        }
+
+        // Step 7: Ultimate fallback - regex extraction from original content
+        Log::warning('AI Grading JSON parse failed, using regex fallback. Content: ' . substr($content, 0, 300));
+        preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+        // Try multiple feedback patterns
+        $feedback = null;
+        // Pattern 1: standard JSON string value
+        if (preg_match('/"feedback"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/', $content, $feedbackMatches)) {
+            $feedback = $feedbackMatches[1];
+        }
+        // Pattern 2: if feedback contains escaped quotes, grab everything between feedback": " and the last "
+        if (!$feedback && preg_match('/"feedback"\s*:\s*"(.+)"\s*\}/s', $content, $feedbackMatches)) {
+            $feedback = $feedbackMatches[1];
+        }
+
+        return [
+            'score' => isset($scoreMatches[1]) ? intval($scoreMatches[1]) : 0,
+            'feedback' => $feedback ?: 'AI tidak memberikan feedback yang dapat dibaca. Silakan coba lagi.'
+        ];
+    }
+
     protected function evaluateWithGemini($question, $studentAnswer, $correctAnswer, $maxScore)
     {
         $prompt = "Anda adalah asisten guru. Tugas: Menilai jawaban soal uraian.
@@ -193,21 +258,7 @@ class AiGradingService
 
         $json = $response->json();
         $content = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
-        
-        // Clean markdown blocks
-        $cleanContent = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $content);
-        $result = json_decode($cleanContent, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // Fallback strategy if JSON is broken (regex)
-            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
-            preg_match('/"feedback"\s*:\s*"([^"]*)"/s', $content, $feedbackMatches);
-
-            $result = [
-                'score' => $scoreMatches[1] ?? 0,
-                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
-            ];
-        }
+        $result = $this->cleanAndParseJson($content);
 
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
@@ -257,21 +308,7 @@ class AiGradingService
 
         $json = $response->json();
         $content = $json['choices'][0]['message']['content'] ?? '{}';
-        
-        // Clean markdown blocks
-        $cleanContent = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $content);
-        $result = json_decode($cleanContent, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // Fallback strategy if JSON is broken (regex)
-            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
-            preg_match('/"feedback"\s*:\s*"([^"]*)"/s', $content, $feedbackMatches);
-            
-            $result = [
-                'score' => $scoreMatches[1] ?? 0,
-                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
-            ];
-        }
+        $result = $this->cleanAndParseJson($content);
 
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
@@ -367,21 +404,7 @@ class AiGradingService
 
                 $json = $response->json();
                 $content = $json['choices'][0]['message']['content'] ?? '{}';
-                
-                // Clean markdown blocks
-                $cleanContent = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $content);
-                $result = json_decode($cleanContent, true);
-
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    // Fallback strategy if JSON is broken (regex)
-                    preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
-                    preg_match('/"feedback"\s*:\s*"([^"]*)"/s', $content, $feedbackMatches);
-                    
-                    $result = [
-                        'score' => $scoreMatches[1] ?? 0,
-                        'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
-                    ];
-                }
+                $result = $this->cleanAndParseJson($content);
 
                 return [
                     'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
@@ -464,21 +487,7 @@ class AiGradingService
 
         $json = $response->json();
         $content = $json['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
-        
-        // Clean markdown blocks
-        $cleanContent = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $content);
-        $result = json_decode($cleanContent, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // Fallback strategy if JSON is broken (regex)
-            preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
-            preg_match('/"feedback"\s*:\s*"([^"]*)"/s', $content, $feedbackMatches);
-
-            $result = [
-                'score' => $scoreMatches[1] ?? 0,
-                'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
-            ];
-        }
+        $result = $this->cleanAndParseJson($content);
 
         return [
             'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
