@@ -90,7 +90,42 @@ class AiGradingService
 
         try {
             if ($this->provider === 'groq') {
-                return $this->evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore);
+                try {
+                    return $this->evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore);
+                } catch (\Exception $e) {
+                    $errorMsg = strtolower($e->getMessage());
+                    $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
+                                    strpos($errorMsg, 'quota') !== false ||
+                                    strpos($errorMsg, '429') !== false;
+
+                    if ($isQuotaError) {
+                        // Determine alternative Groq model
+                        $altModel = str_contains($this->model, 'qwen') ? 'llama-3.3-70b-versatile' : 'qwen/qwen3-32b';
+                        Log::warning("Groq quota exceeded for {$this->model} during grading, trying alternative model {$altModel}");
+                        
+                        // Temporarily change model and retry
+                        $originalModel = $this->model;
+                        $this->model = $altModel;
+                        
+                        try {
+                            $result = $this->evaluateWithGroq($question, $studentAnswer, $correctAnswer, $maxScore);
+                            $this->model = $originalModel; // restore
+                            return $result;
+                        } catch (\Exception $e2) {
+                            $this->model = $originalModel; // restore
+                            Log::warning("Alternative Groq model also failed, falling back to Gemini: " . $e2->getMessage());
+                            
+                            // Fallback to Gemini
+                            $settings = AppSetting::where('key', 'gemini_api_key')->first();
+                            if ($settings && !empty($settings->value)) {
+                                $this->apiKey = $settings->value;
+                                return $this->evaluateWithGemini($question, $studentAnswer, $correctAnswer, $maxScore);
+                            }
+                            throw $e2; // If no Gemini key, throw alternative error
+                        }
+                    }
+                    throw $e; // If not quota error, throw original error
+                }
             } elseif ($this->provider === 'gemini') {
                 return $this->evaluateWithGemini($question, $studentAnswer, $correctAnswer, $maxScore);
             }

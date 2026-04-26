@@ -548,11 +548,8 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
      */
     private function selectModelForSubject(string $subject): string
     {
-        // Note: Previously used qwen-2.5-32b-instruct for Indonesian subjects,
-        // but this model is not available on Groq anymore.
-        // Llama 3.3 70B is excellent for all subjects including Indonesian.
-
-        return 'llama-3.3-70b-versatile';
+        // Use the dynamically configured model from the admin settings
+        return $this->model;
     }
 
     /**
@@ -576,9 +573,23 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                                 strpos($errorMsg, 'quota') !== false ||
                                 strpos($errorMsg, '429') !== false;
 
-                if ($isQuotaError && !empty($this->geminiApiKey)) {
-                    Log::warning('Groq quota exceeded, falling back to Gemini');
-                    return $this->callGeminiApi($systemPrompt, $userPrompt, $temperature);
+                if ($isQuotaError) {
+                    // Determine alternative Groq model
+                    $altModel = str_contains($model, 'qwen') ? 'llama-3.3-70b-versatile' : 'qwen/qwen3-32b';
+                    Log::warning("Groq quota exceeded for {$model}, trying alternative model {$altModel}");
+                    
+                    // Try alternative model
+                    $altResponse = $this->callGroqApi($altModel, $systemPrompt, $userPrompt, $temperature, $maxTokens);
+                    
+                    if ($altResponse['success']) {
+                        return $altResponse;
+                    }
+                    
+                    // If alternative also fails, fallback to Gemini
+                    if (!empty($this->geminiApiKey)) {
+                        Log::warning('Alternative Groq model also failed, falling back to Gemini');
+                        return $this->callGeminiApi($systemPrompt, $userPrompt, $temperature);
+                    }
                 }
             }
 
