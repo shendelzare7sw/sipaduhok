@@ -86,6 +86,11 @@
             generatedQuestions = result.questions || [];
             displayGeneratedQuestions(generatedQuestions, data.type);
 
+            // Update model status badge if metadata available
+            if (result.metadata) {
+                updateModelStatus(result.metadata.model_used, result.metadata.provider);
+            }
+
             // Show metadata info if available
             let successMsg = result.message || `Berhasil generate ${generatedQuestions.length} soal!`;
             if (result.metadata && result.metadata.provider === 'gemini') {
@@ -199,35 +204,30 @@
     function renderQuestionDetails(question, type) {
         switch (type) {
             case 'pilihan_ganda':
+            case 'pilihan_ganda_kompleks':
+                const isKompleks = type === 'pilihan_ganda_kompleks';
+                const kunciArr = isKompleks ? String(question.kunci_jawaban).split(',').map(k => k.trim()) : [question.kunci_jawaban];
                 return `
                     <div class="ms-3">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="${question.kunci_jawaban === 'A' ? 'text-success fw-bold' : ''}">
-                                    A. ${escapeHtml(question.pilihan_a)}
-                                    ${question.kunci_jawaban === 'A' ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
-                                </div>
-                                <div class="${question.kunci_jawaban === 'B' ? 'text-success fw-bold' : ''}">
-                                    B. ${escapeHtml(question.pilihan_b)}
-                                    ${question.kunci_jawaban === 'B' ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
-                                </div>
-                                <div class="${question.kunci_jawaban === 'C' ? 'text-success fw-bold' : ''}">
-                                    C. ${escapeHtml(question.pilihan_c)}
-                                    ${question.kunci_jawaban === 'C' ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
-                                </div>
+                                ${['A','B','C'].map(opt => `
+                                    <div class="${kunciArr.includes(opt) ? 'text-success fw-bold' : ''}">
+                                        ${opt}. ${escapeHtml(question['pilihan_' + opt.toLowerCase()])}
+                                        ${kunciArr.includes(opt) ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
+                                    </div>
+                                `).join('')}
                             </div>
                             <div class="col-md-6">
-                                <div class="${question.kunci_jawaban === 'D' ? 'text-success fw-bold' : ''}">
-                                    D. ${escapeHtml(question.pilihan_d)}
-                                    ${question.kunci_jawaban === 'D' ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
-                                </div>
-                                <div class="${question.kunci_jawaban === 'E' ? 'text-success fw-bold' : ''}">
-                                    E. ${escapeHtml(question.pilihan_e)}
-                                    ${question.kunci_jawaban === 'E' ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
-                                </div>
+                                ${['D','E'].map(opt => `
+                                    <div class="${kunciArr.includes(opt) ? 'text-success fw-bold' : ''}">
+                                        ${opt}. ${escapeHtml(question['pilihan_' + opt.toLowerCase()])}
+                                        ${kunciArr.includes(opt) ? '<i class="fas fa-check-circle ms-1"></i>' : ''}
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
-                        <p class="mt-2 mb-0"><strong class="text-success">Kunci Jawaban: ${question.kunci_jawaban}</strong></p>
+                        <p class="mt-2 mb-0"><strong class="text-success">Kunci Jawaban: ${question.kunci_jawaban}</strong>${isKompleks ? ' <span class="badge bg-warning text-dark ms-1">Multi-jawaban</span>' : ''}</p>
                     </div>
                 `;
 
@@ -371,7 +371,7 @@
                 };
 
                 // Format based on question type
-                if (q.tipe_soal === 'pilihan_ganda') {
+                if (q.tipe_soal === 'pilihan_ganda' || q.tipe_soal === 'pilihan_ganda_kompleks') {
                     soalData.pilihan_jawaban = {
                         A: q.pilihan_a || '',
                         B: q.pilihan_b || '',
@@ -537,6 +537,7 @@
     function getQuestionTypeLabel(type) {
         const labels = {
             pilihan_ganda: 'Pilihan Ganda',
+            pilihan_ganda_kompleks: 'Pilihan Ganda Kompleks',
             benar_salah: 'Benar / Salah',
             uraian: 'Uraian / Essay',
             isian_singkat: 'Isian Singkat'
@@ -605,6 +606,43 @@
             }
         }
     });
+
+    /**
+     * Update model status badge after generation
+     */
+    function updateModelStatus(modelUsed, provider) {
+        const badge = document.getElementById('aiModelStatusBadge');
+        const switchInfo = document.getElementById('aiModelSwitchInfo');
+        if (!badge) return;
+
+        // Map model ID to friendly name
+        const modelNames = {
+            'llama-3.3-70b-versatile': 'Llama 3.3 70B',
+            'qwen/qwen3-32b': 'Qwen3 32B',
+            'gemini-2.5-flash': 'Gemini 2.5 Flash',
+            'meta-llama/llama-4-scout-17b-16e-instruct': 'Llama 4 Scout'
+        };
+
+        const friendlyName = modelNames[modelUsed] || modelUsed;
+        badge.innerHTML = `<i class="fas fa-circle text-success me-1" style="font-size: 0.5rem;"></i> ${friendlyName}`;
+        badge.title = modelUsed;
+
+        // Show switch info if provider changed
+        if (provider === 'gemini' && switchInfo) {
+            switchInfo.textContent = '⚡ Auto-switched from Groq';
+            switchInfo.classList.remove('d-none');
+            switchInfo.classList.add('bg-warning', 'text-dark');
+        } else if (switchInfo) {
+            // Check if model was auto-switched within Groq
+            const configuredModel = badge.dataset.originalModel || '';
+            if (configuredModel && modelUsed !== configuredModel) {
+                switchInfo.textContent = `↔ Switched from ${modelNames[configuredModel] || configuredModel}`;
+                switchInfo.classList.remove('d-none');
+            } else {
+                switchInfo.classList.add('d-none');
+            }
+        }
+    }
 
     // Make sidebar functions globally accessible
     window.openAiSidebar = openAiSidebar;

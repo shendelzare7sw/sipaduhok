@@ -53,6 +53,24 @@
             </div>
         </div>
 
+        {{-- Model Status Badge --}}
+        @php
+            $currentModel = \App\Models\AppSetting::where('key', 'ai_model')->first()?->value ?? 'llama-3.3-70b-versatile';
+            $modelShortName = str_contains($currentModel, 'llama') ? 'Llama 3.3 70B' :
+                              (str_contains($currentModel, 'qwen') ? 'Qwen3 32B' :
+                              (str_contains($currentModel, 'gemini') ? 'Gemini 2.5 Flash' : $currentModel));
+        @endphp
+        <div class="d-flex align-items-center gap-2 mb-3 px-1" id="aiModelStatusContainer">
+            <small class="text-muted"><i class="fas fa-microchip me-1"></i> Model:</small>
+            <span class="badge bg-dark bg-opacity-75" id="aiModelStatusBadge" title="{{ $currentModel }}">
+                <i class="fas fa-circle text-success me-1" style="font-size: 0.5rem;"></i>
+                {{ $modelShortName }}
+            </span>
+            <span class="badge bg-light text-muted d-none" id="aiModelSwitchInfo" style="font-size: 0.65rem;">
+                {{-- Updated dynamically via JS after generation --}}
+            </span>
+        </div>
+
         {{-- Generator Form --}}
         <form id="aiGeneratorForm">
             {{-- Topic Input --}}

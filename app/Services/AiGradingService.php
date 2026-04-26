@@ -33,6 +33,13 @@ class AiGradingService
 
         $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
 
+        // GRADING PRIORITY: Always prefer Llama for grading (stable JSON output)
+        // Qwen3 has <think> mode that breaks grading JSON, so we use it only as fallback
+        if ($this->provider === 'groq' && str_contains($this->model, 'qwen')) {
+            Log::info("AiGradingService: Configured model is {$this->model}, switching to llama-3.3-70b-versatile for stable grading.");
+            $this->model = 'llama-3.3-70b-versatile';
+        }
+
         // Auto-fix for decommissioned Groq models
         if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview', 'llama-3.1-70b-versatile'])) {
             Log::warning("Decommissioned model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
@@ -291,7 +298,9 @@ class AiGradingService
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => "/no_think\nAnda adalah sistem penilaian otomatis yang outputnya SELALU berupa JSON murni. JANGAN gunakan tag <think>. Langsung output JSON saja."
+                    'content' => str_contains($this->model, 'qwen')
+                        ? "/no_think\nAnda adalah sistem penilaian otomatis yang outputnya SELALU berupa JSON murni. JANGAN gunakan tag <think>. Langsung output JSON saja."
+                        : 'Anda adalah sistem penilaian otomatis yang outputnya selalu berupa JSON valid.'
                 ],
                 [
                     'role' => 'user',
