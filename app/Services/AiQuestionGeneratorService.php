@@ -282,7 +282,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         $model = $this->selectModelForSubject($subject);
 
         // Call AI with fallback
-        $maxTokens = $generateNarasi ? 2000 : 1500; // Higher if narasi enabled
+        $maxTokens = $generateNarasi ? max(2000, $count * 300 + 500) : min($count * 300 + 500, 3000);
         $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.8, $maxTokens);
 
         if (!$response['success']) {
@@ -291,6 +291,19 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
         // Parse and validate questions
         $questions = $this->parseQuestions($response['content'], 'pilihan_ganda');
+
+        if (count($questions) < $count) {
+            $missing = $count - count($questions);
+            Log::warning("MCQ generator returned {count($questions)}/{$count} questions. Retrying.");
+            $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal. Jangan berhenti di tengah jalan.";
+            $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
+            if ($retryResponse['success']) {
+                $retryQuestions = $this->parseQuestions($retryResponse['content'], 'pilihan_ganda');
+                if (count($retryQuestions) >= count($questions)) {
+                    $questions = $retryQuestions;
+                }
+            }
+        }
 
         return [
             'success' => true,
@@ -342,13 +355,27 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         }
 
         $model = $this->selectModelForSubject($subject);
-        $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.8, 1500);
+        $maxTokens = $generateNarasi ? max(2000, $count * 350 + 500) : min($count * 350 + 500, 3000);
+        $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.8, $maxTokens);
 
         if (!$response['success']) {
             return $response;
         }
 
         $questions = $this->parseQuestions($response['content'], 'pilihan_ganda_kompleks');
+
+        if (count($questions) < $count) {
+            $missing = $count - count($questions);
+            Log::warning("Complex MCQ generator returned {count($questions)}/{$count} questions. Retrying.");
+            $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal.";
+            $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
+            if ($retryResponse['success']) {
+                $retryQuestions = $this->parseQuestions($retryResponse['content'], 'pilihan_ganda_kompleks');
+                if (count($retryQuestions) >= count($questions)) {
+                    $questions = $retryQuestions;
+                }
+            }
+        }
 
         return [
             'success' => true,
@@ -421,7 +448,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         }
 
         $model = $this->selectModelForSubject($subject);
-        $maxTokens = $generateNarasi ? 1200 : 800; // Higher if narasi enabled
+        $maxTokens = $generateNarasi ? max(2000, $count * 250 + 500) : min($count * 250 + 500, 3000);
         $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.7, $maxTokens);
 
         if (!$response['success']) {
@@ -429,6 +456,19 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         }
 
         $questions = $this->parseQuestions($response['content'], 'benar_salah');
+
+        if (count($questions) < $count) {
+            $missing = $count - count($questions);
+            Log::warning("True/False generator returned {count($questions)}/{$count} questions. Retrying.");
+            $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal.";
+            $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
+            if ($retryResponse['success']) {
+                $retryQuestions = $this->parseQuestions($retryResponse['content'], 'benar_salah');
+                if (count($retryQuestions) >= count($questions)) {
+                    $questions = $retryQuestions;
+                }
+            }
+        }
 
         return [
             'success' => true,
@@ -610,7 +650,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
         $model = $this->selectModelForSubject($subject);
         // Isian singkat needs moderate tokens - no complex rubric
-        $maxTokens = $generateNarasi ? 1500 : 1000;
+        $maxTokens = $generateNarasi ? max(2000, $count * 250 + 500) : min($count * 250 + 500, 3000);
         $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.7, $maxTokens, false); // false = no json_object mode
 
         if (!$response['success']) {
@@ -618,6 +658,19 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         }
 
         $questions = $this->parseQuestions($response['content'], 'isian_singkat');
+
+        if (count($questions) < $count) {
+            $missing = $count - count($questions);
+            Log::warning("Fill In Blank generator returned {count($questions)}/{$count} questions. Retrying.");
+            $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal.";
+            $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens, false);
+            if ($retryResponse['success']) {
+                $retryQuestions = $this->parseQuestions($retryResponse['content'], 'isian_singkat');
+                if (count($retryQuestions) >= count($questions)) {
+                    $questions = $retryQuestions;
+                }
+            }
+        }
 
         return [
             'success' => true,
