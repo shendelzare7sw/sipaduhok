@@ -245,8 +245,7 @@ class AiGradingService
                 ]
             ],
             'temperature' => 0.2, // Low temperature for consistent grading
-            'max_tokens' => 300,
-            'response_format' => ['type' => 'json_object']
+            'max_tokens' => 300
         ]);
 
         if ($response->failed()) {
@@ -353,8 +352,7 @@ class AiGradingService
                         ]
                     ],
                     'temperature' => 0.2,
-                    'max_tokens' => 300,
-                    'response_format' => ['type' => 'json_object']
+                    'max_tokens' => 300
                 ]);
 
                 if ($response->failed()) {
