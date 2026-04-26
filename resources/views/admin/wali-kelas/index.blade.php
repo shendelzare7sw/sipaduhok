@@ -1,4 +1,4 @@
-@extends('layouts.sneat')
+﻿@extends('layouts.sneat')
 
 @section('title', 'Data Wali Kelas')
 
@@ -587,7 +587,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                 <h5 class="modal-title fw-bold text-dark m-0 d-flex align-items-center gap-2">
                     <i class="fas fa-user-tie text-purple"></i> Assign Wali Kelas
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="assignForm" method="POST">
                 @csrf
@@ -665,7 +665,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                 </div>
                 
                 <div class="modal-footer px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center flex-wrap">
-                    <button type="button" id="btnRemoveWali" class="btn btn-danger fw-medium d-flex align-items-center justify-content-center btn-responsive" style="border-radius: 8px;">
+                    <button type="button" id="btnRemoveWali" class="btn btn-danger fw-medium d-flex align-items-center justify-content-center btn-responsive text-white" style="border-radius: 8px;">
                         <span>Cabut Status Wali</span>
                     </button>
                     
@@ -686,7 +686,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-bottom-0 pb-0">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center pt-0 pb-4">
                 <div class="mb-3">
@@ -699,7 +699,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                 
                 <div class="d-flex justify-content-center gap-2 mt-4">
                     <button type="button" class="btn btn-secondary fw-medium px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
-                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger fw-medium px-4 d-flex align-items-center gap-2" style="border-radius: 8px;">
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger fw-medium px-4 d-flex align-items-center gap-2 text-white" style="border-radius: 8px;">
                         <i class="fas fa-trash"></i> Cabut
                     </button>
                 </div>
@@ -818,3 +818,4 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', function()
 });
 </script>
 @endsection
+

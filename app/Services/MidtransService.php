@@ -185,7 +185,8 @@ class MidtransService
     public function getTransactionStatus($orderId)
     {
         try {
-            $status = \Midtrans\Transaction::status($orderId);
+            // Gunakan @ untuk suppress PHP warnings dari Midtrans SDK (bug: Undefined array key)
+            $status = @\Midtrans\Transaction::status($orderId);
             return $status;
         } catch (\Exception $e) {
             \Log::error('Midtrans Get Status Error: ' . $e->getMessage());

@@ -84,6 +84,56 @@ class OrangTuaController extends Controller
             ]);
         }
 
+        // --- SYNC PENDING MIDTRANS PAYMENTS FOR ALL CHILDREN ---
+        $childIds = $children->pluck('id')->toArray();
+        $pendingMidtrans = Pembayaran::whereIn('siswa_id', $childIds)
+            ->where('payment_gateway', 'midtrans')
+            ->where('status_validasi', 'pending')
+            ->whereNotNull('order_id')
+            ->get();
+
+        if ($pendingMidtrans->isNotEmpty()) {
+            $midtransService = new \App\Services\MidtransService();
+            if ($midtransService->isConfigured()) {
+                foreach ($pendingMidtrans as $payment) {
+                    try {
+                        $status = $midtransService->getTransactionStatus($payment->order_id);
+                        $transactionStatus = $status->transaction_status ?? null;
+                        $fraudStatus = $status->fraud_status ?? 'accept';
+
+                        $newStatus = $midtransService->mapTransactionStatus($transactionStatus, $fraudStatus);
+
+                        if ($newStatus !== 'pending') {
+                            $payment->update([
+                                'status_validasi' => $newStatus,
+                                'transaction_id' => $status->transaction_id ?? null,
+                                'payment_type' => $status->payment_type ?? null,
+                                'gateway_response' => json_encode($status),
+                                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
+                            ]);
+
+                            if ($newStatus === 'disetujui') {
+                                $payment->tagihan->updateStatusBayar();
+
+                                // Batalkan pembayaran pending lainnya untuk tagihan yang sama
+                                Pembayaran::where('tagihan_id', $payment->tagihan_id)
+                                    ->where('siswa_id', $payment->siswa_id)
+                                    ->where('id', '!=', $payment->id)
+                                    ->where('status_validasi', 'pending')
+                                    ->update([
+                                        'status_validasi' => 'ditolak',
+                                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $payment->order_id . ')',
+                                    ]);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Dashboard Sync Midtrans Status Error: ' . $e->getMessage());
+                    }
+                }
+            }
+        }
+        // --- END SYNC ---
+
         // Hitung total tagihan dan pembayaran untuk semua anak
         $summary = [];
         foreach ($children as $child) {
@@ -117,6 +167,56 @@ class OrangTuaController extends Controller
             return redirect()->route('orang-tua.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
+
+        // --- SYNC PENDING MIDTRANS PAYMENTS ---
+        $pendingMidtrans = Pembayaran::where('siswa_id', $siswa->id)
+            ->where('payment_gateway', 'midtrans')
+            ->where('status_validasi', 'pending')
+            ->whereNotNull('order_id')
+            ->get();
+
+        if ($pendingMidtrans->isNotEmpty()) {
+            $midtransService = new \App\Services\MidtransService();
+            if ($midtransService->isConfigured()) {
+                foreach ($pendingMidtrans as $payment) {
+                    try {
+                        $status = $midtransService->getTransactionStatus($payment->order_id);
+                        $transactionStatus = $status->transaction_status ?? null;
+                        $fraudStatus = $status->fraud_status ?? 'accept';
+
+                        $newStatus = $midtransService->mapTransactionStatus($transactionStatus, $fraudStatus);
+
+                        if ($newStatus !== 'pending') {
+                            $payment->update([
+                                'status_validasi' => $newStatus,
+                                'transaction_id' => $status->transaction_id ?? null,
+                                'payment_type' => $status->payment_type ?? null,
+                                'gateway_response' => json_encode($status),
+                                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
+                            ]);
+
+                            if ($newStatus === 'disetujui') {
+                                $payment->tagihan->updateStatusBayar();
+
+                                // Batalkan pembayaran pending lainnya untuk tagihan yang sama
+                                Pembayaran::where('tagihan_id', $payment->tagihan_id)
+                                    ->where('siswa_id', $payment->siswa_id)
+                                    ->where('id', '!=', $payment->id)
+                                    ->where('status_validasi', 'pending')
+                                    ->update([
+                                        'status_validasi' => 'ditolak',
+                                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $payment->order_id . ')',
+                                    ]);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        // Jika transaction belum ada (misal di sandbox API belum siap), kita biarkan saja
+                        \Log::error('Tagihan Sync Midtrans Status Error: ' . $e->getMessage());
+                    }
+                }
+            }
+        }
+        // --- END SYNC ---
 
         // Info tahun ajaran aktif
         $activeYear = \App\Models\TahunAjaran::where('is_active', true)->first();
@@ -354,7 +454,7 @@ class OrangTuaController extends Controller
                 \Log::error('Midtrans Payment Error: ' . $e->getMessage());
 
                 return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
-                    ->with('error', 'Gagal memproses pembayaran digital: ' . $e->getMessage());
+                    ->with('error', 'Layanan pembayaran sedang offline atau terjadi gangguan sistem. Silakan coba beberapa saat lagi.');
             }
         }
 
@@ -491,7 +591,8 @@ class OrangTuaController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
+            \Log::error('Midtrans Bulk Payment Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Layanan pembayaran sedang offline atau terjadi gangguan sistem. Silakan coba beberapa saat lagi.');
         }
     }
 
