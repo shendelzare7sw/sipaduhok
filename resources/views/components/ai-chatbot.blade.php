@@ -2113,8 +2113,8 @@ async function loadAvailableModels() {
     } catch (error) {
         console.error('[AI Chatbot] Error loading models:', error);
         const defaultModels = [
-            { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B (High Rate Limit)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
-            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Recommended)', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
+            { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B (High Rate Limit)', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
+            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Recommended)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
             { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
             { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout (Vision)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false },
             { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (PDF + Vision)', provider: 'gemini', supports_vision: true, supports_pdf: true, default: false }
@@ -2129,8 +2129,12 @@ async function loadAvailableModels() {
 function populateModelSelector(models) {
     const selector = document.getElementById('modelSelector');
     if (!selector) return;
-    const groqDefaultModel = models.find(m => m.id === 'qwen/qwen3-32b') || models.find(m => m.id === 'llama-3.3-70b-versatile');
-    const forcedDefaultId = groqDefaultModel ? groqDefaultModel.id : models[0]?.id;
+    
+    // Prioritize backend default, fallback to Llama
+    const backendDefault = models.find(m => m.default === true);
+    const fallbackDefault = models.find(m => m.id === 'llama-3.3-70b-versatile');
+    const forcedDefaultId = backendDefault ? backendDefault.id : (fallbackDefault ? fallbackDefault.id : models[0]?.id);
+    
     selector.innerHTML = models.map(m => {
         let icons = '';
         if (m.supports_vision) icons += '📷';
