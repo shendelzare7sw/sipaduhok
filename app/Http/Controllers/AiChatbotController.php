@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AiChatbotService;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -19,7 +20,77 @@ class AiChatbotController extends Controller
     }
 
     /**
-     * Send message to AI chatbot
+     * Send message to NLP Python API (replaces old client-side rule-based KB)
+     * This is the "Sistem" mode — for navigating SIPADUHOK features.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendNlpMessage(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'message' => 'required|string|max:2000',
+            ]);
+
+            $userMessage = $validated['message'];
+            $userRole = auth()->user()->role;
+
+            // Send to Python NLP API at port 5000
+            $response = Http::timeout(10)->post('http://127.0.0.1:5000/chat', [
+                'teks' => $userMessage,
+                'role' => $userRole,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                return response()->json([
+                    'success' => true,
+                    'response' => $data['response'] ?? 'Tidak ada respons.',
+                    'ui_data' => $data['ui_data'] ?? null,
+                    'tag' => $data['tag'] ?? null,
+                    'confidence' => $data['confidence'] ?? 0,
+                ]);
+            }
+
+            // NLP API returned error status
+            Log::warning('NLP API returned non-200', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Asisten sedang istirahat. Silakan coba beberapa saat lagi. 🙏',
+            ], 503);
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('NLP API Connection Failed', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Asisten sedang istirahat. Silakan coba beberapa saat lagi. 🙏',
+            ], 503);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Validasi gagal: ' . $e->getMessage(),
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('NLP Chatbot Error', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Asisten sedang istirahat. Silakan coba beberapa saat lagi. 🙏',
+            ], 500);
+        }
+    }
+
+    /**
+     * Send message to LLM AI chatbot (Groq/Gemini) — fallback mode
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

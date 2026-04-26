@@ -307,7 +307,12 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('ai-chatbot')->name('ai-chatbot.')->group(function () {
-        // Send message (with optional file attachment)
+        // Send message to NLP Python API (System mode — replaces old rule-based KB)
+        Route::post('/nlp-message', [AiChatbotController::class, 'sendNlpMessage'])
+            ->name('nlp-message')
+            ->middleware('throttle:15,1'); // 15 requests per minute
+
+        // Send message to LLM (Groq/Gemini) — fallback mode (with optional file attachment)
         Route::post('/send-message', [AiChatbotController::class, 'sendMessage'])
             ->name('send-message')
             ->middleware('throttle:10,1'); // 10 requests per minute

@@ -1,0 +1,2281 @@
+{
+    "intents": [
+        {
+            "tag": "global_ganti_password",
+            "role": "global",
+            "patterns": [
+                "bagaimana cara ganti password?",
+                "lupa password",
+                "ubah kata sandi di mana?",
+                "setting keamanan akun",
+                "cara reset password saya"
+            ],
+            "responses": [
+                "Untuk mengganti password, klik ikon profil di pojok kanan atas â†’ Pengaturan Akun â†’ tab Ganti Password. Masukkan password lama dan password baru, lalu klik Simpan."
+            ]
+        },
+        {
+            "tag": "global_edit_profil",
+            "role": "global",
+            "patterns": [
+                "cara ubah foto profil",
+                "edit data diri",
+                "ganti nama akun",
+                "update profil saya"
+            ],
+            "responses": [
+                "Buka menu Profil di pojok kanan atas. Di sana Anda bisa mengubah data diri, upload foto profil baru, atau menghapus foto profil."
+            ]
+        },
+        {
+            "tag": "global_notifikasi",
+            "role": "global",
+            "patterns": [
+                "cara lihat notifikasi",
+                "notif dimana ya",
+                "ada pemberitahuan baru gak",
+                "bell notifikasi"
+            ],
+            "responses": [
+                "Klik ikon lonceng (bell) di pojok kanan atas untuk melihat notifikasi terbaru. Anda juga bisa klik 'Lihat Semua' untuk membuka halaman notifikasi lengkap."
+            ]
+        },
+        {
+            "tag": "global_logout",
+            "role": "global",
+            "patterns": [
+                "cara logout",
+                "keluar dari sistem",
+                "sign out dimana",
+                "mau keluar akun"
+            ],
+            "responses": [
+                "Klik ikon profil di pojok kanan atas, lalu pilih Logout untuk keluar dari sistem."
+            ]
+        },
+        {
+            "tag": "global_chatbot",
+            "role": "global",
+            "patterns": [
+                "cara pakai chatbot",
+                "asisten ai dimana",
+                "chatbot ga muncul",
+                "tombol chat assistant"
+            ],
+            "responses": [
+                "Chatbot AI muncul sebagai ikon floating di pojok kanan bawah layar. Klik ikon tersebut untuk membuka jendela chat. Jika tidak muncul, kemungkinan admin belum mengaktifkan akses chatbot untuk role Anda."
+            ]
+        },
+        {
+            "tag": "out_of_scope",
+            "role": "global",
+            "patterns": [
+                "siapa presiden saat ini?",
+                "cuaca hari ini",
+                "tolong buatkan kode python",
+                "berita politik terbaru",
+                "cara masak nasi goreng"
+            ],
+            "responses": [
+                "Maaf, saya hanya bisa membantu pertanyaan seputar penggunaan sistem SIPADUHOK. Silakan tanyakan tentang menu, fitur, atau navigasi sistem."
+            ]
+        },
+        {
+            "tag": "ketua_dashboard",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "dashboard ketua pkbm",
+                "beranda ketua",
+                "lihat ringkasan ketua"
+            ],
+            "responses": [
+                "Setelah login sebagai Ketua PKBM, Anda langsung masuk ke Dashboard. Klik menu 'Dashboard' di sidebar untuk kembali ke halaman utama."
+            ]
+        },
+        {
+            "tag": "ketua_approval_dispensasi",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "approve dispensasi kenaikan",
+                "setujui dispensasi siswa",
+                "approval dispensasi dimana"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Approval Dispensasi. Di sana Anda bisa meng-approve atau reject permintaan dispensasi kenaikan kelas, termasuk bulk update."
+            ]
+        },
+        {
+            "tag": "ketua_validasi_rapor",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "validasi rapor siswa",
+                "approve rapor wali kelas",
+                "cek rapor sebelum terbit",
+                "minta revisi rapor"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Validasi Rapor. Anda bisa memvalidasi rapor satu per satu, bulk validasi, preview rapor, atau minta revisi ke wali kelas."
+            ]
+        },
+        {
+            "tag": "ketua_dispensasi_keuangan",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "dispensasi keuangan siswa",
+                "approve keringanan bayar",
+                "permintaan dispensasi masuk"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Dispensasi Keuangan. Badge merah menunjukkan jumlah permintaan pending. Klik untuk approve atau reject dispensasi."
+            ]
+        },
+        {
+            "tag": "ketua_monitoring",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "pantau data pengguna",
+                "monitoring guru dan siswa",
+                "lihat statistik sekolah"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Monitoring. Pilih sub-menu: Data Pengguna, Data Wali Kelas, Data Guru Pengajar, atau Data Siswa untuk melihat informasi masing-masing."
+            ]
+        },
+        {
+            "tag": "ketua_laporan",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "cetak laporan sekolah",
+                "print data siswa",
+                "rekap laporan ketua"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Laporan & Catatan â†’ Cetak Laporan. Pilih jenis: Siswa, Tenaga Pendidik, Kelas, Wali Kelas, Guru Pengajar, atau Rekap."
+            ]
+        },
+        {
+            "tag": "ketua_catatan",
+            "role": "ketua_pkbm",
+            "patterns": [
+                "kirim catatan sebagai ketua",
+                "buat teguran guru",
+                "catat untuk tenaga pendidik"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Laporan & Catatan â†’ Kirim Catatan. Klik 'Buat Catatan Baru' untuk mengirim catatan atau arahan."
+            ]
+        },
+        {
+            "tag": "waka_dashboard",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "dashboard waka",
+                "beranda wakil kepala sekolah",
+                "ringkasan data waka"
+            ],
+            "responses": [
+                "Setelah login sebagai Wakil Kepala Sekolah, Anda langsung masuk ke Dashboard. Klik 'Dashboard' di sidebar untuk kembali."
+            ]
+        },
+        {
+            "tag": "waka_tahun_ajaran",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "kelola tahun ajaran",
+                "tambah semester baru",
+                "aktifkan tahun ajaran"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Tahun Ajaran. Klik 'Tambah' untuk membuat periode baru, atau 'Aktifkan' untuk mengubah tahun ajaran aktif."
+            ]
+        },
+        {
+            "tag": "waka_mata_pelajaran",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "tambah mata pelajaran baru",
+                "import mapel",
+                "kelola daftar mapel waka"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Mata Pelajaran. Klik 'Tambah' atau 'Import Excel'. Tersedia fitur Suggest Kode dan Cetak."
+            ]
+        },
+        {
+            "tag": "waka_kelas",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "kelola kelas waka",
+                "tambah kelas baru",
+                "manage siswa di kelas"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Manajemen Kelas. Klik 'Tambah', 'Import', atau pilih kelas untuk manage siswa dan assign wali."
+            ]
+        },
+        {
+            "tag": "waka_manajemen_siswa",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "pindahkan siswa kelas",
+                "data siswa per kelas",
+                "cetak kartu siswa"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Manajemen Siswa. Pilih siswa untuk assign kelas, lihat detail, atau cetak kartu siswa."
+            ]
+        },
+        {
+            "tag": "waka_wali_kelas",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "assign wali kelas baru",
+                "penugasan wali kelas",
+                "ganti wali kelas"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Penugasan Wali Kelas. Pilih kelas, lalu klik 'Assign' untuk menugaskan guru sebagai wali kelas."
+            ]
+        },
+        {
+            "tag": "waka_jadwal",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "buat jadwal pelajaran",
+                "import jadwal",
+                "duplikasi jadwal antar kelas"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Jadwal Pelajaran. Klik 'Tambah' atau 'Import Excel'. Gunakan 'Duplikasi' untuk menyalin jadwal. Export tersedia dalam PDF dan Excel."
+            ]
+        },
+        {
+            "tag": "waka_guru_pengajar",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "lihat guru pengajar",
+                "data guru dari jadwal",
+                "rebuild data guru"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Guru Pengajar. Data di-generate dari jadwal pelajaran. Klik 'Rebuild' jika tidak sinkron."
+            ]
+        },
+        {
+            "tag": "waka_pengaturan_istirahat",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "atur jam istirahat",
+                "setting waktu break",
+                "pengaturan istirahat sekolah"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Akademik â†’ Pengaturan Istirahat. Klik 'Tambah' untuk slot istirahat baru, atau toggle status aktif/nonaktif."
+            ]
+        },
+        {
+            "tag": "waka_kkm",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "atur kkm mapel",
+                "setting nilai minimum waka",
+                "pengaturan kkm"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Pengaturan KKM. Atur nilai KKM per mata pelajaran, lalu Simpan."
+            ]
+        },
+        {
+            "tag": "waka_pengaturan_naik_kelas",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "setting naik kelas",
+                "atur syarat kenaikan",
+                "pengaturan promotion"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Pengaturan Naik Kelas. Atur aturan dan syarat kenaikan kelas."
+            ]
+        },
+        {
+            "tag": "waka_proses_kenaikan",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "proses kenaikan kelas waka",
+                "eksekusi naik kelas",
+                "rekap kenaikan"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Proses & Rekap. Klik 'Eksekusi' untuk memproses kenaikan, atau 'Rollback' untuk membatalkan."
+            ]
+        },
+        {
+            "tag": "waka_monitoring",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "monitoring wali kelas",
+                "pantau guru pengajar",
+                "data siswa waka"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Monitoring. Pilih sub-menu: Monitoring Wali Kelas, Guru Pengajar, atau Siswa."
+            ]
+        },
+        {
+            "tag": "waka_catatan",
+            "role": "wakil_kepala_sekolah",
+            "patterns": [
+                "kirim teguran guru",
+                "buat catatan waka",
+                "catat untuk bawahan"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Komunikasi â†’ Kirim Catatan. Klik 'Buat Catatan Baru' untuk mengirim catatan atau teguran."
+            ]
+        },
+        {
+            "tag": "sekretaris_dashboard",
+            "role": "sekretaris",
+            "patterns": [
+                "dashboard sekretaris",
+                "beranda sekretaris",
+                "halaman utama sekretaris"
+            ],
+            "responses": [
+                "Setelah login sebagai Sekretaris, Anda langsung masuk ke Dashboard. Klik 'Dashboard' di sidebar untuk kembali."
+            ]
+        },
+        {
+            "tag": "sekretaris_kalender",
+            "role": "sekretaris",
+            "patterns": [
+                "tambah event kalender",
+                "kelola kalender akademik",
+                "jadwal kegiatan sekolah"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Konten â†’ Kalender Akademik. Klik 'Tambah Event' untuk kegiatan baru. Tersedia tampilan bulanan dan cetak."
+            ]
+        },
+        {
+            "tag": "sekretaris_pengumuman",
+            "role": "sekretaris",
+            "patterns": [
+                "buat pengumuman",
+                "posting pengumuman sekolah",
+                "kelola info penting"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Konten â†’ Pengumuman. Klik 'Tambah' untuk membuat pengumuman baru."
+            ]
+        },
+        {
+            "tag": "sekretaris_flyer",
+            "role": "sekretaris",
+            "patterns": [
+                "upload flyer",
+                "kelola iklan sekolah",
+                "tambah poster promosi"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Konten â†’ Flyer / Iklan. Klik 'Tambah' untuk upload flyer baru."
+            ]
+        },
+        {
+            "tag": "sekretaris_berita",
+            "role": "sekretaris",
+            "patterns": [
+                "tulis berita sekolah",
+                "posting artikel baru",
+                "kelola berita"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Manajemen Konten â†’ Kelola Berita. Klik 'Tambah' untuk menulis berita baru. Toggle 'Featured' untuk highlight di halaman depan."
+            ]
+        },
+        {
+            "tag": "bendahara_dashboard",
+            "role": "bendahara",
+            "patterns": [
+                "catat uang masuk",
+                "config midtrans",
+                "rekap tagihan",
+                "ringkasan keuangan",
+                "dashboard bendahara",
+                "validasi bayar",
+                "laporan keuangan bendahara",
+                "bayar gaji",
+                "pengeluaran sekolah",
+                "beranda bendahara"
+            ],
+            "responses": [
+                "Setelah login sebagai Bendahara, Anda langsung masuk ke Dashboard dengan statistik total tagihan, pembayaran masuk, dan tunggakan."
+            ]
+        },
+        {
+            "tag": "bendahara_tagihan",
+            "role": "bendahara",
+            "patterns": [
+                "cara buat tagihan",
+                "generate spp bulanan",
+                "tagihan custom siswa",
+                "kelola tagihan"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Keuangan â†’ Kelola Tagihan. Pilih 'Generate SPP' untuk tagihan bulanan, 'Buat Tagihan Custom' untuk tagihan khusus, atau 'Buat Massal' untuk banyak siswa."
+            ]
+        },
+        {
+            "tag": "bendahara_pembayaran",
+            "role": "bendahara",
+            "patterns": [
+                "validasi pembayaran masuk",
+                "approve bayar siswa",
+                "input pembayaran manual",
+                "cetak kwitansi",
+                "untuk lihat menu pembayaran",
+                "menu pembayaran dimana"
+            ],
+            "responses": [
+                "Buka sidebar -> Kelola Pembayaran. Di sini Anda bisa menyetujui transaksi midtrans atau mencatat pembayaran tunai."
+            ]
+        },
+        {
+            "tag": "bendahara_config_bayar",
+            "role": "bendahara",
+            "patterns": [
+                "setting midtrans bendahara",
+                "atur rekening bank",
+                "config pembayaran"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Keuangan â†’ Config Pembayaran. Atur API Midtrans dan informasi rekening bank untuk pembayaran."
+            ]
+        },
+        {
+            "tag": "bendahara_validasi_akses",
+            "role": "bendahara",
+            "patterns": [
+                "blokir siswa ikut ujian",
+                "validasi akses rapor",
+                "buka akses ujian siswa"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Validasi Akses â†’ Validasi Ujian & Rapor. Gunakan tombol validasi per siswa atau bulk validasi per kelas. Atur batas pembayaran minimal untuk akses."
+            ]
+        },
+        {
+            "tag": "bendahara_validasi_dispensasi",
+            "role": "bendahara",
+            "patterns": [
+                "validasi dispensasi bendahara",
+                "dispensasi kenaikan kelas",
+                "history dispensasi"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Validasi Dispensasi. Validasi permintaan dispensasi dari sisi keuangan, termasuk bulk validasi dan lihat history."
+            ]
+        },
+        {
+            "tag": "bendahara_laporan",
+            "role": "bendahara",
+            "patterns": [
+                "cetak laporan pembayaran",
+                "rekap keuangan",
+                "print laporan bendahara"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Laporan â†’ Laporan Pembayaran. Klik 'Cetak' untuk mencetak laporan pembayaran sesuai filter yang dipilih."
+            ]
+        },
+        {
+            "tag": "bendahara_rekap_tagihan",
+            "role": "bendahara",
+            "patterns": [
+                "rekap tagihan per kelas",
+                "ringkasan tagihan siswa",
+                "cetak rekap tagihan"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Laporan â†’ Rekap Tagihan. Lihat ringkasan tagihan per kelas/siswa dan klik 'Cetak Rekap' untuk mencetak."
+            ]
+        },
+        {
+            "tag": "bendahara_belum_lunas",
+            "role": "bendahara",
+            "patterns": [
+                "siswa yang belum bayar",
+                "daftar tunggakan",
+                "siapa yang belum lunas"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Laporan â†’ Siswa Belum Lunas. Lihat daftar siswa yang masih memiliki tunggakan, bisa dicetak untuk tindak lanjut."
+            ]
+        },
+        {
+            "tag": "wali_dashboard",
+            "role": "wali_kelas",
+            "patterns": [
+                "dashboard wali kelas",
+                "beranda wali kelas",
+                "ringkasan kelas saya"
+            ],
+            "responses": [
+                "Setelah login sebagai Wali Kelas, Anda masuk ke Dashboard. Di sana tersedia statistik jumlah siswa, rekap presensi, dan status rapor kelas Anda."
+            ]
+        },
+        {
+            "tag": "wali_pilih_kelas",
+            "role": "wali_kelas",
+            "patterns": [
+                "ganti kelas aktif",
+                "pilih kelas lain",
+                "switch kelas wali"
+            ],
+            "responses": [
+                "Jika Anda memegang lebih dari satu kelas, buka sidebar â†’ Pilih Kelas, atau klik tombol 'Ganti Kelas' di indikator kelas aktif di sidebar."
+            ]
+        },
+        {
+            "tag": "wali_jadwal",
+            "role": "wali_kelas",
+            "patterns": [
+                "lihat jadwal pelajaran kelas",
+                "jadwal kelas saya",
+                "cetak jadwal"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Akademik â†’ Jadwal Pelajaran. Jadwal ini bersifat read-only (dikelola Admin/Waka). Klik 'Cetak' untuk mencetak jadwal."
+            ]
+        },
+        {
+            "tag": "wali_presensi_input",
+            "role": "wali_kelas",
+            "patterns": [
+                "cara input presensi harian",
+                "absensi siswa hari ini",
+                "isi kehadiran siswa",
+                "presensi dimana"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Presensi Siswa â†’ Input Harian. Pilih tanggal, centang status kehadiran setiap siswa (Hadir/Sakit/Izin/Alpha), lalu klik Simpan."
+            ]
+        },
+        {
+            "tag": "wali_presensi_validasi_izin",
+            "role": "wali_kelas",
+            "patterns": [
+                "ada izin siswa masuk",
+                "validasi surat izin",
+                "approve izin sakit",
+                "preview bukti izin"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Presensi Siswa â†’ Validasi Izin. Lihat daftar pengajuan izin, klik 'Preview Bukti' untuk melihat lampiran, lalu Setujui atau Tolak."
+            ]
+        },
+        {
+            "tag": "wali_presensi_rekap",
+            "role": "wali_kelas",
+            "patterns": [
+                "rekap presensi harian",
+                "kehadiran siswa hari ini",
+                "lihat absensi per hari"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Presensi Siswa â†’ Rekap Harian. Pilih tanggal untuk melihat detail kehadiran seluruh siswa pada hari tersebut."
+            ]
+        },
+        {
+            "tag": "wali_presensi_riwayat",
+            "role": "wali_kelas",
+            "patterns": [
+                "edit presensi yang salah",
+                "riwayat kehadiran siswa",
+                "ubah status absensi",
+                "cetak rekap presensi"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Presensi Siswa â†’ Riwayat & Edit. Anda bisa mengedit status presensi yang sudah diinput dan mencetak rekap kehadiran."
+            ]
+        },
+        {
+            "tag": "wali_presensi_import",
+            "role": "wali_kelas",
+            "patterns": [
+                "import presensi excel",
+                "upload absensi dari file",
+                "download template presensi"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Presensi Siswa â†’ Input Harian. Di sana tersedia tombol 'Download Template' dan 'Import Excel' untuk input presensi massal."
+            ]
+        },
+        {
+            "tag": "wali_nilai",
+            "role": "wali_kelas",
+            "patterns": [
+                "lihat nilai siswa",
+                "input nilai per siswa",
+                "edit nilai",
+                "import nilai excel"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Akademik â†’ Nilai Siswa. Pilih siswa untuk lihat/edit nilai. Gunakan 'Import Excel' untuk input massal atau 'Download Template' untuk format file."
+            ]
+        },
+        {
+            "tag": "wali_rapor",
+            "role": "wali_kelas",
+            "patterns": [
+                "cara buat rapor",
+                "generate rapor semua siswa",
+                "edit rapor siswa",
+                "terbitkan rapor"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Akademik â†’ Kelola Rapor. Klik 'Generate Semua' atau 'Generate per Siswa'. Setelah diedit, klik 'Terbitkan' untuk menerbitkan rapor. Gunakan 'Auto-Fill Kehadiran' untuk isi data presensi otomatis."
+            ]
+        },
+        {
+            "tag": "wali_rapor_validasi",
+            "role": "wali_kelas",
+            "patterns": [
+                "kirim rapor ke ketua",
+                "validasi rapor ketua pkbm",
+                "batalkan pengiriman rapor"
+            ],
+            "responses": [
+                "Di halaman Kelola Rapor, klik 'Kirim Validasi' per rapor atau 'Kirim Validasi Semua' untuk mengirim ke Ketua PKBM. Klik 'Batalkan Kirim' jika perlu revisi."
+            ]
+        },
+        {
+            "tag": "wali_request_download",
+            "role": "wali_kelas",
+            "patterns": [
+                "ada permintaan download rapor",
+                "approve download rapor",
+                "orang tua minta rapor"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Request Download. Badge merah menunjukkan jumlah permintaan pending. Klik 'Approve' atau 'Reject' untuk merespons permintaan download rapor dari orang tua."
+            ]
+        },
+        {
+            "tag": "wali_prediksi_kenaikan",
+            "role": "wali_kelas",
+            "patterns": [
+                "prediksi kenaikan kelas",
+                "siswa mana yang naik",
+                "simulasi kenaikan"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Kenaikan Kelas â†’ Prediksi Kenaikan. Lihat simulasi apakah siswa memenuhi syarat naik kelas berdasarkan nilai dan kehadiran."
+            ]
+        },
+        {
+            "tag": "wali_validasi_akses",
+            "role": "wali_kelas",
+            "patterns": [
+                "validasi akses ujian siswa",
+                "buka akses rapor siswa",
+                "blokir siswa ikut ujian"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Validasi â†’ Validasi Akses. Gunakan tombol validasi untuk membuka/menutup akses ujian dan rapor per siswa atau bulk."
+            ]
+        },
+        {
+            "tag": "guru_dashboard",
+            "role": "guru_pengajar",
+            "patterns": [
+                "dashboard guru",
+                "beranda guru pengajar",
+                "ringkasan kelas yang diajar"
+            ],
+            "responses": [
+                "Setelah login sebagai Guru Pengajar, Anda masuk ke Dashboard dengan statistik jumlah kelas, total siswa, tugas aktif, dan ujian aktif."
+            ]
+        },
+        {
+            "tag": "guru_jadwal",
+            "role": "guru_pengajar",
+            "patterns": [
+                "lihat jadwal mengajar",
+                "jadwal saya hari ini",
+                "jam mengajar di kelas mana"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Jadwal Mengajar. Lihat seluruh jadwal mengajar Anda di semua kelas dan mata pelajaran."
+            ]
+        },
+        {
+            "tag": "guru_kelas",
+            "role": "guru_pengajar",
+            "patterns": [
+                "daftar kelas yang saya ajar",
+                "lihat semua kelas",
+                "kelas dan mapel saya"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Pembelajaran â†’ Semua Kelas. Pilih kelas untuk melihat daftar mata pelajaran yang Anda ajar di kelas tersebut, lalu klik mapel untuk masuk ke LMS."
+            ]
+        },
+        {
+            "tag": "guru_lms_dashboard",
+            "role": "guru_pengajar",
+            "patterns": [
+                "beranda lms kelas",
+                "dashboard lms mapel",
+                "halaman utama lms guru"
+            ],
+            "responses": [
+                "Klik nama kelas dan mapel di sidebar (Kelas Saya), atau buka Semua Kelas â†’ pilih kelas â†’ pilih mapel untuk masuk ke Dashboard LMS."
+            ]
+        },
+        {
+            "tag": "guru_materi",
+            "role": "guru_pengajar",
+            "patterns": [
+                "cara upload materi",
+                "tambah materi pelajaran",
+                "kelola materi lms",
+                "hapus materi"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Materi. Klik 'Tambah Materi' untuk upload file/konten baru. Gunakan tombol Edit atau Hapus untuk mengelola materi yang sudah ada."
+            ]
+        },
+        {
+            "tag": "guru_tugas",
+            "role": "guru_pengajar",
+            "patterns": [
+                "cara buat tugas baru",
+                "kelola tugas siswa",
+                "hapus tugas lms"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Tugas. Klik 'Tambah Tugas' untuk membuat tugas baru dengan deskripsi dan deadline."
+            ]
+        },
+        {
+            "tag": "guru_koreksi_tugas",
+            "role": "guru_pengajar",
+            "patterns": [
+                "koreksi jawaban tugas",
+                "nilai tugas siswa",
+                "lihat submisi tugas",
+                "bulk grading tugas"
+            ],
+            "responses": [
+                "Di LMS, buka Tugas â†’ pilih tugas â†’ klik 'Koreksi'. Lihat jawaban siswa satu per satu, input nilai dan feedback, atau gunakan 'Bulk Grade' untuk koreksi massal."
+            ]
+        },
+        {
+            "tag": "guru_koreksi_ai",
+            "role": "guru_pengajar",
+            "patterns": [
+                "cara pakai ai grading",
+                "koreksi otomatis ai",
+                "ai suggest nilai",
+                "bantuan ai untuk koreksi"
+            ],
+            "responses": [
+                "Di halaman Koreksi Tugas atau Ujian, klik tombol 'AI Suggest' pada jawaban siswa. AI akan menganalisis jawaban dan memberikan rekomendasi nilai beserta feedback."
+            ]
+        },
+        {
+            "tag": "guru_ujian",
+            "role": "guru_pengajar",
+            "patterns": [
+                "cara buat ujian baru",
+                "kelola ujian lms",
+                "hapus ujian",
+                "buka tutup ujian"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Ujian. Klik 'Tambah Ujian' untuk ujian baru. Gunakan 'Toggle Status' untuk membuka/menutup akses ujian siswa."
+            ]
+        },
+        {
+            "tag": "guru_soal",
+            "role": "guru_pengajar",
+            "patterns": [
+                "cara tambah soal ujian",
+                "manage soal",
+                "import soal dari excel",
+                "edit soal ujian"
+            ],
+            "responses": [
+                "Di halaman Ujian, klik 'Manajemen Soal'. Tambah soal manual satu per satu, atau gunakan 'Import Soal' dari Excel. Tersedia juga 'Simpan Semua Soal' untuk batch."
+            ]
+        },
+        {
+            "tag": "guru_ai_generate_soal",
+            "role": "guru_pengajar",
+            "patterns": [
+                "generate soal pakai ai",
+                "bikin soal otomatis",
+                "ai question generator",
+                "soal pilgan otomatis"
+            ],
+            "responses": [
+                "Di halaman Manajemen Soal ujian, klik tombol 'AI Generate Questions'. Pilih topik, tipe soal, tingkat kesulitan, dan jumlah soal. AI akan membuat soal yang bisa langsung Anda simpan."
+            ]
+        },
+        {
+            "tag": "guru_hasil_ujian",
+            "role": "guru_pengajar",
+            "patterns": [
+                "lihat hasil ujian siswa",
+                "rekap nilai ujian",
+                "koreksi ujian uraian"
+            ],
+            "responses": [
+                "Di LMS, buka Ujian â†’ pilih ujian â†’ klik 'Hasil'. Untuk soal uraian, klik 'Koreksi' per siswa untuk menilai jawaban manual atau dengan bantuan AI Suggest."
+            ]
+        },
+        {
+            "tag": "guru_nilai",
+            "role": "guru_pengajar",
+            "patterns": [
+                "input nilai siswa",
+                "rekap nilai per mapel",
+                "export nilai excel",
+                "import nilai"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Nilai. Input nilai manual, gunakan 'Recalculate' untuk hitung ulang, atau Export/Import Excel untuk kelola nilai massal."
+            ]
+        },
+        {
+            "tag": "guru_forum",
+            "role": "guru_pengajar",
+            "patterns": [
+                "buat forum diskusi",
+                "buka diskusi kelas",
+                "pin topik penting",
+                "tutup diskusi"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Forum Diskusi. Klik 'Buat Topik Baru'. Gunakan 'Pin' untuk topik penting dan 'Close' untuk menutup diskusi."
+            ]
+        },
+        {
+            "tag": "guru_meeting",
+            "role": "guru_pengajar",
+            "patterns": [
+                "buat kelas virtual",
+                "jadwalkan meeting online",
+                "kelola meeting lms"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Kelas Virtual / Meeting. Klik 'Buat Meeting' untuk menjadwalkan kelas virtual baru."
+            ]
+        },
+        {
+            "tag": "guru_latihan",
+            "role": "guru_pengajar",
+            "patterns": [
+                "cara buat latihan soal",
+                "kelola kuis",
+                "latihan harian siswa"
+            ],
+            "responses": [
+                "Di LMS kelas terkait, buka menu Latihan. Fitur ini identik dengan Ujian (tambah soal, koreksi, AI generate), tetapi dikategorikan sebagai latihan/kuis."
+            ]
+        },
+        {
+            "tag": "siswa_dashboard_sia",
+            "role": "siswa",
+            "patterns": [
+                "dashboard siswa",
+                "beranda sia",
+                "halaman utama siswa"
+            ],
+            "responses": [
+                "Setelah login sebagai Siswa, Anda masuk ke Dashboard SIA. Di sana ada kalender, pengumuman, statistik presensi, dan info pembayaran."
+            ]
+        },
+        {
+            "tag": "siswa_presensi",
+            "role": "siswa",
+            "patterns": [
+                "lihat kehadiran saya",
+                "rekap presensi siswa",
+                "berapa kali saya absen"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Akademik â†’ Presensi. Anda bisa melihat rekap kehadiran (Hadir, Sakit, Izin, Alpha). Untuk mengajukan izin, minta Orang Tua login ke akun mereka."
+            ]
+        },
+        {
+            "tag": "siswa_penilaian",
+            "role": "siswa",
+            "patterns": [
+                "masuk lms",
+                "forum diskusi",
+                "kerjakan tugas",
+                "lihat nilai saya",
+                "cek nilai mapel",
+                "rapor saya",
+                "izin tidak masuk",
+                "lihat nilai harian",
+                "cek tagihan saya",
+                "jadwal pelajaran saya",
+                "data penilaian saya",
+                "materi pelajaran",
+                "cara bayar spp",
+                "presensi saya",
+                "ujian lms"
+            ],
+            "responses": [
+                "Buka sidebar â†’ Akademik â†’ Data Penilaian. Lihat seluruh nilai harian Anda per mata pelajaran."
+            ]
+        },
+        {
+            "tag": "siswa_lms_dashboard",
+            "role": "siswa",
+            "patterns": [
+                "buka learning management",
+                "masuk lms",
+                "forum diskusi",
+                "masuk ke lms",
+                "kerjakan tugas",
+                "lihat nilai saya",
+                "rapor saya",
+                "izin tidak masuk",
+                "cek tagihan saya",
+                "jadwal pelajaran saya",
+                "materi pelajaran",
+                "beranda lms siswa",
+                "cara bayar spp",
+                "presensi saya",
+                "ujian lms"
+            ],
+            "responses": [
+                "Di sidebar SIA, klik 'HOK-LMS' untuk masuk ke Learning Management System. Di Beranda LMS, Anda bisa melihat tugas mendatang, pengumuman, dan progress."
+            ]
+        },
+        {
+            "tag": "siswa_lihat_materi",
+            "role": "siswa",
+            "patterns": [
+                "cara lihat materi pelajaran",
+                "download materi",
+                "buka materi lms"
+            ],
+            "responses": [
+                "Di LMS, pilih Mata Pelajaran di sidebar, lalu klik materi yang ingin dipelajari untuk membuka/download kontennya."
+            ]
+        },
+        {
+            "tag": "siswa_kumpul_tugas",
+            "role": "siswa",
+            "patterns": [
+                "upload jawaban tugas",
+                "masuk lms",
+                "cara kumpul tugas",
+                "forum diskusi",
+                "kerjakan tugas",
+                "lihat nilai saya",
+                "rapor saya",
+                "izin tidak masuk",
+                "cek tagihan saya",
+                "submit tugas lms",
+                "dimana kirim tugas",
+                "jadwal pelajaran saya",
+                "materi pelajaran",
+                "cara bayar spp",
+                "presensi saya",
+                "ujian lms"
+            ],
+            "responses": [
+                "Di LMS, pilih Mata Pelajaran â†’ Tugas. Pilih tugas yang ingin dikerjakan, lalu klik tombol 'Upload/Submit Jawaban' untuk mengirim jawaban Anda."
+            ]
+        },
+        {
+            "tag": "siswa_ikut_ujian",
+            "role": "siswa",
+            "patterns": [
+                "cara ikut ujian online",
+                "mulai ujian lms",
+                "submit jawaban ujian",
+                "ujian bisa diulang?"
+            ],
+            "responses": [
+                "Di LMS, pilih Mata Pelajaran â†’ klik ujian yang tersedia. Klik 'Mulai Ujian' untuk memulai. Setelah selesai, klik 'Submit'. Jika diizinkan guru, Anda bisa klik 'Retake'."
+            ]
+        },
+        {
+            "tag": "siswa_forum",
+            "role": "siswa",
+            "patterns": [
+                "buat topik diskusi",
+                "forum kelas dimana",
+                "tanya di forum lms"
+            ],
+            "responses": [
+                "Di LMS, pilih Mata Pelajaran â†’ Forum. Klik 'Buat Topik Baru' untuk memulai diskusi, atau reply di topik yang sudah ada."
+            ]
+        },
+        {
+            "tag": "siswa_jadwal",
+            "role": "siswa",
+            "patterns": [
+                "lihat jadwal pelajaran",
+                "jadwal saya hari ini",
+                "cetak jadwal siswa"
+            ],
+            "responses": [
+                "Di LMS, klik menu 'Jadwal Pelajaran' di sidebar. Anda bisa melihat jadwal per hari dan mencetaknya."
+            ]
+        },
+        {
+            "tag": "siswa_kalender",
+            "role": "siswa",
+            "patterns": [
+                "kalender akademik siswa",
+                "event sekolah",
+                "kegiatan sekolah kapan"
+            ],
+            "responses": [
+                "Di LMS, klik menu 'Kalender Akademik' di sidebar untuk melihat seluruh jadwal kegiatan dan event sekolah."
+            ]
+        },
+        {
+            "tag": "siswa_guru",
+            "role": "siswa",
+            "patterns": [
+                "siapa guru mapel saya",
+                "daftar guru pengajar",
+                "profil guru"
+            ],
+            "responses": [
+                "Di LMS, klik menu 'Daftar Guru' di sidebar untuk melihat seluruh guru yang mengajar di kelas Anda."
+            ]
+        },
+        {
+            "tag": "siswa_pengumuman",
+            "role": "siswa",
+            "patterns": [
+                "pengumuman sekolah",
+                "info terbaru dari sekolah",
+                "ada pengumuman baru?"
+            ],
+            "responses": [
+                "Di LMS, klik menu 'Pengumuman' di sidebar untuk melihat pengumuman terbaru dari sekolah."
+            ]
+        },
+        {
+            "tag": "siswa_rapor",
+            "role": "siswa",
+            "patterns": [
+                "cara lihat rapor",
+                "menu rapor kok gak ada",
+                "download nilai rapor"
+            ],
+            "responses": [
+                "Akses Rapor tidak tersedia untuk akun Siswa. Silakan minta Orang Tua/Wali Murid login ke akun mereka untuk melihat dan mengunduh rapor Anda."
+            ]
+        },
+        {
+            "tag": "siswa_pembayaran",
+            "role": "siswa",
+            "patterns": [
+                "cara bayar spp siswa",
+                "menu pembayaran dimana",
+                "lunasi tagihan",
+                "bayar tagihan spp",
+                "lihat menu pembayaran",
+                "untuk lihat menu pembayaran"
+            ],
+            "responses": [
+                "Menu Pembayaran dan Tagihan tidak tersedia di akun Siswa. Silakan minta Orang Tua/Wali Murid login ke sistem untuk melihat tagihan dan melakukan pembayaran."
+            ]
+        },
+        {
+            "tag": "siswa_meeting",
+            "role": "siswa",
+            "patterns": [
+                "gabung kelas virtual",
+                "meeting online dimana",
+                "join meeting guru"
+            ],
+            "responses": [
+                "Di LMS, pilih Mata Pelajaran â†’ Kelas Virtual. Lihat jadwal meeting yang dibuat guru dan klik untuk bergabung."
+            ]
+        },
+        {
+            "tag": "ortu_dashboard",
+            "role": "orang_tua",
+            "patterns": [
+                "tagihan anak",
+                "lms anak",
+                "rapor anak",
+                "halaman utama ortu",
+                "bayar spp anak",
+                "presensi anak",
+                "beranda wali murid",
+                "cek nilai anak",
+                "izin anak sakit",
+                "dashboard orang tua"
+            ],
+            "responses": [
+                "Setelah login sebagai Orang Tua, Anda masuk ke Dashboard dengan daftar anak, ringkasan tagihan, dan status presensi."
+            ]
+        },
+        {
+            "tag": "ortu_presensi",
+            "role": "orang_tua",
+            "patterns": [
+                "lihat kehadiran anak",
+                "rekap presensi anak saya",
+                "berapa kali anak absen"
+            ],
+            "responses": [
+                "Klik nama anak di sidebar â†’ Presensi. Anda bisa melihat rekap kehadiran anak (Hadir, Sakit, Izin, Alpha) secara lengkap."
+            ]
+        },
+        {
+            "tag": "ortu_ajukan_izin",
+            "role": "orang_tua",
+            "patterns": [
+                "cara ajukan izin anak",
+                "kirim surat izin sakit",
+                "anak tidak masuk sekolah"
+            ],
+            "responses": [
+                "Klik nama anak di sidebar â†’ Presensi â†’ klik 'Ajukan Izin'. Isi formulir alasan (Sakit/Izin), upload bukti jika ada, lalu Submit. Wali kelas akan memvalidasi."
+            ]
+        },
+        {
+            "tag": "ortu_riwayat_izin",
+            "role": "orang_tua",
+            "patterns": [
+                "lihat riwayat izin anak",
+                "status izin saya",
+                "edit pengajuan izin"
+            ],
+            "responses": [
+                "Klik nama anak â†’ Presensi â†’ 'Riwayat Izin'. Anda bisa melihat status pengajuan dan mengedit izin yang belum divalidasi."
+            ]
+        },
+        {
+            "tag": "ortu_tagihan",
+            "role": "orang_tua",
+            "patterns": [
+                "lihat tagihan anak",
+                "berapa spp bulan ini",
+                "cek tunggakan anak",
+                "dimana menu tagihan",
+                "lihat menu pembayaran",
+                "menu pembayaran dimana"
+            ],
+            "responses": [
+                "Buka sidebar -> Tagihan Anak (jika anak sudah terhubung). Anda bisa melihat rincian tagihan SPP dan riwayat pembayaran di sana."
+            ]
+        },
+        {
+            "tag": "ortu_bayar_tagihan",
+            "role": "orang_tua",
+            "patterns": [
+                "cara bayar spp anak",
+                "bayar tagihan online",
+                "lunasi tagihan sekaligus",
+                "pembayaran midtrans"
+            ],
+            "responses": [
+                "Klik nama anak â†’ Tagihan â†’ klik 'Bayar Tagihan' pada item yang ingin dibayar, atau 'Bayar Beberapa Sekaligus' untuk bulk payment. Anda akan diarahkan ke halaman pembayaran digital Midtrans."
+            ]
+        },
+        {
+            "tag": "ortu_rapor",
+            "role": "orang_tua",
+            "patterns": [
+                "lihat rapor anak",
+                "download rapor semester",
+                "nilai anak saya berapa"
+            ],
+            "responses": [
+                "Klik nama anak di sidebar â†’ Rapor. Pilih rapor semester yang ingin dilihat, klik 'Lihat Detail'. Untuk mengunduh, klik 'Request Download' dan tunggu approval dari Wali Kelas."
+            ]
+        },
+        {
+            "tag": "ortu_cetak_invoice",
+            "role": "orang_tua",
+            "patterns": [
+                "cetak bukti pembayaran",
+                "invoice pembayaran",
+                "kwitansi bayar spp"
+            ],
+            "responses": [
+                "Setelah melakukan pembayaran, buka riwayat pembayaran anak, lalu klik 'Cetak Invoice' pada transaksi yang diinginkan."
+            ]
+        },
+        {
+            "tag": "ortu_lanjut_bayar",
+            "role": "orang_tua",
+            "patterns": [
+                "lanjutkan pembayaran pending",
+                "bayar yang tertunda",
+                "continue payment"
+            ],
+            "responses": [
+                "Jika ada pembayaran yang belum selesai di Midtrans, buka Tagihan anak â†’ klik 'Lanjutkan Pembayaran' pada transaksi yang masih pending."
+            ]
+        },
+        {
+            "tag": "admin_dashboard",
+            "role": "admin",
+            "patterns": [
+                "tampilan awal",
+                "beranda admin",
+                "kembali ke dashboard",
+                "dashboard admin",
+                "ringkasan admin",
+                "lihat statistik sekolah",
+                "halaman utama",
+                "halaman awal admin",
+                "grafik utama"
+            ],
+            "responses": [
+                {
+                    "text": "Buka dashboard utama untuk melihat ringkasan statistik sekolah.",
+                    "ui": {
+                        "icon": "bi bi-speedometer2",
+                        "title": "Dashboard Admin",
+                        "steps": [
+                            "Buka sidebar utama",
+                            "Klik menu 'Dashboard'"
+                        ],
+                        "note": "Menampilkan statistik siswa, guru, kelas, dan grafik pembayaran.",
+                        "url": "/admin/dashboard",
+                        "urlText": "Ke Dashboard",
+                        "related": [
+                            "statistik",
+                            "beranda"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_landing_page",
+            "role": "admin",
+            "patterns": [
+                "ubah konten website sekolah",
+                "kelola website depan",
+                "ubah informasi publik",
+                "ganti profil sekolah",
+                "cara ganti foto di web luar",
+                "edit tampilan luar",
+                "atur halaman publik",
+                "edit landing page"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola konten publik website sekolah Anda di halaman Landing Page.",
+                    "ui": {
+                        "icon": "bi bi-globe",
+                        "title": "Landing Page",
+                        "steps": [
+                            "Sidebar → Manajemen Konten",
+                            "Klik 'Landing Page'",
+                            "Edit Hero Section, Tentang Kami, atau Fasilitas",
+                            "Simpan perubahan untuk mengupdate website publik"
+                        ],
+                        "note": "Perubahan di halaman ini akan langsung terlihat oleh pengunjung publik website sekolah.",
+                        "url": "/admin/landing-page",
+                        "urlText": "Kelola Landing Page",
+                        "related": [
+                            "website",
+                            "profil sekolah"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_tenaga_pendidik",
+            "role": "admin",
+            "patterns": [
+                "data guru staff",
+                "kelola user guru",
+                "edit staf",
+                "input pegawai baru",
+                "tambah tenaga pendidik",
+                "tambah pegawai",
+                "hapus guru",
+                "daftar pegawai tata usaha",
+                "kelola data staff",
+                "import tenaga pendidik"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola akun pengguna untuk Guru dan Staf Tenaga Pendidik.",
+                    "ui": {
+                        "icon": "bi bi-person-badge",
+                        "title": "Data Tenaga Pendidik",
+                        "steps": [
+                            "Sidebar → Manajemen Pengguna",
+                            "Pilih Manajemen User → Tenaga Pendidik",
+                            "Klik 'Tambah' untuk membuat akun satuan",
+                            "Atau gunakan 'Import' untuk unggah via Excel"
+                        ],
+                        "note": "Akun tenaga pendidik akan diklasifikasikan sebagai guru atau staf sesuai jabatan.",
+                        "url": "/admin/users/tenaga-pendidik",
+                        "urlText": "Kelola Guru & Staf",
+                        "related": [
+                            "manajemen user",
+                            "guru pengajar"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_siswa",
+            "role": "admin",
+            "patterns": [
+                "pindah siswa",
+                "data user siswa",
+                "import akun siswa",
+                "daftar siswa terdaftar",
+                "hapus siswa",
+                "naik kelas siswa",
+                "edit profil siswa",
+                "edit akun murid",
+                "tambah siswa baru",
+                "kelola daftar siswa",
+                "cara edit akun siswa"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola pendaftaran akun baru untuk Siswa.",
+                    "ui": {
+                        "icon": "bi bi-people",
+                        "title": "Data User Siswa",
+                        "steps": [
+                            "Buka sidebar → Manajemen Pengguna → Siswa",
+                            "Klik 'Tambah' untuk mendaftarkan siswa secara manual",
+                            "Atau klik 'Import' lalu unggah file Excel template",
+                            "Isikan NISN, Nama, dan Email (opsional)",
+                            "Klik Simpan untuk membuat akun"
+                        ],
+                        "note": "Akun siswa akan otomatis mendapatkan password default sesuai pengaturan sekolah (biasanya NISN atau tanggal lahir).",
+                        "url": "/admin/users/siswa",
+                        "urlText": "Kelola Siswa",
+                        "related": [
+                            "manajemen siswa",
+                            "tagihan",
+                            "ploting kelas"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_jadwal_pelajaran",
+            "role": "admin",
+            "patterns": [
+                "edit jadwal",
+                "buat jadwal mengajar",
+                "jadwal pelajaran",
+                "susun roster kelas",
+                "cara hapus roster",
+                "import jadwal",
+                "hapus jadwal",
+                "ubah jam mapel",
+                "jam pelajaran",
+                "cara buat jadwal"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola jadwal pelajaran (roster) untuk setiap kelas.",
+                    "ui": {
+                        "icon": "bi bi-calendar-week",
+                        "title": "Jadwal Pelajaran",
+                        "steps": [
+                            "Sidebar → Data Akademik",
+                            "Pilih 'Jadwal Pelajaran'",
+                            "Klik 'Tambah' untuk buat jadwal baru per slot",
+                            "Pilih kelas, hari, jam, mata pelajaran, dan guru",
+                            "Atau gunakan 'Import' untuk unggah jadwal massal"
+                        ],
+                        "note": "Fitur tambahan: cetak PDF, export Excel, duplikat jadwal, ganti guru massal, atur jam istirahat.",
+                        "url": "/admin/jadwal",
+                        "urlText": "Kelola Jadwal",
+                        "related": [
+                            "mata pelajaran",
+                            "guru pengajar",
+                            "kelas"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_tagihan",
+            "role": "admin",
+            "patterns": [
+                "buat tagihan spp",
+                "kelola tagihan siswa",
+                "ubah nominal",
+                "edit tagihan",
+                "reset tagihan salah",
+                "dimana menu tagihan",
+                "hapus invoice",
+                "generate tagihan bulanan",
+                "buat invoice",
+                "kelola spp",
+                "cara bikin tagihan"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola pembuatan dan penerbitan tagihan siswa (SPP, Uang Gedung, dll).",
+                    "ui": {
+                        "icon": "bi bi-receipt",
+                        "title": "Kelola Tagihan",
+                        "steps": [
+                            "Sidebar → Keuangan",
+                            "Pilih 'Tagihan'",
+                            "Klik 'Generate SPP' untuk tagihan bulanan rutin",
+                            "Gunakan 'Tagihan Custom' untuk denda/kegiatan",
+                            "Pilih siswa yang dituju lalu Terbitkan"
+                        ],
+                        "note": "Gunakan fitur 'Reset Tagihan' jika terjadi kesalahan generate sebelum tagihan dibayar.",
+                        "url": "/admin/keuangan/tagihan",
+                        "urlText": "Kelola Tagihan",
+                        "related": [
+                            "pembayaran",
+                            "laporan keuangan"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_pembayaran",
+            "role": "admin",
+            "patterns": [
+                "tolak bayar",
+                "dimana menu pembayaran",
+                "riwayat bayar",
+                "batal validasi",
+                "cetak kwitansi",
+                "approve bayar siswa",
+                "untuk lihat menu pembayaran",
+                "validasi pembayaran",
+                "edit pembayaran",
+                "cara input pembayaran manual"
+            ],
+            "responses": [
+                {
+                    "text": "Validasi pembayaran masuk dan input pembayaran manual/tunai.",
+                    "ui": {
+                        "icon": "bi bi-cash-stack",
+                        "title": "Pembayaran",
+                        "steps": [
+                            "Sidebar → Keuangan",
+                            "Pilih 'Pembayaran'",
+                            "Cari nama siswa atau invoice",
+                            "Klik 'Validasi' untuk menerima pembayaran",
+                            "Atau klik 'Input Manual' jika siswa bayar tunai"
+                        ],
+                        "note": "Kwitansi digital akan otomatis dikirim ke akun siswa setelah pembayaran divalidasi.",
+                        "url": "/admin/keuangan/pembayaran",
+                        "urlText": "Kelola Pembayaran",
+                        "related": [
+                            "tagihan",
+                            "config midtrans"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_pengumuman",
+            "role": "admin",
+            "patterns": [
+                "edit pengumuman",
+                "cara buat pengumuman",
+                "cara bikin pengumuman",
+                "siarkan informasi ke siswa",
+                "tambah pengumuman di dashboard",
+                "batalkan pengumuman",
+                "tulis pengumuman",
+                "buat pengumuman baru",
+                "ubah teks pengumuman",
+                "hapus informasi"
+            ],
+            "responses": [
+                {
+                    "text": "Buat pengumuman yang akan disiarkan ke dashboard semua pengguna.",
+                    "ui": {
+                        "icon": "bi bi-megaphone",
+                        "title": "Pengumuman Sistem",
+                        "steps": [
+                            "Sidebar → Manajemen Akademik",
+                            "Pilih 'Pengumuman'",
+                            "Klik tombol 'Tambah Pengumuman'",
+                            "Tulis judul dan isi pengumuman",
+                            "Tentukan rentang tanggal penayangan",
+                            "Klik Simpan"
+                        ],
+                        "note": "Pengumuman akan muncul di atas dashboard utama siswa, guru, dan staf selama tanggal tayang masih berlaku.",
+                        "url": "/admin/pengumuman",
+                        "urlText": "Buat Pengumuman",
+                        "related": [
+                            "berita",
+                            "kalender akademik",
+                            "flyer"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_wali_murid",
+            "role": "admin",
+            "patterns": [
+                "buat ortu",
+                "data orang tua",
+                "hapus orang tua",
+                "tambah wali murid",
+                "akun wali murid",
+                "edit wali"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola akses akun wali murid.",
+                    "ui": {
+                        "icon": "bi-people",
+                        "title": "Wali Murid",
+                        "steps": [
+                            "Buka sidebar -> Wali Murid"
+                        ],
+                        "url": "/admin/users/orang-tua",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_tiket_pemulihan",
+            "role": "admin",
+            "patterns": [
+                "tolak reset",
+                "approve tiket",
+                "lupa password",
+                "ganti password user",
+                "reset sandi",
+                "tiket pemulihan",
+                "pemulihan akun"
+            ],
+            "responses": [
+                {
+                    "text": "Proses permohonan reset password.",
+                    "ui": {
+                        "icon": "bi-shield-lock",
+                        "title": "Tiket Pemulihan",
+                        "steps": [
+                            "Buka sidebar -> Tiket Pemulihan"
+                        ],
+                        "url": "/admin/recovery-tickets",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_pengaturan_lms",
+            "role": "admin",
+            "patterns": [
+                "pengaturan lms",
+                "aktifkan pendaftaran",
+                "konfigurasi ujian",
+                "edit config lms",
+                "setting elearning"
+            ],
+            "responses": [
+                {
+                    "text": "Konfigurasi fitur LMS.",
+                    "ui": {
+                        "icon": "bi-gear",
+                        "title": "Pengaturan Lms",
+                        "steps": [
+                            "Buka sidebar -> Pengaturan Lms"
+                        ],
+                        "url": "/admin/settings",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_pengaturan_ai",
+            "role": "admin",
+            "patterns": [
+                "pengaturan ai",
+                "prompt sistem",
+                "aktifkan llm",
+                "setting chatbot",
+                "ganti api key"
+            ],
+            "responses": [
+                {
+                    "text": "Konfigurasi API Key AI.",
+                    "ui": {
+                        "icon": "bi-robot",
+                        "title": "Pengaturan Ai",
+                        "steps": [
+                            "Buka sidebar -> Pengaturan Ai"
+                        ],
+                        "url": "/admin/settings",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_google_sheets",
+            "role": "admin",
+            "patterns": [
+                "tarik data excel",
+                "export ke google",
+                "update sheet",
+                "sinkron data",
+                "google sheets sync"
+            ],
+            "responses": [
+                {
+                    "text": "Sinkronisasi dengan Google Sheets.",
+                    "ui": {
+                        "icon": "bi-file-earmark-spreadsheet",
+                        "title": "Google Sheets",
+                        "steps": [
+                            "Buka sidebar -> Google Sheets"
+                        ],
+                        "url": "/admin/sheets",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_tahun_ajaran",
+            "role": "admin",
+            "patterns": [
+                "ubah tahun akademik",
+                "cara edit tahun ajaran",
+                "hapus tahun ajaran",
+                "edit tahun ajaran",
+                "ubah genap",
+                "aktifkan ganjil",
+                "tahun ajaran baru",
+                "tambah semester"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola Tahun Ajaran aktif.",
+                    "ui": {
+                        "icon": "bi-calendar3",
+                        "title": "Tahun Ajaran",
+                        "steps": [
+                            "Buka sidebar utama → Manajemen Akademik",
+                            "Pilih menu 'Tahun Ajaran'",
+                            "Klik tombol 'Tambah' untuk membuat tahun ajaran/semester baru",
+                            "Isikan kode, nama, dan tanggal mulai/selesai",
+                            "Klik 'Aktifkan' pada tahun ajaran yang ingin digunakan saat ini"
+                        ],
+                        "url": "/admin/tahun-ajaran",
+                        "urlText": "Buka Menu",
+                        "related": [
+                            "kalender akademik",
+                            "data kelas",
+                            "kenaikan kelas"
+                        ],
+                        "note": "Perhatian: Mengubah Tahun Ajaran aktif akan mereset tampilan dashboard dan data presensi ke semester baru bagi semua pengguna."
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_manajemen_cabang",
+            "role": "admin",
+            "patterns": [
+                "edit lokasi cabang",
+                "manajemen cabang",
+                "tambah rayon",
+                "hapus cabang",
+                "sekolah cabang"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola cabang sekolah.",
+                    "ui": {
+                        "icon": "bi-building",
+                        "title": "Manajemen Cabang",
+                        "steps": [
+                            "Buka sidebar -> Manajemen Cabang"
+                        ],
+                        "url": "/admin/cabang",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_data_kelas",
+            "role": "admin",
+            "patterns": [
+                "hapus rombel",
+                "tambah kelas",
+                "data kelas",
+                "kelola rombongan belajar",
+                "edit nama kelas"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola data kelas.",
+                    "ui": {
+                        "icon": "bi-door-open",
+                        "title": "Data Kelas",
+                        "steps": [
+                            "Buka sidebar -> Data Kelas"
+                        ],
+                        "url": "/admin/kelas",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_data_wali_kelas",
+            "role": "admin",
+            "patterns": [
+                "pilih wali kelas",
+                "ganti wali kelas",
+                "data wali kelas",
+                "assign wali",
+                "edit pembimbing"
+            ],
+            "responses": [
+                {
+                    "text": "Tentukan wali kelas.",
+                    "ui": {
+                        "icon": "bi-person-badge",
+                        "title": "Data Wali Kelas",
+                        "steps": [
+                            "Buka sidebar -> Data Wali Kelas"
+                        ],
+                        "url": "/admin/wali-kelas",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_data_guru_pengajar",
+            "role": "admin",
+            "patterns": [
+                "plotting pengajar",
+                "jadwalkan guru",
+                "data guru pengajar",
+                "hapus guru mengajar",
+                "edit guru mapel"
+            ],
+            "responses": [
+                {
+                    "text": "Plotting guru mata pelajaran.",
+                    "ui": {
+                        "icon": "bi-person-workspace",
+                        "title": "Data Guru Pengajar",
+                        "steps": [
+                            "Buka sidebar -> Data Guru Pengajar"
+                        ],
+                        "url": "/admin/guru-pengajar",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_mata_pelajaran",
+            "role": "admin",
+            "patterns": [
+                "bikin mapel baru",
+                "edit kurikulum",
+                "tambah mapel",
+                "mata pelajaran",
+                "hapus pelajaran"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola mapel sekolah.",
+                    "ui": {
+                        "icon": "bi-book",
+                        "title": "Mata Pelajaran",
+                        "steps": [
+                            "Buka sidebar -> Mata Pelajaran"
+                        ],
+                        "url": "/admin/mata-pelajaran",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_manajemen_siswa",
+            "role": "admin",
+            "patterns": [
+                "manajemen siswa",
+                "atur siswa per kelas",
+                "ploting kelas",
+                "masukkan murid ke kelas",
+                "pindah rombel siswa"
+            ],
+            "responses": [
+                {
+                    "text": "Plotting siswa ke dalam kelas.",
+                    "ui": {
+                        "icon": "bi-people-fill",
+                        "title": "Manajemen Siswa",
+                        "steps": [
+                            "Buka sidebar -> Manajemen Siswa"
+                        ],
+                        "url": "/admin/manajemen-siswa",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_laporan_keuangan",
+            "role": "admin",
+            "patterns": [
+                "laporan keuangan",
+                "rekap uang masuk",
+                "download rekap bayar",
+                "lihat grafik bulanan",
+                "cetak uang spp"
+            ],
+            "responses": [
+                {
+                    "text": "Rekap laporan uang masuk.",
+                    "ui": {
+                        "icon": "bi-graph-up",
+                        "title": "Laporan Keuangan",
+                        "steps": [
+                            "Buka sidebar -> Laporan Keuangan"
+                        ],
+                        "url": "/admin/keuangan/laporan",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_config_pembayaran",
+            "role": "admin",
+            "patterns": [
+                "setting midtrans",
+                "atur bank gateway",
+                "ubah api pembayaran",
+                "config pembayaran",
+                "ganti virtual account"
+            ],
+            "responses": [
+                {
+                    "text": "Pengaturan payment gateway.",
+                    "ui": {
+                        "icon": "bi-credit-card",
+                        "title": "Config Pembayaran",
+                        "steps": [
+                            "Buka sidebar -> Config Pembayaran"
+                        ],
+                        "url": "/admin/keuangan/config",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_validasi_dispensasi",
+            "role": "admin",
+            "patterns": [
+                "validasi dispensasi",
+                "persetujuan dispensasi",
+                "cek pengajuan ringan bayar",
+                "tolak cicilan",
+                "approve keringanan"
+            ],
+            "responses": [
+                {
+                    "text": "Validasi keringanan biaya.",
+                    "ui": {
+                        "icon": "bi-patch-check",
+                        "title": "Validasi Dispensasi",
+                        "steps": [
+                            "Buka sidebar -> Validasi Dispensasi"
+                        ],
+                        "url": "/admin/keuangan/dispensasi",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_validasi_akses",
+            "role": "admin",
+            "patterns": [
+                "beri akses tes",
+                "aktifkan ujian siswa",
+                "izinkan tryout",
+                "validasi akses",
+                "buka blokir ujian"
+            ],
+            "responses": [
+                {
+                    "text": "Buka akses ujian manual.",
+                    "ui": {
+                        "icon": "bi-unlock",
+                        "title": "Validasi Akses",
+                        "steps": [
+                            "Buka sidebar -> Validasi Akses"
+                        ],
+                        "url": "/admin/keuangan/akses",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_pengaturan_kkm",
+            "role": "admin",
+            "patterns": [
+                "setting batas nilai",
+                "cara ganti kkm minimal",
+                "ubah standar kkm",
+                "edit batas lulus",
+                "pengaturan kkm"
+            ],
+            "responses": [
+                {
+                    "text": "Pengaturan standar KKM.",
+                    "ui": {
+                        "icon": "bi-ruler",
+                        "title": "Pengaturan Kkm",
+                        "steps": [
+                            "Buka sidebar -> Pengaturan Kkm"
+                        ],
+                        "url": "/admin/akademik/promotion/kkm",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_pengaturan_kenaikan",
+            "role": "admin",
+            "patterns": [
+                "ubah prasyarat kelulusan",
+                "syarat lulus",
+                "edit aturan tamat",
+                "pengaturan kenaikan",
+                "setting naik kelas"
+            ],
+            "responses": [
+                {
+                    "text": "Syarat kenaikan kelas.",
+                    "ui": {
+                        "icon": "bi-cogs",
+                        "title": "Pengaturan Kenaikan",
+                        "steps": [
+                            "Buka sidebar -> Pengaturan Kenaikan"
+                        ],
+                        "url": "/admin/akademik/promotion/settings",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_proses_rekap",
+            "role": "admin",
+            "patterns": [
+                "hitung kelulusan",
+                "rekap ujian akhir",
+                "simulasikan naik kelas",
+                "generate kenaikan",
+                "proses rekap kenaikan"
+            ],
+            "responses": [
+                {
+                    "text": "Hitung kenaikan kelas otomatis.",
+                    "ui": {
+                        "icon": "bi-calculator",
+                        "title": "Proses Rekap",
+                        "steps": [
+                            "Buka sidebar -> Proses Rekap"
+                        ],
+                        "url": "/admin/akademik/promotion/report",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_kalender_akademik",
+            "role": "admin",
+            "patterns": [
+                "jadwal libur",
+                "kalender akademik",
+                "edit kalender",
+                "hapus hari libur",
+                "tambah event tanggal merah"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola kalender event.",
+                    "ui": {
+                        "icon": "bi-calendar-event",
+                        "title": "Kalender Akademik",
+                        "steps": [
+                            "Buka sidebar -> Kalender Akademik"
+                        ],
+                        "url": "/admin/akademik/kalender",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_berita",
+            "role": "admin",
+            "patterns": [
+                "tambah artikel",
+                "hapus berita sekolah",
+                "cara posting blog",
+                "tulis berita",
+                "edit publikasi"
+            ],
+            "responses": [
+                {
+                    "text": "Publikasi berita sekolah.",
+                    "ui": {
+                        "icon": "bi-newspaper",
+                        "title": "Berita",
+                        "steps": [
+                            "Buka sidebar -> Berita"
+                        ],
+                        "url": "/admin/berita",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_flyer",
+            "role": "admin",
+            "patterns": [
+                "pasang iklan pop up",
+                "edit gambar promosi",
+                "tambah flyer",
+                "ganti brosur login",
+                "hapus flyer event"
+            ],
+            "responses": [
+                {
+                    "text": "Kelola pop-up brosur.",
+                    "ui": {
+                        "icon": "bi-image",
+                        "title": "Flyer",
+                        "steps": [
+                            "Buka sidebar -> Flyer"
+                        ],
+                        "url": "/admin/flyer",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_monitoring_pengguna",
+            "role": "admin",
+            "patterns": [
+                "monitoring pengguna",
+                "siapa yang online",
+                "cek ip login",
+                "pantau aktivitas login",
+                "cek log login"
+            ],
+            "responses": [
+                {
+                    "text": "Pantau login sistem.",
+                    "ui": {
+                        "icon": "bi-activity",
+                        "title": "Monitoring Pengguna",
+                        "steps": [
+                            "Buka sidebar -> Monitoring Pengguna"
+                        ],
+                        "url": "/admin/monitoring/pengguna",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_monitoring_wali_kelas",
+            "role": "admin",
+            "patterns": [
+                "kinerja wali",
+                "cek wali lapor",
+                "monitoring wali kelas",
+                "progres wali",
+                "pantau aktivitas pembimbing"
+            ],
+            "responses": [
+                {
+                    "text": "Pantau kinerja wali.",
+                    "ui": {
+                        "icon": "bi-eye",
+                        "title": "Monitoring Wali Kelas",
+                        "steps": [
+                            "Buka sidebar -> Monitoring Wali Kelas"
+                        ],
+                        "url": "/admin/monitoring/wali-kelas",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_monitoring_guru_pengajar",
+            "role": "admin",
+            "patterns": [
+                "cek isi nilai",
+                "monitoring guru pengajar",
+                "cek soal yang dibuat guru",
+                "kinerja pengajar"
+            ],
+            "responses": [
+                {
+                    "text": "Pantau kinerja guru.",
+                    "ui": {
+                        "icon": "bi-eye-fill",
+                        "title": "Monitoring Guru Pengajar",
+                        "steps": [
+                            "Buka sidebar -> Monitoring Guru Pengajar"
+                        ],
+                        "url": "/admin/monitoring/guru-pengajar",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_monitoring_siswa",
+            "role": "admin",
+            "patterns": [
+                "cek absensi murid",
+                "log murid online",
+                "pantau aktivitas murid",
+                "monitoring siswa",
+                "lihat login siswa"
+            ],
+            "responses": [
+                {
+                    "text": "Pantau keaktifan siswa.",
+                    "ui": {
+                        "icon": "bi-search",
+                        "title": "Monitoring Siswa",
+                        "steps": [
+                            "Buka sidebar -> Monitoring Siswa"
+                        ],
+                        "url": "/admin/monitoring/siswa",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_laporan",
+            "role": "admin",
+            "patterns": [
+                "cetak pdf laporan",
+                "export rekap",
+                "tarik file report",
+                "download rekap excel",
+                "laporan sistem"
+            ],
+            "responses": [
+                {
+                    "text": "Cetak rekapitulasi data.",
+                    "ui": {
+                        "icon": "bi-printer",
+                        "title": "Laporan",
+                        "steps": [
+                            "Buka sidebar -> Laporan"
+                        ],
+                        "url": "/admin/laporan",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        },
+        {
+            "tag": "admin_catatan",
+            "role": "admin",
+            "patterns": [
+                "edit pesan staff",
+                "buat memo staf",
+                "kirim instruksi",
+                "pesan internal",
+                "kirim catatan"
+            ],
+            "responses": [
+                {
+                    "text": "Kirim memo antar staf.",
+                    "ui": {
+                        "icon": "bi-pencil-square",
+                        "title": "Catatan",
+                        "steps": [
+                            "Buka sidebar -> Catatan"
+                        ],
+                        "url": "/admin/catatan",
+                        "urlText": "Buka Menu",
+                        "related": []
+                    }
+                }
+            ]
+        }
+    ]
+}
