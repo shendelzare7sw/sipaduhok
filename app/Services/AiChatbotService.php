@@ -395,7 +395,7 @@ class AiChatbotService
                     'model' => $model,
                     'messages' => $messages,
                     'temperature' => 0.7,
-                    'max_tokens' => 8000, // Increased from 1000 to 8000 for longer responses
+                    'max_tokens' => 1500, // Reduced from 8000 to 1500 to prevent exceeding Free Tier TPM limit (usually 6000)
                 ]);
 
             if (!$response->successful()) {
