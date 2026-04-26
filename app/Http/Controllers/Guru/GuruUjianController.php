@@ -1109,7 +1109,7 @@ class GuruUjianController extends Controller
 
         $validated = $request->validate([
             'topic' => 'required|string|max:200',
-            'type' => 'required|in:pilihan_ganda,benar_salah,uraian,isian_singkat',
+            'type' => 'required|in:pilihan_ganda,pilihan_ganda_kompleks,benar_salah,uraian,isian_singkat',
             'difficulty' => 'required|in:easy,medium,hard',
             'count' => 'required|integer|min:1|max:10',
             'custom_instructions' => 'nullable|string|max:500',
@@ -1172,7 +1172,7 @@ class GuruUjianController extends Controller
 
         $validated = $request->validate([
             'soal' => 'required|array|min:1|max:10',
-            'soal.*.tipe_soal' => 'required|in:pilihan_ganda,benar_salah,uraian,isian_singkat',
+            'soal.*.tipe_soal' => 'required|in:pilihan_ganda,pilihan_ganda_kompleks,benar_salah,uraian,isian_singkat',
             'soal.*.pertanyaan' => 'required|string',
             'soal.*.bobot' => 'required|integer|min:1',
             'soal.*.kunci_jawaban' => 'nullable',
