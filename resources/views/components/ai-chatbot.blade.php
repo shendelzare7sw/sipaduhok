@@ -2454,12 +2454,21 @@ async function sendMessage(messageText = null) {
     } else {
         // Show user-friendly error message instead of raw JSON
         let errorMsg = response.error || 'Terjadi kesalahan tidak diketahui.';
-        let friendlyMsg = '<div style="font-size:13.5px;line-height:1.6">'
-            + '<div style="font-weight:700;color:#ef4444;margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> AI sedang tidak tersedia</div>'
-            + '<div style="color:#475569;margin-bottom:8px">Server AI sedang mengalami gangguan. Silakan coba lagi dalam beberapa saat.</div>';
-        // If it's a 503/overload error, show specific advice
-        if (errorMsg.includes('503') || errorMsg.includes('UNAVAILABLE') || errorMsg.includes('high demand') || errorMsg.includes('overloaded')) {
-            friendlyMsg += '<div style="padding:8px 12px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;font-size:12px;color:#92400e"><i class="fas fa-info-circle" style="margin-right:4px"></i> Server AI sedang kelebihan beban. Coba lagi dalam 1-2 menit atau ganti model AI di pengaturan.</div>';
+        let friendlyMsg = '<div style="font-size:13.5px;line-height:1.6">';
+        
+        // If it's a specific configuration or capability error, show the actual error message
+        if (errorMsg.includes('tidak support PDF') || errorMsg.includes('belum dikonfigurasi')) {
+            friendlyMsg += '<div style="font-weight:700;color:#ef4444;margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> Fitur Tidak Tersedia</div>';
+            friendlyMsg += `<div style="color:#475569;margin-bottom:8px">${escapeHtml(errorMsg)}</div>`;
+        } else {
+            // General server error
+            friendlyMsg += '<div style="font-weight:700;color:#ef4444;margin-bottom:6px"><i class="fas fa-exclamation-triangle" style="margin-right:4px"></i> AI sedang tidak tersedia</div>';
+            friendlyMsg += '<div style="color:#475569;margin-bottom:8px">Server AI sedang mengalami gangguan. Silakan coba lagi dalam beberapa saat.</div>';
+            
+            // If it's a 503/overload error, show specific advice
+            if (errorMsg.includes('503') || errorMsg.includes('UNAVAILABLE') || errorMsg.includes('high demand') || errorMsg.includes('overloaded')) {
+                friendlyMsg += '<div style="padding:8px 12px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;font-size:12px;color:#92400e"><i class="fas fa-info-circle" style="margin-right:4px"></i> Server AI sedang kelebihan beban. Coba lagi dalam 1-2 menit atau ganti model AI di pengaturan.</div>';
+            }
         }
         friendlyMsg += '</div>';
         addMessage('assistant', friendlyMsg, null, true, true);

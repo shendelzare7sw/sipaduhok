@@ -142,7 +142,8 @@ class AiChatbotController extends Controller
                 return response()->json([
                     'success' => false,
                     'error' => $result['error'],
-                ], 500);
+                    'switch_to_gemini' => $result['switch_to_gemini'] ?? false,
+                ], 200); // Return 200 OK so frontend JS can read switch_to_gemini flag instead of throwing 500
             }
 
         } catch (\Illuminate\Validation\ValidationException $e) {

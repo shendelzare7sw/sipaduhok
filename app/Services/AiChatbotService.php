@@ -171,6 +171,15 @@ class AiChatbotService
             // Validate PDF compatibility
             $hasPdf = !empty($attachedFiles) && collect($attachedFiles)->contains('mime', 'application/pdf');
             if ($hasPdf && $provider === 'groq') {
+                if (empty($this->geminiApiKey)) {
+                    return [
+                        'success' => false,
+                        'error' => 'Model Groq tidak support membaca dokumen PDF. API Key Gemini belum dikonfigurasi, silakan hubungi Administrator.',
+                        'model' => $selectedModel,
+                        'switch_to_gemini' => false,
+                    ];
+                }
+                
                 return [
                     'success' => false,
                     'error' => 'Model Groq tidak support PDF. Silakan gunakan Gemini 2.5 Flash untuk membaca PDF.',
