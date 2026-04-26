@@ -38,10 +38,15 @@ class AiQuestionGeneratorService
             $this->model = 'llama-3.3-70b-versatile';
         }
 
-        // Auto-fix for unavailable Qwen/Mixtral/Gemma models (not free in Groq)
-        if (str_contains($this->model, 'qwen') || str_contains($this->model, 'mixtral') || str_contains($this->model, 'gemma')) {
-            Log::warning("Qwen/Mixtral/Gemma model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
-            $this->model = 'llama-3.3-70b-versatile';
+        // Auto-fix for unavailable Mixtral/Gemma models (not free in Groq)
+        // Note: qwen/qwen3-32b IS available on Groq free tier (60 RPM), so we allow it
+        $blockedModels = ['mixtral', 'gemma', 'qwen-2.5', 'qwen2'];
+        foreach ($blockedModels as $blocked) {
+            if (str_contains($this->model, $blocked)) {
+                Log::warning("Unavailable model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
+                $this->model = 'llama-3.3-70b-versatile';
+                break;
+            }
         }
 
         // Auto-fix for deprecated Gemini models
