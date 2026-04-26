@@ -123,6 +123,11 @@ class AiQuestionGeneratorService
                     $result = $this->generateMCQ($topic, $difficulty, $count, $subjectName, $jenjang, $kelasNumber, $customInstructions, $generateNarasi);
                     break;
 
+                case 'pilihan_ganda_kompleks':
+                    // Complex MCQ uses same generator but with multi-answer flag
+                    $result = $this->generateComplexMCQ($topic, $difficulty, $count, $subjectName, $jenjang, $kelasNumber, $customInstructions, $generateNarasi);
+                    break;
+
                 case 'benar_salah':
                     $result = $this->generateTrueFalse($topic, $count, $subjectName, $jenjang, $kelasNumber, $customInstructions, $generateNarasi);
                     break;
@@ -293,6 +298,63 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             'metadata' => [
                 'topic' => $topic,
                 'difficulty' => $difficulty,
+                'jenjang' => $jenjang,
+                'model_used' => $response['model'],
+                'provider' => $response['provider'] ?? 'groq',
+            ],
+        ];
+    }
+
+    /**
+     * Generate Complex MCQ (Pilihan Ganda Kompleks) - multi-answer format
+     */
+    private function generateComplexMCQ(
+        string $topic,
+        string $difficulty,
+        int $count,
+        string $subject,
+        string $jenjang,
+        int $kelas,
+        ?string $customInstructions = null,
+        bool $generateNarasi = false
+    ): array {
+        $jenjangData = config("ai-prompts.jenjang_guidelines.{$jenjang}");
+
+        $systemPrompt = 'Anda adalah generator soal Pilihan Ganda Kompleks profesional untuk siswa Indonesia. Soal Pilihan Ganda Kompleks (PGK) memiliki LEBIH DARI SATU jawaban benar dari 5 pilihan yang tersedia.';
+
+        $userPrompt = "Tugas: Buat {$count} soal Pilihan Ganda Kompleks (multi-answer) berkualitas tinggi.\n\n"
+            . "Context:\n"
+            . "- Topik/Materi: {$topic}\n"
+            . "- Mata Pelajaran: {$subject}\n"
+            . "- Tingkat Kesulitan: {$difficulty}\n"
+            . "- Jenjang Pendidikan: {$jenjang} Kelas {$kelas}\n\n"
+            . "Pedoman Sesuai Jenjang:\n{$jenjangData['guidelines']}\n\n"
+            . "Instruksi KHUSUS Soal PGK:\n"
+            . "1. Setiap soal HARUS memiliki 2-4 jawaban benar dari 5 pilihan (A-E)\n"
+            . "2. Pastikan pilihan salah (distractor) masuk akal dan menantang\n"
+            . "3. kunci_jawaban berisi STRING kunci benar yang dipisahkan koma, contoh: \"A,C,E\"\n\n"
+            . "Output JSON array (PENTING: strict JSON, no markdown):\n"
+            . '[{"pertanyaan":"teks soal","tipe_soal":"pilihan_ganda_kompleks","pilihan_a":"teks A","pilihan_b":"teks B","pilihan_c":"teks C","pilihan_d":"teks D","pilihan_e":"teks E","kunci_jawaban":"A,C","bobot":10,"penjelasan":"penjelasan singkat"}]' . "\n\n"
+            . "Generate {$count} soal untuk topik \"{$topic}\".";
+
+        if (!empty($customInstructions)) {
+            $userPrompt .= "\n\nInstruksi Tambahan: " . $customInstructions;
+        }
+
+        $model = $this->selectModelForSubject($subject);
+        $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.8, 1500);
+
+        if (!$response['success']) {
+            return $response;
+        }
+
+        $questions = $this->parseQuestions($response['content'], 'pilihan_ganda_kompleks');
+
+        return [
+            'success' => true,
+            'questions' => $questions,
+            'metadata' => [
+                'topic' => $topic,
                 'jenjang' => $jenjang,
                 'model_used' => $response['model'],
                 'provider' => $response['provider'] ?? 'groq',
@@ -547,8 +609,9 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         }
 
         $model = $this->selectModelForSubject($subject);
-        $maxTokens = $generateNarasi ? 1200 : 800; // Higher if narasi enabled
-        $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.7, $maxTokens);
+        // Isian singkat needs moderate tokens - no complex rubric
+        $maxTokens = $generateNarasi ? 1500 : 1000;
+        $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.7, $maxTokens, false); // false = no json_object mode
 
         if (!$response['success']) {
             return $response;
@@ -580,13 +643,15 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
     /**
      * Call AI with automatic fallback from Groq to Gemini
+     * @param bool $useJsonObjectMode Whether to use Groq's json_object response_format (not compatible with nested arrays)
      */
     private function callAiWithFallback(
         string $model,
         string $systemPrompt,
         string $userPrompt,
         float $temperature,
-        int $maxTokens
+        int $maxTokens,
+        bool $useJsonObjectMode = true
     ): array {
         // Try Groq first if API key is available
         if ($this->useGroq) {
@@ -605,7 +670,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                     Log::warning("Groq quota exceeded for {$model}, trying alternative model {$altModel}");
                     
                     // Try alternative model
-                    $altResponse = $this->callGroqApi($altModel, $systemPrompt, $userPrompt, $temperature, $maxTokens);
+                    $altResponse = $this->callGroqApi($altModel, $systemPrompt, $userPrompt, $temperature, $maxTokens, $useJsonObjectMode);
                     
                     if ($altResponse['success']) {
                         return $altResponse;
@@ -641,7 +706,8 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         string $systemPrompt,
         string $userPrompt,
         float $temperature,
-        int $maxTokens
+        int $maxTokens,
+        bool $useJsonObjectMode = true
     ): array {
         try {
             $response = Http::withOptions([
@@ -649,7 +715,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
             ])->withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(90)->post('https://api.groq.com/openai/v1/chat/completions', [
+            ])->timeout(90)->post('https://api.groq.com/openai/v1/chat/completions', array_filter([
                 'model' => $model,
                 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
@@ -657,8 +723,9 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                 ],
                 'temperature' => $temperature,
                 'max_tokens' => $maxTokens,
-                'response_format' => ['type' => 'json_object'], // Force JSON output
-            ]);
+                // Only use json_object mode when flag is true AND we're not using nested arrays
+                'response_format' => $useJsonObjectMode ? ['type' => 'json_object'] : null,
+            ]));
 
             if (!$response->successful()) {
                 $statusCode = $response->status();
@@ -905,15 +972,17 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
             case 'uraian':
                 // For essay, only require 'pertanyaan' (already checked above).
-                // rubrik_penilaian and bobot are desired but should NOT silently discard a
-                // valid question that the AI generated just because it's missing one field.
-                // This prevents questions being dropped when AI truncates near the token limit.
                 if (!isset($question['rubrik_penilaian']) && !isset($question['bobot'])) {
-                    Log::warning('Essay question missing both rubrik_penilaian and bobot — accepted anyway', [
+                    Log::warning('Essay question missing both rubrik_penilaian and bobot - accepted anyway', [
                         'question_keys' => array_keys($question),
                     ]);
                 }
                 return true; // Accept all essay questions that have 'pertanyaan'
+
+            case 'pilihan_ganda_kompleks':
+                // Multi-answer MCQ: needs pilihan A-E and kunci_jawaban (comma-separated)
+                return isset($question['pilihan_a'], $question['pilihan_b'], $question['pilihan_c'],
+                             $question['pilihan_d'], $question['pilihan_e'], $question['kunci_jawaban']);
 
             case 'isian_singkat':
                 $valid = isset($question['kunci_jawaban']);

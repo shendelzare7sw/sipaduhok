@@ -74,6 +74,7 @@
                             </label>
                             <select class="form-select" id="aiQuestionType" name="type" required>
                                 <option value="pilihan_ganda" selected>Pilihan Ganda (A-E)</option>
+                                <option value="pilihan_ganda_kompleks">Pilihan Ganda Kompleks (multi-jawaban)</option>
                                 <option value="benar_salah">Benar / Salah</option>
                                 <option value="uraian">Uraian / Essay</option>
                                 <option value="isian_singkat">Isian Singkat</option>
@@ -256,35 +257,44 @@
 </style>
 
 <script>
-    // Difficulty hints
-    const difficultyHints = {
-        easy: 'Fakta dasar & hafalan',
-        medium: 'Aplikasi konsep & perhitungan',
-        hard: 'Analisis & problem solving'
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        // Difficulty hints
+        const difficultyHints = {
+            easy: 'Fakta dasar & hafalan (C1-C2)',
+            medium: 'Aplikasi konsep & perhitungan (C3-C4)',
+            hard: 'Analisis & problem solving (C5-C6)'
+        };
 
-    // Estimated time based on count
-    const estimatedTimes = {
-        3: '10-15',
-        5: '15-20',
-        7: '20-25',
-        10: '25-30'
-    };
+        // Estimated time based on count
+        const estimatedTimes = {
+            3: '10-15',
+            5: '15-20',
+            7: '20-25',
+            10: '25-30'
+        };
 
-    // Update difficulty hint
-    document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            document.getElementById('difficultyHint').textContent = difficultyHints[this.value];
+        // Set initial difficulty hint
+        const defaultDifficulty = document.querySelector('input[name="difficulty"]:checked');
+        if (defaultDifficulty) {
+            const hintEl = document.getElementById('difficultyHint');
+            if (hintEl) hintEl.textContent = difficultyHints[defaultDifficulty.value];
+        }
+
+        // Update difficulty hint on change
+        document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const hintEl = document.getElementById('difficultyHint');
+                if (hintEl) hintEl.textContent = difficultyHints[this.value];
+            });
         });
-    });
 
-    // Update estimated time
-    document.getElementById('aiQuestionCount').addEventListener('change', function() {
-        document.getElementById('estimatedTime').textContent = estimatedTimes[this.value];
+        // Update estimated time
+        const countSelector = document.getElementById('aiQuestionCount');
+        if (countSelector) {
+            countSelector.addEventListener('change', function() {
+                const timeEl = document.getElementById('estimatedTime');
+                if (timeEl) timeEl.textContent = estimatedTimes[this.value] || '15-20';
+            });
+        }
     });
-
-    // Auto-expand on page load (optional, can be removed)
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     const collapse = new bootstrap.Collapse(document.getElementById('aiGeneratorCollapse'));
-    // });
 </script>
