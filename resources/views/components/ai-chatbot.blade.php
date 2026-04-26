@@ -78,11 +78,14 @@
 
             {{-- Typing Indicator (hidden by default) --}}
             <div id="typingIndicator" class="typing-indicator d-none">
-                <div class="message-avatar">AI</div>
-                <div class="typing-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                <div class="message-avatar"><i class="fas fa-headset" style="font-size:14px"></i></div>
+                <div style="display: flex; flex-direction: column;">
+                    <div class="typing-dots" style="width: fit-content;">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div id="typingTimer" style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px; padding-left: 2px;">0.00 s</div>
                 </div>
             </div>
         </div>
@@ -2580,14 +2583,40 @@ function addMessage(role, content, attachments = null, saveToHistory = true, isH
 }
 
 // ==================== Show/Hide Typing Indicator ====================
+let typingTimerInterval = null;
+let typingStartTime = null;
+
 function showTypingIndicator() {
     const indicator = document.getElementById('typingIndicator');
-    if (indicator) { indicator.classList.remove('d-none'); scrollToBottom(); }
+    const timerDisplay = document.getElementById('typingTimer');
+    
+    if (indicator) {
+        indicator.classList.remove('d-none');
+        
+        if (timerDisplay) {
+            timerDisplay.textContent = '0.00 s';
+            typingStartTime = Date.now();
+            
+            if (typingTimerInterval) clearInterval(typingTimerInterval);
+            
+            typingTimerInterval = setInterval(() => {
+                const elapsed = (Date.now() - typingStartTime) / 1000;
+                timerDisplay.textContent = elapsed.toFixed(2) + ' s';
+            }, 50); // Update frequently for smooth visual
+        }
+        
+        scrollToBottom();
+    }
 }
 
 function hideTypingIndicator() {
     const indicator = document.getElementById('typingIndicator');
     if (indicator) indicator.classList.add('d-none');
+    
+    if (typingTimerInterval) {
+        clearInterval(typingTimerInterval);
+        typingTimerInterval = null;
+    }
 }
 
 // ==================== Copy Message ====================
