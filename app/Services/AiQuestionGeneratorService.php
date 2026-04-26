@@ -440,11 +440,13 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         if ($generateNarasi) {
             $userPrompt .= "\nSEMUA {$count} soal HARUS include field 'narasi' (150-300 kata)";
         }
-        $userPrompt .= "\nValidasi JSON output Anda sebelum return - pastikan array berisi {$count} object lengkap, tidak boleh kurang!";
+        $userPrompt .= "\nValidasi JSON output Anda sebelum return - pastikan array berisi TEPAT {$count} object, tidak boleh kurang!";
+        $userPrompt .= "\n\nPENTING: Soal uraian memiliki field rubrik_penilaian yang panjang. Pastikan semua {$count} soal ter-generate secara lengkap sebelum response berakhir.";
 
         $model = $this->selectModelForSubject($subject);
-        // Increased max tokens for essay questions (complex + narasi needs more tokens)
-        $maxTokens = $generateNarasi ? 2500 : 1500; // Higher if narasi enabled
+        // Use higher token counts for essay questions (each has rubrik_penilaian which is verbose)
+        // Rule of thumb: ~600 tokens per essay question
+        $maxTokens = $generateNarasi ? 4000 : min(600 * $count + 500, 3500);
         $response = $this->callAiWithFallback($model, $systemPrompt, $userPrompt, 0.7, $maxTokens);
 
         if (!$response['success']) {
@@ -452,6 +454,23 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         }
 
         $questions = $this->parseQuestions($response['content'], 'uraian');
+
+        // If we got fewer questions than requested, retry once with explicit count instruction
+        if (count($questions) < $count) {
+            $missing = $count - count($questions);
+            Log::warning("Essay generator returned {count($questions)}/{$count} questions. Retrying for {$missing} missing questions.");
+
+            $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya {" . count($questions) . "} soal yang di-generate. Kali ini WAJIB generate semua {$count} soal. Jangan berhenti sebelum semua {$count} soal selesai.";
+            $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
+
+            if ($retryResponse['success']) {
+                $retryQuestions = $this->parseQuestions($retryResponse['content'], 'uraian');
+                // Use the retry result if it has more or equal questions
+                if (count($retryQuestions) >= count($questions)) {
+                    $questions = $retryQuestions;
+                }
+            }
+        }
 
         return [
             'success' => true,
@@ -462,6 +481,8 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                 'jenjang' => $jenjang,
                 'model_used' => $response['model'],
                 'provider' => $response['provider'] ?? 'groq',
+                'requested_count' => $count,
+                'actual_count' => count($questions),
             ],
         ];
     }
@@ -883,16 +904,16 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                 return $valid;
 
             case 'uraian':
-                $valid = isset($question['rubrik_penilaian']) || isset($question['bobot']);
-                if (!$valid) {
-                    Log::warning('Essay validation failed', [
-                        'has_rubrik_penilaian' => isset($question['rubrik_penilaian']),
-                        'has_bobot' => isset($question['bobot']),
+                // For essay, only require 'pertanyaan' (already checked above).
+                // rubrik_penilaian and bobot are desired but should NOT silently discard a
+                // valid question that the AI generated just because it's missing one field.
+                // This prevents questions being dropped when AI truncates near the token limit.
+                if (!isset($question['rubrik_penilaian']) && !isset($question['bobot'])) {
+                    Log::warning('Essay question missing both rubrik_penilaian and bobot — accepted anyway', [
                         'question_keys' => array_keys($question),
-                        'full_question' => $question // Log full question for debugging
                     ]);
                 }
-                return $valid;
+                return true; // Accept all essay questions that have 'pertanyaan'
 
             case 'isian_singkat':
                 $valid = isset($question['kunci_jawaban']);
