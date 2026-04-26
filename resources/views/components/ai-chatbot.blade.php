@@ -2629,11 +2629,39 @@ function hideTypingIndicator() {
 function copyMessage(button) {
     const messageBubble = button.closest('.message-content').querySelector('.message-bubble');
     if (!messageBubble) return;
-    navigator.clipboard.writeText(messageBubble.textContent).then(() => {
-        showToastChatbot('success', 'Pesan disalin');
-    }).catch(() => {
-        showToastChatbot('error', 'Gagal menyalin pesan');
-    });
+    
+    // Use innerText to preserve newlines and formatting
+    const textToCopy = messageBubble.innerText;
+    
+    // Modern approach (Requires HTTPS or localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showToastChatbot('success', 'Pesan disalin');
+        }).catch(() => {
+            showToastChatbot('error', 'Gagal menyalin pesan');
+        });
+    } else {
+        // Fallback for insecure contexts (e.g., HTTP on Laragon)
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        
+        // Make the textarea invisible
+        textArea.style.position = "absolute";
+        textArea.style.left = "-999999px";
+        
+        document.body.prepend(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            showToastChatbot('success', 'Pesan disalin');
+        } catch (error) {
+            console.error(error);
+            showToastChatbot('error', 'Gagal menyalin pesan');
+        } finally {
+            textArea.remove();
+        }
+    }
 }
 
 // ==================== Auto-Resize Textarea ====================
