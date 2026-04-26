@@ -2589,8 +2589,14 @@ let typingStartTime = null;
 function showTypingIndicator() {
     const indicator = document.getElementById('typingIndicator');
     const timerDisplay = document.getElementById('typingTimer');
+    const chatBody = document.getElementById('chatMessages');
     
     if (indicator) {
+        // Move to the very bottom of the chat container
+        if (chatBody) {
+            chatBody.appendChild(indicator);
+        }
+        
         indicator.classList.remove('d-none');
         
         if (timerDisplay) {
