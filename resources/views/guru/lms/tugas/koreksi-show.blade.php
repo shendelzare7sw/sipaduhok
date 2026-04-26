@@ -212,6 +212,15 @@
             cursor: not-allowed;
             transform: none;
         }
+        .btn-ai-loading {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.7); }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -229,19 +238,31 @@
                     // Validate if student has submitted answer
                     const hasAnswer = {{ ($tugasSiswa->jawaban_text || $tugasSiswa->file_jawaban) ? 'true' : 'false' }};
                     if (!hasAnswer) {
-                        toastMsg.textContent = 'Belum ada jawaban siswa untuk dianalisis.';
+                        toastMsg.innerHTML = '<i class="fas fa-exclamation-circle text-warning me-1"></i> Belum ada jawaban siswa untuk dianalisis.';
                         toast.show();
                         return;
                     }
 
                     isProcessing = true;
 
-                    // UI Loading State
+                    // UI Loading State with live timer
                     const originalContent = this.innerHTML;
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mengolah...';
-                    this.disabled = true;
-                    toastMsg.textContent = "Sedang menganalisis jawaban (Vision AI)...";
+                    let seconds = 0;
+                    const btnRef = this;
+                    btnRef.disabled = true;
+                    btnRef.classList.add('btn-ai-loading');
+
+                    const updateTimer = () => {
+                        btnRef.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Menganalisis... <span class="badge bg-light text-dark ms-1">${seconds}s</span>`;
+                        toastMsg.innerHTML = `<i class="fas fa-spinner fa-spin text-primary me-1"></i> Sedang menganalisis jawaban (Vision AI)... <strong>${seconds}s</strong>`;
+                    };
+                    updateTimer();
                     toast.show();
+                    
+                    const timerInterval = setInterval(() => {
+                        seconds++;
+                        updateTimer();
+                    }, 1000);
 
                     // URL Construction
                     const url = "{{ route('guru.lms.tugas.koreksi.ai-suggest', [$kelas->id, $mapel->id, $tugas->id, $tugasSiswa->id]) }}";
@@ -268,7 +289,7 @@
                         // Visual Feedback
                         scoreInput.classList.add('bg-success', 'text-white', 'bg-opacity-25');
                         
-                        feedbackInput.value = `[AI Vision] ${data.feedback}\n\n` + feedbackInput.value;
+                        feedbackInput.value = `[AI Suggestion] ${data.feedback}\n\n` + feedbackInput.value;
                         feedbackInput.classList.add('bg-info', 'text-white', 'bg-opacity-10');
 
                         setTimeout(() => {
@@ -277,16 +298,18 @@
                             feedbackInput.classList.remove('bg-info', 'text-white', 'bg-opacity-10');
                         }, 2000);
 
-                        toastMsg.textContent = `Analisis selesai! Saran skor: ${data.score}`;
+                        toastMsg.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Analisis selesai dalam <strong>${seconds}s</strong>! Saran skor: <strong>${data.score}</strong>`;
                     })
                     .catch(error => {
                         console.error(error);
-                        toastMsg.textContent = "Gagal: " + error.message;
+                        toastMsg.innerHTML = `<i class="fas fa-exclamation-triangle text-danger me-1"></i> Gagal (${seconds}s): ${error.message}`;
                         toast.show();
                     })
                     .finally(() => {
-                        this.innerHTML = originalContent;
-                        this.disabled = false;
+                        clearInterval(timerInterval);
+                        btnRef.innerHTML = originalContent;
+                        btnRef.disabled = false;
+                        btnRef.classList.remove('btn-ai-loading');
                         isProcessing = false;
                     });
                 });
