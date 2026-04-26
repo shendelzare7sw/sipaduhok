@@ -291,15 +291,15 @@ class AiGradingService
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'Anda adalah sistem penilaian otomatis yang outputnya selalu JSON.'
+                    'content' => "/no_think\nAnda adalah sistem penilaian otomatis yang outputnya SELALU berupa JSON murni. JANGAN gunakan tag <think>. Langsung output JSON saja."
                 ],
                 [
                     'role' => 'user',
                     'content' => $prompt
                 ]
             ],
-            'temperature' => 0.2, // Low temperature for consistent grading
-            'max_tokens' => 300
+            'temperature' => 0.2,
+            'max_tokens' => 1024
         ]);
 
         if ($response->failed()) {
@@ -395,7 +395,7 @@ class AiGradingService
                         ]
                     ],
                     'temperature' => 0.2,
-                    'max_tokens' => 300
+                    'max_tokens' => 1024
                 ]);
 
                 if ($response->failed()) {
