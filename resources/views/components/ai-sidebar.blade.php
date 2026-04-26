@@ -95,6 +95,7 @@
                 </label>
                 <select class="form-select" id="aiQuestionType" name="type" required>
                     <option value="pilihan_ganda" selected>Pilihan Ganda (A-E)</option>
+                    <option value="pilihan_ganda_kompleks">Pilihan Ganda Kompleks (multi-jawaban)</option>
                     <option value="benar_salah">Benar / Salah</option>
                     <option value="uraian">Uraian / Essay</option>
                     <option value="isian_singkat">Isian Singkat</option>

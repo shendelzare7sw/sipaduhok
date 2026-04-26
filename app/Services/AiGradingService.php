@@ -335,40 +335,68 @@ class AiGradingService
             4. Jika gambar tidak terbaca/irrelavan, beri nilai 0.
             5. Output WAJIB JSON valid: {\"score\": int, \"feedback\": string}";
 
-            $response = Http::withOptions([
-                'verify' => false,
-            ])->withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->post('https://api.groq.com/openai/v1/chat/completions', [
-                'model' => $this->visionModel,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => [
-                            ['type' => 'text', 'text' => $prompt],
-                            ['type' => 'image_url', 'image_url' => ['url' => $dataUrl]]
+            try {
+                $response = Http::withOptions([
+                    'verify' => false,
+                ])->withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ])->post('https://api.groq.com/openai/v1/chat/completions', [
+                    'model' => $this->visionModel,
+                    'messages' => [
+                        [
+                            'role' => 'user',
+                            'content' => [
+                                ['type' => 'text', 'text' => $prompt],
+                                ['type' => 'image_url', 'image_url' => ['url' => $dataUrl]]
+                            ]
                         ]
-                    ]
-                ],
-                'temperature' => 0.2,
-                'max_tokens' => 300,
-                'response_format' => ['type' => 'json_object']
-            ]);
+                    ],
+                    'temperature' => 0.2,
+                    'max_tokens' => 300,
+                    'response_format' => ['type' => 'json_object']
+                ]);
 
-            if ($response->failed()) {
-                throw new \Exception("Groq API Error: " . $response->body());
+                if ($response->failed()) {
+                    throw new \Exception("Groq API Error: " . $response->body());
+                }
+
+                $json = $response->json();
+                $content = $json['choices'][0]['message']['content'] ?? '{}';
+                $result = json_decode($content, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    // Fallback strategy if JSON is broken (regex)
+                    preg_match('/"score"\s*:\s*(\d+)/', $content, $scoreMatches);
+                    preg_match('/"feedback"\s*:\s*"(.*?)"/', $content, $feedbackMatches);
+                    
+                    $result = [
+                        'score' => $scoreMatches[1] ?? 0,
+                        'feedback' => $feedbackMatches[1] ?? 'Feedback tidak terbaca.'
+                    ];
+                }
+
+                return [
+                    'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
+                    'feedback' => $result['feedback'] ?? 'Tidak ada feedback.',
+                    'error' => false
+                ];
+            } catch (\Exception $e) {
+                $errorMsg = strtolower($e->getMessage());
+                $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
+                                strpos($errorMsg, 'quota') !== false ||
+                                strpos($errorMsg, '429') !== false;
+
+                if ($isQuotaError) {
+                    Log::warning("Groq Vision quota exceeded, falling back to Gemini: " . $e->getMessage());
+                    $settings = \App\Models\AppSetting::where('key', 'gemini_api_key')->first();
+                    if ($settings && !empty($settings->value)) {
+                        $this->apiKey = $settings->value; // Swap API key to Gemini
+                        return $this->evaluateImageWithGemini($question, $imagePath, $contextOrKey, $maxScore);
+                    }
+                }
+                throw $e; // Throw original error if not quota or no Gemini fallback available
             }
-
-            $json = $response->json();
-            $content = $json['choices'][0]['message']['content'] ?? '{}';
-            $result = json_decode($content, true);
-
-            return [
-                'score' => isset($result['score']) ? min($maxScore, max(0, intval($result['score']))) : 0,
-                'feedback' => $result['feedback'] ?? 'Tidak ada feedback.',
-                'error' => false
-            ];
 
         } catch (\Exception $e) {
             Log::error('AI Vision Error: ' . $e->getMessage());
