@@ -59,7 +59,7 @@ class AiChatbotService
         if (!empty($this->groqApiKey)) {
             $models[] = [
                 'id' => 'llama-3.3-70b-versatile',
-                'name' => 'Llama 3.3 70B (Recommended)',
+                'name' => 'Llama 3.3 70B (Versatile)',
                 'provider' => 'groq',
                 'supports_vision' => false,
                 'supports_pdf' => false,
@@ -67,21 +67,48 @@ class AiChatbotService
             ];
 
             $models[] = [
-                'id' => 'llama-3.1-8b-instant',
-                'name' => 'Llama 3.1 8B (Fastest)',
+                'id' => 'qwen/qwen3-32b',
+                'name' => 'Qwen 3 32B (High Rate Limit)',
                 'provider' => 'groq',
                 'supports_vision' => false,
                 'supports_pdf' => false,
-                'default' => $this->defaultModel === 'llama-3.1-8b-instant',
+                'default' => $this->defaultModel === 'qwen/qwen3-32b',
+            ];
+
+            $models[] = [
+                'id' => 'openai/gpt-oss-120b',
+                'name' => 'GPT OSS 120B',
+                'provider' => 'groq',
+                'supports_vision' => false,
+                'supports_pdf' => false,
+                'default' => $this->defaultModel === 'openai/gpt-oss-120b',
             ];
 
             $models[] = [
                 'id' => 'meta-llama/llama-4-scout-17b-16e-instruct',
-                'name' => 'Llama 4 Scout (Vision)',
+                'name' => 'Llama 4 Scout 17B (Vision)',
                 'provider' => 'groq',
                 'supports_vision' => true,
-                'supports_pdf' => false, // Groq doesn't support PDF
-                'default' => false,
+                'supports_pdf' => false, 
+                'default' => $this->defaultModel === 'meta-llama/llama-4-scout-17b-16e-instruct',
+            ];
+
+            $models[] = [
+                'id' => 'allam-2-7b',
+                'name' => 'Allam 2 7B',
+                'provider' => 'groq',
+                'supports_vision' => false,
+                'supports_pdf' => false,
+                'default' => $this->defaultModel === 'allam-2-7b',
+            ];
+
+            $models[] = [
+                'id' => 'groq/compound',
+                'name' => 'Groq Compound',
+                'provider' => 'groq',
+                'supports_vision' => false,
+                'supports_pdf' => false,
+                'default' => $this->defaultModel === 'groq/compound',
             ];
         }
 
@@ -310,9 +337,22 @@ class AiChatbotService
                                 strpos($errorMsg, 'quota') !== false ||
                                 strpos($errorMsg, '429') !== false;
 
-                if ($isQuotaError && !empty($this->geminiApiKey)) {
-                    Log::warning('Groq quota exceeded, falling back to Gemini');
-                    return $this->callGeminiApi($messages, $this->defaultModel);
+                if ($isQuotaError) {
+                    Log::warning("Groq quota exceeded for model {$selectedModel}. Attempting internal Groq fallback.");
+                    
+                    // Fallback to another Groq model before Gemini
+                    $backupGroqModel = ($selectedModel === 'qwen/qwen3-32b') ? 'llama-3.3-70b-versatile' : 'qwen/qwen3-32b';
+                    $backupResult = $this->callGroqApi($messages, $backupGroqModel);
+                    
+                    if ($backupResult['success']) {
+                        return $backupResult;
+                    }
+                    
+                    // If backup Groq model ALSO fails, fallback to Gemini
+                    if (!empty($this->geminiApiKey)) {
+                        Log::warning('Both Groq models rate-limited, falling back to Gemini.');
+                        return $this->callGeminiApi($messages, $this->defaultModel);
+                    }
                 }
             }
 
@@ -323,7 +363,7 @@ class AiChatbotService
             return $this->callGeminiApi($messages, $selectedModel);
         }
 
-        // Fallback to Gemini if Groq not available
+        // Fallback to Gemini if Groq not available entirely
         if (!empty($this->geminiApiKey)) {
             return $this->callGeminiApi($messages, $this->defaultModel);
         }

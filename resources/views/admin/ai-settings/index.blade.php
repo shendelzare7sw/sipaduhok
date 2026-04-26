@@ -98,15 +98,19 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold">Model Text (Chat)</label>
                             <select class="form-select" name="ai_model" id="ai_model">
-                                <optgroup label="Llama 3 (Groq - FREE)">
+                                <optgroup label="Groq Cloud (FREE)">
+                                    <option value="qwen/qwen3-32b" {{ $model == 'qwen/qwen3-32b' ? 'selected' : '' }}>Qwen 3 32B (60 RPM - Balanced)</option>
                                     <option value="llama-3.3-70b-versatile" {{ $model == 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B (Recommended - Best)</option>
                                     <option value="llama-3.1-8b-instant" {{ $model == 'llama-3.1-8b-instant' ? 'selected' : '' }}>Llama 3.1 8B (Fastest - Light)</option>
+                                    <option value="openai/gpt-oss-120b" {{ $model == 'openai/gpt-oss-120b' ? 'selected' : '' }}>GPT OSS 120B (Heavy Model)</option>
+                                    <option value="allam-2-7b" {{ $model == 'allam-2-7b' ? 'selected' : '' }}>Allam 2 7B</option>
+                                    <option value="groq/compound" {{ $model == 'groq/compound' ? 'selected' : '' }}>Groq Compound</option>
                                 </optgroup>
                                 <optgroup label="Google Gemini (FREE)">
                                     <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Vision + PDF Support)</option>
                                 </optgroup>
                             </select>
-                            <div class="form-text">Semua model di atas <strong>GRATIS</strong> dan telah diverifikasi berfungsi dengan baik.</div>
+                            <div class="form-text">Fitur Auto-Fallback aktif: Jika model Groq melebihi batas Rate Limit, sistem akan otomatis beralih meminjam model lain.</div>
                         </div>
 
                         <div class="mb-4">
@@ -334,8 +338,12 @@
             // Model mapping by provider (Only FREE & Verified working models)
             const modelsByProvider = {
                 groq: [
+                    'qwen/qwen3-32b',
                     'llama-3.3-70b-versatile',
-                    'llama-3.1-8b-instant'
+                    'llama-3.1-8b-instant',
+                    'openai/gpt-oss-120b',
+                    'allam-2-7b',
+                    'groq/compound'
                 ],
                 gemini: [
                     'gemini-2.5-flash'

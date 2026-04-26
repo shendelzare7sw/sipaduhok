@@ -1846,8 +1846,29 @@ function renderSystemAnswer(entry) {
         h += '<div style="margin-top:10px;padding:8px 12px;background:#fef2f2;border-left:3px solid #ef4444;border-radius:0 8px 8px 0;font-size:12px;color:#991b1b"><i class="fas fa-info-circle" style="margin-right:4px"></i>' + entry.adminNote + '</div>';
         h += '<a href="' + entry.adminLink + '" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#4361ee,#3a0ca3);color:white;padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:600;text-decoration:none;margin-top:10px;box-shadow:0 2px 8px rgba(67,97,238,0.3)"><i class="fas fa-arrow-right"></i> ' + (entry.adminLinkText || 'Buka Halaman') + '</a>';
     } else if (entry.link) {
-        // Show direct link (user is the owner role)
-        h += '<a href="' + entry.link + '" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#4361ee,#3a0ca3);color:white;padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:600;text-decoration:none;margin-top:10px;box-shadow:0 2px 8px rgba(67,97,238,0.3)"><i class="fas fa-arrow-right"></i> ' + (entry.linkText || 'Buka Halaman') + '</a>';
+        let finalLink = entry.link;
+        let finalLinkText = entry.linkText || 'Buka Halaman';
+
+        // FIX: Dynamic Route Resolution based on Role
+        // Prevent 403 errors when non-Siswa accesses a shared intent (like LMS, Tugas, Materi) that has a hardcoded Siswa link
+        if (finalLink && finalLink.includes('/siswa/lms') && USER_ROLE !== 'siswa') {
+            if (USER_ROLE === 'guru_pengajar') {
+                finalLink = '/guru/kelas'; // Guru starts at class selection
+                finalLinkText = 'Pilih Kelas (LMS)';
+            } else if (USER_ROLE === 'admin' || USER_ROLE === 'wakil_kepala_sekolah' || USER_ROLE === 'ketua_pkbm') {
+                finalLink = '/admin/lms-settings';
+                finalLinkText = 'Pengaturan LMS';
+            } else if (USER_ROLE === 'wali_kelas') {
+                finalLink = '/wali/presensi'; 
+                finalLinkText = 'Buka Presensi';
+            } else {
+                finalLink = null;
+            }
+        }
+
+        if (finalLink) {
+            h += '<a href="' + finalLink + '" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#4361ee,#3a0ca3);color:white;padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:600;text-decoration:none;margin-top:10px;box-shadow:0 2px 8px rgba(67,97,238,0.3)"><i class="fas fa-arrow-right"></i> ' + finalLinkText + '</a>';
+        }
     }
 
     if (entry.related && entry.related.length > 0) {
@@ -2092,9 +2113,11 @@ async function loadAvailableModels() {
     } catch (error) {
         console.error('[AI Chatbot] Error loading models:', error);
         const defaultModels = [
-            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Recommended)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
-            { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B (Fastest)', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
-            { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout (Vision)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false }
+            { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B (High Rate Limit)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
+            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Recommended)', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
+            { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
+            { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout (Vision)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false },
+            { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (PDF + Vision)', provider: 'gemini', supports_vision: true, supports_pdf: true, default: false }
         ];
         chatbotState.availableModels = defaultModels;
         populateModelSelector(defaultModels);
@@ -2106,8 +2129,8 @@ async function loadAvailableModels() {
 function populateModelSelector(models) {
     const selector = document.getElementById('modelSelector');
     if (!selector) return;
-    const groqDefaultModel = models.find(m => m.id === 'llama-3.3-70b-versatile');
-    const forcedDefaultId = groqDefaultModel ? 'llama-3.3-70b-versatile' : models[0]?.id;
+    const groqDefaultModel = models.find(m => m.id === 'qwen/qwen3-32b') || models.find(m => m.id === 'llama-3.3-70b-versatile');
+    const forcedDefaultId = groqDefaultModel ? groqDefaultModel.id : models[0]?.id;
     selector.innerHTML = models.map(m => {
         let icons = '';
         if (m.supports_vision) icons += '📷';
