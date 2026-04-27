@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class FileController extends Controller
 {
@@ -22,16 +22,50 @@ class FileController extends Controller
     ];
 
     /**
-     * Preview file inline (instead of download)
+     * Preview file inline (legacy route, kept for backward compatibility)
      */
     public function preview(Request $request)
     {
         $path = $request->query('path');
 
-        if (!$path) {
-            abort(404);
+        if (!$path && $request->query('b64path')) {
+            $path = base64_decode($request->query('b64path'));
         }
 
+        if (!$path) {
+            abort(404, 'No file path provided');
+        }
+
+        return $this->serveFileInline($path);
+    }
+
+    /**
+     * Preview file using cache-based integer ID.
+     * URL looks like /view-document/54321 — identical structure to validasi-izin's /preview-bukti/1
+     * IDM cannot detect this as a file download because:
+     *   - No file extension in URL
+     *   - No query parameters with file paths
+     *   - URL looks like a normal page
+     */
+    public function previewHash($id)
+    {
+        $path = Cache::get('docview_' . $id);
+
+        if (!$path) {
+            abort(404, 'Preview link expired or invalid.');
+        }
+
+        return $this->serveFileInline($path);
+    }
+
+    /**
+     * Serve a file inline — EXACTLY matching PresensiController::previewBukti()
+     * which uses: return response()->file($path);
+     *
+     * This is the pattern that works in validasi-izin without IDM interference.
+     */
+    private function serveFileInline(string $path)
+    {
         // Sanitize: reject null bytes
         if (str_contains($path, "\0")) {
             abort(403, 'Invalid path');
@@ -42,10 +76,10 @@ class FileController extends Controller
             abort(403, 'Invalid path');
         }
 
-        // Normalize slashes and reject absolute paths
+        // Normalize slashes
         $path = ltrim(str_replace('\\', '/', $path), '/');
 
-        // Reject paths starting with dots (hidden files) or containing suspicious segments
+        // Reject hidden files
         if (preg_match('/(?:^|\/)\./', $path)) {
             abort(403, 'Invalid path');
         }
@@ -56,22 +90,15 @@ class FileController extends Controller
             abort(403, 'File type not allowed');
         }
 
-        // Check if file exists in public disk
-        $disk = Storage::disk('public');
-
-        if (!$disk->exists($path)) {
-            abort(404);
-        }
-
         $fullPath = storage_path('app/public/' . $path);
 
         if (!file_exists($fullPath)) {
-            abort(404);
+            abort(404, 'File not found');
         }
 
-        // Return file with inline disposition (prevent download prompt)
-        return response()->file($fullPath, [
-            'Content-Disposition' => 'inline',
-        ]);
+        // EXACTLY like validasi-izin: response()->file($path) with NO custom headers
+        // Laravel will automatically set Content-Type based on the file's MIME type
+        // and Content-Disposition: inline
+        return response()->file($fullPath);
     }
 }

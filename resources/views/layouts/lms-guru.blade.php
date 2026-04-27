@@ -537,6 +537,7 @@
         </div>
     </div>
 
+    @stack('modals')
     @stack('scripts')
 
     {{-- AI Chatbot Integration (Role-based access) --}}

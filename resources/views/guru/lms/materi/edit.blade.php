@@ -74,8 +74,9 @@
                 <div id="fileInputContainer" class="mb-3">
                     <label class="form-label">File Materi <span class="text-danger" id="fileRequired">*</span></label>
                     @if($materi->file_materi && $materi->tipe_file != 'link')
-                        <div class="alert alert-info mb-2">
-                            File saat ini: <strong>{{ basename($materi->file_materi) }}</strong>
+                        <div class="mb-2">
+                            <strong>File saat ini:</strong>
+                            <x-file-preview :path="$materi->file_materi" label="Lihat File Saat Ini" />
                         </div>
                     @endif
                     <input type="file" name="file_materi" id="fileMateri" class="form-control @error('file_materi') is-invalid @enderror">
