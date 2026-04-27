@@ -12,7 +12,7 @@ class AiSettingController extends Controller
 {
     public function index()
     {
-        $settings = AppSetting::whereIn('key', ['groq_api_key', 'gemini_api_key', 'ai_model', 'ai_vision_model', 'ai_provider', 'chatbot_enabled_roles'])->pluck('value', 'key');
+        $settings = AppSetting::whereIn('key', ['groq_api_key', 'gemini_api_key', 'ai_model', 'ai_vision_model', 'ai_provider', 'chatbot_enabled_roles', 'ai_question_generator_enabled'])->pluck('value', 'key');
 
         // Parse chatbot enabled roles (default: all staff enabled, siswa and orang_tua disabled)
         $chatbotEnabledRoles = isset($settings['chatbot_enabled_roles'])
@@ -36,6 +36,7 @@ class AiSettingController extends Controller
             'provider' => $settings['ai_provider'] ?? 'groq',
             'chatbotEnabledRoles' => $chatbotEnabledRoles,
             'llmModeEnabled' => isLlmModeEnabled(),
+            'aiQuestionGeneratorEnabled' => isset($settings['ai_question_generator_enabled']) ? filter_var($settings['ai_question_generator_enabled'], FILTER_VALIDATE_BOOLEAN) : true,
         ]);
     }
 
@@ -78,6 +79,7 @@ class AiSettingController extends Controller
             'ai_provider' => $request->ai_provider,
             'chatbot_enabled_roles' => json_encode($chatbotEnabledRoles),
             'llm_mode_enabled' => $request->has('llm_mode_enabled') ? '1' : '0',
+            'ai_question_generator_enabled' => $request->has('ai_question_generator_enabled') ? '1' : '0',
         ];
 
         foreach ($settings as $key => $value) {

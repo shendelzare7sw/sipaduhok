@@ -618,6 +618,9 @@ class GuruUjianController extends Controller
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
         $tipeUjian = $isLatihan ? 'latihan' : 'ujian';
 
+        $aiSetting = \App\Models\AppSetting::where('key', 'ai_question_generator_enabled')->first();
+        $aiQuestionGeneratorEnabled = $aiSetting ? filter_var($aiSetting->value, FILTER_VALIDATE_BOOLEAN) : true;
+
         return view('guru.lms.ujian.manage_soal', [
             'kelas' => $kelas,
             'mapel' => $mataPelajaran,
@@ -625,6 +628,7 @@ class GuruUjianController extends Controller
             'soalList' => $soalList,
             'guru' => $tenagaPendidik,
             'tipeUjian' => $tipeUjian,
+            'aiQuestionGeneratorEnabled' => $aiQuestionGeneratorEnabled,
             'relatedUjianCount' => Ujian::where('guru_id', $tenagaPendidik->id)
                 ->where('mata_pelajaran_id', $mataPelajaran->id)
                 ->where('judul_ujian', $ujian->judul_ujian)

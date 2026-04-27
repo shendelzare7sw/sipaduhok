@@ -33,13 +33,22 @@
                         @endforeach
 
                         <div class="mb-4 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h6 class="fw-bold mb-1"><i class="fas fa-magic me-2 text-primary"></i>Mode LLM (Generative AI)</h6>
                                     <small class="text-muted">Izinkan Chatbot untuk menjawab pertanyaan umum di luar konteks sistem menggunakan AI Generatif (Llama/Gemini). Jika dimatikan, Chatbot hanya akan melayani pertanyaan seputar sistem saja.</small>
                                 </div>
                                 <div class="form-check form-switch form-switch-lg mb-0" style="padding-left: 3rem;">
                                     <input class="form-check-input" type="checkbox" role="switch" name="llm_mode_enabled" id="llm_mode_enabled" style="width: 3rem; height: 1.5rem;" {{ $llmModeEnabled ? 'checked' : '' }}>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1"><i class="fas fa-pen-fancy me-2 text-primary"></i>AI Question Generator</h6>
+                                    <small class="text-muted">Izinkan Guru untuk menggunakan fitur AI Generator Soal Otomatis pada halaman Kelola Soal Ujian dan Latihan.</small>
+                                </div>
+                                <div class="form-check form-switch form-switch-lg mb-0" style="padding-left: 3rem;">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="ai_question_generator_enabled" id="ai_question_generator_enabled" style="width: 3rem; height: 1.5rem;" {{ $aiQuestionGeneratorEnabled ? 'checked' : '' }}>
                                 </div>
                             </div>
                         </div>
@@ -223,6 +232,9 @@
                         <input type="hidden" name="ai_provider" value="{{ $provider }}">
                         @if($llmModeEnabled)
                             <input type="hidden" name="llm_mode_enabled" value="on">
+                        @endif
+                        @if($aiQuestionGeneratorEnabled)
+                            <input type="hidden" name="ai_question_generator_enabled" value="on">
                         @endif
 
                         <div class="row g-3">

@@ -137,11 +137,13 @@
         </button>
 
         {{-- AI Generator Sidebar Trigger --}}
-        <button type="button" class="btn btn-info btn-sm" onclick="openAiSidebar()" title="Buka AI Question Generator">
-            <i class="fas fa-robot me-1"></i>
-            <span class="btn-label-long">AI Question Generator</span>
-            <span class="btn-label-short">AI</span>
-        </button>
+        @if($aiQuestionGeneratorEnabled)
+            <button type="button" class="btn btn-info btn-sm" onclick="openAiSidebar()" title="Buka AI Question Generator">
+                <i class="fas fa-robot me-1"></i>
+                <span class="btn-label-long">AI Question Generator</span>
+                <span class="btn-label-short">AI</span>
+            </button>
+        @endif
     </div>
 
     {{-- MAIN FORM STARTS HERE --}}
