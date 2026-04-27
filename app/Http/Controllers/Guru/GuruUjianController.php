@@ -648,7 +648,7 @@ class GuruUjianController extends Controller
         $request->validate([
             'soal' => 'nullable|array',
             'soal.*.tipe_soal' => 'required|string',
-            'soal.*.pertanyaan' => 'required|string',
+            'soal.*.pertanyaan' => 'nullable|string',
             'soal.*.bobot_nilai' => 'required|integer|min:0',
         ]);
 
@@ -766,7 +766,7 @@ class GuruUjianController extends Controller
                 'image_path' => $imagePath,
                 'urutan' => $index + 1, // Auto number by loop index
                 'tipe_soal' => $data['tipe_soal'],
-                'pertanyaan' => $data['pertanyaan'],
+                'pertanyaan' => $data['pertanyaan'] ?? '',
                 'bobot_nilai' => $data['bobot_nilai'],
                 'pilihan_jawaban' => $pilihanJawaban,
                 'kunci_jawaban' => $kunciJawaban, // Array or String

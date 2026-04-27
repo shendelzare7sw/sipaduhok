@@ -15,6 +15,7 @@ class SoalUjian extends Model
         'ujian_id',
         'narasi',
         'urutan',
+        'image_path',
         'pertanyaan',
         'tipe_soal',
         'pilihan_jawaban',

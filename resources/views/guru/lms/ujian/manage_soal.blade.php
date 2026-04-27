@@ -479,13 +479,17 @@
             const template = templateEl.innerHTML;
             const bsTemplate = bsTemplateEl.innerHTML;
 
+            // Global counters to prevent index collisions on delete/add
+            let questionCounter = 0;
+            let bsRowCounters = {};
+
             // Existing Data
             const existingData = @json($soalList);
 
             // Expose functions globally for onclick handlers
             window.addQuestion = function (data = null) {
-                let index = document.querySelectorAll('.soal-item').length;
-                let number = index + 1;
+                let index = questionCounter++;
+                let number = document.querySelectorAll('.soal-item').length + 1;
 
                 let contentRaw = data ? (data.pertanyaan || '') : '';
 
@@ -541,7 +545,18 @@
 
             window.removeQuestion = function (e, btn) {
                 e.stopPropagation(); // Prevent accordion toggle
+                
+                // Allow direct removal if it's a new question without ID to save clicks
                 itemToDelete = btn.closest('.soal-item');
+                let idInput = itemToDelete.querySelector('input[name*="[id]"]');
+                if (!idInput || !idInput.value) {
+                    itemToDelete.remove();
+                    renumberQuestions();
+                    updateTotalBadge();
+                    itemToDelete = null;
+                    return;
+                }
+
                 var deleteModal = new bootstrap.Modal(document.getElementById('deleteQuestionModal'));
                 deleteModal.show();
             };
@@ -595,7 +610,11 @@
                 let tbody = btn.previousElementSibling.querySelector('tbody');
                 let item = btn.closest('.soal-item');
                 let index = item.getAttribute('data-index');
-                let rowIdx = tbody.children.length;
+                
+                if (typeof bsRowCounters[index] === 'undefined') {
+                    bsRowCounters[index] = 0;
+                }
+                let rowIdx = bsRowCounters[index]++;
 
                 let html = bsTemplate
                     .replace(/{INDEX}/g, index)
