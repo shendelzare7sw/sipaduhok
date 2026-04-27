@@ -395,15 +395,32 @@
                                     @if($soal->image_path)
                                         <div class="soal-image-box mb-3">
                                             <div class="card border-0 shadow-sm">
-                                                <div class="card-body p-2">
+                                                <div class="card-body p-2 text-center">
                                                     <img src="{{ asset('storage/' . $soal->image_path) }}"
                                                          alt="Gambar Soal {{ $index + 1 }}"
                                                          class="img-fluid rounded"
-                                                         style="max-width: 100%; height: auto; cursor: pointer;"
-                                                         onclick="this.requestFullscreen()">
-                                                    <small class="text-muted d-block mt-2 text-center">
+                                                         style="max-height: 250px; cursor: pointer;"
+                                                         data-bs-toggle="modal" data-bs-target="#imageModal{{$index}}">
+                                                    <small class="text-muted d-block mt-2">
                                                         <i class="fas fa-search-plus me-1"></i> Klik gambar untuk memperbesar
                                                     </small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Image Modal -->
+                                        <div class="modal fade" id="imageModal{{$index}}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                <div class="modal-content bg-transparent border-0">
+                                                    <div class="modal-header border-0 pb-0 justify-content-end">
+                                                        <button type="button" class="btn-close btn-close-white bg-dark" data-bs-dismiss="modal" aria-label="Close" style="opacity: 0.8;"></button>
+                                                    </div>
+                                                    <div class="modal-body text-center pt-2 pb-0">
+                                                        <img src="{{ asset('storage/' . $soal->image_path) }}" class="img-fluid rounded shadow-lg" style="max-height: 80vh;">
+                                                    </div>
+                                                    <div class="modal-footer border-0 justify-content-center">
+                                                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Tutup Gambar</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
