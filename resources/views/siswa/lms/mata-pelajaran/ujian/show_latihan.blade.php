@@ -406,9 +406,6 @@
                                     <div class="modal fade" id="imageModal{{$index}}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-lg modal-dialog-centered">
                                             <div class="modal-content bg-transparent border-0">
-                                                <div class="modal-header border-0 pb-0 justify-content-end">
-                                                    <button type="button" class="btn-close btn-close-white bg-dark" data-bs-dismiss="modal" aria-label="Close" style="opacity: 0.8;"></button>
-                                                </div>
                                                 <div class="modal-body text-center pt-2 pb-0">
                                                     <img src="{{ asset('storage/' . $soal->image_path) }}" class="img-fluid rounded shadow-lg" style="max-height: 80vh;">
                                                 </div>
