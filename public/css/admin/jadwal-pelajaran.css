@@ -246,9 +246,24 @@
 
 /* Bulk action bar */
 .bulk-action-bar {
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-bottom: 1px solid var(--jp-border);
-    background: var(--jp-bg);
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.selected-badge {
+    background: #eef2ff;
+    color: #4361ee;
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e7ff;
 }
 
 /* Empty State */
@@ -293,13 +308,29 @@
     .filter-wrapper { flex-direction: column; align-items: stretch; }
     .filter-wrapper .form-select { width: 100% !important; }
     .btn-scroll-mobile {
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 4px;
+        display: flex;
+        gap: 0.5rem;
+        width: 100%;
+        flex-wrap: wrap;
     }
-    .btn-scroll-mobile::-webkit-scrollbar { height: 3px; }
-    .btn-scroll-mobile::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+    .btn-scroll-mobile > .btn, 
+    .btn-scroll-mobile > .dropdown {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 120px;
+    }
+
+    .btn-scroll-mobile .dropdown .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 400px) {
+    .btn-scroll-mobile > .btn, 
+    .btn-scroll-mobile > .dropdown {
+        flex: 1 1 100%;
+    }
+}
 
     /* Mobile Card Table */
     .table-clean thead { display: none; }

@@ -1,4 +1,4 @@
-﻿@extends('layouts.sneat')
+@extends('layouts.sneat')
 
 @section('title', 'Jadwal Pelajaran')
 @section('page-title', 'Kelola Jadwal Pelajaran')
@@ -69,33 +69,41 @@
                 <div class="jp-card-subtitle">Kelola dan atur jadwal mengajar untuk setiap kelas</div>
             </div>
             <div class="btn-scroll-mobile">
-                <a href="{{ route('admin.pengaturan-istirahat.index') }}" class="btn btn-warning text-white btn-sm text-white">
-                    <i class="fas fa-coffee me-1"></i> Istirahat
-                </a>
-                <button type="button" class="btn btn-info text-white btn-sm text-white" data-bs-toggle="modal" data-bs-target="#duplicateModal">
-                    <i class="fas fa-copy me-1"></i> Duplikasi
-                </button>
-                <button type="button" class="btn btn-danger btn-sm text-white"
-                    onclick="window.open('{{ route('admin.jadwal-pelajaran.export-pdf', request()->query()) }}', '_blank')">
-                    <i class="fas fa-file-pdf me-1"></i> PDF
-                </button>
-                <button type="button" class="btn btn-success btn-sm text-white"
-                    onclick="window.location.href='{{ route('admin.jadwal-pelajaran.export-excel', request()->query()) }}'">
-                    <i class="fas fa-file-excel me-1"></i> Excel
-                </button>
-                <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
-                    <i class="fas fa-print me-1"></i> Cetak
-                </button>
-                <a href="{{ route('admin.jadwal-pelajaran.import') }}" class="btn btn-outline-success btn-sm">
-                    <i class="fas fa-file-import me-1"></i> Import
-                </a>
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
-                    data-bs-target="#bulkReplaceModal">
-                    <i class="fas fa-exchange-alt me-1"></i> Ganti Guru
-                </button>
                 <a href="{{ route('admin.jadwal-pelajaran.create', request()->query()) }}" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus me-1"></i> Tambah
                 </a>
+                <a href="{{ route('admin.pengaturan-istirahat.index') }}" class="btn btn-warning btn-sm text-white">
+                    <i class="fas fa-coffee me-1"></i> Istirahat
+                </a>
+                
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-info btn-sm text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-tools me-1"></i> Aksi
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#duplicateModal">
+                            <i class="fas fa-copy me-2 text-info"></i> Duplikasi Jadwal</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#bulkReplaceModal">
+                            <i class="fas fa-random me-2 text-secondary"></i> Ganti Semua Guru</a></li>
+                        <li><a class="dropdown-item" href="{{ route('admin.jadwal-pelajaran.import') }}">
+                            <i class="fas fa-file-import me-2 text-success"></i> Import Excel</a></li>
+                    </ul>
+                </div>
+
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-print me-1"></i> Cetak/Export
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="window.open('{{ route('admin.jadwal-pelajaran.export-pdf', request()->query()) }}', '_blank')">
+                            <i class="fas fa-file-pdf me-2 text-danger"></i> Export PDF (Semua)</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="window.location.href='{{ route('admin.jadwal-pelajaran.export-excel', request()->query()) }}'">
+                            <i class="fas fa-file-excel me-2 text-success"></i> Export Excel (Semua)</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
+                            <i class="fas fa-id-card me-2 text-dark"></i> Cetak Per Kelas</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -161,22 +169,32 @@
         @if($jadwalList->count() > 0)
             <form id="bulk-form-jadwal">
                 @csrf
-                <div class="d-flex gap-2 align-items-center bulk-action-bar">
-                    <div class="d-flex align-items-center gap-2 d-md-none mobile-select-bar">
-                        <input type="checkbox" id="mobile-select-all-jadwal" class="form-check-input"
-                            style="width:18px;height:18px;cursor:pointer;" onclick="mobileToggleSelectAll()">
-                        <label for="mobile-select-all-jadwal" class="mb-0 small fw-semibold text-secondary" style="cursor:pointer;">
-                            Pilih Semua
-                        </label>
+                <div class="bulk-action-bar">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2 d-md-none mobile-select-bar">
+                                <input type="checkbox" id="mobile-select-all-jadwal" class="form-check-input"
+                                    style="width:18px;height:18px;cursor:pointer;" onclick="mobileToggleSelectAll()">
+                                <label for="mobile-select-all-jadwal" class="mb-0 small fw-semibold text-secondary" style="cursor:pointer;">
+                                    Semua
+                                </label>
+                            </div>
+                            <div id="selectedInfo" class="selected-badge" style="display: none;">
+                                <i class="fas fa-check-circle me-1"></i>
+                                <span id="selectedCount">0</span> <span class="d-none d-sm-inline">Jadwal</span> Terpilih
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-danger btn-sm text-white px-3" onclick="bulkDelete()" id="bulkDeleteBtn"
+                                style="display: none;">
+                                <i class="fas fa-trash me-1"></i> Hapus
+                            </button>
+                            <button type="button" class="btn btn-warning text-white btn-sm text-white px-3" onclick="bulkUpdateStatus()" id="bulkStatusBtn"
+                                style="display: none;">
+                                <i class="fas fa-sync me-1"></i> Status
+                            </button>
+                        </div>
                     </div>
-                    <button type="button" class="btn btn-danger btn-sm text-white" onclick="bulkDelete()" id="bulkDeleteBtn"
-                        style="display: none;">
-                        <i class="fas fa-trash me-1"></i> Hapus Terpilih (<span id="selectedCount">0</span>)
-                    </button>
-                    <button type="button" class="btn btn-warning text-white btn-sm text-white" onclick="bulkUpdateStatus()" id="bulkStatusBtn"
-                        style="display: none;">
-                        <i class="fas fa-sync me-1"></i> Ubah Status Terpilih
-                    </button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-clean">
@@ -286,9 +304,9 @@
             aria-labelledby="deleteModalLabel{{ $jadwal->id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
                 <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                    <div class="modal-header border-0 text-white" style="background: #dc3545; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                        <h6 class="modal-title fw-semibold mb-0" id="deleteModalLabel{{ $jadwal->id }}">
-                            <i class="fas fa-trash-alt me-2"></i>Hapus Jadwal Pelajaran
+                    <div class="modal-header border-0" style="background: #dc3545; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                        <h6 class="modal-title fw-semibold mb-0 text-white" id="deleteModalLabel{{ $jadwal->id }}">
+                            <i class="fas fa-trash-alt me-2 text-white"></i>Hapus Jadwal Pelajaran
                         </h6>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -337,9 +355,9 @@
                     @csrf
                     <input type="hidden" name="guru_id_baru" id="guruIdBaru{{ $jadwal->id }}" value="">
                     <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                        <div class="modal-header border-0 text-white" style="background: #0dcaf0; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                            <h6 class="modal-title fw-semibold mb-0" id="gantiGuruModalLabel{{ $jadwal->id }}">
-                                <i class="fas fa-exchange-alt me-2"></i>Ganti Guru &middot; {{ $jadwal->mataPelajaran->nama_mapel }}
+                        <div class="modal-header border-0" style="background: #0dcaf0; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                            <h6 class="modal-title fw-semibold mb-0 text-white" id="gantiGuruModalLabel{{ $jadwal->id }}">
+                                <i class="fas fa-exchange-alt me-2 text-white"></i>Ganti Guru &middot; {{ $jadwal->mataPelajaran->nama_mapel }}
                             </h6>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -368,7 +386,7 @@
                                 {{-- Search Input --}}
                                 <div class="mb-2">
                                     <input type="text" class="form-control" id="searchGuru{{ $jadwal->id }}"
-                                        placeholder="ðŸ” Cari nama guru..." oninput="filterGuruOptions({{ $jadwal->id }})">
+                                        placeholder="Cari nama guru..." oninput="filterGuruOptions({{ $jadwal->id }})">
                                 </div>
 
                                 {{-- Guru Display Selected --}}
@@ -381,7 +399,7 @@
                                             <span id="selectedGuruName{{ $jadwal->id }}" style="font-weight: 500;"></span>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                            onclick="clearGuruSelection{{ $jadwal->id }}()">
+                                            onclick="clearGuruSelection({{ $jadwal->id }})">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -452,9 +470,9 @@
                 <input type="hidden" name="tahun_ajaran_id"
                     value="{{ request('tahun_ajaran_id', $currentTahunAjaran?->id) }}">
                 <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                    <div class="modal-header border-0 text-white" style="background: #6f42c1; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                        <h6 class="modal-title fw-semibold mb-0">
-                            <i class="fas fa-random me-2"></i>Ganti Semua Jadwal Guru
+                    <div class="modal-header border-0" style="background: #6f42c1; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                        <h6 class="modal-title fw-semibold mb-0 text-white">
+                            <i class="fas fa-random me-2 text-white"></i>Ganti Semua Jadwal Guru
                         </h6>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
@@ -505,9 +523,9 @@
             <form action="{{ route('admin.jadwal-pelajaran.duplicate') }}" method="POST">
                 @csrf
                 <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                    <div class="modal-header border-0 text-white" style="background: #198754; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                        <h6 class="modal-title fw-semibold mb-0">
-                            <i class="fas fa-copy me-2"></i>Duplikasi Jadwal
+                    <div class="modal-header border-0" style="background: #198754; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                        <h6 class="modal-title fw-semibold mb-0 text-white">
+                            <i class="fas fa-copy me-2 text-white"></i>Duplikasi Jadwal
                         </h6>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
@@ -559,9 +577,9 @@
     <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
             <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                <div class="modal-header border-0 text-white" style="background: #dc3545; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h6 class="modal-title fw-semibold mb-0" id="bulkDeleteModalLabel">
-                        <i class="fas fa-trash-alt me-2"></i>
+                <div class="modal-header border-0" style="background: #dc3545; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h6 class="modal-title fw-semibold mb-0 text-white" id="bulkDeleteModalLabel">
+                        <i class="fas fa-trash-alt me-2 text-white"></i>
                         Hapus Massal &middot; <span class="badge" style="background: rgba(255,255,255,0.25); font-size: 12px;" id="bulkDeleteCount">0</span> jadwal dipilih
                     </h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -596,9 +614,9 @@
     <div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-labelledby="bulkStatusModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
             <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                <div class="modal-header border-0 text-white" style="background: #e0a800; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h6 class="modal-title fw-semibold mb-0" id="bulkStatusModalLabel">
-                        <i class="fas fa-toggle-on me-2"></i>
+                <div class="modal-header border-0" style="background: #e0a800; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h6 class="modal-title fw-semibold mb-0 text-white" id="bulkStatusModalLabel">
+                        <i class="fas fa-toggle-on me-2 text-white"></i>
                         Ubah Status Massal &middot; <span id="bulkStatusCount">0</span> jadwal
                     </h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -636,15 +654,25 @@
 @endsection
 
 @section('scripts')
+    <script>
+        window.JP_CONFIG = {
+            bulkUpdateStatusUrl: "{{ route('admin.jadwal-pelajaran.bulk-update-status') }}",
+            bulkDeleteUrl: "{{ route('admin.jadwal-pelajaran.bulk-delete') }}",
+            csrfToken: "{{ csrf_token() }}",
+            currentTahunAjaranId: "{{ request('tahun_ajaran_id', $currentTahunAjaran?->id) }}",
+            exportExcelBaseUrl: "{{ url('admin/jadwal-pelajaran/kelas') }}",
+            printBaseUrl: "{{ url('admin/jadwal-pelajaran/kelas') }}"
+        };
+    </script>
     <script src="{{ asset('js/admin/jadwal-pelajaran.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- Modal Cetak Per Kelas --}}
     <div class="modal fade" id="cetakKelasModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                <div class="modal-header border-0 text-white" style="background: #343a40; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                    <h6 class="modal-title fw-semibold mb-0">
-                        <i class="fas fa-print me-2"></i>Cetak Jadwal Pelajaran
+                <div class="modal-header border-0" style="background: #343a40; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h6 class="modal-title fw-semibold mb-0 text-white">
+                        <i class="fas fa-print me-2 text-white"></i>Cetak Jadwal Pelajaran
                     </h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
