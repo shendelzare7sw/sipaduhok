@@ -677,14 +677,16 @@ class GuruUjianController extends Controller
             // Proses sesuai tipe soal (Logic mirip storeSoal tapi disederhanakan untuk bulk)
             switch ($data['tipe_soal']) {
                 case 'pilihan_ganda':
-                    $pilihanJawaban = $data['pilihan_jawaban_pilgan'] ?? [];
-                    // Ensure keys are A, B, C, D, E for storage consistency
+                    $rawPilihan = $data['pilihan_jawaban_pilgan'] ?? [];
+                    // Filter out empty options (teacher may have used only A,B,C)
+                    $pilihanJawaban = array_filter($rawPilihan, fn($v) => $v !== null && $v !== '');
                     $kunciJawaban = $data['kunci_jawaban_pilgan'] ?? null;
                     $jawabanBenarStr = $kunciJawaban;
                     break;
 
                 case 'pilihan_ganda_kompleks':
-                    $pilihanJawaban = $data['pilihan_jawaban_kompleks'] ?? [];
+                    $rawPilihan = $data['pilihan_jawaban_kompleks'] ?? [];
+                    $pilihanJawaban = array_filter($rawPilihan, fn($v) => $v !== null && $v !== '');
                     $kunciJawaban = $data['kunci_jawaban_kompleks'] ?? []; // Array
                     // Store jawaban_benar inside pilihan_jawaban for model checkPilihanGandaKompleks()
                     $pilihanJawaban['jawaban_benar'] = array_map('strtoupper', $kunciJawaban);
@@ -764,12 +766,19 @@ class GuruUjianController extends Controller
             }
 
             // Prepare Update/Create Data
+            $jumlahPilihan = count(array_filter(
+                $data['pilihan_jawaban_pilgan'] ?? $data['pilihan_jawaban_kompleks'] ?? [],
+                fn($v, $k) => preg_match('/^[A-E]$/', $k) && $v !== null && $v !== '',
+                ARRAY_FILTER_USE_BOTH
+            ));
+
             $saveData = [
                 'ujian_id' => $ujianId,
                 'narasi' => $data['narasi'] ?? null,
                 'image_path' => $imagePath,
                 'urutan' => $index + 1, // Auto number by loop index
                 'tipe_soal' => $data['tipe_soal'],
+                'jumlah_pilihan' => in_array($data['tipe_soal'], ['pilihan_ganda', 'pilihan_ganda_kompleks']) ? max($jumlahPilihan, 3) : 5,
                 'pertanyaan' => $data['pertanyaan'] ?? '',
                 'bobot_nilai' => $data['bobot_nilai'],
                 'pilihan_jawaban' => $pilihanJawaban,

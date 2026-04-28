@@ -18,6 +18,7 @@ class SoalUjian extends Model
         'image_path',
         'pertanyaan',
         'tipe_soal',
+        'jumlah_pilihan',
         'pilihan_jawaban',
         'jawaban_benar',
         'kunci_jawaban',

@@ -380,32 +380,30 @@
 
                         {{-- 1. PILGAN --}}
                         <div class="type-section section-pilihan_ganda">
-                            @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
-                                <div class="input-group input-group-sm mb-2">
-                                    <div class="input-group-text">
-                                        <input class="form-check-input mt-0" type="radio"
-                                            name="soal[{INDEX}][kunci_jawaban_pilgan]" value="{{ $opt }}">
-                                        <span class="ms-2 fw-bold">{{ $opt }}</span>
-                                    </div>
-                                    <input type="text" name="soal[{INDEX}][pilihan_jawaban_pilgan][{{ $opt }}]"
-                                        class="form-control" placeholder="Opsi {{ $opt }}">
-                                </div>
-                            @endforeach
+                            <div class="pg-options-container"></div>
+                            <div class="d-flex gap-2 mt-2">
+                                <button type="button" class="btn btn-xs btn-outline-success" onclick="addPgOption(this, 'pilgan')" title="Tambah Opsi">
+                                    <i class="fas fa-plus me-1"></i>Opsi
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePgOption(this, 'pilgan')" title="Kurangi Opsi">
+                                    <i class="fas fa-minus me-1"></i>Opsi
+                                </button>
+                                <small class="text-muted align-self-center">(Min 3, Maks 5)</small>
+                            </div>
                         </div>
 
                         {{-- 2. PILGAN KOMPLEKS --}}
                         <div class="type-section section-pilihan_ganda_kompleks" style="display:none;">
-                            @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
-                                <div class="input-group input-group-sm mb-2">
-                                    <div class="input-group-text">
-                                        <input class="form-check-input mt-0" type="checkbox"
-                                            name="soal[{INDEX}][kunci_jawaban_kompleks][]" value="{{ $opt }}">
-                                        <span class="ms-2 fw-bold">{{ $opt }}</span>
-                                    </div>
-                                    <input type="text" name="soal[{INDEX}][pilihan_jawaban_kompleks][{{ $opt }}]"
-                                        class="form-control" placeholder="Opsi {{ $opt }}">
-                                </div>
-                            @endforeach
+                            <div class="pgk-options-container"></div>
+                            <div class="d-flex gap-2 mt-2">
+                                <button type="button" class="btn btn-xs btn-outline-success" onclick="addPgOption(this, 'kompleks')" title="Tambah Opsi">
+                                    <i class="fas fa-plus me-1"></i>Opsi
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePgOption(this, 'kompleks')" title="Kurangi Opsi">
+                                    <i class="fas fa-minus me-1"></i>Opsi
+                                </button>
+                                <small class="text-muted align-self-center">(Min 3, Maks 5)</small>
+                            </div>
                         </div>
 
                         {{-- 3. BENAR SALAH --}}
@@ -532,9 +530,12 @@
                     // Trigger type change to show correct section
                     changeType(el.querySelector('.type-select'));
 
-                    // Populate Section Data
+                    // Populate Section Data (this will create the option rows from data)
                     populateSectionData(el, index, data);
                 } else {
+                    // New question: initialize default 5 options for PG and PGK
+                    initDefaultPgOptions(el, index, 'pilgan', 5);
+                    initDefaultPgOptions(el, index, 'kompleks', 5);
                     // Default 1 BS row if new
                     addBsRow(el.querySelector('button[onclick="addBsRow(this)"]'));
                 }
@@ -630,6 +631,15 @@
 
                 if (type === 'pilihan_ganda') {
                     let opts = data.pilihan_jawaban || {};
+                    // Filter out non-letter keys like 'jawaban_benar'
+                    let optKeys = Object.keys(opts).filter(k => /^[A-E]$/.test(k));
+                    let count = Math.max(optKeys.length, 3); // at least 3
+                    count = Math.min(count, 5); // at most 5
+
+                    // Initialize option rows
+                    initDefaultPgOptions(el, index, 'pilgan', count);
+
+                    // Fill values
                     if (typeof opts === 'object' && opts !== null) {
                         for (let k in opts) {
                             let input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_pilgan][${k}]"]`);
@@ -643,6 +653,12 @@
                 }
                 else if (type === 'pilihan_ganda_kompleks') {
                     let opts = data.pilihan_jawaban || {};
+                    let optKeys = Object.keys(opts).filter(k => /^[A-E]$/.test(k));
+                    let count = Math.max(optKeys.length, 3);
+                    count = Math.min(count, 5);
+
+                    initDefaultPgOptions(el, index, 'kompleks', count);
+
                     if (typeof opts === 'object' && opts !== null) {
                         for (let k in opts) {
                             let input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_kompleks][${k}]"]`);
@@ -659,8 +675,14 @@
                             if (cb) cb.checked = true;
                         });
                     }
+                    // Also init PG defaults for when user switches type
+                    initDefaultPgOptions(el, index, 'pilgan', count);
                 }
                 else if (type === 'benar_salah') {
+                    // Init default PG/PGK options for type switching
+                    initDefaultPgOptions(el, index, 'pilgan', 5);
+                    initDefaultPgOptions(el, index, 'kompleks', 5);
+
                     let rows = [];
                     if (data.pilihan_jawaban && data.pilihan_jawaban.pernyataan) {
                         rows = data.pilihan_jawaban.pernyataan;
@@ -686,10 +708,94 @@
                         window.addBsRow(el.querySelector('button[onclick="addBsRow(this)"]'));
                     }
                 }
-                else if (type === 'isian_singkat') {
-                    let val = data.kunci_jawaban || '';
-                    el.querySelector(`input[name="soal[${index}][kunci_jawaban_isian]"]`).value = val;
+                else if (type === 'isian_singkat' || type === 'uraian') {
+                    // Init default PG/PGK options for type switching
+                    initDefaultPgOptions(el, index, 'pilgan', 5);
+                    initDefaultPgOptions(el, index, 'kompleks', 5);
+
+                    if (type === 'isian_singkat') {
+                        let val = data.kunci_jawaban || '';
+                        el.querySelector(`input[name="soal[${index}][kunci_jawaban_isian]"]`).value = val;
+                    }
                 }
+            };
+
+            // === DYNAMIC PG OPTION FUNCTIONS ===
+            const allLetters = ['A', 'B', 'C', 'D', 'E'];
+
+            /**
+             * Create a single PG option row HTML
+             */
+            function createPgOptionHtml(index, letter, mode) {
+                let inputType = mode === 'pilgan' ? 'radio' : 'checkbox';
+                let namePrefix = mode === 'pilgan' ? 'pilihan_jawaban_pilgan' : 'pilihan_jawaban_kompleks';
+                let keyName = mode === 'pilgan'
+                    ? `soal[${index}][kunci_jawaban_pilgan]`
+                    : `soal[${index}][kunci_jawaban_kompleks][]`;
+
+                return `<div class="input-group input-group-sm mb-2 pg-option-row" data-letter="${letter}">
+                    <div class="input-group-text">
+                        <input class="form-check-input mt-0" type="${inputType}"
+                            name="${keyName}" value="${letter}">
+                        <span class="ms-2 fw-bold">${letter}</span>
+                    </div>
+                    <input type="text" name="soal[${index}][${namePrefix}][${letter}]"
+                        class="form-control" placeholder="Opsi ${letter}">
+                </div>`;
+            }
+
+            /**
+             * Initialize default PG options for a question
+             */
+            window.initDefaultPgOptions = function(el, index, mode, count) {
+                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
+                let container = el.querySelector(containerClass);
+                if (!container) return;
+
+                // Clear existing
+                container.innerHTML = '';
+
+                // Add options
+                for (let i = 0; i < count; i++) {
+                    container.insertAdjacentHTML('beforeend', createPgOptionHtml(index, allLetters[i], mode));
+                }
+            };
+
+            /**
+             * Add a PG/PGK option (max 5)
+             */
+            window.addPgOption = function(btn, mode) {
+                let item = btn.closest('.soal-item');
+                let index = item.getAttribute('data-index');
+                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
+                let container = item.querySelector(containerClass);
+                let currentCount = container.querySelectorAll('.pg-option-row').length;
+
+                if (currentCount >= 5) {
+                    alert('Maksimal 5 opsi jawaban (A-E).');
+                    return;
+                }
+
+                let nextLetter = allLetters[currentCount];
+                container.insertAdjacentHTML('beforeend', createPgOptionHtml(index, nextLetter, mode));
+            };
+
+            /**
+             * Remove last PG/PGK option (min 3)
+             */
+            window.removePgOption = function(btn, mode) {
+                let item = btn.closest('.soal-item');
+                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
+                let container = item.querySelector(containerClass);
+                let rows = container.querySelectorAll('.pg-option-row');
+
+                if (rows.length <= 3) {
+                    alert('Minimal 3 opsi jawaban (A-C).');
+                    return;
+                }
+
+                // Remove last row
+                rows[rows.length - 1].remove();
             };
 
             // Initialize
