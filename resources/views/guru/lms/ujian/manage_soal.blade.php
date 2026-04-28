@@ -462,9 +462,42 @@
 
     @push('scripts')
     {{-- AI Question Generator JavaScript --}}
-    <script src="{{ asset('js/ai-question-generator.js') }}?v=1.0"></script>
+    <script src="{{ asset('js/ai-question-generator.js') }}?v=1.1"></script>
 
     <script>
+        // === Global LMS Toast Notification ===
+        function showLmsToast(type, message) {
+            let container = document.getElementById('lmsToastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'lmsToastContainer';
+                container.className = 'toast-container position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '9999';
+                document.body.appendChild(container);
+            }
+
+            const bgClass = type === 'error' || type === 'danger' ? 'bg-danger' : type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning text-dark' : 'bg-info';
+            const icon = type === 'error' || type === 'danger' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+            const closeClass = type === 'warning' ? 'btn-close' : 'btn-close btn-close-white';
+
+            const toastHtml = `
+                <div class="toast align-items-center text-white ${bgClass} border-0 shadow-lg" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas ${icon} me-2"></i>${message}
+                        </div>
+                        <button type="button" class="${closeClass} me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            const toastEl = container.lastElementChild;
+            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            toast.show();
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Variables initialized after DOM load
             const container = document.getElementById('soalAccordion');
@@ -772,7 +805,7 @@
                 let currentCount = container.querySelectorAll('.pg-option-row').length;
 
                 if (currentCount >= 5) {
-                    alert('Maksimal 5 opsi jawaban (A-E).');
+                    showLmsToast('warning', 'Maksimal 5 opsi jawaban (A-E).');
                     return;
                 }
 
@@ -790,7 +823,7 @@
                 let rows = container.querySelectorAll('.pg-option-row');
 
                 if (rows.length <= 3) {
-                    alert('Minimal 3 opsi jawaban (A-C).');
+                    showLmsToast('warning', 'Minimal 3 opsi jawaban (A-C).');
                     return;
                 }
 
@@ -871,7 +904,7 @@
 
                     // Validate file size (max 2MB)
                     if (file.size > 2 * 1024 * 1024) {
-                        alert('Ukuran gambar terlalu besar! Maksimal 2MB.');
+                        showLmsToast('error', 'Ukuran gambar terlalu besar! Maksimal 2MB.');
                         input.value = '';
                         return;
                     }
@@ -879,7 +912,7 @@
                     // Validate file type
                     const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                     if (!validTypes.includes(file.type)) {
-                        alert('Format gambar tidak valid! Gunakan JPG, PNG, atau GIF.');
+                        showLmsToast('error', 'Format gambar tidak valid! Gunakan JPG, PNG, atau GIF.');
                         input.value = '';
                         return;
                     }

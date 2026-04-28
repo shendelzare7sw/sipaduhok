@@ -379,7 +379,16 @@
                         D: q.pilihan_d || '',
                         E: q.pilihan_e || '',
                     };
-                    soalData.kunci_jawaban = q.kunci_jawaban;
+
+                    if (q.tipe_soal === 'pilihan_ganda_kompleks') {
+                        // PGK: kunci_jawaban from AI is a comma-separated string like "A,C,D"
+                        // populateSectionData expects an array like ["A","C","D"]
+                        let kunciStr = String(q.kunci_jawaban || '');
+                        soalData.kunci_jawaban = kunciStr.split(',').map(k => k.trim()).filter(k => k);
+                    } else {
+                        // PG: kunci_jawaban is a single letter like "A"
+                        soalData.kunci_jawaban = q.kunci_jawaban;
+                    }
                 } else if (q.tipe_soal === 'benar_salah') {
                     // Convert to BS format
                     const isBenar = ['benar', 'true', 'B', '1'].includes(String(q.kunci_jawaban).toLowerCase());
