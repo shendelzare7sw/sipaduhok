@@ -111,6 +111,7 @@ class GuruUjianController extends Controller
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'durasi_menit' => 'nullable|integer|min:0',
             'tampilkan_nilai' => 'nullable|boolean',
+            'tampilkan_riwayat' => 'nullable|boolean',
             'bisa_diulang' => 'nullable|boolean',
             'batas_pengulangan' => 'nullable|integer|min:0',
         ]);
@@ -131,6 +132,7 @@ class GuruUjianController extends Controller
             'durasi_menit' => $validated['durasi_menit'],
             'is_active' => false,
             'tampilkan_nilai' => $request->has('tampilkan_nilai'),
+            'tampilkan_riwayat' => $request->has('tampilkan_riwayat'),
             'bisa_diulang' => $request->has('bisa_diulang'),
             'batas_pengulangan' => $request->has('bisa_diulang') ? $validated['batas_pengulangan'] : null,
         ];
@@ -248,6 +250,7 @@ class GuruUjianController extends Controller
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'durasi_menit' => 'nullable|integer|min:0',
             'tampilkan_nilai' => 'nullable|boolean',
+            'tampilkan_riwayat' => 'nullable|boolean',
             'bisa_diulang' => 'nullable|boolean',
             'batas_pengulangan' => 'nullable|integer|min:0',
         ]);
@@ -258,6 +261,7 @@ class GuruUjianController extends Controller
         }
 
         $validated['tampilkan_nilai'] = $request->has('tampilkan_nilai');
+        $validated['tampilkan_riwayat'] = $request->has('tampilkan_riwayat');
         $validated['bisa_diulang'] = $request->has('bisa_diulang');
         $validated['batas_pengulangan'] = $request->has('bisa_diulang') ? $validated['batas_pengulangan'] : null;
 
@@ -282,6 +286,7 @@ class GuruUjianController extends Controller
                 'durasi_menit' => $ujian->durasi_menit,
                 'is_active' => $ujian->is_active,
                 'tampilkan_nilai' => $ujian->tampilkan_nilai,
+                'tampilkan_riwayat' => $ujian->tampilkan_riwayat,
                 'bisa_diulang' => $ujian->bisa_diulang,
                 'batas_pengulangan' => $ujian->batas_pengulangan,
             ];

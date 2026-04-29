@@ -51,7 +51,7 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                @if($ujianSiswa && $ujianSiswa->status === 'selesai')
+                @if($ujianSiswa && in_array($ujianSiswa->status, ['selesai', 'dinilai']))
                      <!-- RESULT SCREEN -->
                      <div class="ujian-card text-center">
                         <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
@@ -100,6 +100,11 @@
                                         </button>
                                     </form>
                                 @endif
+                            @endif
+                            @if($ujian->tampilkan_riwayat)
+                                <a href="{{ route('siswa.lms.mapel.ujian.review', [$mataPelajaran->id, $ujian->id]) }}" class="btn btn-outline-primary px-4 m-0">
+                                    <i class="fas fa-search me-2"></i> Lihat Pembahasan
+                                </a>
                             @endif
                             <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary px-4 m-0">
                                 <i class="fas fa-arrow-left me-2"></i> Kembali ke Mata Pelajaran

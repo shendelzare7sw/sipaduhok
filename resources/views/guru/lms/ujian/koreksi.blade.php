@@ -23,26 +23,7 @@
         </a>
     </div>
 
-    {{-- AI Provider Info Badge --}}
-    @php
-        $currentProvider = \App\Models\AppSetting::where('key', 'ai_provider')->first()?->value ?? 'groq';
-        $providerName = $currentProvider === 'groq' ? 'Groq Cloud' : 'Google Gemini';
-        $providerIcon = $currentProvider === 'groq' ? 'fa-bolt' : 'fa-google';
-        $providerColor = $currentProvider === 'groq' ? 'primary' : 'success';
-    @endphp
-    <div class="alert alert-{{$providerColor}} alert-dismissible fade show mb-3" role="alert">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <i class="fas fa-robot me-2"></i>
-                <strong>AI Grading Assistant:</strong> Menggunakan <span class="fw-bold">{{ $providerName }}</span>
-            </div>
-            @if(auth()->user()->role === 'admin')
-            <a href="{{ route('admin.ai-settings.index') }}" class="btn btn-sm btn-outline-{{$providerColor}}">
-                <i class="fas fa-cog me-1"></i> Ubah Provider
-            </a>
-            @endif
-        </div>
-    </div>
+
 
     <div class="card-custom mb-4">
         <div class="card-body">

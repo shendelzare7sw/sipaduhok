@@ -32,14 +32,16 @@ class Ujian extends Model
         'guru_id',
         'judul_ujian',
         'deskripsi',
-        'tipe_ujian',
         'tanggal_mulai',
         'tanggal_selesai',
         'durasi_menit',
         'is_active',
+        'acak_soal',
         'tampilkan_nilai',
         'bisa_diulang',
         'batas_pengulangan',
+        'tampilkan_riwayat',
+        'tipe_ujian', // 'ujian' atau 'latihan'
     ];
 
     protected $casts = [
@@ -47,8 +49,10 @@ class Ujian extends Model
         'tanggal_selesai' => 'datetime',
         'durasi_menit' => 'integer',
         'is_active' => 'boolean',
+        'acak_soal' => 'boolean',
         'tampilkan_nilai' => 'boolean',
         'bisa_diulang' => 'boolean',
+        'tampilkan_riwayat' => 'boolean',
     ];
 
     /**

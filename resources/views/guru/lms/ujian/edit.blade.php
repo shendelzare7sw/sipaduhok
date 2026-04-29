@@ -106,6 +106,13 @@
                             <small class="text-muted d-block mt-1">Jika dinonaktifkan, siswa hanya akan melihat ucapan terima kasih setelah mengerjakan.</small>
                         </div>
 
+                        <!-- Tampilkan Riwayat / Pembahasan -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="tampilkanRiwayat" name="tampilkan_riwayat" value="1" {{ old('tampilkan_riwayat', $ujian->tampilkan_riwayat) ? 'checked' : '' }}>
+                            <label class="form-check-label fw-bold text-success" for="tampilkanRiwayat">Izinkan Siswa Melihat Riwayat & Jawaban Benar</label>
+                            <small class="text-muted d-block mt-1">Siswa dapat melihat riwayat jawaban dan mencocokkannya dengan kunci jawaban setelah ujian selesai.</small>
+                        </div>
+
                         <hr>
 
                         <!-- Pengulangan -->

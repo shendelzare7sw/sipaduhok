@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Siswa;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use App\Models\Siswa;
 use App\Models\Ujian;
 use App\Models\UjianSiswa;
 use App\Models\SoalUjian;
 use App\Models\JawabanSiswa;
+use App\Models\MataPelajaran;
 
 class LmsUjianController extends Controller
 {
@@ -346,5 +348,39 @@ class LmsUjianController extends Controller
         $routePrefix = $ujian->tipe_ujian === 'latihan' ? 'latihan' : 'ujian';
         return redirect()->route('siswa.lms.mapel.' . $routePrefix . '.show', [$mapelId, $ujianId])
             ->with('success', 'Ujian telah di-reset. Silakan kerjakan ulang! Nilai sebelumnya telah disimpan sebagai nilai terbaik jika lebih tinggi.');
+    }
+
+    /**
+     * Tampilkan riwayat dan pembahasan ujian/latihan
+     */
+    public function review($mapelId, $ujianId): View|\Illuminate\Http\RedirectResponse
+    {
+        $siswa = Siswa::where('user_id', auth()->id())->firstOrFail();
+        
+        $ujian = Ujian::with(['soalUjian' => function($q) {
+            $q->orderBy('urutan', 'asc');
+        }])
+            ->where('id', $ujianId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
+
+        $ujianSiswa = UjianSiswa::with('jawabanSiswa')
+            ->where('ujian_id', $ujianId)
+            ->where('siswa_id', $siswa->id)
+            ->first();
+
+        // Check conditions
+        if (!$ujianSiswa || !in_array($ujianSiswa->status, ['selesai', 'dinilai'])) {
+            return back()->with('error', 'Anda belum menyelesaikan ' . $ujian->tipe_label . ' ini.');
+        }
+
+        if (!$ujian->tampilkan_riwayat) {
+            return back()->with('error', 'Guru tidak mengizinkan untuk melihat riwayat ' . $ujian->tipe_label . ' ini.');
+        }
+
+        $mapel = MataPelajaran::findOrFail($mapelId);
+
+        return view('siswa.lms.mata-pelajaran.ujian.review', compact('ujian', 'ujianSiswa', 'siswa', 'mapel'));
     }
 }
