@@ -97,7 +97,7 @@
                             </div>
 
                         @if($isAutoGraded)
-                            {{-- Tampilan Auto Graded (Read Only) --}}
+                            {{-- Tampilan Auto Graded (Bisa di-override guru) --}}
                             <div class="mb-3">
                                 <label class="small text-muted fw-bold mb-1">Jawaban Siswa:</label>
                                 <div class="p-3 border rounded student-answer-box">
@@ -110,16 +110,34 @@
                                         @else
                                             <span class="text-muted fst-italic">(Tidak dijawab)</span>
                                         @endif
+                                    @elseif($soal->tipe_soal == 'pilihan_ganda_kompleks')
+                                        @php
+                                            $ansArray = [];
+                                            if (isset($jawaban->jawaban) && $jawaban->jawaban) {
+                                                $ansArray = is_array($jawaban->jawaban) ? $jawaban->jawaban : (json_decode($jawaban->jawaban, true) ?? []);
+                                            }
+                                        @endphp
+                                        @if(empty($ansArray))
+                                            <span class="text-muted fst-italic">(Tidak dijawab)</span>
+                                        @else
+                                            <strong>{{ implode(', ', $ansArray) }}</strong>
+                                        @endif
                                     @else
                                         {{-- Simplifikasi tampilan untuk tipe lain --}}
-                                        {{ is_array($jawaban->jawaban ?? null) ? json_encode($jawaban->jawaban) : ($jawaban->jawaban ?? '-') }}
+                                        @php
+                                            $decoded = null;
+                                            if (isset($jawaban->jawaban)) {
+                                                $decoded = is_array($jawaban->jawaban) ? $jawaban->jawaban : json_decode($jawaban->jawaban, true);
+                                            }
+                                        @endphp
+                                        {{ is_array($decoded) ? implode(', ', $decoded) : ($jawaban->jawaban ?? '-') }}
                                     @endif
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-2">
-                                    <label class="small text-muted fw-bold">Nilai Otomatis:</label>
-                                    <input type="text" class="form-control form-control-lg-custom" value="{{ $jawaban->nilai_soal ?? 0 }}" readonly>
+                                <div class="col-md-3">
+                                    <label class="small text-muted fw-bold">Nilai Otomatis (Bisa Diubah):</label>
+                                    <input type="number" step="0.1" min="0" max="{{ $soal->bobot_nilai }}" name="nilai[{{ $soal->id }}]" class="form-control form-control-lg-custom border-primary" value="{{ $jawaban->nilai_soal ?? 0 }}">
                                 </div>
                             </div>
 

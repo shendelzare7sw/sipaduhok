@@ -382,6 +382,9 @@
 
                         {{-- 2. PILGAN KOMPLEKS --}}
                         <div class="type-section section-pilihan_ganda_kompleks" style="display:none;">
+                            <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.75rem;">
+                                <i class="fas fa-info-circle me-1"></i> Penilaian parsial: <strong class="text-success">+Poin</strong> untuk opsi benar, <strong class="text-danger">-Poin</strong> untuk opsi salah (min. 0).
+                            </div>
                             <div class="pgk-options-container"></div>
                             <div class="d-flex gap-2 mt-2">
                                 <button type="button" class="btn btn-xs btn-outline-success" onclick="addPgOption(this, 'kompleks')" title="Tambah Opsi">

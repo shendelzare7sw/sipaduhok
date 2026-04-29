@@ -178,35 +178,82 @@ class SoalUjian extends Model
      */
     public function calculatePartialScore($jawaban)
     {
-        if ($this->tipe_soal !== self::TIPE_BENAR_SALAH) {
-            return $this->checkAnswer($jawaban) ? $this->bobot_nilai : 0;
-        }
-
-        if (!is_array($jawaban)) {
-            $jawaban = json_decode($jawaban, true) ?? [];
-        }
-
-        $pilihanData = $this->pilihan_jawaban;
-        $pernyataan = $pilihanData['pernyataan'] ?? [];
-
-        if (empty($pernyataan))
-            return 0;
-
-        $benar = 0;
-        foreach ($pernyataan as $index => $item) {
-            $jawabanBenar = $item['benar'] ?? false;
-            $jawabanSiswa = $jawaban[$index] ?? false;
-
-            if (is_string($jawabanSiswa)) {
-                $jawabanSiswa = filter_var($jawabanSiswa, FILTER_VALIDATE_BOOLEAN);
+        // 1. Partial Scoring untuk Pilihan Ganda Kompleks
+        if ($this->tipe_soal === self::TIPE_PILGAN_KOMPLEKS) {
+            if (!is_array($jawaban)) {
+                $jawaban = json_decode($jawaban, true) ?? [];
+            }
+            $pilihanData = $this->pilihan_jawaban;
+            $kunciBenar = $pilihanData['jawaban_benar'] ?? [];
+            
+            // Collect valid options based on keys A, B, C, D, E that have non-empty text
+            $availableOptions = [];
+            foreach (['A', 'B', 'C', 'D', 'E'] as $letter) {
+                if (isset($pilihanData[$letter]) && $pilihanData[$letter] !== '') {
+                    $availableOptions[] = $letter;
+                }
             }
 
-            if ($jawabanSiswa === $jawabanBenar) {
-                $benar++;
+            if (empty($kunciBenar) || empty($availableOptions)) return 0;
+
+            // Normalize choices to uppercase and trim
+            $jawaban = array_map('strtoupper', array_map('trim', $jawaban));
+            $kunciBenar = array_map('strtoupper', array_map('trim', $kunciBenar));
+
+            $jumlahKunciBenar = count($kunciBenar);
+            $jumlahKunciSalah = count($availableOptions) - $jumlahKunciBenar;
+
+            $benarDipilih = 0;
+            $salahDipilih = 0;
+
+            foreach ($jawaban as $j) {
+                if (in_array($j, $kunciBenar)) {
+                    $benarDipilih++;
+                } elseif (in_array($j, $availableOptions)) {
+                    $salahDipilih++;
+                }
             }
+
+            // Calculate points: (benar dipilih / total kunci benar) * bobot - (salah dipilih / total opsi salah) * bobot
+            $poinPerBenar = $jumlahKunciBenar > 0 ? ($this->bobot_nilai / $jumlahKunciBenar) : 0;
+            $poinPerSalah = $jumlahKunciSalah > 0 ? ($this->bobot_nilai / $jumlahKunciSalah) : 0;
+
+            $skor = ($benarDipilih * $poinPerBenar) - ($salahDipilih * $poinPerSalah);
+            
+            return max(0, $skor);
         }
 
-        return ($benar / count($pernyataan)) * $this->bobot_nilai;
+        // 2. Partial Scoring untuk Benar / Salah
+        if ($this->tipe_soal === self::TIPE_BENAR_SALAH) {
+            if (!is_array($jawaban)) {
+                $jawaban = json_decode($jawaban, true) ?? [];
+            }
+
+            $pilihanData = $this->pilihan_jawaban;
+            $pernyataan = $pilihanData['pernyataan'] ?? [];
+
+            if (empty($pernyataan))
+                return 0;
+
+            $benar = 0;
+            foreach ($pernyataan as $index => $item) {
+                $jawabanBenar = $item['benar'] ?? false;
+                $jawabanSiswa = $jawaban[$index] ?? false;
+
+                if (is_string($jawabanSiswa)) {
+                    $jawabanSiswa = filter_var($jawabanSiswa, FILTER_VALIDATE_BOOLEAN);
+                }
+
+                if ($jawabanSiswa === $jawabanBenar) {
+                    $benar++;
+                }
+            }
+
+            return ($benar / count($pernyataan)) * $this->bobot_nilai;
+        }
+
+        // 3. Fallback: Full score or 0 for other types
+        return $this->checkAnswer($jawaban) ? $this->bobot_nilai : 0;
     }
 
     /**
