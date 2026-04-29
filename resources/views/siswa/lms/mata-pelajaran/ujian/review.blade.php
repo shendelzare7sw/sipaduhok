@@ -6,14 +6,24 @@
     $routePrefix = $isLatihan ? 'latihan' : 'ujian';
     $soalList = $ujian->soalUjian;
     $jawabanMap = $ujianSiswa->jawabanSiswa->keyBy('soal_ujian_id');
+    
     $totalSoal = $soalList->count();
-    $benar = 0; $salah = 0; $tidakDijawab = 0;
+    $totalBobot = 0;
+    $poinDiperoleh = 0;
+    $menungguKoreksi = 0;
+
     foreach($soalList as $s) {
+        $totalBobot += $s->bobot_nilai;
         $j = $jawabanMap->get($s->id);
-        if (!$j || $j->jawaban === null || $j->jawaban === '') { $tidakDijawab++; }
-        elseif ($j->nilai_soal !== null && $j->nilai_soal >= $s->bobot_nilai) { $benar++; }
-        else { $salah++; }
+        if ($j) {
+            if ($j->nilai_soal !== null) {
+                $poinDiperoleh += (float)$j->nilai_soal;
+            } elseif ($j->perluKoreksiManual()) {
+                $menungguKoreksi++;
+            }
+        }
     }
+
     $nilaiDisplay = $ujianSiswa->nilai_terbaik ?? $ujianSiswa->nilai ?? 0;
 @endphp
 
@@ -98,10 +108,16 @@
 </div>
 
 <div class="rv-stats">
-    <div class="rv-stat s1"><h2>{{ number_format($nilaiDisplay,1) }}</h2><small>Nilai Terbaik</small></div>
-    <div class="rv-stat s2"><h2>{{ $benar }}</h2><small>Benar</small></div>
-    <div class="rv-stat s3"><h2>{{ $salah }}</h2><small>Salah</small></div>
-    <div class="rv-stat s4"><h2>{{ $tidakDijawab }}</h2><small>Tidak Dijawab</small></div>
+    <div class="rv-stat s1"><h2>{{ number_format($nilaiDisplay,1) }}</h2><small>Nilai Akhir (100)</small></div>
+    <div class="rv-stat s2"><h2>{{ floatval($poinDiperoleh) }}/{{ floatval($totalBobot) }}</h2><small>Total Poin</small></div>
+    <div class="rv-stat s4"><h2>{{ $totalSoal }}</h2><small>Total Soal</small></div>
+    <div class="rv-stat {{ $menungguKoreksi > 0 ? 's3' : 's2' }}">
+        @if($menungguKoreksi > 0)
+            <h2><i class="fas fa-clock"></i></h2><small>Menunggu Koreksi Guru</small>
+        @else
+            <h2><i class="fas fa-check-double"></i></h2><small>Selesai Dikoreksi</small>
+        @endif
+    </div>
 </div>
 
 @foreach($soalList as $index => $soal)

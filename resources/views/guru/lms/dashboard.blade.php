@@ -62,7 +62,7 @@
         </div>
         
         <div class="premium-actions-grid">
-            <a href="{{ route('guru.lms.materi.create', [$kelas->id, $mapel->id]) }}" class="premium-action-card card-materi">
+            <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}" class="premium-action-card card-materi">
                 <div class="icon-circle">
                     <i class="fas fa-book"></i>
                 </div>
@@ -73,13 +73,13 @@
                 <i class="fas fa-chevron-right arrow-icon"></i>
             </a>
 
-            <a href="{{ route('guru.lms.tugas.create', [$kelas->id, $mapel->id]) }}" class="premium-action-card card-tugas">
+            <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="premium-action-card card-tugas">
                 <div class="icon-circle">
                     <i class="fas fa-tasks"></i>
                 </div>
                 <div class="card-details">
                     <span class="card-title">Tugas</span>
-                    <span class="card-subtitle">Buat tugas baru</span>
+                    <span class="card-subtitle">Kelola tugas</span>
                 </div>
                 <i class="fas fa-chevron-right arrow-icon"></i>
             </a>
@@ -90,18 +90,18 @@
                 </div>
                 <div class="card-details">
                     <span class="card-title">Latihan</span>
-                    <span class="card-subtitle">Buat soal latihan</span>
+                    <span class="card-subtitle">Kelola soal latihan</span>
                 </div>
                 <i class="fas fa-chevron-right arrow-icon"></i>
             </a>
 
-            <a href="{{ route('guru.lms.ujian.create', [$kelas->id, $mapel->id]) }}" class="premium-action-card card-ujian">
+            <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="premium-action-card card-ujian">
                 <div class="icon-circle">
                     <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="card-details">
                     <span class="card-title">Ujian</span>
-                    <span class="card-subtitle">Selenggarakan ujian</span>
+                    <span class="card-subtitle">Kelola ujian</span>
                 </div>
                 <i class="fas fa-chevron-right arrow-icon"></i>
             </a>
