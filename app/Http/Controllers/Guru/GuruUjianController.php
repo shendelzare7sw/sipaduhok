@@ -385,7 +385,10 @@ class GuruUjianController extends Controller
             ->where('ujian_id', $id)
             ->get()
             ->filter(function($result) use ($mataPelajaran) {
-                 return $result->siswa && $result->siswa->canAccessMapel($mataPelajaran);
+                 // Tetap tampilkan jika siswa tidak ditemukan di DB (untuk menangani data orphan/inkonsisten)
+                 // Namun tetap lakukan filter agama jika data siswanya tersedia
+                 if (!$result->siswa) return true;
+                 return $result->siswa->canAccessMapel($mataPelajaran);
             });
 
         // Statistik

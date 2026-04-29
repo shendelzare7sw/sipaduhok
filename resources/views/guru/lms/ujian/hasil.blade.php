@@ -97,7 +97,7 @@
                                 {{ $index + 1 }}
                             @endif
                         </td>
-                        <td><strong>{{ $hasil->siswa->nama_lengkap }}</strong></td>
+                        <td><strong>{{ $hasil->siswa->nama_lengkap ?? 'Siswa Tidak Ditemukan (ID: '.$hasil->siswa_id.')' }}</strong></td>
                         <td class="text-center">
                             {{ $hasil->waktu_mulai ? $hasil->waktu_mulai->format('d M Y H:i') : '-' }}
                         </td>
