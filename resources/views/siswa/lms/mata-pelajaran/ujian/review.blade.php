@@ -4,509 +4,324 @@
     $isLatihan = $ujian->tipe_ujian === 'latihan';
     $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
     $routePrefix = $isLatihan ? 'latihan' : 'ujian';
-@endphp
-
-@section('title', 'Pembahasan ' . $tipeLabel . ': ' . $ujian->judul_ujian)
-@section('page-title', $mapel->nama_mapel)
-@section('page-subtitle', 'Pembahasan ' . $tipeLabel)
-
-@section('sidebar-menu')
-    @include('siswa.partials.sidebar-lms')
-@endsection
-
-@section('content')
-
-@push('styles')
-<style>
-    /* ===== BASE ===== */
-    .review-header {
-        background: linear-gradient(135deg, #165fac 0%, #1e88e5 50%, #42a5f5 100%);
-        border-radius: 12px;
-        padding: 24px 28px;
-        color: white;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 15px rgba(22, 95, 172, 0.3);
-    }
-    .review-header h4 { font-weight: 700; margin-bottom: 4px; }
-    .review-header .badge-pill {
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(4px);
-        border-radius: 20px;
-        padding: 6px 14px;
-        font-size: .8rem;
-        font-weight: 600;
-    }
-
-    /* Stats row */
-    .stat-card {
-        background: white;
-        border-radius: 10px;
-        padding: 18px 16px;
-        text-align: center;
-        border: 1px solid #e9ecef;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        transition: transform .2s ease;
-    }
-    .stat-card:hover { transform: translateY(-2px); }
-    .stat-card .stat-icon {
-        width: 44px; height: 44px;
-        border-radius: 10px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.15rem;
-        margin-bottom: 8px;
-    }
-    .stat-card h3 { font-size: 1.6rem; font-weight: 700; margin-bottom: 2px; }
-    .stat-card small { color: #6c757d; font-size: .78rem; }
-
-    /* Soal card */
-    .soal-review-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 16px;
-        overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        transition: box-shadow .2s;
-    }
-    .soal-review-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    .soal-review-card .card-header-strip {
-        height: 4px;
-    }
-    .soal-review-card .card-body { padding: 20px 24px; }
-
-    .soal-number-badge {
-        width: 32px; height: 32px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: .85rem;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    /* Question text */
-    .question-text {
-        font-size: 1rem;
-        line-height: 1.7;
-        color: #2c3e50;
-        padding: 12px 16px;
-        background: #f8f9fc;
-        border-radius: 8px;
-        border-left: 3px solid #165fac;
-    }
-
-    /* Answer comparison */
-    .answer-comparison {
-        display: grid;
-        gap: 12px;
-    }
-    @media(min-width: 768px) {
-        .answer-comparison { grid-template-columns: 1fr 1fr; }
-    }
-    .answer-box {
-        border-radius: 10px;
-        padding: 14px 16px;
-        border: 1px solid;
-    }
-    .answer-box .answer-label {
-        font-size: .75rem;
-        text-transform: uppercase;
-        letter-spacing: .5px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .answer-box .answer-value {
-        font-size: .95rem;
-        font-weight: 500;
-        line-height: 1.5;
-    }
-    .answer-student {
-        background: #f0f4ff;
-        border-color: #b8d0f8;
-    }
-    .answer-student .answer-label { color: #165fac; }
-
-    .answer-correct {
-        background: #eaf7ee;
-        border-color: #b3e0c0;
-    }
-    .answer-correct .answer-label { color: #198754; }
-
-    /* Feedback */
-    .feedback-box {
-        background: #fff8e1;
-        border: 1px solid #ffe082;
-        border-radius: 8px;
-        padding: 12px 16px;
-        font-size: .9rem;
-        color: #7b6b2d;
-    }
-
-    /* Narasi */
-    .narasi-box {
-        background: #f5f0ff;
-        border-left: 3px solid #7c3aed;
-        padding: 12px 16px;
-        border-radius: 0 8px 8px 0;
-        margin-bottom: 12px;
-    }
-
-    /* Pilihan ganda options */
-    .option-review {
-        padding: 10px 14px;
-        border-radius: 8px;
-        margin-bottom: 6px;
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: .92rem;
-        border: 1px solid transparent;
-        transition: all .15s;
-    }
-    .option-review .option-letter {
-        width: 28px; height: 28px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: .8rem;
-        flex-shrink: 0;
-    }
-    .option-neutral { background: #f8f9fa; }
-    .option-neutral .option-letter { background: #e9ecef; color: #6c757d; }
-
-    .option-correct {
-        background: #d4edda;
-        border-color: #b3e0c0;
-    }
-    .option-correct .option-letter {
-        background: #198754; color: white;
-    }
-
-    .option-wrong {
-        background: #f8d7da;
-        border-color: #f1aeb5;
-    }
-    .option-wrong .option-letter {
-        background: #dc3545; color: white;
-    }
-
-    .option-student-correct {
-        background: #d4edda;
-        border-color: #198754;
-        border-width: 2px;
-    }
-    .option-student-correct .option-letter {
-        background: #198754; color: white;
-    }
-
-    /* Score pill */
-    .score-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: .8rem;
-        font-weight: 700;
-    }
-    .score-full { background: #d4edda; color: #0f5132; }
-    .score-partial { background: #fff3cd; color: #664d03; }
-    .score-zero { background: #f8d7da; color: #842029; }
-
-    /* Back button area */
-    .review-footer {
-        background: white;
-        border-radius: 12px;
-        padding: 20px 24px;
-        border: 1px solid #e9ecef;
-        text-align: center;
-    }
-
-    /* Mobile optimizations */
-    @media(max-width: 767.98px) {
-        .review-header { padding: 18px 16px; }
-        .review-header h4 { font-size: 1.1rem; }
-        .stat-card { padding: 14px 12px; }
-        .stat-card h3 { font-size: 1.3rem; }
-        .soal-review-card .card-body { padding: 16px; }
-        .question-text { font-size: .92rem; padding: 10px 12px; }
-        .answer-comparison { grid-template-columns: 1fr; }
-        .answer-box { padding: 12px; }
-        .option-review { padding: 8px 10px; font-size: .85rem; }
-        .option-review .option-letter { width: 24px; height: 24px; font-size: .72rem; }
-    }
-</style>
-@endpush
-
-{{-- ===== HEADER ===== --}}
-<div class="review-header">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-        <div>
-            <h4 class="mb-1"><i class="fas fa-clipboard-check me-2"></i>Pembahasan {{ $tipeLabel }}</h4>
-            <p class="mb-0 opacity-75">{{ $ujian->judul_ujian }}</p>
-        </div>
-        <div class="d-flex gap-2 flex-wrap">
-            <span class="badge-pill"><i class="fas fa-book-open me-1"></i> {{ $mapel->nama_mapel }}</span>
-            <span class="badge-pill"><i class="fas fa-calendar me-1"></i> {{ $ujianSiswa->waktu_selesai ? $ujianSiswa->waktu_selesai->format('d M Y') : '-' }}</span>
-        </div>
-    </div>
-</div>
-
-{{-- ===== STATS ===== --}}
-@php
     $soalList = $ujian->soalUjian;
     $jawabanMap = $ujianSiswa->jawabanSiswa->keyBy('soal_ujian_id');
     $totalSoal = $soalList->count();
-    $benar = 0;
-    $salah = 0;
-    $tidakDijawab = 0;
-
-    foreach($soalList as $soal) {
-        $jawaban = $jawabanMap->get($soal->id);
-        if (!$jawaban || $jawaban->jawaban === null || $jawaban->jawaban === '') {
-            $tidakDijawab++;
-        } elseif ($jawaban->nilai_soal !== null && $jawaban->nilai_soal >= $soal->bobot_nilai) {
-            $benar++;
-        } else {
-            $salah++;
-        }
+    $benar = 0; $salah = 0; $tidakDijawab = 0;
+    foreach($soalList as $s) {
+        $j = $jawabanMap->get($s->id);
+        if (!$j || $j->jawaban === null || $j->jawaban === '') { $tidakDijawab++; }
+        elseif ($j->nilai_soal !== null && $j->nilai_soal >= $s->bobot_nilai) { $benar++; }
+        else { $salah++; }
     }
     $nilaiDisplay = $ujianSiswa->nilai_terbaik ?? $ujianSiswa->nilai ?? 0;
 @endphp
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-primary bg-opacity-10 text-primary mx-auto"><i class="fas fa-star"></i></div>
-            <h3 class="text-primary">{{ number_format($nilaiDisplay, 1) }}</h3>
-            <small>Nilai Terbaik</small>
+@section('title', 'Pembahasan ' . $tipeLabel)
+@section('page-title', $mapel->nama_mapel)
+@section('page-subtitle', 'Pembahasan ' . $tipeLabel)
+@section('sidebar-menu') @include('siswa.partials.sidebar-lms') @endsection
+
+@section('content')
+@push('styles')
+<style>
+:root { --rv-primary: #1a1a2e; --rv-accent: #165fac; --rv-green: #059669; --rv-red: #dc2626; --rv-gray: #64748b; --rv-light: #f8fafc; --rv-border: #e2e8f0; }
+.rv-hero { background: var(--rv-primary); border-radius: 16px; padding: 28px 32px; color: #fff; margin-bottom: 28px; }
+.rv-hero h4 { font-weight: 700; font-size: 1.25rem; }
+.rv-hero-sub { opacity: .7; font-size: .88rem; }
+.rv-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+.rv-stat { background: #fff; border-radius: 12px; padding: 20px 16px; text-align: center; border: 1px solid var(--rv-border); }
+.rv-stat h2 { font-size: 1.8rem; font-weight: 800; margin: 4px 0 2px; }
+.rv-stat small { color: var(--rv-gray); font-size: .78rem; font-weight: 500; }
+.rv-stat.st-score h2 { color: var(--rv-accent); }
+.rv-stat.st-correct h2 { color: var(--rv-green); }
+.rv-stat.st-wrong h2 { color: var(--rv-red); }
+.rv-stat.st-skip h2 { color: var(--rv-gray); }
+
+.rv-soal { background: #fff; border-radius: 14px; margin-bottom: 16px; border: 1px solid var(--rv-border); overflow: hidden; }
+.rv-soal-head { padding: 16px 20px 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.rv-num { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .82rem; color: #fff; flex-shrink: 0; }
+.rv-num.ok { background: var(--rv-green); }
+.rv-num.fail { background: var(--rv-red); }
+.rv-num.skip { background: var(--rv-gray); }
+.rv-num.partial { background: #d97706; }
+.rv-tipe { font-size: .72rem; background: #f1f5f9; color: var(--rv-gray); padding: 3px 10px; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+.rv-score-tag { font-size: .82rem; font-weight: 700; padding: 4px 12px; border-radius: 8px; }
+.rv-score-tag.ok { background: #ecfdf5; color: var(--rv-green); }
+.rv-score-tag.fail { background: #fef2f2; color: var(--rv-red); }
+.rv-score-tag.partial { background: #fffbeb; color: #92400e; }
+.rv-score-tag.skip { background: #f8fafc; color: var(--rv-gray); }
+
+.rv-soal-body { padding: 16px 20px 20px; }
+.rv-question { font-size: .95rem; line-height: 1.65; color: #1e293b; margin-bottom: 16px; padding: 14px 16px; background: var(--rv-light); border-radius: 10px; }
+.rv-narasi { font-size: .85rem; color: #475569; background: #f1f5f9; padding: 12px 14px; border-radius: 8px; margin-bottom: 12px; }
+.rv-narasi strong { font-size: .75rem; text-transform: uppercase; letter-spacing: .3px; color: var(--rv-gray); }
+
+/* PG Options */
+.rv-opt { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 10px; margin-bottom: 6px; font-size: .9rem; line-height: 1.5; border: 1.5px solid transparent; transition: .15s; }
+.rv-opt-letter { min-width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .78rem; flex-shrink: 0; background: #f1f5f9; color: var(--rv-gray); }
+.rv-opt.neutral { background: #fafafa; }
+.rv-opt.student-correct { background: #ecfdf5; border-color: var(--rv-green); }
+.rv-opt.student-correct .rv-opt-letter { background: var(--rv-green); color: #fff; }
+.rv-opt.student-wrong { background: #fef2f2; border-color: var(--rv-red); }
+.rv-opt.student-wrong .rv-opt-letter { background: var(--rv-red); color: #fff; }
+.rv-opt.is-kunci { background: #f0fdf4; border-color: #86efac; }
+.rv-opt.is-kunci .rv-opt-letter { background: var(--rv-green); color: #fff; }
+.rv-opt-tag { font-size: .7rem; font-weight: 700; margin-left: 6px; white-space: nowrap; }
+
+/* Benar/Salah Table */
+.rv-bs-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .88rem; }
+.rv-bs-table th { background: #f8fafc; color: var(--rv-gray); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .3px; padding: 10px 12px; border-bottom: 1px solid var(--rv-border); }
+.rv-bs-table td { padding: 10px 12px; border-bottom: 1px solid var(--rv-border); vertical-align: middle; }
+.rv-bs-table tr:last-child td { border-bottom: none; }
+.rv-bs-row-ok { background: #f0fdf4; }
+.rv-bs-row-fail { background: #fef2f2; }
+
+/* Isian/Uraian */
+.rv-compare { display: grid; gap: 10px; }
+.rv-compare-box { border-radius: 10px; padding: 14px 16px; }
+.rv-compare-box .rv-compare-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .4px; font-weight: 700; margin-bottom: 6px; }
+.rv-compare-box .rv-compare-value { font-size: .9rem; line-height: 1.6; }
+.rv-compare-student { background: #f0f4ff; }
+.rv-compare-student .rv-compare-label { color: var(--rv-accent); }
+.rv-compare-correct { background: #ecfdf5; }
+.rv-compare-correct .rv-compare-label { color: var(--rv-green); }
+
+/* Feedback */
+.rv-feedback { background: #fffbeb; border-radius: 8px; padding: 12px 14px; font-size: .85rem; color: #92400e; margin-top: 12px; }
+
+/* Footer */
+.rv-footer { background: #fff; border-radius: 14px; padding: 24px; border: 1px solid var(--rv-border); text-align: center; margin-top: 8px; }
+.rv-footer p { color: var(--rv-gray); font-size: .88rem; margin-bottom: 16px; }
+
+/* Soal image */
+.rv-soal-img { max-width: 100%; max-height: 300px; border-radius: 8px; margin-bottom: 12px; }
+
+@media(max-width:767.98px) {
+    .rv-hero { padding: 20px 16px; border-radius: 12px; }
+    .rv-hero h4 { font-size: 1.05rem; }
+    .rv-stats { grid-template-columns: repeat(2,1fr); gap: 8px; }
+    .rv-stat { padding: 14px 10px; }
+    .rv-stat h2 { font-size: 1.4rem; }
+    .rv-soal-head { padding: 12px 14px 0; }
+    .rv-soal-body { padding: 12px 14px 16px; }
+    .rv-question { padding: 10px 12px; font-size: .88rem; }
+    .rv-opt { padding: 8px 10px; font-size: .84rem; }
+    .rv-opt-letter { min-width: 24px; height: 24px; font-size: .72rem; }
+    .rv-compare { grid-template-columns: 1fr; }
+    .rv-bs-table { font-size: .82rem; }
+    .rv-bs-table th, .rv-bs-table td { padding: 8px; }
+}
+@media(min-width:768px) {
+    .rv-compare { grid-template-columns: 1fr 1fr; }
+}
+</style>
+@endpush
+
+{{-- HERO --}}
+<div class="rv-hero">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+        <div>
+            <h4><i class="fas fa-clipboard-check me-2 opacity-75"></i>Pembahasan {{ $tipeLabel }}</h4>
+            <span class="rv-hero-sub">{{ $ujian->judul_ujian }} &bull; {{ $mapel->nama_mapel }}</span>
         </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto"><i class="fas fa-check"></i></div>
-            <h3 class="text-success">{{ $benar }}</h3>
-            <small>Benar</small>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-danger bg-opacity-10 text-danger mx-auto"><i class="fas fa-times"></i></div>
-            <h3 class="text-danger">{{ $salah }}</h3>
-            <small>Salah</small>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <div class="stat-icon bg-secondary bg-opacity-10 text-secondary mx-auto"><i class="fas fa-minus-circle"></i></div>
-            <h3 class="text-secondary">{{ $tidakDijawab }}</h3>
-            <small>Tidak Dijawab</small>
-        </div>
+        <span class="rv-hero-sub"><i class="far fa-calendar me-1"></i>{{ $ujianSiswa->waktu_selesai ? $ujianSiswa->waktu_selesai->format('d M Y, H:i') : '-' }}</span>
     </div>
 </div>
 
-{{-- ===== SOAL LIST ===== --}}
+{{-- STATS --}}
+<div class="rv-stats">
+    <div class="rv-stat st-score"><h2>{{ number_format($nilaiDisplay,1) }}</h2><small>Nilai Terbaik</small></div>
+    <div class="rv-stat st-correct"><h2>{{ $benar }}</h2><small>Benar</small></div>
+    <div class="rv-stat st-wrong"><h2>{{ $salah }}</h2><small>Salah</small></div>
+    <div class="rv-stat st-skip"><h2>{{ $tidakDijawab }}</h2><small>Tidak Dijawab</small></div>
+</div>
+
+{{-- SOAL LIST --}}
 @foreach($soalList as $index => $soal)
-    @php
-        $jawaban = $jawabanMap->get($soal->id);
-        $jawabanSiswa = $jawaban->jawaban ?? null;
-        $nilaiSoal = $jawaban->nilai_soal ?? 0;
-        $maxNilai = $soal->bobot_nilai;
-        $isCorrect = $nilaiSoal >= $maxNilai;
-        $isPartial = $nilaiSoal > 0 && $nilaiSoal < $maxNilai;
-        $stripColor = $isCorrect ? '#198754' : ($isPartial ? '#ffc107' : '#dc3545');
-
-        if (!$jawaban || $jawabanSiswa === null || $jawabanSiswa === '') {
-            $stripColor = '#6c757d';
-        }
-    @endphp
-
-    <div class="soal-review-card">
-        <div class="card-header-strip" style="background: {{ $stripColor }};"></div>
-        <div class="card-body">
-            {{-- Soal Header --}}
-            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="soal-number-badge" style="background: {{ $stripColor }}">{{ $index + 1 }}</span>
-                    <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ \App\Models\SoalUjian::getTipeSoalLabel($soal->tipe_soal) }}</span>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    @if(!$jawaban || $jawabanSiswa === null || $jawabanSiswa === '')
-                        <span class="score-pill score-zero"><i class="fas fa-minus-circle"></i> Tidak dijawab</span>
-                    @elseif($isCorrect)
-                        <span class="score-pill score-full"><i class="fas fa-check-circle"></i> {{ $nilaiSoal }}/{{ $maxNilai }}</span>
-                    @elseif($isPartial)
-                        <span class="score-pill score-partial"><i class="fas fa-adjust"></i> {{ $nilaiSoal }}/{{ $maxNilai }}</span>
-                    @else
-                        <span class="score-pill score-zero"><i class="fas fa-times-circle"></i> {{ $nilaiSoal }}/{{ $maxNilai }}</span>
-                    @endif
-                </div>
-            </div>
-
-            {{-- Narasi --}}
-            @if($soal->narasi)
-                <div class="narasi-box mb-3">
-                    <strong class="d-block mb-1" style="font-size:.82rem;color:#5b21b6;"><i class="fas fa-book-open me-1"></i>Narasi:</strong>
-                    <div class="text-dark" style="font-size:.9rem;">{!! nl2br(e($soal->narasi)) !!}</div>
-                </div>
-            @endif
-
-            {{-- Pertanyaan --}}
-            <div class="question-text mb-3">
-                {!! nl2br(e($soal->pertanyaan)) !!}
-            </div>
-
-            {{-- Answer Display --}}
-            @if(in_array($soal->tipe_soal, ['pilihan_ganda', 'benar_salah']))
-                {{-- Pilihan Ganda & Benar/Salah: Show option list --}}
-                @php
-                    if ($soal->tipe_soal === 'benar_salah') {
-                        $options = ['Benar' => 'Benar', 'Salah' => 'Salah'];
-                    } else {
-                        $options = [];
-                        foreach (['A', 'B', 'C', 'D', 'E'] as $huruf) {
-                            $opsiField = 'opsi_' . strtolower($huruf);
-                            if (!empty($soal->$opsiField)) {
-                                $options[$huruf] = $soal->$opsiField;
-                            }
-                        }
-                    }
-                    $kunciJawaban = $soal->jawaban_benar;
-                @endphp
-
-                <div class="mb-3">
-                    @foreach($options as $key => $text)
-                        @php
-                            $isKunci = strtolower($key) === strtolower($kunciJawaban);
-                            $isPilihan = $jawabanSiswa !== null && strtolower($jawabanSiswa) === strtolower($key);
-                            
-                            if ($isPilihan && $isKunci) {
-                                $optionClass = 'option-student-correct';
-                            } elseif ($isPilihan && !$isKunci) {
-                                $optionClass = 'option-wrong';
-                            } elseif ($isKunci) {
-                                $optionClass = 'option-correct';
-                            } else {
-                                $optionClass = 'option-neutral';
-                            }
-                        @endphp
-                        <div class="option-review {{ $optionClass }}">
-                            <span class="option-letter">{{ $key }}</span>
-                            <div class="flex-grow-1">
-                                {{ $text }}
-                                @if($isPilihan && $isKunci)
-                                    <i class="fas fa-check-circle text-success ms-1"></i>
-                                @elseif($isPilihan && !$isKunci)
-                                    <i class="fas fa-times-circle text-danger ms-1"></i> <small class="text-danger">(Jawaban Anda)</small>
-                                @elseif($isKunci)
-                                    <i class="fas fa-check text-success ms-1"></i> <small class="text-success">(Jawaban Benar)</small>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-            @elseif($soal->tipe_soal === 'kompleks')
-                {{-- Pilihan Ganda Kompleks --}}
-                @php
-                    $kunciKompleks = is_array($soal->jawaban_benar) ? $soal->jawaban_benar : json_decode($soal->jawaban_benar, true);
-                    $jawabanSiswaKompleks = is_array($jawabanSiswa) ? $jawabanSiswa : json_decode($jawabanSiswa, true);
-                    $kunciKompleks = $kunciKompleks ?? [];
-                    $jawabanSiswaKompleks = $jawabanSiswaKompleks ?? [];
-                @endphp
-                <div class="mb-3">
-                    @foreach (['A', 'B', 'C', 'D', 'E'] as $huruf)
-                        @php
-                            $opsiField = 'opsi_' . strtolower($huruf);
-                            if (empty($soal->$opsiField)) continue;
-                            $isKunci = in_array($huruf, $kunciKompleks);
-                            $isPilihan = in_array($huruf, $jawabanSiswaKompleks);
-
-                            if ($isPilihan && $isKunci) {
-                                $optionClass = 'option-student-correct';
-                            } elseif ($isPilihan && !$isKunci) {
-                                $optionClass = 'option-wrong';
-                            } elseif ($isKunci) {
-                                $optionClass = 'option-correct';
-                            } else {
-                                $optionClass = 'option-neutral';
-                            }
-                        @endphp
-                        <div class="option-review {{ $optionClass }}">
-                            <span class="option-letter">{{ $huruf }}</span>
-                            <div class="flex-grow-1">
-                                {{ $soal->$opsiField }}
-                                @if($isPilihan && $isKunci)
-                                    <i class="fas fa-check-circle text-success ms-1"></i>
-                                @elseif($isPilihan && !$isKunci)
-                                    <i class="fas fa-times-circle text-danger ms-1"></i> <small class="text-danger">(Jawaban Anda)</small>
-                                @elseif($isKunci)
-                                    <i class="fas fa-check text-success ms-1"></i> <small class="text-success">(Jawaban Benar)</small>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-            @else
-                {{-- Uraian / Essay / Isian Singkat --}}
-                <div class="answer-comparison mb-3">
-                    <div class="answer-box answer-student">
-                        <div class="answer-label"><i class="fas fa-user"></i> Jawaban Anda</div>
-                        <div class="answer-value">
-                            @if($jawabanSiswa)
-                                {!! nl2br(e($jawabanSiswa)) !!}
-                            @else
-                                <span class="text-muted fst-italic">Tidak dijawab</span>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="answer-box answer-correct">
-                        <div class="answer-label"><i class="fas fa-key"></i> Kunci Jawaban</div>
-                        <div class="answer-value">
-                            @if($soal->jawaban_benar)
-                                {!! nl2br(e(is_array($soal->jawaban_benar) ? implode(', ', $soal->jawaban_benar) : $soal->jawaban_benar)) !!}
-                            @else
-                                <span class="text-muted fst-italic">Dinilai oleh guru</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Feedback Guru --}}
-            @if($jawaban && $jawaban->feedback)
-                <div class="feedback-box">
-                    <strong class="d-block mb-1"><i class="fas fa-comment-dots me-1"></i> Catatan Guru:</strong>
-                    {!! nl2br(e($jawaban->feedback)) !!}
-                </div>
-            @endif
+@php
+    $jawaban = $jawabanMap->get($soal->id);
+    $jawabanSiswa = $jawaban->jawaban ?? null;
+    $nilaiSoal = $jawaban->nilai_soal ?? 0;
+    $maxNilai = $soal->bobot_nilai;
+    $empty = !$jawaban || $jawabanSiswa === null || $jawabanSiswa === '';
+    $full = $nilaiSoal >= $maxNilai;
+    $partial = $nilaiSoal > 0 && !$full;
+    $numClass = $empty ? 'skip' : ($full ? 'ok' : ($partial ? 'partial' : 'fail'));
+    $scoreClass = $empty ? 'skip' : ($full ? 'ok' : ($partial ? 'partial' : 'fail'));
+@endphp
+<div class="rv-soal">
+    <div class="rv-soal-head">
+        <div class="d-flex align-items-center gap-2">
+            <span class="rv-num {{ $numClass }}">{{ $index+1 }}</span>
+            <span class="rv-tipe">{{ \App\Models\SoalUjian::getTipeSoalLabel($soal->tipe_soal) }}</span>
         </div>
+        <span class="rv-score-tag {{ $scoreClass }}">
+            @if($empty) — @else {{ number_format($nilaiSoal,1) }}/{{ $maxNilai }} @endif
+        </span>
     </div>
+    <div class="rv-soal-body">
+        @if($soal->narasi)
+        <div class="rv-narasi"><strong><i class="fas fa-book-open me-1"></i>Narasi</strong><div class="mt-1">{!! nl2br(e($soal->narasi)) !!}</div></div>
+        @endif
+
+        @if($soal->image_path)
+        <img src="{{ asset('storage/'.$soal->image_path) }}" class="rv-soal-img" alt="Gambar Soal">
+        @endif
+
+        <div class="rv-question">{!! nl2br(e($soal->pertanyaan)) !!}</div>
+
+        {{-- ============ PILIHAN GANDA ============ --}}
+        @if($soal->tipe_soal === 'pilihan_ganda')
+            @php
+                $pilihanData = $soal->pilihan_jawaban;
+                $options = $pilihanData['options'] ?? [];
+                $kunci = strtoupper(trim($soal->jawaban_benar ?? ''));
+                $picked = $jawabanSiswa ? strtoupper(trim($jawabanSiswa)) : null;
+                $letters = ['A','B','C','D','E'];
+            @endphp
+            @foreach($options as $i => $optText)
+                @php
+                    $letter = $letters[$i] ?? chr(65+$i);
+                    $isKunci = $letter === $kunci;
+                    $isPicked = $letter === $picked;
+                    if ($isPicked && $isKunci) $cls = 'student-correct';
+                    elseif ($isPicked) $cls = 'student-wrong';
+                    elseif ($isKunci) $cls = 'is-kunci';
+                    else $cls = 'neutral';
+                @endphp
+                <div class="rv-opt {{ $cls }}">
+                    <span class="rv-opt-letter">{{ $letter }}</span>
+                    <div class="flex-grow-1">
+                        {{ $optText }}
+                        @if($isPicked && $isKunci)<span class="rv-opt-tag text-success"><i class="fas fa-check-circle"></i> Benar</span>
+                        @elseif($isPicked)<span class="rv-opt-tag text-danger"><i class="fas fa-times-circle"></i> Jawaban Anda</span>
+                        @elseif($isKunci)<span class="rv-opt-tag text-success"><i class="fas fa-check"></i> Kunci Jawaban</span>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
+        {{-- ============ PILIHAN GANDA KOMPLEKS ============ --}}
+        @elseif($soal->tipe_soal === 'pilihan_ganda_kompleks')
+            @php
+                $pilihanData = $soal->pilihan_jawaban;
+                $options = $pilihanData['options'] ?? [];
+                $kunciArr = array_map('strtoupper', array_map('trim', $pilihanData['jawaban_benar'] ?? []));
+                $pickedArr = [];
+                if ($jawabanSiswa) {
+                    $pickedArr = is_array($jawabanSiswa) ? $jawabanSiswa : (json_decode($jawabanSiswa, true) ?? []);
+                    $pickedArr = array_map('strtoupper', array_map('trim', $pickedArr));
+                }
+                $letters = ['A','B','C','D','E'];
+            @endphp
+            @foreach($options as $i => $optText)
+                @php
+                    $letter = $letters[$i] ?? chr(65+$i);
+                    $isKunci = in_array($letter, $kunciArr);
+                    $isPicked = in_array($letter, $pickedArr);
+                    if ($isPicked && $isKunci) $cls = 'student-correct';
+                    elseif ($isPicked) $cls = 'student-wrong';
+                    elseif ($isKunci) $cls = 'is-kunci';
+                    else $cls = 'neutral';
+                @endphp
+                <div class="rv-opt {{ $cls }}">
+                    <span class="rv-opt-letter">{{ $letter }}</span>
+                    <div class="flex-grow-1">
+                        {{ $optText }}
+                        @if($isPicked && $isKunci)<span class="rv-opt-tag text-success"><i class="fas fa-check-circle"></i> Benar</span>
+                        @elseif($isPicked)<span class="rv-opt-tag text-danger"><i class="fas fa-times-circle"></i> Jawaban Anda</span>
+                        @elseif($isKunci)<span class="rv-opt-tag text-success"><i class="fas fa-check"></i> Kunci</span>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
+        {{-- ============ BENAR / SALAH ============ --}}
+        @elseif($soal->tipe_soal === 'benar_salah')
+            @php
+                $pilihanData = $soal->pilihan_jawaban;
+                $pernyataan = $pilihanData['pernyataan'] ?? [];
+                $jawabanArr = [];
+                if ($jawabanSiswa) {
+                    $jawabanArr = is_array($jawabanSiswa) ? $jawabanSiswa : (json_decode($jawabanSiswa, true) ?? []);
+                }
+            @endphp
+            <table class="rv-bs-table">
+                <thead><tr><th style="width:50%">Pernyataan</th><th>Kunci</th><th>Jawaban Anda</th><th>Hasil</th></tr></thead>
+                <tbody>
+                @foreach($pernyataan as $pi => $item)
+                    @php
+                        $kunciBs = $item['benar'] ?? false;
+                        $jawabanBs = $jawabanArr[$pi] ?? null;
+                        if (is_string($jawabanBs)) $jawabanBs = filter_var($jawabanBs, FILTER_VALIDATE_BOOLEAN);
+                        $bsMatch = ($jawabanBs !== null && $jawabanBs === $kunciBs);
+                    @endphp
+                    <tr class="{{ $bsMatch ? 'rv-bs-row-ok' : 'rv-bs-row-fail' }}">
+                        <td>{{ $item['text'] ?? '-' }}</td>
+                        <td><span class="fw-bold">{{ $kunciBs ? 'Benar' : 'Salah' }}</span></td>
+                        <td>{{ $jawabanBs !== null ? ($jawabanBs ? 'Benar' : 'Salah') : '-' }}</td>
+                        <td>
+                            @if($jawabanBs === null) <i class="fas fa-minus text-muted"></i>
+                            @elseif($bsMatch) <i class="fas fa-check-circle text-success"></i>
+                            @else <i class="fas fa-times-circle text-danger"></i>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+
+        {{-- ============ ISIAN SINGKAT ============ --}}
+        @elseif($soal->tipe_soal === 'isian_singkat')
+            @php
+                $pilihanData = $soal->pilihan_jawaban;
+                $kunciIsian = $pilihanData['jawaban_benar'] ?? [];
+                if (!is_array($kunciIsian)) $kunciIsian = [$kunciIsian];
+                if (empty($kunciIsian) && $soal->jawaban_benar) $kunciIsian = [$soal->jawaban_benar];
+            @endphp
+            <div class="rv-compare">
+                <div class="rv-compare-box rv-compare-student">
+                    <div class="rv-compare-label"><i class="fas fa-pen me-1"></i> Jawaban Anda</div>
+                    <div class="rv-compare-value">{{ $jawabanSiswa ?: '—' }}</div>
+                </div>
+                <div class="rv-compare-box rv-compare-correct">
+                    <div class="rv-compare-label"><i class="fas fa-key me-1"></i> Kunci Jawaban</div>
+                    <div class="rv-compare-value">{{ implode(' / ', $kunciIsian) }}</div>
+                </div>
+            </div>
+
+        {{-- ============ URAIAN / ESSAY ============ --}}
+        @else
+            <div class="rv-compare">
+                <div class="rv-compare-box rv-compare-student">
+                    <div class="rv-compare-label"><i class="fas fa-pen me-1"></i> Jawaban Anda</div>
+                    <div class="rv-compare-value">
+                        @if($jawabanSiswa) {!! nl2br(e($jawabanSiswa)) !!} @else <span class="text-muted">Tidak dijawab</span> @endif
+                    </div>
+                </div>
+                <div class="rv-compare-box rv-compare-correct">
+                    <div class="rv-compare-label"><i class="fas fa-key me-1"></i> Kunci / Referensi</div>
+                    <div class="rv-compare-value">
+                        @if($soal->jawaban_benar) {!! nl2br(e($soal->jawaban_benar)) !!} @else <span class="text-muted">Dinilai manual oleh guru</span> @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($jawaban && $jawaban->feedback)
+        <div class="rv-feedback"><i class="fas fa-comment-dots me-1"></i> <strong>Catatan Guru:</strong> {{ $jawaban->feedback }}</div>
+        @endif
+    </div>
+</div>
 @endforeach
 
-{{-- ===== FOOTER ===== --}}
-<div class="review-footer">
-    <p class="text-muted mb-3"><i class="fas fa-lightbulb text-warning me-1"></i> Pelajari kembali soal-soal yang salah untuk meningkatkan pemahaman Anda.</p>
+{{-- FOOTER --}}
+<div class="rv-footer">
+    <p><i class="fas fa-lightbulb me-1"></i> Pelajari kembali soal yang salah untuk meningkatkan pemahaman.</p>
     <div class="d-flex justify-content-center gap-2 flex-wrap">
-        <a href="{{ route('siswa.lms.mapel.' . $routePrefix . '.show', [$mapel->id, $ujian->id]) }}" class="btn btn-primary px-4">
-            <i class="fas fa-arrow-left me-2"></i> Kembali ke {{ $tipeLabel }}
-        </a>
-        <a href="{{ route('siswa.lms.mapel.show', $mapel->id) }}" class="btn btn-outline-secondary px-4">
-            <i class="fas fa-book me-2"></i> Ke Mata Pelajaran
-        </a>
+        <a href="{{ route('siswa.lms.mapel.'.$routePrefix.'.show', [$mapel->id, $ujian->id]) }}" class="btn btn-dark px-4"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
+        <a href="{{ route('siswa.lms.mapel.show', $mapel->id) }}" class="btn btn-outline-secondary px-4"><i class="fas fa-book me-2"></i>Mata Pelajaran</a>
     </div>
 </div>
-
 @endsection
