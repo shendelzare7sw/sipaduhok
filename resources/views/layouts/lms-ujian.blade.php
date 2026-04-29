@@ -114,7 +114,7 @@
             <div class="text-end d-none d-sm-block">
                 <div class="fw-bold">{{ Auth::user()->name }}</div>
                 <small style="opacity: 0.8">
-                    Peserta Ujian
+                    {{ isset($ujian) ? $ujian->tipe_label : 'Peserta Ujian' }}
                 </small>
             </div>
             <div class="user-avatar">

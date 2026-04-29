@@ -35,9 +35,9 @@ class LmsUjianController extends Controller
         // Cek validasi akses ujian untuk semester (PTS/PAS/UTS/UAS)
         if ($ujian->requiresValidation()) {
             $aksesService = app(\App\Services\ValidasiAksesService::class);
-            if (!$aksesService->cekAksesUjian($siswa)) {
+            if (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali) {
                 return redirect()->route('siswa.lms.mapel.show', $mapelId)
-                    ->with('error', 'Belum Memiliki Akses Ujian. Pastikan pembayaran sudah lunas atau hubungi Bendahara.');
+                    ->with('error', 'Belum Memiliki Akses Ujian. Pastikan pembayaran sudah lunas (Bendahara) dan disetujui Wali Kelas.');
             }
         }
 
@@ -125,8 +125,9 @@ class LmsUjianController extends Controller
 
         // Cek validasi akses untuk ujian semester (PTS/PAS/UTS/UAS)
         if ($ujian->requiresValidation()) {
-            if (!$siswa->validasi_ujian_bendahara) {
-                return back()->with('error', 'Belum Memiliki Akses Ujian.');
+            $aksesService = app(\App\Services\ValidasiAksesService::class);
+            if (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali) {
+                return back()->with('error', 'Belum Memiliki Akses Ujian. Pastikan pembayaran sudah lunas (Bendahara) dan disetujui Wali Kelas.');
             }
         }
 
@@ -285,15 +286,15 @@ class LmsUjianController extends Controller
 
         // Cek apakah diperbolehkan diulang
         if (!$ujian->bisa_diulang) {
-            return back()->with('error', 'Latihan ini tidak dapat diulang.');
+            return back()->with('error', $ujian->tipe_label . ' ini tidak dapat diulang.');
         }
 
         // Cek apakah aktif dan waktu cocok
         if (!$ujian->is_active) {
-            return back()->with('error', 'Latihan ini ditarik oleh guru.');
+            return back()->with('error', $ujian->tipe_label . ' ini ditarik oleh guru.');
         }
         if (!$ujian->isOngoing()) {
-            return back()->with('error', 'Latihan belum dimulai atau sudah berakhir.');
+            return back()->with('error', $ujian->tipe_label . ' belum dimulai atau sudah berakhir.');
         }
 
         $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
@@ -306,7 +307,8 @@ class LmsUjianController extends Controller
             $ujianSiswa->delete();
         }
 
-        return redirect()->route('siswa.lms.mapel.ujian.show', [$mapelId, $ujianId])
+        $routePrefix = $ujian->tipe_ujian === 'latihan' ? 'latihan' : 'ujian';
+        return redirect()->route('siswa.lms.mapel.' . $routePrefix . '.show', [$mapelId, $ujianId])
             ->with('success', 'Riwayat nilai dihapus. Silakan kerjakan ulang!');
     }
 }

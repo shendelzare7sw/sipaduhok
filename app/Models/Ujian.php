@@ -117,8 +117,6 @@ class Ujian extends Model
             self::TIPE_UTS, self::TIPE_UAS,
             self::TIPE_PTS_GANJIL, self::TIPE_PAS_GANJIL,
             self::TIPE_PTS_GENAP, self::TIPE_PAS_GENAP,
-            self::TIPE_TO_1, self::TIPE_TO_2, self::TIPE_TO_3,
-            self::TIPE_UPK, self::TIPE_UJIAN_PRAKTEK,
         ]);
     }
 

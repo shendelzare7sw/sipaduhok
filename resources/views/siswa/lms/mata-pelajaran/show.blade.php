@@ -360,7 +360,7 @@
                                             <i class="fas fa-lock me-1"></i> Belum Dirilis
                                         </button>
                                     @elseif($latihan->isOngoing())
-                                        <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $latihan->id]) }}"
+                                        <a href="{{ route('siswa.lms.mapel.latihan.show', [$mataPelajaran->id, $latihan->id]) }}"
                                             class="btn btn-warning btn-sm">
                                             <i class="fas fa-play"></i> Mulai Latihan
                                         </a>
@@ -370,7 +370,7 @@
                                         </button>
                                     @else
                                         @if($latihan->tampilkan_nilai)
-                                            <a href="{{ route('siswa.lms.mapel.ujian.show', [$mataPelajaran->id, $latihan->id]) }}"
+                                            <a href="{{ route('siswa.lms.mapel.latihan.show', [$mataPelajaran->id, $latihan->id]) }}"
                                                 class="btn btn-info btn-sm">
                                                 <i class="fas fa-poll"></i> Lihat Hasil
                                             </a>
@@ -455,7 +455,8 @@
                                             <i class="fas fa-lock me-1"></i> Belum Dirilis
                                         </button>
                                     @elseif($ujian->isOngoing())
-                                        @if($ujian->requiresValidation() && (!$siswa->validasi_ujian_bendahara || !$siswa->validasi_ujian_wali))
+                                        @php $aksesService = app(\App\Services\ValidasiAksesService::class); @endphp
+                                        @if($ujian->requiresValidation() && (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali))
                                             <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
                                                 <i class="fas fa-lock me-1"></i> Belum Memiliki Akses
                                             </button>

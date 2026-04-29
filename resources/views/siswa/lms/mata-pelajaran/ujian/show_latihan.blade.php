@@ -86,7 +86,7 @@
 
                         <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
                             @if($ujian->bisa_diulang)
-                                <form id="form-retake" action="{{ route('siswa.lms.mapel.ujian.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
+                                <form id="form-retake" action="{{ route('siswa.lms.mapel.latihan.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
                                     @csrf
                                     <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
                                         <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang
@@ -147,7 +147,7 @@
                             </div>
                         @elseif($ujian->isOngoing())
                              <div class="text-center mt-4">
-                                <form action="{{ route('siswa.lms.mapel.ujian.mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
+                                <form action="{{ route('siswa.lms.mapel.latihan.mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-primary btn-lg">
                                         <i class="fas fa-play me-2"></i> Mulai Latihan Sekarang
@@ -354,7 +354,7 @@
         }
     </style>
 
-    <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
+    <form action="{{ route('siswa.lms.mapel.latihan.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
         
         <!-- Sticky Header -->
@@ -588,6 +588,23 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('examForm').submit();
+                }
+            });
+        }
+
+        function confirmRetake() {
+            Swal.fire({
+                title: 'Kerjakan Ulang?',
+                text: 'Riwayat nilai sebelumnya akan dihapus. Anda yakin?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ffc107',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Kerjakan Ulang!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-retake').submit();
                 }
             });
         }

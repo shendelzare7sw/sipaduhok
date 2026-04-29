@@ -48,18 +48,6 @@
     </style>
 
     <div class="container-fluid">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -95,9 +83,37 @@
                             </div>
                         @endif
 
-                        <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary mt-3">
-                            <i class="fas fa-arrow-left me-2"></i> Kembali ke Mata Pelajaran
-                        </a>
+                        <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
+                            @if($ujian->bisa_diulang)
+                                <form id="form-retake" action="{{ route('siswa.lms.mapel.ujian.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
+                                    @csrf
+                                    <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
+                                        <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang
+                                    </button>
+                                </form>
+                            @endif
+                            <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary px-4 m-0">
+                                <i class="fas fa-arrow-left me-2"></i> Kembali ke Mata Pelajaran
+                            </a>
+                        </div>
+                        <script>
+                            function confirmRetake() {
+                                Swal.fire({
+                                    title: 'Kerjakan Ulang?',
+                                    text: 'Riwayat nilai sebelumnya akan dihapus. Anda yakin?',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#ffc107',
+                                    cancelButtonColor: '#6c757d',
+                                    confirmButtonText: 'Ya, Kerjakan Ulang!',
+                                    cancelButtonText: 'Batal'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        document.getElementById('form-retake').submit();
+                                    }
+                                });
+                            }
+                        </script>
                      </div>
                 @else
                     <!-- START SCREEN -->

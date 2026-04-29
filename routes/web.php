@@ -1430,6 +1430,14 @@ Route::middleware(['auth'])->group(function () {
                     Route::post('/{ujianId}/retake', [LmsUjianController::class, 'retake'])->name('retake');
                 });
 
+                // Latihan
+                Route::prefix('{mapelId}/latihan')->name('latihan.')->group(function () {
+                    Route::get('/{ujianId}', [LmsUjianController::class, 'show'])->name('show');
+                    Route::post('/{ujianId}/mulai', [LmsUjianController::class, 'mulai'])->name('mulai');
+                    Route::post('/{ujianId}/submit', [LmsUjianController::class, 'submit'])->name('submit');
+                    Route::post('/{ujianId}/retake', [LmsUjianController::class, 'retake'])->name('retake');
+                });
+
                 // Forum Diskusi
                 Route::prefix('{mapelId}/forum')->name('forum.')->group(function () {
                     Route::get('/', [App\Http\Controllers\Siswa\LmsForumController::class, 'index'])->name('index');
