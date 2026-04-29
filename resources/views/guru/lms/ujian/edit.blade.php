@@ -96,17 +96,15 @@
                     <small class="text-muted">Isi 0 untuk waktu tidak terbatas.</small>
                 </div>
 
-                @if($tipeUjian === 'latihan')
-                <div class="mb-3 p-3 border rounded bg-light">
+                <div class="mb-3 p-3 border rounded bg-light" id="bisaDiulangContainer" style="{{ $tipeUjian === 'latihan' || old('tipe_ujian', $ujian->tipe_ujian) === 'ulangan_harian' ? 'display:block;' : 'display:none;' }}">
                     <div class="form-check form-switch mb-1">
                         <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" {{ old('bisa_diulang', $ujian->bisa_diulang) ? 'checked' : '' }}>
                         <label class="form-check-label fw-bold text-primary" for="bisaDiulang">Bisa Dikerjakan Ulang</label>
                     </div>
                     <small class="text-muted d-block mt-1">
-                        <i class="fas fa-info-circle me-1"></i> Jika diaktifkan, siswa dapat mereset dan mengulang latihan ini berkali-kali. Riwayat sebelumnya akan terhapus saat siswa mencoba ulang.
+                        <i class="fas fa-info-circle me-1"></i> Jika diaktifkan, siswa dapat mereset dan mengulang latihan/ulangan harian ini berkali-kali. Riwayat sebelumnya akan terhapus saat siswa mencoba ulang.
                     </small>
                 </div>
-                @endif
 
                 @include('guru.partials.multi-kelas-selector')
 
@@ -121,3 +119,24 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tipeUjianSelect = document.querySelector('select[name="tipe_ujian"]');
+        const bisaDiulangContainer = document.getElementById('bisaDiulangContainer');
+        const bisaDiulangCheckbox = document.getElementById('bisaDiulang');
+
+        if (tipeUjianSelect) {
+            tipeUjianSelect.addEventListener('change', function() {
+                if (this.value === 'ulangan_harian' || this.value === 'latihan') {
+                    bisaDiulangContainer.style.display = 'block';
+                } else {
+                    bisaDiulangContainer.style.display = 'none';
+                    bisaDiulangCheckbox.checked = false;
+                }
+            });
+        }
+    });
+</script>
+@endpush
