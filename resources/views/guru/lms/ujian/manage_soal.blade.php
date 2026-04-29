@@ -68,6 +68,7 @@
             padding: 5px 8px;
         }
         /* Hide long text labels on extra-small screens, show short labels */
+        .fs-5-mobile { font-size: 1.05rem !important; }
         .btn-label-long { display: none; }
         .btn-label-short { display: inline !important; }
     }
@@ -82,14 +83,14 @@
     {{-- Header & Controls (Outside Form) --}}
     <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm soal-toolbar-header"
         style="z-index: 10;">
-        <div>
+        <div class="d-flex align-items-center gap-2">
             <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
-                class="btn btn-outline-secondary mb-2 btn-sm">
-                <i class="fas fa-arrow-left me-1"></i>Kembali
+                class="btn btn-outline-secondary btn-sm py-1 px-2">
+                <i class="fas fa-arrow-left"></i><span class="ms-1 d-none d-sm-inline">Kembali</span>
             </a>
-            <h4 class="mb-0">
+            <h4 class="mb-0 fs-5-mobile">
                 Menu Kelola Soal
-                <span class="badge bg-primary ms-2" id="totalSoalBadge">0 Soal</span>
+                <span class="badge bg-primary ms-1" id="totalSoalBadge">0 Soal</span>
             </h4>
         </div>
 

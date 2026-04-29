@@ -2438,8 +2438,7 @@ async function sendMessage(messageText = null) {
         
         const noLlmResponse = '<div style="font-size:13.5px;line-height:1.6">'
             + '<div style="font-weight:700;color:#f59e0b;margin-bottom:6px"><i class="fas fa-info-circle" style="margin-right:4px"></i> Di Luar Konteks Sistem</div>'
-            + '<div style="color:#475569;margin-bottom:8px">Maaf, Asisten Sistem saat ini diatur untuk hanya melayani pertanyaan seputar navigasi dan fitur SIPADUHOK.</div>'
-            + '<div style="color:#475569;">Untuk pertanyaan pengetahuan umum di luar sistem, fitur <strong>AI Generatif</strong> sedang dinonaktifkan oleh Administrator.</div>'
+            + '<div style="color:#475569;">Maaf, Asisten Sistem saat ini diatur untuk hanya melayani pertanyaan seputar navigasi dan fitur SIPADUHOK.</div>'
             + '</div>';
             
         addMessage('assistant', noLlmResponse, null, true, true);
