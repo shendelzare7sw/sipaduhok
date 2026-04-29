@@ -381,15 +381,33 @@ class GuruUjianController extends Controller
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
         $ujian = Ujian::findOrFail($id);
 
-        $results = UjianSiswa::with('siswa')
-            ->where('ujian_id', $id)
-            ->get()
-            ->filter(function($result) use ($mataPelajaran) {
-                 // Tetap tampilkan jika siswa tidak ditemukan di DB (untuk menangani data orphan/inkonsisten)
-                 // Namun tetap lakukan filter agama jika data siswanya tersedia
-                 if (!$result->siswa) return true;
-                 return $result->siswa->canAccessMapel($mataPelajaran);
-            });
+        // Ambil semua siswa aktif di kelas ini
+        $siswaList = Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->get();
+
+        $results = $siswaList->map(function($siswa) use ($id, $mataPelajaran) {
+            // Filter berdasarkan akses mata pelajaran (agama/mapel khusus)
+            if (!$siswa->canAccessMapel($mataPelajaran)) return null;
+
+            // Cari pengerjaan ujian untuk siswa ini
+            $ujianSiswa = UjianSiswa::with('siswa')
+                ->where('ujian_id', $id)
+                ->where('siswa_id', $siswa->id)
+                ->first();
+
+            if (!$ujianSiswa) {
+                // Jika belum ada record pengerjaan, buat objek sementara agar muncul di tabel sebagai 'Belum Mulai'
+                $dummy = new UjianSiswa();
+                $dummy->ujian_id = $id;
+                $dummy->siswa_id = $siswa->id;
+                $dummy->status = 'belum_mulai';
+                $dummy->setRelation('siswa', $siswa); // Set relasi secara manual
+                return $dummy;
+            }
+
+            return $ujianSiswa;
+        })->filter()->values();
 
         // Statistik
         $stats = [
