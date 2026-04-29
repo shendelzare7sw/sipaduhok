@@ -87,25 +87,43 @@ class LmsTugasController extends Controller
             return back()->with('error', 'Waktu pengumpulan tugas sudah habis');
         }
 
+        // Cek batas pengulangan jika tugas ini membatasi pengulangan
+        $tugasSiswa = TugasSiswa::where('tugas_id', $tugasId)
+            ->where('siswa_id', $siswa->id)
+            ->first();
+
+        if ($tugasSiswa && $tugas->bisa_diulang && $tugas->batas_pengulangan > 0) {
+            if ($tugasSiswa->pengulangan_ke > $tugas->batas_pengulangan) {
+                return back()->with('error', 'Anda sudah mencapai batas maksimal edit jawaban (' . $tugas->batas_pengulangan . ' kali).');
+            }
+        }
+
         // Upload file jika ada
-        $filePath = null;
+        $filePath = $tugasSiswa ? $tugasSiswa->file_jawaban : null;
         if ($request->hasFile('file_jawaban')) {
             $filePath = $request->file('file_jawaban')->store('tugas/jawaban', 'public');
         }
 
         // Simpan atau update jawaban
-        $tugasSiswa = TugasSiswa::updateOrCreate(
-            [
-                'tugas_id' => $tugasId,
-                'siswa_id' => $siswa->id,
-            ],
-            [
+        if ($tugasSiswa) {
+            $tugasSiswa->update([
                 'jawaban_text' => $request->jawaban_text,
-                'file_jawaban' => $filePath ?? null,
+                'file_jawaban' => $filePath,
                 'tanggal_submit' => now(),
                 'status' => now()->gt($tugas->tanggal_deadline) ? 'terlambat' : 'dikerjakan',
-            ]
-        );
+                'pengulangan_ke' => $tugasSiswa->pengulangan_ke + 1,
+            ]);
+        } else {
+            $tugasSiswa = TugasSiswa::create([
+                'tugas_id' => $tugasId,
+                'siswa_id' => $siswa->id,
+                'jawaban_text' => $request->jawaban_text,
+                'file_jawaban' => $filePath,
+                'tanggal_submit' => now(),
+                'status' => now()->gt($tugas->tanggal_deadline) ? 'terlambat' : 'dikerjakan',
+                'pengulangan_ke' => 1,
+            ]);
+        }
 
         // Notify guru about tugas submission
         $tugasSiswa->load(['tugas', 'siswa']);

@@ -19,6 +19,7 @@ class TugasSiswa extends Model
         'tanggal_submit',
         'nilai',
         'status',
+        'pengulangan_ke',
         'feedback_guru',
     ];
 

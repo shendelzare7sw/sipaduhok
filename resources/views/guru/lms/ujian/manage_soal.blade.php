@@ -103,14 +103,7 @@
                 <span class="btn-label-short">{{ $ujian->is_active ? 'Tarik' : 'Rilis' }}</span>
             </button>
 
-            {{-- Tampilkan Nilai Toggle --}}
-            <button type="button" class="btn btn-sm {{ $ujian->tampilkan_nilai ? 'btn-outline-danger' : 'btn-outline-info' }}"
-                onclick="confirmSyncAction('toggleResultForm', '{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}', 'Mengubah visibilitas nilai...')"
-                title="{{ $ujian->tampilkan_nilai ? 'Klik untuk menyembunyikan nilai dari siswa' : 'Klik untuk menampilkan nilai ke siswa' }}">
-                <i class="fas {{ $ujian->tampilkan_nilai ? 'fa-eye-slash' : 'fa-poll' }} me-1"></i>
-                <span class="btn-label-long">{{ $ujian->tampilkan_nilai ? 'Sembunyikan Nilai' : 'Tampilkan Nilai' }}</span>
-                <span class="btn-label-short">Nilai</span>
-            </button>
+
 
             {{-- SIMPAN SEMUA --}}
             <button type="button" class="btn btn-sm btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')"
@@ -178,11 +171,6 @@
         <input type="hidden" name="sync_kelas" id="sync_kelas_status" value="0">
     </form>
 
-    <form action="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.toggleResult' : 'guru.lms.ujian.toggleResult', [$kelas->id, $mapel->id, $ujian->id]) }}" method="POST"
-        id="toggleResultForm" class="d-none">
-        @csrf
-        <input type="hidden" name="sync_kelas" id="sync_kelas_result" value="0">
-    </form>
 
     <!-- Sync Confirmation Modal -->
     <div class="modal fade" id="syncConfirmModal" tabindex="-1" aria-hidden="true">

@@ -244,10 +244,17 @@ class LmsUjianController extends Controller
         $totalBobot = $soalList->sum('bobot_nilai');
         $nilaiNormalized = $totalBobot > 0 ? round(($totalNilai / $totalBobot) * 100, 1) : 0;
 
+        // Hitung nilai terbaik
+        $nilaiTerbaik = $ujianSiswa->nilai_terbaik ?? 0;
+        if ($nilaiNormalized > $nilaiTerbaik) {
+            $nilaiTerbaik = $nilaiNormalized;
+        }
+
         // Update status ujian siswa
         $ujianSiswa->update([
             'waktu_selesai' => now(),
             'nilai' => $nilaiNormalized,
+            'nilai_terbaik' => $nilaiTerbaik,
             'status' => 'selesai',
         ]);
 
@@ -302,13 +309,32 @@ class LmsUjianController extends Controller
             ->first();
 
         if ($ujianSiswa) {
-            // Hapus jawaban dan riwayat
-            JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)->delete();
-            $ujianSiswa->delete();
+            // Cek batas pengulangan
+            $batas = $ujian->batas_pengulangan;
+            if ($batas > 0 && $ujianSiswa->pengulangan_ke > $batas) {
+                return back()->with('error', 'Anda sudah mencapai batas maksimal pengulangan (' . $batas . ' kali).');
+            }
+
+            // Simpan nilai terbaik
+            $nilaiSekarang = $ujianSiswa->nilai ?? 0;
+            $nilaiTerbaik = $ujianSiswa->nilai_terbaik ?? 0;
+            if ($nilaiSekarang > $nilaiTerbaik) {
+                $nilaiTerbaik = $nilaiSekarang;
+            }
+
+            // Reset status ujian siswa tapi biarkan jawaban sebelumnya
+            $ujianSiswa->update([
+                'status' => 'belum_mulai',
+                'waktu_mulai' => null,
+                'waktu_selesai' => null,
+                'nilai' => 0,
+                'pengulangan_ke' => $ujianSiswa->pengulangan_ke + 1,
+                'nilai_terbaik' => $nilaiTerbaik,
+            ]);
         }
 
         $routePrefix = $ujian->tipe_ujian === 'latihan' ? 'latihan' : 'ujian';
         return redirect()->route('siswa.lms.mapel.' . $routePrefix . '.show', [$mapelId, $ujianId])
-            ->with('success', 'Riwayat nilai dihapus. Silakan kerjakan ulang!');
+            ->with('success', 'Ujian telah di-reset. Silakan kerjakan ulang! Nilai sebelumnya telah disimpan sebagai nilai terbaik jika lebih tinggi.');
     }
 }

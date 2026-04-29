@@ -130,6 +130,17 @@
                     {{ $tugas->tanggal_mulai->format('d M Y') }}</div>
                 <div><i class="fas fa-calendar-times"></i> <strong>Ditutup:</strong>
                     {{ $tugas->tanggal_deadline->format('d M Y, H:i') }}</div>
+                @if($tugas->bisa_diulang)
+                    <div><i class="fas fa-redo-alt"></i> <strong>Sisa Pengeditan:</strong> 
+                        @if($tugas->batas_pengulangan)
+                            {{ max(0, $tugas->batas_pengulangan - (($existingSubmission->pengulangan_ke ?? 1) - 1)) }} kali
+                        @else
+                            Tak Terbatas
+                        @endif
+                    </div>
+                @else
+                    <div><i class="fas fa-lock"></i> <strong>Batas Pengeditan:</strong> 1 kali</div>
+                @endif
             </div>
 
             @if($existingSubmission)
@@ -190,11 +201,23 @@
                     enctype="multipart/form-data">
                     @csrf
 
+                    @php
+                        $canSubmit = true;
+                        if ($existingSubmission) {
+                            if (!$tugas->bisa_diulang) {
+                                $canSubmit = false;
+                            } elseif ($tugas->batas_pengulangan > 0 && $existingSubmission->pengulangan_ke > $tugas->batas_pengulangan) {
+                                $canSubmit = false;
+                            }
+                        }
+                        $isDisabled = $isExpired || !$canSubmit;
+                    @endphp
+
                     <!-- Jawaban Text -->
                     <div class="form-group mb-3">
                         <label class="form-label">Jawaban (Text)</label>
                         <textarea name="jawaban_text" rows="8" class="form-control @error('jawaban_text') is-invalid @enderror"
-                            placeholder="Tulis jawaban Anda di sini..." {{ $isExpired ? 'disabled' : '' }}>{{ old('jawaban_text', $existingSubmission->jawaban_text ?? '') }}</textarea>
+                            placeholder="Tulis jawaban Anda di sini..." {{ $isDisabled ? 'disabled' : '' }}>{{ old('jawaban_text', $existingSubmission->jawaban_text ?? '') }}</textarea>
                         @error('jawaban_text')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -204,7 +227,7 @@
                     <div class="form-group mb-3">
                         <label class="form-label">Upload File Jawaban (Opsional)</label>
                         <input type="file" name="file_jawaban" class="form-control @error('file_jawaban') is-invalid @enderror"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4" {{ $isExpired ? 'disabled' : '' }}>
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4" {{ $isDisabled ? 'disabled' : '' }}>
                         <small class="form-text text-muted">
                             Format: PDF, Word, Excel, PowerPoint, Image (JPG/PNG), Video (MP4). Max 10MB.
                         </small>
@@ -222,15 +245,26 @@
 
                     <!-- Submit Button -->
                     @if(!$isExpired)
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i>
-                                {{ $existingSubmission ? 'Update Jawaban' : 'Kirim Jawaban' }}
-                            </button>
-                            <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Kembali
-                            </a>
-                        </div>
+                        @if($canSubmit)
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    {{ $existingSubmission ? 'Update Jawaban' : 'Kirim Jawaban' }}
+                                </button>
+                                <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Kembali
+                                </a>
+                            </div>
+                        @else
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-lock"></i> Batas maksimal pengeditan jawaban telah tercapai.
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Kembali
+                                </a>
+                            </div>
+                        @endif
                     @else
                         <div class="alert alert-danger" role="alert">
                             <i class="fas fa-lock"></i> Deadline sudah lewat. Jawaban tidak dapat diubah.

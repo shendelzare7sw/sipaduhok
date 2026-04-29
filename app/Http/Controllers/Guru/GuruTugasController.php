@@ -91,6 +91,9 @@ class GuruTugasController extends Controller
             'file_tugas' => 'nullable|file|max:10240', // 10MB
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
+            'tampilkan_nilai' => 'nullable|boolean',
+            'bisa_diulang' => 'nullable|boolean',
+            'batas_pengulangan' => 'nullable|integer|min:0',
         ]);
 
         $filePath = null;
@@ -108,6 +111,9 @@ class GuruTugasController extends Controller
             'file_tugas' => $filePath,
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_deadline' => $validated['tanggal_deadline'],
+            'tampilkan_nilai' => $request->has('tampilkan_nilai'),
+            'bisa_diulang' => $request->has('bisa_diulang'),
+            'batas_pengulangan' => $request->has('bisa_diulang') ? $validated['batas_pengulangan'] : null,
         ];
 
         // Buat untuk kelas utama
@@ -202,7 +208,14 @@ class GuruTugasController extends Controller
             'file_tugas' => 'nullable|file|max:10240',
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
+            'tampilkan_nilai' => 'nullable|boolean',
+            'bisa_diulang' => 'nullable|boolean',
+            'batas_pengulangan' => 'nullable|integer|min:0',
         ]);
+
+        $validated['tampilkan_nilai'] = $request->has('tampilkan_nilai');
+        $validated['bisa_diulang'] = $request->has('bisa_diulang');
+        $validated['batas_pengulangan'] = $request->has('bisa_diulang') ? $validated['batas_pengulangan'] : null;
 
         if ($request->hasFile('file_tugas')) {
             // SAFE FILE DELETE: Cek apakah file lama digunakan oleh tugas lain
@@ -237,6 +250,7 @@ class GuruTugasController extends Controller
                 'file_tugas' => $tugas->file_tugas,
                 'tanggal_mulai' => $tugas->tanggal_mulai,
                 'tanggal_deadline' => $tugas->tanggal_deadline,
+                'tampilkan_nilai' => $tugas->tampilkan_nilai,
             ];
 
             foreach ($kelasTambahan as $kelasLainId) {

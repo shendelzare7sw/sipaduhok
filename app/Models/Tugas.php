@@ -24,6 +24,9 @@ class Tugas extends Model
         'file_tugas',
         'tanggal_mulai',
         'tanggal_deadline',
+        'tampilkan_nilai',
+        'bisa_diulang',
+        'batas_pengulangan',
     ];
 
     protected $casts = [

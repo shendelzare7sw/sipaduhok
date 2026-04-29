@@ -110,6 +110,9 @@ class GuruUjianController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'durasi_menit' => 'nullable|integer|min:0',
+            'tampilkan_nilai' => 'nullable|boolean',
+            'bisa_diulang' => 'nullable|boolean',
+            'batas_pengulangan' => 'nullable|integer|min:0',
         ]);
 
         // Jika dari latihan route, pastikan tipe_ujian adalah latihan
@@ -127,7 +130,9 @@ class GuruUjianController extends Controller
             'tanggal_selesai' => $validated['tanggal_selesai'],
             'durasi_menit' => $validated['durasi_menit'],
             'is_active' => false,
-            'bisa_diulang' => ($isLatihan || $validated['tipe_ujian'] === 'ulangan_harian') && $request->has('bisa_diulang') ? true : false,
+            'tampilkan_nilai' => $request->has('tampilkan_nilai'),
+            'bisa_diulang' => $request->has('bisa_diulang'),
+            'batas_pengulangan' => $request->has('bisa_diulang') ? $validated['batas_pengulangan'] : null,
         ];
 
         // Buat untuk kelas utama
@@ -242,20 +247,19 @@ class GuruUjianController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'durasi_menit' => 'nullable|integer|min:0',
+            'tampilkan_nilai' => 'nullable|boolean',
+            'bisa_diulang' => 'nullable|boolean',
+            'batas_pengulangan' => 'nullable|integer|min:0',
         ]);
 
         // Prevent changing tipe_ujian when updating from latihan route
         if ($isLatihan) {
             $validated['tipe_ujian'] = 'latihan';
-            $validated['bisa_diulang'] = $request->has('bisa_diulang') ? true : false;
-        } else {
-            if ($validated['tipe_ujian'] === 'ulangan_harian') {
-                $validated['bisa_diulang'] = $request->has('bisa_diulang') ? true : false;
-            } else {
-                // For regular exams, reset bisa_diulang to false just in case
-                $validated['bisa_diulang'] = false;
-            }
         }
+
+        $validated['tampilkan_nilai'] = $request->has('tampilkan_nilai');
+        $validated['bisa_diulang'] = $request->has('bisa_diulang');
+        $validated['batas_pengulangan'] = $request->has('bisa_diulang') ? $validated['batas_pengulangan'] : null;
 
         $ujian->update($validated);
 

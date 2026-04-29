@@ -96,14 +96,35 @@
                     <small class="text-muted">Isi 0 untuk waktu tidak terbatas.</small>
                 </div>
 
-                <div class="mb-3 p-3 border rounded bg-light" id="bisaDiulangContainer" style="{{ $tipeUjian === 'latihan' || old('tipe_ujian', $ujian->tipe_ujian) === 'ulangan_harian' ? 'display:block;' : 'display:none;' }}">
-                    <div class="form-check form-switch mb-1">
-                        <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" {{ old('bisa_diulang', $ujian->bisa_diulang) ? 'checked' : '' }}>
-                        <label class="form-check-label fw-bold text-primary" for="bisaDiulang">Bisa Dikerjakan Ulang</label>
+                <div class="mb-4">
+                    <h5 class="form-label fw-bold border-bottom pb-2">Pengaturan Penilaian & Pengulangan</h5>
+                    <div class="p-3 border rounded bg-light">
+                        <!-- Tampilkan Nilai -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="tampilkanNilai" name="tampilkan_nilai" value="1" {{ old('tampilkan_nilai', $ujian->tampilkan_nilai) ? 'checked' : '' }}>
+                            <label class="form-check-label fw-bold" for="tampilkanNilai">Tampilkan Nilai ke Siswa</label>
+                            <small class="text-muted d-block mt-1">Jika dinonaktifkan, siswa hanya akan melihat ucapan terima kasih setelah mengerjakan.</small>
+                        </div>
+
+                        <hr>
+
+                        <!-- Pengulangan -->
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" {{ old('bisa_diulang', $ujian->bisa_diulang) ? 'checked' : '' }} onchange="toggleBatasPengulangan()">
+                            <label class="form-check-label fw-bold text-primary" for="bisaDiulang">Bisa Dikerjakan Ulang (Pengulangan)</label>
+                        </div>
+                        
+                        <div id="batasPengulanganContainer" style="{{ old('bisa_diulang', $ujian->bisa_diulang) ? 'display:block;' : 'display:none;' }}">
+                            <div class="d-flex align-items-center mt-2 ms-4">
+                                <label class="me-2 text-muted">Diulang</label>
+                                <input type="number" class="form-control form-control-sm text-center" name="batas_pengulangan" style="width: 70px;" value="{{ old('batas_pengulangan', $ujian->batas_pengulangan ?? 2) }}" min="0">
+                                <label class="ms-2 text-muted">kali</label>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2 ms-4">
+                            <i class="fas fa-info-circle me-1"></i> Jika diaktifkan, siswa dapat mengulang pengerjaan sesuai batas. Nilai yang diambil adalah nilai terbaik.
+                        </small>
                     </div>
-                    <small class="text-muted d-block mt-1">
-                        <i class="fas fa-info-circle me-1"></i> Jika diaktifkan, siswa dapat mereset dan mengulang latihan/ulangan harian ini berkali-kali. Riwayat sebelumnya akan terhapus saat siswa mencoba ulang.
-                    </small>
                 </div>
 
                 @include('guru.partials.multi-kelas-selector')
@@ -122,21 +143,18 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tipeUjianSelect = document.querySelector('select[name="tipe_ujian"]');
-        const bisaDiulangContainer = document.getElementById('bisaDiulangContainer');
-        const bisaDiulangCheckbox = document.getElementById('bisaDiulang');
-
-        if (tipeUjianSelect) {
-            tipeUjianSelect.addEventListener('change', function() {
-                if (this.value === 'ulangan_harian' || this.value === 'latihan') {
-                    bisaDiulangContainer.style.display = 'block';
-                } else {
-                    bisaDiulangContainer.style.display = 'none';
-                    bisaDiulangCheckbox.checked = false;
-                }
-            });
+    function toggleBatasPengulangan() {
+        var checkbox = document.getElementById('bisaDiulang');
+        var container = document.getElementById('batasPengulanganContainer');
+        if (checkbox.checked) {
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
         }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleBatasPengulangan();
     });
 </script>
 @endpush

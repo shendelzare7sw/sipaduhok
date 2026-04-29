@@ -18,6 +18,8 @@ class UjianSiswa extends Model
         'waktu_selesai',
         'nilai',
         'status',
+        'pengulangan_ke',
+        'nilai_terbaik',
     ];
 
     protected $casts = [

@@ -39,6 +39,7 @@ class Ujian extends Model
         'is_active',
         'tampilkan_nilai',
         'bisa_diulang',
+        'batas_pengulangan',
     ];
 
     protected $casts = [

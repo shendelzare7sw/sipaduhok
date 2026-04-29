@@ -67,8 +67,14 @@
                         @if($ujian->tampilkan_nilai)
                             @if($ujianSiswa->nilai !== null)
                                 <div class="my-4">
-                                    <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai, 1) }}/100</h1>
-                                    <span class="text-muted">Nilai Akhir</span>
+                                    <h1 class="display-4 fw-bold text-primary">{{ number_format($ujianSiswa->nilai_terbaik ?? $ujianSiswa->nilai, 1) }}/100</h1>
+                                    <span class="text-muted">Nilai Terbaik Anda</span>
+                                    
+                                    @if(($ujianSiswa->pengulangan_ke ?? 1) > 1)
+                                    <div class="mt-2 text-muted small">
+                                        Nilai Percobaan Terakhir: {{ number_format($ujianSiswa->nilai, 1) }}
+                                    </div>
+                                    @endif
                                 </div>
                             @else
                                 <div class="my-4">
@@ -83,13 +89,18 @@
                         @endif
 
                         <div class="d-flex justify-content-center align-items-center gap-2 mt-4 flex-wrap">
-                            @if($ujian->bisa_diulang)
-                                <form id="form-retake" action="{{ route('siswa.lms.mapel.latihan.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
-                                    @csrf
-                                    <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
-                                        <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang
-                                    </button>
-                                </form>
+                            @if($ujian->bisa_diulang && $ujian->isOngoing())
+                                @php
+                                    $sisaPengulangan = $ujian->batas_pengulangan ? max(0, $ujian->batas_pengulangan - (($ujianSiswa->pengulangan_ke ?? 1) - 1)) : null;
+                                @endphp
+                                @if($sisaPengulangan === null || $sisaPengulangan > 0)
+                                    <form id="form-retake" action="{{ route('siswa.lms.mapel.latihan.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
+                                        @csrf
+                                        <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
+                                            <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
+                                        </button>
+                                    </form>
+                                @endif
                             @endif
                             <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-primary px-4 m-0">
                                 <i class="fas fa-arrow-left me-2"></i> Kembali
@@ -105,25 +116,41 @@
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="info-box">
                                     <i class="fas fa-clock text-warning"></i>
                                     <h5>{{ $ujian->durasi_menit == 0 ? 'Tanpa Batas' : $ujian->durasi_menit . ' Menit' }}</h5>
                                     <small class="text-muted">Durasi</small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="info-box">
                                     <i class="fas fa-list-ol text-info"></i>
                                     <h5>{{ $soalList->count() }} Soal</h5>
                                     <small class="text-muted">Jumlah Soal</small>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="info-box">
                                     <i class="fas fa-calendar-alt text-success"></i>
-                                    <h5>{{ $ujian->tanggal_mulai->format('d M') }} - {{ $ujian->tanggal_selesai->format('d M') }}</h5>
-                                    <small class="text-muted">Periode</small>
+                                    <h5>{{ $ujian->tanggal_mulai->format('d M') }}</h5>
+                                    <small class="text-muted">Tanggal</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="info-box">
+                                    <i class="fas fa-redo-alt text-primary"></i>
+                                    @if($ujian->bisa_diulang)
+                                        @if($ujian->batas_pengulangan)
+                                            <h5>{{ max(0, $ujian->batas_pengulangan - ($ujianSiswa->pengulangan_ke ?? 0)) }} Kali</h5>
+                                        @else
+                                            <h5>Tak Terbatas</h5>
+                                        @endif
+                                        <small class="text-muted">Sisa Pengulangan</small>
+                                    @else
+                                        <h5>1 Kali</h5>
+                                        <small class="text-muted">Batas Ujian</small>
+                                    @endif
                                 </div>
                             </div>
                         </div>
