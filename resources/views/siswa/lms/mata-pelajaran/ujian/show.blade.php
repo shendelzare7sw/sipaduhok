@@ -77,9 +77,7 @@
                             @endif
                         @else
                             <div class="my-4">
-                                <i class="fas fa-lock fa-3x text-secondary mb-2"></i>
-                                <h5 class="text-secondary">Nilai Tidak Ditampilkan</h5>
-
+                                <h5 class="text-secondary fw-medium">Terima Kasih Sudah Menyelesaikan {{ ucwords(str_replace('_', ' ', $ujian->tipe_ujian)) }}</h5>
                             </div>
                         @endif
 
