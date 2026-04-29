@@ -84,6 +84,14 @@ class LmsUjianController extends Controller
 
         $mataPelajaran = $ujian->mataPelajaran;
 
+        // Load existing answers if any
+        $existingAnswers = [];
+        if ($ujianSiswa) {
+            $existingAnswers = \App\Models\JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)
+                ->pluck('jawaban', 'soal_ujian_id')
+                ->toArray();
+        }
+
         // Use different view for Latihan (Worksheet Style)
         if ($ujian->tipe_ujian === 'latihan') {
             return view('siswa.lms.mata-pelajaran.ujian.show_latihan', compact(
@@ -92,7 +100,8 @@ class LmsUjianController extends Controller
                 'ujianSiswa',
                 'isOngoing',
                 'soalList',
-                'mataPelajaran'
+                'mataPelajaran',
+                'existingAnswers'
             ));
         }
 
@@ -102,7 +111,8 @@ class LmsUjianController extends Controller
             'ujianSiswa',
             'isOngoing',
             'soalList',
-            'mataPelajaran'
+            'mataPelajaran',
+            'existingAnswers'
         ));
     }
 

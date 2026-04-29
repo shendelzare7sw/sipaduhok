@@ -480,7 +480,7 @@
                                             @if(is_array($pilihan))
                                                 @foreach($pilihan as $key => $value)
                                                     <label class="option-item">
-                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="selectOption({{ $index }}, '{{ $key }}')">
+                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="selectOption({{ $index }}, '{{ $key }}')" {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
                                                         <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                     </label>
                                                 @endforeach
@@ -494,12 +494,15 @@
                                             @endphp
                                             <small class="text-muted mb-2 d-block"><i class="fas fa-info-circle me-1"></i>Pilih semua jawaban yang benar</small>
                                             <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="">
+                                            @php
+                                                $checkedKompleks = isset($existingAnswers[$soal->id]) ? explode(',', $existingAnswers[$soal->id]) : [];
+                                            @endphp
                                             @if(is_array($pilihan))
                                                 @foreach($pilihan as $key => $value)
                                                     @if($key !== 'jawaban_benar')
                                                         <label class="option-item">
                                                             <input type="checkbox" class="kompleks-cb" data-soal-id="{{ $soal->id }}" data-index="{{ $index }}" value="{{ $key }}"
-                                                                onchange="updateKompleks({{ $soal->id }}, {{ $index }})" style="margin-right: 10px; margin-top: 3px; width: 18px; height: 18px;">
+                                                                onchange="updateKompleks({{ $soal->id }}, {{ $index }})" style="margin-right: 10px; margin-top: 3px; width: 18px; height: 18px;" {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
                                                             <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                         </label>
                                                     @endif
@@ -514,18 +517,21 @@
                                                 $pernyataanList = $pilihanData['pernyataan'] ?? [];
                                             @endphp
                                             <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="">
+                                            @php
+                                                $checkedBS = isset($existingAnswers[$soal->id]) ? json_decode($existingAnswers[$soal->id], true) : [];
+                                            @endphp
                                             @foreach($pernyataanList as $pIdx => $item)
                                                 <div class="mb-3 p-3 border rounded bg-light">
                                                     <p class="mb-2 fw-bold">{{ $item['text'] ?? $item['pernyataan'] ?? '' }}</p>
                                                     <div class="d-flex gap-3">
                                                         <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
                                                             <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="true"
-                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;">
+                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && $checkedBS[$pIdx] == 'true' ? 'checked' : '' }}>
                                                             <span><strong>BENAR</strong></span>
                                                         </label>
                                                         <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
                                                             <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="false"
-                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;">
+                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && $checkedBS[$pIdx] == 'false' ? 'checked' : '' }}>
                                                             <span><strong>SALAH</strong></span>
                                                         </label>
                                                     </div>
@@ -534,7 +540,7 @@
 
                                         @else
                                             <textarea name="jawaban[{{ $soal->id }}]" rows="6" class="form-control"
-                                                placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, 'text')"></textarea>
+                                                placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, 'text')">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
                                         @endif
                                     </div>
                                 </div>

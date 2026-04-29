@@ -281,7 +281,9 @@ class GuruUjianController extends Controller
                 'tanggal_selesai' => $ujian->tanggal_selesai,
                 'durasi_menit' => $ujian->durasi_menit,
                 'is_active' => $ujian->is_active,
+                'tampilkan_nilai' => $ujian->tampilkan_nilai,
                 'bisa_diulang' => $ujian->bisa_diulang,
+                'batas_pengulangan' => $ujian->batas_pengulangan,
             ];
 
             foreach ($kelasTambahan as $kelasLainId) {
