@@ -656,7 +656,7 @@
 
         // Timer
         const durasiMenit = {{ $ujian->durasi_menit ?? 0 }};
-        const startTime = new Date("{{ $ujianSiswa->waktu_mulai }}").getTime();
+        const startTime = new Date("{{ $ujianSiswa->waktu_mulai->toIso8601String() }}").getTime();
         
         // Jika durasi 0, berarti tanpa batas waktu
         const isUnlimited = (durasiMenit === 0);

@@ -70,6 +70,13 @@ class LmsUjianController extends Controller
         // Cek apakah ujian sedang berlangsung
         $isOngoing = $ujian->isOngoing();
 
+        // PROTEKSI: Jika sedang mengerjakan tapi waktu sudah habis (Server-side check)
+        if ($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan' && $ujianSiswa->isTimeUp()) {
+            $this->selesaikanUjian($ujianSiswa, []); // Selesaikan tanpa jawaban tambahan (yang sudah ada di DB tetap ada)
+            return redirect()->route('siswa.lms.mapel.show', $mapelId)
+                ->with('error', 'Waktu ujian telah habis. Ujian Anda telah disubmit otomatis.');
+        }
+
         // Get soal ujian - pastikan soal di-load dengan benar
         // Query soal secara langsung dan urutkan
         $soalList = SoalUjian::where('ujian_id', $ujianId)
@@ -188,11 +195,6 @@ class LmsUjianController extends Controller
      */
     public function submit(Request $request, $mapelId, $ujianId)
     {
-        $request->validate([
-            'jawaban' => 'required|array',
-            'jawaban.*' => 'required|string',
-        ]);
-
         $user = Auth::user();
         $siswa = Siswa::where('user_id', $user->id)->first();
 
@@ -200,69 +202,78 @@ class LmsUjianController extends Controller
             return back()->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $ujian = Ujian::where('id', $ujianId)
-            ->where('kelas_id', $siswa->kelas_id)
-            ->where('mata_pelajaran_id', $mapelId)
-            ->firstOrFail();
-
         $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
             ->where('siswa_id', $siswa->id)
             ->firstOrFail();
 
+        $jawabanInput = $request->input('jawaban', []);
+        
         // Cek waktu habis
         if ($ujianSiswa->isTimeUp()) {
-            $ujianSiswa->update([
-                'status' => 'selesai',
-                'waktu_selesai' => now(),
-            ]);
-            return back()->with('error', 'Waktu ujian telah habis');
+            $this->selesaikanUjian($ujianSiswa, $jawabanInput);
+            return redirect()->route('siswa.lms.mapel.show', $mapelId)
+                ->with('error', 'Waktu ujian telah habis. Jawaban yang sempat masuk telah disimpan.');
         }
 
-        // Simpan jawaban
+        $result = $this->selesaikanUjian($ujianSiswa, $jawabanInput);
+
+        $tipeLabel = ($ujianSiswa->ujian->tipe_ujian === 'latihan') ? 'Latihan' : 'Ujian';
+        $msg = "$tipeLabel berhasil dikumpulkan!";
+        
+        if ($result['perluKoreksiManual']) {
+            $msg .= ' Nilai sementara: ' . number_format($result['nilai'], 1) . '/100 (beberapa soal menunggu koreksi guru)';
+        } else {
+            $msg .= ' Nilai: ' . number_format($result['nilai'], 1) . '/100';
+        }
+
+        return redirect()->route('siswa.lms.mapel.show', $mapelId)
+            ->with('success', $msg);
+    }
+
+    /**
+     * Logika internal untuk memproses perhitungan nilai dan menutup sesi ujian
+     */
+    private function selesaikanUjian(UjianSiswa $ujianSiswa, array $jawabanInput)
+    {
+        $ujianId = $ujianSiswa->ujian_id;
+        $soalList = SoalUjian::where('ujian_id', $ujianId)->get();
         $totalNilai = 0;
         $perluKoreksiManual = false;
-        $soalList = SoalUjian::where('ujian_id', $ujianId)->get();
 
-        foreach ($request->jawaban as $soalId => $jawaban) {
+        // 1. Simpan Jawaban jika ada yang dikirim
+        foreach ($jawabanInput as $soalId => $jawaban) {
             $soal = $soalList->where('id', $soalId)->first();
-
             if ($soal) {
                 $jawabanSiswa = JawabanSiswa::updateOrCreate(
-                    [
-                        'ujian_siswa_id' => $ujianSiswa->id,
-                        'soal_ujian_id' => $soalId,
-                    ],
-                    [
-                        'jawaban' => $jawaban,
-                    ]
+                    ['ujian_siswa_id' => $ujianSiswa->id, 'soal_ujian_id' => $soalId],
+                    ['jawaban' => $jawaban]
                 );
 
-                // Auto-grade untuk semua tipe yang bisa di-auto-grade
-                $result = $soal->checkAnswer($jawaban);
-
-                if ($result !== null) {
-                    // Tipe auto-gradable: pilgan, pilgan_kompleks, benar_salah, isian
+                // Auto-grade
+                $gradeResult = $soal->checkAnswer($jawaban);
+                if ($gradeResult !== null) {
                     $score = $soal->calculatePartialScore($jawaban);
                     $jawabanSiswa->update(['nilai_soal' => $score]);
-                    $totalNilai += $score;
                 } else {
-                    // Tipe uraian/essay → perlu koreksi manual oleh guru
                     $perluKoreksiManual = true;
                 }
             }
         }
 
-        // Normalisasi nilai ke skala 0-100
+        // 2. Hitung Total Nilai (termasuk jawaban yang sudah tersimpan sebelumnya di DB)
+        $totalNilai = JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)->sum('nilai_soal');
+
+        // 3. Normalisasi nilai ke skala 0-100
         $totalBobot = $soalList->sum('bobot_nilai');
         $nilaiNormalized = $totalBobot > 0 ? round(($totalNilai / $totalBobot) * 100, 1) : 0;
 
-        // Hitung nilai terbaik
+        // 4. Hitung nilai terbaik
         $nilaiTerbaik = $ujianSiswa->nilai_terbaik ?? 0;
         if ($nilaiNormalized > $nilaiTerbaik) {
             $nilaiTerbaik = $nilaiNormalized;
         }
 
-        // Update status ujian siswa
+        // 5. Update status ujian siswa
         $ujianSiswa->update([
             'waktu_selesai' => now(),
             'nilai' => $nilaiNormalized,
@@ -270,20 +281,14 @@ class LmsUjianController extends Controller
             'status' => 'selesai',
         ]);
 
-        // Notify guru about ujian completion
+        // 6. Notifikasi ke Guru
         $ujianSiswa->load(['ujian', 'siswa']);
         app(\App\Services\NotificationService::class)->notifyUjianSelesai($ujianSiswa);
 
-        $tipeLabel = ($ujian->tipe_ujian === 'latihan') ? 'Latihan' : 'Ujian';
-        $msg = "$tipeLabel berhasil dikumpulkan!";
-        if ($perluKoreksiManual) {
-            $msg .= ' Nilai sementara: ' . number_format($nilaiNormalized, 1) . '/100 (beberapa soal menunggu koreksi guru)';
-        } else {
-            $msg .= ' Nilai: ' . number_format($nilaiNormalized, 1) . '/100';
-        }
-
-        return redirect()->route('siswa.lms.mapel.show', $mapelId)
-            ->with('success', $msg);
+        return [
+            'nilai' => $nilaiNormalized,
+            'perluKoreksiManual' => $perluKoreksiManual
+        ];
     }
 
     /**
