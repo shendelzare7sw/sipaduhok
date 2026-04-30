@@ -341,7 +341,9 @@ class LmsUjianController extends Controller
                 $nilaiTerbaik = $nilaiSekarang;
             }
 
-            // Reset status ujian siswa tapi biarkan jawaban sebelumnya
+            // Reset status ujian siswa dan HAPUS jawaban sebelumnya agar mulai dari nol
+            \App\Models\JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)->delete();
+            
             $ujianSiswa->update([
                 'status' => 'belum_mulai',
                 'waktu_mulai' => null,

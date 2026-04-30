@@ -79,7 +79,8 @@
                         <th class="text-center">Waktu Mulai</th>
                         <th class="text-center">Waktu Selesai</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center">Nilai</th>
+                        <th class="text-center">Nilai Terakhir</th>
+                        <th class="text-center">Nilai Terbaik</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -117,7 +118,14 @@
                         </td>
                         <td class="text-center">
                             @if($hasil->nilai !== null)
-                                <strong class="fs-5 text-primary">{{ number_format($hasil->nilai, 1) }}/100</strong>
+                                <strong class="fs-6 text-secondary">{{ number_format($hasil->nilai, 1) }}</strong>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if($hasil->nilai_terbaik !== null)
+                                <strong class="fs-5 text-primary">{{ number_format($hasil->nilai_terbaik, 1) }}/100</strong>
                             @else
                                 <span class="text-muted">-</span>
                             @endif

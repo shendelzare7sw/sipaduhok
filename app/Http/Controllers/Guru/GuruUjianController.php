@@ -1027,9 +1027,16 @@ class GuruUjianController extends Controller
         $totalBobot = SoalUjian::where('ujian_id', $ujianId)->sum('bobot_nilai');
         $nilaiNormalized = $totalBobot > 0 ? round(($totalNilai / $totalBobot) * 100, 1) : 0;
 
+        // Update nilai terbaik jika nilai baru lebih tinggi
+        $nilaiTerbaik = $ujianSiswa->nilai_terbaik ?? 0;
+        if ($nilaiNormalized > $nilaiTerbaik) {
+            $nilaiTerbaik = $nilaiNormalized;
+        }
+
         // Update status ujian siswa menjadi 'dinilai'
         $ujianSiswa->update([
             'nilai' => $nilaiNormalized,
+            'nilai_terbaik' => $nilaiTerbaik,
             'status' => 'dinilai',
         ]);
 

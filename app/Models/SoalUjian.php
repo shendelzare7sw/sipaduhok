@@ -82,7 +82,7 @@ class SoalUjian extends Model
      */
     protected function checkPilihanGanda($jawaban)
     {
-        return strtoupper(trim($jawaban)) === strtoupper(trim($this->jawaban_benar));
+        return strtoupper(trim($jawaban)) === strtoupper(trim($this->kunci_jawaban));
     }
 
     /**
@@ -95,8 +95,10 @@ class SoalUjian extends Model
             $jawaban = json_decode($jawaban, true) ?? [];
         }
 
-        $pilihanData = $this->pilihan_jawaban;
-        $jawabanBenar = $pilihanData['jawaban_benar'] ?? [];
+        $jawabanBenar = $this->kunci_jawaban;
+        if (!is_array($jawabanBenar)) {
+            $jawabanBenar = json_decode($jawabanBenar, true) ?? [];
+        }
 
         // Normalize to uppercase
         $jawaban = array_map('strtoupper', array_map('trim', $jawaban));
@@ -165,9 +167,9 @@ class SoalUjian extends Model
             }
         }
 
-        // Fallback to jawaban_benar column
-        if ($this->jawaban_benar) {
-            return strtolower(trim($this->jawaban_benar)) === $jawaban;
+        // Fallback to kunci_jawaban column
+        if ($this->kunci_jawaban) {
+            return strtolower(trim($this->kunci_jawaban)) === $jawaban;
         }
 
         return false;
@@ -184,7 +186,10 @@ class SoalUjian extends Model
                 $jawaban = json_decode($jawaban, true) ?? [];
             }
             $pilihanData = $this->pilihan_jawaban;
-            $kunciBenar = $pilihanData['jawaban_benar'] ?? [];
+            $kunciBenar = $this->kunci_jawaban;
+            if (!is_array($kunciBenar)) {
+                $kunciBenar = json_decode($kunciBenar, true) ?? [];
+            }
             
             // Collect valid options based on keys A, B, C, D, E that have non-empty text
             $availableOptions = [];
