@@ -1002,23 +1002,21 @@ class GuruUjianController extends Controller
             foreach ($request->nilai as $soalId => $nilai) {
                 $feedback = $request->feedback[$soalId] ?? null;
 
-                // Update or Create jawaban record
-                $jawabanSiswa = \App\Models\JawabanSiswa::updateOrCreate(
-                    [
-                        'ujian_siswa_id' => $ujianSiswa->id,
-                        'soal_ujian_id' => $soalId,
-                    ],
-                    [
-                        'nilai_soal' => $nilai,
-                        'feedback' => $feedback,
-                    ]
-                );
-                
-                // If clean record created, ensure jawaban has value so it's not null (if schema enforces)
-                if ($jawabanSiswa->wasRecentlyCreated && empty($jawabanSiswa->jawaban)) {
-                    $jawabanSiswa->jawaban = '-'; 
-                    $jawabanSiswa->save();
+                // Cari jawaban yang sudah ada atau siapkan yang baru
+                $jawabanSiswa = \App\Models\JawabanSiswa::firstOrNew([
+                    'ujian_siswa_id' => $ujianSiswa->id,
+                    'soal_ujian_id' => $soalId,
+                ]);
+
+                // Jika ini record baru (siswa tidak menjawab), beri nilai default '-'
+                if (!$jawabanSiswa->exists) {
+                    $jawabanSiswa->jawaban = '-';
                 }
+
+                // Update nilai hasil koreksi guru
+                $jawabanSiswa->nilai_soal = $nilai;
+                $jawabanSiswa->feedback = $feedback;
+                $jawabanSiswa->save();
             }
         }
 
