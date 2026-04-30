@@ -116,7 +116,7 @@
                             function confirmRetake() {
                                 Swal.fire({
                                     title: 'Kerjakan Ulang?',
-                                    text: 'Riwayat nilai sebelumnya akan dihapus. Anda yakin?',
+                                    text: 'Jawaban dan nilai Anda sebelumnya akan di-reset. Apakah Anda yakin?',
                                     icon: 'warning',
                                     showCancelButton: true,
                                     confirmButtonColor: '#ffc107',
