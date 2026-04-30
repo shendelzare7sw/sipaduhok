@@ -653,8 +653,27 @@
     <script>
         let currentIndex = 0;
         const totalQuestions = {{ $soalList->count() }};
-        const answersState = new Array(totalQuestions).fill(false);
+        const answersState = [
+            @foreach($soalList as $soal)
+                @php
+                    $isAnswered = false;
+                    if(isset($existingAnswers[$soal->id])) {
+                        $ans = $existingAnswers[$soal->id];
+                        if($ans !== '' && $ans !== '-' && $ans !== '[]' && $ans !== 'null' && $ans !== '[null]') {
+                            $isAnswered = true;
+                        }
+                    }
+                @endphp
+                {{ $isAnswered ? 'true' : 'false' }},
+            @endforeach
+        ];
         const doubtState = new Array(totalQuestions).fill(false);
+        
+        // Update nav colors on load
+        for(let i=0; i<totalQuestions; i++) {
+            updateNavColor(i);
+        }
+
 
         // Timer
         const durasiMenit = {{ $ujian->durasi_menit ?? 0 }};
@@ -799,10 +818,23 @@
             const unanswered = answersState.filter(x => !x).length;
             const doubts = doubtState.filter(x => x).length;
 
+            const isLatihan = {{ $ujian->tipe_ujian === 'latihan' ? 'true' : 'false' }};
+
+            if (!isLatihan && unanswered > 0) {
+                Swal.fire({
+                    title: 'Peringatan!',
+                    text: `Anda tidak dapat mengumpulkan ujian. Masih ada ${unanswered} soal yang belum dijawab. Harap jawab semua soal terlebih dahulu.`,
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Tutup'
+                });
+                return;
+            }
+
             let msg = '';
             if (unanswered > 0) msg += `Masih ada ${unanswered} soal belum dijawab.\n`;
             if (doubts > 0) msg += `Masih ada ${doubts} soal ditandai ragu-ragu.\n`;
-            msg += '\nApakah Anda yakin ingin menyelesaikan ujian ini?';
+            msg += '\nApakah Anda yakin ingin menyelesaikan sesi ini?';
 
             Swal.fire({
                 title: 'Konfirmasi Submit',
