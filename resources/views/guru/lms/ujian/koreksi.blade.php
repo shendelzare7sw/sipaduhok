@@ -137,7 +137,7 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <label class="small text-muted fw-bold">Nilai Otomatis (Bisa Diubah):</label>
-                                    <input type="number" step="0.1" min="0" max="{{ $soal->bobot_nilai }}" name="nilai[{{ $soal->id }}]" class="form-control form-control-lg-custom border-primary" value="{{ $jawaban->nilai_soal ?? 0 }}">
+                                    <input type="number" step="any" min="0" max="{{ $soal->bobot_nilai }}" name="nilai[{{ $soal->id }}]" class="form-control form-control-lg-custom border-primary" value="{{ $jawaban->nilai_soal ?? 0 }}">
                                 </div>
                             </div>
 
@@ -157,7 +157,7 @@
                             <div class="row g-3">
                                 <div class="col-md-3">
                                     <label class="form-label fw-bold text-primary">Berikan Nilai (Max: {{ $soal->bobot_nilai }})</label>
-                                    <input type="number" step="0.1" min="0" max="{{ $soal->bobot_nilai }}" 
+                                    <input type="number" step="any" min="0" max="{{ $soal->bobot_nilai }}" 
                                         name="nilai[{{ $soal->id }}]" 
                                         id="nilai_{{ $soal->id }}"
                                         class="form-control form-control-lg-custom" 
