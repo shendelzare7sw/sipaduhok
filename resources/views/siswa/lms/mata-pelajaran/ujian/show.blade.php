@@ -1,5 +1,7 @@
 @php
     $layout = ($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan') ? 'layouts.lms-ujian' : 'layouts.lms';
+    $isLatihan = request()->routeIs('siswa.lms.mapel.latihan.*') || (isset($ujian) && $ujian->tipe_ujian === 'latihan');
+    $routePrefix = $isLatihan ? 'siswa.lms.mapel.latihan.' : 'siswa.lms.mapel.ujian.';
 @endphp
 
 @extends($layout)
@@ -93,7 +95,7 @@
                                     $sisaPengulangan = $ujian->batas_pengulangan ? max(0, $ujian->batas_pengulangan - (($ujianSiswa->pengulangan_ke ?? 1) - 1)) : null;
                                 @endphp
                                 @if($sisaPengulangan === null || $sisaPengulangan > 0)
-                                    <form id="form-retake" action="{{ route('siswa.lms.mapel.ujian.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
+                                    <form id="form-retake" action="{{ route($routePrefix . 'retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
                                         @csrf
                                         <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
                                             <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
@@ -102,7 +104,7 @@
                                 @endif
                             @endif
                             @if($ujian->tampilkan_riwayat)
-                                <a href="{{ route('siswa.lms.mapel.ujian.review', [$mataPelajaran->id, $ujian->id]) }}" class="btn btn-outline-primary px-4 m-0">
+                                <a href="{{ route($routePrefix . 'review', [$mataPelajaran->id, $ujian->id]) }}" class="btn btn-outline-primary px-4 m-0">
                                     <i class="fas fa-search me-2"></i> Lihat Pembahasan
                                 </a>
                             @endif
@@ -195,7 +197,7 @@
                             </div>
                         @elseif($ujian->isOngoing())
                              <div class="text-center mt-4">
-                                <form action="{{ route('siswa.lms.mapel.ujian.mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
+                                <form action="{{ route($routePrefix . 'mulai', [$mataPelajaran->id, $ujian->id]) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-primary btn-lg">
                                         <i class="fas fa-play me-2"></i> Mulai Ujian Sekarang
@@ -403,7 +405,7 @@
         }
     </style>
 
-    <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
+    <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
         <div class="container-fluid px-0">
             <div class="row g-3 mx-0">
@@ -563,7 +565,7 @@
                                 @if($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan')
                                 <div class="mt-4">
                                     <p class="text-muted mb-3">Anda sedang dalam sesi ujian tanpa ada soal. Pilih aksi di bawah:</p>
-                                    <form action="{{ route('siswa.lms.mapel.ujian.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" style="display: inline;">
+                                    <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" style="display: inline;">
                                         @csrf
                                         <button type="submit" class="btn btn-danger" onclick="return confirm('Anda akan mengakhiri ujian tanpa menjawab soal. Lanjutkan?')">
                                             <i class="fas fa-times-circle"></i> Akhiri Ujian Sekarang

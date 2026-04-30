@@ -186,8 +186,10 @@ class LmsUjianController extends Controller
         $ujianSiswa = $ujianSiswa->fresh();
 
         $durasiMsg = ($ujian->durasi_menit == 0) ? 'Tanpa Batas' : $ujian->durasi_menit . ' menit';
-        return redirect()->route('siswa.lms.mapel.ujian.show', [$mapelId, $ujianId])
-            ->with('success', 'Ujian dimulai. Waktu: ' . $durasiMsg);
+        $routePrefix = $ujian->tipe_ujian === 'latihan' ? 'latihan' : 'ujian';
+        
+        return redirect()->route('siswa.lms.mapel.' . $routePrefix . '.show', [$mapelId, $ujianId])
+            ->with('success', ucfirst($routePrefix) . ' dimulai. Waktu: ' . $durasiMsg);
     }
 
     /**
@@ -246,7 +248,7 @@ class LmsUjianController extends Controller
             if ($soal) {
                 $jawabanSiswa = JawabanSiswa::updateOrCreate(
                     ['ujian_siswa_id' => $ujianSiswa->id, 'soal_ujian_id' => $soalId],
-                    ['jawaban' => $jawaban]
+                    ['jawaban' => $jawaban ?? '-']
                 );
 
                 // Auto-grade
