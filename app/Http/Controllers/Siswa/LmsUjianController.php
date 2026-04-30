@@ -390,4 +390,53 @@ class LmsUjianController extends Controller
 
         return view('siswa.lms.mata-pelajaran.ujian.review', compact('ujian', 'ujianSiswa', 'siswa', 'mapel'));
     }
+
+    /**
+     * Autosave jawaban siswa via AJAX
+     */
+    public function autosave(Request $request, $mapelId, $ujianId)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+        
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Siswa tidak ditemukan'], 404);
+        }
+
+        $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'sedang_mengerjakan')
+            ->first();
+
+        if (!$ujianSiswa) {
+            return response()->json(['success' => false, 'message' => 'Sesi ujian tidak aktif atau sudah selesai'], 403);
+        }
+
+        // Cek apakah waktu sudah habis
+        if ($ujianSiswa->isTimeUp()) {
+            return response()->json(['success' => false, 'message' => 'Waktu sudah habis'], 403);
+        }
+
+        $soalId = $request->soal_id;
+        $jawaban = $request->jawaban;
+
+        // Validasi soal milik ujian ini
+        $soal = SoalUjian::where('id', $soalId)->where('ujian_id', $ujianId)->first();
+        if (!$soal) {
+            return response()->json(['success' => false, 'message' => 'Soal tidak valid'], 404);
+        }
+
+        // Simpan jawaban
+        \App\Models\JawabanSiswa::updateOrCreate(
+            [
+                'ujian_siswa_id' => $ujianSiswa->id,
+                'soal_ujian_id' => $soalId,
+            ],
+            [
+                'jawaban' => $jawaban ?? '-',
+            ]
+        );
+
+        return response()->json(['success' => true]);
+    }
 }

@@ -1428,6 +1428,7 @@ Route::middleware(['auth'])->group(function () {
                     Route::post('/{ujianId}/mulai', [LmsUjianController::class, 'mulai'])->name('mulai');
                     Route::post('/{ujianId}/submit', [LmsUjianController::class, 'submit'])->name('submit');
                     Route::post('/{ujianId}/retake', [LmsUjianController::class, 'retake'])->name('retake');
+                    Route::post('/{ujianId}/autosave', [LmsUjianController::class, 'autosave'])->name('autosave');
                     Route::get('/{ujianId}/review', [LmsUjianController::class, 'review'])->name('review');
                 });
 
@@ -1437,6 +1438,7 @@ Route::middleware(['auth'])->group(function () {
                     Route::post('/{ujianId}/mulai', [LmsUjianController::class, 'mulai'])->name('mulai');
                     Route::post('/{ujianId}/submit', [LmsUjianController::class, 'submit'])->name('submit');
                     Route::post('/{ujianId}/retake', [LmsUjianController::class, 'retake'])->name('retake');
+                    Route::post('/{ujianId}/autosave', [LmsUjianController::class, 'autosave'])->name('autosave');
                     Route::get('/{ujianId}/review', [LmsUjianController::class, 'review'])->name('review');
                 });
 

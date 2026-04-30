@@ -207,7 +207,7 @@
         </div>
     </div>
 
-    @if($ujianSiswa && $ujianSiswa->status === 'selesai' && $ujian->bisa_diulang)
+    @if($ujianSiswa && in_array($ujianSiswa->status, ['selesai', 'dinilai']) && $ujian->bisa_diulang)
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

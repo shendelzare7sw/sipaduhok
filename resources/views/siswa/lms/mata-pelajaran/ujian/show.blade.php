@@ -491,7 +491,7 @@
                                             @if(is_array($pilihan))
                                                 @foreach($pilihan as $key => $value)
                                                     <label class="option-item">
-                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="selectOption({{ $index }}, '{{ $key }}')" {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
+                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="selectOption({{ $index }}, '{{ $key }}', {{ $soal->id }})" {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
                                                         <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                     </label>
                                                 @endforeach
@@ -551,7 +551,7 @@
 
                                         @else
                                             <textarea name="jawaban[{{ $soal->id }}]" rows="6" class="form-control"
-                                                placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, 'text')">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
+                                                placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, this.value, {{ $soal->id }})">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
                                         @endif
                                     </div>
                                 </div>
@@ -596,9 +596,10 @@
                             <i class="fas fa-chevron-left me-1"></i> <span class="d-none d-sm-inline">SOAL </span>SEBELUMNYA
                         </button>
 
-                        <label class="btn btn-outline-secondary d-flex align-items-center justify-content-center m-0 flex-grow-1 text-nowrap" id="label-ragu" style="cursor: pointer; padding: 8px 12px; font-size: 0.85rem; transition: all 0.2s;">
+                        <label class="btn btn-warning d-flex align-items-center justify-content-center m-0 flex-grow-1 text-nowrap" id="label-ragu" 
+                            style="cursor: pointer; padding: 8px 12px; font-size: 0.85rem; border: 1px solid #ffc107; transition: none; color: #000;">
                             <input type="checkbox" id="cb-ragu" onchange="toggleRagu(this.checked)" style="transform: scale(1.1); margin-right: 6px;">
-                            <span class="fw-bold text-dark"><i class="fas fa-flag me-1"></i> RAGU-RAGU</span>
+                            <span class="fw-bold"><i class="fas fa-flag me-1"></i> RAGU-RAGU</span>
                         </label>
 
                         <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-next" onclick="nextQuestion()" style="font-size: 0.85rem; padding: 8px 12px;">
@@ -765,19 +766,7 @@
             document.getElementById('btn-prev').disabled = (currentIndex === 0);
             document.getElementById('btn-next').disabled = (currentIndex === totalQuestions - 1);
 
-            // Update ragu checkbox and label
-            const cbRagu = document.getElementById('cb-ragu');
-            const labelRagu = document.getElementById('label-ragu');
-            if (cbRagu && labelRagu) {
-                cbRagu.checked = doubtState[currentIndex];
-                if (doubtState[currentIndex]) {
-                    labelRagu.classList.remove('btn-outline-secondary');
-                    labelRagu.classList.add('btn-warning');
-                } else {
-                    labelRagu.classList.remove('btn-warning');
-                    labelRagu.classList.add('btn-outline-secondary');
-                }
-            }
+            syncRaguUI();
 
             document.querySelectorAll('.q-nav-item').forEach((el, idx) => {
                 if (idx === currentIndex) el.classList.add('active');
@@ -785,29 +774,73 @@
             });
         }
 
-        function selectOption(index, value) {
-            if(value && value.trim() !== '') {
+        function syncRaguUI() {
+            const cbRagu = document.getElementById('cb-ragu');
+            const labelRagu = document.getElementById('label-ragu');
+            if (cbRagu && labelRagu) {
+                cbRagu.checked = doubtState[currentIndex];
+                if (doubtState[currentIndex]) {
+                    labelRagu.style.filter = 'brightness(0.9) saturate(1.2)';
+                    labelRagu.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.2)';
+                } else {
+                    labelRagu.style.filter = 'none';
+                    labelRagu.style.boxShadow = 'none';
+                }
+            }
+        }
+
+        function selectOption(index, value, soalId) {
+            if(value && value.trim() !== '' && value.trim() !== '-') {
                 answersState[index] = true;
             } else {
                 answersState[index] = false;
             }
             updateNavColor(index);
+
+            // Auto-save
+            if (soalId) {
+                autoSaveAnswer(soalId, value);
+            }
+        }
+
+        function autoSaveAnswer(soalId, jawaban) {
+            const url = '{{ route($routePrefix . "autosave", [$mataPelajaran->id, $ujian->id]) }}';
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    soal_id: soalId,
+                    jawaban: jawaban
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Autosave failed:', data.message);
+                }
+            })
+            .catch(error => console.error('Autosave error:', error));
         }
 
         function toggleRagu(isChecked) {
             if (isChecked === undefined) {
-                doubtState[currentIndex] = !doubtState[currentIndex]; // fallback
+                doubtState[currentIndex] = !doubtState[currentIndex];
             } else {
                 doubtState[currentIndex] = isChecked;
             }
             updateNavColor(currentIndex);
+            syncRaguUI();
         }
 
         function updateKompleks(soalId, index) {
             const checkboxes = document.querySelectorAll(`.kompleks-cb[data-soal-id="${soalId}"]:checked`);
             const selected = Array.from(checkboxes).map(cb => cb.value);
-            document.getElementById(`kompleks-hidden-${soalId}`).value = JSON.stringify(selected);
-            selectOption(index, selected.length > 0 ? 'checked' : '');
+            const val = JSON.stringify(selected);
+            document.getElementById(`kompleks-hidden-${soalId}`).value = val;
+            selectOption(index, selected.length > 0 ? val : '', soalId);
         }
 
         function updateBenarSalah(soalId, totalPernyataan, index) {
@@ -822,8 +855,9 @@
                     answers.push(null);
                 }
             }
-            document.getElementById(`bs-hidden-${soalId}`).value = JSON.stringify(answers);
-            selectOption(index, answeredCount > 0 ? 'answered' : '');
+            const val = JSON.stringify(answers);
+            document.getElementById(`bs-hidden-${soalId}`).value = val;
+            selectOption(index, answeredCount === totalPernyataan ? val : '', soalId);
         }
 
         function updateNavColor(index) {
@@ -887,6 +921,35 @@
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
             history.go(1);
+        };
+        // EXAM LOCKDOWN LOGIC
+        let blurCount = 0;
+        const examType = '{{ $ujian->tipe_ujian }}';
+
+        window.addEventListener('blur', function() {
+            if (examType !== 'latihan') {
+                blurCount++;
+                Swal.fire({
+                    title: 'Peringatan Kecurangan!',
+                    text: 'Anda dilarang meninggalkan atau berpindah tab saat ujian berlangsung! Percobaan ini telah dicatat sistem.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Kembali Fokus'
+                });
+            }
+        });
+
+        // Prevent Right Click & Inspect
+        document.addEventListener('contextmenu', event => {
+            if (examType !== 'latihan') event.preventDefault();
+        });
+
+        document.onkeydown = function(e) {
+            if (examType !== 'latihan') {
+                if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 85 || e.keyCode === 73)) {
+                    return false;
+                }
+            }
         };
     </script>
 @endif
