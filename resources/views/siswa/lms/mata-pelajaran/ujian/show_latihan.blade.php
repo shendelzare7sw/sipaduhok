@@ -100,6 +100,10 @@
                                             <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
                                         </button>
                                     </form>
+                                @else
+                                    <button type="button" class="btn btn-secondary px-4 m-0" disabled>
+                                        <i class="fas fa-ban me-2"></i> Pengulangan Habis
+                                    </button>
                                 @endif
                             @endif
                             @if($ujian->tampilkan_riwayat)

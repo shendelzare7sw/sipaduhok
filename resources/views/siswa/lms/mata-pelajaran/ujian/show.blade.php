@@ -101,6 +101,10 @@
                                             <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
                                         </button>
                                     </form>
+                                @else
+                                    <button type="button" class="btn btn-secondary px-4 m-0" disabled>
+                                        <i class="fas fa-ban me-2"></i> Pengulangan Habis
+                                    </button>
                                 @endif
                             @endif
                             @if($ujian->tampilkan_riwayat)
@@ -587,18 +591,18 @@
                     </div>
 
                     <!-- Navigation Buttons -->
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <button type="button" class="btn btn-primary btn-nav-q" id="btn-prev" onclick="prevQuestion()">
-                            <i class="fas fa-chevron-left"></i> SOAL SEBELUMNYA
+                    <div class="d-flex justify-content-between align-items-center mt-3 gap-2 flex-nowrap" style="overflow-x: auto;">
+                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-prev" onclick="prevQuestion()" style="font-size: 0.85rem; padding: 8px 12px;">
+                            <i class="fas fa-chevron-left me-1"></i> <span class="d-none d-sm-inline">SOAL </span>SEBELUMNYA
                         </button>
 
-                        <label class="btn btn-outline-warning d-flex align-items-center m-0" style="cursor: pointer; padding: 6px 16px;">
-                            <input type="checkbox" id="cb-ragu" onchange="toggleRagu(this.checked)" style="transform: scale(1.2); margin-right: 8px;">
-                            <span class="fw-bold text-dark"><i class="fas fa-flag"></i> RAGU-RAGU</span>
+                        <label class="btn btn-outline-secondary d-flex align-items-center justify-content-center m-0 flex-grow-1 text-nowrap" id="label-ragu" style="cursor: pointer; padding: 8px 12px; font-size: 0.85rem; transition: all 0.2s;">
+                            <input type="checkbox" id="cb-ragu" onchange="toggleRagu(this.checked)" style="transform: scale(1.1); margin-right: 6px;">
+                            <span class="fw-bold text-dark"><i class="fas fa-flag me-1"></i> RAGU-RAGU</span>
                         </label>
 
-                        <button type="button" class="btn btn-primary btn-nav-q" id="btn-next" onclick="nextQuestion()">
-                            SOAL SELANJUTNYA <i class="fas fa-chevron-right"></i>
+                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-next" onclick="nextQuestion()" style="font-size: 0.85rem; padding: 8px 12px;">
+                            <span class="d-none d-sm-inline">SOAL </span>SELANJUTNYA <i class="fas fa-chevron-right ms-1"></i>
                         </button>
                     </div>
                 </div>
@@ -761,10 +765,18 @@
             document.getElementById('btn-prev').disabled = (currentIndex === 0);
             document.getElementById('btn-next').disabled = (currentIndex === totalQuestions - 1);
 
-            // Update ragu checkbox
+            // Update ragu checkbox and label
             const cbRagu = document.getElementById('cb-ragu');
-            if (cbRagu) {
+            const labelRagu = document.getElementById('label-ragu');
+            if (cbRagu && labelRagu) {
                 cbRagu.checked = doubtState[currentIndex];
+                if (doubtState[currentIndex]) {
+                    labelRagu.classList.remove('btn-outline-secondary');
+                    labelRagu.classList.add('btn-warning');
+                } else {
+                    labelRagu.classList.remove('btn-warning');
+                    labelRagu.classList.add('btn-outline-secondary');
+                }
             }
 
             document.querySelectorAll('.q-nav-item').forEach((el, idx) => {
