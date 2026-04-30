@@ -684,7 +684,9 @@
                 {{ $isAnswered ? 'true' : 'false' }},
             @endforeach
         ];
-        const doubtState = new Array(totalQuestions).fill(false);
+        const storageKey = `doubtState_{{ $ujianSiswa->id }}`;
+        const savedDoubts = localStorage.getItem(storageKey);
+        const doubtState = savedDoubts ? JSON.parse(savedDoubts) : new Array(totalQuestions).fill(false);
         
         // Update nav colors on load
         for(let i=0; i<totalQuestions; i++) {
@@ -831,6 +833,7 @@
             } else {
                 doubtState[currentIndex] = isChecked;
             }
+            localStorage.setItem(storageKey, JSON.stringify(doubtState));
             updateNavColor(currentIndex);
             syncRaguUI();
         }
@@ -909,6 +912,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    localStorage.removeItem(storageKey);
                     document.getElementById('examForm').submit();
                 }
             });
