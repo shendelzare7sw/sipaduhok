@@ -504,9 +504,13 @@
                                                     : json_decode($soal->pilihan_jawaban, true);
                                             @endphp
                                             <small class="text-muted mb-2 d-block"><i class="fas fa-info-circle me-1"></i>Pilih semua jawaban yang benar</small>
-                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="">
+                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
                                             @php
-                                                $checkedKompleks = isset($existingAnswers[$soal->id]) ? explode(',', $existingAnswers[$soal->id]) : [];
+                                                $ansRaw = $existingAnswers[$soal->id] ?? '';
+                                                $checkedKompleks = json_decode($ansRaw, true);
+                                                if (!is_array($checkedKompleks)) {
+                                                    $checkedKompleks = $ansRaw ? explode(',', $ansRaw) : [];
+                                                }
                                             @endphp
                                             @if(is_array($pilihan))
                                                 @foreach($pilihan as $key => $value)
@@ -527,7 +531,7 @@
                                                     : json_decode($soal->pilihan_jawaban, true);
                                                 $pernyataanList = $pilihanData['pernyataan'] ?? [];
                                             @endphp
-                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="">
+                                            <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
                                             @php
                                                 $checkedBS = isset($existingAnswers[$soal->id]) ? json_decode($existingAnswers[$soal->id], true) : [];
                                             @endphp
@@ -537,12 +541,12 @@
                                                     <div class="d-flex gap-3">
                                                         <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
                                                             <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="true"
-                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && $checkedBS[$pIdx] == 'true' ? 'checked' : '' }}>
+                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1) ? 'checked' : '' }}>
                                                             <span><strong>BENAR</strong></span>
                                                         </label>
                                                         <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
                                                             <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="false"
-                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && $checkedBS[$pIdx] == 'false' ? 'checked' : '' }}>
+                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0) ? 'checked' : '' }}>
                                                             <span><strong>SALAH</strong></span>
                                                         </label>
                                                     </div>
