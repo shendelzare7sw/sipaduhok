@@ -592,9 +592,10 @@
                             <i class="fas fa-chevron-left"></i> SOAL SEBELUMNYA
                         </button>
 
-                        <button type="button" class="btn btn-warning text-white" id="btn-ragu" onclick="toggleRagu()">
-                            <i class="fas fa-flag"></i> RAGU-RAGU
-                        </button>
+                        <label class="btn btn-outline-warning d-flex align-items-center m-0" style="cursor: pointer; padding: 6px 16px;">
+                            <input type="checkbox" id="cb-ragu" onchange="toggleRagu(this.checked)" style="transform: scale(1.2); margin-right: 8px;">
+                            <span class="fw-bold text-dark"><i class="fas fa-flag"></i> RAGU-RAGU</span>
+                        </label>
 
                         <button type="button" class="btn btn-primary btn-nav-q" id="btn-next" onclick="nextQuestion()">
                             SOAL SELANJUTNYA <i class="fas fa-chevron-right"></i>
@@ -659,8 +660,19 @@
                     $isAnswered = false;
                     if(isset($existingAnswers[$soal->id])) {
                         $ans = $existingAnswers[$soal->id];
-                        if($ans !== '' && $ans !== '-' && $ans !== '[]' && $ans !== 'null' && $ans !== '[null]') {
-                            $isAnswered = true;
+                        if (is_string($ans)) {
+                            $decoded = json_decode($ans, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                if ($soal->tipe_soal === 'pilihan_ganda_kompleks') {
+                                    $isAnswered = count($decoded) > 0;
+                                } elseif ($soal->tipe_soal === 'benar_salah') {
+                                    $isAnswered = count($decoded) > 0 && !in_array(null, $decoded, true);
+                                } else {
+                                    $isAnswered = count($decoded) > 0;
+                                }
+                            } else {
+                                $isAnswered = trim($ans) !== '' && trim($ans) !== '-';
+                            }
                         }
                     }
                 @endphp
@@ -749,14 +761,10 @@
             document.getElementById('btn-prev').disabled = (currentIndex === 0);
             document.getElementById('btn-next').disabled = (currentIndex === totalQuestions - 1);
 
-            // Update ragu button style
-            const btnRagu = document.getElementById('btn-ragu');
-            if(doubtState[currentIndex]) {
-                btnRagu.classList.remove('btn-warning');
-                btnRagu.classList.add('btn-outline-warning');
-            } else {
-                btnRagu.classList.remove('btn-outline-warning');
-                btnRagu.classList.add('btn-warning', 'text-white');
+            // Update ragu checkbox
+            const cbRagu = document.getElementById('cb-ragu');
+            if (cbRagu) {
+                cbRagu.checked = doubtState[currentIndex];
             }
 
             document.querySelectorAll('.q-nav-item').forEach((el, idx) => {
@@ -774,10 +782,13 @@
             updateNavColor(index);
         }
 
-        function toggleRagu() {
-            doubtState[currentIndex] = !doubtState[currentIndex];
+        function toggleRagu(isChecked) {
+            if (isChecked === undefined) {
+                doubtState[currentIndex] = !doubtState[currentIndex]; // fallback
+            } else {
+                doubtState[currentIndex] = isChecked;
+            }
             updateNavColor(currentIndex);
-            updateUI();
         }
 
         function updateKompleks(soalId, index) {
@@ -820,10 +831,15 @@
 
             const isLatihan = {{ $ujian->tipe_ujian === 'latihan' ? 'true' : 'false' }};
 
-            if (!isLatihan && unanswered > 0) {
+            if (!isLatihan && (unanswered > 0 || doubts > 0)) {
+                let errorMsg = 'Anda tidak dapat mengumpulkan ujian karena ada soal yang belum selesai.\n';
+                if (unanswered > 0) errorMsg += `\n- Terdapat ${unanswered} soal belum dijawab.`;
+                if (doubts > 0) errorMsg += `\n- Terdapat ${doubts} soal ditandai ragu-ragu.`;
+                errorMsg += '\n\nSilakan lengkapi dan hilangkan tanda ragu-ragu sebelum submit.';
+
                 Swal.fire({
                     title: 'Peringatan!',
-                    text: `Anda tidak dapat mengumpulkan ujian. Masih ada ${unanswered} soal yang belum dijawab. Harap jawab semua soal terlebih dahulu.`,
+                    text: errorMsg,
                     icon: 'error',
                     confirmButtonColor: '#dc3545',
                     confirmButtonText: 'Tutup'
