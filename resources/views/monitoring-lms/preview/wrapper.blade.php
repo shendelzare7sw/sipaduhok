@@ -369,30 +369,39 @@
         opacity: 0.9;
     }
     #imagePreviewModal .modal-body {
-        padding: 0;
+        padding: 20px 0;
         text-align: center;
-        background: #000;
+        background: transparent;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         min-height: 300px;
     }
     #imagePreviewModal img {
         max-width: 100%;
-        max-height: 85vh;
+        max-height: 80vh;
         object-fit: contain;
     }
-    #imagePreviewModal .btn-close {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background-color: white;
-        opacity: 0.8;
-        z-index: 10;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    .btn-close-custom {
+        background-color: rgba(71, 85, 105, 0.9);
+        color: white;
+        border: none;
+        padding: 8px 24px;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        margin-top: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    #imagePreviewModal .btn-close:hover {
-        opacity: 1;
+    .btn-close-custom:hover {
+        background-color: rgba(51, 65, 85, 1);
+        color: white;
+        transform: translateY(-1px);
     }
 </style>
 @endsection
@@ -432,9 +441,11 @@
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content bg-transparent border-0">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            <div class="modal-body rounded shadow-lg overflow-hidden">
-                <img src="" id="imagePreviewSource" alt="Preview Image">
+            <div class="modal-body">
+                <img src="" id="imagePreviewSource" alt="Preview Image" class="rounded shadow-lg">
+                <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Tutup Gambar
+                </button>
             </div>
         </div>
     </div>
