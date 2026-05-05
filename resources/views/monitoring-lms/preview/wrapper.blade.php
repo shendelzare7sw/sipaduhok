@@ -368,16 +368,7 @@
     .preview-content img:hover {
         opacity: 0.9;
     }
-    #imagePreviewModal .modal-body {
-        padding: 20px 0;
-        text-align: center;
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 300px;
-    }
+
     #imagePreviewModal img {
         max-width: 100%;
         max-height: 80vh;
@@ -439,14 +430,12 @@
 
 <!-- Image Preview Modal -->
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content bg-transparent border-0">
-            <div class="modal-body">
-                <img src="" id="imagePreviewSource" alt="Preview Image" class="rounded shadow-lg">
-                <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Tutup Gambar
-                </button>
-            </div>
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="justify-content: center;">
+        <div class="modal-content" style="background: transparent !important; border: none !important; box-shadow: none !important; align-items: center; width: auto;">
+            <img src="" id="imagePreviewSource" alt="Preview Image" style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
+                <i class="fas fa-times"></i> Tutup Gambar
+            </button>
         </div>
     </div>
 </div>
