@@ -359,6 +359,41 @@
         color: var(--primary-color);
         box-shadow: none;
     }
+    
+    /* Image Lightbox */
+    .preview-content img {
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .preview-content img:hover {
+        opacity: 0.9;
+    }
+    #imagePreviewModal .modal-body {
+        padding: 0;
+        text-align: center;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 300px;
+    }
+    #imagePreviewModal img {
+        max-width: 100%;
+        max-height: 85vh;
+        object-fit: contain;
+    }
+    #imagePreviewModal .btn-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: white;
+        opacity: 0.8;
+        z-index: 10;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #imagePreviewModal .btn-close:hover {
+        opacity: 1;
+    }
 </style>
 @endsection
 
@@ -393,5 +428,34 @@
     </div>
 </div>
 
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-body rounded shadow-lg overflow-hidden">
+                <img src="" id="imagePreviewSource" alt="Preview Image">
+            </div>
+        </div>
+    </div>
+</div>
+
 @include('monitoring-lms.partials.modal-catatan')
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const previewImages = document.querySelectorAll('.preview-content img');
+        const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+        const modalImage = document.getElementById('imagePreviewSource');
+
+        previewImages.forEach(img => {
+            img.addEventListener('click', function() {
+                modalImage.src = this.src;
+                modal.show();
+            });
+        });
+    });
+</script>
 @endsection
