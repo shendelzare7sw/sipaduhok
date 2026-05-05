@@ -1267,6 +1267,36 @@ class NotificationService
     }
     
     /**
+     * Notify guru about a monitoring catatan from Kepsek/Wakepsek/Admin.
+     */
+    public function notifyCatatanMonitoring(\App\Models\CatatanMonitoring $catatan)
+    {
+        $catatan->loadMissing(['guru.user', 'pengirim']);
+
+        $guruUser = $catatan->guru?->user;
+        if (!$guruUser) {
+            return;
+        }
+
+        $pengirimName = $catatan->pengirim?->name ?? 'Pimpinan';
+        $kontenLabel = $catatan->kontenLabel();
+        $judulKonten = $catatan->kontenJudul();
+
+        $this->create(
+            $guruUser->id,
+            Notification::TIPE_CATATAN,
+            'Catatan Monitoring dari ' . $pengirimName,
+            $kontenLabel . ' "' . \Illuminate\Support\Str::limit($judulKonten, 60) . '": ' . \Illuminate\Support\Str::limit($catatan->isi_catatan, 100),
+            route('guru.lms.catatan-monitoring.show', $catatan->id),
+            [
+                'catatan_monitoring_id' => $catatan->id,
+                'konten_type' => $catatan->konten_type,
+                'konten_id' => $catatan->konten_id,
+            ]
+        );
+    }
+
+    /**
      * Notify Admin about new Recovery Ticket that needs intervention
      */
     public function notifyAdminTicketPemulihan($ticket)

@@ -166,4 +166,16 @@ class MonitoringController extends KetuaController
         }
         return $response;
     }
+
+    /**
+     * Override LMS view context for admin namespace.
+     */
+    protected function lmsViewContext(): array
+    {
+        return [
+            'rolePartial' => 'admin.partials.sneat-sidebar-menu',
+            'baseRoute' => 'admin.monitoring.lms',
+            'cabangScope' => null,
+        ];
+    }
 }

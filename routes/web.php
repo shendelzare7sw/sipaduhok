@@ -640,6 +640,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/wali-kelas', [$monitoringController, 'monitoringWaliKelas'])->name('wali-kelas');
             Route::get('/guru-pengajar', [$monitoringController, 'monitoringGuruPengajar'])->name('guru-pengajar');
             Route::get('/siswa', [$monitoringController, 'monitoringSiswa'])->name('siswa');
+
+            // Monitoring LMS
+            Route::prefix('lms')->name('lms.')->group(function () use ($monitoringController) {
+                Route::get('/', [$monitoringController, 'lmsIndex'])->name('index');
+                Route::get('/kelas/{kelas}', [$monitoringController, 'lmsKelas'])->name('kelas');
+                Route::get('/preview/{type}/{id}', [$monitoringController, 'lmsPreview'])->name('preview');
+                Route::post('/catatan', [$monitoringController, 'lmsKirimCatatan'])->name('catatan');
+            });
         });
 
         // Laporan
@@ -683,6 +691,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/wali-kelas', [KetuaController::class, 'monitoringWaliKelas'])->name('wali-kelas');
             Route::get('/guru-pengajar', [KetuaController::class, 'monitoringGuruPengajar'])->name('guru-pengajar');
             Route::get('/siswa', [KetuaController::class, 'monitoringSiswa'])->name('siswa');
+
+            // Monitoring LMS
+            Route::prefix('lms')->name('lms.')->group(function () {
+                Route::get('/', [KetuaController::class, 'lmsIndex'])->name('index');
+                Route::get('/kelas/{kelas}', [KetuaController::class, 'lmsKelas'])->name('kelas');
+                Route::get('/preview/{type}/{id}', [KetuaController::class, 'lmsPreview'])->name('preview');
+                Route::post('/catatan', [KetuaController::class, 'lmsKirimCatatan'])->name('catatan');
+            });
         });
 
         // Laporan
@@ -836,6 +852,14 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/wali-kelas', [WakilKepalaSekolahController::class, 'monitoringWaliKelas'])->name('wali-kelas');
             Route::get('/guru-pengajar', [WakilKepalaSekolahController::class, 'monitoringGuruPengajar'])->name('guru-pengajar');
             Route::get('/siswa', [WakilKepalaSekolahController::class, 'monitoringSiswa'])->name('siswa');
+
+            // Monitoring LMS (cabang-scoped)
+            Route::prefix('lms')->name('lms.')->group(function () {
+                Route::get('/', [WakilKepalaSekolahController::class, 'lmsIndex'])->name('index');
+                Route::get('/kelas/{kelas}', [WakilKepalaSekolahController::class, 'lmsKelas'])->name('kelas');
+                Route::get('/preview/{type}/{id}', [WakilKepalaSekolahController::class, 'lmsPreview'])->name('preview');
+                Route::post('/catatan', [WakilKepalaSekolahController::class, 'lmsKirimCatatan'])->name('catatan');
+            });
         });
 
         // Catatan / Teguran
@@ -1324,6 +1348,12 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{meeting}', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'update'])->name('update');
                 Route::delete('/{meeting}', [App\Http\Controllers\Guru\GuruLmsMeetingController::class, 'destroy'])->name('destroy');
             });
+        });
+
+        // Catatan Monitoring (notifikasi dari Kepsek/Wakepsek/Admin)
+        Route::prefix('lms/catatan-monitoring')->name('lms.catatan-monitoring.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Guru\GuruCatatanMonitoringController::class, 'index'])->name('index');
+            Route::get('/{catatan}', [\App\Http\Controllers\Guru\GuruCatatanMonitoringController::class, 'show'])->name('show');
         });
     });
 

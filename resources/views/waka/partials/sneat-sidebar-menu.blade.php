@@ -135,6 +135,14 @@
     </a>
 </li>
 
+<!-- Monitoring LMS (cabang-scoped) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.monitoring.lms') ? 'active' : '' }}">
+    <a href="{{ route('waka.monitoring.lms.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-desktop"></i>
+        <div>Monitoring LMS</div>
+    </a>
+</li>
+
 <!-- Menu Header - Komunikasi -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Komunikasi</span>

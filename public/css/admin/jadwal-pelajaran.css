@@ -332,6 +332,7 @@
     }
 }
 
+@media (max-width: 768px) {
     /* Mobile Card Table */
     .table-clean thead { display: none; }
     .table-clean tbody tr {

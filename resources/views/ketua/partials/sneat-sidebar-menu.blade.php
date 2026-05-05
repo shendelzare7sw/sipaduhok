@@ -87,6 +87,14 @@
     </a>
 </li>
 
+<!-- Monitoring LMS -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.monitoring.lms') ? 'active' : '' }}">
+    <a href="{{ route('ketua.monitoring.lms.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-desktop"></i>
+        <div>Monitoring LMS</div>
+    </a>
+</li>
+
 <!-- Menu Header - Laporan & Catatan -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Laporan & Catatan</span>

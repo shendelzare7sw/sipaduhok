@@ -90,13 +90,14 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
-<!-- Google Sheets Integration -->
+{{-- Google Sheets Integration (Sembunyikan sementara)
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.google-sheets') ? 'active' : '' }}">
     <a href="{{ route('admin.google-sheets.index') }}" class="menu-link">
         <i class="menu-icon fas fa-table"></i>
         <div>Google Sheets Sync</div>
     </a>
 </li>
+--}}
 
 <!-- Tahun Ajaran -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.tahun-ajaran') ? 'active' : '' }}">
@@ -317,6 +318,11 @@ Compatible dengan Sneat Bootstrap 5 Template
         <li class="menu-item {{ $currentRoute == 'admin.monitoring.siswa' ? 'active' : '' }}">
             <a href="{{ route('admin.monitoring.siswa') }}" class="menu-link">
                 <div>Siswa</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.monitoring.lms') ? 'active' : '' }}">
+            <a href="{{ route('admin.monitoring.lms.index') }}" class="menu-link">
+                <div>Monitoring LMS</div>
             </a>
         </li>
     </ul>

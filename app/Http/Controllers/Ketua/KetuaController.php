@@ -14,8 +14,10 @@ use App\Models\Ujian;
 use App\Models\Tagihan;
 use App\Models\Pembayaran;
 use App\Models\Catatan;
+use App\Models\CatatanMonitoring;
 use App\Models\TahunAjaran;
 use App\Models\Cabang;
+use App\Services\LmsMonitoringService;
 use Illuminate\Http\Request;
 
 class KetuaController extends Controller
@@ -526,5 +528,124 @@ class KetuaController extends Controller
         $catatan->delete();
 
         return redirect()->route('ketua.catatan.index')->with('success', 'Catatan berhasil dihapus dari riwayat.');
+    }
+
+    // ============================================
+    // MONITORING LMS (Materi / Tugas / Latihan / Ujian dari Guru)
+    // ============================================
+
+    /**
+     * Konteks per-role untuk view bersama monitoring-lms.
+     * Override di MonitoringController (admin) dan WakilKepalaSekolahController (waka).
+     */
+    protected function lmsViewContext(): array
+    {
+        return [
+            'rolePartial' => 'ketua.partials.sneat-sidebar-menu',
+            'baseRoute' => 'ketua.monitoring.lms',
+            'cabangScope' => null,
+        ];
+    }
+
+    public function lmsIndex(Request $request)
+    {
+        $ctx = $this->lmsViewContext();
+        $service = app(LmsMonitoringService::class);
+
+        $taFilter = $request->has('tahun_ajaran_id') ? (int) $request->input('tahun_ajaran_id') : 0;
+        $onlyWithContent = $request->boolean('only_with_content');
+
+        $kelas = $service->getKelasList(
+            $ctx['cabangScope'],
+            $request->input('search'),
+            $taFilter,
+            $onlyWithContent
+        );
+
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $tahunAjarans = TahunAjaran::orderByDesc('tanggal_mulai')->get();
+
+        return view('monitoring-lms.index', array_merge($ctx, compact('kelas', 'tahunAjaranAktif', 'tahunAjarans', 'taFilter', 'onlyWithContent')));
+    }
+
+    public function lmsKelas(Request $request, $kelasId)
+    {
+        $ctx = $this->lmsViewContext();
+        $service = app(LmsMonitoringService::class);
+
+        $kelas = $service->findKelasOrFail((int) $kelasId, $ctx['cabangScope']);
+
+        $filters = [
+            'mapel_id' => $request->input('mapel_id') ? (int) $request->input('mapel_id') : null,
+            'search' => $request->input('search'),
+            'date_from' => $request->input('date_from'),
+            'date_to' => $request->input('date_to'),
+            'tab' => $request->input('tab', 'materi'),
+        ];
+
+        $konten = $service->getKontenByKelas(
+            (int) $kelasId,
+            $filters['mapel_id'],
+            $filters['search'],
+            $filters['date_from'],
+            $filters['date_to']
+        );
+
+        return view('monitoring-lms.kelas-detail', array_merge($ctx, compact('kelas', 'konten', 'filters')));
+    }
+
+    public function lmsPreview(Request $request, $type, $id)
+    {
+        $ctx = $this->lmsViewContext();
+        $service = app(LmsMonitoringService::class);
+
+        $previewView = match ($type) {
+            CatatanMonitoring::KONTEN_MATERI => 'monitoring-lms.preview.materi',
+            CatatanMonitoring::KONTEN_TUGAS => 'monitoring-lms.preview.tugas',
+            CatatanMonitoring::KONTEN_UJIAN, 'latihan' => 'monitoring-lms.preview.ujian',
+            default => abort(404),
+        };
+
+        $konten = match ($type) {
+            CatatanMonitoring::KONTEN_MATERI => $service->findMateriOrFail((int) $id, $ctx['cabangScope']),
+            CatatanMonitoring::KONTEN_TUGAS => $service->findTugasOrFail((int) $id, $ctx['cabangScope']),
+            CatatanMonitoring::KONTEN_UJIAN, 'latihan' => $service->findUjianOrFail((int) $id, $ctx['cabangScope']),
+        };
+
+        return view($previewView, array_merge($ctx, [
+            'konten' => $konten,
+            'kontenType' => $type,
+            'kontenId' => (int) $id,
+        ]));
+    }
+
+    public function lmsKirimCatatan(Request $request)
+    {
+        $validated = $request->validate([
+            'konten_type' => 'required|in:materi,tugas,ujian',
+            'konten_id' => 'required|integer',
+            'isi_catatan' => 'required|string|min:5|max:5000',
+        ]);
+
+        $ctx = $this->lmsViewContext();
+        $service = app(LmsMonitoringService::class);
+
+        $catatan = $service->kirimCatatan(
+            auth()->user(),
+            $validated['konten_type'],
+            (int) $validated['konten_id'],
+            $validated['isi_catatan'],
+            $ctx['cabangScope']
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Catatan berhasil dikirim ke guru.',
+                'catatan_id' => $catatan->id,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Catatan berhasil dikirim ke guru.');
     }
 }

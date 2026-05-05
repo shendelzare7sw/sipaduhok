@@ -38,6 +38,26 @@
     </a>
 </li>
 
+<!-- Catatan Monitoring -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'guru.lms.catatan-monitoring') ? 'active' : '' }}">
+    <a href="{{ route('guru.lms.catatan-monitoring.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-comment-dots"></i>
+        <div>Catatan Monitoring</div>
+        @php
+            $unreadCm = 0;
+            try {
+                $tpId = optional(\App\Models\TenagaPendidik::where('user_id', auth()->id())->first())->id;
+                if ($tpId) {
+                    $unreadCm = \App\Models\CatatanMonitoring::forGuru($tpId)->unread()->count();
+                }
+            } catch (\Throwable $e) { /* table may not exist yet */ }
+        @endphp
+        @if($unreadCm > 0)
+            <span class="badge bg-danger rounded-pill ms-auto">{{ $unreadCm }}</span>
+        @endif
+    </a>
+</li>
+
 <!-- Kelas Saya (Dynamic) -->
 @if(isset($sidebarKelas) && count($sidebarKelas) > 0)
     <li class="menu-header small text-uppercase">
