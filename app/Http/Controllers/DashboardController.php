@@ -139,12 +139,17 @@ class DashboardController extends Controller
         $jadwalHariIni = collect();
         
         if ($tenagaPendidik) {
-            // Get all kelas yang diajar guru ini
+            // Filter scope ke TA aktif — supaya pasca aktivasi TA baru,
+            // dashboard tidak nampilkan kelas/jadwal/mapel dari TA lama.
+            $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+
+            // Get all kelas yang diajar guru ini di TA aktif
             $guruKelasRaw = GuruPengajarKelas::with(['kelas', 'mataPelajaran'])
                 ->where('tenaga_pendidik_id', $tenagaPendidik->id)
+                ->when($taAktifId, fn($q) => $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $taAktifId)))
                 ->get()
                 ->groupBy('kelas_id');
-            
+
             // Transform data untuk view
             $kelasYangDiajar = collect();
             foreach ($guruKelasRaw as $kelasId => $items) {
@@ -155,30 +160,33 @@ class DashboardController extends Controller
                     'jumlah_mapel' => $items->count(),
                 ]);
             }
-            
+
             $kelasIds = $guruKelasRaw->keys();
             $totalSiswa = Siswa::whereIn('kelas_id', $kelasIds)
                 ->where('status', 'aktif')
                 ->count();
-            
+
             $hariIni = $this->getHariIndonesia(now()->dayOfWeek);
             $jadwalHariIni = JadwalPelajaran::with(['kelas', 'mataPelajaran'])
                 ->where('guru_id', $tenagaPendidik->id)
+                ->when($taAktifId, fn($q) => $q->where('tahun_ajaran_id', $taAktifId))
                 ->where('hari', $hariIni)
                 ->orderBy('jam_mulai')
                 ->get();
 
-            // Mapping mapel yang valid (assigned) untuk lookup cepat
+            // Mapping mapel yang valid (assigned) untuk lookup cepat — scope TA aktif
             $assignedMapels = GuruPengajarKelas::where('tenaga_pendidik_id', $tenagaPendidik->id)
+                ->when($taAktifId, fn($q) => $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $taAktifId)))
                 ->get()
                 ->map(function($gpk) {
                     return $gpk->kelas_id . '-' . $gpk->mata_pelajaran_id;
                 })
                 ->flip();
-            
+
             // Mapping by name untuk handle kasus ID mapel di jadwal beda dengan di assignment (e.g. duplikat mapel)
             $assignedMapelsByName = GuruPengajarKelas::with('mataPelajaran')
                 ->where('tenaga_pendidik_id', $tenagaPendidik->id)
+                ->when($taAktifId, fn($q) => $q->whereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $taAktifId)))
                 ->get()
                 ->mapWithKeys(function($gpk) {
                     if ($gpk->mataPelajaran) {

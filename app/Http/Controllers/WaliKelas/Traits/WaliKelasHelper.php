@@ -17,9 +17,29 @@ trait WaliKelasHelper
     }
 
     /**
-     * Get all kelas yang dipegang wali kelas ini.
+     * Get kelas yang dipegang wali kelas ini DI TA AKTIF SAJA (default untuk dashboard).
+     *
+     * Pasca aktivasi TA baru, kelas TA lama tidak akan tampil di dashboard wali — supaya
+     * mereka melihat assignment baru. Akses ke kelas TA lama tetap tersedia via menu
+     * "Rapor Pending Saya" yang lintas TA.
      */
     protected function getKelasWali(TenagaPendidik $tenagaPendidik)
+    {
+        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+
+        return Kelas::whereHas('waliKelasAssignments', function($q) use ($tenagaPendidik) {
+            $q->where('tenaga_pendidik_id', $tenagaPendidik->id);
+        })
+        ->when($taAktifId, fn($q) => $q->where('tahun_ajaran_id', $taAktifId))
+        ->with(['cabang', 'tahunAjaran'])
+        ->get();
+    }
+
+    /**
+     * Get SEMUA kelas yang pernah/sedang diwalikan (lintas TA) — untuk fitur historis
+     * seperti rapor pending TA lalu.
+     */
+    protected function getKelasWaliAllTa(TenagaPendidik $tenagaPendidik)
     {
         return Kelas::whereHas('waliKelasAssignments', function($q) use ($tenagaPendidik) {
             $q->where('tenaga_pendidik_id', $tenagaPendidik->id);
