@@ -13,12 +13,6 @@
         </a>
     </li>
     <li class="menu-item">
-        <a href="{{ route('siswa.lms.riwayat.index') }}" class="menu-link">
-            <i class="menu-icon fas fa-history"></i>
-            <div>Riwayat LMS</div>
-        </a>
-    </li>
-    <li class="menu-item">
         <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
             @csrf
             <button type="submit" class="menu-link border-0 bg-transparent w-100 text-start"
@@ -115,14 +109,6 @@
     @endif
 
     <div class="alumni-grid">
-        <a href="{{ route('siswa.lms.riwayat.index') }}" class="alumni-action-card">
-            <div class="icon-circle" style="background: #4361ee;"><i class="fas fa-history"></i></div>
-            <div>
-                <div class="label">Riwayat LMS</div>
-                <div class="desc">Tugas, latihan, ujian yang pernah dikerjakan</div>
-            </div>
-        </a>
-
         <form method="POST" action="{{ route('logout') }}" class="m-0">
             @csrf
             <button type="submit" class="alumni-action-card w-100 border-0 text-start"

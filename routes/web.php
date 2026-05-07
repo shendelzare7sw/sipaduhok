@@ -1450,13 +1450,6 @@ Route::middleware(['auth'])->group(function () {
             // Dashboard LMS
             Route::get('/dashboard', [LmsDashboardController::class, 'index'])->name('dashboard');
 
-            // Riwayat LMS (lintas TA — tidak tergantung kelas saat ini)
-            Route::prefix('riwayat')->name('riwayat.')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Siswa\SiswaLmsRiwayatController::class, 'index'])->name('index');
-                Route::get('/tugas/{id}', [\App\Http\Controllers\Siswa\SiswaLmsRiwayatController::class, 'showTugas'])->name('tugas')->where('id', '[0-9]+');
-                Route::get('/ujian/{id}', [\App\Http\Controllers\Siswa\SiswaLmsRiwayatController::class, 'showUjian'])->name('ujian')->where('id', '[0-9]+');
-            });
-
             // Kalender Akademik
             Route::get('/kalender', [SiswaDashboardController::class, 'kalenderTahunan'])->name('kalender');
             Route::get('/kalender/{tanggal}', [SiswaDashboardController::class, 'kalenderDetail'])->name('kalender.detail');

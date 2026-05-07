@@ -45,6 +45,3 @@
 <a href="{{ route('siswa.lms.guru') }}" class="nav-link {{ request()->routeIs('siswa.lms.guru') ? 'active' : '' }}">
     <i class="bi bi-person-video3"></i> Daftar Guru
 </a>
-<a href="{{ route('siswa.lms.riwayat.index') }}" class="nav-link {{ request()->routeIs('siswa.lms.riwayat.*') ? 'active' : '' }}">
-    <i class="bi bi-clock-history"></i> Riwayat LMS
-</a>

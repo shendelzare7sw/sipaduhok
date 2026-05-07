@@ -36,19 +36,7 @@ class CheckStudentActive
                     'notifications.index',
                 ];
 
-                $allowedPrefixes = [
-                    'siswa.lms.riwayat.', // Riwayat LMS lintas TA
-                ];
-
                 $isAllowed = in_array($currentRoute, $allowedExact, true);
-                if (!$isAllowed && $currentRoute) {
-                    foreach ($allowedPrefixes as $prefix) {
-                        if (str_starts_with($currentRoute, $prefix)) {
-                            $isAllowed = true;
-                            break;
-                        }
-                    }
-                }
 
                 if (!$isAllowed) {
                     return redirect()->route('siswa.sia.dashboard')
