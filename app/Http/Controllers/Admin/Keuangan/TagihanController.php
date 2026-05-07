@@ -16,6 +16,14 @@ class TagihanController extends BendaharaTagihanController
     }
 
     /**
+     * Override carryover view to use admin layout
+     */
+    protected function carryoverViewName(): string
+    {
+        return 'admin.keuangan.tagihan.carryover';
+    }
+
+    /**
      * Override index method to use admin view
      */
     public function index(Request $request)

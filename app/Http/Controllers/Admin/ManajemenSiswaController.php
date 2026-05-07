@@ -7,6 +7,7 @@ use App\Models\Siswa;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\Cabang;
+use App\Models\StatusNaikKelasSiswa;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 
@@ -17,11 +18,19 @@ class ManajemenSiswaController extends Controller
      */
     public function index(Request $request)
     {
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $taFilterId = $request->tahun_ajaran_id ?: ($tahunAjaranAktif?->id);
+        $isHistorical = $taFilterId && $tahunAjaranAktif && $taFilterId != $tahunAjaranAktif->id;
+
         $query = Siswa::with(['user', 'cabang', 'kelas.tahunAjaran']);
 
-        // Filter by tahun ajaran (via kelas)
-        if ($request->filled('tahun_ajaran_id')) {
-            $query->whereHas('kelas', fn($q) => $q->where('tahun_ajaran_id', $request->tahun_ajaran_id));
+        // Filter by tahun ajaran — pakai scope yang include snapshot (status_naik_kelas_siswa)
+        // Saat TA non-aktif: ambil siswa yang punya snapshot di TA itu (mode historis)
+        // Saat TA aktif: ambil siswa yang sekarang ada di kelas TA aktif
+        if ($taFilterId) {
+            $query->forTahunAjaran($taFilterId);
+            // Eager load snapshot agar view bisa render kelas asal
+            $query->with(['statusNaikKelas' => fn($q) => $q->where('tahun_ajaran_id', $taFilterId)]);
         }
 
         // Filter by cabang
@@ -29,8 +38,8 @@ class ManajemenSiswaController extends Controller
             $query->where('cabang_id', $request->cabang_id);
         }
 
-        // Filter by kelas
-        if ($request->filled('kelas_id')) {
+        // Filter by kelas — hanya relevan saat TA aktif (kelas_id menunjuk ke kelas saat ini)
+        if (!$isHistorical && $request->filled('kelas_id')) {
             $kelasId = $request->kelas_id;
             if (is_array($kelasId)) {
                 $query->whereIn('kelas_id', $kelasId);
@@ -39,20 +48,21 @@ class ManajemenSiswaController extends Controller
             }
         }
 
-        // Filter by jenjang (via kelas)
-        if ($request->filled('jenjang')) {
+        // Filter by jenjang (via kelas saat ini)
+        if (!$isHistorical && $request->filled('jenjang')) {
             $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
         }
 
         // Filter by status
+        // Saat historis: jangan default 'aktif' — biarkan user lihat semua siswa di TA itu (termasuk lulus/tidak naik)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        } else {
-            $query->where('status', 'aktif'); // Default: hanya siswa aktif
+        } elseif (!$isHistorical) {
+            $query->where('status', 'aktif');
         }
 
-        // Filter belum punya kelas
-        if ($request->filled('no_kelas') && $request->no_kelas == '1') {
+        // Filter belum punya kelas — hanya saat TA aktif
+        if (!$isHistorical && $request->filled('no_kelas') && $request->no_kelas == '1') {
             $query->whereNull('kelas_id');
         }
 
@@ -66,28 +76,39 @@ class ManajemenSiswaController extends Controller
             });
         }
 
-        $siswaList = $query->orderBy('nama_lengkap')->paginate(20);
+        $siswaList = $query->orderBy('nama_lengkap')->paginate(20)->withQueryString();
 
         // Data untuk filter
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
-        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $cabangs = Cabang::where('is_active', true)->get();
         $kelasList = Kelas::with('cabang')
-            ->when($request->tahun_ajaran_id, fn($q) => $q->where('tahun_ajaran_id', $request->tahun_ajaran_id))
-            ->when(!$request->tahun_ajaran_id && $tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+            ->when($taFilterId, fn($q) => $q->where('tahun_ajaran_id', $taFilterId))
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
         // Jenjang options
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
-        // Statistics
-        $stats = [
-            'totalSiswa' => Siswa::where('status', 'aktif')->count(),
-            'siswaWithKelas' => Siswa::where('status', 'aktif')->whereNotNull('kelas_id')->count(),
-            'siswaNoKelas' => Siswa::where('status', 'aktif')->whereNull('kelas_id')->count(),
-            'siswaLaki' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'L')->count(),
-            'siswaPerempuan' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'P')->count(),
-        ];
+        // Statistics — saat historis, hitung dari snapshot. Saat aktif, hitung siswa aktif sekarang.
+        if ($isHistorical) {
+            $snapshotIds = StatusNaikKelasSiswa::where('tahun_ajaran_id', $taFilterId)->pluck('siswa_id');
+            $totalHistoris = $snapshotIds->count();
+            $stats = [
+                'totalSiswa' => $totalHistoris,
+                'siswaWithKelas' => StatusNaikKelasSiswa::where('tahun_ajaran_id', $taFilterId)
+                    ->whereNotNull('kelas_asal')->where('kelas_asal', '!=', '-')->count(),
+                'siswaNoKelas' => 0,
+                'siswaLaki' => Siswa::whereIn('id', $snapshotIds)->where('jenis_kelamin', 'L')->count(),
+                'siswaPerempuan' => Siswa::whereIn('id', $snapshotIds)->where('jenis_kelamin', 'P')->count(),
+            ];
+        } else {
+            $stats = [
+                'totalSiswa' => Siswa::where('status', 'aktif')->count(),
+                'siswaWithKelas' => Siswa::where('status', 'aktif')->whereNotNull('kelas_id')->count(),
+                'siswaNoKelas' => Siswa::where('status', 'aktif')->whereNull('kelas_id')->count(),
+                'siswaLaki' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'L')->count(),
+                'siswaPerempuan' => Siswa::where('status', 'aktif')->where('jenis_kelamin', 'P')->count(),
+            ];
+        }
 
         return view('admin.manajemen-siswa.index', compact(
             'siswaList',
@@ -96,7 +117,9 @@ class ManajemenSiswaController extends Controller
             'cabangs',
             'kelasList',
             'jenjangs',
-            'stats'
+            'stats',
+            'isHistorical',
+            'taFilterId'
         ));
     }
 

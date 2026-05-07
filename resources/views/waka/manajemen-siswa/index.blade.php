@@ -64,7 +64,36 @@
 .col-md-2-4 { flex: 0 0 20%; max-width: 20%; padding: 10px; }
 
 @media (max-width: 1200px) { .col-md-2-4 { flex: 0 0 33.33%; max-width: 33.33%; } }
-@media (max-width: 768px) { .col-md-2-4 { flex: 0 0 50%; max-width: 50%; } }
+.filter-section .dropdown-menu .kelas-item {
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+.filter-section .dropdown-menu .kelas-item:hover {
+    background: #f8fafc;
+}
+.filter-section .dropdown-menu .kelas-item .form-check-label {
+    line-height: 1.4;
+    cursor: pointer;
+    white-space: normal;
+    word-break: break-word;
+}
+.filter-section .dropdown-menu .kelas-item .form-check-label small {
+    display: inline;
+    color: #64748b;
+}
+
+@media (max-width: 768px) {
+    .col-md-2-4 { flex: 0 0 50%; max-width: 50%; }
+    .filter-section .dropdown {
+        width: 100% !important;
+        display: block !important;
+    }
+    .filter-section .dropdown .dropdown-menu {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+}
 @media (max-width: 480px) { .col-md-2-4 { flex: 0 0 100%; max-width: 100%; } }
 
 .card {
@@ -73,6 +102,8 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     margin-bottom: 24px;
     border: none;
+    position: relative;
+    /* overflow: hidden; -- Removed to allow dropdowns to overflow */
 }
 
 .card-header {
@@ -102,6 +133,8 @@
     flex-wrap: wrap;
     align-items: center;
     margin-bottom: 24px;
+    position: relative;
+    z-index: 10;
 }
 
 .search-box { position: relative; }
@@ -492,31 +525,46 @@
                     </select>
 
                     <div class="dropdown" style="display: inline-block;">
-                        <button class="filter-select d-flex align-items-center justify-content-between" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="min-width: 200px; text-align: left; background: white;">
+                        <button class="btn btn-outline-secondary d-flex justify-content-between align-items-center w-100 dropdown-toggle" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static" aria-expanded="false" style="border-radius: 8px;">
                             <span id="selectedKelasText">Pilih Kelas</span>
-                            <i class="fas fa-chevron-down ms-2" style="font-size: 0.8em; color: #6b7280;"></i>
                         </button>
-                        <ul class="dropdown-menu p-2" aria-labelledby="dropdownKelas" style="max-height: 300px; overflow-y: auto; width: 100%; min-width: 250px;">
+                        <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="dropdownKelas" style="max-height: 360px; overflow-y: auto; scroll-behavior: smooth; width: 100%; min-width: 280px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-radius: 10px;">
                             <li>
-                                <div class="form-check p-2 border-bottom mb-1">
+                                <div class="px-2 pb-2 border-bottom mb-1">
+                                    <input type="text" id="searchKelasInput" class="form-control form-control-sm"
+                                        placeholder="Cari kelas..." autocomplete="off" style="font-size: 13px; padding: 8px 12px; border-radius: 6px;">
+                                </div>
+                            </li>
+                            <li>
+                                <div class="form-check p-2 border-bottom mb-1" style="padding-left: 2.2rem !important;">
                                     <input class="form-check-input" type="checkbox" id="checkAllKelas">
-                                    <label class="form-check-label fw-bold" for="checkAllKelas">Pilih Semua</label>
+                                    <label class="form-check-label fw-bold" for="checkAllKelas">Pilih Semua (Terlihat)</label>
                                 </div>
                             </li>
                             @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
-                                <li><h6 class="dropdown-header text-uppercase font-weight-bold p-2 mt-1">{{ $jenjang }}</h6></li>
+                                <li class="kelas-jenjang-group" data-jenjang="{{ $jenjang }}">
+                                    <h6 class="dropdown-header text-uppercase font-weight-bold p-2 mt-1" style="font-size: 11px; color: #9ca3af; letter-spacing: 0.5px;">{{ $jenjang }}</h6>
+                                </li>
                                 @foreach($kelasGroup as $k)
-                                    <li>
-                                        <div class="form-check px-3 py-1 hover-bg-light">
+                                    <li class="kelas-item"
+                                        data-jenjang="{{ $k->jenjang }}"
+                                        data-search="{{ strtolower($k->nama_kelas . ' ' . ($k->cabang->nama_cabang ?? '')) }}">
+                                        <div class="form-check py-1 pe-3 hover-bg-light" style="padding-left: 2.2rem;">
                                             <input class="form-check-input class-checkbox" type="checkbox" name="kelas_id[]" value="{{ $k->id }}" id="kelas_{{ $k->id }}"
                                                 {{ (is_array(request('kelas_id')) && in_array($k->id, request('kelas_id'))) || request('kelas_id') == $k->id ? 'checked' : '' }}>
-                                            <label class="form-check-label w-100 cursor-pointer" for="kelas_{{ $k->id }}">
+                                            <label class="form-check-label w-100 cursor-pointer" for="kelas_{{ $k->id }}" style="font-size: 14px;">
                                                 {{ $k->nama_kelas }}
+                                                @if($k->cabang)
+                                                    <small class="text-muted d-block" style="font-size: 11px;">— {{ $k->cabang->nama_cabang }}</small>
+                                                @endif
                                             </label>
                                         </div>
                                     </li>
                                 @endforeach
                             @endforeach
+                            <li id="kelasEmptyState" class="px-3 py-3 text-center text-muted small" style="display: none;">
+                                <i class="fas fa-search me-1"></i> Tidak ada kelas yang cocok
+                            </li>
                         </ul>
                     </div>
 
@@ -525,6 +573,11 @@
                             const checkboxes = document.querySelectorAll('.class-checkbox');
                             const checkAll = document.getElementById('checkAllKelas');
                             const buttonText = document.getElementById('selectedKelasText');
+                            const searchInput = document.getElementById('searchKelasInput');
+                            const emptyState = document.getElementById('kelasEmptyState');
+                            const kelasItems = document.querySelectorAll('.kelas-item');
+                            const jenjangGroups = document.querySelectorAll('.kelas-jenjang-group');
+                            const jenjangSelect = document.querySelector('select[name="jenjang"]');
                             
                             function updateButtonText() {
                                 const checked = Array.from(checkboxes).filter(cb => cb.checked);
@@ -540,23 +593,74 @@
                                 }
                             }
 
+                            function applyKelasFilter() {
+                                const jenjangFilter = jenjangSelect ? jenjangSelect.value : '';
+                                const searchText = searchInput ? searchInput.value.trim().toLowerCase() : '';
+                                let visibleCount = 0;
+                                const visibleJenjangs = new Set();
+
+                                kelasItems.forEach(item => {
+                                    const itemJenjang = item.getAttribute('data-jenjang');
+                                    const itemSearch = item.getAttribute('data-search') || '';
+
+                                    const matchJenjang = !jenjangFilter || itemJenjang === jenjangFilter;
+                                    const matchSearch = !searchText || itemSearch.includes(searchText);
+                                    const visible = matchJenjang && matchSearch;
+
+                                    item.style.display = visible ? '' : 'none';
+                                    if (visible) {
+                                        visibleCount++;
+                                        visibleJenjangs.add(itemJenjang);
+                                    }
+                                });
+
+                                jenjangGroups.forEach(g => {
+                                    g.style.display = visibleJenjangs.has(g.getAttribute('data-jenjang')) ? '' : 'none';
+                                });
+
+                                if (emptyState) emptyState.style.display = visibleCount === 0 ? '' : 'none';
+                            }
+
                             // Check all functionality
-                            checkAll.addEventListener('change', function() {
-                                checkboxes.forEach(cb => cb.checked = this.checked);
-                                updateButtonText();
-                            });
+                            if (checkAll) {
+                                checkAll.addEventListener('change', function() {
+                                    checkboxes.forEach(cb => {
+                                        const li = cb.closest('.kelas-item');
+                                        if (li && li.style.display !== 'none') cb.checked = this.checked;
+                                    });
+                                    updateButtonText();
+                                });
+                            }
 
                             // Individual checkbox change
                             checkboxes.forEach(cb => {
                                 cb.addEventListener('change', function() {
                                     updateButtonText();
-                                    checkAll.checked = Array.from(checkboxes).every(c => c.checked);
+                                    if (checkAll) {
+                                        const visibleCbs = Array.from(checkboxes).filter(c => {
+                                            const li = c.closest('.kelas-item');
+                                            return li && li.style.display !== 'none';
+                                        });
+                                        checkAll.checked = visibleCbs.length > 0 && visibleCbs.every(c => c.checked);
+                                    }
                                 });
                             });
 
+                            if (searchInput) {
+                                searchInput.addEventListener('input', applyKelasFilter);
+                                searchInput.addEventListener('click', e => e.stopPropagation());
+                            }
+
+                            if (jenjangSelect) {
+                                jenjangSelect.addEventListener('change', applyKelasFilter);
+                            }
+
                             // Initial update
+                            applyKelasFilter();
                             updateButtonText();
-                            checkAll.checked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(c => c.checked);
+                            if (checkAll) {
+                                checkAll.checked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(c => c.checked);
+                            }
                         });
                     </script>
                     

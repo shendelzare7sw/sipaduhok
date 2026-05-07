@@ -227,6 +227,24 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id">
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahunAjaranAktif && $ta->id == $tahunAjaranAktif->id ? 'selected' : '' }}>
+                                    {{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status Siswa</label>
+                        <select name="status">
+                            <option value="aktif">Aktif</option>
+                            <option value="lulus">Lulus / Alumni</option>
+                            <option value="">Semua Status</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Urut Berdasarkan</label>
                         <select name="sort_by">
                             <option value="nama">Nama (Abjad)</option>
@@ -409,6 +427,41 @@
                     </div>
                     <button type="submit" class="btn-print pink">
                         <i class="fas fa-print"></i> Cetak Laporan
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {{-- Rekap Akademik per TA (snapshot status_naik_kelas_siswa) --}}
+        <div class="report-card">
+            <div class="report-card-header" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white;">
+                <div class="report-card-icon"><i class="fas fa-user-graduate"></i></div>
+                <h4 class="report-card-title">Rekap Akademik per TA</h4>
+            </div>
+            <div class="report-card-body">
+                <p class="report-card-desc">Snapshot kenaikan kelas / kelulusan / dispensasi per tahun ajaran. Data dari hasil promosi.</p>
+                <form action="{{ route('admin.cetak-laporan.rekap-akademik') }}" method="GET" target="_blank" class="report-form">
+                    <div class="form-group">
+                        <label>Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id">
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahunAjaranAktif && $ta->id == $tahunAjaranAktif->id ? 'selected' : '' }}>
+                                    {{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cabang</label>
+                        <select name="cabang_id">
+                            <option value="">Semua Cabang</option>
+                            @foreach($cabangs as $c)
+                                <option value="{{ $c->id }}">{{ $c->nama_cabang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-print" style="background: #16a34a;">
+                        <i class="fas fa-print"></i> Cetak Rekap Akademik
                     </button>
                 </form>
             </div>

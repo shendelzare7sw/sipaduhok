@@ -727,8 +727,6 @@
             </div>
         @endif
 
-
-
         <div class="card">
             <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-3">
                 {{-- Left Group: Title & Filter --}}

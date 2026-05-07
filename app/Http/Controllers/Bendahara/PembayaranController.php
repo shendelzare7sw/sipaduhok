@@ -93,12 +93,9 @@ class PembayaranController extends Controller
 
         $siswa = Siswa::with(['kelas', 'cabang'])->findOrFail($siswaId);
 
-        // Ambil tagihan untuk tahun ajaran aktif
-        $tagihan = Tagihan::where('siswa_id', $siswaId)
-            ->when($tahunAjaranAktif, function ($q) use ($tahunAjaranAktif) {
-                return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
-            })
-            ->get();
+        // Ambil SEMUA tagihan siswa (lintas TA) — supaya tunggakan TA lama yg belum dialihkan
+        // tetap muncul di riwayat pembayaran. Tagihan TA aktif + tagihan asal TA lama keduanya inclusive.
+        $tagihan = Tagihan::where('siswa_id', $siswaId)->get();
 
         $tagihanIds = $tagihan->pluck('id');
 

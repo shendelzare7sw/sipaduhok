@@ -346,6 +346,27 @@
                         </select>
                     </div>
                     <div class="rpt-form-group">
+                        <label>Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id">
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahunAjaranAktif && $ta->id == $tahunAjaranAktif->id ? 'selected' : '' }}>
+                                    {{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small style="font-size: 11px; display: block; margin-top: 4px; color: #6b7280;">
+                            <i class="fas fa-info-circle"></i> TA non-aktif menampilkan snapshot dari riwayat kenaikan kelas
+                        </small>
+                    </div>
+                    <div class="rpt-form-group">
+                        <label>Status Siswa</label>
+                        <select name="status">
+                            <option value="aktif">Aktif</option>
+                            <option value="lulus">Lulus / Alumni</option>
+                            <option value="">Semua Status</option>
+                        </select>
+                    </div>
+                    <div class="rpt-form-group">
                         <label>Urut Berdasarkan</label>
                         <select name="sort_by">
                             <option value="nama">Nama (Abjad)</option>
@@ -548,6 +569,45 @@
                     </div>
                     <button type="submit" class="btn-rpt-print btn-rpt-pink">
                         <i class="fas fa-print"></i> Cetak Laporan
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {{-- Rekap Akademik per TA (snapshot status_naik_kelas_siswa) --}}
+        <div class="rpt-card">
+            <div class="rpt-card-header">
+                <div class="rpt-card-icon" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white;">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="rpt-card-info">
+                    <h6 class="rpt-card-title">Rekap Akademik per TA</h6>
+                    <p class="rpt-card-subtitle">Snapshot kenaikan kelas / kelulusan / dispensasi</p>
+                </div>
+            </div>
+            <div class="rpt-card-body">
+                <form action="{{ route('ketua.laporan.rekap-akademik') }}" method="GET" target="_blank" class="rpt-form">
+                    <div class="rpt-form-group">
+                        <label>Tahun Ajaran</label>
+                        <select name="tahun_ajaran_id">
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}" {{ $tahunAjaranAktif && $ta->id == $tahunAjaranAktif->id ? 'selected' : '' }}>
+                                    {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="rpt-form-group">
+                        <label>Cabang</label>
+                        <select name="cabang_id">
+                            <option value="">Semua Cabang</option>
+                            @foreach($cabangs as $c)
+                                <option value="{{ $c->id }}">{{ $c->nama_cabang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-rpt-print" style="background: #16a34a; color: white;">
+                        <i class="fas fa-print"></i> Cetak Rekap Akademik
                     </button>
                 </form>
             </div>

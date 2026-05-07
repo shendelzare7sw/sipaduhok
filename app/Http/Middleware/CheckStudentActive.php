@@ -24,17 +24,35 @@ class CheckStudentActive
             $siswa = \App\Models\Siswa::where('user_id', $user->id)->first();
 
             if ($siswa && $siswa->status === 'lulus') {
-                // List of allowed routes for alumni (Dashboard, Logout)
-                $allowedRoutes = [
+                // Alumni read-only access: dashboard, riwayat LMS (semua tugas/ujian lampau),
+                // dan logout. Tidak boleh akses LMS aktif (kerjakan tugas, ikut ujian baru, dll).
+                $currentRoute = $request->route()?->getName();
+                $allowedExact = [
                     'siswa.sia.dashboard',
+                    'siswa.alumni.dashboard',
                     'logout',
-                    'siswa.alumni.dashboard' // Alias if any
+                    'profile.show', // Lihat profil sendiri
+                    'profile.update',
+                    'notifications.index',
                 ];
 
-                // Check if current route is NOT in allowed list
-                if (!in_array($request->route()->getName(), $allowedRoutes)) {
-                    // Redirect to alumni dashboard (which will handle auto-logout)
-                    return redirect()->route('siswa.sia.dashboard');
+                $allowedPrefixes = [
+                    'siswa.lms.riwayat.', // Riwayat LMS lintas TA
+                ];
+
+                $isAllowed = in_array($currentRoute, $allowedExact, true);
+                if (!$isAllowed && $currentRoute) {
+                    foreach ($allowedPrefixes as $prefix) {
+                        if (str_starts_with($currentRoute, $prefix)) {
+                            $isAllowed = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$isAllowed) {
+                    return redirect()->route('siswa.sia.dashboard')
+                        ->with('info', 'Sebagai alumni, akses Anda terbatas pada riwayat akademik.');
                 }
             }
         }

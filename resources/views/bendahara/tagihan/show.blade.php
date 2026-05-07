@@ -201,6 +201,19 @@
                                     <td class="text-center align-middle fw-bold text-gray-600" data-label="No">{{ $loop->iteration }}</td>
                                     <td class="align-middle" data-label="Jenis Tagihan">
                                         <strong>{{ $jenisTagihan[$item->jenis_tagihan] ?? ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}</strong>
+                                        @if($item->tagihan_asal_id && $item->tagihanAsal)
+                                            <br><span class="badge" style="background:#fff7ed;color:#c2410c;font-size:10px;font-weight:600;padding:3px 7px;border-radius:6px;">
+                                                <i class="fas fa-arrow-right"></i> Carryover dari {{ $item->tagihanAsal->tahunAjaran->nama_tahun_ajaran ?? 'TA lama' }}
+                                            </span>
+                                        @endif
+                                        @if($item->dialihkan_ke_id && $item->tagihanAlihan)
+                                            <br><span class="badge" style="background:#dbeafe;color:#1e40af;font-size:10px;font-weight:600;padding:3px 7px;border-radius:6px;">
+                                                <i class="fas fa-share"></i> Dialihkan ke {{ $item->tagihanAlihan->tahunAjaran->nama_tahun_ajaran ?? 'TA aktif' }}
+                                            </span>
+                                        @endif
+                                        @if($item->keterangan)
+                                            <br><small class="text-muted">{{ $item->keterangan }}</small>
+                                        @endif
                                     </td>
                                     <td class="align-middle text-end fw-bold" data-label="Jumlah">Rp {{ number_format($item->jumlah, 0, ',', '.') }}</td>
                                     <td class="align-middle text-center" data-label="Jatuh Tempo">{{ $item->tanggal_jatuh_tempo ? $item->tanggal_jatuh_tempo->format('d/m/Y') : '-' }}</td>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Siswa;
 use App\Models\Tagihan;
+use App\Models\TahunAjaran;
 use App\Models\Pembayaran;
 use App\Models\Rapor;
 use App\Models\Presensi;
@@ -221,9 +222,9 @@ class OrangTuaController extends Controller
         // Info tahun ajaran aktif
         $activeYear = \App\Models\TahunAjaran::where('is_active', true)->first();
 
-        // Ambil semua tagihan siswa dengan relasi tahun ajaran
+        // Ambil semua tagihan siswa dengan relasi tahun ajaran + tagihan asal/alihan untuk carryover
         $tagihanAll = Tagihan::where('siswa_id', $siswa->id)
-            ->with('tahunAjaran')
+            ->with(['tahunAjaran', 'tagihanAsal.tahunAjaran', 'tagihanAlihan.tahunAjaran'])
             ->orderBy('tanggal_jatuh_tempo', 'desc')
             ->get();
 
@@ -236,30 +237,39 @@ class OrangTuaController extends Controller
         }
 
         // Pisahkan tagihan berdasarkan tahun ajaran
+        // CURRENT: TA aktif (termasuk tagihan carryover dari TA lama yang sudah dialihkan)
         $tagihanCurrent = $tagihanAll->where('tahun_ajaran_id', $activeYear->id ?? 0);
-        $tagihanArrears = $tagihanAll->where('tahun_ajaran_id', '!=', $activeYear->id ?? 0)->where('status', '!=', 'sudah_bayar');
-        
+
+        // ARREARS DIALIHKAN: tagihan TA lama yang sudah dialihkan ke TA aktif (audit-trail)
+        $arrearsDialihkan = $tagihanAll->where('tahun_ajaran_id', '!=', $activeYear->id ?? 0)
+            ->whereNotNull('dialihkan_ke_id');
+
+        // ARREARS BELUM DIALIHKAN: tagihan TA lama yang masih original & belum lunas (perlu diurus sekolah)
+        $arrearsBelumDialihkan = $tagihanAll->where('tahun_ajaran_id', '!=', $activeYear->id ?? 0)
+            ->whereNull('dialihkan_ke_id')
+            ->where('status', '!=', 'sudah_bayar');
+
         // Group tagihan CURRENT berdasarkan jenis
         $tagihanGroup = $tagihanCurrent->groupBy('jenis_tagihan');
         $tagihanGroup = $this->sortTagihanGroup($tagihanGroup);
 
-        // Group ARREARS berdasarkan tahun ajaran lalu jenis
-        $arrearsGroup = $tagihanArrears->groupBy('tahun_ajaran_id');
+        // Group ARREARS berdasarkan tahun ajaran (untuk both section)
+        $arrearsDialihkanGroup = $arrearsDialihkan->groupBy('tahun_ajaran_id');
+        $arrearsBelumDialihkanGroup = $arrearsBelumDialihkan->groupBy('tahun_ajaran_id');
 
         // Calculate Totals Separately
         $totalTagihanCurrent = $tagihanCurrent->sum('jumlah');
-        
-        // Total Tunggakan (Use calculated sisa_tagihan)
-        $totalTunggakan = $tagihanArrears->sum('sisa_tagihan'); 
-        
+
+        // Total Tunggakan: hanya yang BELUM DIALIHKAN (yang dialihkan sudah jadi tagihan baru di current)
+        $totalTunggakan = $arrearsBelumDialihkan->sum('sisa_tagihan');
+
         // Sisa tagihan CURRENT (Use calculated sisa_tagihan)
         $sisaTagihanCurrent = $tagihanCurrent->where('status', '!=', 'sudah_bayar')->sum('sisa_tagihan');
 
-        // Total Yang Harus Dibayar (Current Sisa + Tunggakan)
+        // Total Yang Harus Dibayar (Current Sisa + Tunggakan belum dialihkan)
         $grandTotalUnpaid = $sisaTagihanCurrent + $totalTunggakan;
-        
+
         // Total sudah dibayar (Current only)
-        // Kalkulasi: Total Awal - Sisa Sekarang
         $totalBayarCurrent = $totalTagihanCurrent - $sisaTagihanCurrent;
 
         // Riwayat pembayaran
@@ -275,7 +285,8 @@ class OrangTuaController extends Controller
             'siswa' => $siswa,
             'tagihan' => $tagihanAll,
             'tagihanGroup' => $tagihanGroup,
-            'arrearsGroup' => $arrearsGroup,
+            'arrearsDialihkanGroup' => $arrearsDialihkanGroup,
+            'arrearsBelumDialihkanGroup' => $arrearsBelumDialihkanGroup,
             'totalTagihanCurrent' => $totalTagihanCurrent, // Tagihan Tahun Ini
             'totalTunggakan' => $totalTunggakan, // Tunggakan Masa Lalu
             'sisaTagihanCurrent' => $sisaTagihanCurrent,
@@ -328,6 +339,17 @@ class OrangTuaController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        // Guard: tagihan original TA lama yang belum dialihkan TIDAK boleh dibayar via orang tua
+        // Harus di-carryover dulu oleh admin/bendahara
+        $tagihanCheck = Tagihan::find($validated['tagihan_id']);
+        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
+        if ($tagihanCheck && $taAktifId && $tagihanCheck->tahun_ajaran_id != $taAktifId
+            && empty($tagihanCheck->dialihkan_ke_id) && empty($tagihanCheck->tagihan_asal_id)) {
+            return redirect()->back()
+                ->with('error', 'Tagihan tunggakan TA lama belum dialihkan ke TA aktif. Hubungi bendahara untuk pengalihan terlebih dahulu.')
+                ->withInput();
+        }
 
         // Generate kode pembayaran unik
         $validated['kode_pembayaran'] = $this->generateKodePembayaran();
@@ -488,6 +510,20 @@ class OrangTuaController extends Controller
             'metode_pembayaran' => 'required|in:transfer,midtrans',
             'bukti_bayar' => 'required_if:metode_pembayaran,transfer|image|mimes:jpeg,png,jpg|max:10240',
         ]);
+
+        // Guard: blokir pembayaran tagihan tunggakan TA lama yang belum dialihkan
+        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
+        $blockedIds = collect($validated['items'])->pluck('tagihan_id')->all();
+        $blocked = Tagihan::whereIn('id', $blockedIds)
+            ->where('tahun_ajaran_id', '!=', $taAktifId)
+            ->whereNull('dialihkan_ke_id')
+            ->whereNull('tagihan_asal_id')
+            ->exists();
+        if ($blocked) {
+            return redirect()->back()
+                ->with('error', 'Sebagian tagihan adalah tunggakan TA lama yang belum dialihkan. Hubungi bendahara untuk pengalihan terlebih dahulu.')
+                ->withInput();
+        }
 
         $orderId = 'ORD-' . strtoupper(\Illuminate\Support\Str::random(10)) . '-' . date('YmdHis'); // Distinct Order ID
         $buktiPath = null;

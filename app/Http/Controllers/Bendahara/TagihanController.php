@@ -9,6 +9,7 @@ use App\Models\Tagihan;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\Pembayaran;
+use App\Services\TunggakanCarryoverService;
 use Illuminate\Support\Facades\DB;
 
 class TagihanController extends Controller
@@ -1107,5 +1108,88 @@ class TagihanController extends Controller
             ->get();
 
         return response()->json($tagihan);
+    }
+
+    /**
+     * View resolver untuk halaman carryover. Override di Admin/Keuangan/TagihanController
+     * untuk pakai admin view.
+     */
+    protected function carryoverViewName(): string
+    {
+        return 'bendahara.tagihan.carryover';
+    }
+
+    /**
+     * Halaman daftar kandidat tunggakan + form pratinjau & eksekusi.
+     */
+    public function carryoverIndex(Request $request, TunggakanCarryoverService $service)
+    {
+        $taAktif = TahunAjaran::where('is_active', true)->first();
+        if (!$taAktif) {
+            return redirect()->route($this->getRoutePrefix() . '.index')
+                ->with('error', 'Tidak ada tahun ajaran aktif. Aktifkan TA terlebih dahulu sebelum menarik tunggakan.');
+        }
+
+        $cabangId = $request->input('cabang_id');
+        $kandidat = $service->getKandidatTunggakan($cabangId ? (int) $cabangId : null);
+
+        $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get();
+
+        return view($this->carryoverViewName(), [
+            'kandidat' => $kandidat,
+            'taAktif' => $taAktif,
+            'cabangList' => $cabangList,
+            'selectedCabangId' => $cabangId,
+            'totalSiswa' => $kandidat->count(),
+            'grandTotal' => $kandidat->sum('totalTunggakan'),
+        ]);
+    }
+
+    /**
+     * Pratinjau (AJAX): tampilkan list tagihan baru yang akan dibuat.
+     */
+    public function carryoverPreview(Request $request, TunggakanCarryoverService $service)
+    {
+        $request->validate([
+            'siswa_ids' => 'required|array|min:1',
+            'siswa_ids.*' => 'integer|exists:siswa,id',
+        ]);
+
+        $taAktif = TahunAjaran::where('is_active', true)->first();
+        if (!$taAktif) {
+            return response()->json(['error' => 'Tidak ada TA aktif.'], 422);
+        }
+
+        $preview = $service->previewCarryover($request->input('siswa_ids'), $taAktif->id);
+        $preview['tujuan_tahun_ajaran_nama'] = $taAktif->nama_tahun_ajaran;
+
+        return response()->json($preview);
+    }
+
+    /**
+     * Eksekusi carryover.
+     */
+    public function carryoverExecute(Request $request, TunggakanCarryoverService $service)
+    {
+        $request->validate([
+            'siswa_ids' => 'required|array|min:1',
+            'siswa_ids.*' => 'integer|exists:siswa,id',
+        ]);
+
+        $taAktif = TahunAjaran::where('is_active', true)->first();
+        if (!$taAktif) {
+            return redirect()->back()->with('error', 'Tidak ada TA aktif.');
+        }
+
+        $hasil = $service->executeCarryover(
+            $request->input('siswa_ids'),
+            $taAktif->id,
+            auth()->user()
+        );
+
+        $route = redirect()->route($this->getRoutePrefix() . '.carryover');
+        return $hasil['success']
+            ? $route->with('success', $hasil['message'])
+            : $route->with('error', $hasil['message']);
     }
 }

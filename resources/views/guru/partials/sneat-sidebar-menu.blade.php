@@ -38,6 +38,14 @@
     </a>
 </li>
 
+<!-- Arsip LMS (lintas TA) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'guru.lms.arsip') ? 'active' : '' }}">
+    <a href="{{ route('guru.lms.arsip.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-archive"></i>
+        <div>Arsip LMS</div>
+    </a>
+</li>
+
 <!-- Catatan Monitoring -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'guru.lms.catatan-monitoring') ? 'active' : '' }}">
     <a href="{{ route('guru.lms.catatan-monitoring.index') }}" class="menu-link">

@@ -175,10 +175,18 @@ Compatible dengan Sneat Bootstrap 5 Template
 </li>
 
 <!-- Tagihan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.tagihan') ? 'active' : '' }}">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.tagihan') && !Str::contains($currentRoute, 'carryover') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.tagihan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-file-invoice-dollar"></i>
         <div>Tagihan</div>
+    </a>
+</li>
+
+<!-- Tarik Tunggakan TA Lama -->
+<li class="menu-item {{ Str::contains($currentRoute, 'admin.keuangan.tagihan.carryover') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.tagihan.carryover') }}" class="menu-link">
+        <i class="menu-icon fas fa-arrow-circle-right"></i>
+        <div>Tarik Tunggakan</div>
     </a>
 </li>
 

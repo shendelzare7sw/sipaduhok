@@ -51,6 +51,7 @@
                 @if($kelas) Kelas: {{ $kelas->nama_kelas }} @endif
                 @if($cabang) | Cabang: {{ $cabang->nama_cabang }} @endif
                 @if($tahunAjaran) | Tahun Ajaran: {{ $tahunAjaran->nama_tahun_ajaran }} @endif
+                @if(!empty($isHistorical)) | <strong>Mode: Snapshot Historis</strong> @endif
             </p>
         </div>
 
@@ -68,14 +69,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php $no = 1; $currentGroup = ''; @endphp
+                    @php $no = 1; $currentGroup = ''; $isHist = $isHistorical ?? false; @endphp
                     @foreach($siswaList as $siswa)
+                        @php
+                            // Saat mode historis, ambil dari snapshot status_naik_kelas_siswa
+                            $namaKelasRow = $isHist
+                                ? ($siswa->kelas_snapshot_nama ?? ($siswa->kelas_snapshot->nama_kelas ?? '-'))
+                                : ($siswa->kelas->nama_kelas ?? '-');
+                            $jenjangRow = $isHist
+                                ? ($siswa->kelas_snapshot->jenjang ?? '')
+                                : ($siswa->kelas->jenjang ?? '');
+                        @endphp
                         @if($sortBy == 'kelas' && !$kelas)
-                            @php $groupName = $siswa->kelas->nama_kelas ?? 'Tanpa Kelas'; @endphp
+                            @php $groupName = $namaKelasRow ?: 'Tanpa Kelas'; @endphp
                             @if($currentGroup !== $groupName)
                                 @php $currentGroup = $groupName; @endphp
                                 <tr class="group-header">
-                                    <td colspan="{{ $kelas ? 6 : 7 }}">{{ $currentGroup }} {{ $siswa->kelas ? '(' . $siswa->kelas->jenjang . ')' : '' }}</td>
+                                    <td colspan="{{ $kelas ? 6 : 7 }}">{{ $currentGroup }} {{ $jenjangRow ? '(' . $jenjangRow . ')' : '' }}</td>
                                 </tr>
                             @endif
                         @endif
@@ -83,10 +93,15 @@
                             <td class="center">{{ $no++ }}</td>
                             <td>{{ $siswa->nisn }}</td>
                             <td>{{ $siswa->nis ?? '-' }}</td>
-                            <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
+                            <td>
+                                <strong>{{ $siswa->nama_lengkap }}</strong>
+                                @if($isHist && !empty($siswa->status_kelulusan_snapshot))
+                                    <br><small style="color: #666;">Status TA tsb: {{ str_replace('_', ' ', $siswa->status_kelulusan_snapshot) }}</small>
+                                @endif
+                            </td>
                             <td class="center">{{ $siswa->jenis_kelamin }}</td>
-                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d/m/Y') }}</td>
-                            @if(!$kelas)<td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>@endif
+                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir?->format('d/m/Y') }}</td>
+                            @if(!$kelas)<td>{{ $namaKelasRow }}</td>@endif
                         </tr>
                     @endforeach
                 </tbody>

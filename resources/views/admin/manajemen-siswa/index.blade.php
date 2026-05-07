@@ -1,4 +1,4 @@
-﻿@extends('layouts.sneat')
+@extends('layouts.sneat')
 
 @section('title', 'Manajemen Siswa')
 @section('page-title', 'Manajemen Siswa')
@@ -9,7 +9,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/manajemen-siswa.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/manajemen-siswa.css') }}?v={{ filemtime(public_path('css/admin/manajemen-siswa.css')) }}">
 @endsection
 
 @section('content')
@@ -78,6 +78,11 @@
             <div>
                 <h5 class="ms-card-title">
                     <i class="fas fa-user-graduate" style="color: #3b82f6;"></i> Daftar Siswa
+                    @if($isHistorical)
+                        <span class="badge" style="background: #e0f2fe; color: #075985; font-size: 10px; margin-left: 8px;">
+                            <i class="fas fa-history"></i> Snapshot {{ $tahunAjarans->firstWhere('id', $taFilterId)?->nama_tahun_ajaran }}
+                        </span>
+                    @endif
                 </h5>
                 <div class="ms-card-subtitle">Kelola penempatan siswa ke kelas</div>
             </div>
@@ -103,7 +108,7 @@
                     @endforeach
                 </select>
 
-                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()" {{ $isHistorical ? 'disabled' : '' }}>
                     <option value="">Semua Jenjang</option>
                     @foreach($jenjangs as $j)
                         <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
@@ -111,43 +116,69 @@
                 </select>
 
                 <div class="dropdown" style="display: inline-block;">
-                    <button class="form-select filter-select d-flex align-items-center justify-content-between" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="min-width: 180px; text-align: left;">
+                    <button class="form-select filter-select d-flex align-items-center justify-content-between" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static" aria-expanded="false" style="min-width: 180px; text-align: left;">
                         <span id="selectedKelasText">Pilih Kelas</span>
-                        <i class="fas fa-chevron-down ms-2" style="font-size: 0.7em; color: #94a3b8;"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-kelas-menu p-2" aria-labelledby="dropdownKelas">
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-kelas-menu p-2" aria-labelledby="dropdownKelas">
                         <li>
-                            <div class="form-check p-2 border-bottom mb-1">
+                            <div class="px-2 pb-2 border-bottom mb-1">
+                                <input type="text" id="searchKelasInput" class="form-control form-control-sm"
+                                    placeholder="Cari kelas..." autocomplete="off" style="font-size: 12px;">
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check p-2 border-bottom mb-1" style="padding-left: 2.2rem !important;">
                                 <input class="form-check-input" type="checkbox" id="checkAllKelas">
-                                <label class="form-check-label fw-bold" for="checkAllKelas">Pilih Semua</label>
+                                <label class="form-check-label fw-bold" for="checkAllKelas">Pilih Semua (Terlihat)</label>
                             </div>
                         </li>
                         @foreach($kelasList->groupBy('jenjang') as $jenjang => $kelasGroup)
-                            <li><h6 class="dropdown-header text-uppercase font-weight-bold p-2 mt-1">{{ $jenjang }}</h6></li>
+                            <li class="kelas-jenjang-group" data-jenjang="{{ $jenjang }}">
+                                <h6 class="dropdown-header text-uppercase font-weight-bold p-2 mt-1">{{ $jenjang }}</h6>
+                            </li>
                             @foreach($kelasGroup as $k)
-                                <li>
-                                    <div class="form-check px-3 py-1">
+                                <li class="kelas-item"
+                                    data-jenjang="{{ $k->jenjang }}"
+                                    data-cabang-id="{{ $k->cabang_id }}"
+                                    data-search="{{ strtolower($k->nama_kelas . ' ' . ($k->cabang->nama_cabang ?? '')) }}">
+                                    <div class="form-check py-1 pe-3" style="padding-left: 2.2rem;">
                                         <input class="form-check-input class-checkbox" type="checkbox" name="kelas_id[]" value="{{ $k->id }}" id="kelas_{{ $k->id }}"
-                                            {{ (is_array(request('kelas_id')) && in_array($k->id, request('kelas_id'))) || request('kelas_id') == $k->id ? 'checked' : '' }}>
+                                            {{ (is_array(request('kelas_id')) && in_array($k->id, request('kelas_id'))) || request('kelas_id') == $k->id ? 'checked' : '' }}
+                                            {{ $isHistorical ? 'disabled' : '' }}>
                                         <label class="form-check-label w-100" for="kelas_{{ $k->id }}" style="cursor: pointer;">
                                             {{ $k->nama_kelas }}
+                                            @if($k->cabang)
+                                                <small class="text-muted">— {{ $k->cabang->nama_cabang }}</small>
+                                            @endif
                                         </label>
                                     </div>
                                 </li>
                             @endforeach
                         @endforeach
+                        <li id="kelasEmptyState" class="px-3 py-3 text-center text-muted small" style="display: none;">
+                            <i class="fas fa-search"></i> Tidak ada kelas yang cocok
+                        </li>
                     </ul>
                 </div>
 
                 <select name="status" class="form-select filter-select" onchange="this.form.submit()">
                     <option value="aktif" {{ request('status', 'aktif') == 'aktif' ? 'selected' : '' }}>Status: Aktif</option>
-                    <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus</option>
+                    <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus / Alumni</option>
                     <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah</option>
                     <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
                 </select>
 
+                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()" title="Filter berdasarkan tahun ajaran kelas">
+                    <option value="">TA: Semua</option>
+                    @foreach($tahunAjarans as $ta)
+                        <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id') == $ta->id ? 'selected' : '' }}>
+                            {{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+
                 <label class="filter-checkbox">
-                    <input type="checkbox" name="no_kelas" value="1" {{ request('no_kelas') == '1' ? 'checked' : '' }} onchange="this.form.submit()">
+                    <input type="checkbox" name="no_kelas" value="1" {{ request('no_kelas') == '1' ? 'checked' : '' }} onchange="this.form.submit()" {{ $isHistorical ? 'disabled' : '' }}>
                     Belum ada kelas
                 </label>
 
@@ -155,7 +186,7 @@
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
 
-                @if(request()->hasAny(['search', 'cabang_id', 'jenjang', 'kelas_id', 'no_kelas']) || request('status') != 'aktif')
+                @if(request()->hasAny(['search', 'cabang_id', 'jenjang', 'kelas_id', 'no_kelas', 'tahun_ajaran_id']) || request('status') != 'aktif')
                     <a href="{{ route('admin.manajemen-siswa.index') }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
                         <i class="fas fa-times"></i> Reset
                     </a>
@@ -198,7 +229,18 @@
                             </td>
                             <td data-label="Cabang">{{ $siswa->cabang->nama_cabang ?? '-' }}</td>
                             <td data-label="Kelas">
-                                @if($siswa->kelas)
+                                @php
+                                    $snapshot = $isHistorical ? $siswa->statusNaikKelas->first() : null;
+                                @endphp
+                                @if($isHistorical && $snapshot)
+                                    <span class="kelas-badge" title="Kelas asal di TA {{ $tahunAjarans->firstWhere('id', $taFilterId)?->nama_tahun_ajaran }}">
+                                        <i class="fas fa-history"></i>
+                                        {{ $snapshot->kelas_asal ?? '-' }}
+                                    </span>
+                                    @if($snapshot->kelas_tujuan)
+                                        <small class="text-muted d-block" style="font-size: 11px;">→ {{ $snapshot->kelas_tujuan }}</small>
+                                    @endif
+                                @elseif($siswa->kelas)
                                     <span class="kelas-badge">
                                         <i class="fas fa-graduation-cap"></i>
                                         {{ $siswa->kelas->nama_kelas }}
@@ -208,15 +250,29 @@
                                 @endif
                             </td>
                             <td data-label="Status">
-                                @php
-                                    $statusClass = [
-                                        'aktif' => 'badge-success',
-                                        'lulus' => 'badge-info',
-                                        'pindah' => 'badge-warning',
-                                        'keluar' => 'badge-secondary',
-                                    ][$siswa->status] ?? 'badge-secondary';
-                                @endphp
-                                <span class="badge {{ $statusClass }} badge-jnj">{{ ucfirst($siswa->status) }}</span>
+                                @if($isHistorical && $snapshot)
+                                    @php
+                                        $kelMap = [
+                                            'NAIK_KELAS' => ['badge-success', 'Naik Kelas'],
+                                            'NAIK_KELAS_TUNGGAKAN' => ['badge-warning', 'Naik (Dispensasi)'],
+                                            'TIDAK_NAIK_KELAS' => ['badge-danger', 'Tidak Naik'],
+                                            'LULUS' => ['badge-info', 'Lulus'],
+                                            'LULUS_TUNGGAKAN' => ['badge-warning', 'Lulus (Dispensasi)'],
+                                        ];
+                                        [$cls, $lbl] = $kelMap[$snapshot->status_kelulusan] ?? ['badge-secondary', $snapshot->status_kelulusan];
+                                    @endphp
+                                    <span class="badge {{ $cls }} badge-jnj">{{ $lbl }}</span>
+                                @else
+                                    @php
+                                        $statusClass = [
+                                            'aktif' => 'badge-success',
+                                            'lulus' => 'badge-info',
+                                            'pindah' => 'badge-warning',
+                                            'keluar' => 'badge-secondary',
+                                        ][$siswa->status] ?? 'badge-secondary';
+                                    @endphp
+                                    <span class="badge {{ $statusClass }} badge-jnj">{{ ucfirst($siswa->status) }}</span>
+                                @endif
                             </td>
                             <td class="td-actions text-end" data-label="Aksi">
                                 <div class="d-flex justify-content-end gap-1 action-btns">
@@ -258,6 +314,12 @@
         const checkboxes = document.querySelectorAll('.class-checkbox');
         const checkAll = document.getElementById('checkAllKelas');
         const buttonText = document.getElementById('selectedKelasText');
+        const cabangSelect = document.querySelector('select[name="cabang_id"]');
+        const jenjangSelect = document.querySelector('select[name="jenjang"]');
+        const searchInput = document.getElementById('searchKelasInput');
+        const emptyState = document.getElementById('kelasEmptyState');
+        const kelasItems = document.querySelectorAll('.kelas-item');
+        const jenjangGroups = document.querySelectorAll('.kelas-jenjang-group');
 
         function updateButtonText() {
             const checked = Array.from(checkboxes).filter(cb => cb.checked);
@@ -273,9 +335,43 @@
             }
         }
 
+        function applyKelasFilter() {
+            const cabangFilter = cabangSelect ? cabangSelect.value : '';
+            const jenjangFilter = jenjangSelect ? jenjangSelect.value : '';
+            const searchText = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let visibleCount = 0;
+            const visibleJenjangs = new Set();
+
+            kelasItems.forEach(item => {
+                const itemCabang = item.getAttribute('data-cabang-id');
+                const itemJenjang = item.getAttribute('data-jenjang');
+                const itemSearch = item.getAttribute('data-search') || '';
+
+                const matchCabang = !cabangFilter || itemCabang === cabangFilter;
+                const matchJenjang = !jenjangFilter || itemJenjang === jenjangFilter;
+                const matchSearch = !searchText || itemSearch.includes(searchText);
+                const visible = matchCabang && matchJenjang && matchSearch;
+
+                item.style.display = visible ? '' : 'none';
+                if (visible) {
+                    visibleCount++;
+                    visibleJenjangs.add(itemJenjang);
+                }
+            });
+
+            jenjangGroups.forEach(g => {
+                g.style.display = visibleJenjangs.has(g.getAttribute('data-jenjang')) ? '' : 'none';
+            });
+
+            if (emptyState) emptyState.style.display = visibleCount === 0 ? '' : 'none';
+        }
+
         if (checkAll) {
             checkAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
+                checkboxes.forEach(cb => {
+                    const li = cb.closest('.kelas-item');
+                    if (li && li.style.display !== 'none') cb.checked = this.checked;
+                });
                 updateButtonText();
             });
         }
@@ -284,11 +380,26 @@
             cb.addEventListener('change', function() {
                 updateButtonText();
                 if (checkAll) {
-                    checkAll.checked = Array.from(checkboxes).every(c => c.checked);
+                    const visibleCbs = Array.from(checkboxes).filter(c => {
+                        const li = c.closest('.kelas-item');
+                        return li && li.style.display !== 'none';
+                    });
+                    checkAll.checked = visibleCbs.length > 0 && visibleCbs.every(c => c.checked);
                 }
             });
         });
 
+        if (searchInput) {
+            searchInput.addEventListener('input', applyKelasFilter);
+            // Prevent dropdown closing on click inside search
+            searchInput.addEventListener('click', e => e.stopPropagation());
+        }
+
+        // Auto-apply filter when cabang/jenjang changes (before form submit)
+        if (cabangSelect) cabangSelect.addEventListener('change', applyKelasFilter);
+        if (jenjangSelect) jenjangSelect.addEventListener('change', applyKelasFilter);
+
+        applyKelasFilter();
         updateButtonText();
         if (checkAll) {
             checkAll.checked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(c => c.checked);

@@ -28,7 +28,8 @@
     border-radius: var(--ms-radius);
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     margin-bottom: 1.5rem;
-    overflow: hidden;
+    position: relative;
+    /* overflow: hidden; -- Removed to allow dropdowns to overflow */
 }
 
 .ms-card-header {
@@ -40,6 +41,8 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+    border-top-left-radius: var(--ms-radius);
+    border-top-right-radius: var(--ms-radius);
 }
 
 .ms-card-title {
@@ -124,6 +127,8 @@
     background: var(--ms-bg);
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--ms-border);
+    position: relative;
+    z-index: 10;
 }
 
 .search-box {
@@ -175,6 +180,11 @@
 }
 
 /* Table */
+.table-responsive {
+    border-bottom-left-radius: var(--ms-radius);
+    border-bottom-right-radius: var(--ms-radius);
+}
+
 .table-clean { margin: 0; }
 
 .table-clean th {
@@ -298,9 +308,74 @@
 
 /* Dropdown custom */
 .dropdown-kelas-menu {
-    max-height: 300px;
+    max-height: 360px;
     overflow-y: auto;
-    min-width: 250px;
+    min-width: 280px;
+    max-width: 360px;
+    border: 1px solid var(--ms-border, #e2e8f0);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    padding: 8px !important;
+    z-index: 1080;
+    scroll-behavior: smooth;
+}
+
+.dropdown-kelas-menu .kelas-item .form-check-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 6px;
+    row-gap: 0;
+}
+
+.dropdown-kelas-menu::-webkit-scrollbar {
+    width: 6px;
+}
+.dropdown-kelas-menu::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.dropdown-kelas-menu .form-check-label {
+    line-height: 1.4;
+    word-break: break-word;
+    white-space: normal;
+    cursor: pointer;
+}
+
+.dropdown-kelas-menu .form-check-label small {
+    font-size: 11px;
+    color: var(--ms-muted, #64748b);
+    font-weight: 400;
+}
+
+.dropdown-kelas-menu .kelas-item:hover {
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.dropdown-kelas-menu .dropdown-header {
+    background: #f8fafc;
+    color: var(--ms-muted, #64748b);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+    .dropdown-kelas-menu {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    .filter-wrapper .dropdown {
+        width: 100% !important;
+        display: block !important;
+    }
+    .filter-wrapper .dropdown .form-select {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 /* Responsive */

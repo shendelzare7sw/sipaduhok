@@ -402,6 +402,39 @@ class NotificationService
     }
 
     /**
+     * Notify orang tua bahwa tunggakan TA lama dialihkan menjadi tagihan di TA aktif.
+     * Tagihan parameter di sini adalah tagihan BARU (carryover) dengan tagihan_asal_id.
+     */
+    public function notifyTunggakanDialihkan($tagihanBaru)
+    {
+        $siswa = $tagihanBaru->siswa;
+        if (!$siswa) {
+            return;
+        }
+
+        $namaTaAsal = $tagihanBaru->tagihanAsal?->tahunAjaran?->nama_tahun_ajaran ?? 'TA sebelumnya';
+        $jumlahFmt = 'Rp ' . number_format($tagihanBaru->jumlah, 0, ',', '.');
+
+        $parents = $siswa->orangTua;
+        foreach ($parents as $parent) {
+            if ($parent->user_id) {
+                $this->create(
+                    $parent->user_id,
+                    Notification::TIPE_PEMBAYARAN,
+                    'Tunggakan Dialihkan ke TA Aktif',
+                    "Tunggakan {$siswa->nama_lengkap} dari {$namaTaAsal} sebesar {$jumlahFmt} telah dialihkan dan harus dilunasi di TA aktif.",
+                    route('orang-tua.tagihan.anak', $siswa->id),
+                    [
+                        'tagihan_id' => $tagihanBaru->id,
+                        'tagihan_asal_id' => $tagihanBaru->tagihan_asal_id,
+                        'siswa_id' => $siswa->id,
+                    ]
+                );
+            }
+        }
+    }
+
+    /**
      * Notify orang tua about new tagihan
      */
     public function notifyTagihanBaru($tagihan)

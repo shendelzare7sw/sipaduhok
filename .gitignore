@@ -21,3 +21,19 @@ yarn-error.log
 
 # SSL Certificate Bundle
 /cacert.pem
+
+# Internal documentation & test artifacts (not for repo)
+BILLING_SYSTEM_OVERVIEW.md
+DEPLOYMENT_GUIDE.md
+GOOGLE_SHEETS_COMPLETION_REPORT.md
+implementation_plan.md.resolved
+PRODUCTION_FIX_INSTRUCTIONS.md
+SETUP.md
+START_HERE_TESTING.md
+TESTING_DATA_GENERATOR.md
+TESTING_GUIDE.md
+TESTING_GUIDE_INDONESIA.md
+TESTING_QUICK_REFERENCE.md
+VERIFICATION_AND_DELIVERY_REPORT.md
+kontak_html.txt
+groq_models.json

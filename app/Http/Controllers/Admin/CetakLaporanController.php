@@ -9,6 +9,7 @@ use App\Models\Kelas;
 use App\Models\Cabang;
 use App\Models\TahunAjaran;
 use App\Models\GuruPengajarKelas;
+use App\Models\StatusNaikKelasSiswa;
 use Illuminate\Http\Request;
 
 class CetakLaporanController extends Controller
@@ -42,50 +43,99 @@ class CetakLaporanController extends Controller
 
     /**
      * Cetak Daftar Siswa.
+     *
+     * Mendukung filter TA: kalau TA bukan aktif, gunakan snapshot dari
+     * status_naik_kelas_siswa agar daftar = siswa yang berada di TA itu
+     * (termasuk siswa yang sekarang sudah lulus / sudah pindah kelas).
      */
     public function siswa(Request $request)
     {
-        $query = Siswa::with(['cabang', 'kelas.tahunAjaran']);
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $taId = $request->integer('tahun_ajaran_id') ?: ($tahunAjaranAktif?->id);
+        $tahunAjaran = $taId ? TahunAjaran::find($taId) : $tahunAjaranAktif;
+        $isTaAktif = $tahunAjaran && $tahunAjaranAktif && $tahunAjaran->id === $tahunAjaranAktif->id;
 
-        // Filter
-        if ($request->filled('kelas_id')) {
-            $query->where('siswa.kelas_id', $request->kelas_id);
-        }
-        if ($request->filled('cabang_id')) {
-            $query->where('siswa.cabang_id', $request->cabang_id);
-        }
-        if ($request->filled('jenjang')) {
-            $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
-        }
-        if ($request->filled('status')) {
-            $query->where('siswa.status', $request->status);
+        if (!$isTaAktif && $tahunAjaran) {
+            // Mode HISTORIS: ambil siswa via snapshot status_naik_kelas_siswa
+            $snapshots = StatusNaikKelasSiswa::where('tahun_ajaran_id', $tahunAjaran->id)
+                ->with(['siswa.cabang', 'siswa.kelas', 'originalKelas.cabang'])
+                ->get();
+
+            // Filter snapshot
+            $snapshots = $snapshots->filter(function ($s) use ($request) {
+                $siswa = $s->siswa;
+                if (!$siswa) return false;
+                if ($request->filled('cabang_id') && (int) $siswa->cabang_id !== (int) $request->cabang_id) return false;
+                if ($request->filled('kelas_id') && (int) $s->original_kelas_id !== (int) $request->kelas_id) return false;
+                if ($request->filled('jenjang')) {
+                    $jenjang = $s->originalKelas?->jenjang;
+                    if ($jenjang !== $request->jenjang) return false;
+                }
+                return true;
+            });
+
+            $siswaList = $snapshots->map(function ($s) {
+                $siswa = $s->siswa;
+                // Tempel info kelas snapshot agar view bisa pakai
+                $siswa->kelas_snapshot_nama = $s->kelas_asal;
+                $siswa->kelas_snapshot = $s->originalKelas;
+                $siswa->status_kelulusan_snapshot = $s->status_kelulusan;
+                return $siswa;
+            });
+
+            // Sort
+            $sortBy = $request->sort_by ?? 'nama';
+            $siswaList = match ($sortBy) {
+                'kelas' => $siswaList->sortBy(fn($s) => ($s->kelas_snapshot?->jenjang ?? '') . '-' . ($s->kelas_snapshot_nama ?? '')),
+                'cabang' => $siswaList->sortBy(fn($s) => $s->cabang_id . '-' . $s->nama_lengkap),
+                default => $siswaList->sortBy('nama_lengkap'),
+            };
+            $siswaList = $siswaList->values();
         } else {
-            $query->where('siswa.status', 'aktif');
+            // Mode AKTIF (default): query siswa sekarang
+            $query = Siswa::with(['cabang', 'kelas.tahunAjaran']);
+
+            if ($request->filled('kelas_id')) {
+                $query->where('siswa.kelas_id', $request->kelas_id);
+            }
+            if ($request->filled('cabang_id')) {
+                $query->where('siswa.cabang_id', $request->cabang_id);
+            }
+            if ($request->filled('jenjang')) {
+                $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
+            }
+            if ($request->filled('status')) {
+                $query->where('siswa.status', $request->status);
+            } else {
+                $query->where('siswa.status', 'aktif');
+            }
+
+            $sortBy = $request->sort_by ?? 'nama';
+            switch ($sortBy) {
+                case 'kelas':
+                    $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+                          ->orderBy('kelas.jenjang')
+                          ->orderBy('kelas.nama_kelas')
+                          ->orderBy('siswa.nama_lengkap')
+                          ->select('siswa.*');
+                    break;
+                case 'cabang':
+                    $query->orderBy('siswa.cabang_id')->orderBy('siswa.nama_lengkap');
+                    break;
+                default:
+                    $query->orderBy('siswa.nama_lengkap');
+            }
+
+            $siswaList = $query->get();
         }
 
-        // Sort
-        $sortBy = $request->sort_by ?? 'nama';
-        switch ($sortBy) {
-            case 'kelas':
-                $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
-                      ->orderBy('kelas.jenjang')
-                      ->orderBy('kelas.nama_kelas')
-                      ->orderBy('siswa.nama_lengkap')
-                      ->select('siswa.*');
-                break;
-            case 'cabang':
-                $query->orderBy('siswa.cabang_id')->orderBy('siswa.nama_lengkap');
-                break;
-            default:
-                $query->orderBy('siswa.nama_lengkap');
-        }
-
-        $siswaList = $query->get();
         $kelas = $request->kelas_id ? Kelas::find($request->kelas_id) : null;
         $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
-        $tahunAjaran = TahunAjaran::where('is_active', true)->first();
+        $isHistorical = !$isTaAktif;
 
-        return view('admin.cetak-laporan.print-siswa', compact('siswaList', 'kelas', 'cabang', 'sortBy', 'tahunAjaran'));
+        return view('admin.cetak-laporan.print-siswa', compact(
+            'siswaList', 'kelas', 'cabang', 'sortBy', 'tahunAjaran', 'isHistorical'
+        ));
     }
 
     /**
@@ -198,6 +248,45 @@ class CetakLaporanController extends Controller
         $tahunAjaran = TahunAjaran::find($tahunAjaranId);
 
         return view('admin.cetak-laporan.print-guru-pengajar', compact('guruList', 'tahunAjaran'));
+    }
+
+    /**
+     * Cetak Rekap Akademik per TA — diambil dari snapshot status_naik_kelas_siswa.
+     * Menampilkan siswa yang naik kelas / tidak naik / lulus / tunggakan / dispensasi
+     * untuk satu tahun ajaran tertentu.
+     */
+    public function rekapAkademik(Request $request)
+    {
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $taId = $request->integer('tahun_ajaran_id') ?: ($tahunAjaranAktif?->id);
+        $tahunAjaran = $taId ? TahunAjaran::find($taId) : null;
+
+        if (!$tahunAjaran) {
+            return redirect()->route('admin.cetak-laporan.index')
+                ->with('error', 'Tahun ajaran tidak valid.');
+        }
+
+        $snapshots = StatusNaikKelasSiswa::where('tahun_ajaran_id', $tahunAjaran->id)
+            ->with(['siswa.cabang', 'originalKelas.cabang'])
+            ->get();
+
+        if ($request->filled('cabang_id')) {
+            $snapshots = $snapshots->filter(fn($s) => (int) ($s->siswa?->cabang_id) === (int) $request->cabang_id);
+        }
+
+        $byStatus = $snapshots->groupBy('status_kelulusan');
+
+        $stats = [
+            'total' => $snapshots->count(),
+            'naik' => ($byStatus->get('NAIK_KELAS')?->count() ?? 0) + ($byStatus->get('NAIK_KELAS_TUNGGAKAN')?->count() ?? 0),
+            'tidak_naik' => $byStatus->get('TIDAK_NAIK_KELAS')?->count() ?? 0,
+            'lulus' => ($byStatus->get('LULUS')?->count() ?? 0) + ($byStatus->get('LULUS_TUNGGAKAN')?->count() ?? 0),
+            'dispensasi' => ($byStatus->get('NAIK_KELAS_TUNGGAKAN')?->count() ?? 0) + ($byStatus->get('LULUS_TUNGGAKAN')?->count() ?? 0),
+        ];
+
+        $cabang = $request->cabang_id ? Cabang::find($request->cabang_id) : null;
+
+        return view('admin.cetak-laporan.print-rekap-akademik', compact('tahunAjaran', 'byStatus', 'stats', 'cabang'));
     }
 
     /**

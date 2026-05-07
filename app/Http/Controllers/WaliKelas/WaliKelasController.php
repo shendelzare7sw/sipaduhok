@@ -13,6 +13,7 @@ use App\Models\Siswa;
 use App\Models\Presensi;
 use App\Models\Rapor;
 use App\Models\JadwalPelajaran;
+use App\Models\WaliKelasAssignment;
 
 class WaliKelasController extends Controller
 {
@@ -119,6 +120,58 @@ class WaliKelasController extends Controller
             'izinMenungguValidasi' => $izinMenungguValidasi,
             'raporBelumSelesai' => $raporBelumSelesai,
             'jadwalHariIni' => $jadwalHariIni,
+        ]);
+    }
+
+    /**
+     * Halaman "Rapor Pending Saya" — daftar rapor draft yang masih perlu diselesaikan/dikirim
+     * untuk SEMUA kelas yang pernah/sedang diwalikan oleh wali ini (lintas TA).
+     *
+     * Solusi untuk kasus: setelah promosi TA baru, wali yang sudah re-assign ke kelas baru
+     * tidak punya akses lagi ke rapor draft TA lalu, sehingga rapor terjebak.
+     */
+    public function raporPending(Request $request)
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+
+        if (!$tenagaPendidik) {
+            return view('wali-kelas.rapor-pending.index', [
+                'tenagaPendidik' => null,
+                'raporList' => collect(),
+                'kelasIds' => collect(),
+                'totalDraft' => 0,
+                'totalRevisi' => 0,
+                'totalKirim' => 0,
+            ]);
+        }
+
+        // Ambil SEMUA kelas yang pernah diwalikan (lintas TA, tanpa filter is_active)
+        $kelasIds = WaliKelasAssignment::where('tenaga_pendidik_id', $tenagaPendidik->id)
+            ->pluck('kelas_id')
+            ->unique()
+            ->values();
+
+        // Rapor pending: status='draft' (belum diterbitkan) atau status_review_ketua='revisi'
+        $raporList = Rapor::with(['siswa', 'kelas.tahunAjaran'])
+            ->whereIn('kelas_id', $kelasIds)
+            ->where(function ($q) {
+                $q->where('status', 'draft')
+                  ->orWhere('status_review_ketua', 'revisi');
+            })
+            ->orderByDesc('updated_at')
+            ->get();
+
+        $totalDraft = $raporList->where('status', 'draft')->whereNull('status_review_ketua')->count();
+        $totalRevisi = $raporList->where('status_review_ketua', 'revisi')->count();
+        $totalKirim = $raporList->where('status_review_ketua', 'pending')->count();
+
+        return view('wali-kelas.rapor-pending.index', [
+            'tenagaPendidik' => $tenagaPendidik,
+            'raporList' => $raporList,
+            'kelasIds' => $kelasIds,
+            'totalDraft' => $totalDraft,
+            'totalRevisi' => $totalRevisi,
+            'totalKirim' => $totalKirim,
         ]);
     }
 

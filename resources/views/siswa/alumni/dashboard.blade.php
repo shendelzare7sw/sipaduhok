@@ -1,56 +1,196 @@
 @extends('layouts.sneat')
 
-@section('title', 'Alumni Dashboard')
+@section('title', 'Dashboard Alumni')
+@section('page-title', 'Dashboard Alumni')
+@section('page-subtitle', 'Akses arsip akademik Anda')
 
-@section('content')
-<div class="container-xxl d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card text-center shadow-lg" style="max-width: 500px; width: 100%; border-radius: 1rem;">
-        <div class="card-body p-5">
-            <div class="mb-4">
-                <div class="avatar avatar-xl mx-auto mb-3">
-                    <img src="{{ $siswa->foto_profil ?? asset('assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
-                </div>
-                <h3 class="fw-bold text-primary mb-2">Selamat, {{ $siswa->nama_lengkap }}! <i class="fas fa-graduation-cap"></i></h3>
-                <p class="text-muted mb-4">Anda telah dinyatakan <strong>LULUS</strong> dari PKBM House of Knowledge.</p>
-                <div class="alert alert-success d-flex align-items-center justify-content-center" role="alert">
-                    <i class="bx bx-check-circle me-2"></i>
-                    <div>
-                        Terima kasih telah menjadi bagian dari kami.
-                    </div>
-                </div>
-            </div>
-            
-            <hr class="my-4">
-
-            <div>
-                <p class="small text-muted mb-2">Anda akan dialihkan keluar dalam:</p>
-                <h1 class="display-4 fw-bold text-danger" id="countdown">5</h1>
-                <p class="small text-muted">detik</p>
-            </div>
-
-            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                @csrf
-            </form>
-        </div>
-    </div>
-</div>
+@section('sidebar-menu')
+    {{-- Sidebar minimal alumni: hanya dashboard, riwayat, logout --}}
+    <li class="menu-item active">
+        <a href="{{ route('siswa.sia.dashboard') }}" class="menu-link">
+            <i class="menu-icon fas fa-graduation-cap"></i>
+            <div>Dashboard Alumni</div>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="{{ route('siswa.lms.riwayat.index') }}" class="menu-link">
+            <i class="menu-icon fas fa-history"></i>
+            <div>Riwayat LMS</div>
+        </a>
+    </li>
+    <li class="menu-item">
+        <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
+            @csrf
+            <button type="submit" class="menu-link border-0 bg-transparent w-100 text-start"
+                    onclick="return confirm('Yakin ingin logout?')">
+                <i class="menu-icon fas fa-sign-out-alt"></i>
+                <div>Logout</div>
+            </button>
+        </form>
+    </li>
 @endsection
 
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let timeLeft = 5;
-        const countdownEl = document.getElementById('countdown');
-        
-        const timer = setInterval(function() {
-            timeLeft--;
-            countdownEl.textContent = timeLeft;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                document.getElementById('logout-form').submit();
-            }
-        }, 1000);
-    });
-</script>
+@section('styles')
+<style>
+    .alumni-hero {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: white;
+        border-radius: 14px;
+        padding: 28px 24px;
+        margin-bottom: 22px;
+        box-shadow: 0 8px 20px -5px rgba(22, 163, 74, 0.3);
+    }
+    .alumni-hero .greeting { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
+    .alumni-hero .subtext { font-size: 0.92rem; opacity: 0.95; margin-top: 6px; }
+
+    .alumni-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .alumni-action-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 18px;
+        text-decoration: none;
+        color: #1e293b;
+        transition: all .15s ease;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .alumni-action-card:hover {
+        border-color: #4361ee;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px -2px rgba(0,0,0,.08);
+        color: #1e293b;
+    }
+    .alumni-action-card .icon-circle {
+        width: 48px; height: 48px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .alumni-action-card .label { font-weight: 700; font-size: 1rem; }
+    .alumni-action-card .desc { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .info-card {
+        background: white; border: 1px solid #e5e7eb;
+        border-radius: 12px; padding: 20px;
+        margin-bottom: 18px;
+    }
+    .rapor-summary {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+        background: #f8fafc; border-radius: 10px; padding: 16px;
+        margin-top: 12px;
+    }
+    .rapor-summary .field { font-size: 13px; }
+    .rapor-summary .field .label { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: .5px; }
+    .rapor-summary .field .value { font-weight: 700; color: #1e293b; }
+</style>
+@endsection
+
+@section('content')
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="alumni-hero">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-graduation-cap fa-2x"></i>
+            <div>
+                <div class="greeting">Selamat, {{ $siswa->nama_lengkap }}!</div>
+                <div class="subtext">
+                    Anda telah dinyatakan <strong>LULUS</strong> dari PKBM. Akses Anda terbatas pada arsip akademik —
+                    rapor terakhir, riwayat tugas, dan riwayat ujian/latihan.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show">
+            <i class="fas fa-info-circle me-1"></i>{{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    <div class="alumni-grid">
+        <a href="{{ route('siswa.lms.riwayat.index') }}" class="alumni-action-card">
+            <div class="icon-circle" style="background: #4361ee;"><i class="fas fa-history"></i></div>
+            <div>
+                <div class="label">Riwayat LMS</div>
+                <div class="desc">Tugas, latihan, ujian yang pernah dikerjakan</div>
+            </div>
+        </a>
+
+        <form method="POST" action="{{ route('logout') }}" class="m-0">
+            @csrf
+            <button type="submit" class="alumni-action-card w-100 border-0 text-start"
+                    style="background: white; cursor: pointer;"
+                    onclick="return confirm('Yakin ingin logout?')">
+                <div class="icon-circle" style="background: #dc2626;"><i class="fas fa-sign-out-alt"></i></div>
+                <div>
+                    <div class="label">Logout</div>
+                    <div class="desc">Keluar dari sistem</div>
+                </div>
+            </button>
+        </form>
+    </div>
+
+    <div class="info-card">
+        <h5 class="fw-bold mb-2"><i class="fas fa-id-card me-2 text-primary"></i>Profil Saya</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <img src="{{ $siswa->foto ? asset('storage/' . $siswa->foto) : asset('assets/img/avatars/1.png') }}"
+                     alt="Foto" class="rounded shadow-sm"
+                     style="width: 100%; max-width: 140px; aspect-ratio: 1/1; object-fit: cover;">
+            </div>
+            <div class="col-md-9">
+                <table class="table table-sm">
+                    <tr><td class="text-muted" style="width: 140px;">Nama Lengkap</td><td><strong>{{ $siswa->nama_lengkap }}</strong></td></tr>
+                    <tr><td class="text-muted">NISN</td><td>{{ $siswa->nisn ?? '-' }}</td></tr>
+                    <tr><td class="text-muted">NIS</td><td>{{ $siswa->nis ?? '-' }}</td></tr>
+                    <tr><td class="text-muted">Jenis Kelamin</td><td>{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td></tr>
+                    <tr><td class="text-muted">Status</td><td><span class="badge bg-success">ALUMNI</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        @if($raporTerakhir)
+            <h6 class="fw-bold mt-3 mb-1"><i class="fas fa-file-alt me-2 text-primary"></i>Rapor Terakhir</h6>
+            <div class="rapor-summary">
+                <div class="field">
+                    <div class="label">Tahun Ajaran</div>
+                    <div class="value">{{ $raporTerakhir->tahunAjaran?->nama_tahun_ajaran ?? '-' }}</div>
+                </div>
+                <div class="field">
+                    <div class="label">Semester / Jenis</div>
+                    <div class="value">Semester {{ $raporTerakhir->semester }} · {{ $raporTerakhir->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }}</div>
+                </div>
+                <div class="field">
+                    <div class="label">Status</div>
+                    <div class="value">
+                        @if($raporTerakhir->status === 'diterbitkan')
+                            <span class="badge bg-success">Diterbitkan</span>
+                        @else
+                            <span class="badge bg-secondary">{{ ucfirst($raporTerakhir->status) }}</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="label">Tanggal Terbit</div>
+                    <div class="value">{{ $raporTerakhir->tanggal_terbit ? $raporTerakhir->tanggal_terbit->locale('id')->translatedFormat('d M Y') : '-' }}</div>
+                </div>
+            </div>
+            <div class="text-muted small mt-2">
+                <i class="fas fa-info-circle me-1"></i>
+                Untuk akses rapor lengkap (download/cetak), silakan hubungi orang tua atau wali Anda. Akun orang tua tetap memiliki akses penuh.
+            </div>
+        @else
+            <div class="alert alert-warning mt-3 mb-0">
+                <i class="fas fa-exclamation-triangle me-1"></i>Belum ada rapor yang tercatat untuk Anda.
+            </div>
+        @endif
+    </div>
+</div>
 @endsection

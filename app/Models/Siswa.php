@@ -110,6 +110,28 @@ class Siswa extends Model
         return $this->hasMany(Rapor::class);
     }
 
+    /**
+     * Riwayat status naik kelas per tahun ajaran (snapshot dari PromotionService).
+     * Source of truth untuk laporan historis: kelas_asal/kelas_tujuan/status_kelulusan.
+     */
+    public function statusNaikKelas()
+    {
+        return $this->hasMany(StatusNaikKelasSiswa::class);
+    }
+
+    /**
+     * Scope: siswa yang relevan dengan TA tertentu.
+     * - Punya snapshot di status_naik_kelas_siswa untuk TA itu, ATAU
+     * - Sedang berada di kelas yang berada di TA itu (untuk siswa aktif TA aktif).
+     */
+    public function scopeForTahunAjaran($query, $tahunAjaranId)
+    {
+        return $query->where(function ($q) use ($tahunAjaranId) {
+            $q->whereHas('statusNaikKelas', fn($s) => $s->where('tahun_ajaran_id', $tahunAjaranId))
+              ->orWhereHas('kelas', fn($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+        });
+    }
+
     // New relationship for parents (many-to-many)
     public function parents()
     {

@@ -23,10 +23,18 @@
 </li>
 
 <!-- Kelola Tagihan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') ? 'active' : '' }}">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') && !Str::contains($currentRoute, 'carryover') ? 'active' : '' }}">
     <a href="{{ route('bendahara.tagihan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-file-invoice-dollar"></i>
         <div>Kelola Tagihan</div>
+    </a>
+</li>
+
+<!-- Tarik Tunggakan TA Lama -->
+<li class="menu-item {{ Str::contains($currentRoute, 'bendahara.tagihan.carryover') ? 'active' : '' }}">
+    <a href="{{ route('bendahara.tagihan.carryover') }}" class="menu-link">
+        <i class="menu-icon fas fa-arrow-circle-right"></i>
+        <div>Tarik Tunggakan</div>
     </a>
 </li>
 

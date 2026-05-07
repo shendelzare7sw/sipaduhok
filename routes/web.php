@@ -430,6 +430,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('cetak-laporan/wali-kelas', [CetakLaporanController::class, 'waliKelas'])->name('cetak-laporan.wali-kelas');
         Route::get('cetak-laporan/guru-pengajar', [CetakLaporanController::class, 'guruPengajar'])->name('cetak-laporan.guru-pengajar');
         Route::get('cetak-laporan/rekap', [CetakLaporanController::class, 'rekap'])->name('cetak-laporan.rekap');
+        Route::get('cetak-laporan/rekap-akademik', [CetakLaporanController::class, 'rekapAkademik'])->name('cetak-laporan.rekap-akademik');
 
         /*
         |--------------------------------------------------------------------------
@@ -466,6 +467,11 @@ Route::middleware(['auth'])->group(function () {
 
                 // Reset Tagihan (Admin Only - masa percobaan)
                 Route::post('/reset-tagihan', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'resetTagihan'])->name('reset-tagihan');
+
+                // Tarik Tunggakan TA Lama → TA Aktif (carryover)
+                Route::get('/carryover', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'carryoverIndex'])->name('carryover');
+                Route::post('/carryover/preview', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'carryoverPreview'])->name('carryover.preview');
+                Route::post('/carryover/execute', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'carryoverExecute'])->name('carryover.execute');
 
                 Route::get('/{siswa}', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'show'])->name('show');
                 Route::get('/{siswa}/edit', [\App\Http\Controllers\Admin\Keuangan\TagihanController::class, 'edit'])->name('edit');
@@ -710,6 +716,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/cetak-wali-kelas', [KetuaController::class, 'waliKelas'])->name('wali-kelas');
             Route::get('/cetak-guru-pengajar', [KetuaController::class, 'guruPengajar'])->name('guru-pengajar');
             Route::get('/cetak-rekap', [KetuaController::class, 'rekap'])->name('rekap');
+            Route::get('/rekap-akademik', [KetuaController::class, 'rekapAkademik'])->name('rekap-akademik');
         });
 
         // Catatan
@@ -995,6 +1002,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/api/tagihan-preview/{siswa}', [TagihanController::class, 'getTagihanPreview'])->name('api.tagihan-preview');
 
             Route::get('/cetak-laporan', [TagihanController::class, 'cetakLaporan'])->name('cetak-laporan');
+
+            // Tarik Tunggakan TA Lama → TA Aktif (carryover)
+            Route::get('/carryover', [TagihanController::class, 'carryoverIndex'])->name('carryover');
+            Route::post('/carryover/preview', [TagihanController::class, 'carryoverPreview'])->name('carryover.preview');
+            Route::post('/carryover/execute', [TagihanController::class, 'carryoverExecute'])->name('carryover.execute');
+
             Route::get('/{siswa}', [TagihanController::class, 'show'])->name('show');
             Route::get('/{siswa}/edit', [TagihanController::class, 'edit'])->name('edit');
             Route::put('/{siswa}', [TagihanController::class, 'update'])->name('update');
@@ -1131,6 +1144,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{nilaiId}/clear', [WaliKelasNilaiController::class, 'clearNilai'])->name('clear');
         });
 
+        // Rapor Pending Saya (lintas TA — untuk akses rapor draft TA lalu yang masih perlu diselesaikan)
+        Route::get('/rapor-pending', [WaliKelasController::class, 'raporPending'])->name('rapor-pending');
+
         // Rapor
         Route::prefix('rapor')->name('rapor.')->group(function () {
             Route::get('/', [RaporController::class, 'index'])->name('index');
@@ -1202,6 +1218,19 @@ Route::middleware(['auth'])->group(function () {
 
         // Jadwal Pelajaran
         Route::get('/jadwal', [\App\Http\Controllers\Guru\GuruJadwalController::class, 'index'])->name('jadwal.index');
+
+        /*
+        |--------------------------------------------------------------------------
+        | LMS GURU - ARSIP (lintas TA, untuk reuse konten lama)
+        | Diletakkan SEBELUM group lms/{kelas}/{mapel} agar tidak match wildcard.
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('lms/arsip')->name('lms.arsip.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'index'])->name('index');
+            Route::get('/preview/{type}/{id}', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'preview'])->name('preview');
+            Route::get('/salin/{type}/{id}', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'formSalin'])->name('form-salin');
+            Route::post('/salin', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'salin'])->name('salin');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -1420,6 +1449,13 @@ Route::middleware(['auth'])->group(function () {
 
             // Dashboard LMS
             Route::get('/dashboard', [LmsDashboardController::class, 'index'])->name('dashboard');
+
+            // Riwayat LMS (lintas TA — tidak tergantung kelas saat ini)
+            Route::prefix('riwayat')->name('riwayat.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Siswa\SiswaLmsRiwayatController::class, 'index'])->name('index');
+                Route::get('/tugas/{id}', [\App\Http\Controllers\Siswa\SiswaLmsRiwayatController::class, 'showTugas'])->name('tugas')->where('id', '[0-9]+');
+                Route::get('/ujian/{id}', [\App\Http\Controllers\Siswa\SiswaLmsRiwayatController::class, 'showUjian'])->name('ujian')->where('id', '[0-9]+');
+            });
 
             // Kalender Akademik
             Route::get('/kalender', [SiswaDashboardController::class, 'kalenderTahunan'])->name('kalender');

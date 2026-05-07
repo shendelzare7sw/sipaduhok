@@ -438,6 +438,9 @@
                         </div>
                     </div>
                     <div class="header-actions">
+                        <a href="{{ route('admin.users.edit-siswa', $siswa->id) }}" class="btn btn-white" title="Edit identitas, foto, status, dll">
+                            <i class="fas fa-edit"></i> Edit Data
+                        </a>
                         <a href="{{ route('admin.manajemen-siswa.print-kartu', $siswa) }}" class="btn btn-white"
                             target="_blank">
                             <i class="fas fa-id-card"></i> Cetak Kartu

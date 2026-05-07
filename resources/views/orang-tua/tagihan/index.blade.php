@@ -143,51 +143,45 @@
                         <div>Tidak ada tagihan untuk siswa ini.</div>
                     </div>
                 @else
-                    {{-- Section: Tunggakan Tahun Lalu --}}
-                    @if($arrearsGroup->isNotEmpty())
+                    {{-- Section A: Tunggakan TA Lama yang BELUM DIALIHKAN --}}
+                    @if($arrearsBelumDialihkanGroup->isNotEmpty())
                         <div class="mb-5">
-                            <div class="alert alert-danger d-flex align-items-center mb-3">
-                                <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+                            <div class="alert alert-danger d-flex align-items-start mb-3">
+                                <i class="fas fa-exclamation-triangle me-2 fa-lg mt-1"></i>
                                 <div>
-                                    <strong>Perhatian:</strong> Terdapat tunggakan dari tahun ajaran sebelumnya yang belum dilunasi.
+                                    <strong>Perhatian:</strong> Terdapat tunggakan dari tahun ajaran sebelumnya yang
+                                    <strong>belum dialihkan</strong> ke TA aktif. Daftar di bawah hanya tampil sebagai informasi —
+                                    silakan <strong>hubungi bendahara sekolah</strong> agar tunggakan ini dialihkan ke tagihan TA aktif terlebih dahulu sebelum dapat dibayar.
                                 </div>
                             </div>
-                            
-                            @foreach($arrearsGroup as $tahunId => $tagihans)
+
+                            @foreach($arrearsBelumDialihkanGroup as $tahunId => $tagihans)
                                 @php $tahunLabel = $tagihans->first()->tahunAjaran->nama_tahun_ajaran ?? 'Tahun Lalu'; @endphp
                                 <h6 class="text-danger fw-bold border-bottom border-danger pb-2 mb-3">
-                                    <i class="fas fa-history me-2"></i>Tunggakan Tahun Ajaran {{ $tahunLabel }}
+                                    <i class="fas fa-history me-2"></i>Tunggakan TA {{ $tahunLabel }} <small class="text-muted">(belum dialihkan)</small>
                                 </h6>
-                                
+
                                 <div class="table-responsive mb-4">
                                     <table class="table table-hover align-middle border border-danger">
                                         <thead class="table-light">
                                             <tr>
-                                                <th style="width: 50px;" class="text-center">Pilih</th>
                                                 <th>Keterangan</th>
                                                 <th class="text-nowrap" style="width: 150px;">Jatuh Tempo</th>
                                                 <th class="text-end text-nowrap" style="width: 150px;">Tagihan</th>
-                                                <th class="text-center" style="width: 100px;">Status</th>
+                                                <th class="text-center" style="width: 130px;">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($tagihans as $item)
                                                 @php
-                                                    $isSpp = str_contains($item->jenis_tagihan, 'spp');
                                                     $isPartial = $item->sisa_tagihan < $item->jumlah;
                                                 @endphp
-                                                <tr>
-                                                    <td data-label="PILIH" class="text-start text-md-center">
-                                                        <input type="checkbox" class="form-check-input item-checkbox group-arrears-{{ $tahunId }}"
-                                                            value="{{ $item->id }}" data-amount="{{ $item->sisa_tagihan }}"
-                                                            data-label="{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }} ({{ $tahunLabel }})"
-                                                            data-is-spp="{{ $isSpp ? 'true' : 'false' }}">
-                                                    </td>
+                                                <tr style="background: #fef2f2;">
                                                     <td data-label="KETERANGAN">
                                                         <div class="fw-bold text-danger">
                                                             {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
                                                         </div>
-                                                        <small class="text-muted">Dispensasi: {{ $item->status == 'cicilan' ? 'Cicilan' : 'Belum Lunas' }}</small>
+                                                        <small class="text-muted">Status: {{ $item->status == 'cicilan' ? 'Cicilan' : 'Belum Lunas' }}</small>
                                                     </td>
                                                     <td data-label="JATUH TEMPO" class="text-end text-md-start text-nowrap">
                                                         <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
@@ -199,7 +193,63 @@
                                                         @endif
                                                     </td>
                                                     <td data-label="STATUS" class="text-end text-md-center">
-                                                        <span class="badge bg-danger">Tunggakan</span>
+                                                        <span class="badge bg-danger" title="Hubungi sekolah untuk pengalihan">
+                                                            <i class="fas fa-lock"></i> Belum Bisa Dibayar
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="fas fa-info-circle"></i> Tunggakan ini hanya tampil sebagai laporan. Hubungi bendahara sekolah agar dialihkan ke tagihan TA aktif sebelum dapat dibayar.
+                                    </small>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- Section B: Tunggakan TA Lama yang SUDAH DIALIHKAN ke TA aktif (info read-only) --}}
+                    @if($arrearsDialihkanGroup->isNotEmpty())
+                        <div class="mb-5">
+                            <div class="alert alert-info d-flex align-items-start mb-3">
+                                <i class="fas fa-info-circle me-2 fa-lg mt-1"></i>
+                                <div>
+                                    <strong>Riwayat:</strong> Tunggakan dari TA sebelumnya berikut sudah <strong>dialihkan</strong> menjadi tagihan baru di TA aktif (lihat di bagian "Tagihan Tahun Ajaran Ini" di bawah).
+                                </div>
+                            </div>
+
+                            @foreach($arrearsDialihkanGroup as $tahunId => $tagihans)
+                                @php $tahunLabel = $tagihans->first()->tahunAjaran->nama_tahun_ajaran ?? 'Tahun Lalu'; @endphp
+                                <h6 class="text-secondary fw-bold border-bottom pb-2 mb-3">
+                                    <i class="fas fa-history me-2"></i>TA {{ $tahunLabel }} <small class="text-muted">(sudah dialihkan)</small>
+                                </h6>
+
+                                <div class="table-responsive mb-4">
+                                    <table class="table align-middle table-sm">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Keterangan</th>
+                                                <th class="text-end text-nowrap" style="width: 160px;">Jumlah Asli</th>
+                                                <th class="text-center" style="width: 180px;">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($tagihans as $item)
+                                                <tr class="text-muted">
+                                                    <td data-label="KETERANGAN">
+                                                        <div class="fw-bold">{{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}</div>
+                                                        <small>Dialihkan {{ $item->dialihkan_pada ? \Carbon\Carbon::parse($item->dialihkan_pada)->format('d M Y') : '-' }}</small>
+                                                    </td>
+                                                    <td data-label="JUMLAH" class="text-end">
+                                                        Rp {{ number_format($item->jumlah, 0, ',', '.') }}
+                                                    </td>
+                                                    <td data-label="STATUS" class="text-end text-md-center">
+                                                        @if($item->status === 'sudah_bayar')
+                                                            <span class="badge bg-success">Lunas (via TA aktif)</span>
+                                                        @else
+                                                            <span class="badge bg-info">Sudah dialihkan</span>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -208,7 +258,9 @@
                                 </div>
                             @endforeach
                         </div>
-                        
+                    @endif
+
+                    @if($arrearsBelumDialihkanGroup->isNotEmpty() || $arrearsDialihkanGroup->isNotEmpty())
                         <h5 class="mb-4 mt-5">
                             <i class="fas fa-calendar-check me-2 text-primary"></i>
                             Tagihan Tahun Ajaran Ini
@@ -255,6 +307,12 @@
                                                     <div class="fw-bold">
                                                         {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
                                                     </div>
+                                                    @if($item->tagihan_asal_id && $item->tagihanAsal)
+                                                        <span class="badge bg-label-warning text-warning mt-1" style="font-size: 0.7rem;">
+                                                            <i class="fas fa-exchange-alt me-1"></i>
+                                                            Tunggakan dari TA {{ $item->tagihanAsal->tahunAjaran->nama_tahun_ajaran ?? '-' }}
+                                                        </span>
+                                                    @endif
                                                 </td>
                                                 <td data-label="JATUH TEMPO" class="text-end text-md-start text-nowrap">
                                                     <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>

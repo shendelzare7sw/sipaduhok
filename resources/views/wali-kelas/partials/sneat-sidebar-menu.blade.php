@@ -119,10 +119,34 @@
 </li>
 
 <!-- Kelola Rapor -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.rapor') ? 'active' : '' }}">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.rapor.') ? 'active' : '' }}">
     <a href="{{ route('wali.rapor.index') }}" class="menu-link">
         <i class="menu-icon fas fa-file-alt"></i>
         <div>Kelola Rapor</div>
+    </a>
+</li>
+
+<!-- Rapor Pending Saya (lintas TA — termasuk dari kelas yang dulu pernah diwalikan) -->
+<li class="menu-item {{ $currentRoute === 'wali.rapor-pending' ? 'active' : '' }}">
+    <a href="{{ route('wali.rapor-pending') }}" class="menu-link">
+        <i class="menu-icon fas fa-history"></i>
+        <div>Rapor Pending Saya</div>
+        @php
+            try {
+                $wkTp = \App\Models\TenagaPendidik::where('user_id', auth()->id())->first();
+                $kelasIds = $wkTp ? \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $wkTp->id)->pluck('kelas_id') : collect();
+                $pendingCount = $kelasIds->isNotEmpty()
+                    ? \App\Models\Rapor::whereIn('kelas_id', $kelasIds)
+                        ->where(fn($q) => $q->where('status', 'draft')->orWhere('status_review_ketua', 'revisi'))
+                        ->count()
+                    : 0;
+            } catch (\Throwable $e) {
+                $pendingCount = 0;
+            }
+        @endphp
+        @if($pendingCount > 0)
+            <span class="badge bg-warning rounded-pill ms-auto">{{ $pendingCount }}</span>
+        @endif
     </a>
 </li>
 

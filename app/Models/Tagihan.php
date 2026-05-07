@@ -14,6 +14,9 @@ class Tagihan extends Model
     protected $fillable = [
         'siswa_id',
         'tahun_ajaran_id',
+        'tagihan_asal_id',
+        'dialihkan_ke_id',
+        'dialihkan_pada',
         'jenis_tagihan',
         'keterangan',
         'jumlah',
@@ -24,6 +27,7 @@ class Tagihan extends Model
     protected $casts = [
         'jumlah' => 'decimal:2',
         'tanggal_jatuh_tempo' => 'date',
+        'dialihkan_pada' => 'datetime',
     ];
 
     // Relationships
@@ -43,31 +47,88 @@ class Tagihan extends Model
     }
 
     /**
-     * Update status tagihan berdasarkan total pembayaran yang disetujui
+     * Tagihan asal di TA lama (jika ini adalah carryover).
      */
-    public function updateStatusBayar()
+    public function tagihanAsal()
     {
-        // Jika jumlah = 0, tandai sebagai sudah bayar (lunas)
-        if ($this->jumlah == 0) {
-            $this->update(['status' => 'sudah_bayar']);
-            return $this;
-        }
+        return $this->belongsTo(Tagihan::class, 'tagihan_asal_id');
+    }
 
-        // Hitung total pembayaran yang sudah disetujui
-        $totalDibayar = $this->pembayaran()
+    /**
+     * Tagihan turunan di TA aktif (jika tagihan ini sudah dialihkan).
+     */
+    public function tagihanAlihan()
+    {
+        return $this->belongsTo(Tagihan::class, 'dialihkan_ke_id');
+    }
+
+    /**
+     * Scope: tagihan asli yang belum lunas (exclude yang sudah dialihkan ke TA lain).
+     * Dipakai dashboard agar tidak double-count carryover.
+     */
+    public function scopeBelumLunasOriginal($query)
+    {
+        return $query->whereNull('dialihkan_ke_id')
+            ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat']);
+    }
+
+    /**
+     * Tandai tagihan ini sebagai sudah dialihkan ke tagihan baru di TA aktif.
+     */
+    public function tandaiDialihkan(int $tagihanBaruId): void
+    {
+        $this->update([
+            'dialihkan_ke_id' => $tagihanBaruId,
+            'dialihkan_pada' => now(),
+        ]);
+    }
+
+    /**
+     * Hitung sisa pembayaran (jumlah - total pembayaran disetujui).
+     */
+    public function getSisaPembayaranAttribute(): float
+    {
+        $terbayar = $this->pembayaran()
             ->where('status_validasi', 'disetujui')
             ->sum('jumlah_bayar');
 
-        // Update status tagihan based on payment progress
-        if ($totalDibayar >= $this->jumlah) {
-            // Fully paid
+        return max(0, (float) $this->jumlah - (float) $terbayar);
+    }
+
+    /**
+     * Update status tagihan berdasarkan total pembayaran yang disetujui.
+     * Jika tagihan ini adalah carryover (punya tagihan_asal_id) dan menjadi lunas,
+     * propagasikan status lunas ke tagihan asal.
+     */
+    public function updateStatusBayar()
+    {
+        $oldStatus = $this->status;
+
+        // Jika jumlah = 0, tandai sebagai sudah bayar (lunas)
+        if ($this->jumlah == 0) {
             $this->update(['status' => 'sudah_bayar']);
-        } elseif ($totalDibayar > 0) {
-            // Partial payment (cicilan)
-            $this->update(['status' => 'cicilan']);
         } else {
-            // Not paid yet
-            $this->update(['status' => 'belum_bayar']);
+            // Hitung total pembayaran yang sudah disetujui
+            $totalDibayar = $this->pembayaran()
+                ->where('status_validasi', 'disetujui')
+                ->sum('jumlah_bayar');
+
+            if ($totalDibayar >= $this->jumlah) {
+                $this->update(['status' => 'sudah_bayar']);
+            } elseif ($totalDibayar > 0) {
+                $this->update(['status' => 'cicilan']);
+            } else {
+                $this->update(['status' => 'belum_bayar']);
+            }
+        }
+
+        // Propagasi ke tagihan asal: bila tagihan ini carryover dan baru menjadi lunas,
+        // tandai tagihan asal di TA lama juga lunas (audit-trail tetap utuh).
+        if ($this->status === 'sudah_bayar' && $oldStatus !== 'sudah_bayar' && $this->tagihan_asal_id) {
+            $asal = static::find($this->tagihan_asal_id);
+            if ($asal && $asal->status !== 'sudah_bayar') {
+                $asal->update(['status' => 'sudah_bayar']);
+            }
         }
 
         return $this;
