@@ -1147,6 +1147,15 @@ Route::middleware(['auth'])->group(function () {
         // Rapor Pending Saya (lintas TA — untuk akses rapor draft TA lalu yang masih perlu diselesaikan)
         Route::get('/rapor-pending', [WaliKelasController::class, 'raporPending'])->name('rapor-pending');
 
+        // Arsip Kelas Saya — read-only, lintas TA, untuk kelas yang pernah diwalikan
+        Route::prefix('arsip')->name('arsip.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\WaliKelas\WaliKelasArsipController::class, 'index'])->name('index');
+            Route::get('/{kelas}', [\App\Http\Controllers\WaliKelas\WaliKelasArsipController::class, 'show'])->name('show');
+            Route::get('/{kelas}/rapor', [\App\Http\Controllers\WaliKelas\WaliKelasArsipController::class, 'rapor'])->name('rapor');
+            Route::get('/{kelas}/presensi', [\App\Http\Controllers\WaliKelas\WaliKelasArsipController::class, 'presensi'])->name('presensi');
+            Route::get('/{kelas}/nilai', [\App\Http\Controllers\WaliKelas\WaliKelasArsipController::class, 'nilai'])->name('nilai');
+        });
+
         // Rapor
         Route::prefix('rapor')->name('rapor.')->group(function () {
             Route::get('/', [RaporController::class, 'index'])->name('index');

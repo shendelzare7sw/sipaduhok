@@ -126,6 +126,14 @@
     </a>
 </li>
 
+<!-- Arsip Kelas Saya (lintas TA — read-only, untuk kelas yang dulu pernah diwalikan) -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.arsip') ? 'active' : '' }}">
+    <a href="{{ route('wali.arsip.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-archive"></i>
+        <div>Arsip Kelas Saya</div>
+    </a>
+</li>
+
 <!-- Rapor Pending Saya (lintas TA — termasuk dari kelas yang dulu pernah diwalikan) -->
 <li class="menu-item {{ $currentRoute === 'wali.rapor-pending' ? 'active' : '' }}">
     <a href="{{ route('wali.rapor-pending') }}" class="menu-link">
