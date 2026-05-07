@@ -11,7 +11,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/waka.jadwal-pelajaran.css') }}">
+<link rel="stylesheet" href="{{ asset('css/admin/jadwal-pelajaran.css') }}">
 @endsection
 
 @section('content')
@@ -651,11 +651,11 @@
             bulkDeleteUrl: "{{ route('waka.jadwal-pelajaran.bulk-delete') }}",
             csrfToken: "{{ csrf_token() }}",
             currentTahunAjaranId: "{{ request('tahun_ajaran_id', $currentTahunAjaran?->id) }}",
-            exportExcelBaseUrl: "{{ url('waka.jadwal-pelajaran/kelas') }}",
-            printBaseUrl: "{{ url('waka.jadwal-pelajaran/kelas') }}"
+            exportExcelBaseUrl: "{{ url('waka/jadwal-pelajaran/kelas') }}",
+            printBaseUrl: "{{ url('waka/jadwal-pelajaran/kelas') }}"
         };
     </script>
-    <script src="{{ asset('js/waka.jadwal-pelajaran.js') }}"></script>
+    <script src="{{ asset('js/admin/jadwal-pelajaran.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- Modal Cetak Per Kelas --}}
     <div class="modal fade" id="cetakKelasModal" tabindex="-1">
