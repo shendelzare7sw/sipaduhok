@@ -327,7 +327,7 @@
                                 </div>
                                 <a href="{{ route('guru.lms.dashboard', [$jadwal->kelas->id, $jadwal->link_mapel_id]) }}"
                                    class="btn btn-sm btn-outline-primary px-3" style="font-size: 0.75rem; font-weight: 600; border-radius: 6px; white-space: nowrap;">
-                                    <i class="fas fa-door-open me-1"></i>Masuk
+                                    <i class="fas fa-door-open me-1"></i>Masuk LMS
                                 </a>
                             </li>
                         @endforeach

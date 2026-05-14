@@ -312,9 +312,9 @@
     </section>
 
     <!-- ==================== NEWS SECTION (3D CAROUSEL) ==================== -->
-    <section class="py-20" style="background: linear-gradient(135deg, #165fac 0%, #7cb5ec 100%);">
+    <section class="py-12 sm:py-20" style="background: linear-gradient(135deg, #165fac 0%, #7cb5ec 100%);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
+            <div class="text-center mb-6 sm:mb-12">
                 <span class="inline-block px-4 py-2 bg-white/20 text-white text-sm font-medium rounded-full mb-4">
                     {{ $newsHeader['badge'] ?? 'Berita Terbaru' }}
                 </span>
@@ -327,8 +327,8 @@
             <!-- 3D Carousel -->
             <div class="carousel-3d relative flex items-center justify-center overflow-hidden">
                 <!-- Navigation Left -->
-                <button id="carouselPrev" class="absolute left-4 md:left-8 z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="carouselPrev" aria-label="Berita sebelumnya" class="absolute left-3 sm:left-6 md:left-8 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
@@ -339,9 +339,9 @@
                     <div class="carousel-item" data-index="{{ $index }}">
                         <a href="{{ $berita->url_berita }}" target="_blank" class="block w-full h-full">
                             <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
-                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                                <span class="inline-block px-3 py-1 {{ $berita->kategori_badge_class }} text-xs rounded-full mb-2">{{ $berita->kategori_label }}</span>
-                                <h3 class="text-white font-bold">{{ Str::limit($berita->judul, 50) }}</h3>
+                            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
+                                <span class="inline-block px-2.5 py-0.5 {{ $berita->kategori_badge_class }} text-[11px] sm:text-xs rounded-full mb-2">{{ $berita->kategori_label }}</span>
+                                <h3 class="text-white font-bold text-sm sm:text-base leading-snug line-clamp-2">{{ $berita->judul }}</h3>
                             </div>
                         </a>
                     </div>
@@ -349,12 +349,15 @@
                 </div>
 
                 <!-- Navigation Right -->
-                <button id="carouselNext" class="absolute right-4 md:right-8 z-10 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="carouselNext" aria-label="Berita berikutnya" class="absolute right-3 sm:right-6 md:right-8 z-20 w-9 h-9 sm:w-12 sm:h-12 bg-white/95 backdrop-blur rounded-full flex items-center justify-center shadow-xl hover:bg-primary hover:text-white transition-all duration-300">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
             </div>
+
+            <!-- Pagination Dots -->
+            <div id="carouselDots" class="carousel-dots" aria-label="Indikator slide berita"></div>
 
             <!-- Info Display -->
             <div id="newsInfo" class="text-center mt-8">

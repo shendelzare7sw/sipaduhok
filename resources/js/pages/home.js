@@ -6,12 +6,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const nextBtn = document.getElementById('carouselNext');
     const newsTitle = document.getElementById('newsTitle');
     const newsCategory = document.getElementById('newsCategory');
+    const dotsContainer = document.getElementById('carouselDots');
+    const carouselSection = document.querySelector('.carousel-3d');
 
     // PHP data is passed via window.PageData from the blade template
     const newsData = (window.PageData && window.PageData.newsData) ? window.PageData.newsData : [];
 
     let currentIndex = 0;
     const totalItems = items.length;
+
+    // Build dots
+    if (dotsContainer && totalItems > 1) {
+        for (let i = 0; i < totalItems; i++) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.setAttribute('aria-label', `Slide ${i + 1}`);
+            dot.addEventListener('click', () => {
+                currentIndex = i;
+                updateCarousel();
+                restartAutoRotate();
+            });
+            dotsContainer.appendChild(dot);
+        }
+    }
+    const dots = dotsContainer ? dotsContainer.querySelectorAll('button') : [];
 
     function updateCarousel() {
         items.forEach((item, index) => {
@@ -38,6 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newsTitle) newsTitle.textContent = newsData[currentIndex].title;
             if (newsCategory) newsCategory.textContent = newsData[currentIndex].category;
         }
+
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
     }
 
     function nextSlide() {
@@ -50,8 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCarousel();
     }
 
-    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
-    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+    if (prevBtn) prevBtn.addEventListener('click', () => { prevSlide(); restartAutoRotate(); });
+    if (nextBtn) nextBtn.addEventListener('click', () => { nextSlide(); restartAutoRotate(); });
 
     // Keyboard navigation
     document.addEventListener('keydown', function(e) {
@@ -61,13 +81,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto rotate
     let autoRotate = setInterval(nextSlide, 5000);
+    function restartAutoRotate() {
+        clearInterval(autoRotate);
+        autoRotate = setInterval(nextSlide, 5000);
+    }
 
-    const carouselSection = document.querySelector('.carousel-3d');
     if (carouselSection) {
         carouselSection.addEventListener('mouseenter', () => clearInterval(autoRotate));
         carouselSection.addEventListener('mouseleave', () => {
             autoRotate = setInterval(nextSlide, 5000);
         });
+
+        // Touch swipe support (mobile)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const SWIPE_THRESHOLD = 40;
+
+        carouselSection.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            clearInterval(autoRotate);
+        }, { passive: true });
+
+        carouselSection.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            const delta = touchEndX - touchStartX;
+            if (Math.abs(delta) > SWIPE_THRESHOLD) {
+                if (delta < 0) nextSlide(); else prevSlide();
+            }
+            restartAutoRotate();
+        }, { passive: true });
     }
 
     // Initialize carousel

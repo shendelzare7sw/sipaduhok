@@ -120,10 +120,62 @@
     pointer-events: none;
 }
 
+/* Tablet narrow: 641px – 768px — peek side cards pushed to edges */
 @media (max-width: 768px) {
-    .carousel-3d { height: 350px; }
-    .carousel-item { width: 200px; height: 280px; }
-    .carousel-item.left-2, .carousel-item.right-2 { opacity: 0.4; }
+    .carousel-3d { height: 340px; }
+    .carousel-item { width: 240px; height: 320px; border-radius: 1.25rem; }
+    .carousel-item.left-1 {
+        transform: translateX(-50%) scale(0.72) rotateY(20deg);
+        left: 10%;
+        opacity: 0.5;
+    }
+    .carousel-item.right-1 {
+        transform: translateX(-50%) scale(0.72) rotateY(-20deg);
+        left: 90%;
+        opacity: 0.5;
+    }
+    .carousel-item.left-2,
+    .carousel-item.right-2 {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* Mobile: ≤ 640px — center card only, full clean rectangle */
+@media (max-width: 640px) {
+    .carousel-3d { height: 320px; }
+    .carousel-item { width: min(72vw, 260px); height: 320px; }
+    .carousel-item.center { transform: translateX(-50%) scale(1); }
+    .carousel-item.left-1,
+    .carousel-item.right-1,
+    .carousel-item.left-2,
+    .carousel-item.right-2 {
+        opacity: 0 !important;
+        pointer-events: none;
+    }
+}
+
+/* Carousel pagination dots */
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+.carousel-dots button {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+.carousel-dots button.active {
+    background: #ffffff;
+    width: 24px;
 }
 
 /* Gallery Hover */
