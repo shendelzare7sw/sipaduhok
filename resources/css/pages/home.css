@@ -122,8 +122,11 @@
 
 /* Tablet narrow: 641px – 768px — peek side cards pushed to edges */
 @media (max-width: 768px) {
-    .carousel-3d { height: 340px; }
+    .carousel-3d { height: 352px; }
     .carousel-item { width: 240px; height: 320px; border-radius: 1.25rem; }
+    .carousel-item.center {
+        transform: translateX(-50%) scale(1);
+    }
     .carousel-item.left-1 {
         transform: translateX(-50%) scale(0.72) rotateY(20deg);
         left: 10%;
