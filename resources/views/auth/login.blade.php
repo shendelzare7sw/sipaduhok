@@ -150,14 +150,16 @@
                             <div>
                                 <label for="captcha" class="block text-sm font-semibold text-gray-700 mb-2">Kode Keamanan</label>
 
-                                {{-- Baris 1: gambar captcha full-width + tombol refresh di pojok --}}
-                                <div class="relative w-full h-16 bg-gray-100 rounded-xl border-2 border-gray-200 overflow-hidden shadow-inner mb-2">
-                                    <img id="captchaImage" src="{{ route('captcha') }}" alt="CAPTCHA"
-                                        class="w-full h-full object-cover mix-blend-multiply">
+                                {{-- Baris 1: gambar captcha (lebar terbatas, tengah) + refresh di samping --}}
+                                <div class="flex items-center justify-center gap-2 mb-2">
+                                    <div class="relative w-44 h-11 bg-gray-100 rounded-xl border-2 border-gray-200 overflow-hidden shadow-inner">
+                                        <img id="captchaImage" src="{{ route('captcha') }}" alt="CAPTCHA"
+                                            class="w-full h-full object-cover mix-blend-multiply">
+                                    </div>
                                     <button type="button" onclick="refreshCaptcha()"
-                                        class="absolute top-1.5 right-1.5 w-8 h-8 flex items-center justify-center bg-white/80 hover:bg-white text-gray-500 hover:text-[#165fac] rounded-lg shadow transition-all"
+                                        class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-[#165fac] hover:bg-gray-100 rounded-xl border border-gray-200 transition-all shrink-0"
                                         title="Refresh CAPTCHA">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                         </svg>
                                     </button>
