@@ -13,22 +13,39 @@
 --}}
 
 <style>
+    /* ── Summary widgets ─ white cards like dashboard ─── */
     .carryover-summary {
-        background: linear-gradient(135deg, #4e73df, #3651d4);
-        color: white;
+        background: var(--surface-color, #fff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 22px;
-        box-shadow: 0 4px 14px -4px rgba(78, 115, 223, 0.4);
+        padding: 1.4rem 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
     }
-    .carryover-summary .label { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: .5px; }
-    .carryover-summary .value { font-size: 1.5rem; font-weight: 800; line-height: 1.2; }
+    .carryover-summary:hover { transform: translateY(-2px); }
+    .carryover-summary .cs-icon {
+        width: 48px; height: 48px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.25rem; flex-shrink: 0;
+    }
+    .carryover-summary .cs-body { flex-grow: 1; }
+    .carryover-summary .label {
+        font-size: 11px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; color: var(--text-muted, #64748b); margin-bottom: 4px;
+    }
+    .carryover-summary .value {
+        font-size: 1.4rem; font-weight: 700; line-height: 1.2;
+        color: var(--text-main, #1e293b);
+    }
 
     .filter-bar {
-        background: white;
+        background: var(--background-color, #f8fafc);
         padding: 14px 18px;
         border-radius: 10px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--border-color, #e2e8f0);
         margin-bottom: 18px;
         display: flex;
         gap: 12px;
@@ -38,23 +55,24 @@
 
     .kandidat-table { width: 100%; border-collapse: separate; border-spacing: 0; }
     .kandidat-table th {
-        background: #f8f9fc;
-        color: #4e73df;
-        font-weight: 700;
+        background: var(--background-color, #f8fafc);
+        color: var(--text-muted, #64748b);
+        font-weight: 600;
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: .5px;
         padding: 12px 14px;
         text-align: left;
-        border-bottom: 2px solid #e3e6f0;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
     }
     .kandidat-table td {
         padding: 14px;
-        border-bottom: 1px solid #eef0f4;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
         vertical-align: middle;
         font-size: 13px;
+        color: var(--text-main, #1e293b);
     }
-    .kandidat-row:hover { background: #fafbfd; }
+    .kandidat-row:hover { background: var(--background-color, #f8fafc); }
 
     .siswa-info { display: flex; flex-direction: column; gap: 2px; }
     .siswa-info .nama { font-weight: 700; color: #1e293b; }
@@ -143,22 +161,10 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="{{ route($baseRouteName . '.index') }}">Tagihan</a></li>
-                    <li class="breadcrumb-item active">Tarik Tunggakan</li>
-                </ol>
-            </nav>
-            <h4 class="fw-bold mb-1"><i class="fas fa-arrow-circle-right me-2 text-primary"></i>Tarik Tunggakan ke TA Aktif</h4>
-            <p class="text-muted mb-0">Alihkan tunggakan tahun ajaran sebelumnya menjadi tagihan baru di TA aktif. Tagihan asal tetap tersimpan untuk audit.</p>
-        </div>
-        <div>
-            <a href="{{ route($baseRouteName . '.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i>Kembali
-            </a>
-        </div>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ route($baseRouteName . '.index') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Kembali ke Tagihan
+        </a>
     </div>
 
     {{-- Flash messages --}}
@@ -185,20 +191,35 @@
     <div class="row g-3 mb-3">
         <div class="col-md-4">
             <div class="carryover-summary">
-                <div class="label">TA Tujuan (Aktif)</div>
-                <div class="value">{{ $taAktif->nama_tahun_ajaran }}</div>
+                <div class="cs-icon" style="color: #3b82f6; background: #eff6ff;">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="cs-body">
+                    <div class="label">TA Tujuan (Aktif)</div>
+                    <div class="value">{{ $taAktif->nama_tahun_ajaran }}</div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="carryover-summary" style="background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 4px 14px -4px rgba(220, 38, 38, 0.4);">
-                <div class="label">Siswa dengan Tunggakan</div>
-                <div class="value">{{ $totalSiswa }} <small style="font-size: 0.75rem; font-weight: 600;">siswa</small></div>
+            <div class="carryover-summary">
+                <div class="cs-icon" style="color: #ef4444; background: #fef2f2;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="cs-body">
+                    <div class="label">Siswa dengan Tunggakan</div>
+                    <div class="value">{{ $totalSiswa }} <small style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">siswa</small></div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="carryover-summary" style="background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 14px -4px rgba(245, 158, 11, 0.4);">
-                <div class="label">Total Tunggakan</div>
-                <div class="value">Rp {{ number_format($grandTotal, 0, ',', '.') }}</div>
+            <div class="carryover-summary">
+                <div class="cs-icon" style="color: #f59e0b; background: #fffbeb;">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="cs-body">
+                    <div class="label">Total Tunggakan</div>
+                    <div class="value">Rp {{ number_format($grandTotal, 0, ',', '.') }}</div>
+                </div>
             </div>
         </div>
     </div>
