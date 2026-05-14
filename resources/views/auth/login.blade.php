@@ -150,29 +150,27 @@
                             <div>
                                 <label for="captcha" class="block text-sm font-semibold text-gray-700 mb-2">Kode Keamanan</label>
 
-                                {{-- Baris 1: gambar captcha + tombol refresh --}}
-                                <div class="flex items-center gap-2 mb-2">
-                                    <div class="bg-gray-100 p-1 rounded-xl border-2 border-transparent flex-1 h-[56px] flex items-center justify-center shadow-inner overflow-hidden">
+                                {{-- Satu baris: gambar captcha (lebar tetap) + refresh + input --}}
+                                <div class="flex items-center gap-2">
+                                    <div class="bg-gray-100 p-1 rounded-xl border-2 border-transparent w-28 shrink-0 h-[52px] flex items-center justify-center shadow-inner overflow-hidden">
                                         <img id="captchaImage" src="{{ route('captcha') }}" alt="CAPTCHA" class="h-full w-full object-cover mix-blend-multiply scale-90 transition-transform duration-300">
                                     </div>
                                     <button type="button" onclick="refreshCaptcha()"
-                                        class="w-11 h-[56px] flex items-center justify-center text-gray-500 hover:text-[#165fac] hover:bg-gray-100 rounded-xl border border-transparent hover:border-gray-200 transition-all shrink-0"
+                                        class="w-9 h-[52px] flex items-center justify-center text-gray-500 hover:text-[#165fac] hover:bg-gray-100 rounded-xl border border-transparent hover:border-gray-200 transition-all shrink-0"
                                         title="Refresh CAPTCHA">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                         </svg>
                                     </button>
-                                </div>
-
-                                {{-- Baris 2: input kode (full width) --}}
-                                <div class="relative flex items-center w-full border-2 rounded-xl focus-within:border-[#165fac] focus-within:ring-4 focus-within:ring-blue-500/10 bg-white transition-all {{ $errors->has('captcha') ? 'border-red-500' : 'border-gray-200' }}">
-                                    <input type="text" id="captcha" name="captcha"
-                                        class="peer w-full py-3.5 pr-4 pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
-                                        placeholder="Masukkan kode di atas" required autocomplete="off">
-                                    <div class="absolute left-4 flex items-center pointer-events-none text-gray-400 transition-all duration-200 peer-focus:text-[#165fac] peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:-translate-x-2">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                        </svg>
+                                    <div class="relative flex-1 flex items-center border-2 rounded-xl focus-within:border-[#165fac] focus-within:ring-4 focus-within:ring-blue-500/10 bg-white transition-all {{ $errors->has('captcha') ? 'border-red-500' : 'border-gray-200' }}">
+                                        <input type="text" id="captcha" name="captcha"
+                                            class="peer w-full py-3.5 pr-4 pl-12 outline-none bg-transparent transition-all duration-200 [&:not(:placeholder-shown)]:pl-4"
+                                            placeholder="Kode di atas" required autocomplete="off">
+                                        <div class="absolute left-4 flex items-center pointer-events-none text-gray-400 transition-all duration-200 peer-focus:text-[#165fac] peer-[:not(:placeholder-shown)]:opacity-0 peer-[:not(:placeholder-shown)]:-translate-x-2">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
                                     </div>
                                 </div>
 
