@@ -1,36 +1,43 @@
 @extends('layouts.sneat')
 
 @section('title', 'Validasi Izin Ketidakhadiran')
+@section('page-title', 'Validasi Izin')
+@section('page-subtitle', 'Validasi pengajuan izin dan sakit siswa')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+@include('shared.wali-kelas.styles')
+<style>
+    .izin-empty-icon {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 14px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(16, 185, 129, .12);
+        color: #10b981;
+    }
+
+    .izin-empty-icon i {
+        font-size: 1.5rem;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
 
-    <!-- Page Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <div class="mb-3 mb-md-0">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="{{ route('wali.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('wali.presensi.index') }}">Presensi</a></li>
-                    <li class="breadcrumb-item active">Validasi Izin</li>
-                </ol>
-            </nav>
-            <h4 class="fw-bold mb-1">Validasi Izin Ketidakhadiran</h4>
-            <p class="text-muted mb-0">
-                <i class="fas fa-school me-1"></i>{{ $kelas->nama_kelas ?? '-' }}
-            </p>
-        </div>
-        <div>
+    <div class="d-flex justify-content-end mb-3">
+        <div class="w-100 w-sm-auto">
             <a href="{{ route('wali.presensi.index') }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-arrow-left me-1"></i>Kembali ke Presensi
             </a>
         </div>
-    </div>
-
     </div>
 
     <!-- Stats Card -->
@@ -324,10 +331,8 @@
         <!-- Empty State -->
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
-                <div class="avatar avatar-xl mx-auto mb-3">
-                    <div class="avatar-initial rounded-circle bg-label-success">
-                        <i class="fas fa-check-circle fa-3x"></i>
-                    </div>
+                <div class="izin-empty-icon">
+                    <i class="fas fa-check"></i>
                 </div>
                 <h5 class="fw-bold mb-2">Tidak Ada Pengajuan Pending</h5>
                 <p class="text-muted mb-0">Semua pengajuan izin sudah divalidasi</p>

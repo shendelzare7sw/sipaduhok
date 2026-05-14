@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     .table-validasi thead th {
         background-color: #f8f9fc;
@@ -31,6 +32,53 @@
         border-radius: 10px;
         border-left: 4px solid;
     }
+    .wk-access-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+    .wk-access-stats .card {
+        min-height: 82px !important;
+    }
+    .wk-access-stats .card-body {
+        padding: 12px 14px !important;
+    }
+    .wk-access-stats .text-xs {
+        font-size: 13px;
+        line-height: 1.3;
+        margin-bottom: 5px !important;
+    }
+    .wk-access-stats .text-muted {
+        font-size: 12px !important;
+        line-height: 1.35;
+    }
+    .wk-access-stats .h5 {
+        font-size: 24px;
+        line-height: 1.05;
+    }
+    .wk-access-stats .fa-2x {
+        font-size: 1.25rem;
+    }
+    @media (max-width: 767.98px) {
+        .wk-access-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        .wk-access-stats .col-auto {
+            display: none;
+        }
+        .wk-access-stats .card {
+            min-height: 78px !important;
+        }
+        .wk-access-stats .text-xs {
+            font-size: 12px;
+            line-height: 1.35;
+        }
+        .wk-access-stats .text-muted {
+            font-size: 11.5px !important;
+        }
+        .wk-access-stats .h5 {
+            font-size: 24px;
+        }
+    }
 </style>
 @endsection
 
@@ -43,7 +91,7 @@
         </div>
     @else
         {{-- STATISTICS --}}
-        <div class="row mb-4">
+        <div class="row mb-4 wk-access-stats">
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card stat-card-custom border-start border-success border-4 shadow h-100 py-2">
                     <div class="card-body">
@@ -144,7 +192,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover table-validasi mb-0">
+                    <table class="table table-hover table-validasi wk-card-table mb-0">
                         <thead>
                             <tr>
                                 <th width="50">NO</th>

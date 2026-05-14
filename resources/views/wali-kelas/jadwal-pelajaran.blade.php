@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
 /* Sama dengan admin show.blade.php styles */
 .schedule-grid {

@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     .status-select { font-weight: 700; border-radius: 5px; }
     .rekap-cell { font-weight: 700; text-align: center; }
@@ -153,7 +154,7 @@
                 <input type="hidden" name="tanggal" value="{{ $tanggal }}">
 
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover wk-card-table mb-0">
                         <thead class="bg-light">
                             <tr>
                                 <th class="text-center" width="50">NO</th>
@@ -223,7 +224,7 @@
         </div>
         <div class="card-body p-0 text-center">
             <div class="table-responsive">
-                <table class="table table-bordered table-rekap mb-0">
+                <table class="table table-bordered table-rekap wk-card-table mb-0">
                     <thead class="bg-gray-100">
                         <tr>
                             <th rowspan="2">No</th>
@@ -245,13 +246,13 @@
                                 $total = $rekap['hadir'] + $rekap['sakit'] + $rekap['izin'] + $rekap['alpha'];
                             @endphp
                             <tr>
-                                <td class="align-middle">{{ $index + 1 }}</td>
-                                <td class="text-start fw-bold align-middle text-gray-800">{{ $siswa->nama_lengkap }}</td>
-                                <td class="rekap-cell bg-hadir text-success align-middle">{{ $rekap['hadir'] }}</td>
-                                <td class="rekap-cell bg-sakit text-warning align-middle">{{ $rekap['sakit'] }}</td>
-                                <td class="rekap-cell bg-izin text-primary align-middle">{{ $rekap['izin'] }}</td>
-                                <td class="rekap-cell bg-alpha text-danger align-middle">{{ $rekap['alpha'] }}</td>
-                                <td class="rekap-cell fw-bold bg-light align-middle text-dark">{{ $total }}</td>
+                                <td class="align-middle" data-label="No">{{ $index + 1 }}</td>
+                                <td class="text-start fw-bold align-middle text-gray-800" data-label="Nama Siswa">{{ $siswa->nama_lengkap }}</td>
+                                <td class="rekap-cell bg-hadir text-success align-middle" data-label="Hadir">{{ $rekap['hadir'] }}</td>
+                                <td class="rekap-cell bg-sakit text-warning align-middle" data-label="Sakit">{{ $rekap['sakit'] }}</td>
+                                <td class="rekap-cell bg-izin text-primary align-middle" data-label="Izin">{{ $rekap['izin'] }}</td>
+                                <td class="rekap-cell bg-alpha text-danger align-middle" data-label="Alpha">{{ $rekap['alpha'] }}</td>
+                                <td class="rekap-cell fw-bold bg-light align-middle text-dark" data-label="Total">{{ $total }}</td>
                             </tr>
                         @endforeach
                     </tbody>

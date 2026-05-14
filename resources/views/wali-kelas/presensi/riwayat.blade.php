@@ -1,12 +1,15 @@
 @extends('layouts.sneat')
 
 @section('title', 'Riwayat Presensi Siswa')
+@section('page-title', 'Riwayat Presensi')
+@section('page-subtitle', 'Edit dan koreksi data presensi siswa')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     .badge-status { font-weight: 700; border-radius: 5px; text-transform: uppercase; font-size: 10px; }
     .table-history thead th { font-size: 11px; text-transform: uppercase; background: #f8f9fc; color: #4e73df; }
@@ -16,24 +19,11 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="{{ route('wali.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('wali.presensi.index') }}">Presensi</a></li>
-                    <li class="breadcrumb-item active">Riwayat</li>
-                </ol>
-            </nav>
-            <h4 class="fw-bold mb-0">Riwayat & Edit Presensi</h4>
-            <p class="text-muted mb-0">Kelola dan perbaiki data presensi siswa yang sudah lalu.</p>
-        </div>
-        <a href="{{ route('wali.presensi.index') }}" class="btn btn-outline-secondary">
+    <div class="d-flex justify-content-start mb-3">
+        <a href="{{ route('wali.presensi.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bx bx-arrow-back me-1"></i> Kembali ke Presensi
         </a>
     </div>
-
-
 
     {{-- FILTER --}}
     <div class="card card-filter shadow-sm mb-4">
@@ -83,7 +73,7 @@
     {{-- DATA TABLE --}}
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
-            <table class="table table-hover table-history mb-0">
+            <table class="table table-hover table-history wk-card-table mb-0">
                 <thead>
                     <tr>
                         <th class="ps-4">Tanggal</th>

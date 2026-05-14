@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     .card-hari {
         border: none;
@@ -97,7 +98,7 @@
                 <div class="card-body p-0">
                     @if($jadwalPerHari[$hari]->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover table-jadwal mb-0">
+                        <table class="table table-hover table-jadwal wk-card-table mb-0">
                             <thead>
                                 <tr>
                                     <th class="ps-4">Jam</th>

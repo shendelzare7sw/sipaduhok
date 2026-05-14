@@ -30,6 +30,35 @@
     </a>
 </li>
 
+<!-- Menu Header - Data Akademik -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Data Akademik</span>
+</li>
+
+<!-- Kelas -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.kelas') ? 'active' : '' }}">
+    <a href="{{ route('waka.kelas.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-school"></i>
+        <div>Data Kelas</div>
+    </a>
+</li>
+
+<!-- Wali Kelas -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.wali-kelas') ? 'active' : '' }}">
+    <a href="{{ route('waka.wali-kelas.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-chalkboard-teacher"></i>
+        <div>Data Wali Kelas</div>
+    </a>
+</li>
+
+<!-- Guru Pengajar -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.guru-pengajar') ? 'active' : '' }}">
+    <a href="{{ route('waka.guru-pengajar.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-user-tie"></i>
+        <div>Data Guru Pengajar</div>
+    </a>
+</li>
+
 <!-- Mata Pelajaran -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.mata-pelajaran') ? 'active' : '' }}">
     <a href="{{ route('waka.mata-pelajaran.index') }}" class="menu-link">
@@ -38,43 +67,19 @@
     </a>
 </li>
 
-<!-- Kelas -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.kelas') ? 'active' : '' }}">
-    <a href="{{ route('waka.kelas.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-school"></i>
-        <div>Manajemen Kelas</div>
+<!-- Jadwal Pelajaran -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.jadwal-pelajaran') ? 'active' : '' }}">
+    <a href="{{ route('waka.jadwal-pelajaran.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-calendar-week"></i>
+        <div>Jadwal Pelajaran</div>
     </a>
 </li>
 
 <!-- Manajemen Siswa -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.manajemen-siswa') ? 'active' : '' }}">
     <a href="{{ route('waka.manajemen-siswa.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-users"></i>
+        <i class="menu-icon fas fa-user-graduate"></i>
         <div>Manajemen Siswa</div>
-    </a>
-</li>
-
-<!-- Wali Kelas -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.wali-kelas') ? 'active' : '' }}">
-    <a href="{{ route('waka.wali-kelas.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-user-check"></i>
-        <div>Penugasan Wali Kelas</div>
-    </a>
-</li>
-
-<!-- Jadwal Pelajaran -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.jadwal-pelajaran') ? 'active' : '' }}">
-    <a href="{{ route('waka.jadwal-pelajaran.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-clipboard-list"></i>
-        <div>Jadwal Pelajaran</div>
-    </a>
-</li>
-
-<!-- Guru Pengajar -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.guru-pengajar') ? 'active' : '' }}">
-    <a href="{{ route('waka.guru-pengajar.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-chalkboard-teacher"></i>
-        <div>Guru Pengajar</div>
     </a>
 </li>
 
@@ -95,7 +100,7 @@
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.settings') ? 'active' : '' }}">
     <a href="{{ route('waka.promotion.settings.index') }}" class="menu-link">
         <i class="menu-icon fas fa-cogs"></i>
-        <div>Pengaturan Naik Kelas</div>
+        <div>Pengaturan Kenaikan</div>
     </a>
 </li>
 
@@ -108,7 +113,7 @@
 </li>
 <!-- Menu Header - Monitoring -->
 <li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Monitoring</span>
+    <span class="menu-header-text">Monitoring & Analitik</span>
 </li>
 
 <!-- Monitoring Wali Kelas -->
@@ -152,6 +157,6 @@
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.catatan') ? 'active' : '' }}">
     <a href="{{ route('waka.catatan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-sticky-note"></i>
-        <div>Kirim Catatan</div>
+        <div>Catatan</div>
     </a>
 </li>

@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     @media print {
         .no-print { display: none !important; }
@@ -132,7 +133,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover mb-0 align-middle">
+                <table class="table table-bordered table-hover wk-card-table mb-0 align-middle">
                     <thead>
                         <tr>
                             <th rowspan="2" class="text-center" style="width: 40px;">No</th>
@@ -242,7 +243,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover mb-0 align-middle">
+                <table class="table table-bordered table-hover wk-card-table mb-0 align-middle">
                     <thead>
                         <tr>
                             <th class="text-center" style="width: 40px;">No</th>

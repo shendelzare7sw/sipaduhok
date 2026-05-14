@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     /* Styling Tabel Nilai agar tetap Rapi */
     .table-nilai thead th {
@@ -183,7 +184,7 @@
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover wk-card-table mb-0">
                         <thead>
                             <tr>
                                 <th width="50">NO</th>

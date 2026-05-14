@@ -8,6 +8,10 @@
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+@include('shared.wali-kelas.styles')
+@endsection
+
 @section('content')
 <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
 <div class="container-fluid px-0">
@@ -30,7 +34,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover wk-card-table mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="text-center" width="50">No</th>

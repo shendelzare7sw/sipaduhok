@@ -8,6 +8,10 @@
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+@include('shared.wali-kelas.styles')
+@endsection
+
 @section('content')
 <style>
     .arsip-banner {
@@ -62,6 +66,26 @@
     .nilai-pivot td.score { text-align: center; font-weight: 600; }
     .nilai-pivot td.score.below { color: #b91c1c; }
     .nilai-pivot td.score.pass { color: #15803d; }
+
+    @media (max-width: 767.98px) {
+        .arsip-tabs a {
+            flex: 1 1 calc(50% - 4px);
+            justify-content: center;
+        }
+
+        .filter-bar,
+        .filter-bar form {
+            width: 100%;
+            align-items: stretch !important;
+            flex-direction: column;
+        }
+
+        .filter-bar .form-select,
+        .filter-bar .btn {
+            width: 100%;
+            min-width: 0 !important;
+        }
+    }
 </style>
 
 <div class="container-xxl">
@@ -122,7 +146,7 @@
                 <div>Belum ada siswa tercatat di kelas ini.</div>
             </div>
         @else
-            <table class="data-table">
+            <table class="data-table wk-card-table">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -188,7 +212,7 @@
                 <div>Belum ada rapor di kelas ini.</div>
             </div>
         @else
-            <table class="data-table">
+            <table class="data-table wk-card-table">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -258,7 +282,7 @@
                 <div>Belum ada record presensi untuk kelas/periode ini.</div>
             </div>
         @else
-            <table class="data-table">
+            <table class="data-table wk-card-table">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -324,7 +348,7 @@
                         <small class="text-muted ms-2">NIS: {{ $siswa->nis ?? '-' }}</small>
                     </div>
                     <div class="card-body p-0">
-                        <table class="nilai-pivot">
+                        <table class="nilai-pivot wk-card-table">
                             <thead>
                                 <tr>
                                     <th>Mata Pelajaran</th>

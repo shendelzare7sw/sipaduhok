@@ -748,10 +748,11 @@
         }
     }
 </style>
+@include('shared.akademik.styles')
 @endsection
 
 @section('content')
-<div class="container-fluid px-4">
+<div class="container-fluid px-4 ak-calendar-skin">
 
     {{-- STATS CARDS --}}
     <div class="row">

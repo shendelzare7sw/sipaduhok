@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     .status-badge { padding: 4px 12px; border-radius: 50px; font-weight: 700; font-size: 12px; }
     @media print {
@@ -107,7 +108,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover wk-card-table mb-0">
                     <thead>
                         <tr>
                             <th class="text-center" width="50">No</th>

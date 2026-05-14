@@ -9,6 +9,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     /* ===================== BASE TOKENS ===================== */
     :root {

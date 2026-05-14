@@ -9,16 +9,17 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
     .pending-summary {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
     }
     .pending-stat {
         background: white; border: 1px solid #e5e7eb;
-        border-radius: 12px; padding: 16px;
+        border-radius: 12px; padding: 14px;
         display: flex; align-items: center; gap: 12px;
     }
     .pending-stat .icon-circle {
@@ -63,15 +64,40 @@
     .badge-status.pending { background: rgba(217,119,6,.1); color: #92400e; }
     .badge-status.revisi { background: rgba(220,38,38,.1); color: #b91c1c; }
 
-    .empty-state { text-align: center; padding: 60px 20px; color: #64748b; }
-    .empty-state i { font-size: 3rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
+    .empty-state { text-align: center; padding: 42px 20px; color: #64748b; }
+    .empty-state i { font-size: 2.4rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
+
+    @media (max-width: 767.98px) {
+        .pending-summary {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .pending-stat {
+            min-height: 78px;
+        }
+
+        .group-header,
+        .rapor-item {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .group-header .ms-auto {
+            margin-left: 0 !important;
+        }
+
+        .rapor-item .btn {
+            width: 100%;
+        }
+    }
 </style>
 @endsection
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
+    <div class="d-none">
         <div>
             <h4 class="fw-bold mb-1"><i class="fas fa-history me-2 text-primary"></i>Rapor Pending Saya</h4>
             <p class="text-muted mb-0">
@@ -81,7 +107,7 @@
         </div>
     </div>
 
-    <div class="alert alert-info d-flex align-items-start">
+    <div class="d-none">
         <i class="fas fa-info-circle me-2 mt-1"></i>
         <div>
             <strong>Cara kerja:</strong> Sistem menarik kelas yang pernah Anda walikan dari <code>wali_kelas_assignments</code>
@@ -91,6 +117,13 @@
             @endif
         </div>
     </div>
+
+    @if($kelasIds->isEmpty())
+        <div class="alert alert-warning d-flex align-items-start">
+            <i class="fas fa-exclamation-circle me-2 mt-1"></i>
+            <div>Anda belum pernah ditugaskan sebagai wali kelas. Daftar rapor pending akan kosong.</div>
+        </div>
+    @endif
 
     <div class="pending-summary">
         <div class="pending-stat">

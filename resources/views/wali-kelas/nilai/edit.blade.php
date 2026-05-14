@@ -8,6 +8,7 @@
 @endsection
 
 @section('styles')
+@include('shared.wali-kelas.styles')
 <style>
 /* ─── Table base ─────────────────────────────────────── */
 .table-nilai {

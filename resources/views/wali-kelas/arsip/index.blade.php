@@ -8,6 +8,10 @@
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+@include('shared.wali-kelas.styles')
+@endsection
+
 @section('content')
 <style>
     .arsip-stat-row {

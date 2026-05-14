@@ -198,14 +198,6 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
-<!-- Laporan Keuangan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
-    <a href="{{ route('admin.keuangan.laporan.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-chart-line"></i>
-        <div>Laporan Keuangan</div>
-    </a>
-</li>
-
 <!-- Info Pembayaran (API Midtrans & Rekening Bank) -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.info-pembayaran') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.info-pembayaran.index') }}" class="menu-link">
@@ -214,25 +206,38 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
-<!-- Promotion Validation (New) -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.promotion.validation') ? 'active' : '' }}">
-    <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-user-clock"></i>
-        <div>Validasi Dispensasi</div>
+<!-- Laporan Keuangan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.laporan.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-chart-line"></i>
+        <div>Laporan Keuangan</div>
     </a>
 </li>
 
-<!-- Validasi Akses -->
+<!-- Menu Header - Validasi Akses -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Validasi Akses</span>
+</li>
+
+<!-- Validasi Ujian & Rapor -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.validasi-akses') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.validasi-akses.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-circle"></i>
-        <div>Validasi Akses</div>
+        <div>Validasi Ujian & Rapor</div>
     </a>
 </li>
 
 <!-- Menu Header - Kenaikan Kelas -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>
+</li>
+
+<!-- Validasi Dispensasi -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.promotion.validation') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-hand-holding-usd"></i>
+        <div>Validasi Dispensasi</div>
+    </a>
 </li>
 
 <!-- Pengaturan KKM -->
@@ -280,19 +285,19 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
-<!-- Berita -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.berita') ? 'active' : '' }}">
-    <a href="{{ route('admin.akademik.berita.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-newspaper"></i>
-        <div>Berita</div>
+<!-- Flyer / Iklan -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.flyer') ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.flyer.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-image"></i>
+        <div>Flyer / Iklan</div>
     </a>
 </li>
 
-<!-- Flyer -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.flyer') ? 'active' : '' }}">
-    <a href="{{ route('admin.akademik.flyer.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-images"></i>
-        <div>Flyer</div>
+<!-- Kelola Berita -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.berita') ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.berita.index') }}" class="menu-link">
+        <i class="menu-icon fas fa-newspaper"></i>
+        <div>Kelola Berita</div>
     </a>
 </li>
 

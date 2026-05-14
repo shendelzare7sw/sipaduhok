@@ -13,11 +13,143 @@
 
 @section('styles')
 <style>
-/* Make tab content cards stretch wider */
-.tab-content > .tab-pane > .card {
-    margin-left: -1rem;
-    margin-right: -1rem;
-    border-radius: 0;
+.promotion-report {
+    --primary: #4361ee;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --purple: #8b5cf6;
+    --ink: #1f2937;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --soft: #f8fafc;
+}
+
+.promotion-report .stat-card,
+.promotion-report .tab-pane > .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.promotion-report .stat-card {
+    height: 100%;
+    padding: 16px;
+}
+
+.promotion-report .stat-icon {
+    align-items: center;
+    border-radius: 10px;
+    display: inline-flex;
+    height: 36px;
+    justify-content: center;
+    margin-bottom: 14px;
+    width: 36px;
+}
+
+.promotion-report .stat-icon.success { background: rgba(16, 185, 129, .12); color: var(--success); }
+.promotion-report .stat-icon.info { background: rgba(6, 182, 212, .12); color: var(--info); }
+.promotion-report .stat-icon.warning { background: rgba(245, 158, 11, .14); color: var(--warning); }
+.promotion-report .stat-icon.primary { background: rgba(67, 97, 238, .12); color: var(--primary); }
+.promotion-report .stat-icon.danger { background: rgba(239, 68, 68, .12); color: var(--danger); }
+
+.promotion-report .stat-card span {
+    color: var(--muted);
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+.promotion-report .stat-card strong {
+    color: var(--ink);
+    display: block;
+    font-size: 24px;
+    line-height: 1.2;
+    margin-top: 4px;
+}
+
+.promotion-report .stat-card small {
+    color: var(--muted);
+}
+
+.promotion-report .nav-tabs {
+    border-bottom: 1px solid var(--line);
+    gap: 8px;
+}
+
+.promotion-report .nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-radius: 10px 10px 0 0;
+    color: var(--muted);
+    font-weight: 800;
+}
+
+.promotion-report .nav-tabs .nav-link.active {
+    background: #fff;
+    border-color: var(--line) var(--line) #fff;
+    color: var(--primary);
+}
+
+.promotion-report .card-header {
+    background: #fff;
+    padding: 18px 20px;
+}
+
+.promotion-report .card-header h5 {
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.promotion-report .card-body {
+    padding: 20px;
+}
+
+.promotion-report #historyFilterForm,
+.promotion-report #simulationFilterForm {
+    background: var(--soft);
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.promotion-report .table {
+    margin-bottom: 0;
+}
+
+.promotion-report .table thead th {
+    background: var(--soft);
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .03em;
+    padding: 14px 16px;
+    text-transform: uppercase;
+}
+
+.promotion-report .table tbody td {
+    border-color: #eef2f7;
+    padding: 14px 16px;
+    vertical-align: middle;
+}
+
+.promotion-report .badge {
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.promotion-report .dropdown-menu {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.promotion-report .sim-footer-area {
+    background: var(--soft);
+    border-top: 1px solid var(--line);
 }
 
 /* Responsive Styles - Mobile Only */
@@ -42,7 +174,7 @@
     .nav-tabs .nav-link {
         white-space: nowrap;
         font-size: 13px;
-        padding: 8px 12px;
+        padding: 9px 12px;
     }
 
     /* Card headers: stack vertically */
@@ -110,7 +242,7 @@
     .table-card-mobile thead { display: none; }
     .table-card-mobile tbody tr {
         display: block; border: 1px solid #e5e7eb; border-radius: 12px;
-        margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        margin-bottom: 12px; overflow: hidden; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
         background: #fff; position: relative;
     }
     .table-card-mobile tbody td {
@@ -125,9 +257,9 @@
         text-align: left; flex-shrink: 0; margin-right: 12px;
     }
     .table-card-mobile .mobile-card-head {
-        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        background: #f8fafc;
         font-weight: 700; font-size: 15px; padding: 14px !important;
-        border-bottom: 2px solid #e0e7ff !important; display: block !important;
+        border-bottom: 1px solid #e2e8f0 !important; display: block !important;
         text-align: left;
     }
     .table-card-mobile .mobile-card-actions {
@@ -149,6 +281,7 @@
         align-items: stretch !important;
     }
     .sim-footer-area > div { text-align: center; }
+    .sim-footer-area .btn { width: 100%; }
     .sim-footer-area nav { justify-content: center; }
 }
 @media (min-width: 769px) {
@@ -159,57 +292,50 @@
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y promotion-report">
     <!-- Header removed, using layout title -->
 
-    <!-- Statistics - Reorganized into 2 rows -->
-    <!-- Statistics - Single Row 5 Columns -->
     <div class="row row-cols-1 row-cols-md-5 g-3 mb-4">
         <div class="col">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-white">Naik Kelas</h5>
-                    <h2>{{ $stats['NAIK_KELAS'] ?? 0 }}</h2>
-                </div>
+            <div class="stat-card">
+                <div class="stat-icon success"><i class="fas fa-arrow-up"></i></div>
+                <span>Naik Kelas</span>
+                <strong>{{ $stats['NAIK_KELAS'] ?? 0 }}</strong>
             </div>
         </div>
         <div class="col">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-white">Lulus</h5>
-                    <h2>{{ $stats['LULUS'] ?? 0 }}</h2>
-                </div>
+            <div class="stat-card">
+                <div class="stat-icon info"><i class="fas fa-graduation-cap"></i></div>
+                <span>Lulus</span>
+                <strong>{{ $stats['LULUS'] ?? 0 }}</strong>
             </div>
         </div>
         <div class="col">
-            <div class="card bg-warning text-dark h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-dark">Naik (Dispensasi)</h5>
-                    <h2>{{ $stats['NAIK_KELAS_TUNGGAKAN'] ?? 0 }}</h2>
-                </div>
+            <div class="stat-card">
+                <div class="stat-icon warning"><i class="fas fa-hand-holding-usd"></i></div>
+                <span>Naik Dispensasi</span>
+                <strong>{{ $stats['NAIK_KELAS_TUNGGAKAN'] ?? 0 }}</strong>
             </div>
         </div>
         <div class="col">
-            <div class="card bg-label-primary h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-primary">Lulus (Dispensasi)</h5>
-                    <h2 class="text-primary">{{ $stats['LULUS_TUNGGAKAN'] ?? 0 }}</h2>
-                    <small class="text-primary">Lulus meski ada tunggakan</small>
-                </div>
+            <div class="stat-card">
+                <div class="stat-icon primary"><i class="fas fa-user-check"></i></div>
+                <span>Lulus Dispensasi</span>
+                <strong>{{ $stats['LULUS_TUNGGAKAN'] ?? 0 }}</strong>
+                <small>Dengan izin tunggakan</small>
             </div>
         </div>
         <div class="col">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body">
-                    <h5 class="card-title text-white">Tidak Naik</h5>
-                    <h2>{{ $stats['TIDAK_NAIK_KELAS'] ?? 0 }}</h2>
-                </div>
+            <div class="stat-card">
+                <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
+                <span>Tidak Naik</span>
+                <strong>{{ $stats['TIDAK_NAIK_KELAS'] ?? 0 }}</strong>
             </div>
         </div>
     </div>
 
     @php
-        $activeTab = request('tab') == 'history' ? 'history' : 'simulation';
+        $activeTab = in_array(request('tab'), ['history', 'scheduling']) ? request('tab') : 'simulation';
     @endphp
 
     <!-- Navigation Tabs -->
