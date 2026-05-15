@@ -16,35 +16,51 @@
         background: var(--surface-color);
         border: 1px solid var(--border-color);
         border-radius: 12px;
-        padding: 16px;
+        padding: 12px;
         margin-bottom: 20px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
 
     .filter-row {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) minmax(220px, 280px) auto minmax(260px, auto);
         gap: 12px;
         align-items: center;
-        flex-wrap: wrap;
     }
 
-    .filter-input { flex: 1; min-width: 200px; position: relative; }
+    .filter-input {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        display: flex;
+        gap: 10px;
+        height: 42px;
+        min-width: 0;
+        padding: 0 14px;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .filter-input:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, .12);
+    }
 
     .filter-input i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
         color: var(--text-muted);
+        flex: 0 0 auto;
         font-size: 14px;
         pointer-events: none;
     }
 
     .filter-input input {
-        padding-left: 40px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        height: 42px;
+        background: transparent;
+        border: 0 !important;
+        box-shadow: none !important;
+        height: 100%;
+        min-width: 0;
+        padding: 0;
+        width: 100%;
     }
 
     .filter-select {
@@ -58,7 +74,7 @@
         height: 42px;
         border-radius: 10px;
         font-weight: 600;
-        padding: 0 20px;
+        padding: 0 18px;
         white-space: nowrap;
     }
 
@@ -68,9 +84,12 @@
         gap: 8px;
         font-size: 0.82rem;
         color: var(--text-main);
-        margin-top: 12px;
+        margin: 0;
         cursor: pointer;
+        min-width: 0;
     }
+
+    .filter-toggle span { line-height: 1.3; }
 
     /* Stats grid */
     .stats-grid {
@@ -289,9 +308,17 @@
     }
 
     @media (max-width: 768px) {
-        .filter-row { gap: 10px; }
+        .filter-card { padding: 12px; }
+        .filter-row {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
         .filter-input, .filter-select { width: 100%; min-width: 0; }
         .filter-btn { width: 100%; }
+        .filter-toggle {
+            align-items: flex-start;
+            padding: 4px 2px;
+        }
 
         .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .stat-card { padding: 14px; }
@@ -331,12 +358,12 @@
             <button type="submit" class="btn btn-primary filter-btn">
                 <i class="fas fa-filter me-1"></i>Terapkan
             </button>
+            <label class="filter-toggle form-check">
+                <input type="checkbox" name="only_with_content" value="1" class="form-check-input me-2"
+                    onchange="this.form.submit()" {{ ($onlyWithContent ?? false) ? 'checked' : '' }}>
+                <span>Hanya tampilkan kelas yang sudah punya konten LMS</span>
+            </label>
         </div>
-        <label class="filter-toggle form-check">
-            <input type="checkbox" name="only_with_content" value="1" class="form-check-input me-2"
-                onchange="this.form.submit()" {{ ($onlyWithContent ?? false) ? 'checked' : '' }}>
-            <span>Hanya tampilkan kelas yang sudah punya konten LMS</span>
-        </label>
     </form>
 
     {{-- Stats summary --}}
