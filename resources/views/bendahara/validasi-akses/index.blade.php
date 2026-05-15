@@ -151,8 +151,8 @@
 
     .search-box {
         position: relative;
-        flex-grow: 1;
-        min-width: 220px;
+        flex: 1 1 280px;
+        min-width: 260px;
     }
 
     .search-box input {
@@ -172,11 +172,22 @@
     }
 
     .filter-select {
+        width: auto;
+        flex: 1 1 155px;
         min-width: 145px;
         font-size: 0.85rem;
         padding: 0.45rem 2rem 0.45rem 0.75rem;
         border-color: var(--acc-border);
         border-radius: 8px;
+    }
+
+    .filter-wrapper select[name="kelas_id"] {
+        flex-basis: 230px;
+    }
+
+    .filter-wrapper .btn {
+        flex: 0 0 auto;
+        min-height: 37px;
     }
 
     .access-toolbar {
