@@ -225,19 +225,21 @@
 
     .pay-status-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
         gap: 1rem;
     }
 
     .pay-status-item {
         border: 1px solid var(--pay-border);
         border-radius: 10px;
-        padding: 1rem;
+        padding: 0.95rem;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
         min-width: 0;
+        min-height: 118px;
+        overflow: hidden;
     }
 
     .pay-status-main {
@@ -245,18 +247,35 @@
         align-items: center;
         gap: 0.8rem;
         min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .pay-status-main > div:last-child {
+        min-width: 0;
     }
 
     .pay-status-title {
         color: var(--pay-text);
         font-weight: 700;
         line-height: 1.2;
+        overflow-wrap: anywhere;
     }
 
     .pay-status-desc {
         color: var(--pay-muted);
         font-size: 0.78rem;
         margin-top: 0.2rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .pay-status-item form {
+        flex: 0 0 auto;
+        margin-left: 0.35rem;
+    }
+
+    .pay-status-item .form-check-input {
+        cursor: pointer;
     }
 
     .pay-status-item.is-active {
@@ -294,8 +313,8 @@
     @media (max-width: 1200px) {
         .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         .pay-grid,
-        .pay-guide-grid,
-        .pay-status-grid { grid-template-columns: 1fr; }
+        .pay-guide-grid { grid-template-columns: 1fr; }
+        .pay-status-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
     }
 
     @media (max-width: 768px) {
