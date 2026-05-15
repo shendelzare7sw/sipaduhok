@@ -7,15 +7,6 @@
 @endphp
 
 <div class="container-xxl flex-grow-1 container-p-y monitoring-page">
-    <div class="page-panel">
-        <div>
-            <span class="panel-kicker">Monitoring</span>
-            <h4 class="panel-title">Data Pengguna</h4>
-            <p class="panel-subtitle mb-0">Pantau akun tenaga pendidik dan siswa aktif dalam satu tempat.</p>
-        </div>
-        <span class="scope-pill"><i class="fas fa-layer-group"></i> {{ $scopeLabel }}</span>
-    </div>
-
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="summary-card">

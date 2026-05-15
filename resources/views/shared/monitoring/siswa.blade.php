@@ -9,15 +9,6 @@
 @endphp
 
 <div class="container-xxl flex-grow-1 container-p-y monitoring-page">
-    <div class="page-panel">
-        <div>
-            <span class="panel-kicker">Monitoring LMS dan Keuangan</span>
-            <h4 class="panel-title">Siswa</h4>
-            <p class="panel-subtitle mb-0">Pantau progress tugas, ujian, dan status tagihan siswa aktif.</p>
-        </div>
-        <span class="scope-pill"><i class="fas fa-map-marker-alt"></i> {{ $scopeLabel }}</span>
-    </div>
-
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
             <div class="summary-card">
