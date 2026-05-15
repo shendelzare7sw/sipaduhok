@@ -57,7 +57,7 @@ class TunggakanCarryoverService
 
         $tagihanList = $tagihanList->map(function ($t) use ($bayarBy) {
             $terbayar = (float) ($bayarBy[$t->id] ?? 0);
-            $t->sisa = max(0, (float) $t->jumlah - $terbayar);
+            $t->setRelation('sisa', max(0, (float) $t->jumlah - $terbayar));
             return $t;
         })->filter(fn($t) => $t->sisa > 0)->values();
 
@@ -224,7 +224,7 @@ class TunggakanCarryoverService
 
         return $tagihanList->map(function ($t) use ($bayarBy) {
             $terbayar = (float) ($bayarBy[$t->id] ?? 0);
-            $t->sisa = max(0, (float) $t->jumlah - $terbayar);
+            $t->setRelation('sisa', max(0, (float) $t->jumlah - $terbayar));
             return $t;
         })->filter(fn($t) => $t->sisa > 0)->values();
     }

@@ -529,8 +529,10 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/dispensasi', [\App\Http\Controllers\Admin\Keuangan\ValidasiAksesController::class, 'ajukanDispensasi'])->name('dispensasi');
             });
 
-            // Info Pembayaran (API Midtrans & Rekening Bank)
-            Route::prefix('info-pembayaran')->name('info-pembayaran.')->group(function () {
+            // Config Pembayaran (API Midtrans & Rekening Bank)
+            Route::redirect('info-pembayaran', '/admin/keuangan/config', 301)->name('info-pembayaran.legacy-index');
+            Route::post('info-pembayaran/update', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'update'])->name('info-pembayaran.legacy-update');
+            Route::prefix('config')->name('info-pembayaran.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'index'])->name('index');
                 Route::post('/update', [\App\Http\Controllers\Admin\Keuangan\InfoPembayaranController::class, 'update'])->name('update');
             });
@@ -1033,8 +1035,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{pembayaran}/cetak-kwitansi', [PembayaranController::class, 'cetakKwitansi'])->name('cetak-kwitansi');
         });
 
-        // Info Pembayaran
-        Route::prefix('info-pembayaran')->name('info-pembayaran.')->group(function () {
+        // Config Pembayaran
+        Route::redirect('info-pembayaran', '/bendahara/config', 301)->name('info-pembayaran.legacy-index');
+        Route::post('info-pembayaran/update', [InfoPembayaranController::class, 'update'])->name('info-pembayaran.legacy-update');
+        Route::prefix('config')->name('info-pembayaran.')->group(function () {
             Route::get('/', [InfoPembayaranController::class, 'index'])->name('index');
             Route::post('/update', [InfoPembayaranController::class, 'update'])->name('update');
         });
