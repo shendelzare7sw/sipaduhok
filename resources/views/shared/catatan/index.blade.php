@@ -11,13 +11,6 @@
 @endphp
 
 <div class="catatan-page">
-    @if(session('success'))
-        <div class="catatan-alert success">
-            <i class="fas fa-check-circle mt-1"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-
     <div class="catatan-toolbar">
         <div class="catatan-toolbar-title">
             <span class="catatan-toolbar-icon"><i class="fas fa-clipboard-list"></i></span>
