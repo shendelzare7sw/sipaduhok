@@ -354,7 +354,9 @@
 
     .ak-flyer-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 340px));
+        justify-content: start;
+        align-items: start;
         gap: 16px;
     }
 
