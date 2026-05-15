@@ -1,8 +1,9 @@
 <style>
     .ak-page {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 0 1rem;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
     }
 
     .ak-toolbar,
@@ -278,7 +279,8 @@
         font-weight: 900;
         line-height: 1.2;
         text-transform: uppercase;
-        overflow-wrap: anywhere;
+        overflow-wrap: normal;
+        white-space: nowrap;
     }
 
     .ak-badge.primary { color: #3651d4; background: #eef2ff; border: 1px solid #c7d2fe; }
@@ -289,10 +291,23 @@
     .ak-badge.muted { color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; }
 
     .ak-actions {
-        display: flex;
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
         gap: 8px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .ak-table th:last-child,
+    .ak-table td:last-child {
+        width: 148px;
+        min-width: 148px;
+    }
+
+    .ak-table th.text-center,
+    .ak-table td.text-center {
+        min-width: 112px;
     }
 
     .ak-empty {
@@ -339,7 +354,7 @@
 
     .ak-flyer-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         gap: 16px;
     }
 
@@ -425,7 +440,7 @@
 
     @media (max-width: 767.98px) {
         .ak-page {
-            padding: 0 .75rem;
+            padding: 0;
         }
 
         .ak-toolbar,
@@ -522,6 +537,8 @@
         .ak-actions {
             width: 100%;
             justify-content: flex-end;
+            flex-wrap: wrap;
+            white-space: normal;
         }
     }
 </style>

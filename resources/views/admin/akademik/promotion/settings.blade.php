@@ -31,37 +31,6 @@
             </div>
         </div>
 
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="summary-card">
-                    <div class="summary-icon primary"><i class="fas fa-calendar-alt"></i></div>
-                    <span>Tahun Ajaran</span>
-                    <strong>{{ $tahunLabel }}</strong>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="summary-card">
-                    <div class="summary-icon success"><i class="fas fa-chart-line"></i></div>
-                    <span>Minimal Tuntas</span>
-                    <strong>{{ $minimalTuntas }}%</strong>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="summary-card">
-                    <div class="summary-icon info"><i class="fas fa-file-alt"></i></div>
-                    <span>Pembagian Rapor</span>
-                    <strong>{{ $tanggalRapor ? \Carbon\Carbon::parse($tanggalRapor)->format('d/m/Y') : '-' }}</strong>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="summary-card">
-                    <div class="summary-icon warning"><i class="fas fa-clock"></i></div>
-                    <span>Eksekusi Otomatis</span>
-                    <strong>{{ $tanggalEksekusi ? \Carbon\Carbon::parse($tanggalEksekusi)->format('d/m/Y') : 'Manual' }}</strong>
-                </div>
-            </div>
-        </div>
-
         <div class="row g-4">
             <div class="col-lg-7">
                 <div class="content-card">
@@ -188,8 +157,7 @@
 }
 
 .page-panel,
-.content-card,
-.summary-card {
+.content-card {
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -216,17 +184,10 @@
     margin-bottom: 4px;
 }
 
-.panel-subtitle,
-.summary-card span {
+.panel-subtitle {
     color: var(--muted);
 }
 
-.summary-card {
-    height: 100%;
-    padding: 16px;
-}
-
-.summary-icon,
 .info-icon {
     align-items: center;
     border-radius: 10px;
@@ -236,33 +197,9 @@
     width: 36px;
 }
 
-.summary-icon {
-    margin-bottom: 14px;
-}
-
-.summary-icon.primary,
 .info-icon.primary { background: rgba(67, 97, 238, .12); color: var(--primary); }
-.summary-icon.success,
 .info-icon.success { background: rgba(16, 185, 129, .12); color: var(--success); }
-.summary-icon.warning,
 .info-icon.warning { background: rgba(245, 158, 11, .14); color: var(--warning); }
-.summary-icon.info { background: rgba(6, 182, 212, .12); color: var(--info); }
-
-.summary-card span {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-}
-
-.summary-card strong {
-    color: var(--ink);
-    display: block;
-    font-size: 18px;
-    line-height: 1.25;
-    margin-top: 5px;
-}
 
 .content-card {
     overflow: hidden;
