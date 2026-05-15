@@ -1,6 +1,7 @@
 <style>
     .catatan-page {
-        max-width: 1280px;
+        width: 100%;
+        max-width: none;
         margin: 0 auto;
         padding: 0 1rem;
     }
