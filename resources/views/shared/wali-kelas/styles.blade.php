@@ -303,9 +303,23 @@
         overflow: visible !important;
     }
 
+    .modal-dialog,
+    .modal .modal-content,
+    .modal .modal-header {
+        overflow: visible !important;
+    }
+
     .modal .modal-header {
         align-items: center;
         gap: 12px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .modal .modal-body,
+    .modal .modal-footer {
+        position: relative;
+        z-index: 3;
     }
 
     .modal .modal-header .btn-close,
@@ -327,10 +341,10 @@
         opacity: 1 !important;
         padding: 0 !important;
         position: absolute !important;
-        right: -2px !important;
-        top: -2px !important;
+        right: 5px !important;
+        top: 5px !important;
         width: 28px !important;
-        z-index: 10 !important;
+        z-index: 1 !important;
     }
 
     .modal .modal-header .btn-close::before,
@@ -354,6 +368,19 @@
     .modal .modal-header .btn-close:hover::before,
     .modal .modal-header .btn-close.btn-close-white:hover::before {
         color: #64748b;
+    }
+
+    #logoutModal .modal-footer .btn-secondary {
+        background: #8b95a3 !important;
+        border-color: #8b95a3 !important;
+        color: #fff !important;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, .18) !important;
+    }
+
+    #logoutModal .modal-footer .btn-secondary:hover {
+        background: #748091 !important;
+        border-color: #748091 !important;
+        color: #fff !important;
     }
 
     .btn-action-group,
