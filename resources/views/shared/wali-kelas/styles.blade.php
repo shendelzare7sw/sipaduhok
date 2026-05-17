@@ -175,6 +175,55 @@
         box-shadow: 0 10px 24px rgba(15, 23, 42, .04) !important;
     }
 
+    .modal-content {
+        position: relative;
+        overflow: visible;
+    }
+
+    .modal-header .btn-close,
+    .modal-header .btn-close-white {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 5;
+        width: 28px;
+        height: 28px;
+        min-height: 0;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff !important;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        box-shadow: none;
+        opacity: 1;
+        filter: none;
+        color: transparent;
+    }
+
+    .modal-header .btn-close::before,
+    .modal-header .btn-close-white::before {
+        content: "×";
+        color: #94a3b8;
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+    .modal-header .btn-close:hover,
+    .modal-header .btn-close-white:hover {
+        background: #fff !important;
+        border-color: #cbd5e1;
+        opacity: 1;
+    }
+
+    .modal-header .btn-close:hover::before,
+    .modal-header .btn-close-white:hover::before {
+        color: #64748b;
+    }
+
     .table-responsive {
         border-radius: 0 0 12px 12px;
         -webkit-overflow-scrolling: touch;
