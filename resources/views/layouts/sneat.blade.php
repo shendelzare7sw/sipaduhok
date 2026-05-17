@@ -323,7 +323,8 @@
 
         /* Ensure modal header close button is properly positioned */
         .modal-header .btn-close {
-            margin-left: auto;
+            padding: 0.5rem;
+            margin: -0.5rem -0.5rem -0.5rem auto;
         }
 
         /* CRITICAL FIX: Full Width Content Container */
@@ -567,77 +568,6 @@
     </style>
 
     @yield('styles')
-
-    <style>
-        /* Global modal close fix: keep X visible after page-level modal/card overrides. */
-        .modal .modal-header .btn-close {
-            align-items: center !important;
-            background-color: #fff !important;
-            background-image: none !important;
-            border: 1px solid rgba(15, 23, 42, .12) !important;
-            border-radius: 6px !important;
-            box-shadow: none !important;
-            color: #1f2937 !important;
-            display: inline-flex !important;
-            flex: 0 0 auto !important;
-            height: 1.8rem !important;
-            justify-content: center !important;
-            margin: 0 0 0 auto !important;
-            min-height: 1.8rem !important;
-            opacity: 1 !important;
-            padding: 0 !important;
-            position: relative !important;
-            width: 1.8rem !important;
-            z-index: 3 !important;
-        }
-
-        .modal .modal-header .btn-close::before {
-            content: "\00d7";
-            display: block;
-            font-family: Arial, sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            line-height: 1;
-            transform: translateY(-1px);
-        }
-
-        .modal .modal-header .btn-close:hover,
-        .modal .modal-header .btn-close:focus {
-            background-color: #fff !important;
-            border-color: rgba(15, 23, 42, .22) !important;
-            opacity: 1 !important;
-        }
-
-        .modal .modal-header .btn-close.btn-close-white,
-        .modal .modal-header.text-white .btn-close,
-        .modal .modal-header.bg-primary .btn-close,
-        .modal .modal-header.bg-secondary .btn-close,
-        .modal .modal-header.bg-success .btn-close,
-        .modal .modal-header.bg-danger .btn-close,
-        .modal .modal-header.bg-warning .btn-close,
-        .modal .modal-header.bg-info .btn-close,
-        .modal .modal-header.bg-dark .btn-close {
-            background-color: #fff !important;
-            color: #1f2937 !important;
-            filter: none !important;
-            box-shadow: none !important;
-        }
-
-        .modal .modal-header .btn-close.btn-close-white:hover,
-        .modal .modal-header.text-white .btn-close:hover,
-        .modal .modal-header.bg-primary .btn-close:hover,
-        .modal .modal-header.bg-secondary .btn-close:hover,
-        .modal .modal-header.bg-success .btn-close:hover,
-        .modal .modal-header.bg-danger .btn-close:hover,
-        .modal .modal-header.bg-warning .btn-close:hover,
-        .modal .modal-header.bg-info .btn-close:hover,
-        .modal .modal-header.bg-dark .btn-close:hover {
-            background-color: #fff !important;
-            color: #111827 !important;
-            border-color: rgba(15, 23, 42, .22) !important;
-            box-shadow: none !important;
-        }
-    </style>
 </head>
 
 <body>
@@ -893,35 +823,6 @@
     <script>
         // Auto dismiss alerts after 5 seconds
         document.addEventListener('DOMContentLoaded', function () {
-            function ensureModalCloseButtons() {
-                document.querySelectorAll('.modal .modal-header').forEach(function (header) {
-                    if (header.querySelector('.btn-close, [data-bs-dismiss="modal"][aria-label="Close"], [data-bs-dismiss="modal"][aria-label="Tutup"]')) {
-                        return;
-                    }
-
-                    const closeButton = document.createElement('button');
-                    closeButton.type = 'button';
-                    closeButton.className = 'btn-close';
-                    closeButton.setAttribute('data-bs-dismiss', 'modal');
-                    closeButton.setAttribute('aria-label', 'Close');
-
-                    const coloredHeader = header.classList.contains('text-white') ||
-                        ['bg-primary', 'bg-secondary', 'bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'bg-dark']
-                            .some(function (className) {
-                                return header.classList.contains(className);
-                            });
-
-                    if (coloredHeader) {
-                        closeButton.classList.add('btn-close-white');
-                    }
-
-                    header.appendChild(closeButton);
-                });
-            }
-
-            ensureModalCloseButtons();
-            document.addEventListener('shown.bs.modal', ensureModalCloseButtons);
-
             setTimeout(function () {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function (alert) {

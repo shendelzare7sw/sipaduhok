@@ -302,6 +302,82 @@
         overflow: hidden;
     }
 
+    .modal .modal-header.btn-close-header,
+    .modal .modal-header.bg-primary,
+    .modal .modal-header.bg-secondary,
+    .modal .modal-header.bg-success,
+    .modal .modal-header.bg-danger,
+    .modal .modal-header.bg-warning,
+    .modal .modal-header.bg-info,
+    .modal .modal-header.bg-dark,
+    .modal .modal-header.text-white {
+        gap: 12px;
+    }
+
+    .modal .modal-header.btn-close-header .btn-close,
+    .modal .modal-header.bg-primary .btn-close,
+    .modal .modal-header.bg-secondary .btn-close,
+    .modal .modal-header.bg-success .btn-close,
+    .modal .modal-header.bg-danger .btn-close,
+    .modal .modal-header.bg-warning .btn-close,
+    .modal .modal-header.bg-info .btn-close,
+    .modal .modal-header.bg-dark .btn-close,
+    .modal .modal-header.text-white .btn-close,
+    .modal .modal-header .btn-close.btn-close-white {
+        align-items: center !important;
+        background-color: #fff !important;
+        background-image: none !important;
+        border: 1px solid rgba(15, 23, 42, .12) !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        color: #1f2937 !important;
+        display: inline-flex !important;
+        flex: 0 0 auto !important;
+        height: 1.8rem !important;
+        justify-content: center !important;
+        margin: 0 0 0 auto !important;
+        min-height: 1.8rem !important;
+        opacity: 1 !important;
+        padding: 0 !important;
+        position: relative !important;
+        width: 1.8rem !important;
+        z-index: 3 !important;
+    }
+
+    .modal .modal-header.btn-close-header .btn-close::before,
+    .modal .modal-header.bg-primary .btn-close::before,
+    .modal .modal-header.bg-secondary .btn-close::before,
+    .modal .modal-header.bg-success .btn-close::before,
+    .modal .modal-header.bg-danger .btn-close::before,
+    .modal .modal-header.bg-warning .btn-close::before,
+    .modal .modal-header.bg-info .btn-close::before,
+    .modal .modal-header.bg-dark .btn-close::before,
+    .modal .modal-header.text-white .btn-close::before,
+    .modal .modal-header .btn-close.btn-close-white::before {
+        content: "\00d7";
+        display: block;
+        font-family: Arial, sans-serif;
+        font-size: 1.2rem;
+        font-weight: 700;
+        line-height: 1;
+        transform: translateY(-1px);
+    }
+
+    .modal .modal-header.btn-close-header .btn-close:hover,
+    .modal .modal-header.bg-primary .btn-close:hover,
+    .modal .modal-header.bg-secondary .btn-close:hover,
+    .modal .modal-header.bg-success .btn-close:hover,
+    .modal .modal-header.bg-danger .btn-close:hover,
+    .modal .modal-header.bg-warning .btn-close:hover,
+    .modal .modal-header.bg-info .btn-close:hover,
+    .modal .modal-header.bg-dark .btn-close:hover,
+    .modal .modal-header.text-white .btn-close:hover,
+    .modal .modal-header .btn-close.btn-close-white:hover {
+        background-color: #fff !important;
+        border-color: rgba(15, 23, 42, .22) !important;
+        color: #111827 !important;
+    }
+
     .btn-action-group,
     .action-buttons {
         display: flex;
@@ -522,6 +598,35 @@
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    function ensureWaliModalCloseButtons() {
+        document.querySelectorAll('.modal .modal-header').forEach(function (header) {
+            if (header.querySelector('.btn-close, [data-bs-dismiss="modal"][aria-label="Close"], [data-bs-dismiss="modal"][aria-label="Tutup"]')) {
+                return;
+            }
+
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'btn-close';
+            closeButton.setAttribute('data-bs-dismiss', 'modal');
+            closeButton.setAttribute('aria-label', 'Close');
+
+            const coloredHeader = header.classList.contains('text-white') ||
+                ['bg-primary', 'bg-secondary', 'bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'bg-dark']
+                    .some(function (className) {
+                        return header.classList.contains(className);
+                    });
+
+            if (coloredHeader) {
+                closeButton.classList.add('btn-close-white');
+            }
+
+            header.appendChild(closeButton);
+        });
+    }
+
+    ensureWaliModalCloseButtons();
+    document.addEventListener('shown.bs.modal', ensureWaliModalCloseButtons);
+
     document.querySelectorAll('table.wk-card-table').forEach(function (table) {
         const labels = Array.from(table.querySelectorAll('thead th')).map(function (th) {
             return th.textContent.replace(/\s+/g, ' ').trim();
