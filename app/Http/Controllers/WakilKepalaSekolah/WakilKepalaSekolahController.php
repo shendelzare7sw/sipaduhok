@@ -508,9 +508,10 @@ class WakilKepalaSekolahController extends Controller
 
     public function catatanIndex()
     {
-        $catatan = Catatan::with(['pengirim', 'pembaca'])
-            ->where('pengirim_id', auth()->id())
-            ->latest()
+        $catatan = $this->catatanVisibleToCurrentUserQuery()
+            ->with(['pengirim', 'penerima', 'pembaca'])
+            ->orderByDesc('tanggal_kirim')
+            ->orderByDesc('id')
             ->paginate(15);
 
         return view('waka.catatan.index', compact('catatan'));
@@ -562,7 +563,14 @@ class WakilKepalaSekolahController extends Controller
 
     public function catatanShow($id)
     {
-        $catatan = Catatan::with(['pengirim', 'pembaca'])->findOrFail($id);
+        $catatan = $this->catatanVisibleToCurrentUserQuery()
+            ->with(['pengirim', 'penerima', 'pembaca'])
+            ->findOrFail($id);
+
+        if ((int) $catatan->pengirim_id !== (int) auth()->id()) {
+            $catatan->markAsRead(auth()->id());
+        }
+
         return view('waka.catatan.show', compact('catatan'));
     }
 
@@ -572,6 +580,21 @@ class WakilKepalaSekolahController extends Controller
         $catatan->delete();
 
         return redirect()->route('waka.catatan.index')->with('success', 'Catatan berhasil dihapus dari riwayat.');
+    }
+
+    private function catatanVisibleToCurrentUserQuery()
+    {
+        $user = auth()->user();
+
+        return Catatan::query()->where(function ($query) use ($user) {
+            $query->where('pengirim_id', $user->id)
+                ->orWhere('penerima_id', $user->id)
+                ->orWhere(function ($roleQuery) use ($user) {
+                    $roleQuery->where('tipe_penerima', 'role')
+                        ->where('role_penerima', $user->role);
+                })
+                ->orWhere('tipe_penerima', 'semua');
+        });
     }
 
     // ============================================

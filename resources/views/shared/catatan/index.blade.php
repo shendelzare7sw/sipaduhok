@@ -8,6 +8,11 @@
     $totalPembaca = $catatanItems->sum(function ($item) {
         return $item->relationLoaded('pembaca') ? $item->pembaca->count() : $item->totalPembaca();
     });
+    $showDirection = $showDirection ?? false;
+    $toolbarDescription = $toolbarDescription ?? 'Kelola riwayat catatan, instruksi, dan teguran yang sudah dikirim.';
+    $listTitle = $listTitle ?? 'Riwayat Catatan Terkirim';
+    $emptyTitle = $emptyTitle ?? 'Belum ada catatan terkirim';
+    $emptyDescription = $emptyDescription ?? 'Catatan yang Anda buat akan tampil sebagai riwayat di halaman ini.';
 @endphp
 
 <div class="catatan-page">
@@ -16,7 +21,7 @@
             <span class="catatan-toolbar-icon"><i class="fas fa-clipboard-list"></i></span>
             <div>
                 <h5>Manajemen Catatan</h5>
-                <p>Kelola riwayat catatan, instruksi, dan teguran yang sudah dikirim.</p>
+                <p>{{ $toolbarDescription }}</p>
             </div>
         </div>
         <a href="{{ route($routePrefix . '.catatan.create') }}" class="catatan-btn primary">
@@ -54,7 +59,7 @@
 
     <div class="catatan-panel">
         <div class="catatan-panel-header">
-            <h5><i class="fas fa-history text-primary me-2"></i>Riwayat Catatan Terkirim</h5>
+            <h5><i class="fas fa-history text-primary me-2"></i>{{ $listTitle }}</h5>
         </div>
         <div class="catatan-panel-body">
             @if($catatanItems->count() > 0)
@@ -64,6 +69,7 @@
                             $sentAt = $item->tanggal_kirim ? \Carbon\Carbon::parse($item->tanggal_kirim) : $item->created_at;
                             $readCount = $item->relationLoaded('pembaca') ? $item->pembaca->count() : $item->totalPembaca();
                             $priority = $item->prioritas ?: 'biasa';
+                            $isSentByCurrentUser = (int) $item->pengirim_id === (int) auth()->id();
                         @endphp
 
                         <article class="catatan-note-card priority-{{ $priority }}">
@@ -73,6 +79,12 @@
                                     <div class="catatan-meta">
                                         <span><i class="far fa-clock me-1"></i>{{ $sentAt?->format('d M Y, H:i') }}</span>
                                         <span><i class="fas fa-layer-group me-1"></i>{{ ucfirst($priority) }}</span>
+                                        @if($showDirection)
+                                            <span>
+                                                <i class="fas {{ $isSentByCurrentUser ? 'fa-paper-plane' : 'fa-inbox' }} me-1"></i>
+                                                {{ $isSentByCurrentUser ? 'Terkirim' : 'Dari ' . ($item->pengirim->name ?? '-') }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -100,12 +112,14 @@
                                         <i class="fas fa-eye"></i>
                                         Detail
                                     </a>
-                                    <button type="button"
-                                        class="catatan-btn danger"
-                                        onclick="confirmDeleteCatatan({{ $item->id }}, @js($item->judul))">
-                                        <i class="fas fa-trash"></i>
-                                        Hapus
-                                    </button>
+                                    @if(!$showDirection || $isSentByCurrentUser)
+                                        <button type="button"
+                                            class="catatan-btn danger"
+                                            onclick="confirmDeleteCatatan({{ $item->id }}, @js($item->judul))">
+                                            <i class="fas fa-trash"></i>
+                                            Hapus
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </article>
@@ -120,8 +134,8 @@
             @else
                 <div class="catatan-empty">
                     <i class="fas fa-inbox"></i>
-                    <h5>Belum ada catatan terkirim</h5>
-                    <p class="mb-3">Catatan yang Anda buat akan tampil sebagai riwayat di halaman ini.</p>
+                    <h5>{{ $emptyTitle }}</h5>
+                    <p class="mb-3">{{ $emptyDescription }}</p>
                     <a href="{{ route($routePrefix . '.catatan.create') }}" class="catatan-btn primary">
                         <i class="fas fa-plus"></i>
                         Kirim Catatan Pertama
