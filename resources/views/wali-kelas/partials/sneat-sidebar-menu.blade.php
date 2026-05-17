@@ -25,20 +25,75 @@
 @endphp
 
 @if($selectedKelas && $hasMultipleKelas)
+<style>
+    .wk-active-class-card {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        border-radius: 8px;
+        margin: 8px 12px;
+        padding: 12px;
+        text-align: center;
+    }
+
+    .wk-active-class-label {
+        color: rgba(255, 255, 255, .82);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .wk-active-class-name {
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-bottom: 4px;
+    }
+
+    .wk-active-class-meta {
+        color: rgba(255, 255, 255, .76);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 10px;
+    }
+
+    .wk-active-class-switch {
+        align-items: center;
+        background: rgba(255, 255, 255, .2);
+        border-radius: 4px;
+        color: #fff;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        gap: 5px;
+        justify-content: center;
+        margin: 0 auto;
+        min-height: 28px;
+        padding: 5px 12px;
+        text-decoration: none;
+        transition: all .2s;
+    }
+
+    .wk-active-class-switch:hover {
+        background: rgba(255, 255, 255, .3);
+        color: #fff;
+    }
+</style>
 <!-- Current Class Indicator -->
 <li class="menu-item">
-    <div class="px-3 py-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; margin: 8px 12px 8px;">
-        <div style="color: rgba(255,255,255,0.8); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+    <div class="wk-active-class-card">
+        <div class="wk-active-class-label">
             <i class="fas fa-school me-1"></i> Kelas Aktif
         </div>
-        <div style="color: white; font-weight: 600; font-size: 14px;">
+        <div class="wk-active-class-name">
             {{ $selectedKelas->nama_kelas }}
         </div>
-        <div style="color: rgba(255,255,255,0.7); font-size: 12px;">
+        <div class="wk-active-class-meta">
             {{ $selectedKelas->cabang->nama_cabang ?? '' }} - {{ $selectedKelas->jenjang }}
         </div>
-        <a href="{{ route('wali.pilih-kelas') }}" 
-           style="display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 12px; background: rgba(255,255,255,0.2); color: white; font-size: 12px; border-radius: 4px; text-decoration: none; transition: all 0.2s;">
+        <a href="{{ route('wali.pilih-kelas') }}" class="wk-active-class-switch">
             <i class="fas fa-exchange-alt"></i> Ganti Kelas
         </a>
     </div>
