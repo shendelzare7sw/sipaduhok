@@ -616,9 +616,10 @@
         .modal .modal-header.bg-warning .btn-close,
         .modal .modal-header.bg-info .btn-close,
         .modal .modal-header.bg-dark .btn-close {
-            background-color: rgba(255, 255, 255, .22) !important;
-            color: #fff !important;
+            background-color: #fff !important;
+            color: #1f2937 !important;
             filter: none !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, .18) !important;
         }
 
         .modal .modal-header .btn-close.btn-close-white:hover,
@@ -630,7 +631,9 @@
         .modal .modal-header.bg-warning .btn-close:hover,
         .modal .modal-header.bg-info .btn-close:hover,
         .modal .modal-header.bg-dark .btn-close:hover {
-            background-color: rgba(255, 255, 255, .32) !important;
+            background-color: #f8fafc !important;
+            color: #111827 !important;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, .24) !important;
         }
     </style>
 </head>
