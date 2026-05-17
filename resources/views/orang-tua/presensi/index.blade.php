@@ -98,6 +98,20 @@
         color: #fff;
     }
 
+    .btn-attendance-secondary {
+        background: #465fe8;
+        border-color: #465fe8;
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 8px 18px rgba(70, 95, 232, .2);
+    }
+
+    .btn-attendance-secondary:hover {
+        background: #354bd1;
+        border-color: #354bd1;
+        color: #fff;
+    }
+
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -234,6 +248,9 @@
         <div class="action-row">
             <a href="{{ route('orang-tua.presensi.ajukan-izin', $siswa->id) }}" class="btn btn-attendance-primary">
                 <i class="fas fa-file-medical me-1"></i>Ajukan Izin / Sakit
+            </a>
+            <a href="{{ route('orang-tua.presensi.riwayat-izin', $siswa->id) }}" class="btn btn-attendance-secondary">
+                <i class="fas fa-history me-1"></i>Riwayat Pengajuan
             </a>
             <a href="{{ route('orang-tua.dashboard') }}" class="btn btn-outline-secondary btn-sm">
                 <i class="fas fa-arrow-left me-1"></i>Kembali
