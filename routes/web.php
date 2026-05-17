@@ -1574,6 +1574,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/anak/{siswa}', [OrangTuaController::class, 'presensiAnak'])->name('anak');
             Route::get('/anak/{siswa}/ajukan-izin', [OrangTuaController::class, 'ajukanIzin'])->name('ajukan-izin');
             Route::post('/anak/{siswa}/store-izin', [OrangTuaController::class, 'storeIzin'])->name('store-izin');
+            Route::get('/anak/{siswa}/riwayat-presensi', [OrangTuaController::class, 'riwayatPresensi'])->name('riwayat-presensi');
             Route::get('/anak/{siswa}/riwayat-izin', [OrangTuaController::class, 'riwayatIzin'])->name('riwayat-izin');
             Route::get('/edit-izin/{presensi}', [OrangTuaController::class, 'editIzin'])->name('edit-izin');
             Route::put('/update-izin/{presensi}', [OrangTuaController::class, 'updateIzin'])->name('update-izin');

@@ -893,6 +893,46 @@ class OrangTuaController extends Controller
     }
 
     /**
+     * Lihat riwayat presensi harian anak.
+     */
+    public function riwayatPresensi(Request $request, $siswaId)
+    {
+        $user = Auth::user();
+
+        $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
+
+        if (!$siswa) {
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
+        }
+
+        $baseQuery = Presensi::where('siswa_id', $siswa->id)
+            ->when($request->filled('tanggal_mulai'), function ($query) use ($request) {
+                $query->whereDate('tanggal', '>=', $request->tanggal_mulai);
+            })
+            ->when($request->filled('tanggal_akhir'), function ($query) use ($request) {
+                $query->whereDate('tanggal', '<=', $request->tanggal_akhir);
+            });
+
+        $riwayat = (clone $baseQuery)
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->orderBy('tanggal', 'desc')
+            ->paginate(15)
+            ->withQueryString();
+
+        $rekap = [
+            'hadir' => (clone $baseQuery)->where('status', 'hadir')->count(),
+            'sakit' => (clone $baseQuery)->where('status', 'sakit')->count(),
+            'izin' => (clone $baseQuery)->where('status', 'izin')->count(),
+            'alpha' => (clone $baseQuery)->where('status', 'alpha')->count(),
+        ];
+
+        return view('orang-tua.presensi.riwayat-presensi', compact('siswa', 'riwayat', 'rekap'));
+    }
+
+    /**
      * Form edit pengajuan izin
      */
     public function editIzin($presensiId)

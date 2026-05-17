@@ -84,6 +84,14 @@
         gap: 10px;
     }
 
+    .action-row .btn {
+        align-items: center;
+        display: inline-flex;
+        justify-content: center;
+        min-height: 40px;
+        white-space: normal;
+    }
+
     .btn-attendance-primary {
         background: #f59e0b;
         border-color: #f59e0b;
@@ -110,6 +118,19 @@
         background: #354bd1;
         border-color: #354bd1;
         color: #fff;
+    }
+
+    .btn-attendance-soft {
+        background: #f8fafc;
+        border: 1px solid var(--parent-line);
+        color: var(--parent-ink);
+        font-weight: 800;
+    }
+
+    .btn-attendance-soft:hover {
+        background: #eef2ff;
+        border-color: #c7d2fe;
+        color: var(--parent-blue);
     }
 
     .stats-grid {
@@ -233,6 +254,30 @@
         color: var(--parent-ink);
         vertical-align: middle;
     }
+
+    @media (max-width: 767.98px) {
+        .page-heading {
+            padding: 20px 16px;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+        }
+
+        .action-row .btn {
+            width: 100%;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .action-row {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 @endsection
 
@@ -249,10 +294,13 @@
             <a href="{{ route('orang-tua.presensi.ajukan-izin', $siswa->id) }}" class="btn btn-attendance-primary">
                 <i class="fas fa-file-medical me-1"></i>Ajukan Izin / Sakit
             </a>
+            <a href="{{ route('orang-tua.presensi.riwayat-presensi', $siswa->id) }}" class="btn btn-attendance-soft">
+                <i class="fas fa-calendar-alt me-1"></i>Riwayat Presensi
+            </a>
             <a href="{{ route('orang-tua.presensi.riwayat-izin', $siswa->id) }}" class="btn btn-attendance-secondary">
                 <i class="fas fa-history me-1"></i>Riwayat Pengajuan
             </a>
-            <a href="{{ route('orang-tua.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ route('orang-tua.dashboard') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i>Kembali
             </a>
         </div>
@@ -321,6 +369,10 @@
                     Bulan {{ now()->translatedFormat('F Y') }}
                 </small>
             </div>
+            <a href="{{ route('orang-tua.presensi.riwayat-presensi', $siswa->id) }}"
+               class="btn btn-attendance-soft btn-sm">
+                <i class="fas fa-calendar-alt me-1"></i>Lihat Semua Riwayat
+            </a>
         </div>
     </div>
 
