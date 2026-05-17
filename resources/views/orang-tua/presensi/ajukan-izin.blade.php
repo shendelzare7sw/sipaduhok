@@ -153,7 +153,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-1"></i>Ajukan Izin
                             </button>
-                            <a href="{{ route('orang-tua.dashboard') }}" class="btn btn-outline-secondary">
+                            <a href="{{ route('orang-tua.presensi.anak', $siswa->id) }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i>Kembali
                             </a>
                         </div>
