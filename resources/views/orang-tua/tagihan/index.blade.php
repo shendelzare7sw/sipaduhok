@@ -7,6 +7,27 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+<style>
+    .paid-bill-row {
+        --bs-table-bg: #ecfdf5;
+        --bs-table-striped-bg: #ecfdf5;
+        --bs-table-hover-bg: #d1fae5;
+        background-color: #ecfdf5 !important;
+        color: #14532d !important;
+    }
+
+    .paid-bill-row td {
+        background-color: transparent !important;
+        color: #14532d !important;
+    }
+
+    .paid-bill-row .fw-bold {
+        color: #064e3b !important;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
 
@@ -286,7 +307,7 @@
                                                 $isPaid = $item->status == 'sudah_bayar';
                                                 $isPartial = (!$isPaid && $item->sisa_tagihan < $item->jumlah);
                                             @endphp
-                                            <tr class="{{ $isPaid ? 'table-light text-muted' : '' }}">
+                                            <tr class="{{ $isPaid ? 'paid-bill-row' : '' }}">
                                                 <td data-label="PILIH" class="text-start text-md-center">
                                                     @if(!$isPaid)
                                                         <input type="checkbox" class="form-check-input item-checkbox group-{{ $jenis }}"
