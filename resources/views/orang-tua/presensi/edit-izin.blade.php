@@ -13,13 +13,6 @@
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
         <div class="mb-3 mb-md-0">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="{{ route('orang-tua.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id) }}">Riwayat Izin</a></li>
-                    <li class="breadcrumb-item active">Edit Pengajuan</li>
-                </ol>
-            </nav>
             <h4 class="fw-bold mb-1">Edit Pengajuan Izin</h4>
             <p class="text-muted mb-0">
                 <i class="fas fa-user-graduate me-1"></i>{{ $presensi->siswa->nama_lengkap }}

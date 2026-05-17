@@ -205,10 +205,24 @@ class PresensiController extends Controller
             return $this->redirectToPilihKelas();
         }
 
-        // Get pengajuan izin yang status validasinya pending
-        $pengajuanIzin = Presensi::where('kelas_id', $kelas->id)
+        $siswaIds = Siswa::where('kelas_id', $kelas->id)
+            ->where('status', 'aktif')
+            ->pluck('id');
+
+        // Get pengajuan izin yang status validasinya pending.
+        // Cocokkan juga lewat siswa_id agar pengajuan tetap tampil jika kelas_id presensi lama tidak sinkron.
+        $pengajuanIzin = Presensi::where(function ($query) use ($kelas, $siswaIds) {
+                $query->where('kelas_id', $kelas->id)
+                    ->orWhereIn('siswa_id', $siswaIds);
+            })
             ->whereIn('status', ['sakit', 'izin'])
-            ->where('status_validasi', 'pending')
+            ->where(function ($query) {
+                $query->where('status_validasi', 'pending')
+                    ->orWhere(function ($legacyQuery) {
+                        $legacyQuery->whereNull('status_validasi')
+                            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%');
+                    });
+            })
             ->with(['siswa', 'inputBy'])
             ->orderBy('tanggal', 'desc')
             ->get();
@@ -230,7 +244,14 @@ class PresensiController extends Controller
             'keterangan' => 'nullable|string|max:500',
         ]);
 
-        $presensi = Presensi::findOrFail($presensiId);
+        $presensi = Presensi::with('siswa')->findOrFail($presensiId);
+
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $tenagaPendidik ? $this->getSelectedKelas($tenagaPendidik) : null;
+
+        if (!$kelas || ($presensi->kelas_id != $kelas->id && optional($presensi->siswa)->kelas_id != $kelas->id)) {
+            abort(403, 'Anda tidak memiliki akses ke pengajuan izin ini.');
+        }
 
         if ($request->status == 'setuju') {
             $keteranganBaru = $presensi->keterangan . ' - Divalidasi dan disetujui oleh wali kelas';

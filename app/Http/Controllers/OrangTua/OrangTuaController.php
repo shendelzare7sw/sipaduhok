@@ -12,6 +12,7 @@ use App\Models\Pembayaran;
 use App\Models\Rapor;
 use App\Models\Presensi;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Services\MidtransService;
 use App\Models\RequestDownloadRapor;
 
@@ -793,6 +794,11 @@ class OrangTuaController extends Controller
                 ->with('error', 'Siswa yang sudah lulus tidak dapat mengajukan izin.');
         }
 
+        if (!$siswa->kelas_id) {
+            return redirect()->route('orang-tua.dashboard')
+                ->with('error', 'Siswa belum memiliki kelas aktif, pengajuan izin belum dapat dibuat.');
+        }
+
         $validated = $request->validate([
             'tanggal' => 'required|date',
             'jenis' => 'required|in:sakit,izin',
@@ -815,34 +821,36 @@ class OrangTuaController extends Controller
             $buktiFoto = $request->file('bukti')->store('presensi/bukti', 'public');
         }
 
-        // Simpan atau update presensi
-    $presensi = null;
-    if ($existingPresensi) {
-        $dataToUpdate = [
-            'status' => $validated['jenis'],
-            'keterangan' => $validated['keterangan'],
-            'status_validasi' => 'pending',
-            'diinput_oleh' => $user->id,
-        ];
+        // Simpan atau update presensi sebagai pengajuan orang tua.
+        // Riwayat dan validasi wali kelas membaca status_validasi, bukan teks keterangan.
+        $presensi = null;
+        if ($existingPresensi) {
+            $dataToUpdate = [
+                'kelas_id' => $siswa->kelas_id,
+                'status' => $validated['jenis'],
+                'keterangan' => $validated['keterangan'],
+                'status_validasi' => 'pending',
+                'diinput_oleh' => $user->id,
+            ];
 
-        if ($buktiFoto) {
-            $dataToUpdate['bukti_file'] = $buktiFoto;
+            if ($buktiFoto) {
+                $dataToUpdate['bukti_file'] = $buktiFoto;
+            }
+
+            $existingPresensi->update($dataToUpdate);
+            $presensi = $existingPresensi;
+        } else {
+            $presensi = Presensi::create([
+                'siswa_id' => $siswa->id,
+                'kelas_id' => $siswa->kelas_id,
+                'tanggal' => $validated['tanggal'],
+                'status' => $validated['jenis'],
+                'keterangan' => $validated['keterangan'],
+                'bukti_file' => $buktiFoto,
+                'status_validasi' => 'pending',
+                'diinput_oleh' => $user->id,
+            ]);
         }
-
-        $existingPresensi->update($dataToUpdate);
-        $presensi = $existingPresensi;
-    } else {
-        $presensi = Presensi::create([
-            'siswa_id' => $siswa->id,
-            'kelas_id' => $siswa->kelas_id,
-            'tanggal' => $validated['tanggal'],
-            'status' => $validated['jenis'],
-            'keterangan' => $validated['keterangan'],
-            'bukti_file' => $buktiFoto,
-            'status_validasi' => 'pending',
-            'diinput_oleh' => $user->id,
-        ]);
-    }
 
         // Notify wali kelas about new izin request
         if ($presensi) {
@@ -850,7 +858,7 @@ class OrangTuaController extends Controller
             app(\App\Services\NotificationService::class)->notifyIzinBaru($presensi);
         }
 
-        return redirect()->route('orang-tua.dashboard')
+        return redirect()->route('orang-tua.presensi.anak', $siswa->id)
             ->with('success', "Pengajuan izin untuk {$siswa->nama_lengkap} berhasil diajukan. Menunggu validasi wali kelas.");
     }
 
@@ -869,11 +877,15 @@ class OrangTuaController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        // Ambil pengajuan izin yang diajukan oleh orang tua ini
+        // Ambil pengajuan izin yang diajukan oleh orang tua ini.
+        // Gunakan field terstruktur agar pengajuan baru tetap tampil walau keterangan tidak berisi teks khusus.
         $pengajuanIzin = Presensi::where('siswa_id', $siswa->id)
             ->whereIn('status', ['sakit', 'izin', 'alpha'])
-            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%')
             ->where('diinput_oleh', $user->id)
+            ->where(function ($query) {
+                $query->whereIn('status_validasi', ['pending', 'disetujui', 'ditolak'])
+                    ->orWhere('keterangan', 'LIKE', '%Diajukan oleh orang tua%');
+            })
             ->orderBy('tanggal', 'desc')
             ->get();
 
@@ -898,7 +910,7 @@ class OrangTuaController extends Controller
         }
 
         // Cek apakah sudah divalidasi
-        if (str_contains($presensi->keterangan, 'Divalidasi')) {
+        if ($presensi->status_validasi && $presensi->status_validasi !== 'pending') {
             return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
                 ->with('error', 'Pengajuan yang sudah divalidasi tidak dapat diedit.');
         }
@@ -924,9 +936,14 @@ class OrangTuaController extends Controller
         }
 
         // Cek apakah sudah divalidasi
-        if (str_contains($presensi->keterangan, 'Divalidasi')) {
+        if ($presensi->status_validasi && $presensi->status_validasi !== 'pending') {
             return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
                 ->with('error', 'Pengajuan yang sudah divalidasi tidak dapat diedit.');
+        }
+
+        if (!$presensi->siswa->kelas_id) {
+            return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+                ->with('error', 'Siswa belum memiliki kelas aktif, pengajuan izin belum dapat diperbarui.');
         }
 
         $validated = $request->validate([
@@ -936,19 +953,14 @@ class OrangTuaController extends Controller
             'hapus_bukti' => 'nullable|boolean',
         ]);
 
-        // Extract old bukti path
-        $oldBuktiPath = null;
-        if (preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan, $matches)) {
-            $oldBuktiPath = $matches[1];
-        }
-
         // Handle bukti
+        $oldBuktiPath = $presensi->bukti_file;
         $buktiFoto = $oldBuktiPath; // Keep old bukti by default
 
         // Hapus bukti lama jika diminta
         if ($request->hapus_bukti) {
-            if ($oldBuktiPath && \Storage::disk('public')->exists($oldBuktiPath)) {
-                \Storage::disk('public')->delete($oldBuktiPath);
+            if ($oldBuktiPath && Storage::disk('public')->exists($oldBuktiPath)) {
+                Storage::disk('public')->delete($oldBuktiPath);
             }
             $buktiFoto = null;
         }
@@ -956,24 +968,20 @@ class OrangTuaController extends Controller
         // Upload bukti baru jika ada
         if ($request->hasFile('bukti')) {
             // Hapus file lama jika ada
-            if ($oldBuktiPath && \Storage::disk('public')->exists($oldBuktiPath)) {
-                \Storage::disk('public')->delete($oldBuktiPath);
+            if ($oldBuktiPath && Storage::disk('public')->exists($oldBuktiPath)) {
+                Storage::disk('public')->delete($oldBuktiPath);
             }
             $buktiFoto = $request->file('bukti')->store('presensi/bukti', 'public');
         }
 
-        // Build keterangan
-        $keterangan = $validated['keterangan'];
-        if ($buktiFoto) {
-            $keterangan .= " (Bukti: $buktiFoto)";
-        }
-        $keterangan .= " - Diajukan oleh orang tua ({$user->name})";
-
         // Update presensi
         $presensi->update([
+            'kelas_id' => $presensi->siswa->kelas_id,
             'status' => $validated['jenis'],
-            'keterangan' => $keterangan,
-            'diinput_oleh' => $user->id, // FIX: Set diinput_oleh on update too
+            'keterangan' => $validated['keterangan'],
+            'bukti_file' => $buktiFoto,
+            'status_validasi' => 'pending',
+            'diinput_oleh' => $user->id,
         ]);
 
         return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)

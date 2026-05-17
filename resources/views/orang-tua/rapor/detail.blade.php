@@ -15,13 +15,6 @@
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
         <div class="mb-3 mb-md-0">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item"><a href="{{ route('orang-tua.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('orang-tua.rapor.anak', $rapor->siswa_id) }}">Rapor</a></li>
-                    <li class="breadcrumb-item active">Detail Rapor</li>
-                </ol>
-            </nav>
             <h4 class="fw-bold mb-1">Detail Rapor - Semester {{ $rapor->semester }}</h4>
             <p class="text-muted mb-0">
                 <i class="fas fa-user-graduate me-1"></i>{{ $rapor->siswa->nama_lengkap }}

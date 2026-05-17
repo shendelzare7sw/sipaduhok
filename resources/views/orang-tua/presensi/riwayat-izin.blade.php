@@ -13,12 +13,6 @@
         <!-- Page Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
             <div class="mb-3 mb-md-0">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-2">
-                        <li class="breadcrumb-item"><a href="{{ route('orang-tua.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Riwayat Pengajuan Izin</li>
-                    </ol>
-                </nav>
                 <h4 class="fw-bold mb-1">Riwayat Pengajuan Izin</h4>
                 <p class="text-muted mb-0">
                     <i class="fas fa-user-graduate me-1"></i>{{ $siswa->nama_lengkap }}
@@ -45,15 +39,26 @@
                 <div class="card-body p-0">
                     @foreach($pengajuanIzin as $index => $presensi)
                         @php
-                            $isValidated = str_contains($presensi->keterangan, 'Divalidasi');
-                            $isApproved = str_contains($presensi->keterangan, 'disetujui');
-                            $isRejected = $presensi->status === 'alpha' && str_contains($presensi->keterangan, 'ditolak');
+                            $statusValidasi = $presensi->status_validasi;
+                            if (!$statusValidasi) {
+                                if (str_contains($presensi->keterangan ?? '', 'ditolak')) {
+                                    $statusValidasi = 'ditolak';
+                                } elseif (str_contains($presensi->keterangan ?? '', 'Divalidasi')) {
+                                    $statusValidasi = 'disetujui';
+                                }
+                            }
 
-                            // Extract bukti
-                            $buktiPath = null;
-                            if (preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan, $matches)) {
+                            $isValidated = in_array($statusValidasi, ['disetujui', 'ditolak']);
+                            $isApproved = $statusValidasi === 'disetujui';
+                            $isRejected = $statusValidasi === 'ditolak';
+
+                            // Extract bukti from column first, then legacy keterangan text.
+                            $buktiPath = $presensi->bukti_file;
+                            if (!$buktiPath && preg_match('/\(Bukti: (.+?)\)/', $presensi->keterangan ?? '', $matches)) {
                                 $buktiPath = $matches[1];
                             }
+
+                            $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan ?? '-');
                         @endphp
 
                         <div class="border-bottom p-4 {{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
@@ -93,7 +98,7 @@
                                             <div class="text-muted small mb-2">
                                                 <i class="fas fa-comment me-1"></i>
                                                 <strong>Keterangan:</strong>
-                                                {{ preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan) }}
+                                                {{ $keteranganText }}
                                             </div>
 
                                             @if($buktiPath)
