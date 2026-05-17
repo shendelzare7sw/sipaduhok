@@ -15,9 +15,22 @@
 
     .container-xxl,
     .container-fluid.px-0,
+    div[style*="max-width: 1600px"],
     div[style*="max-width: 1400px"],
     div[style*="max-width: 1200px"] {
         max-width: 1280px !important;
+    }
+
+    @media (min-width: 1200px) {
+        .layout-page .container-xxl,
+        .layout-page .container-fluid.px-0,
+        .layout-page .wk-page,
+        .layout-page div[style*="max-width: 1600px"],
+        .layout-page div[style*="max-width: 1400px"],
+        .layout-page div[style*="max-width: 1200px"] {
+            max-width: none !important;
+            width: 100% !important;
+        }
     }
 
     .card {
@@ -310,6 +323,7 @@
     @media (max-width: 767.98px) {
         .wk-page,
         .container-xxl,
+        div[style*="max-width: 1600px"],
         div[style*="max-width: 1400px"],
         div[style*="max-width: 1200px"] {
             padding-left: .75rem !important;
