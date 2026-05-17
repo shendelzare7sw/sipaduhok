@@ -298,8 +298,9 @@
     }
 
     .modal-content {
+        position: relative;
         border-radius: 14px !important;
-        overflow: hidden;
+        overflow: visible !important;
     }
 
     .modal .modal-header {
@@ -321,15 +322,15 @@
         filter: none !important;
         height: 28px !important;
         justify-content: center !important;
-        margin: 0 0 0 auto !important;
+        margin: 0 !important;
         min-height: 0 !important;
         opacity: 1 !important;
         padding: 0 !important;
-        position: relative !important;
-        right: auto !important;
-        top: auto !important;
+        position: absolute !important;
+        right: -10px !important;
+        top: -18px !important;
         width: 28px !important;
-        z-index: 3 !important;
+        z-index: 10 !important;
     }
 
     .modal .modal-header .btn-close::before,
