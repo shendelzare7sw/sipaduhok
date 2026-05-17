@@ -327,8 +327,8 @@
         opacity: 1 !important;
         padding: 0 !important;
         position: absolute !important;
-        right: -4px !important;
-        top: -4px !important;
+        right: -2px !important;
+        top: -2px !important;
         width: 28px !important;
         z-index: 10 !important;
     }
