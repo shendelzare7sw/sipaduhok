@@ -175,55 +175,6 @@
         box-shadow: 0 10px 24px rgba(15, 23, 42, .04) !important;
     }
 
-    .modal-content {
-        position: relative;
-        overflow: visible;
-    }
-
-    .modal-header .btn-close,
-    .modal-header .btn-close-white {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        z-index: 5;
-        width: 28px;
-        height: 28px;
-        min-height: 0;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #fff !important;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        box-shadow: none;
-        opacity: 1;
-        filter: none;
-        color: transparent;
-    }
-
-    .modal-header .btn-close::before,
-    .modal-header .btn-close-white::before {
-        content: "×";
-        color: #94a3b8;
-        font-size: 20px;
-        font-weight: 500;
-        line-height: 1;
-    }
-
-    .modal-header .btn-close:hover,
-    .modal-header .btn-close-white:hover {
-        background: #fff !important;
-        border-color: #cbd5e1;
-        opacity: 1;
-    }
-
-    .modal-header .btn-close:hover::before,
-    .modal-header .btn-close-white:hover::before {
-        color: #64748b;
-    }
-
     .table-responsive {
         border-radius: 0 0 12px 12px;
         -webkit-overflow-scrolling: touch;
@@ -351,80 +302,57 @@
         overflow: hidden;
     }
 
-    .modal .modal-header.btn-close-header,
-    .modal .modal-header.bg-primary,
-    .modal .modal-header.bg-secondary,
-    .modal .modal-header.bg-success,
-    .modal .modal-header.bg-danger,
-    .modal .modal-header.bg-warning,
-    .modal .modal-header.bg-info,
-    .modal .modal-header.bg-dark,
-    .modal .modal-header.text-white {
+    .modal .modal-header {
+        align-items: center;
         gap: 12px;
     }
 
-    .modal .modal-header.btn-close-header .btn-close,
-    .modal .modal-header.bg-primary .btn-close,
-    .modal .modal-header.bg-secondary .btn-close,
-    .modal .modal-header.bg-success .btn-close,
-    .modal .modal-header.bg-danger .btn-close,
-    .modal .modal-header.bg-warning .btn-close,
-    .modal .modal-header.bg-info .btn-close,
-    .modal .modal-header.bg-dark .btn-close,
-    .modal .modal-header.text-white .btn-close,
+    .modal .modal-header .btn-close,
     .modal .modal-header .btn-close.btn-close-white {
         align-items: center !important;
         background-color: #fff !important;
         background-image: none !important;
-        border: 1px solid rgba(15, 23, 42, .12) !important;
-        border-radius: 6px !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 4px !important;
         box-shadow: none !important;
-        color: #1f2937 !important;
+        color: transparent !important;
         display: inline-flex !important;
         flex: 0 0 auto !important;
-        height: 1.8rem !important;
+        filter: none !important;
+        height: 28px !important;
         justify-content: center !important;
         margin: 0 0 0 auto !important;
-        min-height: 1.8rem !important;
+        min-height: 0 !important;
         opacity: 1 !important;
         padding: 0 !important;
         position: relative !important;
-        width: 1.8rem !important;
+        right: auto !important;
+        top: auto !important;
+        width: 28px !important;
         z-index: 3 !important;
     }
 
-    .modal .modal-header.btn-close-header .btn-close::before,
-    .modal .modal-header.bg-primary .btn-close::before,
-    .modal .modal-header.bg-secondary .btn-close::before,
-    .modal .modal-header.bg-success .btn-close::before,
-    .modal .modal-header.bg-danger .btn-close::before,
-    .modal .modal-header.bg-warning .btn-close::before,
-    .modal .modal-header.bg-info .btn-close::before,
-    .modal .modal-header.bg-dark .btn-close::before,
-    .modal .modal-header.text-white .btn-close::before,
+    .modal .modal-header .btn-close::before,
     .modal .modal-header .btn-close.btn-close-white::before {
         content: "\00d7";
         display: block;
         font-family: Arial, sans-serif;
-        font-size: 1.2rem;
-        font-weight: 700;
+        font-size: 20px;
+        font-weight: 500;
         line-height: 1;
+        color: #94a3b8;
         transform: translateY(-1px);
     }
 
-    .modal .modal-header.btn-close-header .btn-close:hover,
-    .modal .modal-header.bg-primary .btn-close:hover,
-    .modal .modal-header.bg-secondary .btn-close:hover,
-    .modal .modal-header.bg-success .btn-close:hover,
-    .modal .modal-header.bg-danger .btn-close:hover,
-    .modal .modal-header.bg-warning .btn-close:hover,
-    .modal .modal-header.bg-info .btn-close:hover,
-    .modal .modal-header.bg-dark .btn-close:hover,
-    .modal .modal-header.text-white .btn-close:hover,
+    .modal .modal-header .btn-close:hover,
     .modal .modal-header .btn-close.btn-close-white:hover {
         background-color: #fff !important;
-        border-color: rgba(15, 23, 42, .22) !important;
-        color: #111827 !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    .modal .modal-header .btn-close:hover::before,
+    .modal .modal-header .btn-close.btn-close-white:hover::before {
+        color: #64748b;
     }
 
     .btn-action-group,
