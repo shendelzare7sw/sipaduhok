@@ -572,22 +572,22 @@
         /* Global modal close fix: keep X visible after page-level modal/card overrides. */
         .modal .modal-header .btn-close {
             align-items: center !important;
-            background-color: rgba(15, 23, 42, .08) !important;
+            background-color: #fff !important;
             background-image: none !important;
-            border: 0 !important;
-            border-radius: 999px !important;
+            border: 1px solid rgba(15, 23, 42, .12) !important;
+            border-radius: 6px !important;
             box-shadow: none !important;
             color: #1f2937 !important;
             display: inline-flex !important;
             flex: 0 0 auto !important;
-            height: 2rem !important;
+            height: 1.8rem !important;
             justify-content: center !important;
             margin: 0 0 0 auto !important;
-            min-height: 2rem !important;
+            min-height: 1.8rem !important;
             opacity: 1 !important;
             padding: 0 !important;
             position: relative !important;
-            width: 2rem !important;
+            width: 1.8rem !important;
             z-index: 3 !important;
         }
 
@@ -595,7 +595,7 @@
             content: "\00d7";
             display: block;
             font-family: Arial, sans-serif;
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             font-weight: 700;
             line-height: 1;
             transform: translateY(-1px);
@@ -603,7 +603,8 @@
 
         .modal .modal-header .btn-close:hover,
         .modal .modal-header .btn-close:focus {
-            background-color: rgba(15, 23, 42, .14) !important;
+            background-color: #fff !important;
+            border-color: rgba(15, 23, 42, .22) !important;
             opacity: 1 !important;
         }
 
@@ -619,7 +620,7 @@
             background-color: #fff !important;
             color: #1f2937 !important;
             filter: none !important;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, .18) !important;
+            box-shadow: none !important;
         }
 
         .modal .modal-header .btn-close.btn-close-white:hover,
@@ -631,9 +632,10 @@
         .modal .modal-header.bg-warning .btn-close:hover,
         .modal .modal-header.bg-info .btn-close:hover,
         .modal .modal-header.bg-dark .btn-close:hover {
-            background-color: #f8fafc !important;
+            background-color: #fff !important;
             color: #111827 !important;
-            box-shadow: 0 3px 10px rgba(15, 23, 42, .24) !important;
+            border-color: rgba(15, 23, 42, .22) !important;
+            box-shadow: none !important;
         }
     </style>
 </head>
