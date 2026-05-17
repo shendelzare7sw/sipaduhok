@@ -102,10 +102,13 @@
                                     </div>
 
                                     <h5 class="card-title mb-2">{{ $r->tahunAjaran->nama_tahun_ajaran ?? 'Tahun Ajaran' }}</h5>
+                                    @php
+                                        $tanggalRilis = $r->tanggal_rilis ?? $r->tanggal_terbit ?? $r->created_at;
+                                    @endphp
                                     <p class="text-muted mb-3">
                                         <small>
                                             <i class="fas fa-calendar me-1"></i>
-                                            {{ $r->tahunAjaran->tahun_mulai ?? '-' }} / {{ $r->tahunAjaran->tahun_selesai ?? '-' }}
+                                            {{ $tanggalRilis ? $tanggalRilis->locale('id')->translatedFormat('d F Y') : 'Tanggal rilis belum tersedia' }}
                                         </small>
                                     </p>
 
