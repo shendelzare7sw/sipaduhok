@@ -21,7 +21,7 @@
                 </p>
             </div>
             <div>
-                <a href="{{ route('orang-tua.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ route('orang-tua.presensi.anak', $siswa->id) }}" class="btn btn-outline-secondary btn-sm">
                     <i class="fas fa-arrow-left me-1"></i>Kembali
                 </a>
             </div>
