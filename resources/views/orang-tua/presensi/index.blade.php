@@ -293,7 +293,7 @@
         </div>
     </div>
 
-    <!-- Header with Action Button -->
+    <!-- History Header -->
     <div class="history-panel mb-3">
         <div class="history-panel-header">
             <div>
@@ -304,10 +304,6 @@
                     Bulan {{ now()->translatedFormat('F Y') }}
                 </small>
             </div>
-            <a href="{{ route('orang-tua.presensi.ajukan-izin', $siswa->id) }}"
-               class="btn btn-attendance-primary">
-                <i class="fas fa-file-medical me-1"></i>Ajukan Izin / Sakit
-            </a>
         </div>
     </div>
 

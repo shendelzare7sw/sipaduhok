@@ -59,6 +59,10 @@
                             }
 
                             $keteranganText = preg_replace('/\s*\(Bukti: .+?\)/', '', $presensi->keterangan ?? '-');
+                            $buktiUrl = $buktiPath ? asset('storage/' . $buktiPath) : null;
+                            $buktiExtension = $buktiPath ? strtolower(pathinfo($buktiPath, PATHINFO_EXTENSION)) : null;
+                            $isBuktiImage = in_array($buktiExtension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                            $isBuktiPdf = $buktiExtension === 'pdf';
                         @endphp
 
                         <div class="border-bottom p-4 {{ $index % 2 == 0 ? 'bg-white' : 'bg-light' }}">
@@ -103,9 +107,12 @@
 
                                             @if($buktiPath)
                                                 <div class="mt-2">
-                                                    <small class="text-primary">
-                                                        <i class="fas fa-paperclip me-1"></i>Ada lampiran bukti
-                                                    </small>
+                                                    <button type="button"
+                                                            class="btn btn-outline-primary btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#buktiModal{{ $presensi->id }}">
+                                                        <i class="fas fa-paperclip me-1"></i>Lihat Bukti
+                                                    </button>
                                                 </div>
                                             @endif
                                         </div>
@@ -131,6 +138,40 @@
                                 </div>
                             </div>
                         </div>
+
+                        @if($buktiPath)
+                            <div class="modal fade" id="buktiModal{{ $presensi->id }}" tabindex="-1" aria-labelledby="buktiModalLabel{{ $presensi->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="buktiModalLabel{{ $presensi->id }}">
+                                                <i class="fas fa-paperclip me-2"></i>Lampiran Bukti
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                                        </div>
+                                        <div class="modal-body p-0">
+                                            @if($isBuktiImage)
+                                                <div class="text-center p-3">
+                                                    <img src="{{ $buktiUrl }}"
+                                                         alt="Lampiran bukti {{ $siswa->nama_lengkap }}"
+                                                         class="img-fluid rounded"
+                                                         style="max-height: 75vh;">
+                                                </div>
+                                            @elseif($isBuktiPdf)
+                                                <iframe src="{{ $buktiUrl }}"
+                                                        title="Lampiran bukti {{ $siswa->nama_lengkap }}"
+                                                        style="width: 100%; height: 75vh; border: 0;"></iframe>
+                                            @else
+                                                <div class="text-center p-5">
+                                                    <i class="fas fa-file fa-3x text-muted mb-3"></i>
+                                                    <p class="text-muted mb-0">Format lampiran tidak dapat dipreview.</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
             </div>
