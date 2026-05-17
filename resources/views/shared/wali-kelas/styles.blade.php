@@ -28,8 +28,10 @@
         .layout-page div[style*="max-width: 1600px"],
         .layout-page div[style*="max-width: 1400px"],
         .layout-page div[style*="max-width: 1200px"] {
-            max-width: none !important;
+            max-width: calc(100% - 4rem) !important;
             width: 100% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
     }
 
