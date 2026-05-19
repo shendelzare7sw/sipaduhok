@@ -26,6 +26,7 @@ class LandingPageController extends Controller
     public function update(Request $request, LandingPage $landingPage)
     {
         $data = $request->input('sections', []);
+        $hasUpdatedSection = false;
 
         foreach ($landingPage->sections as $section) {
             if (!isset($data[$section->id])) {
@@ -176,6 +177,11 @@ class LandingPageController extends Controller
             }
 
             $section->save();
+            $hasUpdatedSection = true;
+        }
+
+        if ($hasUpdatedSection) {
+            $landingPage->touch();
         }
 
         return redirect()->route('admin.landing-pages.index')->with('success', 'Halaman berhasil diperbarui.');
