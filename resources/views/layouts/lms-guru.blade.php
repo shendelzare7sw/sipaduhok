@@ -607,27 +607,33 @@
                     ? Math.min(360, availableWidth)
                     : availableWidth;
                 let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
+                let topOffset = top;
+                let leftOffset = options.lockMobileHeight
+                    ? Math.max(margin, viewportWidth - margin - width)
+                    : margin;
 
                 if (options.lockMobileHeight) {
-                    if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight) {
+                    if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight &&
+                        menu.dataset.mobileDropdownTop && menu.dataset.mobileDropdownLeft) {
                         width = Number(menu.dataset.mobileDropdownWidth);
                         maxHeight = Number(menu.dataset.mobileDropdownHeight);
+                        topOffset = Number(menu.dataset.mobileDropdownTop);
+                        leftOffset = Number(menu.dataset.mobileDropdownLeft);
                     } else {
                         menu.dataset.mobileDropdownWidth = String(width);
                         menu.dataset.mobileDropdownHeight = String(maxHeight);
+                        menu.dataset.mobileDropdownTop = String(topOffset);
+                        menu.dataset.mobileDropdownLeft = String(leftOffset);
                     }
                 }
 
                 const heightRule = options.lockMobileHeight
                     ? `height:${maxHeight}px!important;`
                     : '';
-                const leftOffset = options.lockMobileHeight
-                    ? Math.max(margin, viewportWidth - margin - width)
-                    : margin;
 
                 menu.setAttribute('style',
                     `position:fixed!important;` +
-                    `top:${top}px!important;` +
+                    `top:${topOffset}px!important;` +
                     `left:${leftOffset}px!important;` +
                     `right:auto!important;` +
                     `width:${width}px!important;` +
@@ -721,6 +727,8 @@
                     if (menu) {
                         delete menu.dataset.mobileDropdownWidth;
                         delete menu.dataset.mobileDropdownHeight;
+                        delete menu.dataset.mobileDropdownTop;
+                        delete menu.dataset.mobileDropdownLeft;
                     }
                 });
             }
