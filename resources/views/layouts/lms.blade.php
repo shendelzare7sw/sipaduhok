@@ -565,12 +565,107 @@
                 transform: translateX(0) !important;
             }
         }
+
+        body.lms-layout .lms-topbar-dropdown,
+        body.lms-layout .notif-dropdown-menu {
+            border: 1px solid rgba(67, 89, 113, 0.14);
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.18) !important;
+            overflow: hidden;
+            z-index: 1055;
+        }
+
+        body.lms-layout .lms-profile-menu {
+            width: 240px;
+            padding: 0.35rem 0;
+        }
+
+        body.lms-layout .lms-profile-menu .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            min-height: 42px;
+            padding: 0.6rem 1rem;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        body.lms-layout .lms-profile-menu .dropdown-item i {
+            width: 18px;
+            margin-right: 0 !important;
+            text-align: center;
+            color: #334155;
+        }
+
+        body.lms-layout .lms-profile-menu .dropdown-item.text-danger,
+        body.lms-layout .lms-profile-menu .dropdown-item.text-danger i {
+            color: #dc3545 !important;
+        }
+
+        body.lms-layout .lms-profile-menu .dropdown-divider {
+            margin: 0.35rem 0;
+        }
+
+        body.lms-layout .lms-profile-summary {
+            padding: 0.75rem 1rem;
+        }
+
+        body.lms-layout .lms-profile-summary-text {
+            min-width: 0;
+        }
+
+        body.lms-layout .notif-dropdown-menu .dropdown-header,
+        body.lms-layout .notif-dropdown-menu .dropdown-footer {
+            background-color: #fff !important;
+            flex: 0 0 auto;
+        }
+
+        body.lms-layout .notif-dropdown-menu .dropdown-header {
+            min-height: 44px;
+        }
+
+        body.lms-layout .notif-dropdown-menu.show {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.lms-layout .notif-dropdown-menu .dropdown-footer .btn-link {
+            color: var(--primary) !important;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        body.lms-layout .notif-dropdown-menu .dropdown-footer .btn-link:hover {
+            color: var(--primary-dark) !important;
+        }
+
+        body.lms-layout .notif-list-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        @media (max-width: 575.98px) {
+            body.lms-layout .lms-topbar-dropdown,
+            body.lms-layout .notif-dropdown-menu {
+                border-radius: 0.5rem;
+                box-shadow: 0 0.25rem 1rem rgba(67, 89, 113, 0.18) !important;
+            }
+
+            body.lms-layout .notification-item.unread {
+                background: #fff;
+                border-left-color: var(--primary);
+            }
+
+            body.lms-layout .lms-profile-menu {
+                width: auto;
+            }
+        }
     </style>
 
     @stack('styles')
 </head>
 
-<body>
+<body class="lms-layout">
     <div class="d-flex">
         <!-- Sidebar LMS -->
         <aside class="sidebar-lms">
@@ -599,8 +694,9 @@
                 </div>
                 <div class="header-right">
                     <x-notification-bell ctx="lms" />
-                    <div class="dropdown">
-                        <div class="user-profile" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="dropdown lms-profile-dropdown">
+                        <div class="user-profile lms-profile-trigger" id="lmsProfileDropdown"
+                            data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                             <div class="user-avatar">
                                 @if(auth()->user()->foto_profil)
                                     <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar"
@@ -614,7 +710,27 @@
                                 <div class="user-role">Siswa</div>
                             </div>
                         </div>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end lms-topbar-dropdown lms-profile-menu"
+                            aria-labelledby="lmsProfileDropdown">
+                            <li>
+                                <a class="dropdown-item lms-profile-summary" href="{{ route('profile.index') }}">
+                                    <div class="user-avatar">
+                                        @if(auth()->user()->foto_profil)
+                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar"
+                                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                        @else
+                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                        @endif
+                                    </div>
+                                    <div class="flex-grow-1 lms-profile-summary-text">
+                                        <span class="fw-semibold d-block text-truncate">{{ auth()->user()->name }}</span>
+                                        <small class="text-muted">Siswa</small>
+                                    </div>
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
                             <li>
                                 <a class="dropdown-item" href="{{ route('profile.index') }}">
                                     <i class="fas fa-user me-2"></i> Profil Saya
@@ -703,11 +819,76 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        function setLmsTopbarDropdownPosition(menu, trigger, options = {}) {
+            if (!menu || !trigger) return;
+
+            const triggerRect = trigger.getBoundingClientRect();
+            const header = trigger.closest('.header-lms, header');
+            const headerRight = trigger.closest('.header-right');
+            const headerBottom = header ? header.getBoundingClientRect().bottom : triggerRect.bottom;
+            const top = Math.max(triggerRect.bottom, headerBottom) + 8;
+            const isMobile = window.innerWidth <= 575.98;
+
+            if (isMobile) {
+                const margin = window.innerWidth <= 360 ? 16 : 24;
+                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+                const maxHeight = Math.max(220, viewportHeight - top - margin);
+
+                menu.setAttribute('style',
+                    `position:fixed!important;` +
+                    `top:${top}px!important;` +
+                    `left:${margin}px!important;` +
+                    `right:${margin}px!important;` +
+                    `width:auto!important;` +
+                    `max-width:calc(100vw - ${margin * 2}px)!important;` +
+                    `max-height:${maxHeight}px!important;` +
+                    `transform:none!important;` +
+                    `z-index:1055!important;`
+                );
+                return;
+            }
+
+            const width = options.desktopWidth || 240;
+            const anchorRect = headerRight ? headerRight.getBoundingClientRect() : triggerRect;
+            const rightOffset = Math.max(16, window.innerWidth - anchorRect.right);
+            const leftLimit = 16;
+            const availableWidth = window.innerWidth - rightOffset - leftLimit;
+            const finalWidth = Math.min(width, availableWidth);
+
+            menu.setAttribute('style',
+                `position:fixed!important;` +
+                `top:${top}px!important;` +
+                `right:${rightOffset}px!important;` +
+                `left:auto!important;` +
+                `width:${finalWidth}px!important;` +
+                `max-width:${finalWidth}px!important;` +
+                `transform:none!important;` +
+                `z-index:1055!important;`
+            );
+        }
+
+        function fixNotifDropdownPosition() {
+            const menu = document.querySelector('.notif-dropdown-menu');
+            const btn = document.getElementById('notificationDropdown');
+            setLmsTopbarDropdownPosition(menu, btn, {
+                desktopWidth: window.innerWidth <= 991 ? 320 : 360
+            });
+        }
+
+        function fixLmsProfileDropdownPosition() {
+            const menu = document.querySelector('.lms-profile-menu');
+            const btn = document.getElementById('lmsProfileDropdown');
+            setLmsTopbarDropdownPosition(menu, btn, { desktopWidth: 240 });
+        }
+    </script>
+
+    <script>
         // Sidebar Toggle Logic
         document.addEventListener('DOMContentLoaded', function () {
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.querySelector('.sidebar-lms');
             const body = document.body;
+            const profileTrigger = document.getElementById('lmsProfileDropdown');
 
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function () {
@@ -721,6 +902,17 @@
                 });
             }
 
+            if (profileTrigger) {
+                profileTrigger.addEventListener('show.bs.dropdown', function () {
+                    requestAnimationFrame(() => requestAnimationFrame(fixLmsProfileDropdownPosition));
+                });
+
+                profileTrigger.addEventListener('hidden.bs.dropdown', function () {
+                    const menu = document.querySelector('.lms-profile-menu');
+                    if (menu) menu.removeAttribute('style');
+                });
+            }
+
             // Close sidebar when clicking outside (Mobile only)
             document.addEventListener('click', function (event) {
                 if (window.innerWidth <= 768) {
@@ -728,6 +920,12 @@
                     if (sidebarToggle && !sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
                         sidebar.classList.remove('active');
                     }
+                }
+            });
+
+            window.addEventListener('resize', function () {
+                if (document.querySelector('.lms-profile-menu.show')) {
+                    fixLmsProfileDropdownPosition();
                 }
             });
         });

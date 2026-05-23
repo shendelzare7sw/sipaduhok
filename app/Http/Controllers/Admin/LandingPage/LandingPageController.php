@@ -37,6 +37,12 @@ class LandingPageController extends Controller
 
             $sectionInput = $data[$section->id];
 
+            // Handle visibility toggle (sent regardless of type)
+            if (array_key_exists('is_visible', $sectionInput)) {
+                $section->is_visible = (bool) $sectionInput['is_visible'];
+                unset($sectionInput['is_visible']);
+            }
+
             // Handle Type Specific Logic
             if ($section->type === 'list') {
                 $content = $section->content;
@@ -184,7 +190,7 @@ class LandingPageController extends Controller
             $landingPage->touch();
         }
 
-        return redirect()->route('admin.landing-pages.index')->with('success', 'Halaman berhasil diperbarui.');
+        return redirect()->route('admin.landing-pages.edit', $landingPage->slug)->with('success', 'Halaman berhasil diperbarui.');
     }
 
     public function reset(LandingPage $landingPage)

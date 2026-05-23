@@ -134,10 +134,14 @@
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
                             @foreach($sortedSections as $index => $section)
-                                <a href="#section-{{ $section->section_key }}" 
-                                   class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-3 section-nav-link {{ $index === 0 ? 'active' : '' }}">
+                                <a href="#section-{{ $section->section_key }}"
+                                   class="list-group-item list-group-item-action d-flex align-items-center gap-2 py-3 section-nav-link {{ $index === 0 ? 'active' : '' }} {{ $section->is_visible ? '' : 'section-hidden-nav' }}"
+                                   data-section-id="{{ $section->id }}">
                                     <span class="badge bg-label-primary rounded-circle">{{ $index + 1 }}</span>
                                     <span class="text-truncate">{{ $sectionLabels[$section->section_key] ?? ucwords(str_replace('_', ' ', $section->section_key)) }}</span>
+                                    @if(!$section->is_visible)
+                                        <i class="bx bx-hide ms-auto text-muted" title="Tersembunyi"></i>
+                                    @endif
                                 </a>
                             @endforeach
                         </div>
@@ -228,18 +232,37 @@
                         };
                     @endphp
                     
-                    <div class="card mb-4 section-card" id="section-{{ $sectionKey }}" style="scroll-margin-top: 90px;">
+                    <div class="card mb-4 section-card {{ $section->is_visible ? '' : 'section-hidden' }}" id="section-{{ $sectionKey }}" style="scroll-margin-top: 90px;">
                         <input type="hidden" name="sections[{{ $section->id }}][type]" value="{{ $section->type }}">
-                        
+                        <input type="hidden" name="sections[{{ $section->id }}][is_visible]" value="0">
+
                         {{-- Section Header --}}
                         <div class="card-header bg-light border-bottom">
                             <div class="d-flex align-items-center gap-3">
                                 <span class="badge bg-primary rounded-pill fs-6">{{ $index + 1 }}</span>
-                                <div>
-                                    <h5 class="mb-0 fw-bold">{{ $label }}</h5>
+                                <div class="flex-grow-1 min-w-0">
+                                    <h5 class="mb-0 fw-bold">
+                                        {{ $label }}
+                                        @if(!$section->is_visible)
+                                            <span class="badge bg-label-secondary ms-1" title="Section ini tidak ditampilkan di halaman publik">
+                                                <i class="bx bx-hide"></i> Tersembunyi
+                                            </span>
+                                        @endif
+                                    </h5>
                                     @if($description)
-                                        <small class="text-muted">{{ $description }}</small>
+                                        <small class="text-muted d-block mb-1">{{ $description }}</small>
                                     @endif
+                                    <div class="form-check form-switch mb-0 mt-1">
+                                        <input class="form-check-input section-visibility-toggle" type="checkbox"
+                                            role="switch"
+                                            id="visible-{{ $section->id }}"
+                                            name="sections[{{ $section->id }}][is_visible]"
+                                            value="1"
+                                            {{ $section->is_visible ? 'checked' : '' }}>
+                                        <label class="form-check-label small fw-semibold" for="visible-{{ $section->id }}">
+                                            Tampilkan di halaman
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -535,12 +558,21 @@
 <style>
     html { scroll-behavior: smooth; }
     
-    .section-card { transition: box-shadow 0.3s ease; }
+    .section-card { transition: box-shadow 0.3s ease, opacity 0.2s ease; }
     .section-card:target,
     .section-card:focus-within { box-shadow: 0 0 0 3px rgba(105, 108, 255, 0.25); }
-    
-    .list-group-item.active { background-color: #696cff; border-color: #696cff; }
-    .section-nav-link:not(.active):hover { background-color: rgba(105, 108, 255, 0.08); }
+    .section-card.section-hidden { opacity: 0.65; }
+    .section-card.section-hidden .card-header { background-color: #f5f5f9 !important; }
+    .section-nav-link.section-hidden-nav .text-truncate { text-decoration: line-through; opacity: 0.6; }
+
+    .list-group-item.active { background-color: #696cff; border-color: #696cff; color: #fff !important; }
+    .list-group-item.active .badge { background-color: rgba(255,255,255,0.25) !important; color: #fff !important; }
+    .list-group-item.active .text-truncate { color: #fff !important; font-weight: 600; }
+    .list-group-item.active .bx-hide { color: rgba(255,255,255,0.7) !important; }
+    .section-nav-link:not(.active) { color: #566a7f; }
+    .section-nav-link:not(.active) .text-truncate { color: #566a7f; }
+    .section-nav-link:not(.active):hover { background-color: rgba(105, 108, 255, 0.08); color: #696cff; }
+    .section-nav-link:not(.active):hover .text-truncate { color: #696cff; }
     
     .item-wrapper { transition: transform 0.2s ease; }
     .item-wrapper:hover { transform: translateX(4px); }

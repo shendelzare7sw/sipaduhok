@@ -25,6 +25,24 @@
 
         $alurSection = $page->getSection('alur');
         $alurContent = $alurSection->content ?? [];
+        $alurHeader = $alurContent['header'] ?? $alurContent;
+        $alurItems = $alurContent['items'] ?? [];
+        if (empty($alurItems)) {
+            $alurItems = [
+                ['title' => 'Isi Formulir', 'description' => 'Datang ke cabang Gedung Utama dan mengisi formulir yang diberikan administrator.'],
+                ['title' => 'Melengkapi Dokumen', 'description' => 'Melengkapi berkas persyaratan yang diperlukan'],
+                ['title' => 'Verifikasi', 'description' => 'Tim kami akan memverifikasi data dan dokumen Anda'],
+                ['title' => 'Wawancara', 'description' => 'Ikuti sesi wawancara singkat dengan tim kami'],
+                ['title' => 'Pengumuman', 'description' => 'Terima pengumuman hasil dan mulai belajar!'],
+            ];
+        }
+        $alurIconSet = [
+            ['bg' => 'bg-primary/10', 'text' => 'text-primary', 'path' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+            ['bg' => 'bg-secondary/10', 'text' => 'text-secondary', 'path' => 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'],
+            ['bg' => 'bg-accent-yellow/10', 'text' => 'text-accent-yellow', 'path' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+            ['bg' => 'bg-accent-orange/10', 'text' => 'text-accent-orange', 'path' => 'M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z'],
+            ['bg' => 'bg-accent-bright/20', 'text' => 'text-secondary', 'path' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+        ];
 
         // Investasi & Biaya Sections
         $investasiSection = $page->getSection('investasi');
@@ -136,111 +154,40 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="inline-block px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full mb-4">
-                    {{ $alurContent['badge'] ?? 'Langkah Mudah' }}
+                    {{ $alurHeader['badge'] ?? 'Langkah Mudah' }}
                 </span>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                    {{ $alurContent['title'] ?? 'Alur Pendaftaran' }}
+                    {{ $alurHeader['title'] ?? 'Alur Pendaftaran' }}
                 </h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">
-                    {{ $alurContent['description'] ?? 'Ikuti 5 langkah mudah untuk mendaftar sebagai peserta didik baru' }}
+                    {{ $alurHeader['description'] ?? 'Ikuti langkah mudah untuk mendaftar sebagai peserta didik baru' }}
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-5 gap-8 relative">
-                <!-- Step 1 -->
-                <div class="step-connector relative">
-                    <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                            1
+                @foreach($alurItems as $idx => $step)
+                    @php
+                        $icon = $alurIconSet[$idx % count($alurIconSet)];
+                        $isLast = $loop->last;
+                        $gradient = $isLast ? 'from-secondary to-primary' : 'from-primary to-secondary';
+                    @endphp
+                    <div class="{{ $isLast ? 'relative' : 'step-connector relative' }}">
+                        <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center {{ $isLast ? 'border-2 border-secondary' : '' }}">
+                            <div
+                                class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br {{ $gradient }} rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                                {{ $idx + 1 }}
+                            </div>
+                            <div class="w-12 h-12 mx-auto mb-4 {{ $icon['bg'] }} rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 {{ $icon['text'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="{{ $icon['path'] }}" />
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-2">{{ $step['title'] ?? '' }}</h3>
+                            <p class="text-sm text-gray-600">{{ $step['description'] ?? '' }}</p>
                         </div>
-                        <div class="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">Isi Formulir</h3>
-                        <p class="text-sm text-gray-600">Lengkapi formulir pendaftaran online dengan data yang benar</p>
                     </div>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="step-connector relative">
-                    <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                            2
-                        </div>
-                        <div class="w-12 h-12 mx-auto mb-4 bg-secondary/10 rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">Upload Dokumen</h3>
-                        <p class="text-sm text-gray-600">Unggah berkas persyaratan yang diperlukan</p>
-                    </div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="step-connector relative">
-                    <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                            3
-                        </div>
-                        <div
-                            class="w-12 h-12 mx-auto mb-4 bg-accent-yellow/10 rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-accent-yellow" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">Verifikasi</h3>
-                        <p class="text-sm text-gray-600">Tim kami akan memverifikasi data dan dokumen Anda</p>
-                    </div>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="step-connector relative">
-                    <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                            4
-                        </div>
-                        <div
-                            class="w-12 h-12 mx-auto mb-4 bg-accent-orange/10 rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-accent-orange" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">Wawancara</h3>
-                        <p class="text-sm text-gray-600">Ikuti sesi wawancara singkat dengan tim kami</p>
-                    </div>
-                </div>
-
-                <!-- Step 5 -->
-                <div class="relative">
-                    <div class="card-hover bg-white rounded-2xl shadow-lg p-6 text-center border-2 border-secondary">
-                        <div
-                            class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-secondary to-primary rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                            5
-                        </div>
-                        <div
-                            class="w-12 h-12 mx-auto mb-4 bg-accent-bright/20 rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">Pengumuman</h3>
-                        <p class="text-sm text-gray-600">Terima pengumuman hasil dan mulai belajar!</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -662,6 +609,7 @@
     </section>
 
     <!-- Biaya Section -->
+    @if($investasiSection?->is_visible)
     <section id="biaya" class="py-20 bg-gradient-to-br from-cream to-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
@@ -691,15 +639,18 @@
                     'orange' => 'fa-graduation-cap',
                 ];
                 $biayaSections = [
-                    ['content' => $biayaPaudContent, 'items' => $biayaPaudItems, 'modalId' => 'costModal', 'modalFunc' => 'showCostModal'],
-                    ['content' => $biayaSdContent, 'items' => $biayaSdItems, 'modalId' => 'costModalPaketA', 'modalFunc' => 'showCostModalPaketA'],
-                    ['content' => $biayaSmpContent, 'items' => $biayaSmpItems, 'modalId' => 'costModalPaketB', 'modalFunc' => 'showCostModalPaketB'],
-                    ['content' => $biayaSmaContent, 'items' => $biayaSmaItems, 'modalId' => 'costModalPaketC', 'modalFunc' => 'showCostModalPaketC'],
+                    ['section' => $biayaPaudSection, 'content' => $biayaPaudContent, 'items' => $biayaPaudItems, 'modalId' => 'costModal', 'modalFunc' => 'showCostModal'],
+                    ['section' => $biayaSdSection, 'content' => $biayaSdContent, 'items' => $biayaSdItems, 'modalId' => 'costModalPaketA', 'modalFunc' => 'showCostModalPaketA'],
+                    ['section' => $biayaSmpSection, 'content' => $biayaSmpContent, 'items' => $biayaSmpItems, 'modalId' => 'costModalPaketB', 'modalFunc' => 'showCostModalPaketB'],
+                    ['section' => $biayaSmaSection, 'content' => $biayaSmaContent, 'items' => $biayaSmaItems, 'modalId' => 'costModalPaketC', 'modalFunc' => 'showCostModalPaketC'],
                 ];
             @endphp
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 @foreach($biayaSections as $section)
+                    @if(!($section['section']?->is_visible))
+                        @continue
+                    @endif
                     @php
                         $header = $section['content']['header'] ?? [];
                         $items = $section['items'] ?? [];
@@ -788,6 +739,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Formulir Section
     <section id="formulir" class="py-20 bg-white">

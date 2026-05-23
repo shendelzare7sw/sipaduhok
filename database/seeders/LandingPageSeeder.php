@@ -1413,12 +1413,21 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
         LandingPageSection::updateOrCreate(
             ['landing_page_id' => $ppdb->id, 'section_key' => 'alur'],
             [
-                'type' => 'rich_text',
+                'type' => 'list',
                 'order' => 3,
                 'content' => [
-                    'badge' => 'Langkah Mudah',
-                    'title' => 'Alur Pendaftaran',
-                    'description' => 'Ikuti 5 langkah mudah untuk mendaftar sebagai peserta didik baru',
+                    'header' => [
+                        'badge' => 'Langkah Mudah',
+                        'title' => 'Alur Pendaftaran',
+                        'description' => 'Ikuti langkah mudah untuk mendaftar sebagai peserta didik baru',
+                    ],
+                    'items' => [
+                        ['title' => 'Isi Formulir', 'description' => 'Datang ke cabang Gedung Utama dan mengisi formulir yang diberikan administrator.'],
+                        ['title' => 'Melengkapi Dokumen', 'description' => 'Melengkapi berkas persyaratan yang diperlukan'],
+                        ['title' => 'Verifikasi', 'description' => 'Tim kami akan memverifikasi data dan dokumen Anda'],
+                        ['title' => 'Wawancara', 'description' => 'Ikuti sesi wawancara singkat dengan tim kami'],
+                        ['title' => 'Pengumuman', 'description' => 'Terima pengumuman hasil dan mulai belajar!'],
+                    ],
                 ]
             ]
         );
@@ -1429,6 +1438,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'rich_text',
                 'order' => 4,
+                'is_visible' => false,
                 'content' => [
                     'badge' => 'Investasi Pendidikan',
                     'title' => 'Detail Biaya Pendidikan',
@@ -1443,6 +1453,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'list',
                 'order' => 5,
+                'is_visible' => false,
                 'content' => [
                     'header' => [
                         'title' => 'PAUD',
@@ -1470,6 +1481,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'list',
                 'order' => 6,
+                'is_visible' => false,
                 'content' => [
                     'header' => [
                         'title' => 'SD',
@@ -1497,6 +1509,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'list',
                 'order' => 7,
+                'is_visible' => false,
                 'content' => [
                     'header' => [
                         'title' => 'SMP',
@@ -1524,6 +1537,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'list',
                 'order' => 8,
+                'is_visible' => false,
                 'content' => [
                     'header' => [
                         'title' => 'SMA',
