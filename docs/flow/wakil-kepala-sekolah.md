@@ -47,6 +47,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Index view**: `waka/tahun-ajaran/index.blade.php` · **Controller**: `WakilKepalaSekolah/TahunAjaranController.php`
 
+**Tampilan index**: 3 **stat card**: Total Periode, Periode Aktif, Tahun Berjalan (nama TA aktif). Alert filter aktif (muncul saat `?status=1` atau `=0` di-set). Card **Daftar Tahun Ajaran**: header berisi dropdown filter Status (Semua/Hanya Aktif/Tidak Aktif, auto-submit) + tombol kanan **+ Tahun Ajaran** (primary). Tabel: No, Tahun Ajaran, Tanggal Mulai-Selesai, Status (badge Aktif), Aksi (Detail, Edit, Aktifkan/Set Aktif, Hapus).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Tambah | `waka.tahun-ajaran.create` | GET | `@create` | `waka/tahun-ajaran/create.blade.php` | Form: nama TA, tanggal mulai-selesai, semester. |
@@ -64,6 +66,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 ### Data Kelas
 
 **Index view**: `waka/kelas/index.blade.php` · **Controller**: `WakilKepalaSekolah/KelasController.php` (resource + custom)
+
+**Tampilan index**: 4 **stat card**: Total Kelas (di TA pilihan), Siswa Terdaftar, Terisi Wali Kelas, Belum Ada Wali (warning). Card **Daftar Kelas**: header berisi 3 tombol kanan — **Cetak** (secondary, target blank), **Import Excel** (success), **Kelas Baru** (primary). Form filter: search nama/kode kelas, dropdown Tahun Ajaran (default TA aktif, auto-submit), dropdown Jenjang (auto-submit), tombol Filter & Reset. Tabel: Info Kelas (kode+nama+TA), Jenjang badge, Wali Kelas (nama atau "Belum Ditugaskan"), Kuota / Siswa (X/Y), Aksi (Detail, Edit, Kelola Siswa, Hapus).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -89,6 +93,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Index view**: `waka/wali-kelas/index.blade.php` · **Controller**: `WakilKepalaSekolah/WaliKelasController.php`
 
+**Tampilan index**: 4 **stat card**: Total Kelas, Sudah Ada Wali, Belum Ada Wali (warning), Total Guru Aktif. Card **Penunjukan Wali Kelas**: header dengan tombol **Cetak** (secondary). Form filter: search (nama kelas atau wali), dropdown TA, Jenjang, Status (assigned/unassigned) + tombol Filter & Reset. Tabel: Info Kelas, Jenjang & Cabang, Jumlah Siswa, Penugasan Wali Kelas (badge + nama wali atau "Belum ditunjuk"), Aksi (Detail kelas → form assign/ganti wali).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Kelas | `waka.wali-kelas.show` | GET | `@show` | `waka/wali-kelas/show.blade.php` | Detail wali + opsi assign/replace utk satu kelas. |
@@ -102,6 +108,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 ### Data Guru Pengajar (Read-Only)
 
 **Index view**: `waka/guru-pengajar/index.blade.php` · **Controller**: `WakilKepalaSekolah/GuruPengajarController.php`
+
+**Tampilan index**: 4 **stat card**: Total Guru, Sudah Ditugaskan, Total Penugasan (Guru-Kelas-Mapel), Mata Pelajaran. Card **Daftar Guru Pengajar** (subtitle "Penugasan guru otomatis dari Jadwal Pelajaran"): header berisi tombol **Cetak** (secondary, target blank). Form filter: search (nama/NIP/email), dropdown TA, dropdown Status (Aktif/Tidak Aktif) + tombol Filter & Reset. Tabel: identitas guru, jumlah kelas yang diampu, daftar mapel, aksi (Detail, Kelola per Kelas). Tombol **Rebuild dari Jadwal** ada di header atau dekat tabel untuk sinkronisasi cache `GuruPengajarKelas`.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -117,6 +125,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 ### Mata Pelajaran
 
 **Index view**: `waka/mata-pelajaran/index.blade.php` · **Controller**: `WakilKepalaSekolah/MataPelajaranController.php` (resource + custom)
+
+**Tampilan index**: **Stat scroll horizontal** (7 mini-card per jenjang): Total, KB, TKA, TKB, SD, SMP, SMA. Card **Filter & Action**: dropdown filter Jenjang (auto-submit) + tombol Reset di kiri; di kanan tombol-tombol Action: **+ Tambah** (primary), **Import Excel** (success), **Download Template**, **Cetak** (target blank). Tabel mapel: kode, nama mapel, jenjang badge, jumlah penggunaan di Jadwal, Aksi (Detail, Edit, Hapus).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -138,6 +148,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 ### Jadwal Pelajaran
 
 **Index view**: `waka/jadwal-pelajaran/index.blade.php` · **Controller**: `WakilKepalaSekolah/JadwalPelajaranController.php`
+
+**Tampilan index**: 4 **stat card**: Total Jadwal, Jadwal Kosong (warning, slot belum di-assign guru), Guru Mengajar, Total Kelas. Card **Daftar Jadwal Pelajaran**: header dengan tombol kanan dalam scroll-mobile: **+ Tambah** (primary), **Istirahat** (warning, ke modul Pengaturan Istirahat), dropdown **Aksi** (Duplikasi Jadwal modal, Ganti Semua Guru modal, Import Excel), dropdown **Cetak/Export** (Export PDF/Excel Semua + Cetak Per Kelas modal). Form filter: dropdown TA, Jenjang, Kelas, Guru (semua auto-submit). Konten utama: grid jadwal mingguan per kelas (mirip kalender) atau list — klik kelas → detail show. Sub-buttons per baris/cell: edit jadwal, ganti guru, hapus.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -172,6 +184,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Index view**: `waka/manajemen-siswa/index.blade.php` · **Controller**: `WakilKepalaSekolah/ManajemenSiswaController.php`
 
+**Tampilan index**: 5 **stat card**: Total Siswa, Sudah Ada Kelas, Belum Ada Kelas (warning), Laki-laki, Perempuan. Card **Daftar Siswa** dengan badge cabang Waka di header + badge "Snapshot {TA}" bila historical mode. Tombol kanan **Cetak**. Form filter: search (nama/NISN/NIS), dropdown Jenjang (disabled bila historical), Kelas, TA, Status. Tabel siswa: NISN/NIS, nama, jenjang, kelas saat ini (atau "Belum di kelas"), Aksi (Detail, Assign Kelas modal, Cetak Kartu).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Siswa | `waka.manajemen-siswa.show` | GET | `@show` | `waka/manajemen-siswa/show.blade.php` | Profil siswa + form assign kelas + attach/detach orang tua. |
@@ -192,6 +206,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Index view**: `waka/pengaturan-istirahat/index.blade.php` · **Controller**: `WakilKepalaSekolah/PengaturanIstirahatController.php`
 
+**Tampilan index**: Tombol Kembali ke Jadwal Pelajaran. Info card biru: aturan ("Max 2 istirahat per jenjang", "auto-blok slot jadwal", "auto-tampil highlight kuning di cetak jadwal"). Tombol **+ Tambah Waktu Istirahat** (primary). Konten: **section per jenjang** (KB/TKA/TKB/SD/SMP/SMA) — tiap section punya header dengan badge jenjang + tombol "+ Tambah Istirahat" (muncul bila count < 2). Tabel istirahat per jenjang: Urutan, Nama, Jam Mulai, Jam Selesai, Hari Aktif (badge per hari), Status (toggle), Aksi (Edit, Hapus).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Tambah | `waka.pengaturan-istirahat.create` | GET | `@create` | `waka/pengaturan-istirahat/create.blade.php` | Form: jenjang, hari, jam mulai-selesai, label. |
@@ -209,6 +225,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Index view (aktual yang dirender)**: `admin/akademik/promotion/kkm.blade.php` · **Controller**: `Admin/Akademik/PromotionKKMController.php` (**shared dengan Admin**)
 
+**Tampilan index**: Card **Daftar Mata Pelajaran & KKM** dengan header berisi: judul + meta TA aktif, dan dropdown filter **Jenjang** (PAUD/SD/SMP/SMA, auto-submit). Konten: form mass-edit KKM — tabel mapel × kolom (No, Mata Pelajaran, Jenjang, KKM Saat Ini, Set KKM Baru — input numeric per mapel). Tombol Submit di bawah → POST `kkm.store`. Empty state bila tidak ada mapel di jenjang terpilih.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Buka Pengaturan KKM | `waka.promotion.kkm.index` | GET | `@index` | `admin/akademik/promotion/kkm.blade.php` | Form atur KKM per mapel/jenjang (default `?jenjang=SMA`); data dari `pengaturan_kkm`. |
@@ -222,6 +240,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Index view (aktual)**: `admin/akademik/promotion/settings.blade.php` · **Controller**: `Admin/Akademik/PromotionSettingsController.php` (**shared dengan Admin**)
 
+**Tampilan index**: Single form besar pengaturan kenaikan TA aktif. Field utama: tanggal pengambilan rapor, tanggal eksekusi otomatis (date), waktu eksekusi (time, default 02:00 AM bila kosong), persentase minimal tuntas (0-100). Tombol Submit → POST `settings.store` yang juga sinkronkan `PromotionSchedule` (auto-create/cancel).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Buka Pengaturan | `waka.promotion.settings.index` | GET | `@index` | `admin/akademik/promotion/settings.blade.php` | Form atur aturan kenaikan: tanggal pengambilan rapor, tanggal+waktu eksekusi otomatis, % minimal tuntas. |
@@ -234,6 +254,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 ### Kenaikan Kelas → Proses & Rekap (Report)
 
 **Index view (aktual)**: `admin/akademik/promotion/rekap.blade.php` · **Controller**: `Admin/Akademik/PromotionReportController.php` (**shared dengan Admin**)
+
+**Tampilan index**: Filter atas: TA history, Cabang (auto-locked ke cabang Waka), Jenjang, Kelas, Status (NAIK/TIDAK/LULUS/TUNGGAKAN), search. Stat cards summary: jumlah per status kelulusan. Tabel **status kenaikan siswa**: checkbox + nama + kelas asal → kelas tujuan + nilai/% tuntas + flag dispensasi Ketua + status. Tombol header: **Eksekusi Promosi** (danger/primary, modal konfirmasi), **Cetak Rekap** (target blank). Aksi bulk pada terpilih: Rollback, Promote (untuk yang sebelumnya gagal tapi kini layak). Tombol per-baris: Rollback individual. Bila ada `PromotionSchedule` PENDING, muncul info schedule + tombol **Batalkan Jadwal**.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -253,6 +275,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
 
+**Tampilan index** (3 menu, pola seragam, dipowered partial `shared/monitoring/{wali-kelas|guru-pengajar|siswa}.blade.php`): Header dengan badge **scope cabang Waka** (auto-locked, beda dgn Ketua yg lihat semua cabang). 4 **summary card** sesuai konteks (mis. utk Wali Kelas: Total Kelas, Sudah Ada Wali, Belum, Total Guru Aktif). Card konten dengan **filter toolbar** (search + dropdown filter kontekstual + status) + tombol Cari & Reset. Tabel utama menampilkan status pengisian rapor/nilai/aktivitas LMS per record (read-only — tidak ada aksi modify).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Monitoring Wali Kelas | `waka.monitoring.wali-kelas` | GET | `@monitoringWaliKelas` | `waka/monitoring/wali-kelas.blade.php` | Status pengisian rapor/nilai per wali (scoped cabang). |
@@ -267,6 +291,8 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
 
+**Tampilan index**: Filter bar dengan **search** (nama/kode kelas), dropdown **Tahun Ajaran**, tombol Terapkan, toggle **"Hanya tampilkan kelas yang sudah punya konten LMS"**. 5 **stat card**: Total Kelas (scope cabang Waka), Materi, Tugas, Latihan, Ujian. **Grid kartu kelas** — tiap kartu: badge Jenjang, badge TA (highlight bila TA aktif), nama kelas, cabang, wali kelas, stat pill jumlah konten LMS atau "Belum ada konten". Klik kartu → halaman detail per-kelas (`lms.kelas`).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Overview LMS | `waka.monitoring.lms.index` | GET | `@lmsIndex` | `monitoring-lms/index.blade.php` (shared root) | Overview LMS lintas kelas, scope cabang waka. |
@@ -280,7 +306,9 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 ### Catatan / Teguran
 
-**Index view**: `waka/catatan/index.blade.php` · **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
+**Index view**: `waka/catatan/index.blade.php` → `@include('shared.catatan.index')` · **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
+
+**Tampilan index**: Toolbar header **Manajemen Catatan** + tombol kanan **+ Buat Catatan** (primary). 4 **stat card**: Total Catatan, Publik (ke semua pengguna), Total Dibaca, Mendesak (prioritas tinggi). Card **Daftar Catatan** (Waka punya parameter `showDirection=true` — beda dgn Ketua/Admin — sehingga tampil arah panah Terkirim/Dari pengirim). List card per catatan: judul, waktu, prioritas, badge target audience (Semua/Role/Individu), excerpt isi, tombol Detail/Hapus.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

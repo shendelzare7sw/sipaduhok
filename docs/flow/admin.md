@@ -75,6 +75,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/landing-pages/index.blade.php` · **Controller**: `Admin/LandingPage/LandingPageController.php`
 
+**Tampilan index**: Header "Manajemen Landing Page" + card **Daftar Halaman** (tabel sederhana). Kolom: Judul Halaman, Slug (URL path, `/` untuk home), Terakhir Diperbarui (diffForHumans dengan tooltip waktu lengkap), Aksi (tombol **Edit Konten** primary). Tidak ada search/filter/create — halaman landing pre-seeded via seeder, hanya bisa edit konten existing.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Edit halaman | `admin.landing-pages.edit` | GET | `@edit` | `admin/landing-pages/edit.blade.php` | Render form editor section (hero, layanan, statistik, dsb.) untuk slug landing tertentu. Halaman pre-seed; tidak ada create. |
@@ -85,9 +87,17 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ---
 
+### Manajemen User (Dashboard Hub)
+
+**Index view**: `admin/users/index.blade.php` · **Controller**: `Admin/UserController.php`
+
+**Tampilan index**: 4 **stat card** dengan gradient warna: Total Guru (hijau), Total Siswa (biru), User Aktif (ungu), Non-Aktif (merah). 3 **section dashboard** (bukan tab — 3 card berurutan ke bawah): **Tenaga Pendidik Terbaru** (5 row + tombol "Lihat Semua" → `tenaga-pendidik`), **Siswa Terbaru** (5 row + "Lihat Semua" → `siswa`), **Orang Tua Terbaru** (5 row + "Lihat Semua" → `orang-tua`). Tiap section punya tombol kontekstual: bila section kosong, tombol berubah jadi "+ Tambah Baru" langsung. Tabel mini: nama, NIP/NIS, email/cabang, role/kelas, status, aksi (Detail, Edit, Hapus).
+
 ### Manajemen User → Tenaga Pendidik
 
-**Index view**: `admin/users/tenaga-pendidik.blade.php` (dipanggil dari `admin/users/index.blade.php` tab) · **Controller**: `Admin/UserController.php`
+**Index view**: `admin/users/tenaga-pendidik.blade.php` (dipanggil via tombol "Lihat Semua" dari dashboard hub) · **Controller**: `Admin/UserController.php`
+
+**Tampilan index**: Card daftar tenaga pendidik dengan header berisi tombol **+ Tambah Baru** (primary), **Import Excel** (success), **Download Template**, **Cetak** (target blank). Form filter: search nama/NIP/email + dropdown Role (Ketua/Sekretaris/Bendahara/Waka/Wali/Guru) + Status (Aktif/Non-aktif) + tombol Filter. Tabel: Nama, NIP, Email, Role, Status, Aksi (Detail, Edit, Hapus, Bulk select checkbox + tombol bulk delete di header).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -106,6 +116,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/users/siswa.blade.php` · **Controller**: `Admin/UserController.php`
 
+**Tampilan index**: Card daftar siswa dengan header: tombol **+ Tambah Siswa** (primary), **Import Excel** (success), **Download Template**, **Cetak**. Filter: search NISN/nama + dropdown Cabang + Jenjang + Kelas (cascade) + Status (Aktif/Non-aktif). Tabel: NISN, Nama Lengkap, Kelas, Cabang, Orang Tua (count + link), Aksi (Detail, Edit, Hapus, Bulk select).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Tambah | `admin.users.create-siswa` | GET | `@createSiswa` | `admin/users/siswa-create.blade.php` | Form: NISN, nama, cabang, kelas, orang tua. |
@@ -122,6 +134,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Manajemen User → Wali Murid (Orang Tua)
 
 **Index view**: `admin/users/orang-tua.blade.php` · **Controller**: `Admin/UserController.php`
+
+**Tampilan index**: Card daftar orang tua dengan header berisi tombol **+ Tambah** (primary), **Import Excel** (success), **Download Template**, **Cetak**. Filter: search nama/WhatsApp + Cabang + Jenjang anak. Tabel: Nama, WhatsApp, jumlah anak, daftar nama anak (link ke siswa), Status aktif (toggle), Aksi (Detail, Edit, Toggle status, Hapus, Bulk select).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -145,6 +159,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/recovery-tickets/index.blade.php` · **Controller**: `Admin/AdminRecoveryTicketController.php`
 
+**Tampilan index**: 2 **tab navigation** (nav-pills): **Antrean** (aktif, badge merah jumlah pending) & **Riwayat** (link ke `history`). Card **Nomor WhatsApp Bantuan**: form set WhatsApp admin (prefix +62) yang dipakai di halaman login sebagai kontak bantuan. Card **Daftar Antrean Permintaan**: bulk toolbar (muncul saat ada checkbox dipilih) dengan tombol **Arsipkan/Tutup Terpilih**. Tabel: checkbox + No + Tanggal + User Peminta (nama + role badge) + Kendala + Email + Status API + Aksi Admin (Resend, Resolve, Reject, lihat detail). Bisa mobile mode dengan checkbox per-card.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Resend WhatsApp | `admin.recovery-tickets.resend` | POST | `@resend` | redirect | Kirim ulang link reset ke WA siswa/wali. |
@@ -163,6 +179,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/ai-settings/index.blade.php` · **Controller**: `Admin/AiSettingController.php`
 
+**Tampilan index**: Layout 2-kolom — kiri **Konfigurasi AI Provider** (form): toggle "Mode LLM (Generative AI)" + toggle "AI Question Generator", dropdown **AI Provider GLOBAL** (Groq Cloud / Google Gemini), input API Key untuk Groq (dengan toggle eye), input API Key Gemini (kondisional). Tombol **Simpan** + **Test Koneksi** (POST AJAX → notifikasi sukses/gagal). Kolom kanan: card info bantuan & deskripsi tier gratis. Setting **Chatbot Access Control** (per role: ketua/sekretaris/bendahara/waka/wali/guru/siswa/orang_tua) ada di hidden fields untuk preservasi.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Simpan pengaturan | `admin.ai-settings.update` | PUT | `@update` | redirect | Simpan API key / model AI ke `AppSetting`. |
@@ -176,6 +194,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/lms-settings/index.blade.php` · **Controller**: `Admin/LmsSettingController.php`
 
+**Tampilan index**: Layout 2-kolom — kiri **Konfigurasi Akses Jenjang** (form): alert info ("Aktifkan toggle jenjang yang diizinkan akses LMS (Tugas, Materi, Ujian Online)") + list group dengan toggle switch per jenjang (KB/TKA/TKB/SD/SMP/SMA) — tiap item punya avatar berwarna, label jenjang, deskripsi singkat. Tombol **Simpan Perubahan** (primary) di bawah. Kolom kanan: card info bantuan.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Simpan pengaturan | `admin.lms-settings.update` | PUT | `@update` | redirect | Update daftar `allowed_jenjang` LMS (TK, SD, SMP, SMA, dst.) di `AppSetting`. |
@@ -187,6 +207,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Tahun Ajaran
 
 **Index view**: `admin/tahun-ajaran/index.blade.php` · **Controller**: `Admin/TahunAjaranController.php` (Laravel `resource`)
+
+**Tampilan index**: 3 **stat card**: Total Periode, Periode Aktif, Tahun Berjalan (nama TA aktif). Alert filter aktif bila ada `?status=` di URL. Card **Daftar Tahun Ajaran**: header berisi dropdown filter Status (Semua/Hanya Aktif/Tidak Aktif, auto-submit) + tombol kanan **+ Tahun Ajaran** (primary). Tabel: No, Tahun Ajaran, Periode (mulai-selesai), Status (badge Aktif), Aksi (Detail, Edit, Aktifkan, Hapus).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -206,6 +228,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/cabang/index.blade.php` · **Controller**: `Admin/CabangController.php` (resource)
 
+**Tampilan index**: 4 **stat card**: Total Cabang, Aktif Beroperasi, Non-Aktif, Total Siswa (semua cabang). Alert filter aktif bila ada `?status=` atau `?search=`. Card **Daftar Cabang**: dropdown filter Status (Semua/Aktif/Non-Aktif, auto-submit) + tombol **+ Cabang Baru** (primary). Tabel: No, Info Cabang (kode + nama), Kontak & Alamat, Statistik (jumlah siswa, kelas, user), Status (badge), Aksi (Detail, Edit, Toggle aktif, Hapus).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Tambah | `admin.cabang.create` | GET | `@create` | `admin/cabang/create.blade.php` | Form: nama cabang, alamat, jenjang yg tersedia. |
@@ -223,6 +247,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Data Kelas
 
 **Index view**: `admin/kelas/index.blade.php` · **Controller**: `Admin/KelasController.php` (resource + custom)
+
+**Tampilan index**: 4 **stat card**: Total Kelas (di TA terpilih), Siswa Terdaftar, Terisi Wali Kelas, Belum Ada Wali (warning). Card **Daftar Kelas**: header berisi 4 tombol kanan — **Salin Data** (info, buka `copyClassModal`), **Cetak** (secondary, target blank), **Import Excel** (success), **Kelas Baru** (primary). Form filter: search nama/kode kelas + dropdown TA (default TA aktif, auto-submit) + Jenjang + **Cabang** (admin lihat semua cabang, beda dgn Waka) + tombol Filter & Reset. Tabel: Info Kelas (nama+TA+cabang), Jenjang badge, Wali Kelas, Kuota/Siswa, Aksi (Detail, Edit, Kelola Siswa, Hapus).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -249,6 +275,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/wali-kelas/index.blade.php` · **Controller**: `Admin/WaliKelasController.php`
 
+**Tampilan index**: 4 **stat card**: Total Kelas, Sudah Ada Wali, Belum Ada Wali (warning), Total Guru Aktif. Card **Penunjukan Wali Kelas**: header dengan tombol **Cetak** (secondary, target blank). Form filter: search nama kelas/wali + TA + Jenjang + **Cabang** + Status (assigned/unassigned) + Filter/Reset. Tabel: Info Kelas, Jenjang & Cabang, Jumlah Siswa, Penugasan Wali Kelas, Aksi (Detail → form assign/ubah/bulk-assign).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Kelas | `admin.wali-kelas.show` | GET | `@show` | `admin/wali-kelas/show.blade.php` | Detail wali per kelas + opsi assign/replace. |
@@ -264,6 +292,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/guru-pengajar/index.blade.php` · **Controller**: `Admin/GuruPengajarController.php`
 
+**Tampilan index**: 4 **stat card**: Total Guru, Sudah Ditugaskan, Total Penugasan (Guru-Kelas-Mapel), Mata Pelajaran. Card **Daftar Guru Pengajar** (subtitle "Penugasan otomatis dari Jadwal Pelajaran"): tombol header **Cetak** + tombol **Rebuild dari Jadwal** (POST, refresh cache `GuruPengajarKelas`). Form filter: search nama/NIP/email + TA + Status. Tabel: nama guru + foto avatar, jumlah kelas yang diampu, daftar mapel, Aksi (Detail, Kelola per Kelas). Read-only — data derived dari Jadwal.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Guru | `admin.guru-pengajar.show` | GET | `@show` | `admin/guru-pengajar/show.blade.php` | Profil guru + daftar kelas yang diampu (derived dari Jadwal). |
@@ -278,6 +308,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Mata Pelajaran
 
 **Index view**: `admin/mata-pelajaran/index.blade.php` · **Controller**: `Admin/MataPelajaranController.php` (resource + custom)
+
+**Tampilan index**: **Stat scroll horizontal** (7 mini-card per jenjang): Total, KB, TKA, TKB, SD, SMP, SMA. Card filter+action: dropdown Filter Jenjang (auto-submit) + tombol Reset + tombol kanan **+ Tambah** (primary), **Import Excel** (success), **Download Template**, **Cetak** (target blank). Tabel mapel: kode, nama, jenjang badge, count penggunaan di Jadwal, Aksi (Detail, Edit, Hapus). Mobile mode mengubah tabel jadi card-stack.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -300,6 +332,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/pengaturan-istirahat/index.blade.php` · **Controller**: `Admin/PengaturanIstirahatController.php`
 
+**Tampilan index**: Tombol Kembali ke Jadwal Pelajaran. Info card biru: aturan ("Max 2 istirahat per jenjang", "auto-blok slot jadwal", "auto-tampil highlight kuning di cetak jadwal"). Tombol **+ Tambah Waktu Istirahat** (primary). Konten: **section per jenjang** (KB/TKA/TKB/SD/SMP/SMA) — tiap section: header dengan badge jenjang + tombol "+ Tambah Istirahat" (muncul bila count < 2), tabel istirahat: Urutan, Nama, Jam Mulai-Selesai, Hari Aktif (badge per hari), Status toggle, Aksi (Edit, Hapus).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Tambah | `admin.pengaturan-istirahat.create` | GET | `@create` | `admin/pengaturan-istirahat/create.blade.php` | Form: jenjang, hari, jam mulai-selesai, label. |
@@ -316,6 +350,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Jadwal Pelajaran
 
 **Index view**: `admin/jadwal-pelajaran/index.blade.php` · **Controller**: `Admin/JadwalPelajaranController.php`
+
+**Tampilan index**: 4 **stat card**: Total Jadwal, Jadwal Kosong (warning, slot belum di-assign guru), Guru Mengajar, Total Kelas. Card **Daftar Jadwal Pelajaran**: header dengan tombol scroll-mobile: **+ Tambah** (primary), **Istirahat** (warning oranye, cross-link), dropdown **Aksi** (Duplikasi Jadwal modal, Ganti Semua Guru modal, Import Excel), dropdown **Cetak/Export** (PDF Semua, Excel Semua, **Cetak Per Kelas** modal). Form filter: TA, Cabang, Jenjang, Kelas, Guru (semua auto-submit). Konten: grid jadwal mingguan per kelas atau list — klik kelas → detail show. Aksi per cell/jadwal: edit, ganti guru, hapus.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -351,6 +387,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/manajemen-siswa/index.blade.php` · **Controller**: `Admin/ManajemenSiswaController.php`
 
+**Tampilan index**: 5 **stat card**: Total Siswa, Sudah Ada Kelas, Belum Ada Kelas (warning), Laki-laki, Perempuan. Card **Daftar Siswa** (admin lihat semua cabang) dengan badge "Snapshot {TA}" bila historical. Tombol **Cetak** + tombol **Bulk Assign** (kelola siswa batch — admin-only, beda dgn Waka). Form filter: search nama/NISN/NIS + Cabang + Jenjang + Kelas (cascade) + TA + Status. Tabel siswa: identitas, jenjang, kelas saat ini, Aksi (Detail, Assign Kelas modal, Cetak Kartu).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Siswa | `admin.manajemen-siswa.show` | GET | `@show` | `admin/manajemen-siswa/show.blade.php` | Profil siswa + form assign kelas + attach/detach orang tua. |
@@ -372,6 +410,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/cetak-laporan/index.blade.php` · **Controller**: `Admin/CetakLaporanController.php`
 
+**Tampilan index**: 4 **mini stat card** ringkas: Siswa Aktif, Tenaga Pendidik, Kelas Aktif, Cabang. **Grid kartu laporan** (3 kolom desktop) — tiap kartu punya header gradient warna (blue/green/purple/orange/teal/pink), icon, judul, deskripsi, dan **form GET filter** sendiri (Cabang → Jenjang → Kelas cascade, Tahun Ajaran, Status). Tombol **Cetak** (target blank) di tiap kartu → ke route print specific. Tiap kartu mandiri (form sendiri-sendiri), bisa tweak filter per laporan tanpa pengaruh laporan lain.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Cetak Siswa | `admin.cetak-laporan.siswa` | GET | `@siswa` | `admin/cetak-laporan/print-siswa.blade.php` | Layout cetak daftar siswa. |
@@ -389,6 +429,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Keuangan → Tagihan
 
 **Index view**: `admin/keuangan/tagihan/index.blade.php` · **Controller**: `Admin/Keuangan/TagihanController.php` (extends `Bendahara/TagihanController`)
+
+**Tampilan index**: Mirip Bendahara — alert tunggakan TA sebelumnya + alert info massal. Card **Daftar Tagihan Siswa** dengan header berisi dropdown **Filter** (Tahun Ajaran, Kelas) + **search** (nama/NISN), dan tombol kanan: **Import** (outline-danger — fitur tambahan admin-only, beda dgn Bendahara), **Cetak Laporan** (outline secondary), btn-group dropdown **+ Buat Tagihan** (Massal/Custom/Generate SPP), **Duplikasi** (outline-info). Tabel siswa identik dengan Bendahara: NO, IDENTITAS, NISN, KELAS, CABANG, TOTAL, BAYAR, SISA, STATUS, AKSI.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -419,6 +461,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/keuangan/pembayaran/index.blade.php` · **Controller**: `Admin/Keuangan/PembayaranController.php` (extends `Bendahara/PembayaranController`)
 
+**Tampilan index**: Identik dengan Bendahara — 3 **stat card** (Menunggu Validasi, Disetujui, Ditolak). Card **Rincian Transaksi Masuk** dengan dropdown **Filter** lengkap (Status, Metode pembayaran, Kelas, Rentang Tanggal). Tabel transaksi: tanggal, siswa, nominal, metode, status badge, aksi (Detail, Validasi terima/tolak). Pembayaran via Midtrans masuk via callback otomatis.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Pembayaran | `admin.keuangan.pembayaran.show` | GET | `@show` | `admin/keuangan/pembayaran/show.blade.php` | Detail bukti, status, validasi. |
@@ -437,6 +481,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/keuangan/laporan/index.blade.php` · **Controller**: `Admin/Keuangan/LaporanPembayaranController.php` (extends `Bendahara/LaporanPembayaranController`)
 
+**Tampilan index**: Identik Bendahara — card **Filter Laporan** (Tahun, Bulan, Metode + Cabang → Jenjang → Kelas cascade) + tombol Terapkan/Reset/**Cetak** (outline-success). Badge "Filter aktif" muncul saat ada filter. 4 **stat card** (Total Pembayaran, Jumlah Transaksi, dst). Tabel transaksi terfilter. Cross-link ke sub-page Rekap Tagihan & Belum Lunas.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Cetak Laporan Pembayaran | `admin.keuangan.laporan.cetak` | GET | `@cetak` (parent) | `bendahara/laporan/cetak.blade.php` | Layout cetak rekap pembayaran periode (view shared dengan Bendahara). |
@@ -453,6 +499,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/keuangan/info-pembayaran/index.blade.php` · **Controller**: `Admin/Keuangan/InfoPembayaranController.php`
 
+**Tampilan index**: Identik Bendahara — 4 **stat card** status kanal: Transfer Manual, Gateway Midtrans, Pembayaran Tunai, Kesiapan Kanal. Grid 3 card pengaturan: **Rekening Bank Tujuan**, **Gateway Midtrans** (server key, client key, mode sandbox/production toggle), **Info Tunai** (lokasi, jam, deskripsi). Tombol **Atur** per-card → toggle inline-edit form. Semua editing in-place via POST `update`.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Simpan Config | `admin.keuangan.info-pembayaran.update` | POST | `@update` | redirect | Simpan API key Midtrans + daftar `InfoPembayaran` (rekening bank). |
@@ -465,6 +513,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Keuangan → Validasi Akses (Ujian & Rapor)
 
 **Index view**: `admin/keuangan/validasi-akses/index.blade.php` · **Controller**: `Admin/Keuangan/ValidasiAksesController.php` (extends `Bendahara/ValidasiAksesController`)
+
+**Tampilan index**: Identik Bendahara — alur 3-badge (Ketua Approve → Bendahara Validasi → Akses Terbuka). 4 **stat card**: Total Siswa Aktif, Akses Ujian Valid, Akses Rapor Valid, Belum Divalidasi. Card **Daftar Kendali Akses** dengan filter lengkap (search, Cabang, Jenjang, Kelas, Status Ujian, Status Rapor). Toolbar bulk: **Validasi Ujian/Rapor Terpilih**, **Ajukan Dispensasi** (warning, badge merah bila pending) → modal lempar ke Ketua. Tabel: checkbox, identitas, kelas, status, aksi inline (validasi/batalkan).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -487,6 +537,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/keuangan/promotion/validation.blade.php` · **Controller**: `Admin/Keuangan/PromotionValidationController.php`
 
+**Tampilan index**: Identik Bendahara — 4 **stat card** (Kandidat / Siap / Menunggu / Total Tunggakan Rp). Card **Kandidat Dispensasi** dengan tombol kanan link ke **Riwayat**. Toolbar bulk: "Pilih semua" + badge counter + **Ajukan Terpilih** (bulk modal). Tabel kandidat: checkbox + nama + kelas + status akademik (% tuntas) + tunggakan Rp + status pengajuan + Aksi tombol **Ajukan** per-siswa (modal `modalDispensasi{id}` form alasan).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Setujui/Tolak Dispensasi (1) | `admin.keuangan.promotion.validation.store` | POST | `@store` | redirect | Catat keputusan `izin_naik_kelas_khusus` utk satu siswa. |
@@ -500,6 +552,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Akademik → Kalender Akademik
 
 **Index view**: `admin/akademik/kalender/index.blade.php` · **Controller**: `Admin/Akademik/AkademikController.php` (extends `Sekretaris/SekretarisController`)
+
+**Tampilan index**: Identik Sekretaris — halaman kalender 2-kolom: kolom utama **grid kalender** (toggle Bulan/Minggu/Tahun + prev/next + search event), kolom kanan **legend warna jenis kegiatan** & **daftar kegiatan upcoming**. Header: info TA aktif, dropdown **Cetak PDF** (bulanan/tahunan/custom pilih bulan), tombol **+ Tambah Kegiatan** (primary). Klik tanggal/event → modal detail dengan tombol Edit/Hapus.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -519,7 +573,9 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ### Akademik → Pengumuman
 
-**Index view**: `admin/akademik/pengumuman/index.blade.php` · **Controller**: `Admin/Akademik/AkademikController.php`
+**Index view**: `admin/akademik/pengumuman/index.blade.php` → `@include('shared.akademik.pengumuman-index')` · **Controller**: `Admin/Akademik/AkademikController.php`
+
+**Tampilan index**: Identik Sekretaris (partial shared) — toolbar header dengan judul + tombol **+ Tambah Pengumuman**. 3 **stat card**: Total Pengumuman, Sumber Otomatis (generated dari kalender), Prioritas Tinggi. Tabel: Detail | Tanggal | Prioritas | Sumber | Status | Aksi (Edit, Hapus).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -535,7 +591,9 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ### Akademik → Berita
 
-**Index view**: `admin/akademik/berita/index.blade.php` · **Controller**: `Admin/Akademik/AkademikController.php`
+**Index view**: `admin/akademik/berita/index.blade.php` → `@include('shared.akademik.berita-index')` · **Controller**: `Admin/Akademik/AkademikController.php`
+
+**Tampilan index**: Identik Sekretaris (partial shared) — toolbar dengan tombol **+ Tambah Berita**. 4 **stat card**: Total, Published, Featured, Kategori. Form filter: search judul + dropdown Kategori + Status (Aktif/Draft/Arsip) + tombol Filter/Reset. Tabel: judul + thumbnail, kategori badge, status, featured icon, aksi (Edit, Hapus, Toggle Featured ⭐).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -552,7 +610,9 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ### Akademik → Flyer
 
-**Index view**: `admin/akademik/flyer/index.blade.php` · **Controller**: `Admin/Akademik/AkademikController.php`
+**Index view**: `admin/akademik/flyer/index.blade.php` → `@include('shared.akademik.flyer-index')` · **Controller**: `Admin/Akademik/AkademikController.php`
+
+**Tampilan index**: Identik Sekretaris (partial shared) — toolbar dengan tombol **+ Tambah Flyer**. 3 **stat card**: Total Flyer, Aktif, Nonaktif. **Grid card flyer** (bukan tabel) — tiap card: gambar, badge status, judul + nomor urut, deskripsi, target audience, periode tampil, tombol Kunjungi Tautan + Edit + Hapus.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -569,6 +629,12 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Akademik → Promotion (Kenaikan Kelas)
 
 **Index view (Report)**: `admin/akademik/promotion/rekap.blade.php` · **Controller**: `Admin/Akademik/PromotionReportController.php`, `PromotionKKMController`, `PromotionSettingsController`
+
+**Tampilan index** (3 sub-page):
+
+- **Proses & Rekap** (`rekap.blade.php`): Filter atas (TA history, Cabang, Jenjang, Kelas, Status: NAIK/TIDAK/LULUS/TUNGGAKAN, search). Stat summary per status kelulusan. Tabel status kenaikan siswa: checkbox + nama + kelas asal → kelas tujuan + nilai/% tuntas + flag dispensasi Ketua + status. Tombol header: **Eksekusi Promosi** (danger, modal konfirmasi), **Cetak Rekap** (target blank). Bulk: Rollback, Promote (untuk yang sebelumnya gagal). Tombol per-baris: Rollback individual. Bila ada `PromotionSchedule` PENDING — muncul info + tombol **Batalkan Jadwal**.
+- **Pengaturan KKM** (`kkm.blade.php`): Card dengan dropdown filter Jenjang (PAUD/SD/SMP/SMA, auto-submit). Form mass-edit: tabel mapel × kolom (No, Nama, Jenjang badge, KKM Saat Ini, Set KKM Baru — input numeric). Tombol Simpan di bawah.
+- **Pengaturan Kenaikan** (`settings.blade.php`): Form pengaturan TA aktif — tanggal pengambilan rapor, tanggal+waktu eksekusi otomatis (default 02:00 AM), persentase minimal tuntas. Tombol Simpan → sinkronkan `PromotionSchedule`.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -592,6 +658,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/monitoring/{pengguna|wali-kelas|guru-pengajar|siswa}.blade.php` · **Controller**: `Admin/MonitoringController.php` (extends `Ketua/KetuaController`)
 
+**Tampilan index** (4 menu monitoring + 1 LMS, pola seragam — partial `shared/monitoring/*` untuk pengguna/wali/guru/siswa, dan `monitoring-lms/index.blade.php` untuk LMS): 4 **summary card** sesuai konteks (mis. Pengguna: Tenaga Pendidik, Siswa, Total Akun, Akun Aktif). Card konten dengan filter toolbar (search + dropdown filter kontekstual + status). Tabel utama read-only — admin lihat semua cabang (vs Waka yang scoped, dan Ketua yang juga semua). Untuk **Monitoring LMS**: filter bar (search + TA + toggle "hanya kelas dengan konten") + 5 stat (Total Kelas/Materi/Tugas/Latihan/Ujian) + grid kartu kelas (jenjang badge, TA, wali, stat pill konten) → klik kartu = detail kelas.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Monitoring Pengguna | `admin.monitoring.pengguna` | GET | `@monitoringPengguna` | `admin/monitoring/pengguna.blade.php` | Dashboard last-active, role, status user. |
@@ -611,6 +679,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/laporan/index.blade.php` · **Controller**: `Admin/MonitoringController.php` (extends `Ketua/KetuaController`)
 
+**Tampilan index**: Identik pola Ketua — 4 **stat card** ringkasan global (Siswa Aktif, Tenaga Pendidik, Kelas Aktif, Cabang). Section title "Pilih Jenis Laporan" → **grid kartu laporan** (Daftar Siswa, Tenaga Pendidik, Kelas, Wali Kelas, Guru Pengajar, Rekap, Rekap Akademik). Tiap kartu punya form GET filter (Cabang → Jenjang → Kelas cascade, TA, status) + tombol **Cetak** (target blank). Form per-kartu independen.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View aktual | Logika ringkas |
 |---|---|---|---|---|---|
 | Buka Laporan | `admin.laporan.index` | GET | `@index` (wrapView) | `admin/laporan/index.blade.php` | Hub menu cetak laporan + filter. |
@@ -629,6 +699,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 **Index view**: `admin/catatan/index.blade.php` · **Controller**: `Admin/MonitoringController.php`
 
+**Tampilan index**: Toolbar header **Manajemen Catatan** + tombol kanan **+ Buat Catatan** (primary). 4 **stat card**: Total Catatan, Publik, Total Dibaca, Mendesak. Card **Riwayat Catatan Terkirim** berisi **list card per catatan** — tiap card: judul + waktu kirim + badge prioritas + badge target audience (Semua/Role/Individu) + excerpt isi + tombol Detail/Hapus. Empty state bila kosong.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Buat Catatan | `admin.catatan.create` | GET | `@catatanCreate` | `admin/catatan/create.blade.php` | Form: judul, isi, prioritas, tipe penerima (semua/role/individu), penerima_ids. |
@@ -643,6 +715,8 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 ### Google Sheets Integration
 
 **Index view**: `admin/google-sheets/index.blade.php` · **Controller**: `Admin/GoogleSheetsController.php`
+
+**Tampilan index**: Alert status di atas — biru "Setup Diperlukan" + tombol **Setup Wizard** (bila credentials belum ada), atau hijau "Terhubung" + Spreadsheet ID + tombol **Ubah Konfigurasi**. Card **Modul Data**: grid card per modul (Siswa, Tagihan, Pembayaran, dst.) — tiap card berisi badge tier (HARIAN/MINGGUAN), nama sheet, info sinkronisasi terakhir (push/pull + waktu diffForHumans), dan **2 tombol aksi**: **Kirim** (push DB → Sheets, dengan progress feedback) & **Pratinjau** (pull preview → lihat perubahan sebelum apply). Card **Riwayat Sinkronisasi Terbaru**: tabel modul/arah/sheet/baris/status/waktu.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

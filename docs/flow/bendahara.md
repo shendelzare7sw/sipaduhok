@@ -48,6 +48,8 @@ View dir: `resources/views/bendahara/`.
 
 **Index view**: `bendahara/tagihan/index.blade.php` · **Controller**: `Bendahara/TagihanController.php`
 
+**Tampilan index**: Alert merah di atas (bila ada **tunggakan TA sebelumnya** — jumlah siswa + total + tombol per-TA untuk filter cepat) + alert kuning info fitur tagihan massal. Card utama **Daftar Tagihan Siswa**: header berisi dropdown **Filter** (Tahun Ajaran, Kelas) + **search** (nama/NISN), serta tombol kanan: **Cetak Laporan** (outline secondary), btn-group dropdown **+ Buat Tagihan** (Massal / Custom / Generate SPP), **Duplikasi** (outline-info). Tabel siswa: NO | IDENTITAS | NISN | KELAS | CABANG | TOTAL | SUDAH BAYAR | SISA | STATUS (Lunas/Belum Lunas/Kosong) | AKSI (Lihat Detail, Edit, Riwayat Bayar, Cetak). Pagination di bawah.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Detail Tagihan Siswa | `bendahara.tagihan.show` | GET | `@show` | `bendahara/tagihan/show.blade.php` | Rincian item tagihan + riwayat pembayaran 1 siswa. |
@@ -67,7 +69,9 @@ View dir: `resources/views/bendahara/`.
 
 ### Tarik Tunggakan (Carryover)
 
-**Index view**: `bendahara/tagihan/carryover.blade.php` · **Controller**: `Bendahara/TagihanController.php`
+**Index view**: `bendahara/tagihan/carryover.blade.php` → `@include('keuangan-shared.carryover._content')` · **Controller**: `Bendahara/TagihanController.php`
+
+**Tampilan index**: Halaman tipis yang menampilkan partial **shared** dari `keuangan-shared/carryover/_content.blade.php`. UI: form pilih TA sumber → tombol **Preview Tunggakan** (POST AJAX, hitung daftar siswa & total) → tabel preview hasil → tombol **Eksekusi Carryover** (POST, insert ke TA aktif). Tidak ada filter/search lain — alur step-by-step (preview → execute).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -81,6 +85,8 @@ View dir: `resources/views/bendahara/`.
 ### Kelola Pembayaran
 
 **Index view**: `bendahara/pembayaran/index.blade.php` · **Controller**: `Bendahara/PembayaranController.php`
+
+**Tampilan index**: 3 **stat card** di atas — Menunggu Validasi, Pembayaran Disetujui, Pembayaran Ditolak. Card utama **Rincian Transaksi Masuk** dengan header berisi dropdown **Filter** (Status validasi, Metode pembayaran, Kelas, Rentang Tanggal dari–sampai) + tombol Terapkan/Reset. Tabel transaksi: tanggal, siswa, nominal, metode, status (badge warna), aksi (Detail, Validasi terima/tolak). Pembayaran via Midtrans masuk otomatis lewat callback.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -100,6 +106,8 @@ View dir: `resources/views/bendahara/`.
 
 **Index view**: `bendahara/info-pembayaran/index.blade.php` · **Controller**: `Bendahara/InfoPembayaranController.php` · **URL akses**: `/bendahara/config` (path `info-pembayaran` redirect 301 → `config`)
 
+**Tampilan index**: 4 **stat card** status kanal pembayaran — Transfer Manual (Aktif/Belum), Gateway Midtrans (Aktif/Off/Belum + mode sandbox/production), Pembayaran Tunai (Aktif + lokasi loket), Kesiapan Kanal. Grid 3 card pengaturan: **Rekening Bank Tujuan**, **Gateway Midtrans** (server key, client key, mode toggle, enable/disable), **Info Tunai** (lokasi, jam operasional, deskripsi). Tiap card punya tombol **Atur** (toggle inline-edit form) — **tidak ada halaman/view edit terpisah**, semua editing in-place dengan AJAX-like submit POST `update`.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Simpan Config | `bendahara.info-pembayaran.update` | POST | `@update` | redirect | Simpan API key Midtrans (server key, client key, mode sandbox/production) + daftar rekening bank (`InfoPembayaran`). |
@@ -112,6 +120,8 @@ View dir: `resources/views/bendahara/`.
 ### Validasi Akses (Ujian & Rapor)
 
 **Index view**: `bendahara/validasi-akses/index.blade.php` · **Controller**: `Bendahara/ValidasiAksesController.php`
+
+**Tampilan index**: **Alur Validasi** ditampilkan sebagai 3 badge berurutan (Ketua Approve Rapor → Bendahara Validasi → Akses Terbuka). 4 **stat card**: Total Siswa Aktif, Akses Ujian Valid, Akses Rapor Valid, Belum Divalidasi. Card utama **Daftar Kendali Akses Siswa** dengan filter lengkap (search nama/NISN, Cabang, Jenjang, Kelas, Status Ujian, Status Rapor) — semua auto-submit on change. Toolbar berisi checkbox "Pilih semua" + tombol bulk: **Validasi Ujian** (success), **Validasi Rapor** (disabled jika belum di-approve Ketua, ada label "(Perlu Ketua)"), **Ajukan Dispensasi** (warning, buka modal — ke Ketua PKBM; badge merah bila ada pending). Tabel: checkbox + identitas + kelas + status ujian/rapor + aksi inline (validasi/batalkan).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -134,6 +144,8 @@ View dir: `resources/views/bendahara/`.
 
 **Index view**: `bendahara/laporan/index.blade.php` · **Controller**: `Bendahara/LaporanPembayaranController.php`
 
+**Tampilan index**: Card **Filter Laporan** di atas: Tahun, Bulan, Metode (Tunai/Transfer/Midtrans), Cabang → Jenjang → Kelas (cascade — jenjang & kelas hidden sampai cabang dipilih). Tombol **Terapkan Filter**, **Reset**, dan **Cetak** (outline-success, target blank). Badge "Filter aktif" muncul saat ada filter di-apply. 4 **stat card**: Total Pembayaran (Rp), Jumlah Transaksi, dan 2 stat lain (rata-rata/per-metode). Bawahnya: tabel transaksi terfilter. Tombol cross-link ke menu **Rekap Tagihan** & **Belum Lunas** (sub-page).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Cetak Laporan Pembayaran | `bendahara.laporan.cetak` | GET | `@cetak` | `bendahara/laporan/cetak.blade.php` | Layout cetak rekap pembayaran periode (filter tanggal, kelas, status). |
@@ -149,6 +161,8 @@ View dir: `resources/views/bendahara/`.
 ### Validasi Dispensasi (Kenaikan Kelas)
 
 **Index view**: `bendahara/promotion/validation.blade.php` · **Controller**: `Bendahara/PromotionValidationController.php`
+
+**Tampilan index**: 4 **stat card**: Kandidat (akademik tuntas tapi keuangan belum lunas), Siap Diajukan, Menunggu (sudah masuk antrean Ketua), Total Tunggakan (Rp). Card utama **Kandidat Dispensasi** dengan tombol kanan link ke **Riwayat** (`history`). Toolbar: checkbox "Pilih semua" + badge "X siswa terpilih" + tombol **Ajukan Terpilih** (bulk, buka modal). Tabel: checkbox + Nama Siswa + Kelas + Status Akademik (badge %) + Tunggakan (Rp) + Status Pengajuan (Belum Diajukan / Menunggu / Disetujui) + Aksi: tombol **Ajukan** per-siswa (buka modal `modalDispensasi{id}` → form alasan + submit POST `store`).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

@@ -44,6 +44,8 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 
 **Index view**: `ketua/promotion/approval.blade.php` · **Controller**: `Ketua/PromotionApprovalController.php`
 
+**Tampilan index**: Card **Permintaan Izin Khusus (Dispensasi)** dengan header berisi 3 tombol: **Setujui Terpilih** (success, hidden sampai ada checkbox dicentang, badge counter), **Tolak Terpilih** (danger, sama hidden+counter), **Riwayat** (primary → ke `approval.history`). Tabel: checkbox + Siswa (nama+kelas) + Kelas + Diajukan Oleh + Alasan (max 80 char) + Tanggal pengajuan + Aksi (tombol Setujui/Tolak hijau-merah → buka modal konfirmasi per-siswa `modalApprove{id}` / `modalReject{id}` dengan info ringkasan & disclaimer "tidak menghapus tunggakan"). Tidak ada search/filter di Ketua — daftar terbatas pada `menunggu` saja.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Setujui/Tolak (1 siswa) | `ketua.promotion.approval.update` | PUT | `@update` | redirect | Update record `izin_naik_kelas_khusus` (status `DISETUJUI`/`DITOLAK`, alasan, pengaksi) + set `StatusNaikKelasSiswa.izin_khusus_ketua`. |
@@ -57,6 +59,8 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 ### Validasi Rapor (Tingkat-3)
 
 **Index view**: `ketua/validasi-rapor/index.blade.php` · **Controller**: `Ketua/ValidasiRaporController.php`
+
+**Tampilan index**: Alert info "Alur Review Rapor" — 4 badge berurutan (Wali Kirim → Ketua Preview & Review → Validasi/Minta Revisi → Lanjut ke Bendahara). 2 **stat card**: Menunggu Validasi Ketua, Divalidasi Hari Ini. Card **Filter & Pencarian**: Kelas (dropdown), Status Validasi Ketua (pending/validated), Search nama/NIS + tombol Filter & Reset. Card **Daftar Siswa** dengan tombol kanan: **Validasi Semua** (success → modal konfirmasi `validasi-semua`), **Validasi Terpilih** (info → modal `bulk-validasi`). Tabel siswa: nama, kelas, status validasi wali/bendahara/ketua, dan aksi inline per-baris: **Preview** (buka view rapor di tab baru), **Validasi**, **Batalkan**, **Minta Revisi** (kembalikan ke wali).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -75,6 +79,8 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 
 **Index view**: `ketua/dispensasi/index.blade.php` · **Controller**: `Ketua/ValidasiRaporController.php`
 
+**Tampilan index**: Alert info "Dispensasi Keuangan diajukan oleh Bendahara..." menjelaskan dampak approve/reject. 3 **stat card** dengan gradient color: Menunggu Keputusan (kuning), Disetujui (hijau), Ditolak (merah). Card filter ringkas: dropdown Status (menunggu/disetujui/ditolak), dropdown Tipe (ujian/rapor) + tombol Filter & Reset. Card **Daftar Pengajuan Dispensasi** dengan tombol kanan **Setujui Terpilih** & **Tolak Terpilih** (muncul jika ada `menunggu`). Tabel: checkbox + NO + Siswa + Tipe (ujian/rapor badge) + Periode (pts/pas) + Alasan + Diajukan Oleh + Tanggal + Status + Aksi (Setujui/Tolak per-siswa lewat modal).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Approve Dispensasi | `ketua.dispensasi.approve` | POST | `@approveDispensasi` | redirect | Set `PengajuanRaporKetua.status='disetujui'` + set `siswa.validasi_(rapor|ujian)_bendahara=true` (membuka akses meski belum lunas). |
@@ -87,6 +93,8 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 ### Monitoring (Pengguna / Wali Kelas / Guru Pengajar / Siswa)
 
 **Controller**: `Ketua/KetuaController.php`
+
+**Tampilan index** (4 menu, pola seragam, dipowered partial `shared/monitoring/{pengguna|wali-kelas|guru-pengajar|siswa}.blade.php`): 4 **summary card** di atas (mis. utk Pengguna: Tenaga Pendidik, Siswa, Total Akun, Akun Aktif + meta % aktif). Card konten dengan **filter toolbar** di header (search nama, dropdown filter sesuai konteks: role/cabang/kelas/status, dropdown status aktif/nonaktif) + tombol Cari & Reset. Tabel utama dengan kolom konteks (NIP/NIS, Nama, Role/Kelas, Email, Status). Untuk Monitoring Siswa & Wali Kelas ada kolom tambahan seperti progress LMS / status rapor.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -103,6 +111,8 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 
 **Controller**: `Ketua/KetuaController.php`
 
+**Tampilan index**: Filter bar dengan **search** (nama/kode kelas), dropdown **Tahun Ajaran** (default semua), tombol **Terapkan**, dan toggle **"Hanya tampilkan kelas yang sudah punya konten LMS"** (checkbox auto-submit). 5 **stat card**: Total Kelas, Materi, Tugas, Latihan, Ujian. Bawahnya **grid kartu kelas** — tiap kartu: badge Jenjang, badge TA (highlight bila TA aktif), nama kelas, cabang, wali kelas, dan stat pill jumlah konten (atau "Belum ada konten" bila empty). Klik kartu → halaman detail per-kelas (`lms.kelas`).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Overview LMS | `ketua.monitoring.lms.index` | GET | `@lmsIndex` | `monitoring-lms/index.blade.php` (shared root) | Overview konten LMS lintas kelas + filter TA & "hanya kelas berisi konten". |
@@ -118,7 +128,9 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 
 **Index view**: `ketua/laporan/index.blade.php` · **Controller**: `Ketua/KetuaController.php`
 
-| Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
+**Tampilan index**: 4 **stat card** ringkasan global: Siswa Aktif, Tenaga Pendidik, Kelas Aktif, Cabang. Section title "Pilih Jenis Laporan" diikuti **grid kartu laporan** — tiap kartu (Daftar Siswa, Tenaga Pendidik, Daftar Kelas, Wali Kelas, Guru Pengajar, Rekap, Rekap Akademik) berisi form GET dengan filter spesifik (Cabang → Jenjang → Kelas cascade, Tahun Ajaran, Status Siswa, dll) + tombol **Cetak** (target blank → halaman print). Tiap kartu mandiri (form sendiri-sendiri), jadi bisa tweak filter per laporan tanpa pengaruh laporan lain.
+
+| Tombol/Aksi | Route name | HTTP | Controller@method | View aktual | Logika ringkas |
 |---|---|---|---|---|---|
 | Cetak Siswa | `ketua.laporan.siswa` | GET | `@siswa` | `ketua/laporan/print-siswa.blade.php` | Layout cetak daftar siswa (filter cabang/kelas/jenjang/sort). |
 | Cetak Tenaga Pendidik | `ketua.laporan.tenaga-pendidik` | GET | `@tenagaPendidik` | `ketua/laporan/print-guru.blade.php` | Layout cetak tenaga pendidik (filter role). |
@@ -134,7 +146,9 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 
 ### Kirim Catatan / Teguran
 
-**Index view**: `ketua/catatan/index.blade.php` · **Controller**: `Ketua/KetuaController.php`
+**Index view**: `ketua/catatan/index.blade.php` → `@include('shared.catatan.index')` · **Controller**: `Ketua/KetuaController.php`
+
+**Tampilan index**: Toolbar header **Manajemen Catatan** + tombol kanan **+ Buat Catatan** (primary). 4 **stat card**: Total Catatan, Publik (ke semua pengguna), Total Dibaca (akumulasi pembaca), Mendesak (prioritas tinggi). Card **Riwayat Catatan Terkirim** berisi **list card per catatan** (bukan tabel) — tiap card: judul + waktu kirim + badge prioritas + badge target (Semua Pengguna/Role tertentu/Individu) + excerpt isi + tombol Detail/Hapus. Empty state bila kosong.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

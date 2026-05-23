@@ -37,6 +37,8 @@ View dir: `resources/views/sekretaris/`.
 
 **Index view**: `sekretaris/kalender/index.blade.php`
 
+**Tampilan index**: Halaman kalender custom dengan layout dua kolom — kolom utama menampilkan **grid kalender** (toggle Bulan/Minggu/Tahun + tombol navigasi prev/next + search box event), kolom samping kanan menampilkan **legend warna jenis kegiatan** & **daftar kegiatan upcoming**. Header bagian atas: info Tahun Ajaran aktif, dropdown **Cetak PDF** (bulanan/tahunan/custom pilih bulan), tombol **+ Tambah Kegiatan** (primary). Klik tanggal/event di grid → modal detail event dengan tombol Edit/Hapus.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | + Tambah Kegiatan | `sekretaris.kalender.create` | GET | `@kalenderCreate` | `sekretaris/kalender/form.blade.php` | Form: nama_kegiatan, tanggal_mulai-selesai, waktu, jenis_kegiatan (libur/upacara/ujian/dll. + custom), lampiran PDF, status (draft/aktif/selesai). |
@@ -55,7 +57,9 @@ View dir: `resources/views/sekretaris/`.
 
 ### Pengumuman
 
-**Index view**: `sekretaris/pengumuman/index.blade.php`
+**Index view**: `sekretaris/pengumuman/index.blade.php` → `@include('shared.akademik.pengumuman-index')`
+
+**Tampilan index**: Toolbar header dengan judul + tombol **+ Tambah Pengumuman** (primary). 3 **stat card**: Total Pengumuman, Sumber Otomatis (generated dari kalender), Prioritas Tinggi. Tabel daftar pengumuman dengan kolom: Detail | Tanggal | Prioritas (badge warna) | Sumber (manual/otomatis) | Status (aktif/dijadwalkan/kadaluarsa) | Aksi (Edit pensil, Hapus). Tidak ada filter/search di Sekretaris (langsung paginated list).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -71,7 +75,9 @@ View dir: `resources/views/sekretaris/`.
 
 ### Flyer / Iklan
 
-**Index view**: `sekretaris/flyer/index.blade.php`
+**Index view**: `sekretaris/flyer/index.blade.php` → `@include('shared.akademik.flyer-index')`
+
+**Tampilan index**: Toolbar header dengan judul + tombol **+ Tambah Flyer** (primary). 3 **stat card**: Total Flyer, Flyer Aktif, Nonaktif. Daftar flyer ditampilkan dalam **grid card** (bukan tabel) — tiap card berisi: gambar flyer, badge status (aktif/nonaktif), judul + nomor urutan, deskripsi singkat, target audience, periode tampil, tombol **Kunjungi Tautan** (bila ada CTA URL), tombol **Edit** (warning) & **Hapus** (danger).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -87,7 +93,9 @@ View dir: `resources/views/sekretaris/`.
 
 ### Kelola Berita
 
-**Index view**: `sekretaris/berita/index.blade.php`
+**Index view**: `sekretaris/berita/index.blade.php` → `@include('shared.akademik.berita-index')`
+
+**Tampilan index**: Toolbar header dengan judul + tombol **+ Tambah Berita** (primary). 4 **stat card**: Total Berita, Published, Featured (unggulan), Kategori. **Form filter** di atas tabel: search judul (text), dropdown Kategori, dropdown Status (Semua/Aktif/Draft/Arsip), tombol **Filter** + **Reset**. Tabel daftar berita: judul + thumbnail, kategori badge, status, featured icon, aksi (Edit, Hapus, Toggle Featured ⭐).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

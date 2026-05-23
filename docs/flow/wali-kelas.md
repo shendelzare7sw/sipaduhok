@@ -54,6 +54,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 
 **Index view**: `wali-kelas/pilih-kelas/index.blade.php` · **Controller**: `PilihKelasController.php`
 
+**Tampilan index**: Header sapaan "Selamat Datang, {nama wali}" + ringkasan jumlah kelas yg ditugaskan. **Grid kartu kelas** — tiap kartu: header berwarna sesuai jenjang (SD/SMP/SMA/dll), nama kelas, badge "Aktif" bila kelas itu yang sedang terpilih di session, info cabang/tahun ajaran/jumlah siswa, tombol footer **"Pilih Kelas Ini"** (atau **"Sudah Dipilih"** bila currently active).
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Pilih Kelas (klik kartu) | `wali.pilih-kelas.select` | POST | `@select` | redirect | Set `session('wali_kelas_selected', $kelas->id)` → arahkan ke dashboard. Validasi: kelas harus milik wali ini (`WaliKelasAssignment`). |
@@ -65,6 +67,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Jadwal Pelajaran (Read-Only)
 
 **Index view**: `wali-kelas/jadwal/index.blade.php` · **Controller**: `JadwalPelajaranController.php`
+
+**Tampilan index**: Card header: judul "Jadwal Kelas {nama_kelas}" + info "Jadwal dikelola oleh Admin. Anda hanya melihat & mencetak" + tombol kanan **Cetak Jadwal** (primary, target blank). Konten: **grid 2-kolom** kartu jadwal per hari (Senin–Sabtu) — tiap kartu berisi tabel: Jam mulai-selesai, Mata Pelajaran, Pengajar; badge counter "X Pelajaran" di pojok kartu. Bila hari kosong, tampil empty state per-kartu.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -79,6 +83,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 
 **Index view**: `wali-kelas/presensi/index.blade.php` · **Controller**: `PresensiController.php`
 
+**Tampilan index**: Card header dengan judul "Presensi Kelas {nama_kelas}" + 4 tombol kanan dalam grid: **Validasi Izin** (warning, ke sub-page), **Import Excel** (success, buka modal `importPresensiModal`), **Cetak Rekap** (secondary, target blank), **Riwayat & Edit** (info, ke sub-page). Card **Filter**: tanggal presensi (date picker, auto-submit), semester (ganjil/genap), lihat bulan & tahun, tombol Reset. Card utama **Input Presensi Harian**: form tabel siswa × kolom (NO, IDENTITAS, STATUS KEHADIRAN — radio hadir/sakit/izin/alpha, KETERANGAN — text input) + tombol Submit di bawah → POST `input-harian`.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Update Presensi (ubah cell) | `wali.presensi.update` | POST | `@updatePresensi` | redirect | Update status hadir/izin/sakit/alpha utk 1 siswa pada 1 tanggal. |
@@ -89,6 +95,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Presensi → Validasi Izin
 
 **Index view**: `wali-kelas/presensi/validasi-izin.blade.php`
+
+**Tampilan index**: Tombol "Kembali ke Presensi" di atas. **Stat card tunggal**: Menunggu Validasi (warning, count pending). Konten: **list card per pengajuan** (bukan tabel) — tiap card berisi: avatar, nama siswa + NIS, badge status (Sakit/Izin), tanggal, keterangan, **preview bukti lampiran** (gambar inline atau preview PDF — buka modal/new tab via `preview-bukti`), tombol **Setujui** (success) & **Tolak** (danger). Empty state bila tidak ada pending.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -101,6 +109,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 
 **Index view**: `wali-kelas/presensi/rekap-harian.blade.php`
 
+**Tampilan index**: Card header "Rekap Harian Presensi" + tombol Kembali. Card **Filter**: Semester (ganjil/genap, atau "Semua/Per Bulan"), Bulan, Tahun + tombol Filter. Konten: **grid kartu per tanggal** (3 kolom) — tiap kartu menampilkan nama hari + tanggal, badge total siswa, dan **stat pill berwarna**: hadir (hijau), sakit (kuning), izin (info), alpha (merah). Klik kartu → ke `show-harian` (detail tabel siswa per tanggal). Empty state bila tidak ada presensi di bulan tsb. dengan tombol "Input Presensi" sebagai shortcut.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Lihat Detail Hari | `wali.presensi.show-harian` | GET | `@showHarian` | `wali-kelas/presensi/show-harian.blade.php` | Detail presensi 1 tanggal: siswa × status + jumlah. |
@@ -111,6 +121,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Presensi → Riwayat & Edit
 
 **Index view**: `wali-kelas/presensi/riwayat.blade.php`
+
+**Tampilan index**: Tombol Kembali. Card **Filter**: dropdown Nama Siswa (select2), Tanggal Dari–Sampai (date), Status (hadir/sakit/izin/alpha) + tombol Filter & Reset. Tabel utama: kolom Tanggal, Nama Siswa + NIS, Status (badge warna + ikon), Keterangan + preview bukti (komponen `<x-file-preview>`), Validasi (status badge), Aksi inline (Edit baris → modal → POST `riwayat.update`).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -125,6 +137,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Nilai Siswa
 
 **Index view**: `wali-kelas/nilai/index.blade.php` · **Controller**: `NilaiController.php`
+
+**Tampilan index**: Card header "Rekapitulasi Nilai Akademik" + tombol kanan **Cetak Rekap Nilai** (target blank). Card **Filter Nilai**: Semester (ganjil/genap, auto-submit), Mata Pelajaran (default "Lihat Semua (Ringkasan Siswa)" — pilih spesifik utk detail per mapel) + tombol Reset. Bila mapel dipilih, muncul 4 **stat card kondisional**: Rata-rata Kelas, Nilai Tertinggi, Nilai Terendah, Ketuntasan Siswa. Tabel utama: kolom siswa + kolom nilai per komponen (Tugas/UH/UTS/UAS/Akhir) atau kolom mapel × siswa (bila mode "semua"); aksi inline per siswa: Detail/Edit/Cetak/Download Template/Import.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -144,6 +158,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Kelola Rapor
 
 **Index view**: `wali-kelas/rapor/index.blade.php` · **Controller**: `RaporController.php`
+
+**Tampilan index**: Card header "Kelola Rapor - {nama_kelas}" + meta TA & cabang + tombol kanan **Generate Semua** (primary, modal `generateAllModal`) & **Kirim Semua ke Ketua** (success, modal `kirimSemuaModal`). Card **Filter**: Pilih Semester (ganjil/genap), Jenis Rapor (PTS/PAS) + Reset. Alert **Alur Validasi** dengan 6 badge step (Buat → Kirim Ketua → Ketua Approve → Set Tanggal Rilis → Cek Keuangan → Akses Orang Tua). Tabel **Daftar Rapor**: kolom NO, NIS, Nama, Status Validasi (badge 3-tier: wali/ketua/bendahara), Status Rapor (draft/terbitkan/revisi), Rata-rata nilai, dan kolom **Aksi Kelola** lebar (icon-buttons: Generate, Edit, Preview, Print, Excel, Kirim/Tarik Validasi, Auto Kehadiran, Apply Template, Reset Nilai, Terbitkan/Tarik, Hapus draft) — beberapa muncul kondisional berdasar status rapor.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -173,6 +189,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 
 **Index view**: `wali-kelas/rapor/request-download.blade.php` · **Controller**: `RaporController.php`
 
+**Tampilan index**: Alert info "Orang tua dapat mengajukan request download... setelah disetujui aktif 24 jam". Card **Daftar Permintaan Download**: tabel dengan kolom No, Orang Tua, Siswa + Kelas, Rapor (jenis + semester), Alasan (max 50 char), Tanggal request, Status (Menunggu/Disetujui+sisa waktu/Expired/Ditolak — badge warna), Aksi (untuk `menunggu`: tombol Setujui hijau & Tolak merah → buka modal konfirmasi dinamis via JS `showDownloadAction`; untuk status final: tampil tanggal keputusan). Pagination di bawah.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Approve Request | `wali.rapor.request-download.approve` | POST | `@approveDownload` | redirect | Set `RequestDownloadRapor.status='disetujui'` → orang tua bisa unduh PDF. |
@@ -186,6 +204,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 
 **Index view**: `wali-kelas/rapor-pending/index.blade.php` · **Controller**: `WaliKelasController.php`
 
+**Tampilan index**: 3 **pending stat**: Draft Belum Dikirim, Menunggu Ketua, Diminta Revisi (count). Konten utama: list rapor pending yang **dikelompokkan per kelas** — tiap section punya header dengan nama kelas + badge TA (mark "Aktif" jika TA aktif) + counter rapor. Tiap baris rapor: nama siswa + meta (semester, PTS/PAS, terakhir diubah) + **catatan revisi Ketua** (highlight merah bila ada) + badge status (Draft/Menunggu Ketua/Revisi) + tombol **Buka Rapor** (primary → langsung ke `wali.rapor.edit`). Empty state bila semua rapor sudah selesai.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Buka Rapor Pending | `wali.rapor-pending` | GET | `@raporPending` | `wali-kelas/rapor-pending/index.blade.php` | Daftar rapor `draft` atau `status_review_ketua='revisi'` **lintas TA** dari kelas yang pernah/sedang diwalikan. Klik baris → menu Edit Rapor. |
@@ -197,6 +217,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Arsip Kelas Saya
 
 **Index view**: `wali-kelas/arsip/index.blade.php` · **Controller**: `WaliKelasArsipController.php`
+
+**Tampilan index**: 2 **stat card** ringkas: Total Kelas (pernah diwalikan), Tahun Ajaran (jumlah TA berbeda). Konten utama: **section per Tahun Ajaran** (header ungu dengan badge "Aktif" bila TA aktif), masing-masing berisi **grid kartu kelas** — tiap kartu hover effect, berisi nama kelas + meta cabang + 3 stat mini (jumlah siswa, rapor, presensi) dengan border ungu accent. Klik kartu → ke `show` (overview TA arsip). Empty state bila wali belum pernah ditugaskan ke kelas mana pun.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -213,6 +235,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 
 **Index view**: `wali-kelas/promotion/index.blade.php` · **Controller**: `PromotionController.php`
 
+**Tampilan index**: Toolbar judul "Prediksi Kenaikan Kelas" + sub-judul. Card konten "Kelas {nama} - {TA}" + alert info menjelaskan "ini adalah simulasi; status akhir ditentukan saat eksekusi sistem". Form filter: search nama siswa + dropdown Status Prediksi (Aman/Naik vs Rawan/Tertunda) + tombol search. Card **Daftar Prediksi Siswa**: tabel dengan kolom Nama Siswa, Status Keuangan (Lunas/Belum Lunas + badge "Dispensasi OK" bila ada), Status Akademik (Aman X% / Rawan X% + jumlah mapel tuntas), Prediksi Status (Naik/Lulus/Tidak Naik). Tidak ada aksi modify — pure read.
+
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
 | Buka Prediksi | `wali.promotion.prediction` | GET | `@index` | `wali-kelas/promotion/index.blade.php` | Tampil daftar siswa kelas + prediksi `NAIK`/`TIDAK`/`TUNGGAKAN` berdasarkan `Nilai` vs `pengaturan_kkm` + `pengaturan_naik_kelas` (preview saja — eksekusi tetap di Admin/Waka). |
@@ -224,6 +248,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Validasi Akses Akademik
 
 **Index view**: `wali-kelas/validasi-akses/index.blade.php` · **Controller**: `ValidasiAksesController.php`
+
+**Tampilan index**: 4 **stat card**: Ujian Tervalidasi, Rapor Tervalidasi, Belum Akses Ujian, Belum Akses Rapor (semua menampilkan count + ratio terhadap total siswa). Card **Filter**: search nama/NIS + dropdown filter status (Semua / Ujian Pending / Ujian Selesai / Rapor Pending / Rapor Selesai) + tombol Filter & Reset. Card **Status Akses Siswa**: tabel kolom NO, NIS, Nama, Status Akses Ujian (badge + tombol toggle inline Validasi/Batalkan), Status Akses Rapor (idem). Tombol bulk di header tabel: Validasi Ujian Terpilih, Validasi Rapor Terpilih, Validasi Semua.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -243,6 +269,8 @@ Penanggung jawab satu/beberapa kelas. Mengelola **presensi**, **nilai**, dan **r
 ### Template Capaian Kompetensi
 
 **Index view**: `wali-kelas/template-capaian/index.blade.php` · **Controller**: `TemplateCapaianController.php`
+
+**Tampilan index**: Header dengan judul + tombol kanan **+ Tambah Template** (primary → buka modal `createModal` dengan form: Mata Pelajaran, Nama Template, Template Text). Card **Filter**: dropdown Mata Pelajaran + search nama template + tombol Filter. Tabel: No, Mata Pelajaran, Nama Template, Template Text (max 100 char), Aksi (Edit info → modal edit JS-driven, Hapus → modal `hapusTemplateModal` dinamis). Pagination di bawah. **Semua aksi via modal di index** — tidak ada halaman create/edit terpisah.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
