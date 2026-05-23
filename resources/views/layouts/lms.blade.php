@@ -581,6 +581,7 @@
             }
 
             .notif-dropdown-menu.lms-notif-locked {
+                box-sizing: border-box !important;
                 position: fixed !important;
                 inset: auto !important;
                 top: var(--lms-notif-top, 0px) !important;
@@ -594,6 +595,23 @@
                 transform: none !important;
                 overflow: hidden !important;
                 z-index: 9999 !important;
+            }
+
+            .notif-dropdown-menu.lms-notif-locked .dropdown-header {
+                gap: 12px;
+                min-width: 0;
+            }
+
+            .notif-dropdown-menu.lms-notif-locked .dropdown-header h6 {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .notif-dropdown-menu.lms-notif-locked .dropdown-header a {
+                flex-shrink: 0;
+                white-space: nowrap;
             }
 
             .notif-dropdown-menu.lms-notif-locked .notif-list-scroll {
@@ -767,6 +785,17 @@
                 return mobileQuery.matches;
             }
 
+            function currentViewport() {
+                const viewport = window.visualViewport;
+
+                return {
+                    width: Math.floor(viewport?.width || document.documentElement.clientWidth || window.innerWidth),
+                    height: Math.floor(viewport?.height || document.documentElement.clientHeight || window.innerHeight),
+                    left: Math.floor(viewport?.offsetLeft || 0),
+                    top: Math.floor(viewport?.offsetTop || 0)
+                };
+            }
+
             function setMenuVar(menu, name, value) {
                 menu.style.setProperty(name, value);
             }
@@ -853,26 +882,16 @@
                 }
 
                 const btnRect = btn.getBoundingClientRect();
-                const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-                const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
-                const margin = 16;
-                const profileBtn = document.querySelector(
-                    '.header-right > .dropdown:last-child .user-profile, ' +
-                    '.header-right > .dropdown:last-child [data-bs-toggle="dropdown"], ' +
-                    '.header-right > .dropdown:last-child .user-avatar'
-                );
-                const anchorRight = profileBtn
-                    ? profileBtn.getBoundingClientRect().right
-                    : viewportWidth - margin;
-                const rightOffset = Math.max(margin, viewportWidth - anchorRight);
+                const viewport = currentViewport();
+                const margin = viewport.width <= 320 ? 10 : 16;
                 const header = btn.closest('.header-lms, header');
                 const headerBottom = header ? header.getBoundingClientRect().bottom : btnRect.bottom;
-                const top = Math.max(btnRect.bottom, headerBottom) + 8;
-                const maxWidth = Math.max(280, viewportWidth - (margin * 2));
-                const width = Math.min(maxWidth, Math.max(280, viewportWidth - margin - rightOffset));
-                const left = margin;
-                const maxHeight = Math.min(480, Math.max(280, viewportHeight - top - margin));
-                const listMaxHeight = Math.max(180, maxHeight - 98);
+                const topInViewport = Math.max(btnRect.bottom, headerBottom) + 8;
+                const top = viewport.top + topInViewport;
+                const width = Math.max(1, viewport.width - (margin * 2));
+                const left = viewport.left + margin;
+                const maxHeight = Math.min(480, Math.max(1, viewport.height - topInViewport - margin));
+                const listMaxHeight = Math.max(1, maxHeight - 98);
 
                 menu.removeAttribute('style');
                 setMenuVar(menu, '--lms-notif-top', `${top}px`);
