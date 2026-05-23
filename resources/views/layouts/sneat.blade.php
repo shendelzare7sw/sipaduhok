@@ -606,6 +606,10 @@
                 background: #fff;
                 border-left-color: var(--bs-primary, var(--primary-color, #4361ee));
             }
+
+            body.sneat-layout .notif-dropdown-menu.show .notif-list-scroll {
+                max-height: none !important;
+            }
         }
     </style>
 
@@ -869,21 +873,34 @@
 
             const btnRect = btn.getBoundingClientRect();
 
-            if (window.innerWidth <= 575.98) {
-                const margin = window.innerWidth <= 360 ? 16 : 24;
+            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+            const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+
+            if (viewportWidth <= 575.98) {
+                const margin = viewportWidth <= 360 ? 16 : 24;
                 const navbar = btn.closest('.layout-navbar, .navbar, header');
                 const navbarBottom = navbar ? navbar.getBoundingClientRect().bottom : btnRect.bottom;
                 const top = Math.max(btnRect.bottom, navbarBottom) + 8;
-                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                const maxHeight = Math.max(220, viewportHeight - top - margin);
+                let width = Math.max(280, viewportWidth - (margin * 2));
+                let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
+
+                if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight) {
+                    width = Number(menu.dataset.mobileDropdownWidth);
+                    maxHeight = Number(menu.dataset.mobileDropdownHeight);
+                } else {
+                    menu.dataset.mobileDropdownWidth = String(width);
+                    menu.dataset.mobileDropdownHeight = String(maxHeight);
+                }
 
                 menu.setAttribute('style',
                     `position:fixed!important;` +
                     `top:${top}px!important;` +
                     `left:${margin}px!important;` +
-                    `right:${margin}px!important;` +
-                    `width:auto!important;` +
-                    `max-width:calc(100vw - ${margin * 2}px)!important;` +
+                    `right:auto!important;` +
+                    `width:${width}px!important;` +
+                    `min-width:${width}px!important;` +
+                    `max-width:${width}px!important;` +
+                    `height:${maxHeight}px!important;` +
                     `max-height:${maxHeight}px!important;` +
                     `transform:none!important;` +
                     `z-index:9999!important;`
@@ -893,6 +910,19 @@
 
             menu.removeAttribute('style');
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const notificationTrigger = document.getElementById('notificationDropdown');
+            if (notificationTrigger) {
+                notificationTrigger.addEventListener('hidden.bs.dropdown', function () {
+                    const menu = document.querySelector('.notif-dropdown-menu');
+                    if (menu) {
+                        delete menu.dataset.mobileDropdownWidth;
+                        delete menu.dataset.mobileDropdownHeight;
+                    }
+                });
+            }
+        });
     </script>
 
     <!-- Custom SIPADUHOK Scripts -->

@@ -656,6 +656,10 @@
                 border-left-color: var(--primary);
             }
 
+            body.lms-layout .notif-dropdown-menu.show .notif-list-scroll {
+                max-height: none !important;
+            }
+
             body.lms-layout .lms-profile-menu {
                 width: auto;
             }
@@ -827,20 +831,38 @@
             const headerRight = trigger.closest('.header-right');
             const headerBottom = header ? header.getBoundingClientRect().bottom : triggerRect.bottom;
             const top = Math.max(triggerRect.bottom, headerBottom) + 8;
-            const isMobile = window.innerWidth <= 575.98;
+            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+            const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+            const isMobile = viewportWidth <= 575.98;
 
             if (isMobile) {
-                const margin = window.innerWidth <= 360 ? 16 : 24;
-                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                const maxHeight = Math.max(220, viewportHeight - top - margin);
+                const margin = viewportWidth <= 360 ? 16 : 24;
+                let width = Math.max(280, viewportWidth - (margin * 2));
+                let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
+
+                if (options.lockMobileHeight) {
+                    if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight) {
+                        width = Number(menu.dataset.mobileDropdownWidth);
+                        maxHeight = Number(menu.dataset.mobileDropdownHeight);
+                    } else {
+                        menu.dataset.mobileDropdownWidth = String(width);
+                        menu.dataset.mobileDropdownHeight = String(maxHeight);
+                    }
+                }
+
+                const heightRule = options.lockMobileHeight
+                    ? `height:${maxHeight}px!important;`
+                    : '';
 
                 menu.setAttribute('style',
                     `position:fixed!important;` +
                     `top:${top}px!important;` +
                     `left:${margin}px!important;` +
-                    `right:${margin}px!important;` +
-                    `width:auto!important;` +
-                    `max-width:calc(100vw - ${margin * 2}px)!important;` +
+                    `right:auto!important;` +
+                    `width:${width}px!important;` +
+                    `min-width:${width}px!important;` +
+                    `max-width:${width}px!important;` +
+                    heightRule +
                     `max-height:${maxHeight}px!important;` +
                     `transform:none!important;` +
                     `z-index:1055!important;`
@@ -871,7 +893,8 @@
             const menu = document.querySelector('.notif-dropdown-menu');
             const btn = document.getElementById('notificationDropdown');
             setLmsTopbarDropdownPosition(menu, btn, {
-                desktopWidth: window.innerWidth <= 991 ? 320 : 360
+                desktopWidth: window.innerWidth <= 991 ? 320 : 360,
+                lockMobileHeight: true
             });
         }
 
@@ -910,6 +933,17 @@
                 profileTrigger.addEventListener('hidden.bs.dropdown', function () {
                     const menu = document.querySelector('.lms-profile-menu');
                     if (menu) menu.removeAttribute('style');
+                });
+            }
+
+            const notificationTrigger = document.getElementById('notificationDropdown');
+            if (notificationTrigger) {
+                notificationTrigger.addEventListener('hidden.bs.dropdown', function () {
+                    const menu = document.querySelector('.notif-dropdown-menu');
+                    if (menu) {
+                        delete menu.dataset.mobileDropdownWidth;
+                        delete menu.dataset.mobileDropdownHeight;
+                    }
                 });
             }
 
