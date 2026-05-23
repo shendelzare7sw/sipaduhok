@@ -881,7 +881,7 @@
                 const navbar = btn.closest('.layout-navbar, .navbar, header');
                 const navbarBottom = navbar ? navbar.getBoundingClientRect().bottom : btnRect.bottom;
                 const top = Math.max(btnRect.bottom, navbarBottom) + 8;
-                let width = Math.max(280, viewportWidth - (margin * 2));
+                let width = Math.min(360, Math.max(280, viewportWidth - (margin * 2)));
                 let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
 
                 if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight) {
@@ -891,11 +891,12 @@
                     menu.dataset.mobileDropdownWidth = String(width);
                     menu.dataset.mobileDropdownHeight = String(maxHeight);
                 }
+                const leftOffset = Math.max(margin, viewportWidth - margin - width);
 
                 menu.setAttribute('style',
                     `position:fixed!important;` +
                     `top:${top}px!important;` +
-                    `left:${margin}px!important;` +
+                    `left:${leftOffset}px!important;` +
                     `right:auto!important;` +
                     `width:${width}px!important;` +
                     `min-width:${width}px!important;` +

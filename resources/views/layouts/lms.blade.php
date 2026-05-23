@@ -837,7 +837,10 @@
 
             if (isMobile) {
                 const margin = viewportWidth <= 360 ? 16 : 24;
-                let width = Math.max(280, viewportWidth - (margin * 2));
+                const availableWidth = Math.max(280, viewportWidth - (margin * 2));
+                let width = options.lockMobileHeight
+                    ? Math.min(360, availableWidth)
+                    : availableWidth;
                 let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
 
                 if (options.lockMobileHeight) {
@@ -853,11 +856,14 @@
                 const heightRule = options.lockMobileHeight
                     ? `height:${maxHeight}px!important;`
                     : '';
+                const leftOffset = options.lockMobileHeight
+                    ? Math.max(margin, viewportWidth - margin - width)
+                    : margin;
 
                 menu.setAttribute('style',
                     `position:fixed!important;` +
                     `top:${top}px!important;` +
-                    `left:${margin}px!important;` +
+                    `left:${leftOffset}px!important;` +
                     `right:auto!important;` +
                     `width:${width}px!important;` +
                     `min-width:${width}px!important;` +
