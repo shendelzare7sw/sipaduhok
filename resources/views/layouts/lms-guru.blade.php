@@ -361,6 +361,51 @@
                 display: block;
             }
         }
+
+        @media (max-width: 575.98px) {
+            html.lms-notif-open,
+            body.lms-notif-open {
+                overscroll-behavior: none;
+            }
+
+            body.lms-notif-open {
+                overflow: hidden;
+            }
+
+            .notif-dropdown-menu {
+                overscroll-behavior: contain;
+            }
+
+            .notif-dropdown-menu.lms-notif-locked {
+                position: fixed !important;
+                inset: auto !important;
+                top: var(--lms-notif-top, 0px) !important;
+                left: var(--lms-notif-left, 16px) !important;
+                right: auto !important;
+                width: var(--lms-notif-width, calc(100vw - 32px)) !important;
+                min-width: var(--lms-notif-width, calc(100vw - 32px)) !important;
+                max-width: var(--lms-notif-width, calc(100vw - 32px)) !important;
+                max-height: var(--lms-notif-max-height, 420px) !important;
+                margin: 0 !important;
+                transform: none !important;
+                overflow: hidden !important;
+                z-index: 9999 !important;
+            }
+
+            .notif-dropdown-menu.lms-notif-locked .notif-list-scroll {
+                max-height: var(--lms-notif-list-max-height, 300px) !important;
+                overflow-y: auto !important;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+            }
+
+            .notif-list-scroll {
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+            }
+        }
     </style>
 
     @stack('styles')
@@ -466,6 +511,178 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function () {
+            const mobileQuery = window.matchMedia('(max-width: 575.98px)');
+            const openClass = 'lms-notif-open';
+            const lockedClass = 'lms-notif-locked';
+            let lockedScrollY = null;
+            let previousBodyStyle = null;
+
+            function notifMenu() {
+                return document.querySelector('.notif-dropdown-menu');
+            }
+
+            function notifButton() {
+                return document.getElementById('notificationDropdown');
+            }
+
+            function isMobileNotif() {
+                return mobileQuery.matches;
+            }
+
+            function setMenuVar(menu, name, value) {
+                menu.style.setProperty(name, value);
+            }
+
+            function clearMobileLock(menu) {
+                if (!menu) return;
+
+                menu.classList.remove(lockedClass);
+                delete menu.dataset.lmsNotifLocked;
+                menu.style.removeProperty('--lms-notif-top');
+                menu.style.removeProperty('--lms-notif-left');
+                menu.style.removeProperty('--lms-notif-width');
+                menu.style.removeProperty('--lms-notif-max-height');
+                menu.style.removeProperty('--lms-notif-list-max-height');
+            }
+
+            function lockPageScroll() {
+                if (!isMobileNotif() || lockedScrollY !== null) return;
+
+                lockedScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+                previousBodyStyle = {
+                    position: document.body.style.position,
+                    top: document.body.style.top,
+                    left: document.body.style.left,
+                    right: document.body.style.right,
+                    width: document.body.style.width,
+                    overflow: document.body.style.overflow
+                };
+
+                document.documentElement.classList.add(openClass);
+                document.body.classList.add(openClass);
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${lockedScrollY}px`;
+                document.body.style.left = '0';
+                document.body.style.right = '0';
+                document.body.style.width = '100%';
+                document.body.style.overflow = 'hidden';
+            }
+
+            function unlockPageScroll() {
+                if (lockedScrollY === null || !previousBodyStyle) return;
+
+                document.documentElement.classList.remove(openClass);
+                document.body.classList.remove(openClass);
+                document.body.style.position = previousBodyStyle.position;
+                document.body.style.top = previousBodyStyle.top;
+                document.body.style.left = previousBodyStyle.left;
+                document.body.style.right = previousBodyStyle.right;
+                document.body.style.width = previousBodyStyle.width;
+                document.body.style.overflow = previousBodyStyle.overflow;
+                window.scrollTo(0, lockedScrollY);
+                lockedScrollY = null;
+                previousBodyStyle = null;
+            }
+
+            window.fixLmsGuruNotifDropdownPosition = function (force) {
+                const menu = notifMenu();
+                const btn = notifButton();
+                if (!menu || !btn) return;
+
+                if (!isMobileNotif()) {
+                    clearMobileLock(menu);
+
+                    const btnRect = btn.getBoundingClientRect();
+                    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+                    const dropW = viewportWidth <= 991 ? 320 : 360;
+                    const rightOff = Math.max(8, viewportWidth - btnRect.right);
+
+                    menu.setAttribute('style',
+                        `position:fixed!important;` +
+                        `top:${btnRect.bottom + 4}px!important;` +
+                        `right:${rightOff}px!important;` +
+                        `left:auto!important;` +
+                        `width:${dropW}px!important;` +
+                        `transform:none!important;` +
+                        `z-index:9999!important;`
+                    );
+                    return;
+                }
+
+                if (!force && menu.dataset.lmsNotifLocked === '1') {
+                    menu.classList.add(lockedClass);
+                    return;
+                }
+
+                const btnRect = btn.getBoundingClientRect();
+                const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+                const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+                const margin = viewportWidth <= 360 ? 16 : 24;
+                const header = btn.closest('.header-lms, header');
+                const headerBottom = header ? header.getBoundingClientRect().bottom : btnRect.bottom;
+                const top = Math.max(btnRect.bottom, headerBottom) + 8;
+                const width = Math.min(360, Math.max(280, viewportWidth - (margin * 2)));
+                const left = Math.max(margin, viewportWidth - margin - width);
+                const maxHeight = Math.min(480, Math.max(280, viewportHeight - top - margin));
+                const listMaxHeight = Math.max(180, maxHeight - 98);
+
+                menu.removeAttribute('style');
+                setMenuVar(menu, '--lms-notif-top', `${top}px`);
+                setMenuVar(menu, '--lms-notif-left', `${left}px`);
+                setMenuVar(menu, '--lms-notif-width', `${width}px`);
+                setMenuVar(menu, '--lms-notif-max-height', `${maxHeight}px`);
+                setMenuVar(menu, '--lms-notif-list-max-height', `${listMaxHeight}px`);
+                menu.dataset.lmsNotifLocked = '1';
+                menu.classList.add(lockedClass);
+            };
+
+            window.fixNotifDropdownPosition = window.fixLmsGuruNotifDropdownPosition;
+
+            function initLmsGuruNotifDropdown() {
+                const btn = notifButton();
+                const menu = notifMenu();
+                if (!btn || !menu) return;
+
+                btn.setAttribute('data-bs-display', 'static');
+
+                btn.addEventListener('show.bs.dropdown', function () {
+                    clearMobileLock(menu);
+                    window.fixLmsGuruNotifDropdownPosition(true);
+                    lockPageScroll();
+
+                    requestAnimationFrame(function () {
+                        window.fixLmsGuruNotifDropdownPosition(false);
+                    });
+                });
+
+                btn.addEventListener('hidden.bs.dropdown', function () {
+                    clearMobileLock(menu);
+                    menu.removeAttribute('style');
+                    unlockPageScroll();
+                });
+
+                const scrollArea = menu.querySelector('.notif-list-scroll');
+                if (scrollArea) {
+                    scrollArea.addEventListener('touchmove', function (event) {
+                        event.stopPropagation();
+                    }, { passive: true });
+
+                    scrollArea.addEventListener('wheel', function (event) {
+                        event.stopPropagation();
+                    }, { passive: true });
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLmsGuruNotifDropdown);
+            } else {
+                initLmsGuruNotifDropdown();
+            }
+        })();
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
