@@ -620,12 +620,22 @@
                 const btnRect = btn.getBoundingClientRect();
                 const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
                 const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
-                const margin = viewportWidth <= 360 ? 16 : 24;
+                const margin = 16;
+                const profileBtn = document.querySelector(
+                    '.header-right > .dropdown:last-child .user-profile, ' +
+                    '.header-right > .dropdown:last-child [data-bs-toggle="dropdown"], ' +
+                    '.header-right > .dropdown:last-child .user-avatar'
+                );
+                const anchorRight = profileBtn
+                    ? profileBtn.getBoundingClientRect().right
+                    : viewportWidth - margin;
+                const rightOffset = Math.max(margin, viewportWidth - anchorRight);
                 const header = btn.closest('.header-lms, header');
                 const headerBottom = header ? header.getBoundingClientRect().bottom : btnRect.bottom;
                 const top = Math.max(btnRect.bottom, headerBottom) + 8;
-                const width = Math.min(360, Math.max(280, viewportWidth - (margin * 2)));
-                const left = Math.max(margin, viewportWidth - margin - width);
+                const maxWidth = Math.max(280, viewportWidth - (margin * 2));
+                const width = Math.min(maxWidth, Math.max(280, viewportWidth - margin - rightOffset));
+                const left = margin;
                 const maxHeight = Math.min(480, Math.max(280, viewportHeight - top - margin));
                 const listMaxHeight = Math.max(180, maxHeight - 98);
 
