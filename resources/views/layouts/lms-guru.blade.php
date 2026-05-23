@@ -361,111 +361,12 @@
                 display: block;
             }
         }
-
-        body.lms-guru-layout .lms-guru-topbar-dropdown,
-        body.lms-guru-layout .notif-dropdown-menu {
-            border: 1px solid rgba(67, 89, 113, 0.14);
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(67, 89, 113, 0.18) !important;
-            overflow: hidden;
-            z-index: 1055;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-menu {
-            width: 240px;
-            padding: 0.35rem 0;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-menu .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            min-height: 42px;
-            padding: 0.6rem 1rem;
-            color: #334155;
-            font-size: 0.95rem;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-menu .dropdown-item i {
-            width: 18px;
-            margin-right: 0 !important;
-            text-align: center;
-            color: #334155;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-menu .dropdown-item.text-danger,
-        body.lms-guru-layout .lms-guru-profile-menu .dropdown-item.text-danger i {
-            color: #dc3545 !important;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-menu .dropdown-divider {
-            margin: 0.35rem 0;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-summary {
-            padding: 0.75rem 1rem;
-        }
-
-        body.lms-guru-layout .lms-guru-profile-summary-text {
-            min-width: 0;
-        }
-
-        body.lms-guru-layout .notif-dropdown-menu .dropdown-header,
-        body.lms-guru-layout .notif-dropdown-menu .dropdown-footer {
-            background-color: #fff !important;
-            flex: 0 0 auto;
-        }
-
-        body.lms-guru-layout .notif-dropdown-menu .dropdown-header {
-            min-height: 44px;
-        }
-
-        body.lms-guru-layout .notif-dropdown-menu.show {
-            display: flex;
-            flex-direction: column;
-        }
-
-        body.lms-guru-layout .notif-dropdown-menu .dropdown-footer .btn-link {
-            color: var(--primary) !important;
-            font-weight: 500;
-            text-decoration: none;
-        }
-
-        body.lms-guru-layout .notif-dropdown-menu .dropdown-footer .btn-link:hover {
-            color: var(--primary-dark) !important;
-        }
-
-        body.lms-guru-layout .notif-list-scroll {
-            flex: 1 1 auto;
-            min-height: 0;
-        }
-
-        @media (max-width: 575.98px) {
-            body.lms-guru-layout .lms-guru-topbar-dropdown,
-            body.lms-guru-layout .notif-dropdown-menu {
-                border-radius: 0.5rem;
-                box-shadow: 0 0.25rem 1rem rgba(67, 89, 113, 0.18) !important;
-            }
-
-            body.lms-guru-layout .notification-item.unread {
-                background: #fff;
-                border-left-color: var(--primary);
-            }
-
-            body.lms-guru-layout .notif-dropdown-menu.show .notif-list-scroll {
-                max-height: none !important;
-            }
-
-            body.lms-guru-layout .lms-guru-profile-menu {
-                width: auto;
-            }
-        }
     </style>
 
     @stack('styles')
 </head>
 
-<body class="lms-guru-layout">
+<body>
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -497,9 +398,8 @@
                 </div>
                 <div class="header-right">
                     <x-notification-bell ctx="lms-guru" />
-                    <div class="dropdown lms-guru-profile-dropdown">
-                        <div class="d-flex align-items-center gap-3 cursor-pointer lms-guru-profile-trigger"
-                            id="lmsGuruProfileDropdown" data-bs-toggle="dropdown" data-bs-display="static"
+                    <div class="dropdown">
+                        <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             <div class="d-none d-md-flex flex-column text-end">
                                 <span class="fw-semibold" style="font-size: 14px;">{{ auth()->user()->name }}</span>
@@ -514,27 +414,7 @@
                                 @endif
                             </div>
                         </div>
-                        <ul class="dropdown-menu dropdown-menu-end lms-guru-topbar-dropdown lms-guru-profile-menu"
-                            aria-labelledby="lmsGuruProfileDropdown">
-                            <li>
-                                <a class="dropdown-item lms-guru-profile-summary" href="{{ route('profile.index') }}">
-                                    <div class="user-avatar">
-                                        @if(auth()->user()->foto_profil)
-                                            <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar"
-                                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                                        @else
-                                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                                        @endif
-                                    </div>
-                                    <div class="flex-grow-1 lms-guru-profile-summary-text">
-                                        <span class="fw-semibold d-block text-truncate">{{ auth()->user()->name }}</span>
-                                        <small class="text-muted">Guru</small>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" href="{{ route('profile.index') }}">
                                     <i class="fas fa-user me-2"></i> Profil Saya
@@ -588,107 +468,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        function setLmsGuruTopbarDropdownPosition(menu, trigger, options = {}) {
-            if (!menu || !trigger) return;
-
-            const triggerRect = trigger.getBoundingClientRect();
-            const header = trigger.closest('.header-lms, header');
-            const headerRight = trigger.closest('.header-right');
-            const headerBottom = header ? header.getBoundingClientRect().bottom : triggerRect.bottom;
-            const top = Math.max(triggerRect.bottom, headerBottom) + 8;
-            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-            const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
-            const isMobile = viewportWidth <= 575.98;
-
-            if (isMobile) {
-                const margin = viewportWidth <= 360 ? 16 : 24;
-                const availableWidth = Math.max(280, viewportWidth - (margin * 2));
-                let width = options.lockMobileHeight
-                    ? Math.min(360, availableWidth)
-                    : availableWidth;
-                let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
-                let topOffset = top;
-                let leftOffset = options.lockMobileHeight
-                    ? Math.max(margin, viewportWidth - margin - width)
-                    : margin;
-
-                if (options.lockMobileHeight) {
-                    if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight &&
-                        menu.dataset.mobileDropdownTop && menu.dataset.mobileDropdownLeft) {
-                        width = Number(menu.dataset.mobileDropdownWidth);
-                        maxHeight = Number(menu.dataset.mobileDropdownHeight);
-                        topOffset = Number(menu.dataset.mobileDropdownTop);
-                        leftOffset = Number(menu.dataset.mobileDropdownLeft);
-                    } else {
-                        menu.dataset.mobileDropdownWidth = String(width);
-                        menu.dataset.mobileDropdownHeight = String(maxHeight);
-                        menu.dataset.mobileDropdownTop = String(topOffset);
-                        menu.dataset.mobileDropdownLeft = String(leftOffset);
-                    }
-                }
-
-                const heightRule = options.lockMobileHeight
-                    ? `height:${maxHeight}px!important;`
-                    : '';
-
-                menu.setAttribute('style',
-                    `position:fixed!important;` +
-                    `top:${topOffset}px!important;` +
-                    `left:${leftOffset}px!important;` +
-                    `right:auto!important;` +
-                    `width:${width}px!important;` +
-                    `min-width:${width}px!important;` +
-                    `max-width:${width}px!important;` +
-                    heightRule +
-                    `max-height:${maxHeight}px!important;` +
-                    `transform:none!important;` +
-                    `z-index:1055!important;`
-                );
-                return;
-            }
-
-            const width = options.desktopWidth || 240;
-            const anchorRect = headerRight ? headerRight.getBoundingClientRect() : triggerRect;
-            const rightOffset = Math.max(16, window.innerWidth - anchorRect.right);
-            const leftLimit = 16;
-            const availableWidth = window.innerWidth - rightOffset - leftLimit;
-            const finalWidth = Math.min(width, availableWidth);
-
-            menu.setAttribute('style',
-                `position:fixed!important;` +
-                `top:${top}px!important;` +
-                `right:${rightOffset}px!important;` +
-                `left:auto!important;` +
-                `width:${finalWidth}px!important;` +
-                `max-width:${finalWidth}px!important;` +
-                `transform:none!important;` +
-                `z-index:1055!important;`
-            );
-        }
-
-        function fixNotifDropdownPosition() {
-            const menu = document.querySelector('.notif-dropdown-menu');
-            const btn = document.getElementById('notificationDropdown');
-            setLmsGuruTopbarDropdownPosition(menu, btn, {
-                desktopWidth: window.innerWidth <= 991 ? 320 : 360,
-                lockMobileHeight: true
-            });
-        }
-
-        function fixLmsGuruProfileDropdownPosition() {
-            const menu = document.querySelector('.lms-guru-profile-menu');
-            const btn = document.getElementById('lmsGuruProfileDropdown');
-            setLmsGuruTopbarDropdownPosition(menu, btn, { desktopWidth: 240 });
-        }
-    </script>
-
-    <script>
         document.addEventListener('DOMContentLoaded', function () {
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
             const body = document.body;
-            const profileTrigger = document.getElementById('lmsGuruProfileDropdown');
 
             function toggleSidebar() {
                 if (window.innerWidth > 768) {
@@ -709,30 +493,6 @@
                 overlay.addEventListener('click', toggleSidebar);
             }
 
-            if (profileTrigger) {
-                profileTrigger.addEventListener('show.bs.dropdown', function () {
-                    requestAnimationFrame(() => requestAnimationFrame(fixLmsGuruProfileDropdownPosition));
-                });
-
-                profileTrigger.addEventListener('hidden.bs.dropdown', function () {
-                    const menu = document.querySelector('.lms-guru-profile-menu');
-                    if (menu) menu.removeAttribute('style');
-                });
-            }
-
-            const notificationTrigger = document.getElementById('notificationDropdown');
-            if (notificationTrigger) {
-                notificationTrigger.addEventListener('hidden.bs.dropdown', function () {
-                    const menu = document.querySelector('.notif-dropdown-menu');
-                    if (menu) {
-                        delete menu.dataset.mobileDropdownWidth;
-                        delete menu.dataset.mobileDropdownHeight;
-                        delete menu.dataset.mobileDropdownTop;
-                        delete menu.dataset.mobileDropdownLeft;
-                    }
-                });
-            }
-
             // Clean up state on resize
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 768) {
@@ -740,10 +500,6 @@
                     // to prevent them from getting stuck in "mobile open" state
                     sidebar.classList.remove('active');
                     overlay.classList.remove('active');
-                }
-
-                if (document.querySelector('.lms-guru-profile-menu.show')) {
-                    fixLmsGuruProfileDropdownPosition();
                 }
             });
         });

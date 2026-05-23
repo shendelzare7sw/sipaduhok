@@ -565,58 +565,12 @@
                 font-size: 0.9rem;
             }
         }
-
-        body.sneat-layout .notif-dropdown-menu .dropdown-header,
-        body.sneat-layout .notif-dropdown-menu .dropdown-footer {
-            background-color: #fff !important;
-            flex: 0 0 auto;
-        }
-
-        body.sneat-layout .notif-dropdown-menu .dropdown-header {
-            min-height: 44px;
-        }
-
-        body.sneat-layout .notif-dropdown-menu.show {
-            display: flex;
-            flex-direction: column;
-        }
-
-        body.sneat-layout .notif-dropdown-menu .dropdown-footer .btn-link {
-            color: var(--bs-primary, #4361ee) !important;
-            font-weight: 500;
-            text-decoration: none;
-        }
-
-        body.sneat-layout .notif-dropdown-menu .dropdown-footer .btn-link:hover {
-            color: var(--primary-dark, #2b4162) !important;
-        }
-
-        body.sneat-layout .notif-list-scroll {
-            flex: 1 1 auto;
-            min-height: 0;
-        }
-
-        @media (max-width: 575.98px) {
-            body.sneat-layout .notif-dropdown-menu {
-                border-radius: 0.5rem;
-                box-shadow: 0 0.25rem 1rem rgba(67, 89, 113, 0.18) !important;
-            }
-
-            body.sneat-layout .notification-item.unread {
-                background: #fff;
-                border-left-color: var(--bs-primary, var(--primary-color, #4361ee));
-            }
-
-            body.sneat-layout .notif-dropdown-menu.show .notif-list-scroll {
-                max-height: none !important;
-            }
-        }
     </style>
 
     @yield('styles')
 </head>
 
-<body class="sneat-layout">
+<body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -864,75 +818,6 @@
     <!-- Sneat Menu JS (only menu, skip helpers that might conflict) -->
     <script
         src="https://demos.themeselection.com/sneat-bootstrap-html-admin-template-free/assets/vendor/js/menu.js"></script>
-
-    <script>
-        function fixNotifDropdownPosition() {
-            const menu = document.querySelector('.notif-dropdown-menu');
-            const btn = document.getElementById('notificationDropdown');
-            if (!menu || !btn) return;
-
-            const btnRect = btn.getBoundingClientRect();
-
-            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-            const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
-
-            if (viewportWidth <= 575.98) {
-                const margin = viewportWidth <= 360 ? 16 : 24;
-                const navbar = btn.closest('.layout-navbar, .navbar, header');
-                const navbarBottom = navbar ? navbar.getBoundingClientRect().bottom : btnRect.bottom;
-                const top = Math.max(btnRect.bottom, navbarBottom) + 8;
-                let width = Math.min(360, Math.max(280, viewportWidth - (margin * 2)));
-                let maxHeight = Math.min(480, Math.max(320, viewportHeight - top - margin));
-                let topOffset = top;
-                let leftOffset = Math.max(margin, viewportWidth - margin - width);
-
-                if (menu.dataset.mobileDropdownWidth && menu.dataset.mobileDropdownHeight &&
-                    menu.dataset.mobileDropdownTop && menu.dataset.mobileDropdownLeft) {
-                    width = Number(menu.dataset.mobileDropdownWidth);
-                    maxHeight = Number(menu.dataset.mobileDropdownHeight);
-                    topOffset = Number(menu.dataset.mobileDropdownTop);
-                    leftOffset = Number(menu.dataset.mobileDropdownLeft);
-                } else {
-                    menu.dataset.mobileDropdownWidth = String(width);
-                    menu.dataset.mobileDropdownHeight = String(maxHeight);
-                    menu.dataset.mobileDropdownTop = String(topOffset);
-                    menu.dataset.mobileDropdownLeft = String(leftOffset);
-                }
-
-                menu.setAttribute('style',
-                    `position:fixed!important;` +
-                    `top:${topOffset}px!important;` +
-                    `left:${leftOffset}px!important;` +
-                    `right:auto!important;` +
-                    `width:${width}px!important;` +
-                    `min-width:${width}px!important;` +
-                    `max-width:${width}px!important;` +
-                    `height:${maxHeight}px!important;` +
-                    `max-height:${maxHeight}px!important;` +
-                    `transform:none!important;` +
-                    `z-index:9999!important;`
-                );
-                return;
-            }
-
-            menu.removeAttribute('style');
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const notificationTrigger = document.getElementById('notificationDropdown');
-            if (notificationTrigger) {
-                notificationTrigger.addEventListener('hidden.bs.dropdown', function () {
-                    const menu = document.querySelector('.notif-dropdown-menu');
-                    if (menu) {
-                        delete menu.dataset.mobileDropdownWidth;
-                        delete menu.dataset.mobileDropdownHeight;
-                        delete menu.dataset.mobileDropdownTop;
-                        delete menu.dataset.mobileDropdownLeft;
-                    }
-                });
-            }
-        });
-    </script>
 
     <!-- Custom SIPADUHOK Scripts -->
     <script>
