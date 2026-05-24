@@ -14,7 +14,7 @@
     $sectionOrder = ['hero', 'intro', 'stats', 'program', 'history', 'why_choose_us', 'about', 'visi', 'misi', 'values', 'news_header', 'gallery_section', 'contact_section', 'cta_section'];
     
     // Urutan khusus untuk PPDB
-    $ppdbSectionOrder = ['hero', 'quick_info', 'alur', 'investasi', 'biaya_paud', 'biaya_sd', 'biaya_smp', 'biaya_sma'];
+    $ppdbSectionOrder = ['hero', 'quick_info', 'alur', 'syarat_header', 'syarat_paud', 'syarat_paket_a', 'syarat_paket_b', 'syarat_paket_c', 'syarat_inklusi', 'investasi', 'biaya_paud', 'biaya_sd', 'biaya_smp', 'biaya_sma'];
 
     // Nama yang lebih mudah dipahami untuk setiap section
     $sectionLabels = [
@@ -35,6 +35,12 @@
         // Label khusus PPDB
         'quick_info' => 'Info Cepat & Statistik',
         'alur' => 'Alur Pendaftaran',
+        'syarat_header' => 'Header Syarat Pendaftaran',
+        'syarat_paud' => 'Syarat PAUD',
+        'syarat_paket_a' => 'Syarat SD (Paket A)',
+        'syarat_paket_b' => 'Syarat SMP (Paket B)',
+        'syarat_paket_c' => 'Syarat SMA (Paket C)',
+        'syarat_inklusi' => 'Syarat Pendidikan Inklusi',
         'investasi' => 'Header Biaya / Investasi',
         'biaya_paud' => 'Biaya PAUD',
         'biaya_sd' => 'Biaya SD (Paket A)',
@@ -64,6 +70,12 @@
         // Deskripsi PPDB
         'quick_info' => 'Informasi singkat mengenai periode, biaya pendaftaran, dan kuota.',
         'alur' => 'Langkah-langkah pendaftaran.',
+        'syarat_header' => 'Judul utama bagian Syarat Pendaftaran.',
+        'syarat_paud' => 'Dokumen persyaratan untuk jenjang PAUD.',
+        'syarat_paket_a' => 'Dokumen persyaratan untuk jenjang SD (Paket A).',
+        'syarat_paket_b' => 'Dokumen persyaratan untuk jenjang SMP (Paket B).',
+        'syarat_paket_c' => 'Dokumen persyaratan untuk jenjang SMA (Paket C).',
+        'syarat_inklusi' => 'Dokumen persyaratan untuk pendidikan inklusi.',
         'investasi' => 'Judul dan deskripsi utama untuk bagian biaya.',
         'biaya_paud' => 'Rincian biaya untuk jenjang PAUD.',
         'biaya_sd' => 'Rincian biaya untuk jenjang SD.',
@@ -227,6 +239,7 @@
                             str_contains($sectionKey, 'keunggulan') => ['icon' => null, 'color' => '#165fac', 'title' => '', 'description' => ''],
                             str_contains($sectionKey, 'therapy_types') => ['color' => '#165fac', 'title' => '', 'description' => '', 'features' => ''],
                             str_contains($sectionKey, 'alur_terapi') => ['title' => '', 'description' => ''],
+                            str_contains($sectionKey, 'syarat_') => ['text' => ''],
                             str_contains($sectionKey, 'social_media') => ['platform' => '', 'link' => ''],
                             default => ['title' => '', 'description' => '']
                         };
@@ -303,6 +316,8 @@
                                                                 <input type="color" class="form-control form-control-color" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue && str_starts_with($hValue, '#') ? $hValue : '#165fac' }}" title="Pilih warna">
                                                                 <input type="text" class="form-control" value="{{ $hValue }}" readonly style="max-width: 120px; background: #f5f5f9;">
                                                             </div>
+                                                        @elseif(str_contains($hKey, 'description') || str_contains($hKey, 'note') || (is_string($hValue) && strlen($hValue) > 80))
+                                                            <textarea class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" rows="3">{{ $hValue }}</textarea>
                                                         @else
                                                             <input type="text" class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue }}">
                                                         @endif

@@ -16,11 +16,13 @@
         @endif
     </div>
     <div class="card-body">
+        @php $hasVisual = !empty($visualFields); @endphp
         <div class="row g-4">
-            {{-- Visual Column (Left) --}}
+            {{-- Visual Column (Left) — hanya tampil jika ada field visual --}}
+            @if($hasVisual)
             <div class="col-md-4 border-end">
                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Tampilan & Icon</h6>
-                
+
                 @foreach($visualFields as $key => $value)
                     <div class="mb-3">
                         <label class="form-label fw-semibold small text-muted">
@@ -75,9 +77,10 @@
                     </div>
                 @endforeach
             </div>
+            @endif
 
             {{-- Content Column (Right) --}}
-            <div class="col-md-8">
+            <div class="{{ $hasVisual ? 'col-md-8' : 'col-12' }}">
                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Konten Text</h6>
                 <div class="row g-3">
                     @foreach($textFields as $key => $value)

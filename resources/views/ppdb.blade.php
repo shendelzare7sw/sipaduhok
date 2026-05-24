@@ -44,6 +44,16 @@
             ['bg' => 'bg-accent-bright/20', 'text' => 'text-secondary', 'path' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
         ];
 
+        // Syarat Pendaftaran Sections
+        $syaratHeaderSection = $page->getSection('syarat_header');
+        $syaratHeaderContent = $syaratHeaderSection->content ?? [];
+
+        $syaratSectionKeys = ['syarat_paud', 'syarat_paket_a', 'syarat_paket_b', 'syarat_paket_c', 'syarat_inklusi'];
+        $syaratTabs = collect($syaratSectionKeys)
+            ->map(fn($key) => $page->getSection($key))
+            ->filter(fn($s) => $s && $s->is_visible)
+            ->values();
+
         // Investasi & Biaya Sections
         $investasiSection = $page->getSection('investasi');
         $investasiContent = $investasiSection->content ?? [];
@@ -192,421 +202,98 @@
         </div>
     </section>
 
+
     <!-- Syarat Pendaftaran -->
+    @if(($syaratHeaderSection?->is_visible ?? true) && $syaratTabs->isNotEmpty())
+    @php
+        $syaratTabKey = fn($sectionKey) => str_replace('_', '-', preg_replace('/^syarat_/', '', $sectionKey));
+    @endphp
     <section id="syarat" class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span
                     class="inline-block px-4 py-2 bg-secondary/10 text-secondary text-sm font-medium rounded-full mb-4">
-                    Persyaratan
+                    {{ $syaratHeaderContent['badge'] ?? 'Persyaratan' }}
                 </span>
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                    Syarat Pendaftaran
+                    {{ $syaratHeaderContent['title'] ?? 'Syarat Pendaftaran' }}
                 </h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">
-                    Siapkan dokumen-dokumen berikut untuk melengkapi pendaftaran Anda
+                    {{ $syaratHeaderContent['description'] ?? 'Siapkan dokumen-dokumen berikut untuk melengkapi pendaftaran Anda' }}
                 </p>
             </div>
 
             <!-- Tabs -->
             <div class="flex flex-wrap justify-center gap-4 mb-12">
-                <button class="tab-button active px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="paud">
-                    PAUD
-                </button>
-                <button class="tab-button px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="paket-a">
-                    SD (Paket A)
-                </button>
-                <button class="tab-button px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="paket-b">
-                    SMP (Paket B)
-                </button>
-                <button class="tab-button px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="paket-c">
-                    SMA (Paket C)
-                </button>
-                <button class="tab-button px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="inklusi">
-                    Pendidikan Inklusi
-                </button>
+                @foreach($syaratTabs as $tabIdx => $tab)
+                    @php
+                        $tabKey = $syaratTabKey($tab->section_key);
+                        $tabLabel = $tab->content['header']['tab_label'] ?? ucfirst($tabKey);
+                    @endphp
+                    <button class="tab-button {{ $tabIdx === 0 ? 'active' : '' }} px-6 py-3 rounded-full font-semibold bg-gray-100" data-tab="{{ $tabKey }}">
+                        {{ $tabLabel }}
+                    </button>
+                @endforeach
             </div>
 
             <!-- Tab Contents -->
             <div class="max-w-4xl mx-auto">
-                <!-- PAUD -->
-                <div class="tab-content active" id="paud">
-                    <div class="bg-gradient-to-br from-accent-yellow/10 to-accent-bright/10 rounded-3xl p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span
-                                class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3"><i
-                                    class="fas fa-book"></i></span>
-                            Syarat PAUD
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Akta Kelahiran (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Kartu Keluarga (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy KTP Orang Tua (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Pas foto anak 3x4 (4 lembar, background merah)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Usia minimal 3 tahun</span>
+                @foreach($syaratTabs as $tabIdx => $tab)
+                    @php
+                        $tabKey = $syaratTabKey($tab->section_key);
+                        $tabHeader = $tab->content['header'] ?? [];
+                        $tabItems = $tab->content['items'] ?? [];
+                        $tabTitle = $tabHeader['title'] ?? '';
+                        $tabColor = $tabHeader['color'] ?? '#165fac';
+                        $tabIcon = $tabHeader['icon'] ?? 'fa-book';
+                        if (!str_starts_with($tabIcon, 'fa')) {
+                            $tabIcon = 'fas fa-' . ltrim($tabIcon, 'fa-');
+                        } elseif (str_starts_with($tabIcon, 'fa-')) {
+                            $tabIcon = 'fas ' . $tabIcon;
+                        }
+                        $tabNote = $tabHeader['note'] ?? null;
+                    @endphp
+                    <div class="tab-content {{ $tabIdx === 0 ? 'active' : '' }}" id="{{ $tabKey }}">
+                        <div class="rounded-3xl p-8" style="background: linear-gradient(135deg, {{ $tabColor }}1a, {{ $tabColor }}0d);">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                                <span class="w-10 h-10 rounded-full flex items-center justify-center text-white mr-3"
+                                    style="background-color: {{ $tabColor }};">
+                                    <i class="{{ $tabIcon }}"></i>
+                                </span>
+                                {{ $tabTitle }}
+                            </h3>
+                            <div class="space-y-4">
+                                @foreach($tabItems as $item)
+                                    @php $itemText = is_array($item) ? ($item['text'] ?? '') : $item; @endphp
+                                    @if($itemText !== '')
+                                        <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
+                                            <div
+                                                class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <span class="text-gray-700">{{ $itemText }}</span>
+                                        </div>
+                                    @endif
+                                @endforeach
+                                @if($tabNote)
+                                    <div class="p-4 rounded-xl" style="background-color: {{ $tabColor }}1a;">
+                                        <p class="text-sm text-gray-700 leading-relaxed">
+                                            <strong>Catatan:</strong> {{ $tabNote }}
+                                        </p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Paket A -->
-                <div class="tab-content" id="paket-a">
-                    <div class="bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span
-                                class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3"><i
-                                    class="fas fa-graduation-cap"></i></span>
-                            Syarat Paket A (Setara SD)
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Ijazah PAUD/TK atau Surat Keterangan (2
-                                    lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Akta Kelahiran (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Kartu Keluarga (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy KTP Orang Tua (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Pas foto 3x4 (6 lembar, background merah)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Usia minimal 7 tahun atau maksimal 12 tahun</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Paket B -->
-                <div class="tab-content" id="paket-b">
-                    <div class="bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-3xl p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span
-                                class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3"><i
-                                    class="fas fa-book-open"></i></span>
-                            Syarat Paket B (Setara SMP)
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Ijazah SD/Paket A (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy SKHUN SD (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Akta Kelahiran (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Kartu Keluarga (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy KTP atau KTP Orang Tua (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Pas foto 3x4 (6 lembar, background biru)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Paket C -->
-                <div class="tab-content" id="paket-c">
-                    <div class="bg-gradient-to-br from-accent-orange/10 to-accent-orange/5 rounded-3xl p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span
-                                class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3"><i
-                                    class="fas fa-bullseye"></i></span>
-                            Syarat Paket C (Setara SMA)
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Ijazah SMP/Paket B (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy SKHUN SMP (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Akta Kelahiran (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy Kartu Keluarga (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Fotocopy KTP Peserta Didik (2 lembar)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Pas foto 3x4 (6 lembar, background merah)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Pilih jurusan: IPA atau IPS</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Inklusi -->
-                <div class="tab-content" id="inklusi">
-                    <div class="bg-gradient-to-br from-purple-100 to-pink-50 rounded-3xl p-8">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                            <span
-                                class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white mr-3"><i
-                                    class="fas fa-heart"></i></span>
-                            Syarat Pendidikan Inklusi
-                        </h3>
-                        <div class="space-y-4">
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Persyaratan dokumen sesuai jenjang yang diambil</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Surat keterangan dari dokter/psikolog (jika ada)</span>
-                            </div>
-                            <div class="requirement-check flex items-start gap-3 bg-white p-4 rounded-xl">
-                                <div
-                                    class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-gray-700">Asesmen awal kemampuan peserta didik</span>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-xl">
-                                <p class="text-sm text-gray-700 leading-relaxed">
-                                    <strong>Catatan:</strong> Pendidikan inklusi kami dirancang untuk memberikan
-                                    kesempatan belajar yang setara bagi anak berkebutuhan khusus. Kami menyediakan
-                                    pendampingan khusus dan kurikulum yang disesuaikan dengan kebutuhan setiap peserta
-                                    didik.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
     <!-- Biaya Section -->
     @if($investasiSection?->is_visible)

@@ -99,3 +99,69 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(22, 95, 172, 0.15);
 }
+
+/* ===== Text wrapping safety for admin-editable content =====
+   Admin bisa input string panjang tanpa spasi yang dapat menembus
+   batas card. Aturan berikut memaksa pembungkusan teks di area
+   yang isinya dinamis dari DB. */
+.card-hover,
+.card-hover h2,
+.card-hover h3,
+.card-hover h4,
+.card-hover p,
+.card-hover span,
+.card-hover small,
+.requirement-check,
+.requirement-check span,
+.tab-button,
+.tab-content h3,
+.tab-content p,
+.tab-content span {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+/* Prevent visual overflow on rounded cards */
+.card-hover {
+    overflow: hidden;
+}
+
+/* Allow grid items to shrink below their min-content width */
+section#alur .grid > div,
+section#syarat .grid > div,
+section#biaya .grid > div {
+    min-width: 0;
+}
+
+/* Tab button tetap rapi meski label panjang */
+.tab-button {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* Quick info cards — label & value safety */
+section .grid > div p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Hero teks heading */
+section h1,
+section h2 {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* Mobile spacing adjustment */
+@media (max-width: 640px) {
+    .card-hover {
+        padding: 1.25rem;
+    }
+    .tab-button {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+}

@@ -1380,6 +1380,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'rich_text',
                 'order' => 1,
+                'is_visible' => true,
                 'content' => [
                     'tahun_ajaran' => 'Tahun Ajaran 2025/2026',
                     'title' => 'Penerimaan Peserta',
@@ -1398,6 +1399,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'rich_text',
                 'order' => 2,
+                'is_visible' => true,
                 'content' => [
                     'periode_label' => 'Periode Pendaftaran',
                     'periode_value' => '1 Jan - 31 Mei 2026',
@@ -1415,6 +1417,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             [
                 'type' => 'list',
                 'order' => 3,
+                'is_visible' => true,
                 'content' => [
                     'header' => [
                         'badge' => 'Langkah Mudah',
@@ -1432,12 +1435,150 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             ]
         );
 
+        // ===== SYARAT PENDAFTARAN SECTIONS =====
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $ppdb->id, 'section_key' => 'syarat_header'],
+            [
+                'type' => 'rich_text',
+                'order' => 4,
+                'is_visible' => true,
+                'content' => [
+                    'badge' => 'Persyaratan',
+                    'title' => 'Syarat Pendaftaran',
+                    'description' => 'Siapkan dokumen-dokumen berikut untuk melengkapi pendaftaran Anda',
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $ppdb->id, 'section_key' => 'syarat_paud'],
+            [
+                'type' => 'list',
+                'order' => 5,
+                'is_visible' => true,
+                'content' => [
+                    'header' => [
+                        'tab_label' => 'PAUD',
+                        'title' => 'Syarat PAUD',
+                        'color' => '#fac030',
+                        'icon' => 'fa-book',
+                    ],
+                    'items' => [
+                        ['text' => 'Fotocopy Akta Kelahiran (2 lembar)'],
+                        ['text' => 'Fotocopy Kartu Keluarga (2 lembar)'],
+                        ['text' => 'Fotocopy KTP Orang Tua (2 lembar)'],
+                        ['text' => 'Pas foto anak 3x4 (4 lembar, background merah)'],
+                        ['text' => 'Usia minimal 3 tahun'],
+                    ],
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $ppdb->id, 'section_key' => 'syarat_paket_a'],
+            [
+                'type' => 'list',
+                'order' => 6,
+                'is_visible' => true,
+                'content' => [
+                    'header' => [
+                        'tab_label' => 'SD (Paket A)',
+                        'title' => 'Syarat Paket A (Setara SD)',
+                        'color' => '#165fac',
+                        'icon' => 'fa-graduation-cap',
+                    ],
+                    'items' => [
+                        ['text' => 'Fotocopy Ijazah PAUD/TK atau Surat Keterangan (2 lembar)'],
+                        ['text' => 'Fotocopy Akta Kelahiran (2 lembar)'],
+                        ['text' => 'Fotocopy Kartu Keluarga (2 lembar)'],
+                        ['text' => 'Fotocopy KTP Orang Tua (2 lembar)'],
+                        ['text' => 'Pas foto 3x4 (6 lembar, background merah)'],
+                        ['text' => 'Usia minimal 7 tahun atau maksimal 12 tahun'],
+                    ],
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $ppdb->id, 'section_key' => 'syarat_paket_b'],
+            [
+                'type' => 'list',
+                'order' => 7,
+                'is_visible' => true,
+                'content' => [
+                    'header' => [
+                        'tab_label' => 'SMP (Paket B)',
+                        'title' => 'Syarat Paket B (Setara SMP)',
+                        'color' => '#287f3b',
+                        'icon' => 'fa-book-open',
+                    ],
+                    'items' => [
+                        ['text' => 'Fotocopy Ijazah SD/Paket A (2 lembar)'],
+                        ['text' => 'Fotocopy SKHUN SD (2 lembar)'],
+                        ['text' => 'Fotocopy Akta Kelahiran (2 lembar)'],
+                        ['text' => 'Fotocopy Kartu Keluarga (2 lembar)'],
+                        ['text' => 'Fotocopy KTP atau KTP Orang Tua (2 lembar)'],
+                        ['text' => 'Pas foto 3x4 (6 lembar, background biru)'],
+                    ],
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $ppdb->id, 'section_key' => 'syarat_paket_c'],
+            [
+                'type' => 'list',
+                'order' => 8,
+                'is_visible' => true,
+                'content' => [
+                    'header' => [
+                        'tab_label' => 'SMA (Paket C)',
+                        'title' => 'Syarat Paket C (Setara SMA)',
+                        'color' => '#d45930',
+                        'icon' => 'fa-bullseye',
+                    ],
+                    'items' => [
+                        ['text' => 'Fotocopy Ijazah SMP/Paket B (2 lembar)'],
+                        ['text' => 'Fotocopy SKHUN SMP (2 lembar)'],
+                        ['text' => 'Fotocopy Akta Kelahiran (2 lembar)'],
+                        ['text' => 'Fotocopy Kartu Keluarga (2 lembar)'],
+                        ['text' => 'Fotocopy KTP Peserta Didik (2 lembar)'],
+                        ['text' => 'Pas foto 3x4 (6 lembar, background merah)'],
+                        ['text' => 'Pilih jurusan: IPA atau IPS'],
+                    ],
+                ]
+            ]
+        );
+
+        LandingPageSection::updateOrCreate(
+            ['landing_page_id' => $ppdb->id, 'section_key' => 'syarat_inklusi'],
+            [
+                'type' => 'list',
+                'order' => 9,
+                'is_visible' => true,
+                'content' => [
+                    'header' => [
+                        'tab_label' => 'Pendidikan Inklusi',
+                        'title' => 'Syarat Pendidikan Inklusi',
+                        'color' => '#a855f7',
+                        'icon' => 'fa-heart',
+                        'note' => 'Pendidikan inklusi kami dirancang untuk memberikan kesempatan belajar yang setara bagi anak berkebutuhan khusus. Kami menyediakan pendampingan khusus dan kurikulum yang disesuaikan dengan kebutuhan setiap peserta didik.',
+                    ],
+                    'items' => [
+                        ['text' => 'Persyaratan dokumen sesuai jenjang yang diambil'],
+                        ['text' => 'Surat keterangan dari dokter/psikolog (jika ada)'],
+                        ['text' => 'Asesmen awal kemampuan peserta didik'],
+                    ],
+                ]
+            ]
+        );
+
         // Investasi Pendidikan Section Header
         LandingPageSection::updateOrCreate(
             ['landing_page_id' => $ppdb->id, 'section_key' => 'investasi'],
             [
                 'type' => 'rich_text',
-                'order' => 4,
+                'order' => 10,
                 'is_visible' => false,
                 'content' => [
                     'badge' => 'Investasi Pendidikan',
@@ -1452,7 +1593,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             ['landing_page_id' => $ppdb->id, 'section_key' => 'biaya_paud'],
             [
                 'type' => 'list',
-                'order' => 5,
+                'order' => 11,
                 'is_visible' => false,
                 'content' => [
                     'header' => [
@@ -1480,7 +1621,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             ['landing_page_id' => $ppdb->id, 'section_key' => 'biaya_sd'],
             [
                 'type' => 'list',
-                'order' => 6,
+                'order' => 12,
                 'is_visible' => false,
                 'content' => [
                     'header' => [
@@ -1508,7 +1649,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             ['landing_page_id' => $ppdb->id, 'section_key' => 'biaya_smp'],
             [
                 'type' => 'list',
-                'order' => 7,
+                'order' => 13,
                 'is_visible' => false,
                 'content' => [
                     'header' => [
@@ -1536,7 +1677,7 @@ Dengan pengalaman lebih dari 14 tahun dalam bidang pendidikan, kami telah memban
             ['landing_page_id' => $ppdb->id, 'section_key' => 'biaya_sma'],
             [
                 'type' => 'list',
-                'order' => 8,
+                'order' => 14,
                 'is_visible' => false,
                 'content' => [
                     'header' => [
