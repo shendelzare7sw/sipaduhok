@@ -135,6 +135,7 @@ class AiChatbotController extends Controller
                 return response()->json([
                     'success' => true,
                     'response' => $result['response'],
+                    'structured' => $result['structured'] ?? null,
                     'model' => $result['model'],
                     'provider' => $result['provider'] ?? 'unknown',
                 ]);

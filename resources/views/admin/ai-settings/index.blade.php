@@ -35,11 +35,11 @@
                         <div class="mb-4 pb-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
-                                    <h6 class="fw-bold mb-1"><i class="fas fa-magic me-2 text-primary"></i>Mode LLM (Generative AI)</h6>
-                                    <small class="text-muted">Izinkan Chatbot untuk menjawab pertanyaan umum di luar konteks sistem menggunakan AI Generatif (Llama/Gemini). Jika dimatikan, Chatbot hanya akan melayani pertanyaan seputar sistem saja.</small>
+                                    <h6 class="fw-bold mb-1"><i class="fas fa-shield-alt me-2 text-primary"></i>Pembatasan Konteks Chatbot</h6>
+                                    <small class="text-muted">Jika diaktifkan, Chatbot <strong>HANYA</strong> menjawab pertanyaan seputar menu &amp; fitur SIPADUHOK. Pertanyaan di luar konteks (cuaca, politik, hiburan, dll) akan ditolak sopan. Disarankan tetap aktif untuk fokus penggunaan.</small>
                                 </div>
                                 <div class="form-check form-switch form-switch-lg mb-0" style="padding-left: 3rem;">
-                                    <input class="form-check-input" type="checkbox" role="switch" name="llm_mode_enabled" id="llm_mode_enabled" style="width: 3rem; height: 1.5rem;" {{ $llmModeEnabled ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="checkbox" role="switch" name="context_restriction_enabled" id="context_restriction_enabled" style="width: 3rem; height: 1.5rem;" {{ $contextRestrictionEnabled ? 'checked' : '' }}>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
@@ -230,8 +230,8 @@
                         <input type="hidden" name="ai_model" value="{{ $model }}">
                         <input type="hidden" name="ai_vision_model" value="{{ $visionModel }}">
                         <input type="hidden" name="ai_provider" value="{{ $provider }}">
-                        @if($llmModeEnabled)
-                            <input type="hidden" name="llm_mode_enabled" value="on">
+                        @if($contextRestrictionEnabled)
+                            <input type="hidden" name="context_restriction_enabled" value="on">
                         @endif
                         @if($aiQuestionGeneratorEnabled)
                             <input type="hidden" name="ai_question_generator_enabled" value="on">

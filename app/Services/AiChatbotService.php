@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\AppSetting;
+use App\Services\Chatbot\KnowledgeBaseLoader;
 use Exception;
 
 class AiChatbotService
@@ -14,9 +15,11 @@ class AiChatbotService
     private $provider;
     private $defaultModel;
     private $visionModel;
+    private KnowledgeBaseLoader $kb;
 
-    public function __construct()
+    public function __construct(KnowledgeBaseLoader $kb)
     {
+        $this->kb = $kb;
         $this->loadConfig();
     }
 
@@ -194,6 +197,10 @@ class AiChatbotService
             // Call AI with fallback
             $result = $this->callAiWithFallback($messages, $selectedModel, $provider);
 
+            if ($result['success'] && !empty($result['response'])) {
+                $result['structured'] = $this->parseStructuredResponse($result['response'], $userRole);
+            }
+
             return $result;
 
         } catch (Exception $e) {
@@ -211,23 +218,208 @@ class AiChatbotService
     }
 
     /**
-     * Build system prompt based on user role
-     *
-     * @param string $userRole
-     * @return string
+     * Build system prompt with knowledge base injected from docs/flow/{role}.md
      */
     private function buildSystemPrompt(string $userRole): string
     {
-        // IMPORTANT: System/navigation questions are handled by rule-based KB on frontend.
-        // This LLM prompt should ONLY handle general/educational questions.
-        // DO NOT add any SIPADUHOK-specific menu/feature knowledge here.
-        return "Anda adalah asisten AI di sistem informasi akademik SIPADUHOK. Anda membantu menjawab pertanyaan umum, edukasi, dan juga pertanyaan seputar sistem.\n\n"
-             . "**ATURAN PENTING:**\n"
-             . "1. Jawab dengan Bahasa Indonesia yang sopan dan mudah dipahami.\n"
-             . "2. Jika user bertanya tentang navigasi sistem, menu, fitur, atau cara menggunakan SIPADUHOK — coba bantu dengan informasi umum yang wajar (misalnya: 'Untuk reset password, biasanya bisa melalui menu Pengaturan Akun atau hubungi Admin'). Jangan mengarang fitur spesifik.\n"
-             . "3. Jika pertanyaan tidak jelas atau hanya berupa kata singkat ambigu, minta user menjelaskan lebih detail.\n"
-             . "4. Berikan jawaban yang ringkas, informatif, dan to-the-point.\n"
-             . "5. Jangan pernah menjawab 'Silakan ketik ulang pertanyaan Anda' — selalu berusaha memberikan jawaban yang berguna.";
+        $strict = isContextRestrictionEnabled();
+        $knowledge = $this->kb->getForRole($userRole);
+        $landingPages = $this->kb->getLandingPagesPrompt();
+
+        $routeMap = $this->kb->getRouteMapForRole($userRole);
+        $routeList = '';
+        $routeCount = 0;
+        foreach ($routeMap as $name => $url) {
+            if ($routeCount >= 50) break;
+            $routeList .= "{$name}={$url}\n";
+            $routeCount++;
+        }
+        if (strlen($routeList) > 1800) {
+            $routeList = substr($routeList, 0, 1800) . "...\n";
+        }
+
+        $scopeRule = $strict
+            ? "MODE KETAT AKTIF: HANYA jawab pertanyaan seputar menu, fitur, dan cara penggunaan SIPADUHOK berdasarkan KNOWLEDGE BASE di bawah. Untuk pertanyaan di luar topik SIPADUHOK (cuaca, politik, hiburan, matematika umum, tokoh publik, dll), return JSON dengan text: 'Maaf, saya hanya dapat membantu seputar sistem SIPADUHOK. Silakan tanyakan tentang menu atau fitur yang ada di sistem.' tanpa button/related/callout."
+            : "MODE TERBUKA AKTIF: Boleh menjawab pertanyaan umum di luar SIPADUHOK. Untuk pertanyaan umum, jawab langsung secara natural dalam Bahasa Indonesia dan jangan memaksakan KNOWLEDGE BASE, OWNERSHIP TABLE, button, atau related. Jika riwayat chat lama berisi penolakan karena batasan konteks, abaikan penolakan itu dan ikuti mode terbuka saat ini. Untuk pertanyaan yang memang terkait SIPADUHOK, tetap prioritaskan konteks SIPADUHOK jika relevan.";
+
+        $roleLabel = $this->kb->roleLabel($userRole ?: 'guest');
+        $ownershipPrompt = $this->kb->getOwnershipPromptForRole($userRole ?: 'guest');
+        $ownershipTitle = $strict
+            ? '🔴 LANGKAH PERTAMA WAJIB: CEK OWNERSHIP TABLE 🔴'
+            : 'PANDUAN ROLE UNTUK PERTANYAAN SIPADUHOK';
+        $ownershipIntro = $strict
+            ? "Ini adalah daftar fitur yang DIKELOLA OLEH ROLE LAIN (bukan {$roleLabel}). Jika keyword pertanyaan user cocok dengan salah satu topik di bawah, WAJIB pakai POLA REKOMENDASI LINTAS-ROLE — JANGAN kasih langkah teknis menu."
+            : "Gunakan tabel ini hanya jika pertanyaan user berkaitan dengan menu, fitur, data sekolah, hak akses, atau cara penggunaan SIPADUHOK. Untuk pertanyaan umum di luar SIPADUHOK, lewati bagian ini.";
+        $knowledgeInstruction = $strict
+            ? "LANGKAH KEDUA: Jika topik TIDAK ada di OWNERSHIP TABLE di atas, jawab berdasarkan KNOWLEDGE BASE role {$roleLabel} di bawah."
+            : "Untuk pertanyaan yang memang terkait SIPADUHOK dan tidak ada di OWNERSHIP TABLE, jawab berdasarkan KNOWLEDGE BASE role {$roleLabel} di bawah. Untuk pertanyaan umum di luar SIPADUHOK, KNOWLEDGE BASE tidak wajib dipakai.";
+        $coreRules = $strict
+            ? implode("\n", [
+                '1. SETIAP pertanyaan user adalah tentang sistem SIPADUHOK. DILARANG menjawab umum/generik (cth: "tergantung kebijakan sekolah", langkah Windows/Linux, teori jurnalistik, dll).',
+                '2. Jawab HANYA berdasarkan KNOWLEDGE BASE dan OWNERSHIP TABLE di bawah.',
+                '3. Jika tidak yakin: cek OWNERSHIP TABLE dulu, lalu KNOWLEDGE BASE. Jika tetap tidak ada, balas: "Maaf, saya belum punya informasi spesifik tentang itu di SIPADUHOK."',
+            ])
+            : implode("\n", [
+                '1. Jika pertanyaan user terkait SIPADUHOK, menu, fitur, data sekolah, hak akses, atau cara penggunaan sistem: gunakan OWNERSHIP TABLE, KNOWLEDGE BASE, LANDING PAGES, dan ROUTE URL MAP di bawah.',
+                '2. Jika pertanyaan user adalah pertanyaan umum di luar SIPADUHOK: jawab langsung berdasarkan pengetahuan umum secara ringkas, jelas, dan aman. Jangan menolak hanya karena topiknya di luar SIPADUHOK.',
+                '3. Untuk pertanyaan umum di luar SIPADUHOK, set "button": null dan "related": null. Jangan mengarang route atau memaksa jawaban ke konteks SIPADUHOK.',
+            ]);
+
+        return <<<PROMPT
+Anda adalah **Asisten SIPADUHOK** — chatbot resmi sistem informasi akademik PKBM House Of Knowledge. Pengguna login dengan role: **{$roleLabel}**.
+
+⚠️ ATURAN UTAMA (TIDAK BOLEH DILANGGAR):
+{$coreRules}
+
+═══════════════════════════════════════════════════════════
+{$ownershipTitle}
+═══════════════════════════════════════════════════════════
+{$ownershipIntro}
+
+{$ownershipPrompt}
+
+POLA REKOMENDASI LINTAS-ROLE — pakai persis format ini:
+{
+  "text": "Fitur [topik] dikelola oleh [role pemilik]. Sebagai {$roleLabel}, Anda tidak [aksi] langsung — silakan koordinasi dengan [role pemilik] untuk hal ini.",
+  "callout": null,
+  "button": null,   // KECUALI role = admin, boleh isi dengan admin_view_route untuk monitoring
+  "related": null
+}
+
+Contoh OWNERSHIP-aware response (user = wakasek, tanya "cara approve rapor"):
+{"text":"Approve/validasi rapor dilakukan oleh Ketua PKBM (validasi akhir setelah Wali Kelas generate). Sebagai Wakasek, Anda tidak melakukan approve rapor langsung — silakan koordinasi dengan Ketua PKBM.","callout":null,"button":null,"related":null}
+
+Contoh OWNERSHIP-aware response (user = sekretaris, tanya "cara buat tagihan"):
+{"text":"Pembuatan tagihan (SPP, bulk create, custom) dikelola oleh Bendahara atau Admin. Sebagai Sekretaris, Anda tidak membuat tagihan — silakan koordinasi dengan Bendahara/Admin.","callout":null,"button":null,"related":null}
+
+═══════════════════════════════════════════════════════════
+{$knowledgeInstruction}
+═══════════════════════════════════════════════════════════
+
+═══════════════════════════════════════════════════════════
+ATURAN OUTPUT JSON (WAJIB):
+═══════════════════════════════════════════════════════════
+Selalu balas dengan JSON valid (tanpa code fence ```, tanpa teks pembungkus), schema:
+{
+  "text": "jawaban natural Bahasa Indonesia, max 3 paragraf pendek. Pakai \\n untuk newline. Hindari markdown heading (#).",
+  "callout": "info penting singkat (max 200 char) atau null",
+  "button": { "label": "Buka [Nama Menu]", "route": "nama.route.dari.map" } atau null,
+  "related": [ { "label": "topik", "route": "nama.route" } ] atau null (max 3)
+}
+
+Aturan field "button" & "related": route HARUS dari ROUTE URL MAP di bawah. JANGAN mengarang nama route.
+
+═══════════════════════════════════════════════════════════
+ATURAN SCOPE:
+═══════════════════════════════════════════════════════════
+{$scopeRule}
+
+═══════════════════════════════════════════════════════════
+HALAMAN PUBLIK / LANDING PAGES — bisa diakses OLEH SEMUA ROLE (termasuk {$roleLabel}):
+═══════════════════════════════════════════════════════════
+Jika user bertanya tentang informasi umum sekolah (profil, struktur organisasi, visi misi, program, fasilitas, kontak, berita, PPDB, dll), arahkan ke halaman landing page di bawah, BUKAN ke menu admin setelah login. Untuk button/related, gunakan URL path langsung (mis. "/struktur-organisasi") sebagai field "route".
+
+{$landingPages}
+
+Contoh response untuk pertanyaan landing-page (berlaku semua role):
+{"text":"Anda dapat melihat struktur organisasi sekolah di halaman publik /struktur-organisasi.","callout":null,"button":{"label":"Lihat Struktur Organisasi","route":"/struktur-organisasi"},"related":[{"label":"Profil Guru","route":"/profil-guru"},{"label":"Visi & Misi","route":"/visi-misi"}]}
+
+═══════════════════════════════════════════════════════════
+KNOWLEDGE BASE — dokumentasi menu/fitur internal yang DIKELOLA OLEH role {$roleLabel} (setelah login):
+═══════════════════════════════════════════════════════════
+{$knowledge}
+
+═══════════════════════════════════════════════════════════
+ROUTE URL MAP — daftar route name VALID untuk role {$roleLabel}:
+═══════════════════════════════════════════════════════════
+{$routeList}
+PROMPT;
+    }
+
+    /**
+     * Parse LLM raw output into structured response.
+     * Resolves route names → URLs, filters routes not accessible to role.
+     */
+    private function parseStructuredResponse(string $raw, string $role): array
+    {
+        $fallback = [
+            'text' => $raw,
+            'callout' => null,
+            'button' => null,
+            'related' => null,
+        ];
+
+        $cleaned = trim($raw);
+        $cleaned = preg_replace('/^```(?:json)?\s*/i', '', $cleaned);
+        $cleaned = preg_replace('/```\s*$/', '', $cleaned);
+        $cleaned = trim($cleaned);
+
+        if (!str_starts_with($cleaned, '{')) {
+            if (preg_match('/\{[\s\S]+\}/', $cleaned, $m)) {
+                $cleaned = $m[0];
+            } else {
+                return $fallback;
+            }
+        }
+
+        $parsed = json_decode($cleaned, true);
+        if (!is_array($parsed) || empty($parsed['text'])) {
+            return $fallback;
+        }
+
+        $structured = [
+            'text' => (string) $parsed['text'],
+            'callout' => isset($parsed['callout']) && is_string($parsed['callout']) && trim($parsed['callout']) !== ''
+                ? trim($parsed['callout'])
+                : null,
+            'button' => null,
+            'related' => null,
+        ];
+
+        if (isset($parsed['button']) && is_array($parsed['button'])) {
+            $url = $this->resolveButtonUrl($parsed['button']['route'] ?? null, $role);
+            $label = $parsed['button']['label'] ?? null;
+            if ($url && $label) {
+                $structured['button'] = ['label' => trim($label), 'url' => $url];
+            }
+        }
+
+        if (isset($parsed['related']) && is_array($parsed['related'])) {
+            $related = [];
+            foreach ($parsed['related'] as $item) {
+                if (count($related) >= 3) break;
+                if (!is_array($item)) continue;
+                $url = $this->resolveButtonUrl($item['route'] ?? null, $role);
+                $label = $item['label'] ?? null;
+                if (!$url || !$label) continue;
+                $related[] = ['label' => trim($label), 'url' => $url];
+            }
+            if (!empty($related)) {
+                $structured['related'] = $related;
+            }
+        }
+
+        return $structured;
+    }
+
+    /**
+     * Resolve a button/related "route" field to a final URL.
+     * Accepts:
+     *  - Named route (e.g. "admin.kelas.index") — resolved via route() and filtered by role permission.
+     *  - Direct URL path starting with "/" (landing pages only) — allowed for ALL roles.
+     */
+    private function resolveButtonUrl(?string $route, string $role): ?string
+    {
+        if (!$route) return null;
+        $route = trim($route);
+        if ($route === '') return null;
+
+        if (str_starts_with($route, '/')) {
+            return $this->kb->isLandingPageUrl($route) ? $route : null;
+        }
+
+        if (!$this->kb->isRouteAllowedForRole($route, $role)) return null;
+        return $this->kb->resolveRouteUrl($route);
     }
 
     /**
@@ -335,44 +527,49 @@ class AiChatbotService
      */
     private function callAiWithFallback(array $messages, string $selectedModel, string $provider): array
     {
-        // Try primary provider
         if ($provider === 'groq' && !empty($this->groqApiKey)) {
-            $result = $this->callGroqApi($messages, $selectedModel);
+            $chain = $this->buildGroqFallbackChain($selectedModel);
+            $tried = [];
+            $lastResult = null;
 
-            // Check for rate limit (429)
-            if (!$result['success']) {
-                $errorMsg = strtolower($result['error'] ?? '');
-                $isQuotaError = strpos($errorMsg, 'rate limit') !== false ||
-                                strpos($errorMsg, 'quota') !== false ||
-                                strpos($errorMsg, '429') !== false;
-
-                if ($isQuotaError) {
-                    Log::warning("Groq quota exceeded for model {$selectedModel}. Attempting internal Groq fallback.");
-                    
-                    // Fallback to another Groq model before Gemini
-                    $backupGroqModel = ($selectedModel === 'qwen/qwen3-32b') ? 'llama-3.3-70b-versatile' : 'qwen/qwen3-32b';
-                    $backupResult = $this->callGroqApi($messages, $backupGroqModel);
-                    
-                    if ($backupResult['success']) {
-                        return $backupResult;
+            foreach ($chain as $model) {
+                if (in_array($model, $tried, true)) continue;
+                $tried[] = $model;
+                $result = $this->callGroqApi($messages, $model);
+                if ($result['success']) {
+                    if ($model !== $selectedModel) {
+                        Log::info("Groq fallback succeeded with model: {$model} (original: {$selectedModel})");
+                        $result['fallback_used'] = true;
                     }
-                    
-                    // If backup Groq model ALSO fails, fallback to Gemini
-                    if (!empty($this->geminiApiKey)) {
-                        Log::warning('Both Groq models rate-limited, falling back to Gemini.');
-                        return $this->callGeminiApi($messages, $this->defaultModel);
-                    }
+                    return $result;
                 }
+                $lastResult = $result;
+                if (!$this->isQuotaError($result['error'] ?? '')) {
+                    break;
+                }
+                Log::warning("Groq model {$model} hit quota, trying next in fallback chain.");
             }
 
-            return $result;
+            if (!empty($this->geminiApiKey)) {
+                Log::warning('All Groq models exhausted, falling back to Gemini.');
+                $geminiResult = $this->callGeminiApi($messages, 'gemini-2.5-flash');
+                if ($geminiResult['success']) {
+                    $geminiResult['fallback_used'] = true;
+                }
+                return $geminiResult;
+            }
+
+            return $lastResult ?? [
+                'success' => false,
+                'error' => 'Semua model Groq sedang tidak tersedia dan Gemini API Key belum dikonfigurasi.',
+                'model' => $selectedModel,
+            ];
         }
 
         if ($provider === 'gemini' && !empty($this->geminiApiKey)) {
             return $this->callGeminiApi($messages, $selectedModel);
         }
 
-        // Fallback to Gemini if Groq not available entirely
         if (!empty($this->geminiApiKey)) {
             return $this->callGeminiApi($messages, $this->defaultModel);
         }
@@ -382,6 +579,40 @@ class AiChatbotService
             'error' => 'Tidak ada API key yang tersedia (Groq atau Gemini).',
             'model' => $selectedModel,
         ];
+    }
+
+    /**
+     * Build ordered list of Groq models to try, starting with the selected one.
+     */
+    private function buildGroqFallbackChain(string $selectedModel): array
+    {
+        $defaultOrder = [
+            'llama-3.3-70b-versatile',
+            'qwen/qwen3-32b',
+            'llama-3.1-8b-instant',
+            'openai/gpt-oss-120b',
+            'groq/compound',
+            'allam-2-7b',
+        ];
+
+        $chain = [$selectedModel];
+        foreach ($defaultOrder as $model) {
+            if (!in_array($model, $chain, true)) {
+                $chain[] = $model;
+            }
+        }
+        return $chain;
+    }
+
+    private function isQuotaError(string $error): bool
+    {
+        $error = strtolower($error);
+        return str_contains($error, 'rate limit')
+            || str_contains($error, 'quota')
+            || str_contains($error, '429')
+            || str_contains($error, 'tpm')
+            || str_contains($error, 'too many requests')
+            || str_contains($error, 'capacity');
     }
 
     /**
@@ -403,8 +634,8 @@ class AiChatbotService
                 ->post('https://api.groq.com/openai/v1/chat/completions', [
                     'model' => $model,
                     'messages' => $messages,
-                    'temperature' => 0.7,
-                    'max_tokens' => 1500, // Reduced from 8000 to 1500 to prevent exceeding Free Tier TPM limit (usually 6000)
+                    'temperature' => 0.4,
+                    'max_tokens' => 900,
                 ]);
 
             if (!$response->successful()) {
@@ -468,9 +699,11 @@ class AiChatbotService
         try {
             // Convert OpenAI-style messages to Gemini format
             $contents = [];
+            $systemInstruction = null;
+            $systemPrepended = false;
             foreach ($messages as $msg) {
                 if ($msg['role'] === 'system') {
-                    // Prepend system message to first user message
+                    $systemInstruction = is_string($msg['content']) ? $msg['content'] : null;
                     continue;
                 }
 
@@ -525,21 +758,34 @@ class AiChatbotService
                 }
             }
 
+            // Prepend system instruction to first user message (v1 API doesn't support systemInstruction field)
+            if ($systemInstruction && !empty($contents)) {
+                foreach ($contents as &$c) {
+                    if ($c['role'] === 'user' && isset($c['parts'][0]['text']) && !$systemPrepended) {
+                        $c['parts'][0]['text'] = "[INSTRUKSI SISTEM — IKUTI SECARA KETAT]\n" . $systemInstruction . "\n\n[/INSTRUKSI SISTEM]\n\nPESAN USER:\n" . $c['parts'][0]['text'];
+                        $systemPrepended = true;
+                        break;
+                    }
+                }
+                unset($c);
+            }
+
             // Determine Gemini model
             $geminiModel = str_contains($model, 'gemini') ? $model : 'gemini-2.5-flash';
-            // Use v1 API for Gemini 2.0+ models
             $url = "https://generativelanguage.googleapis.com/v1/models/{$geminiModel}:generateContent?key={$this->geminiApiKey}";
+
+            $payload = [
+                'contents' => $contents,
+                'generationConfig' => [
+                    'temperature' => 0.4,
+                    'maxOutputTokens' => 1500,
+                ],
+            ];
 
             $response = Http::withOptions(['verify' => false])
                 ->withHeaders(['Content-Type' => 'application/json'])
-                ->timeout(120) // Increase timeout for PDF processing
-                ->post($url, [
-                    'contents' => $contents,
-                    'generationConfig' => [
-                        'temperature' => 0.7,
-                        'maxOutputTokens' => 8000, // Increased from 1000 to 8000 (max for free tier)
-                    ],
-                ]);
+                ->timeout(45)
+                ->post($url, $payload);
 
             if ($response->failed()) {
                 throw new Exception("Gemini API Error: " . $response->body());

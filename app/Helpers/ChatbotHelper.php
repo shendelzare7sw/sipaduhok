@@ -42,17 +42,37 @@ if (!function_exists('canAccessChatbot')) {
     }
 }
 
-if (!function_exists('isLlmModeEnabled')) {
+if (!function_exists('isContextRestrictionEnabled')) {
     /**
-     * Check if LLM Mode (Generative AI) is enabled globally
+     * Check if Context Restriction is enabled (chatbot only answers
+     * questions about SIPADUHOK menus/features).
      *
      * @return bool
      */
+    function isContextRestrictionEnabled()
+    {
+        return Cache::remember('context_restriction_enabled', 3600, function () {
+            $setting = AppSetting::where('key', 'context_restriction_enabled')->first();
+            if ($setting) {
+                return filter_var($setting->value, FILTER_VALIDATE_BOOLEAN);
+            }
+
+            $legacy = AppSetting::where('key', 'llm_mode_enabled')->first();
+            if ($legacy) {
+                return !filter_var($legacy->value, FILTER_VALIDATE_BOOLEAN);
+            }
+
+            return true;
+        });
+    }
+}
+
+if (!function_exists('isLlmModeEnabled')) {
+    /**
+     * @deprecated Use isContextRestrictionEnabled() with inverted semantics.
+     */
     function isLlmModeEnabled()
     {
-        return Cache::remember('llm_mode_enabled', 3600, function () {
-            $setting = AppSetting::where('key', 'llm_mode_enabled')->first();
-            return $setting ? filter_var($setting->value, FILTER_VALIDATE_BOOLEAN) : true;
-        });
+        return !isContextRestrictionEnabled();
     }
 }
