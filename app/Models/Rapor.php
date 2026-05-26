@@ -153,13 +153,9 @@ class Rapor extends Model
             return $this;
         }
 
-        // Use proper semester periods from TahunAjaran
-        $periods = $tahunAjaran->getSemesterPeriods();
-        $period = $periods[$this->semester] ?? null;
-
-        if (!$period) {
-            return $this;
-        }
+        // Pakai periode rapor (PTS=3 bulan pertama, PAS=full semester) — bukan full semester.
+        // Lihat App\Models\TahunAjaran::getRaporPeriod().
+        $period = $tahunAjaran->getRaporPeriod($this->semester, $this->jenis_rapor);
 
         $startDate = $period['start'];
         $endDate = $period['end'];

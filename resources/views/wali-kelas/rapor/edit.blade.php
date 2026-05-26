@@ -690,14 +690,16 @@
 
         {{-- Data Kehadiran --}}
         @php
-            $taPeriods = $rapor->tahunAjaran ? $rapor->tahunAjaran->getSemesterPeriods() : [];
-            $periodRapor = $taPeriods[$rapor->semester] ?? null;
+            $periodRapor = $rapor->tahunAjaran
+                ? $rapor->tahunAjaran->getRaporPeriod($rapor->semester, $rapor->jenis_rapor)
+                : null;
             $totalPresensiPeriode = $periodRapor
                 ? \App\Models\Presensi::where('siswa_id', $rapor->siswa_id)
                     ->where('kelas_id', $rapor->kelas_id)
                     ->whereBetween('tanggal', [$periodRapor['start'], $periodRapor['end']])
                     ->count()
                 : 0;
+            $jenisLabel = $rapor->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS';
         @endphp
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
@@ -713,12 +715,19 @@
                     <i class="fas fa-info-circle text-info mt-1"></i>
                     <div>
                         <strong>Sumber:</strong> tabel presensi (input via menu Presensi).
-                        Yang dihitung: status <strong>sakit/izin/alpha</strong> dalam periode semester {{ ucfirst($rapor->semester) }}
+                        Yang dihitung: status <strong>sakit/izin/alpha</strong> dalam periode
+                        <strong>{{ $jenisLabel }} {{ ucfirst($rapor->semester) }}</strong>
                         @if($periodRapor)
                             ({{ \Carbon\Carbon::parse($periodRapor['start'])->locale('id')->isoFormat('D MMM Y') }}
                             – {{ \Carbon\Carbon::parse($periodRapor['end'])->locale('id')->isoFormat('D MMM Y') }})
                         @endif.
                         <span class="text-muted">Total presensi tercatat periode ini: <strong>{{ $totalPresensiPeriode }}</strong> record.</span>
+                        @if($rapor->jenis_rapor === 'tengah_semester')
+                            <div class="mt-1 text-muted small">
+                                <i class="fas fa-clock"></i> PTS dihitung dari 3 bulan pertama semester (Jul-Sep untuk ganjil, Jan-Mar untuk genap).
+                                PAS akan dihitung dari periode penuh semester.
+                            </div>
+                        @endif
                         @if($totalPresensiPeriode === 0)
                             <div class="mt-1 text-warning"><i class="fas fa-exclamation-triangle"></i>
                                 Belum ada presensi tercatat untuk periode ini. Input dulu di

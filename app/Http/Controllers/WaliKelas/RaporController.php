@@ -228,8 +228,8 @@ class RaporController extends Controller
         $jumlahAlpha = 0;
 
         if ($tahunAjaran) {
-            $periods = $tahunAjaran->getSemesterPeriods();
-            $period = $periods[$semester] ?? null;
+            // Pakai getRaporPeriod (PTS=3 bulan pertama, PAS=full semester)
+            $period = $tahunAjaran->getRaporPeriod($semester, $jenisRapor);
 
             if ($period) {
                 $presensi = Presensi::where('siswa_id', $siswa->id)

@@ -85,15 +85,17 @@ class TahunAjaran extends Model
     }
 
     /**
-     * Get semester period dates
+     * Get semester period dates (full semester range — untuk PAS / akhir_semester).
+     * Ganjil: tanggal_mulai → (tanggal_mulai_genap - 1 day) atau Des akhir
+     * Genap : tanggal_mulai_genap → tanggal_selesai
      */
     public function getSemesterPeriods(): array
     {
         return [
             'ganjil' => [
                 'start' => $this->tanggal_mulai,
-                'end' => $this->tanggal_mulai_genap 
-                    ? $this->tanggal_mulai_genap->copy()->subDay() 
+                'end' => $this->tanggal_mulai_genap
+                    ? $this->tanggal_mulai_genap->copy()->subDay()
                     : Carbon::parse($this->tanggal_mulai)->month(12)->endOfMonth(),
             ],
             'genap' => [
@@ -101,5 +103,38 @@ class TahunAjaran extends Model
                 'end' => $this->tanggal_selesai,
             ],
         ];
+    }
+
+    /**
+     * Get periode untuk rapor sesuai jenis (PTS vs PAS).
+     *
+     * - PAS (akhir_semester): periode FULL semester (sama dengan getSemesterPeriods)
+     * - PTS (tengah_semester): periode SETENGAH PERTAMA semester (~3 bulan)
+     *   Mengikuti praktik instansi: PTS Ganjil Jul-Sep, PTS Genap Jan-Mar.
+     *
+     * @param string $semester 'ganjil' | 'genap'
+     * @param string $jenisRapor 'tengah_semester' | 'akhir_semester'
+     * @return array{start: \Carbon\Carbon, end: \Carbon\Carbon}
+     */
+    public function getRaporPeriod(string $semester, string $jenisRapor): array
+    {
+        $full = $this->getSemesterPeriods()[$semester] ?? null;
+        if (!$full) {
+            return ['start' => $this->tanggal_mulai, 'end' => $this->tanggal_selesai];
+        }
+
+        $start = Carbon::parse($full['start']);
+        $end = Carbon::parse($full['end']);
+
+        if ($jenisRapor === 'tengah_semester') {
+            // PTS = setengah pertama (3 bulan). PTS Ganjil = Jul-Sep, PTS Genap = Jan-Mar.
+            $midEnd = $start->copy()->addMonths(3)->subDay();
+            // Jangan melebihi end semester
+            if ($midEnd->gt($end)) $midEnd = $end;
+            return ['start' => $start, 'end' => $midEnd];
+        }
+
+        // PAS = full semester
+        return ['start' => $start, 'end' => $end];
     }
 }
