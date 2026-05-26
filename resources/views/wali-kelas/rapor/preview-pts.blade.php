@@ -257,9 +257,58 @@
             padding: 2px 4px;
         }
 
+        .print-bar,
+        .print-bar * {
+            box-sizing: border-box;
+        }
+
+        .print-bar .btn-back,
+        .print-bar .btn-print,
+        .print-bar .btn-zoom,
+        .print-bar .zoom-controls {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
         /* Mobile: handled by JS scale — no reflow needed */
         @media (max-width: 900px) {
             body { padding: 0; background: #e5e7eb; }
+        }
+
+        @media (max-width: 575.98px) {
+            .print-bar {
+                max-width: 100vw;
+                overflow-x: auto;
+                justify-content: flex-start;
+                gap: 6px;
+                padding: 8px max(8px, env(safe-area-inset-left)) 8px max(8px, env(safe-area-inset-left));
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .print-bar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .btn-back,
+            .btn-print {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .btn-zoom {
+                min-width: 32px;
+                padding: 7px 9px;
+            }
+
+            .zoom-level {
+                min-width: 38px;
+                font-size: 12px;
+            }
+
+            .print-bar .bi-info-circle {
+                display: none;
+            }
         }
 
         /* Print Styles */

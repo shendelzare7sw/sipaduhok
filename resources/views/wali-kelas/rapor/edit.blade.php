@@ -520,6 +520,106 @@
             max-width: 100% !important;
         }
 
+        .rapor-edit-page {
+            --rapor-mobile-gap: clamp(3px, 1.35vw, 6px);
+            --rapor-mobile-pad: clamp(6px, 2vw, 9px);
+            --rapor-control-height: clamp(44px, 14vw, 58px);
+        }
+
+        #nilaiTable tbody {
+            gap: clamp(7px, 2.4vw, 10px);
+            padding: clamp(5px, 2vw, 10px);
+        }
+
+        #nilaiTable tbody tr {
+            grid-template-columns: clamp(24px, 7.5vw, 34px) repeat(4, minmax(0, 1fr));
+            gap: var(--rapor-mobile-gap);
+            padding: var(--rapor-mobile-pad);
+        }
+
+        #nilaiTable td[data-label="Nilai"],
+        #nilaiTable td[data-label="Kelompok"],
+        #nilaiTable td[data-label="Tampil"],
+        #nilaiTable td[data-label="Urutan"] {
+            min-height: var(--rapor-control-height);
+            padding: clamp(4px, 1.4vw, 7px) !important;
+        }
+
+        #nilaiTable td::before,
+        #kegiatanTable td::before {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: clip;
+            white-space: nowrap;
+            word-break: normal;
+            letter-spacing: 0;
+            font-size: clamp(6.5px, 1.95vw, 8px);
+            line-height: 1.05;
+        }
+
+        #nilaiTable td[data-label="Kelompok"]::before { content: "Kel."; }
+        #nilaiTable td[data-label="Urutan"]::before { content: "Urut"; }
+
+        #nilaiTable td[data-label="Nilai"] strong {
+            white-space: nowrap;
+            word-break: normal;
+            overflow-wrap: normal;
+            font-size: clamp(11px, 3.4vw, 14px) !important;
+        }
+
+        #nilaiTable td[data-label="Kelompok"] .form-select,
+        #kegiatanTable td[data-label="Predikat"] .form-select {
+            height: clamp(32px, 9vw, 38px) !important;
+            min-height: clamp(32px, 9vw, 38px) !important;
+            padding-top: clamp(4px, 1.2vw, 6px) !important;
+            padding-bottom: clamp(4px, 1.2vw, 6px) !important;
+            padding-left: clamp(7px, 2.4vw, 10px) !important;
+            padding-right: clamp(22px, 7vw, 28px) !important;
+            background-position: right clamp(6px, 2.5vw, 9px) center !important;
+            font-size: clamp(12px, 3.4vw, 14px) !important;
+        }
+
+        #nilaiTable .drag-handle {
+            font-size: clamp(15px, 5vw, 20px) !important;
+            padding: clamp(2px, 1.3vw, 6px);
+        }
+
+        #nilaiTable .btn-arrow {
+            min-height: clamp(27px, 8.5vw, 30px);
+        }
+
+        #kegiatanTable tr {
+            grid-template-columns: clamp(68px, 24vw, 88px) minmax(0, 1fr) clamp(34px, 11vw, 40px);
+            gap: clamp(5px, 1.8vw, 7px);
+            padding: var(--rapor-mobile-pad);
+        }
+
+        #kegiatanTable tbody {
+            padding: clamp(5px, 2vw, 10px);
+        }
+
+        @media (max-width: 360px) {
+            #nilaiTable tbody tr {
+                grid-template-columns: clamp(22px, 7vw, 28px) repeat(4, minmax(0, 1fr));
+                gap: 3px;
+                padding: 6px;
+            }
+
+            #nilaiTable td[data-label="Nilai"],
+            #nilaiTable td[data-label="Kelompok"],
+            #nilaiTable td[data-label="Tampil"],
+            #nilaiTable td[data-label="Urutan"] {
+                min-height: 42px;
+                padding: 4px !important;
+            }
+
+            #nilaiTable td[data-label="Tampil"]::before { content: "On"; }
+
+            #nilaiTable .btn-group-vertical {
+                gap: 2px;
+            }
+        }
+
         /* Sticky submit footer */
         .submit-card {
             position: sticky;
@@ -578,6 +678,9 @@
                     </button>
                     <button type="button" class="btn btn-warning btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#resetNilaiModal">
                         <i class="fas fa-sync-alt me-1"></i>Reset Nilai
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#applyFormatModal">
+                        <i class="fas fa-layer-group me-1"></i>Terapkan Template
                     </button>
                     <a href="{{ route('wali.rapor.preview', $rapor->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank">
                         <i class="fas fa-eye me-1"></i>Preview
@@ -684,9 +787,150 @@
         </div>
     </div>
 
+    {{-- Modal Terapkan Template Rapor --}}
+    <div class="modal fade" id="applyFormatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold text-white">
+                        <i class="fas fa-layer-group me-2"></i>Terapkan Template Rapor
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ route('wali.rapor.apply-format', $rapor->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body py-4">
+                        <div class="alert alert-info bg-light border-info small mb-3">
+                            Format dari rapor <strong>{{ $rapor->siswa->nama_lengkap }}</strong> akan disalin ke rapor target dengan semester dan jenis rapor yang sama. Target hanya rapor draft yang belum dikirim ke Ketua PKBM.
+                        </div>
+
+                        <label class="form-label fw-bold small">Target penerapan</label>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="border rounded p-3 w-100 h-100">
+                                    <input type="radio" name="scope" value="kelas_ini" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Kelas ini saja</span>
+                                    <div class="small text-muted mt-1">{{ $rapor->kelas->nama_kelas }}</div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="border rounded p-3 w-100 h-100">
+                                    <input type="radio" name="scope" value="semua_kelas_wali" class="form-check-input me-2" {{ $kelasList->count() <= 1 ? 'disabled' : '' }}>
+                                    <span class="fw-bold">Semua kelas saya</span>
+                                    <div class="small text-muted mt-1">{{ $kelasList->count() }} kelas wali aktif</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <label class="form-label fw-bold small">Bagian yang disalin</label>
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <label class="form-check border rounded p-3 h-100">
+                                    <input type="checkbox" name="include_order" value="1" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Susunan mata pelajaran</span>
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-check border rounded p-3 h-100">
+                                    <input type="checkbox" name="include_deskripsi" value="1" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Deskripsi capaian</span>
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-check border rounded p-3 h-100">
+                                    <input type="checkbox" name="include_display" value="1" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Tampil & kelompok mapel</span>
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-check border rounded p-3 h-100">
+                                    <input type="checkbox" name="include_kegiatan" value="1" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Kegiatan ekstra & keterangan</span>
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-check border rounded p-3 h-100">
+                                    <input type="checkbox" name="include_catatan" value="1" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Catatan wali kelas</span>
+                                </label>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-check border rounded p-3 h-100">
+                                    <input type="checkbox" name="include_alignment" value="1" class="form-check-input me-2" checked>
+                                    <span class="fw-bold">Alignment tampilan</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <label class="form-check border rounded p-3 mt-3">
+                            <input type="checkbox" name="overwrite_filled" value="1" class="form-check-input me-2" checked>
+                            <span class="fw-bold">Timpa isi yang sudah ada di rapor target</span>
+                            <div class="small text-muted mt-1">Matikan opsi ini jika hanya ingin mengisi data yang masih kosong.</div>
+                        </label>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check me-1"></i>Terapkan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <form action="{{ route('wali.rapor.update', $rapor->id) }}" method="POST">
         @csrf
         @method('PUT')
+
+        @php
+            $alignmentOptions = [
+                'left' => 'Kiri',
+                'center' => 'Tengah',
+                'right' => 'Kanan',
+                'justify' => 'Rata kiri-kanan',
+            ];
+            $catatanAlignment = old('catatan_alignment', $rapor->catatan_alignment ?? 'center');
+            $deskripsiAlignment = old('deskripsi_alignment', $rapor->deskripsi_alignment ?? 'left');
+            $keteranganEkstraAlignment = old('keterangan_ekstra_alignment', $rapor->keterangan_ekstra_alignment ?? 'left');
+        @endphp
+
+        {{-- Pengaturan Tampilan Rapor --}}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-sliders-h me-2"></i>Pengaturan Tampilan Rapor
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Alignment Deskripsi Mapel</label>
+                        <select name="deskripsi_alignment" class="form-select rapor-alignment-select" data-target=".deskripsi-input">
+                            @foreach($alignmentOptions as $value => $label)
+                                <option value="{{ $value }}" {{ $deskripsiAlignment === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Alignment Keterangan Ekstra</label>
+                        <select name="keterangan_ekstra_alignment" class="form-select rapor-alignment-select" data-target=".keterangan-ekstra-input">
+                            @foreach($alignmentOptions as $value => $label)
+                                <option value="{{ $value }}" {{ $keteranganEkstraAlignment === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Alignment Catatan Wali</label>
+                        <select name="catatan_alignment" class="form-select rapor-alignment-select" data-target=".catatan-wali-input">
+                            @foreach($alignmentOptions as $value => $label)
+                                <option value="{{ $value }}" {{ $catatanAlignment === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {{-- Data Kehadiran --}}
         @php
@@ -773,82 +1017,6 @@
             </div>
         </div>
 
-        {{-- Kegiatan Ekstra --}}
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
-                <h6 class="m-0 fw-bold text-primary">
-                    <i class="fas fa-running me-2"></i>Kegiatan Ekstrakurikuler
-                </h6>
-                <button type="button" class="btn btn-outline-success btn-sm" onclick="addKegiatanRow()">
-                    <i class="fas fa-plus me-1"></i>Tambah Kegiatan
-                </button>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="kegiatanTable">
-                        <thead>
-                            <tr>
-                                <th width="40" class="text-center">No</th>
-                                <th>Nama Kegiatan</th>
-                                <th width="120" class="text-center">Predikat</th>
-                                <th>Keterangan</th>
-                                <th width="50" class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="kegiatanBody">
-                            @foreach($kegiatanEkstra as $index => $kegiatan)
-                                <tr>
-                                    <td class="text-center align-middle kegiatan-no" data-label="No">{{ $index + 1 }}</td>
-                                    <td data-label="Nama Kegiatan">
-                                        <input type="text" name="kegiatan_ekstra[{{ $index }}][kegiatan_nama]"
-                                               class="form-control form-control-sm"
-                                               value="{{ old("kegiatan_ekstra.{$index}.kegiatan_nama", $kegiatan->kegiatan_nama) }}"
-                                               placeholder="Nama kegiatan...">
-                                    </td>
-                                    <td data-label="Predikat">
-                                        <select name="kegiatan_ekstra[{{ $index }}][predikat]" class="form-select form-select-sm">
-                                            <option value="">-</option>
-                                            <option value="A" {{ ($kegiatan->predikat ?? '') === 'A' ? 'selected' : '' }}>A</option>
-                                            <option value="B" {{ ($kegiatan->predikat ?? '') === 'B' ? 'selected' : '' }}>B</option>
-                                            <option value="C" {{ ($kegiatan->predikat ?? '') === 'C' ? 'selected' : '' }}>C</option>
-                                        </select>
-                                    </td>
-                                    <td data-label="Keterangan">
-                                        <input type="text" name="kegiatan_ekstra[{{ $index }}][keterangan]"
-                                               class="form-control form-control-sm"
-                                               value="{{ old("kegiatan_ekstra.{$index}.keterangan", $kegiatan->keterangan) }}"
-                                               placeholder="Keterangan...">
-                                    </td>
-                                    <td class="text-center" data-label="Aksi">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeKegiatanRow(this)" title="Hapus">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        {{-- Catatan Wali Kelas --}}
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-white border-bottom">
-                <h6 class="m-0 fw-bold text-primary">
-                    <i class="fas fa-comment-alt me-2"></i>Catatan Wali Kelas
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small">Catatan / Komentar untuk Siswa</label>
-                    <textarea name="catatan_wali_kelas" class="form-control" rows="5"
-                              placeholder="Contoh: Siswa menunjukkan peningkatan yang baik dalam...">{{ old('catatan_wali_kelas', $rapor->catatan_wali_kelas) }}</textarea>
-                    <small class="text-muted">Berikan catatan positif dan saran untuk perkembangan siswa</small>
-                </div>
-            </div>
-        </div>
-
         {{-- Daftar Nilai --}}
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
@@ -928,7 +1096,8 @@
                                     <td class="align-middle" data-label="Deskripsi Capaian">
                                         <input type="text"
                                                name="deskripsi[{{ $raporNilai->id }}]"
-                                               class="form-control form-control-sm"
+                                               class="form-control form-control-sm deskripsi-input"
+                                               style="text-align: {{ $deskripsiAlignment }};"
                                                value="{{ old('deskripsi.' . $raporNilai->id, $raporNilai->deskripsi) }}"
                                                placeholder="Deskripsi capaian kompetensi...">
                                     </td>
@@ -953,6 +1122,84 @@
                         <p class="text-muted">Belum ada data nilai</p>
                     </div>
                 @endif
+            </div>
+        </div>
+
+        {{-- Kegiatan Ekstra --}}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-running me-2"></i>Kegiatan Ekstrakurikuler
+                </h6>
+                <button type="button" class="btn btn-outline-success btn-sm" onclick="addKegiatanRow()">
+                    <i class="fas fa-plus me-1"></i>Tambah Kegiatan
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="kegiatanTable">
+                        <thead>
+                            <tr>
+                                <th width="40" class="text-center">No</th>
+                                <th>Nama Kegiatan</th>
+                                <th width="120" class="text-center">Predikat</th>
+                                <th>Keterangan</th>
+                                <th width="50" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kegiatanBody">
+                            @foreach($kegiatanEkstra as $index => $kegiatan)
+                                <tr>
+                                    <td class="text-center align-middle kegiatan-no" data-label="No">{{ $index + 1 }}</td>
+                                    <td data-label="Nama Kegiatan">
+                                        <input type="text" name="kegiatan_ekstra[{{ $index }}][kegiatan_nama]"
+                                               class="form-control form-control-sm"
+                                               value="{{ old("kegiatan_ekstra.{$index}.kegiatan_nama", $kegiatan->kegiatan_nama) }}"
+                                               placeholder="Nama kegiatan...">
+                                    </td>
+                                    <td data-label="Predikat">
+                                        <select name="kegiatan_ekstra[{{ $index }}][predikat]" class="form-select form-select-sm">
+                                            <option value="">-</option>
+                                            <option value="A" {{ ($kegiatan->predikat ?? '') === 'A' ? 'selected' : '' }}>A</option>
+                                            <option value="B" {{ ($kegiatan->predikat ?? '') === 'B' ? 'selected' : '' }}>B</option>
+                                            <option value="C" {{ ($kegiatan->predikat ?? '') === 'C' ? 'selected' : '' }}>C</option>
+                                        </select>
+                                    </td>
+                                    <td data-label="Keterangan">
+                                        <input type="text" name="kegiatan_ekstra[{{ $index }}][keterangan]"
+                                               class="form-control form-control-sm keterangan-ekstra-input"
+                                               style="text-align: {{ $keteranganEkstraAlignment }};"
+                                               value="{{ old("kegiatan_ekstra.{$index}.keterangan", $kegiatan->keterangan) }}"
+                                               placeholder="Keterangan...">
+                                    </td>
+                                    <td class="text-center" data-label="Aksi">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeKegiatanRow(this)" title="Hapus">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Catatan Wali Kelas --}}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom">
+                <h6 class="m-0 fw-bold text-primary">
+                    <i class="fas fa-comment-alt me-2"></i>Catatan Wali Kelas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Catatan / Komentar untuk Siswa</label>
+                    <textarea name="catatan_wali_kelas" class="form-control catatan-wali-input" rows="5"
+                              style="text-align: {{ $catatanAlignment }};"
+                              placeholder="Contoh: Siswa menunjukkan peningkatan yang baik dalam...">{{ old('catatan_wali_kelas', $rapor->catatan_wali_kelas) }}</textarea>
+                    <small class="text-muted">Berikan catatan positif dan saran untuk perkembangan siswa</small>
+                </div>
             </div>
         </div>
 
@@ -1063,7 +1310,7 @@
             <td class="text-center align-middle kegiatan-no" data-label="No">${kegiatanIndex + 1}</td>
             <td data-label="Nama Kegiatan"><input type="text" name="kegiatan_ekstra[${kegiatanIndex}][kegiatan_nama]" class="form-control form-control-sm" placeholder="Nama kegiatan..."></td>
             <td data-label="Predikat"><select name="kegiatan_ekstra[${kegiatanIndex}][predikat]" class="form-select form-select-sm"><option value="">-</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></td>
-            <td data-label="Keterangan"><input type="text" name="kegiatan_ekstra[${kegiatanIndex}][keterangan]" class="form-control form-control-sm" placeholder="Keterangan..."></td>
+            <td data-label="Keterangan"><input type="text" name="kegiatan_ekstra[${kegiatanIndex}][keterangan]" class="form-control form-control-sm keterangan-ekstra-input" style="text-align: ${document.querySelector('[name="keterangan_ekstra_alignment"]')?.value || 'left'};" placeholder="Keterangan..."></td>
             <td class="text-center" data-label="Aksi"><button type="button" class="btn btn-outline-danger btn-sm" onclick="removeKegiatanRow(this)"><i class="fas fa-trash-alt"></i></button></td>
         `;
         tbody.appendChild(row);
@@ -1112,6 +1359,17 @@
             }, 2000);
         })
         .finally(() => btn.disabled = false);
+    });
+
+    document.querySelectorAll('.rapor-alignment-select').forEach(select => {
+        const applyAlignment = () => {
+            document.querySelectorAll(select.dataset.target).forEach(target => {
+                target.style.textAlign = select.value;
+            });
+        };
+
+        select.addEventListener('change', applyAlignment);
+        applyAlignment();
     });
 </script>
 @endsection

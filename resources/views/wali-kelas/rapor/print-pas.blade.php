@@ -33,6 +33,13 @@
     </style>
 </head>
 <body>
+    @php
+        $alignmentValue = fn($value, $default) => in_array($value, ['left', 'center', 'right', 'justify'], true) ? $value : $default;
+        $deskripsiAlignment = $alignmentValue($rapor->deskripsi_alignment ?? null, 'left');
+        $keteranganEkstraAlignment = $alignmentValue($rapor->keterangan_ekstra_alignment ?? null, 'left');
+        $catatanAlignment = $alignmentValue($rapor->catatan_alignment ?? null, 'center');
+    @endphp
+
     <!-- Header -->
     <div class="header">
         <h1>HOUSE OF KNOWLEDGE</h1>
@@ -91,7 +98,7 @@
                     <td>{{ $no++ }}</td>
                     <td>{{ $nilai->mataPelajaran->nama_mapel }}</td>
                     <td>{{ $nilai->nilai_angka }}</td>
-                    <td>{{ $nilai->deskripsi ?? '-' }}</td>
+                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $nilai->deskripsi ?? '-' }}</td>
                 </tr>
                 @endif
             @endforeach
@@ -122,7 +129,7 @@
                     <td>{{ $no++ }}</td>
                     <td>{{ $nilai->mataPelajaran->nama_mapel }}</td>
                     <td>{{ $nilai->nilai_angka }}</td>
-                    <td>{{ $nilai->deskripsi ?? '-' }}</td>
+                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $nilai->deskripsi ?? '-' }}</td>
                 </tr>
                 @endif
             @endforeach
@@ -148,7 +155,7 @@
                 <td style="text-align: center;">{{ $loop->iteration }}</td>
                 <td>{{ $ekstra->kegiatan_nama }}</td>
                 <td style="text-align: center;">{{ $ekstra->predikat ?? '-' }}</td>
-                <td>{{ $ekstra->keterangan ?? '-' }}</td>
+                <td style="text-align: {{ $keteranganEkstraAlignment }};">{{ $ekstra->keterangan ?? '-' }}</td>
             </tr>
             @empty
             @foreach(\App\Models\RaporKegiatanEkstra::getDefaultKegiatan() as $kegiatan)
@@ -182,7 +189,7 @@
 
     <!-- Catatan Wali Kelas -->
     <h3>Catatan Wali Kelas</h3>
-    <div class="catatan">
+    <div class="catatan" style="text-align: {{ $catatanAlignment }};">
         {{ $rapor->catatan_wali_kelas ?? '-' }}
     </div>
 

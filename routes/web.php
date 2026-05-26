@@ -1177,6 +1177,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{rapor}/kehadiran-auto', [RaporController::class, 'autoFillKehadiran'])->name('kehadiran-auto'); // NEW
             Route::get('/{rapor}/export-excel', [RaporController::class, 'exportExcel'])->name('export-excel'); // NEW
             Route::post('/{rapor}/import-excel', [RaporController::class, 'importExcel'])->name('import-excel');
+            Route::post('/{rapor}/apply-format', [RaporController::class, 'applyFormat'])->name('apply-format');
             Route::post('/apply-template', [RaporController::class, 'applyTemplate'])->name('apply-template'); // NEW
             Route::post('/apply-template-all', [RaporController::class, 'applyTemplateToAll'])->name('apply-template-all'); // NEW
             Route::post('/{rapor}/reset-nilai', [RaporController::class, 'resetNilai'])->name('reset-nilai');

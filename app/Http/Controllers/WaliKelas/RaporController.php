@@ -19,6 +19,7 @@ use App\Models\RaporKegiatanEkstra;
 use App\Models\TemplateCapaianKompetensi;
 use App\Models\TahunAjaran;
 use App\Models\RequestDownloadRapor;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -312,6 +313,9 @@ class RaporController extends Controller
     {
         $request->validate([
             'catatan_wali_kelas' => 'nullable|string',
+            'catatan_alignment' => 'nullable|in:left,center,right,justify',
+            'deskripsi_alignment' => 'nullable|in:left,center,right,justify',
+            'keterangan_ekstra_alignment' => 'nullable|in:left,center,right,justify',
             'jumlah_sakit' => 'required|integer|min:0',
             'jumlah_izin' => 'required|integer|min:0',
             'jumlah_alpha' => 'required|integer|min:0',
@@ -329,6 +333,9 @@ class RaporController extends Controller
         // Update rapor
         $rapor->update([
             'catatan_wali_kelas' => $request->catatan_wali_kelas,
+            'catatan_alignment' => $request->input('catatan_alignment', 'center'),
+            'deskripsi_alignment' => $request->input('deskripsi_alignment', 'left'),
+            'keterangan_ekstra_alignment' => $request->input('keterangan_ekstra_alignment', 'left'),
             'jumlah_sakit' => $request->jumlah_sakit,
             'jumlah_izin' => $request->jumlah_izin,
             'jumlah_alpha' => $request->jumlah_alpha,
@@ -379,6 +386,168 @@ class RaporController extends Controller
         }
 
         return back()->with('success', 'Rapor berhasil diperbarui!');
+    }
+
+    /**
+     * Salin format rapor saat ini ke rapor lain yang masih draft.
+     */
+    public function applyFormat(Request $request, $raporId): RedirectResponse
+    {
+        $request->validate([
+            'scope' => 'required|in:kelas_ini,semua_kelas_wali',
+            'include_order' => 'nullable|boolean',
+            'include_deskripsi' => 'nullable|boolean',
+            'include_display' => 'nullable|boolean',
+            'include_kegiatan' => 'nullable|boolean',
+            'include_catatan' => 'nullable|boolean',
+            'include_alignment' => 'nullable|boolean',
+            'overwrite_filled' => 'nullable|boolean',
+        ]);
+
+        $selectedParts = collect([
+            'include_order',
+            'include_deskripsi',
+            'include_display',
+            'include_kegiatan',
+            'include_catatan',
+            'include_alignment',
+        ])->filter(fn($key) => $request->boolean($key));
+
+        if ($selectedParts->isEmpty()) {
+            return back()->with('error', 'Pilih minimal satu bagian format rapor yang ingin diterapkan.');
+        }
+
+        $tenagaPendidik = $this->getTenagaPendidik();
+        if (!$tenagaPendidik) {
+            return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        $kelasList = $this->getKelasWali($tenagaPendidik);
+        $accessibleClassIds = $kelasList->pluck('id');
+
+        $sourceRapor = Rapor::with(['siswa', 'kelas', 'raporNilai', 'kegiatanEkstra'])->findOrFail($raporId);
+
+        if (!$accessibleClassIds->contains($sourceRapor->kelas_id)) {
+            return back()->with('error', 'Anda tidak memiliki akses ke rapor ini.');
+        }
+
+        $targetClassIds = $request->scope === 'semua_kelas_wali'
+            ? $accessibleClassIds
+            : collect([$sourceRapor->kelas_id]);
+
+        $targetRapors = Rapor::with(['siswa', 'raporNilai', 'kegiatanEkstra'])
+            ->whereIn('kelas_id', $targetClassIds)
+            ->where('tahun_ajaran_id', $sourceRapor->tahun_ajaran_id)
+            ->where('semester', $sourceRapor->semester)
+            ->where('jenis_rapor', $sourceRapor->jenis_rapor)
+            ->where('id', '!=', $sourceRapor->id)
+            ->where('status', 'draft')
+            ->whereHas('siswa', fn($query) => $query->where('validasi_rapor_wali', false))
+            ->get();
+
+        if ($targetRapors->isEmpty()) {
+            return back()->with('info', 'Tidak ada rapor target yang bisa diperbarui. Target harus draft dan belum dikirim ke Ketua PKBM.');
+        }
+
+        $overwriteFilled = $request->has('overwrite_filled');
+        $sourceNilaiByMapel = $sourceRapor->raporNilai
+            ->values()
+            ->mapWithKeys(fn($nilai, $index) => [
+                $nilai->mata_pelajaran_id => [
+                    'urutan' => $index,
+                    'deskripsi' => $nilai->deskripsi,
+                    'is_visible' => $nilai->is_visible,
+                    'kelompok_override' => $nilai->kelompok_override,
+                ],
+            ]);
+
+        $updatedRapors = 0;
+        $updatedNilai = 0;
+
+        DB::transaction(function () use (
+            $request,
+            $targetRapors,
+            $sourceRapor,
+            $sourceNilaiByMapel,
+            $overwriteFilled,
+            &$updatedRapors,
+            &$updatedNilai
+        ) {
+            foreach ($targetRapors as $targetRapor) {
+                $raporUpdates = [];
+
+                if ($request->boolean('include_catatan')) {
+                    $currentCatatan = trim((string) $targetRapor->catatan_wali_kelas);
+                    if ($overwriteFilled || $currentCatatan === '') {
+                        $raporUpdates['catatan_wali_kelas'] = $sourceRapor->catatan_wali_kelas;
+                    }
+                }
+
+                if ($request->boolean('include_alignment')) {
+                    $raporUpdates['catatan_alignment'] = $sourceRapor->catatan_alignment ?: 'center';
+                    $raporUpdates['deskripsi_alignment'] = $sourceRapor->deskripsi_alignment ?: 'left';
+                    $raporUpdates['keterangan_ekstra_alignment'] = $sourceRapor->keterangan_ekstra_alignment ?: 'left';
+                }
+
+                if (!empty($raporUpdates)) {
+                    $targetRapor->update($raporUpdates);
+                }
+
+                if ($request->boolean('include_order') || $request->boolean('include_deskripsi') || $request->boolean('include_display')) {
+                    foreach ($targetRapor->raporNilai as $targetNilai) {
+                        $sourceNilai = $sourceNilaiByMapel->get($targetNilai->mata_pelajaran_id);
+                        if (!$sourceNilai) {
+                            continue;
+                        }
+
+                        $nilaiUpdates = [];
+
+                        if ($request->boolean('include_order')) {
+                            $nilaiUpdates['urutan'] = $sourceNilai['urutan'];
+                        }
+
+                        if ($request->boolean('include_deskripsi')) {
+                            $currentDeskripsi = trim((string) $targetNilai->deskripsi);
+                            if ($overwriteFilled || $currentDeskripsi === '') {
+                                $nilaiUpdates['deskripsi'] = $sourceNilai['deskripsi'];
+                            }
+                        }
+
+                        if ($request->boolean('include_display')) {
+                            $nilaiUpdates['is_visible'] = $sourceNilai['is_visible'];
+                            $nilaiUpdates['kelompok_override'] = $sourceNilai['kelompok_override'];
+                        }
+
+                        if (!empty($nilaiUpdates)) {
+                            $targetNilai->update($nilaiUpdates);
+                            $updatedNilai++;
+                        }
+                    }
+                }
+
+                if ($request->boolean('include_kegiatan')) {
+                    if ($overwriteFilled || $targetRapor->kegiatanEkstra->isEmpty()) {
+                        $targetRapor->kegiatanEkstra()->delete();
+
+                        foreach ($sourceRapor->kegiatanEkstra as $kegiatan) {
+                            RaporKegiatanEkstra::create([
+                                'rapor_id' => $targetRapor->id,
+                                'kegiatan_nama' => $kegiatan->kegiatan_nama,
+                                'predikat' => $kegiatan->predikat,
+                                'keterangan' => $kegiatan->keterangan,
+                            ]);
+                        }
+                    }
+                }
+
+                $updatedRapors++;
+            }
+        });
+
+        return back()->with(
+            'success',
+            "Format rapor berhasil diterapkan ke {$updatedRapors} rapor. Detail nilai tersentuh: {$updatedNilai} baris."
+        );
     }
 
     /**

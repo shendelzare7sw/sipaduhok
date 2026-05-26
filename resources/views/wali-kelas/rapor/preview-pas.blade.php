@@ -306,9 +306,58 @@
             padding: 2px 4px;
         }
 
+        .print-bar,
+        .print-bar * {
+            box-sizing: border-box;
+        }
+
+        .print-bar .btn-back,
+        .print-bar .btn-print,
+        .print-bar .btn-zoom,
+        .print-bar .zoom-controls {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+
         /* Mobile: handled by JS scale — no reflow needed */
         @media (max-width: 900px) {
             body { background: #e5e7eb; }
+        }
+
+        @media (max-width: 575.98px) {
+            .print-bar {
+                max-width: 100vw;
+                overflow-x: auto;
+                justify-content: flex-start;
+                gap: 6px;
+                padding: 8px max(8px, env(safe-area-inset-left)) 8px max(8px, env(safe-area-inset-left));
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .print-bar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .btn-back,
+            .btn-print {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .btn-zoom {
+                min-width: 32px;
+                padding: 7px 9px;
+            }
+
+            .zoom-level {
+                min-width: 38px;
+                font-size: 12px;
+            }
+
+            .print-bar .bi-info-circle {
+                display: none;
+            }
         }
 
         /* Print Styles */
@@ -403,6 +452,13 @@
     </style>
 </head>
 <body>
+    @php
+        $alignmentValue = fn($value, $default) => in_array($value, ['left', 'center', 'right', 'justify'], true) ? $value : $default;
+        $deskripsiAlignment = $alignmentValue($rapor->deskripsi_alignment ?? null, 'left');
+        $keteranganEkstraAlignment = $alignmentValue($rapor->keterangan_ekstra_alignment ?? null, 'left');
+        $catatanAlignment = $alignmentValue($rapor->catatan_alignment ?? null, 'center');
+    @endphp
+
     <div class="print-bar no-print">
         <a href="#" onclick="event.preventDefault(); if(document.referrer && window.history.length > 1) { window.history.back(); } else { window.close(); }" class="btn-back">
             <i class="bi bi-arrow-left"></i> Kembali
@@ -537,7 +593,7 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $raporNilai->mataPelajaran->nama_mapel }}</td>
                     <td class="text-center">{{ $raporNilai->nilai_angka ?? '-' }}</td>
-                    <td>{{ $raporNilai->deskripsi ?? '' }}</td>
+                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $raporNilai->deskripsi ?? '' }}</td>
                 </tr>
                 @endforeach
                 @endif
@@ -552,7 +608,7 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $raporNilai->mataPelajaran->nama_mapel }}</td>
                     <td class="text-center">{{ $raporNilai->nilai_angka ?? '-' }}</td>
-                    <td>{{ $raporNilai->deskripsi ?? '' }}</td>
+                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $raporNilai->deskripsi ?? '' }}</td>
                 </tr>
                 @endforeach
                 @endif
@@ -567,7 +623,7 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $raporNilai->mataPelajaran->nama_mapel }}</td>
                     <td class="text-center">{{ $raporNilai->nilai_angka ?? '-' }}</td>
-                    <td>{{ $raporNilai->deskripsi ?? '' }}</td>
+                    <td style="text-align: {{ $deskripsiAlignment }};">{{ $raporNilai->deskripsi ?? '' }}</td>
                 </tr>
                 @endforeach
                 @endif
@@ -590,7 +646,7 @@
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $kegiatan->kegiatan_nama }}</td>
                     <td class="text-center">{{ $kegiatan->predikat ?? '-' }}</td>
-                    <td>{{ $kegiatan->keterangan ?? '' }}</td>
+                    <td style="text-align: {{ $keteranganEkstraAlignment }};">{{ $kegiatan->keterangan ?? '' }}</td>
                 </tr>
                 @empty
                 <tr>
@@ -621,7 +677,7 @@
 
         <!-- F. Catatan Wali Kelas -->
         <h3>F. CATATAN WALI KELAS</h3>
-        <div class="catatan-box">
+        <div class="catatan-box" style="text-align: {{ $catatanAlignment }};">
             {{ $rapor->catatan_wali_kelas ?? '' }}
         </div>
 
