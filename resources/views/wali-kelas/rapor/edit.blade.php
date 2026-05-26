@@ -689,16 +689,44 @@
         @method('PUT')
 
         {{-- Data Kehadiran --}}
+        @php
+            $taPeriods = $rapor->tahunAjaran ? $rapor->tahunAjaran->getSemesterPeriods() : [];
+            $periodRapor = $taPeriods[$rapor->semester] ?? null;
+            $totalPresensiPeriode = $periodRapor
+                ? \App\Models\Presensi::where('siswa_id', $rapor->siswa_id)
+                    ->where('kelas_id', $rapor->kelas_id)
+                    ->whereBetween('tanggal', [$periodRapor['start'], $periodRapor['end']])
+                    ->count()
+                : 0;
+        @endphp
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="m-0 fw-bold text-primary">
                     <i class="fas fa-calendar-check me-2"></i>Data Kehadiran
                 </h6>
-                <button type="button" class="btn btn-outline-info btn-sm" id="btnSyncKehadiran" title="Sinkron otomatis dari data presensi">
+                <button type="button" class="btn btn-outline-info btn-sm" id="btnSyncKehadiran" title="Sinkron otomatis dari tabel presensi (sumber: /wali/presensi)">
                     <i class="fas fa-sync-alt me-1"></i>Sinkron dari Presensi
                 </button>
             </div>
             <div class="card-body">
+                <div class="alert alert-light border small mb-3 d-flex align-items-start gap-2">
+                    <i class="fas fa-info-circle text-info mt-1"></i>
+                    <div>
+                        <strong>Sumber:</strong> tabel presensi (input via menu Presensi).
+                        Yang dihitung: status <strong>sakit/izin/alpha</strong> dalam periode semester {{ ucfirst($rapor->semester) }}
+                        @if($periodRapor)
+                            ({{ \Carbon\Carbon::parse($periodRapor['start'])->locale('id')->isoFormat('D MMM Y') }}
+                            – {{ \Carbon\Carbon::parse($periodRapor['end'])->locale('id')->isoFormat('D MMM Y') }})
+                        @endif.
+                        <span class="text-muted">Total presensi tercatat periode ini: <strong>{{ $totalPresensiPeriode }}</strong> record.</span>
+                        @if($totalPresensiPeriode === 0)
+                            <div class="mt-1 text-warning"><i class="fas fa-exclamation-triangle"></i>
+                                Belum ada presensi tercatat untuk periode ini. Input dulu di
+                                <a href="{{ route('wali.presensi.index') }}" target="_blank">menu Presensi</a>.
+                            </div>
+                        @endif
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-3">
                         <div class="mb-3">
