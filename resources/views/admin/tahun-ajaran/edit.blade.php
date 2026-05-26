@@ -159,20 +159,61 @@
                             <p class="text-muted" style="font-size: 13px; margin-bottom: 12px;">
                                 Atur kapan semester genap dimulai. Semester ganjil: Tanggal Mulai → sebelum tanggal ini. Semester genap: Tanggal ini → Tanggal Selesai.
                             </p>
-                            <div class="mb-0">
+                            <div class="mb-3">
                                 <label class="form-label">
                                     <i class="fas fa-play-circle" style="color: #16a34a; margin-right: 4px;"></i>
                                     Tanggal Mulai Semester Genap
                                 </label>
-                                <input type="date" 
-                                       class="form-control @error('tanggal_mulai_genap') is-invalid @enderror" 
-                                       name="tanggal_mulai_genap" 
+                                <input type="date"
+                                       class="form-control @error('tanggal_mulai_genap') is-invalid @enderror"
+                                       name="tanggal_mulai_genap"
                                        value="{{ old('tanggal_mulai_genap', $tahunAjaran->tanggal_mulai_genap ? $tahunAjaran->tanggal_mulai_genap->format('Y-m-d') : '') }}">
                                 @error('tanggal_mulai_genap')
                                     <small style="color: #dc3545;">{{ $message }}</small>
                                 @enderror
                                 <small class="text-muted" style="display: block; margin-top: 4px; font-size: 12px;">
                                     Biasanya Januari atau Februari. Kosongkan untuk menggunakan perhitungan otomatis (Juli-Des = Ganjil, Jan-Jun = Genap).
+                                </small>
+                            </div>
+
+                            <hr style="border-top: 1px dashed #d1d5db; margin: 14px 0;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <i class="fas fa-flag-checkered" style="color: #0891b2;"></i>
+                                <strong style="color: #155e75; font-size: 13px;">Periode PTS (Penilaian Tengah Semester)</strong>
+                            </div>
+                            <p class="text-muted" style="font-size: 12px; margin-bottom: 12px;">
+                                Tanggal akhir PTS dipakai untuk menghitung kehadiran rapor PTS (sakit/izin/alpha). PAS otomatis pakai sisa semester sampai akhir. Kosongkan untuk pakai default 3 bulan pertama.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-flag" style="color: #0891b2; margin-right: 4px;"></i>
+                                    Tanggal Akhir PTS Ganjil
+                                </label>
+                                <input type="date"
+                                       class="form-control @error('tanggal_akhir_pts_ganjil') is-invalid @enderror"
+                                       name="tanggal_akhir_pts_ganjil"
+                                       value="{{ old('tanggal_akhir_pts_ganjil', $tahunAjaran->tanggal_akhir_pts_ganjil ? $tahunAjaran->tanggal_akhir_pts_ganjil->format('Y-m-d') : '') }}">
+                                @error('tanggal_akhir_pts_ganjil')
+                                    <small style="color: #dc3545;">{{ $message }}</small>
+                                @enderror
+                                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 12px;">
+                                    Contoh: 30 September. Setelah tanggal ini sampai sebelum semester genap mulai = periode PAS Ganjil.
+                                </small>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label">
+                                    <i class="fas fa-flag" style="color: #0891b2; margin-right: 4px;"></i>
+                                    Tanggal Akhir PTS Genap
+                                </label>
+                                <input type="date"
+                                       class="form-control @error('tanggal_akhir_pts_genap') is-invalid @enderror"
+                                       name="tanggal_akhir_pts_genap"
+                                       value="{{ old('tanggal_akhir_pts_genap', $tahunAjaran->tanggal_akhir_pts_genap ? $tahunAjaran->tanggal_akhir_pts_genap->format('Y-m-d') : '') }}">
+                                @error('tanggal_akhir_pts_genap')
+                                    <small style="color: #dc3545;">{{ $message }}</small>
+                                @enderror
+                                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 12px;">
+                                    Contoh: 31 Maret. Setelah tanggal ini sampai akhir tahun ajaran = periode PAS Genap.
                                 </small>
                             </div>
                         </div>

@@ -17,6 +17,8 @@ class TahunAjaran extends Model
         'tanggal_mulai',
         'tanggal_selesai',
         'tanggal_mulai_genap',
+        'tanggal_akhir_pts_ganjil',
+        'tanggal_akhir_pts_genap',
         'is_active'
     ];
 
@@ -24,6 +26,8 @@ class TahunAjaran extends Model
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
         'tanggal_mulai_genap' => 'date',
+        'tanggal_akhir_pts_ganjil' => 'date',
+        'tanggal_akhir_pts_genap' => 'date',
         'is_active' => 'boolean'
     ];
 
@@ -108,9 +112,18 @@ class TahunAjaran extends Model
     /**
      * Get periode untuk rapor sesuai jenis (PTS vs PAS).
      *
-     * - PAS (akhir_semester): periode FULL semester (sama dengan getSemesterPeriods)
-     * - PTS (tengah_semester): periode SETENGAH PERTAMA semester (~3 bulan)
-     *   Mengikuti praktik instansi: PTS Ganjil Jul-Sep, PTS Genap Jan-Mar.
+     * Semua periode di-baca DINAMIS dari konfigurasi admin di menu
+     * /admin/tahun-ajaran (field: tanggal_mulai, tanggal_mulai_genap,
+     * tanggal_akhir_pts_ganjil, tanggal_akhir_pts_genap, tanggal_selesai).
+     *
+     * Mapping:
+     * - PTS Ganjil : tanggal_mulai → tanggal_akhir_pts_ganjil
+     * - PAS Ganjil : tanggal_mulai → tanggal_mulai_genap - 1 day
+     * - PTS Genap  : tanggal_mulai_genap → tanggal_akhir_pts_genap
+     * - PAS Genap  : tanggal_mulai_genap → tanggal_selesai
+     *
+     * Fallback kalau tanggal_akhir_pts_*  belum di-set admin:
+     * → otomatis pakai 3 bulan pertama dari awal semester.
      *
      * @param string $semester 'ganjil' | 'genap'
      * @param string $jenisRapor 'tengah_semester' | 'akhir_semester'
@@ -120,21 +133,37 @@ class TahunAjaran extends Model
     {
         $full = $this->getSemesterPeriods()[$semester] ?? null;
         if (!$full) {
-            return ['start' => $this->tanggal_mulai, 'end' => $this->tanggal_selesai];
+            return [
+                'start' => Carbon::parse($this->tanggal_mulai),
+                'end' => Carbon::parse($this->tanggal_selesai),
+            ];
         }
 
         $start = Carbon::parse($full['start']);
-        $end = Carbon::parse($full['end']);
+        $endFull = Carbon::parse($full['end']);
 
         if ($jenisRapor === 'tengah_semester') {
-            // PTS = setengah pertama (3 bulan). PTS Ganjil = Jul-Sep, PTS Genap = Jan-Mar.
-            $midEnd = $start->copy()->addMonths(3)->subDay();
-            // Jangan melebihi end semester
-            if ($midEnd->gt($end)) $midEnd = $end;
-            return ['start' => $start, 'end' => $midEnd];
+            // PTS: pakai tanggal admin dulu, fallback 3 bulan kalau kosong
+            $ptsEnd = $semester === 'ganjil'
+                ? $this->tanggal_akhir_pts_ganjil
+                : $this->tanggal_akhir_pts_genap;
+
+            if ($ptsEnd) {
+                $end = Carbon::parse($ptsEnd);
+            } else {
+                // Fallback: 3 bulan pertama
+                $end = $start->copy()->addMonths(3)->subDay();
+            }
+
+            // Clamp: PTS end tidak boleh melebihi end semester full
+            if ($end->gt($endFull)) $end = $endFull;
+            // Clamp: PTS end tidak boleh sebelum start semester
+            if ($end->lt($start)) $end = $start;
+
+            return ['start' => $start, 'end' => $end];
         }
 
-        // PAS = full semester
-        return ['start' => $start, 'end' => $end];
+        // PAS: full semester
+        return ['start' => $start, 'end' => $endFull];
     }
 }

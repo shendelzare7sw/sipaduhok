@@ -348,6 +348,49 @@
                             <a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}" style="color: #16a34a;">Atur periode kustom →</a>
                         </div>
                     @endif
+
+                    {{-- Periode PTS vs PAS untuk rapor --}}
+                    <hr style="margin: 16px 0; border-top: 1px dashed #d1d5db;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                        <i class="fas fa-flag-checkered" style="color: #0891b2;"></i>
+                        <strong style="color: #155e75; font-size: 13px;">Periode Rapor (PTS vs PAS)</strong>
+                    </div>
+                    @php
+                        $ptsGanjil = $tahunAjaran->getRaporPeriod('ganjil', 'tengah_semester');
+                        $pasGanjil = $tahunAjaran->getRaporPeriod('ganjil', 'akhir_semester');
+                        $ptsGenap  = $tahunAjaran->getRaporPeriod('genap', 'tengah_semester');
+                        $pasGenap  = $tahunAjaran->getRaporPeriod('genap', 'akhir_semester');
+                    @endphp
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px;">
+                        <div style="background: #ecfeff; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #0891b2;">
+                            <div style="color: #155e75; font-weight: 600; margin-bottom: 4px;">📋 PTS Ganjil</div>
+                            <div style="color: #155e75;">{{ $ptsGanjil['start']->format('d M Y') }} – {{ $ptsGanjil['end']->format('d M Y') }}</div>
+                            @if(!$tahunAjaran->tanggal_akhir_pts_ganjil)
+                                <small style="color: #64748b;">(default: 3 bulan)</small>
+                            @endif
+                        </div>
+                        <div style="background: #fef3c7; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #f59e0b;">
+                            <div style="color: #92400e; font-weight: 600; margin-bottom: 4px;">📊 PAS Ganjil</div>
+                            <div style="color: #78350f;">{{ $pasGanjil['start']->format('d M Y') }} – {{ $pasGanjil['end']->format('d M Y') }}</div>
+                        </div>
+                        <div style="background: #ecfeff; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #0891b2;">
+                            <div style="color: #155e75; font-weight: 600; margin-bottom: 4px;">📋 PTS Genap</div>
+                            <div style="color: #155e75;">{{ $ptsGenap['start']->format('d M Y') }} – {{ $ptsGenap['end']->format('d M Y') }}</div>
+                            @if(!$tahunAjaran->tanggal_akhir_pts_genap)
+                                <small style="color: #64748b;">(default: 3 bulan)</small>
+                            @endif
+                        </div>
+                        <div style="background: #dbeafe; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                            <div style="color: #1e40af; font-weight: 600; margin-bottom: 4px;">📊 PAS Genap</div>
+                            <div style="color: #1e3a8a;">{{ $pasGenap['start']->format('d M Y') }} – {{ $pasGenap['end']->format('d M Y') }}</div>
+                        </div>
+                    </div>
+                    <small style="display: block; margin-top: 10px; color: #6b7280; font-size: 11px;">
+                        <i class="fas fa-info-circle"></i> Periode ini dipakai untuk auto-fill kehadiran rapor (sakit/izin/alpha) dari menu Presensi.
+                        @if(!$tahunAjaran->tanggal_akhir_pts_ganjil || !$tahunAjaran->tanggal_akhir_pts_genap)
+                            <a href="{{ route('admin.tahun-ajaran.edit', $tahunAjaran->id) }}" style="color: #0891b2;">Atur tanggal akhir PTS →</a>
+                        @endif
+                    </small>
                 </div>
             </div>
 

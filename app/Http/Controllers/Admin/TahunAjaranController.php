@@ -44,6 +44,8 @@ class TahunAjaranController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'tanggal_mulai_genap' => 'nullable|date|after:tanggal_mulai|before:tanggal_selesai',
+            'tanggal_akhir_pts_ganjil' => 'nullable|date|after_or_equal:tanggal_mulai|before:tanggal_selesai',
+            'tanggal_akhir_pts_genap' => 'nullable|date|after_or_equal:tanggal_mulai|before_or_equal:tanggal_selesai',
             'is_active' => 'boolean'
         ], [
             'nama_tahun_ajaran.required' => 'Nama tahun ajaran harus diisi',
@@ -55,7 +57,13 @@ class TahunAjaranController extends Controller
             'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai',
             'tanggal_mulai_genap.date' => 'Tanggal mulai semester genap harus berupa tanggal yang valid',
             'tanggal_mulai_genap.after' => 'Tanggal mulai semester genap harus setelah tanggal mulai tahun ajaran',
-            'tanggal_mulai_genap.before' => 'Tanggal mulai semester genap harus sebelum tanggal selesai tahun ajaran'
+            'tanggal_mulai_genap.before' => 'Tanggal mulai semester genap harus sebelum tanggal selesai tahun ajaran',
+            'tanggal_akhir_pts_ganjil.date' => 'Tanggal akhir PTS ganjil harus berupa tanggal yang valid',
+            'tanggal_akhir_pts_ganjil.after_or_equal' => 'Tanggal akhir PTS ganjil harus pada/setelah tanggal mulai tahun ajaran',
+            'tanggal_akhir_pts_ganjil.before' => 'Tanggal akhir PTS ganjil harus sebelum tanggal selesai tahun ajaran',
+            'tanggal_akhir_pts_genap.date' => 'Tanggal akhir PTS genap harus berupa tanggal yang valid',
+            'tanggal_akhir_pts_genap.after_or_equal' => 'Tanggal akhir PTS genap harus pada/setelah tanggal mulai tahun ajaran',
+            'tanggal_akhir_pts_genap.before_or_equal' => 'Tanggal akhir PTS genap harus pada/sebelum tanggal selesai tahun ajaran'
         ]);
 
         // If is_active is checked, deactivate all other tahun ajaran
@@ -99,6 +107,8 @@ class TahunAjaranController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'tanggal_mulai_genap' => 'nullable|date|after:tanggal_mulai|before:tanggal_selesai',
+            'tanggal_akhir_pts_ganjil' => 'nullable|date|after_or_equal:tanggal_mulai|before:tanggal_selesai',
+            'tanggal_akhir_pts_genap' => 'nullable|date|after_or_equal:tanggal_mulai|before_or_equal:tanggal_selesai',
             'is_active' => 'boolean'
         ], [
             'nama_tahun_ajaran.required' => 'Nama tahun ajaran harus diisi',
@@ -110,7 +120,13 @@ class TahunAjaranController extends Controller
             'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai',
             'tanggal_mulai_genap.date' => 'Tanggal mulai semester genap harus berupa tanggal yang valid',
             'tanggal_mulai_genap.after' => 'Tanggal mulai semester genap harus setelah tanggal mulai tahun ajaran',
-            'tanggal_mulai_genap.before' => 'Tanggal mulai semester genap harus sebelum tanggal selesai tahun ajaran'
+            'tanggal_mulai_genap.before' => 'Tanggal mulai semester genap harus sebelum tanggal selesai tahun ajaran',
+            'tanggal_akhir_pts_ganjil.date' => 'Tanggal akhir PTS ganjil harus berupa tanggal yang valid',
+            'tanggal_akhir_pts_ganjil.after_or_equal' => 'Tanggal akhir PTS ganjil harus pada/setelah tanggal mulai tahun ajaran',
+            'tanggal_akhir_pts_ganjil.before' => 'Tanggal akhir PTS ganjil harus sebelum tanggal selesai tahun ajaran',
+            'tanggal_akhir_pts_genap.date' => 'Tanggal akhir PTS genap harus berupa tanggal yang valid',
+            'tanggal_akhir_pts_genap.after_or_equal' => 'Tanggal akhir PTS genap harus pada/setelah tanggal mulai tahun ajaran',
+            'tanggal_akhir_pts_genap.before_or_equal' => 'Tanggal akhir PTS genap harus pada/sebelum tanggal selesai tahun ajaran'
         ]);
 
         // If is_active is checked, deactivate all other tahun ajaran
