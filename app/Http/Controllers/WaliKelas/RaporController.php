@@ -20,6 +20,7 @@ use App\Models\TemplateCapaianKompetensi;
 use App\Models\TahunAjaran;
 use App\Models\RequestDownloadRapor;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RaporExport;
 
@@ -808,16 +809,58 @@ class RaporController extends Controller
     }
 
     /**
-     * NEW: Export rapor to Excel
+     * NEW: Export rapor to Excel (juga jadi TEMPLATE untuk import balik).
      */
     public function exportExcel($raporId)
     {
         $rapor = Rapor::with(['siswa', 'kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'raporNilai.nilai', 'kegiatanEkstra'])
             ->findOrFail($raporId);
 
-        $filename = "Rapor_{$rapor->siswa->nama_lengkap}_{$rapor->getPeriodeLabel()}.xlsx";
+        $filename = "Rapor_" . Str::slug($rapor->siswa->nama_lengkap) . "_{$rapor->getPeriodeLabel()}.xlsx";
 
         return Excel::download(new RaporExport($rapor), $filename);
+    }
+
+    /**
+     * Import data rapor dari file Excel hasil export (template-then-import).
+     * Hanya diperbolehkan saat rapor masih draft dan belum dikirim ke Ketua PKBM.
+     */
+    public function importExcel(Request $request, $raporId): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:5120',
+        ]);
+
+        $rapor = Rapor::with('siswa', 'kelas')->findOrFail($raporId);
+
+        // Verify ownership: rapor harus di kelas yang sedang diwalikan
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $this->getSelectedKelas($tenagaPendidik);
+        if (!$kelas || $rapor->kelas_id !== $kelas->id) {
+            return back()->with('error', 'Anda tidak memiliki akses ke rapor ini.');
+        }
+
+        // Gate: status harus draft AND belum dikirim ke Ketua
+        if ($rapor->status !== 'draft') {
+            return back()->with('error', 'Rapor sudah diterbitkan. Tarik kembali ke draft dulu sebelum import.');
+        }
+        if ($rapor->siswa->validasi_rapor_wali) {
+            return back()->with('error', 'Rapor sudah dikirim ke Ketua PKBM. Batalkan kiriman dulu sebelum import.');
+        }
+
+        $importer = new \App\Imports\WaliKelas\RaporImport($rapor);
+        $result = $importer->import($request->file('file'));
+
+        if (!$result['success']) {
+            return back()->with('error', implode(' | ', $result['errors']));
+        }
+
+        $msg = "Import berhasil: {$result['updated_count']} mata pelajaran ter-update.";
+        if (!empty($result['errors'])) {
+            $msg .= ' Peringatan: ' . implode(' | ', array_slice($result['errors'], 0, 5));
+            return back()->with('warning', $msg);
+        }
+        return back()->with('success', $msg);
     }
 
     /**

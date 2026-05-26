@@ -16,6 +16,15 @@
             overflow-x: hidden;
         }
 
+        /* Frame untuk simulasi margin per-halaman saat print (thead/tfoot repeat per page) */
+        .print-page-frame { width: 100%; border-collapse: collapse; }
+        .print-page-frame > thead > tr > td,
+        .print-page-frame > tbody > tr > td,
+        .print-page-frame > tfoot > tr > td {
+            border: 0;
+            padding: 0;
+        }
+
         .rapor-wrapper {
             width: 900px;
             margin: 0 auto;
@@ -304,23 +313,38 @@
 
         /* Print Styles */
         @media print {
+            /* @page margin = 0 → suppress browser-added header/footer (tgl, URL, page num).
+               Per-page margin top/bottom diatur via .print-page-frame table thead/tfoot
+               yang DIREPEAT di setiap halaman saat tabel multi-page.
+               Margin kiri/kanan diatur via .rapor-wrapper padding (konsisten antar halaman). */
             @page {
-                margin: 10mm;
+                margin: 0;
                 size: A4 portrait;
             }
 
-            body {
+            html, body {
+                margin: 0;
                 padding: 0;
                 background: white;
                 font-size: 10pt;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
+            .print-page-frame > thead > tr > td.page-margin-top { height: 10mm; }
+            .print-page-frame > tfoot > tr > td.page-margin-bottom { height: 10mm; }
 
             .rapor-wrapper {
                 box-shadow: none;
-                padding: 20px;
+                /* padding kiri/kanan = margin halaman, top/bottom = 0 (di-handle thead/tfoot table) */
+                padding: 0 10mm !important;
                 width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
                 transform: none !important;
             }
+            .rapor-wrapper * { box-sizing: border-box !important; }
+            .rapor-wrapper table { width: 100% !important; max-width: 100% !important; }
 
             table.grade-table {
                 font-size: 9pt;
@@ -337,13 +361,27 @@
                 display: none;
             }
 
-            /* Force watermark to print */
+            /* Watermark: fixed ke halaman (bukan wrapper) supaya selalu center A4 + repeat tiap halaman */
             .rapor-wrapper.with-watermark::before {
+                content: '';
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background-image: url('{{ asset('img/logo/hok-watermark.png') }}?v={{ filemtime(public_path('img/logo/hok-watermark.png')) }}');
+                background-repeat: no-repeat;
+                background-position: center center;
+                background-size: 75%;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
-                opacity: 0.08 !important;
+                opacity: 0.10 !important;
                 display: block !important;
+                z-index: 0;
+                pointer-events: none;
             }
 
             /* Force all table backgrounds transparent */
@@ -375,11 +413,23 @@
             <button class="btn-zoom" onclick="zoomIn()" title="Perbesar"><i class="bi bi-plus"></i></button>
             <button class="btn-zoom" onclick="zoomReset()" title="Reset" style="font-size: 12px;">Fit</button>
         </div>
-        <button class="btn-print" onclick="window.print()">
+        <button class="btn-print" onclick="handlePrintClick()"
+                title="Setelah klik Cetak, untuk hasil paling bersih di Chrome: buka 'More settings' di dialog print → uncheck 'Headers and footers'.">
             <i class="bi bi-printer-fill"></i> Cetak Rapor
         </button>
+        <i class="bi bi-info-circle text-muted ms-2" style="font-size: 14px; cursor: help;"
+           title="Tip: di dialog Print Chrome → 'More settings' → uncheck 'Headers and footers' supaya cetakan bersih dari tanggal & URL."></i>
     </div>
+    <script>
+        function handlePrintClick() {
+            window.print();
+        }
+    </script>
 
+<table class="print-page-frame">
+    <thead><tr><td class="page-margin-top"></td></tr></thead>
+    <tfoot><tr><td class="page-margin-bottom"></td></tr></tfoot>
+    <tbody><tr><td>
     <div class="rapor-wrapper{{ $rapor->jenis_rapor === 'akhir_semester' ? ' with-watermark' : '' }}">
         <!-- Title -->
         <h1>PENCAPAIAN KOMPETENSI PESERTA DIDIK</h1>
@@ -621,6 +671,8 @@
             </p>
         </div>
     </div>
+    </td></tr></tbody>
+</table>
 
     <script>
     (function() {

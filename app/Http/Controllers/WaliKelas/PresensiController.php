@@ -18,6 +18,11 @@ class PresensiController extends Controller
 {
     use WaliKelasHelper;
 
+    private function statusValidasiForWaliInput(string $status): ?string
+    {
+        return in_array($status, ['sakit', 'izin'], true) ? 'disetujui' : null;
+    }
+
     /**
      * Display presensi siswa
      */
@@ -161,6 +166,7 @@ class PresensiController extends Controller
             [
                 'status' => $request->status,
                 'keterangan' => $request->keterangan,
+                'status_validasi' => $this->statusValidasiForWaliInput($request->status),
                 'diinput_oleh' => auth()->id(),
             ]
         );
@@ -312,6 +318,7 @@ class PresensiController extends Controller
                 [
                     'status' => $data['status'],
                     'keterangan' => $data['keterangan'] ?? null,
+                    'status_validasi' => $this->statusValidasiForWaliInput($data['status']),
                     'diinput_oleh' => auth()->id(),
                 ]
             );
@@ -407,6 +414,10 @@ class PresensiController extends Controller
             $statusToSave = 'alpha';
         } elseif ($statusValidasi === 'disetujui' && $statusToSave === 'alpha') {
             $statusToSave = 'izin';
+        }
+
+        if ($statusValidasi === 'pending' && !in_array($statusToSave, ['sakit', 'izin'], true)) {
+            $statusValidasi = null;
         }
 
         $presensi->update([
@@ -778,6 +789,7 @@ class PresensiController extends Controller
                 [
                     'status'      => $statusRaw,
                     'keterangan'  => $keterangan ?: null,
+                    'status_validasi' => $this->statusValidasiForWaliInput($statusRaw),
                     'diinput_oleh' => auth()->id(),
                 ]
             );

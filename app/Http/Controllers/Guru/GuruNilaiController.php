@@ -12,19 +12,20 @@ use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Nilai;
 use App\Models\Siswa;
-use App\Models\TugasSiswa;
-use App\Models\UjianSiswa;
 use App\Models\TahunAjaran;
+use App\Services\NilaiSyncService;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\Guru\NilaiSiswaImport;
 use App\Exports\Guru\NilaiSiswaTemplateExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class GuruNilaiController extends Controller
 {
     /**
      * Tampilkan tabel nilai siswa
      */
-    public function index(Request $request, $kelasId, $mapelId): View
+    public function index(Request $request, int $kelasId, int $mapelId): View
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -82,10 +83,7 @@ class GuruNilaiController extends Controller
     /**
      * Update nilai manual
      */
-    /**
-     * Update nilai manual
-     */
-    public function update(Request $request, $kelasId, $mapelId): RedirectResponse
+    public function update(Request $request, int $kelasId, int $mapelId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -130,66 +128,79 @@ class GuruNilaiController extends Controller
     /**
      * Update batch - save all students' nilai at once
      */
-    public function updateBatch(Request $request, $kelasId, $mapelId): RedirectResponse
+    public function updateBatch(Request $request, int $kelasId, int $mapelId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
         $nilaiData = $request->input('nilai', []);
         $updatedCount = 0;
+        $skipPrimaryCount = 0;
+
+        $allowedFields = ['pts', 'pas', 'to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'];
+        foreach (range(1, 5) as $i) {
+            $allowedFields[] = "tugas_$i";
+            $allowedFields[] = "latihan_$i";
+            $allowedFields[] = "uh_$i";
+        }
 
         foreach ($nilaiData as $nilaiId => $data) {
             $nilai = Nilai::find($nilaiId);
             if (!$nilai) continue;
 
-            // Prepare data to update
+            $newValues = [];
+            foreach ($allowedFields as $field) {
+                if (array_key_exists($field, $data)) {
+                    $newValues[$field] = $data[$field] !== '' ? floatval($data[$field]) : null;
+                }
+            }
+            if (empty($newValues)) continue;
+
+            $snapshotChanged = false;
             $dataToUpdate = [];
-            
-            // Handle tugas, latihan, uh 1-5
-            foreach (range(1, 5) as $i) {
-                if (isset($data["tugas_$i"])) {
-                    $dataToUpdate["tugas_$i"] = $data["tugas_$i"] !== '' ? floatval($data["tugas_$i"]) : null;
+            foreach ($newValues as $field => $value) {
+                $oldSnapshot = $nilai->{$field . '_guru'};
+                $oldFloat = $oldSnapshot !== null ? (float) $oldSnapshot : null;
+                if ($oldFloat !== $value) {
+                    $snapshotChanged = true;
                 }
-                if (isset($data["latihan_$i"])) {
-                    $dataToUpdate["latihan_$i"] = $data["latihan_$i"] !== '' ? floatval($data["latihan_$i"]) : null;
-                }
-                if (isset($data["uh_$i"])) {
-                    $dataToUpdate["uh_$i"] = $data["uh_$i"] !== '' ? floatval($data["uh_$i"]) : null;
-                }
+                $dataToUpdate[$field . '_guru'] = $value;
             }
 
-            // Handle PTS, PAS
-            if (isset($data['pts'])) {
-                $dataToUpdate['pts'] = $data['pts'] !== '' ? floatval($data['pts']) : null;
+            if ($snapshotChanged) {
+                $dataToUpdate['guru_terakhir_simpan_at'] = now();
             }
-            if (isset($data['pas'])) {
-                $dataToUpdate['pas'] = $data['pas'] !== '' ? floatval($data['pas']) : null;
+            $dataToUpdate['guru_id'] = $tenagaPendidik->id;
+
+            $waliPernahEdit = $nilai->wali_terakhir_edit_at !== null;
+            if (!$waliPernahEdit) {
+                $dataToUpdate = array_merge($dataToUpdate, $newValues);
+            } elseif ($snapshotChanged) {
+                $skipPrimaryCount++;
             }
 
-            // Handle tingkat akhir fields
-            foreach (['to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'] as $field) {
-                if (isset($data[$field])) {
-                    $dataToUpdate[$field] = $data[$field] !== '' ? floatval($data[$field]) : null;
-                }
-            }
+            $nilai->update($dataToUpdate);
 
-            if (!empty($dataToUpdate)) {
-                $nilai->update($dataToUpdate);
-                $nilai->hitungSemuaRata();
+            if (!$waliPernahEdit) {
                 $nilai->hitungNilaiAkhir();
-                $updatedCount++;
             }
+            $updatedCount++;
         }
-        
+
+        $message = "Berhasil menyimpan nilai {$updatedCount} siswa.";
+        if ($skipPrimaryCount > 0) {
+            $message .= " {$skipPrimaryCount} siswa hanya disimpan ke snapshot guru karena wali kelas sudah mengedit nilainya - wali perlu sinkronisasi manual.";
+        }
+
         return redirect()
             ->route('guru.lms.nilai.index', [$kelasId, $mapelId])
-            ->with('success', "Berhasil menyimpan nilai {$updatedCount} siswa.");
+            ->with('success', $message);
     }
     
     /**
      * Hitung ulang semua nilai dari tugas dan ujian
      */
-    public function recalculate($kelasId, $mapelId): RedirectResponse
+    public function recalculate(int $kelasId, int $mapelId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -213,12 +224,9 @@ class GuruNilaiController extends Controller
     }
     
     /**
-     * Export nilai ke Excel (placeholder)
-     */
-    /**
      * Export nilai ke Excel
      */
-    public function exportExcel(Request $request, $kelasId, $mapelId)
+    public function exportExcel(Request $request, int $kelasId, int $mapelId): BinaryFileResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -261,7 +269,7 @@ class GuruNilaiController extends Controller
         }
 
         $nilaiCollection = collect($nilaiCollection);
-        $fileName = 'Nilai_Siswa_' . \Str::slug($kelas->nama_kelas) . '_' . \Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
+        $fileName = 'Nilai_Siswa_' . Str::slug($kelas->nama_kelas) . '_' . Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\Guru\NilaiSiswaExport($nilaiCollection, $kelas, $mataPelajaran, $semester),
@@ -272,7 +280,7 @@ class GuruNilaiController extends Controller
     /**
      * Download template Excel untuk import nilai
      */
-    public function downloadTemplate(Request $request, $kelasId, $mapelId)
+    public function downloadTemplate(Request $request, int $kelasId, int $mapelId): BinaryFileResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -291,7 +299,7 @@ class GuruNilaiController extends Controller
             ->get()
             ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
 
-        $fileName = 'Template_Nilai_' . \Str::slug($kelas->nama_kelas) . '_' . \Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
+        $fileName = 'Template_Nilai_' . Str::slug($kelas->nama_kelas) . '_' . Str::slug($mataPelajaran->nama_mapel) . '_' . $semester . '.xlsx';
 
         return Excel::download(
             new NilaiSiswaTemplateExport(collect($siswaList), $kelas, $mataPelajaran, $semester),
@@ -302,7 +310,7 @@ class GuruNilaiController extends Controller
     /**
      * Import nilai dari Excel
      */
-    public function importExcel(Request $request, $kelasId, $mapelId): RedirectResponse
+    public function importExcel(Request $request, int $kelasId, int $mapelId): RedirectResponse
     {
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
@@ -362,81 +370,21 @@ class GuruNilaiController extends Controller
     /**
      * Calculate nilai from tugas and ujian
      */
-    /**
-     * Calculate nilai from tugas and ujian
-     */
-    private function calculateNilai($nilai)
+    private function calculateNilai(Nilai $nilai): void
     {
-        // 1. Fetch Assignments (Tugas & Latihan)
-        $tugasSiswa = TugasSiswa::whereHas('tugas', function($q) use ($nilai) {
-                $q->where('mata_pelajaran_id', $nilai->mata_pelajaran_id)
-                  ->where('kelas_id', $nilai->kelas_id);
-            })
-            ->with('tugas')
-            ->where('siswa_id', $nilai->siswa_id)
-            ->where('status', 'dinilai')
-            ->get();
-
-        $updateData = [];
-
-        // Map Tugas 1-5 & Latihan 1-5
-        foreach ($tugasSiswa as $ts) {
-            $jenis = $ts->tugas->jenis_tugas ?? 'tugas'; // tugas or latihan
-            $urutan = $ts->tugas->urutan ?? 1;
-            
-            if ($urutan >= 1 && $urutan <= 5) {
-                $column = "{$jenis}_{$urutan}"; // e.g., tugas_1, latihan_2
-                $updateData[$column] = $ts->nilai;
-            }
-        }
-
-        // 2. Fetch Exams (UH, PTS, PAS)
-        $ujianSiswa = UjianSiswa::whereHas('ujian', function($q) use ($nilai) {
-                $q->where('mata_pelajaran_id', $nilai->mata_pelajaran_id)
-                  ->where('kelas_id', $nilai->kelas_id);
-            })
-            ->with('ujian')
-            ->where('siswa_id', $nilai->siswa_id)
-            ->where('status', 'selesai')
-            ->get();
-
-        foreach ($ujianSiswa as $us) {
-            $tipe = $us->ujian->tipe_ujian; // uh, uts, uas
-            
-            // Map UTS -> PTS, UAS -> PAS
-            if ($tipe === 'uts') {
-                $updateData['pts'] = $us->nilai;
-            } elseif ($tipe === 'uas') {
-                $updateData['pas'] = $us->nilai;
-            } elseif ($tipe === 'uh') {
-                // Assuming UH has urutan or we take latest? 
-                // For now, let's assume UH works similarly if 'ujian' table has 'urutan' or name parsing.
-                // If 'ujian' doesn't have 'urutan', we might need to rely on 'nama_ujian' or created_at.
-                // Checking previous analysis: `ujian` table exists but `urutan` column check needed.
-                // If missing, we skip mapping UH automatically for now or use name 'UH 1'.
-                // Let's check name:
-                if (preg_match('/(UH|Ulangan Harian)\s*(\d+)/i', $us->ujian->nama_ujian, $matches)) {
-                    $urutan = intval($matches[2]);
-                    if ($urutan >= 1 && $urutan <= 5) {
-                        $updateData["uh_{$urutan}"] = $us->nilai;
-                    }
-                }
-            }
-        }
-
-        if (!empty($updateData)) {
-            $nilai->update($updateData);
-        }
-        
-        // Auto-calculate properties
-        $nilai->hitungSemuaRata();
-        $nilai->hitungNilaiAkhir();
+        app(NilaiSyncService::class)->syncForSiswaMapel(
+            $nilai->siswa_id,
+            $nilai->mata_pelajaran_id,
+            $nilai->kelas_id,
+            $nilai->semester,
+            $nilai->tahun_ajaran_id
+        );
     }
     
     /**
      * Verifikasi akses guru
      */
-    private function verifyAccess($guruId, $kelasId, $mapelId)
+    private function verifyAccess(int $guruId, int $kelasId, int $mapelId): void
     {
         $access = GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
             ->where('kelas_id', $kelasId)

@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\TugasSiswa;
+use App\Models\UjianSiswa;
+use App\Observers\TugasSiswaObserver;
+use App\Observers\UjianSiswaObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\URL;
@@ -31,8 +35,11 @@ class AppServiceProvider extends ServiceProvider
 
         // View Composer for Guru Sidebar
         \Illuminate\Support\Facades\View::composer(
-            'guru.partials.sneat-sidebar-menu', 
+            'guru.partials.sneat-sidebar-menu',
             \App\Http\View\Composers\GuruSidebarComposer::class
         );
+
+        TugasSiswa::observe(TugasSiswaObserver::class);
+        UjianSiswa::observe(UjianSiswaObserver::class);
     }
 }

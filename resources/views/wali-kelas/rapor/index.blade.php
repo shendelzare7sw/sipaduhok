@@ -56,9 +56,17 @@
                         <button type="button" class="btn btn-primary shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#generateAllModal">
                             <i class="fas fa-file-invoice me-1"></i> Generate Semua
                         </button>
-                        <button type="button" class="btn btn-success shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#kirimSemuaModal">
-                            <i class="fas fa-paper-plane me-1"></i> Kirim Semua ke Ketua
-                        </button>
+                        @if(($statusCount['belum_dibuat'] ?? 0) > 0)
+                            <button type="button" class="btn btn-success shadow-sm fw-bold" disabled
+                                    title="Generate dulu rapor untuk {{ $statusCount['belum_dibuat'] }} siswa yang belum memiliki rapor sebelum mengirim semua."
+                                    data-bs-toggle="tooltip" data-bs-placement="bottom">
+                                <i class="fas fa-paper-plane me-1"></i> Kirim Semua ke Ketua
+                            </button>
+                        @else
+                            <button type="button" class="btn btn-success shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#kirimSemuaModal">
+                                <i class="fas fa-paper-plane me-1"></i> Kirim Semua ke Ketua
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -611,6 +619,17 @@
     @endif
 </div>
 </div>
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipEls = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipEls.forEach(function (el) {
+            new bootstrap.Tooltip(el);
+        });
+    });
+</script>
+@endsection
 
 {{-- MODAL KONFIRMASI GENERATE ALL --}}
 <div class="modal fade" id="generateAllModal" tabindex="-1" aria-hidden="true">

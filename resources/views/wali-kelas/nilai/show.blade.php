@@ -74,10 +74,7 @@
 
 @section('content')
 @php
-    $isKelasAkhir = str_contains(strtolower($kelas->nama_kelas), '9') || 
-                    str_contains(strtolower($kelas->nama_kelas), '12') ||
-                    str_contains(strtolower($kelas->nama_kelas), 'ix') ||
-                    str_contains(strtolower($kelas->nama_kelas), 'xii');
+    $isKelasAkhir = $kelas->isTingkatAkhir();
 @endphp
 <div style="max-width: 1600px; margin: 0 auto; padding: 0 1rem;">
 <div class="container-fluid px-0">

@@ -12,6 +12,7 @@ use App\Models\Nilai;
 use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\WaliKelas\NilaiPerSiswaTemplateExport;
 use App\Imports\WaliKelas\NilaiPerSiswaImport;
@@ -105,10 +106,11 @@ class NilaiController extends Controller
         $nilaiTertinggi = 0;
         $nilaiTerendah = 0;
         $jumlahTuntas = 0;
-        
+        $jumlahGuruUpdate = 0;
+
         if ($selectedMapelId) {
             $selectedMapel = MataPelajaran::find($selectedMapelId);
-            
+
             if ($selectedMapel) {
                 // Filter siswa that can access this mapel
                 $siswaList = $siswaList->filter(function($siswa) use ($selectedMapel) {
@@ -122,25 +124,32 @@ class NilaiController extends Controller
                     ->where('semester', $semester)
                     ->with('siswa')
                     ->get();
-                
+
                 $nilaiData = $nilaiQuery->keyBy('siswa_id');
-                
+
                 if ($nilaiQuery->count() > 0) {
                     $nilaiAkhirArray = $nilaiQuery->pluck('nilai_akhir')->filter()->values();
-                    
+
                     if ($nilaiAkhirArray->count() > 0) {
                         $rataRataKelas = $nilaiAkhirArray->avg();
                         $nilaiTertinggi = $nilaiAkhirArray->max();
                         $nilaiTerendah = $nilaiAkhirArray->min();
-                        
+
                         $jumlahTuntas = $nilaiAkhirArray->filter(function($nilai) {
                             return $nilai >= 70;
                         })->count();
                     }
+
+                    $jumlahGuruUpdate = $nilaiQuery->filter(function ($nilai) {
+                        return $nilai->hasGuruUpdate()
+                            && $nilai->guru_terakhir_simpan_at
+                            && (!$nilai->wali_terakhir_edit_at
+                                || $nilai->guru_terakhir_simpan_at->gt($nilai->wali_terakhir_edit_at));
+                    })->count();
                 }
             }
         }
-        
+
         return view('wali-kelas.nilai.index', compact(
             'kelas',
             'kelasList',
@@ -153,6 +162,7 @@ class NilaiController extends Controller
             'nilaiTertinggi',
             'nilaiTerendah',
             'jumlahTuntas',
+            'jumlahGuruUpdate',
             'semester',
             'currentSemester'
         ));
@@ -543,19 +553,18 @@ class NilaiController extends Controller
         
         foreach ($request->nilai as $nilaiInput) {
             $dataToUpdate = [
-                'guru_id' => $wali->id,
+                'edited_by_wali_id' => $wali->id,
+                'wali_terakhir_edit_at' => now(),
                 'pts' => $nilaiInput['pts'] ?? null,
                 'pas' => $nilaiInput['pas'] ?? null,
             ];
 
-            // Add tugas, latihan, uh (1-5)
             foreach (range(1, 5) as $i) {
                 $dataToUpdate["tugas_$i"] = $nilaiInput["tugas_$i"] ?? null;
                 $dataToUpdate["latihan_$i"] = $nilaiInput["latihan_$i"] ?? null;
                 $dataToUpdate["uh_$i"] = $nilaiInput["uh_$i"] ?? null;
             }
 
-            // Add tingkat akhir fields
             $dataToUpdate['to_1'] = $nilaiInput['to_1'] ?? null;
             $dataToUpdate['to_2'] = $nilaiInput['to_2'] ?? null;
             $dataToUpdate['to_3'] = $nilaiInput['to_3'] ?? null;
@@ -578,8 +587,7 @@ class NilaiController extends Controller
                 ],
                 $dataToUpdate
             );
-            
-            // Recalculate averages and final score
+
             $nilai->hitungNilaiAkhir();
         }
         
@@ -688,9 +696,9 @@ class NilaiController extends Controller
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel))
             ->values();
 
-        $isKelasAkhir = $this->isKelasAkhir($kelas->nama_kelas);
+        $isKelasAkhir = $kelas->isTingkatAkhir();
 
-        $fileName = 'Template_Nilai_' . \Str::slug($siswa->nama_lengkap) . '_' . $kelas->nama_kelas . '_' . $semester . '.xlsx';
+        $fileName = 'Template_Nilai_' . Str::slug($siswa->nama_lengkap) . '_' . $kelas->nama_kelas . '_' . $semester . '.xlsx';
 
         return Excel::download(
             new NilaiPerSiswaTemplateExport($mataPelajaranList, $siswa, $kelas, $semester, $isKelasAkhir),
@@ -787,13 +795,34 @@ class NilaiController extends Controller
         }
     }
 
-    /**
-     * Helper: check if a class is a final year class (kelas 9 or 12).
-     */
-    private function isKelasAkhir(string $namaKelas): bool
+    public function syncFromGuru(Request $request, $nilaiId)
     {
-        $nama = strtolower($namaKelas);
-        return str_contains($nama, '9')  || str_contains($nama, '12') ||
-               str_contains($nama, 'ix') || str_contains($nama, 'xii');
+        $wali = $this->getTenagaPendidik();
+        if (!$wali) {
+            return redirect()->route('wali.dashboard')->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
+
+        if ($this->needsKelasSelection($wali)) {
+            return $this->redirectToPilihKelas();
+        }
+
+        $kelas = $this->getSelectedKelas($wali);
+        if (!$kelas) {
+            return redirect()->route('wali.nilai.index')->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
+
+        $nilai = Nilai::where('id', $nilaiId)
+            ->where('kelas_id', $kelas->id)
+            ->firstOrFail();
+
+        $nilai->syncFromGuru();
+
+        $siswaId = $request->input('siswa_id', $nilai->siswa_id);
+        $semester = $request->input('semester', $nilai->semester);
+
+        return redirect()
+            ->route('wali.nilai.edit', ['siswa' => $siswaId, 'semester' => $semester])
+            ->with('success', 'Nilai mapel berhasil disinkronkan dengan snapshot dari guru pengajar.');
     }
+
 }

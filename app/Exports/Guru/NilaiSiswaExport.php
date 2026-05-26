@@ -25,12 +25,7 @@ class NilaiSiswaExport implements FromCollection, WithHeadings, WithStyles, With
         $this->mapel = $mapel;
         $this->semester = $semester;
         
-        // Determine if kelas akhir logic applies
-        $namaKelas = strtolower($kelas->nama_kelas);
-        $this->isKelasAkhir = str_contains($namaKelas, '9') || 
-                             str_contains($namaKelas, '12') ||
-                             str_contains($namaKelas, 'ix') ||
-                             str_contains($namaKelas, 'xii');
+        $this->isKelasAkhir = $kelas->isTingkatAkhir();
     }
 
     public function collection()

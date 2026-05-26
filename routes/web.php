@@ -1146,6 +1146,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{siswa}/import', [WaliKelasNilaiController::class, 'importExcel'])->name('import');
             Route::put('/{siswa}', [WaliKelasNilaiController::class, 'update'])->name('update');
             Route::post('/{nilaiId}/clear', [WaliKelasNilaiController::class, 'clearNilai'])->name('clear');
+            Route::post('/{nilaiId}/sync-guru', [WaliKelasNilaiController::class, 'syncFromGuru'])->name('sync-guru');
         });
 
         // Rapor Pending Saya (lintas TA — untuk akses rapor draft TA lalu yang masih perlu diselesaikan)
@@ -1175,6 +1176,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{rapor}/print', [RaporController::class, 'print'])->name('print');
             Route::post('/{rapor}/kehadiran-auto', [RaporController::class, 'autoFillKehadiran'])->name('kehadiran-auto'); // NEW
             Route::get('/{rapor}/export-excel', [RaporController::class, 'exportExcel'])->name('export-excel'); // NEW
+            Route::post('/{rapor}/import-excel', [RaporController::class, 'importExcel'])->name('import-excel');
             Route::post('/apply-template', [RaporController::class, 'applyTemplate'])->name('apply-template'); // NEW
             Route::post('/apply-template-all', [RaporController::class, 'applyTemplateToAll'])->name('apply-template-all'); // NEW
             Route::post('/{rapor}/reset-nilai', [RaporController::class, 'resetNilai'])->name('reset-nilai');

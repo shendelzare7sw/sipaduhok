@@ -175,6 +175,21 @@
             </div>
         @endif
 
+        @if(isset($selectedMapelId) && $selectedMapelId && ($jumlahGuruUpdate ?? 0) > 0)
+            <div class="alert alert-warning shadow-sm border-start border-warning border-4 mb-4">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-bell fa-lg me-3 mt-1 text-warning"></i>
+                    <div>
+                        <h6 class="alert-heading fw-bold mb-1">{{ $jumlahGuruUpdate }} siswa punya update nilai dari guru</h6>
+                        <p class="small mb-0 text-muted">
+                            Guru pengajar mapel ini sudah menyimpan nilai baru setelah Anda terakhir mengedit.
+                            Klik tombol <span class="badge bg-warning text-dark"><i class="fas fa-bell"></i></span> di kolom AKSI siswa terkait untuk membuka halaman edit — di sana ada tombol <strong>Preview vs Guru</strong> & <strong>Sinkronisasi dari Guru</strong> per mata pelajaran.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- TABEL UTAMA NILAI --}}
         <div class="card shadow mb-4">
             <div class="card-header py-3 bg-white">
@@ -197,7 +212,6 @@
                                     <th>PTS</th>
                                     <th>PAS</th>
                                     <th>N. AKHIR</th>
-                                    <th>PRED.</th>
                                 @endif
                                 <th width="100">AKSI</th>
                             </tr>
@@ -206,6 +220,15 @@
                             @forelse($siswaList ?? [] as $index => $siswa)
                                 @php
                                     $nilai = (isset($selectedMapelId) && $selectedMapelId) ? ($nilaiData[$siswa->id] ?? null) : null;
+                                    $guruBaruUpdate = $nilai
+                                        && $nilai->hasGuruUpdate()
+                                        && $nilai->guru_terakhir_simpan_at
+                                        && (!$nilai->wali_terakhir_edit_at
+                                            || $nilai->guru_terakhir_simpan_at->gt($nilai->wali_terakhir_edit_at));
+                                    $waliEditBeda = $nilai
+                                        && $nilai->wali_terakhir_edit_at
+                                        && $nilai->hasGuruUpdate()
+                                        && !$guruBaruUpdate;
                                 @endphp
                                 <tr>
                                     <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
@@ -213,6 +236,19 @@
                                     <td class="align-middle col-siswa">
                                         <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>
                                         <small class="text-muted">Kelas: {{ $kelas->nama_kelas }}</small>
+                                        @if($guruBaruUpdate)
+                                            <div class="mt-1">
+                                                <span class="badge bg-warning text-dark" title="Guru pengajar sudah update nilai setelah Anda terakhir edit. Buka detail untuk preview diff & sync.">
+                                                    <i class="fas fa-bell me-1"></i> Guru Update Baru
+                                                </span>
+                                            </div>
+                                        @elseif($waliEditBeda)
+                                            <div class="mt-1">
+                                                <span class="badge bg-info text-white" title="Nilai saat ini berbeda dari snapshot guru karena Anda sudah mengedit.">
+                                                    <i class="fas fa-user-edit me-1"></i> Edit Wali
+                                                </span>
+                                            </div>
+                                        @endif
                                     </td>
 
                                     @if(isset($selectedMapelId) && $selectedMapelId)
@@ -224,30 +260,22 @@
                                         <td class="text-center align-middle">
                                             <span class="nilai-akhir">{{ $nilai ? number_format($nilai->nilai_akhir ?? 0, 1) : '-' }}</span>
                                         </td>
-                                        <td class="text-center align-middle">
-                                            @if($nilai)
-                                                @php
-                                                    $predikat = $nilai->nilaiHuruf();
-                                                    $colors = ['A'=>'bg-success', 'B'=>'bg-primary', 'C'=>'bg-warning', 'D'=>'bg-danger', 'E'=>'bg-dark'];
-                                                @endphp
-                                                <span class="badge-predikat {{ $colors[$predikat] ?? 'bg-secondary' }}">
-                                                    {{ $predikat }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted small">N/A</span>
-                                            @endif
-                                        </td>
                                     @endif
 
                                     <td class="text-center align-middle">
-                                        <a href="{{ route('wali.nilai.show', $siswa->id) }}?semester={{ $semester }}" class="btn btn-info btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="Lihat Profil Nilai">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            <a href="{{ route('wali.nilai.show', $siswa->id) }}?semester={{ $semester }}" class="btn btn-info btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="Lihat Profil Nilai">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('wali.nilai.edit', $siswa->id) }}?semester={{ $semester }}" class="btn {{ $guruBaruUpdate ? 'btn-warning' : 'btn-primary' }} btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="{{ $guruBaruUpdate ? 'Ada update guru — buka untuk preview & sinkron' : 'Edit nilai semua mapel' }}">
+                                                <i class="fas {{ $guruBaruUpdate ? 'fa-bell' : 'fa-edit' }}"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" class="text-center py-5">
+                                    <td colspan="9" class="text-center py-5">
                                         <i class="fas fa-database fa-3x text-gray-200 mb-3"></i>
                                         <p class="text-gray-500 mb-0">Belum ada data siswa untuk ditampilkan.</p>
                                     </td>

@@ -99,4 +99,18 @@ class Kelas extends Model
             ->withPivot('assigned_at')
             ->withTimestamps();
     }
+
+    public function isTingkatAkhir(): bool
+    {
+        $jenjang = strtoupper($this->jenjang ?? '');
+        preg_match('/(\d+)/', $this->nama_kelas ?? '', $matches);
+        $tingkat = (int) ($matches[1] ?? 0);
+
+        return match ($jenjang) {
+            'SD' => $tingkat === 6,
+            'SMP' => $tingkat === 9,
+            'SMA' => $tingkat === 12,
+            default => false,
+        };
+    }
 }

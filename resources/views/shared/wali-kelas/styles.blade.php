@@ -1,3 +1,5 @@
+@php($isWaliDashboard = request()->routeIs('wali.dashboard'))
+
 <style>
     :root {
         --wk-primary: #4361ee;
@@ -34,6 +36,41 @@
             margin-right: auto !important;
         }
     }
+
+    @if(!$isWaliDashboard)
+    @media (min-width: 1200px) {
+        .layout-page > .content-wrapper > .container-xxl > .container-fluid.px-0,
+        .layout-page > .content-wrapper > .container-xxl > .container-xxl,
+        .layout-page > .content-wrapper > .container-xxl > .wk-page,
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width: 1600px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width: 1400px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width: 1200px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width:1600px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width:1400px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width:1200px"] {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] > .container-fluid.px-0,
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] > .container-xxl,
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] > .wk-page {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
+    @endif
 
     .card {
         border: 1px solid var(--wk-line) !important;

@@ -135,15 +135,201 @@
     .student-nis {
         font-size: 11px;
     }
+
+    @media (max-width: 767.98px) {
+        .table-responsive {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+
+        .table-nilai,
+        .table-nilai tbody,
+        .table-nilai tr {
+            display: block;
+            width: auto;
+        }
+
+        .table-nilai {
+            border: 0;
+            background: transparent;
+            max-width: 100%;
+        }
+
+        .table-nilai thead {
+            display: none;
+        }
+
+        .table-nilai tbody {
+            display: grid;
+            gap: 12px;
+        }
+
+        .table-nilai tr {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 6px;
+            padding: 12px;
+            width: auto;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            border: 1px solid #dbe4f0;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .table-nilai td {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: auto;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            border: 1px solid #e8eef7 !important;
+            border-radius: 8px;
+            padding: 7px 6px !important;
+            background: #f8fafc;
+            overflow: hidden;
+        }
+
+        .table-nilai tr > * {
+            min-width: 0 !important;
+        }
+
+        .table-nilai td::before {
+            content: attr(data-label);
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1;
+            color: #64748b;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .table-nilai .sticky-col,
+        .table-nilai .sticky-col-2 {
+            position: static;
+            left: auto;
+            box-shadow: none;
+            z-index: auto;
+        }
+
+        .table-nilai td.sticky-col {
+            display: none;
+        }
+
+        .table-nilai td[data-label="No"] {
+            display: none;
+        }
+
+        .table-nilai td.sticky-col-2,
+        .table-nilai td.student-cell {
+            grid-column: 1 / -1;
+            display: block;
+            border: 0 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            border-radius: 0;
+            padding: 0 0 10px !important;
+            background: #fff;
+        }
+
+        .table-nilai td.sticky-col-2::before,
+        .table-nilai td.student-cell::before {
+            display: none;
+        }
+
+        .student-name {
+            font-size: 15px;
+            line-height: 1.25;
+        }
+
+        .student-nis {
+            font-size: 12px;
+        }
+
+        .input-wrapper {
+            width: 100%;
+            min-width: 0;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .table-nilai .input-nilai {
+            flex: 1 1 100%;
+            width: 100% !important;
+            min-width: 0;
+            height: 34px;
+            padding: 5px 4px;
+            font-size: 12.5px;
+            border-radius: 7px;
+        }
+
+        .spinner-btns {
+            display: none;
+        }
+
+        .table-nilai .rata-cell,
+        .table-nilai .nilai-akhir-cell {
+            grid-column: 1 / -1;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            font-size: 15px;
+        }
+
+        .table-nilai .rata-cell::before,
+        .table-nilai .nilai-akhir-cell::before {
+            align-self: stretch;
+        }
+
+        .table-nilai .nilai-akhir-cell {
+            background: #dcfce7;
+        }
+
+        .p-3.text-end.bg-light {
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            display: flex;
+            justify-content: stretch;
+            background: rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(8px);
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .p-3.text-end.bg-light .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .table-nilai tr {
+            gap: 4px;
+            padding: 10px;
+        }
+
+        .table-nilai td {
+            padding: 6px 4px !important;
+        }
+
+        .table-nilai td::before {
+            font-size: 9px;
+        }
+
+        .table-nilai .input-nilai {
+            height: 32px;
+            padding: 4px 3px;
+            font-size: 11.5px;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
 @php
-    $isKelasAkhir = str_contains(strtolower($kelas->nama_kelas), '9') || 
-                    str_contains(strtolower($kelas->nama_kelas), '12') ||
-                    str_contains(strtolower($kelas->nama_kelas), 'ix') ||
-                    str_contains(strtolower($kelas->nama_kelas), 'xii');
+    $isKelasAkhir = $kelas->isTingkatAkhir();
 @endphp
     <div class="row">
         <div class="col-12">
@@ -246,7 +432,7 @@
                                             
                                             {{-- Tugas 1-5 --}}
                                             @for($i = 1; $i <= 5; $i++)
-                                                <td class="text-center p-1">
+                                                <td class="text-center p-1" data-label="T{{ $i }}">
                                                     <div class="input-wrapper">
                                                         <input type="number" step="0.01" min="0" max="100" 
                                                             name="nilai[{{ $nilai->id }}][tugas_{{ $i }}]"
@@ -262,13 +448,13 @@
                                                     </div>
                                                 </td>
                                             @endfor
-                                            <td class="text-center rata-cell" id="rata_tugas_{{ $nilai->id }}">
+                                            <td class="text-center rata-cell" data-label="Rata Tugas" id="rata_tugas_{{ $nilai->id }}">
                                                 {{ $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}
                                             </td>
                                             
                                             {{-- Latihan 1-5 --}}
                                             @for($i = 1; $i <= 5; $i++)
-                                                <td class="text-center p-1">
+                                                <td class="text-center p-1" data-label="L{{ $i }}">
                                                     <div class="input-wrapper">
                                                         <input type="number" step="0.01" min="0" max="100" 
                                                             name="nilai[{{ $nilai->id }}][latihan_{{ $i }}]"
@@ -284,13 +470,13 @@
                                                     </div>
                                                 </td>
                                             @endfor
-                                            <td class="text-center rata-cell" id="rata_latihan_{{ $nilai->id }}">
+                                            <td class="text-center rata-cell" data-label="Rata Latihan" id="rata_latihan_{{ $nilai->id }}">
                                                 {{ $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}
                                             </td>
                                             
                                             {{-- UH 1-5 --}}
                                             @for($i = 1; $i <= 5; $i++)
-                                                <td class="text-center p-1">
+                                                <td class="text-center p-1" data-label="UH{{ $i }}">
                                                     <div class="input-wrapper">
                                                         <input type="number" step="0.01" min="0" max="100" 
                                                             name="nilai[{{ $nilai->id }}][uh_{{ $i }}]"
@@ -306,12 +492,12 @@
                                                     </div>
                                                 </td>
                                             @endfor
-                                            <td class="text-center rata-cell" id="rata_uh_{{ $nilai->id }}">
+                                            <td class="text-center rata-cell" data-label="Rata UH" id="rata_uh_{{ $nilai->id }}">
                                                 {{ $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}
                                             </td>
                                             
                                             {{-- PTS --}}
-                                            <td class="text-center p-1">
+                                            <td class="text-center p-1" data-label="PTS">
                                                 <div class="input-wrapper">
                                                     <input type="number" step="0.01" min="0" max="100" 
                                                         name="nilai[{{ $nilai->id }}][pts]"
@@ -328,7 +514,7 @@
                                             </td>
                                             
                                             {{-- PAS --}}
-                                            <td class="text-center p-1">
+                                            <td class="text-center p-1" data-label="PAS">
                                                 <div class="input-wrapper">
                                                     <input type="number" step="0.01" min="0" max="100" 
                                                         name="nilai[{{ $nilai->id }}][pas]"
@@ -345,7 +531,7 @@
                                             </td>
                                             
                                             {{-- Nilai Akhir --}}
-                                            <td class="text-center nilai-akhir-cell" id="nilai_akhir_{{ $nilai->id }}">
+                                            <td class="text-center nilai-akhir-cell" data-label="Nilai Akhir" id="nilai_akhir_{{ $nilai->id }}">
                                                 {{ $nilai->nilai_akhir !== null ? number_format($nilai->nilai_akhir, 2) : '-' }}
                                             </td>
                                         </tr>
@@ -369,12 +555,12 @@
                 </div>
             </div>
 
-            {{-- Tingkat Akhir Section (Kelas 9/12) --}}
+            {{-- Tingkat Akhir Section (Kelas 6 SD / 9 SMP / 12 SMA) --}}
             @if($isKelasAkhir)
             <div class="card-custom mt-4">
                 <div class="card-header-custom">
                     <h6 class="mb-0 fw-bold"><i class="fas fa-graduation-cap me-2"></i>Penilaian Tingkat Akhir (TO, UPK, Ujian Praktek)</h6>
-                    <small class="text-muted">Khusus untuk kelas 9 / 12</small>
+                    <small class="text-muted">Khusus kelas tingkat akhir: kelas 6 SD, kelas 9 SMP, kelas 12 SMA</small>
                 </div>
                 <div class="p-0">
                     <form action="{{ route('guru.lms.nilai.updateBatch', [$kelas->id, $mapel->id]) }}" method="POST">
@@ -395,8 +581,8 @@
                                 <tbody>
                                     @forelse($nilaiList as $index => $nilai)
                                         <tr>
-                                            <td class="text-center fw-bold">{{ $index + 1 }}</td>
-                                            <td>
+                                            <td class="text-center fw-bold" data-label="No">{{ $index + 1 }}</td>
+                                            <td class="student-cell">
                                                 <div class="student-name">{{ $nilai->siswa->nama_lengkap ?? '-' }}</div>
                                                 <small class="text-muted student-nis">{{ $nilai->siswa->nis ?? $nilai->siswa->nisn ?? '-' }}</small>
                                             </td>
@@ -404,7 +590,7 @@
                                             
                                             {{-- Helper for generating cells --}}
                                             @foreach(['to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'] as $field)
-                                            <td class="text-center p-1">
+                                            <td class="text-center p-1" data-label="{{ str_replace('_', ' ', strtoupper($field)) }}">
                                                 <div class="input-wrapper">
                                                     <input type="number" step="0.01" min="0" max="100" 
                                                         name="nilai[{{ $nilai->id }}][{{ $field }}]"

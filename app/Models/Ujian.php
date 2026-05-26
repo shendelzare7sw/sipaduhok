@@ -125,27 +125,12 @@ class Ujian extends Model
         ]);
     }
 
-    /**
-     * Cek apakah kelas adalah tingkat akhir per jenjang.
-     * SD: kelas 6, SMP: kelas 9, SMA: kelas 12
-     */
     public static function isTingkatAkhir($kelas): bool
     {
         if (!$kelas) return false;
-
-        $jenjang = strtoupper($kelas->jenjang ?? '');
-        $namaKelas = $kelas->nama_kelas ?? '';
-
-        // Extract angka dari nama_kelas (misal "9A" → 9, "12-B" → 12)
-        preg_match('/(\d+)/', $namaKelas, $matches);
-        $tingkat = (int) ($matches[1] ?? 0);
-
-        return match ($jenjang) {
-            'SD' => $tingkat === 6,
-            'SMP' => $tingkat === 9,
-            'SMA' => $tingkat === 12,
-            default => false,
-        };
+        return $kelas instanceof Kelas
+            ? $kelas->isTingkatAkhir()
+            : (new Kelas((array) $kelas))->isTingkatAkhir();
     }
 
     // Helper: Cek apakah ujian sedang berlangsung

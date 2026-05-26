@@ -120,12 +120,18 @@
                             @endif
                         </td>
                         <td class="text-center align-middle">
+                            @php
+                                $isPendingValidation = $item->status_validasi === 'pending'
+                                    && in_array($item->status, ['sakit', 'izin'], true);
+                            @endphp
                             @if($item->status_validasi == 'disetujui')
                                 <span class="badge bg-label-success rounded-pill">DISETUJUI</span>
                             @elseif($item->status_validasi == 'ditolak')
                                 <span class="badge bg-label-danger rounded-pill">DITOLAK</span>
-                            @else
+                            @elseif($isPendingValidation)
                                 <span class="badge bg-label-warning rounded-pill">PENDING</span>
+                            @else
+                                <span class="badge bg-label-success rounded-pill">VALID</span>
                             @endif
                         </td>
                         <td class="text-center align-middle">
@@ -163,6 +169,12 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Validasi (Jika Sakit/Izin)</label>
+                                            @php
+                                                $selectedValidasi = $item->status_validasi === 'pending'
+                                                    && !in_array($item->status, ['sakit', 'izin'], true)
+                                                        ? null
+                                                        : $item->status_validasi;
+                                            @endphp
                                             <select name="status_validasi" class="form-select" onchange="
                                                 let statusSelect = this.closest('.modal-body').querySelector('select[name=status]');
                                                 if (this.value === 'ditolak') {
@@ -171,10 +183,10 @@
                                                     statusSelect.value = 'izin';
                                                 }
                                             ">
-                                                <option value="" {{ is_null($item->status_validasi) ? 'selected' : '' }}>- Belum Tervalidasi -</option>
-                                                <option value="pending" {{ $item->status_validasi == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                <option value="disetujui" {{ $item->status_validasi == 'disetujui' ? 'selected' : '' }}>Setujui (Sakit/Izin)</option>
-                                                <option value="ditolak" {{ $item->status_validasi == 'ditolak' ? 'selected' : '' }}>Tolak (Jadi Alpha)</option>
+                                                <option value="" {{ is_null($selectedValidasi) ? 'selected' : '' }}>Valid / Tidak Perlu Validasi</option>
+                                                <option value="pending" {{ $selectedValidasi == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                <option value="disetujui" {{ $selectedValidasi == 'disetujui' ? 'selected' : '' }}>Setujui (Sakit/Izin)</option>
+                                                <option value="ditolak" {{ $selectedValidasi == 'ditolak' ? 'selected' : '' }}>Tolak (Jadi Alpha)</option>
                                             </select>
                                             <small class="text-muted mt-1 d-block">Pilih 'Setujui' agar status muncul sebagai Sakit/Izin di orang tua.</small>
                                         </div>
