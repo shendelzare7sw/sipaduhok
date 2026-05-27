@@ -27,7 +27,15 @@
         .signature-box { text-align: center; }
         .signature-line { margin-top: 70px; border-top: 1px solid #000; padding-top: 5px; display: inline-block; min-width: 200px; }
         .ketua-section { margin-top: 40px; text-align: center; }
-        @media print { body { padding: 15mm; } @page { margin: 15mm; size: A4; } }
+        @media print {
+            body { padding: 15mm; }
+            @page { margin: 15mm; size: A4; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
     </style>
 </head>
 <body>

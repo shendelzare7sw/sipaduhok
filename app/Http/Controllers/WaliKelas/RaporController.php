@@ -595,9 +595,10 @@ class RaporController extends Controller
         $request->validate([
             'order' => 'required|array',
             'order.*' => 'integer|exists:rapor_nilai,id',
+            'sync_all' => 'nullable|boolean',
         ]);
 
-        $rapor = Rapor::findOrFail($raporId);
+        $rapor = Rapor::with('siswa')->findOrFail($raporId);
 
         foreach ($request->order as $index => $raporNilaiId) {
             RaporNilai::where('id', $raporNilaiId)
@@ -605,7 +606,56 @@ class RaporController extends Controller
                 ->update(['urutan' => $index]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Urutan berhasil disimpan.']);
+        $syncedRapors = 0;
+
+        if ($request->boolean('sync_all')) {
+            $tenagaPendidik = $this->getTenagaPendidik();
+            $kelasIds = $tenagaPendidik
+                ? $this->getKelasWali($tenagaPendidik)->pluck('id')
+                : collect();
+
+            if ($kelasIds->isNotEmpty() && $kelasIds->contains($rapor->kelas_id)) {
+                $orderedMapelIds = RaporNilai::where('rapor_id', $rapor->id)
+                    ->whereIn('id', $request->order)
+                    ->get()
+                    ->keyBy('id');
+
+                $orderByMapel = collect($request->order)
+                    ->values()
+                    ->mapWithKeys(function ($raporNilaiId, $index) use ($orderedMapelIds) {
+                        $raporNilai = $orderedMapelIds->get($raporNilaiId);
+
+                        return $raporNilai
+                            ? [$raporNilai->mata_pelajaran_id => $index]
+                            : [];
+                    });
+
+                $targetRapors = Rapor::whereIn('kelas_id', $kelasIds)
+                    ->where('tahun_ajaran_id', $rapor->tahun_ajaran_id)
+                    ->where('semester', $rapor->semester)
+                    ->where('jenis_rapor', $rapor->jenis_rapor)
+                    ->where('id', '!=', $rapor->id)
+                    ->where('status', 'draft')
+                    ->whereHas('siswa', fn($query) => $query->where('validasi_rapor_wali', false))
+                    ->pluck('id');
+
+                foreach ($targetRapors as $targetRaporId) {
+                    foreach ($orderByMapel as $mapelId => $index) {
+                        RaporNilai::where('rapor_id', $targetRaporId)
+                            ->where('mata_pelajaran_id', $mapelId)
+                            ->update(['urutan' => $index]);
+                    }
+                }
+
+                $syncedRapors = $targetRapors->count();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Urutan berhasil disimpan.',
+            'synced_rapors' => $syncedRapors,
+        ]);
     }
 
     /**

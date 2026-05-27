@@ -381,42 +381,20 @@
                 pointer-events: none;
             }
 
-            /* REMOVE ALL COLORS - Force all table backgrounds to TRANSPARENT */
-            table th, table td {
+            /* Preserve preview colors in browser print preview. */
+            table th,
+            table td,
+            .grade-table tfoot td,
+            .grade-table .tidak-tuntas,
+            .grade-table .tidak-tuntas td,
+            .bg-ekstra,
+            .bg-kehadiran,
+            .text-center,
+            .font-bold,
+            .info-value {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
-                background-color: transparent !important;
-            }
-
-            /* Override specific colored backgrounds to transparent */
-            table th {
-                background-color: transparent !important;
-            }
-
-            .grade-table tfoot td {
-                background-color: transparent !important;
-            }
-
-            .grade-table .tidak-tuntas {
-                background-color: transparent !important;
-            }
-
-            .grade-table .tidak-tuntas td {
-                background-color: transparent !important;
-            }
-
-            .bg-ekstra {
-                background-color: transparent !important;
-            }
-
-            .bg-kehadiran {
-                background-color: transparent !important;
-            }
-
-            /* Remove any other potential backgrounds */
-            .text-center, .font-bold, .info-value {
-                background-color: transparent !important;
             }
 
             .watermark-container {

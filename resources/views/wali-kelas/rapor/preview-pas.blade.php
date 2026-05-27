@@ -433,20 +433,13 @@
                 pointer-events: none;
             }
 
-            /* Force all table backgrounds transparent */
-            table th, table td {
+            /* Preserve preview colors in browser print preview. */
+            table th,
+            table td,
+            .grade-table .kelompok-header {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
-                background-color: transparent !important;
-            }
-
-            table th {
-                background-color: transparent !important;
-            }
-
-            .grade-table .kelompok-header {
-                background-color: transparent !important;
             }
         }
     </style>

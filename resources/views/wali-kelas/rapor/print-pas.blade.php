@@ -30,6 +30,13 @@
         .signature table { width: 100%; }
         .signature td { text-align: center; padding: 10px; vertical-align: top; }
         .signature .sign-line { border-top: 1px solid #000; margin-top: 60px; padding-top: 5px; }
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
     </style>
 </head>
 <body>

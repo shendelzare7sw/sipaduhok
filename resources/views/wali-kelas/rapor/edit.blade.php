@@ -1023,7 +1023,13 @@
                 <h6 class="m-0 fw-bold text-primary">
                     <i class="fas fa-list-alt me-2"></i>Daftar Nilai Mata Pelajaran
                 </h6>
-                <small class="text-muted"><i class="fas fa-grip-vertical me-1"></i>Drag untuk mengubah urutan</small>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <label class="form-check form-switch mb-0 d-flex align-items-center gap-2 small text-muted">
+                        <input class="form-check-input" type="checkbox" id="syncOrderAll" checked>
+                        <span>Sinkron urutan ke semua kelas saya</span>
+                    </label>
+                    <small class="text-muted"><i class="fas fa-grip-vertical me-1"></i>Drag untuk mengubah urutan</small>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
@@ -1288,7 +1294,10 @@
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json',
             },
-            body: JSON.stringify({ order: order })
+            body: JSON.stringify({
+                order: order,
+                sync_all: document.getElementById('syncOrderAll')?.checked || false,
+            })
         }).catch(err => console.error('Reorder error:', err));
     }
 
