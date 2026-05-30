@@ -14,6 +14,7 @@ use App\Models\Ujian;
 use App\Models\UjianSiswa;
 use App\Models\SoalUjian;
 use App\Models\Siswa;
+use App\Models\UjianPengawasanLog;
 use App\Services\NotificationService;
 
 class GuruUjianController extends Controller
@@ -429,6 +430,100 @@ class GuruUjianController extends Controller
             'hasilUjian' => $results,
             'stats' => $stats,
             'guru' => $tenagaPendidik,
+        ]);
+    }
+
+    public function pengawasan($kelasId, $mapelId, $id): View
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $kelas = Kelas::findOrFail($kelasId);
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $ujian = Ujian::where('id', $id)
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('guru_id', $tenagaPendidik->id)
+            ->with(['soalUjian' => function ($query) {
+                $query->orderBy('urutan', 'asc')->orderBy('id', 'asc');
+            }])
+            ->firstOrFail();
+
+        if ($ujian->tipe_ujian === 'latihan') {
+            abort(404, 'Pengawasan realtime hanya tersedia untuk ujian.');
+        }
+
+        return view('guru.lms.ujian.pengawasan', [
+            'kelas' => $kelas,
+            'mapel' => $mataPelajaran,
+            'ujian' => $ujian,
+            'soalList' => $ujian->soalUjian,
+            'guru' => $tenagaPendidik,
+        ]);
+    }
+
+    public function pengawasanData($kelasId, $mapelId, $id)
+    {
+        $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
+        $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
+
+        $mataPelajaran = MataPelajaran::findOrFail($mapelId);
+        $ujian = Ujian::where('id', $id)
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('guru_id', $tenagaPendidik->id)
+            ->with(['soalUjian' => function ($query) {
+                $query->orderBy('urutan', 'asc')->orderBy('id', 'asc');
+            }])
+            ->firstOrFail();
+
+        if ($ujian->tipe_ujian === 'latihan') {
+            return response()->json(['success' => false, 'message' => 'Pengawasan realtime hanya tersedia untuk ujian.'], 404);
+        }
+
+        $siswaList = $this->getPesertaUjian($kelasId, $mataPelajaran);
+        $siswaIds = $siswaList->pluck('id');
+
+        $ujianSiswaList = UjianSiswa::with(['siswa', 'soalStatuses'])
+            ->where('ujian_id', $id)
+            ->whereIn('siswa_id', $siswaIds)
+            ->get()
+            ->keyBy('siswa_id');
+
+        $ujianSiswaIds = $ujianSiswaList->pluck('id');
+        $logs = UjianPengawasanLog::whereIn('ujian_siswa_id', $ujianSiswaIds)
+            ->whereIn('event_type', ['exam_started', 'focus_lost', 'focus_returned', 'doubt_updated', 'exam_submitted'])
+            ->where('occurred_at', '>=', now()->subHours(12))
+            ->orderBy('occurred_at', 'desc')
+            ->get()
+            ->groupBy('ujian_siswa_id');
+
+        $students = $siswaList->map(function ($siswa) use ($ujianSiswaList, $ujian, $logs) {
+            $ujianSiswa = $ujianSiswaList->get($siswa->id);
+            return $this->formatPengawasanStudent($siswa, $ujianSiswa, $ujian, $logs->get(optional($ujianSiswa)->id, collect()));
+        })->values();
+
+        $stats = [
+            'total' => $students->count(),
+            'belum_mulai' => $students->where('status', 'belum_mulai')->count(),
+            'sedang_mengerjakan' => $students->where('status', 'sedang_mengerjakan')->count(),
+            'selesai' => $students->filter(fn($student) => in_array($student['status'], ['selesai', 'dinilai'], true))->count(),
+            'aktif' => $students->where('is_online', true)->count(),
+            'keluar_fokus' => $students->where('is_focus_lost', true)->count(),
+            'total_pelanggaran' => $students->sum('focus_lost_count'),
+        ];
+
+        return response()->json([
+            'success' => true,
+            'generated_at' => now()->toIso8601String(),
+            'ujian' => [
+                'id' => $ujian->id,
+                'judul' => $ujian->judul_ujian,
+                'is_ongoing' => $ujian->isOngoing(),
+                'total_soal' => $ujian->soalUjian->count(),
+            ],
+            'stats' => $stats,
+            'students' => $students,
         ]);
     }
 
@@ -1336,6 +1431,194 @@ class GuruUjianController extends Controller
                 'status' => 'belum_mulai',
             ]);
         }
+    }
+
+    private function getPesertaUjian($kelasId, MataPelajaran $mataPelajaran)
+    {
+        return Siswa::where('kelas_id', $kelasId)
+            ->where('status', 'aktif')
+            ->orderBy('nama_lengkap')
+            ->get()
+            ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran))
+            ->values();
+    }
+
+    private function formatPengawasanStudent(Siswa $siswa, ?UjianSiswa $ujianSiswa, Ujian $ujian, $logs): array
+    {
+        if (!$ujianSiswa) {
+            return [
+                'id' => null,
+                'siswa_id' => $siswa->id,
+                'nama' => $siswa->nama_lengkap,
+                'status' => 'belum_mulai',
+                'status_label' => 'Belum Mulai',
+                'is_online' => false,
+                'is_focus_lost' => false,
+                'current_nomor_soal' => null,
+                'waktu_mulai' => null,
+                'waktu_selesai' => null,
+                'last_activity_at' => null,
+                'last_activity_label' => '-',
+                'remaining_seconds' => null,
+                'answered_count' => 0,
+                'doubt_count' => 0,
+                'visited_count' => 0,
+                'focus_lost_count' => 0,
+                'focus_lost_total_seconds' => 0,
+                'progress_percent' => 0,
+                'statuses' => $this->emptySoalStatuses($ujian),
+                'recent_logs' => [],
+            ];
+        }
+
+        $now = now();
+        $totalSoal = max(1, $ujian->soalUjian->count());
+        $lastPing = $ujianSiswa->last_heartbeat_at ?: $ujianSiswa->last_activity_at;
+        $isOnline = $ujianSiswa->status === 'sedang_mengerjakan'
+            && $lastPing
+            && $lastPing->gte($now->copy()->subSeconds(20));
+        $isFocusLost = (bool) $ujianSiswa->active_focus_lost_at;
+        $timelineLogs = $this->formatPengawasanLogs($logs);
+        $focusLostTotalSeconds = max(
+            (int) ($ujianSiswa->focus_lost_total_seconds ?? 0),
+            (int) $timelineLogs['computed_total_seconds']
+        );
+
+        if ($isFocusLost) {
+            $focusLostTotalSeconds += $ujianSiswa->active_focus_lost_at->diffInSeconds($now);
+        }
+
+        return [
+            'id' => $ujianSiswa->id,
+            'siswa_id' => $siswa->id,
+            'nama' => $siswa->nama_lengkap,
+            'status' => $ujianSiswa->status,
+            'status_label' => $this->statusLabel($ujianSiswa->status),
+            'is_online' => $isOnline,
+            'is_focus_lost' => $isFocusLost,
+            'current_nomor_soal' => $ujianSiswa->current_nomor_soal,
+            'waktu_mulai' => $ujianSiswa->waktu_mulai?->format('d M Y H:i:s'),
+            'waktu_selesai' => $ujianSiswa->waktu_selesai?->format('d M Y H:i:s'),
+            'last_activity_at' => $ujianSiswa->last_activity_at?->toIso8601String(),
+            'last_activity_label' => $ujianSiswa->last_activity_at ? $this->relativeTimeId($ujianSiswa->last_activity_at) : '-',
+            'remaining_seconds' => $this->remainingSeconds($ujianSiswa, $ujian),
+            'answered_count' => (int) ($ujianSiswa->answered_count ?? 0),
+            'doubt_count' => (int) ($ujianSiswa->doubt_count ?? 0),
+            'visited_count' => (int) ($ujianSiswa->visited_count ?? 0),
+            'focus_lost_count' => (int) ($ujianSiswa->focus_lost_count ?? 0),
+            'focus_lost_total_seconds' => $focusLostTotalSeconds,
+            'progress_percent' => round(((int) ($ujianSiswa->answered_count ?? 0) / $totalSoal) * 100),
+            'statuses' => $this->formatSoalStatuses($ujian, $ujianSiswa),
+            'recent_logs' => $timelineLogs['logs'],
+        ];
+    }
+
+    private function formatPengawasanLogs($logs): array
+    {
+        $latestReturnAt = null;
+        $latestReturnDuration = null;
+        $computedTotalSeconds = 0;
+
+        $formatted = $logs->values()->map(function ($log) use (&$latestReturnAt, &$latestReturnDuration, &$computedTotalSeconds) {
+            $metadata = is_array($log->metadata) ? $log->metadata : ((array) $log->metadata);
+
+            if ($log->event_type === 'focus_returned') {
+                $latestReturnAt = $log->occurred_at;
+                $latestReturnDuration = $metadata['duration_seconds'] ?? null;
+            }
+
+            if ($log->event_type === 'focus_lost' && empty($metadata['duration_seconds'])) {
+                if ($latestReturnDuration !== null) {
+                    $metadata['duration_seconds'] = (int) round((float) $latestReturnDuration);
+                } elseif ($latestReturnAt && $log->occurred_at && $latestReturnAt->gt($log->occurred_at)) {
+                    $metadata['duration_seconds'] = (int) round(max(0, $log->occurred_at->diffInSeconds($latestReturnAt)));
+                }
+            }
+
+            if ($log->event_type === 'focus_lost' && !empty($metadata['duration_seconds'])) {
+                $computedTotalSeconds += (int) $metadata['duration_seconds'];
+            }
+
+            return [
+                'event_type' => $log->event_type,
+                'event_label' => $this->pengawasanEventLabel($log->event_type),
+                'description' => $log->description,
+                'metadata' => $metadata,
+                'occurred_at' => $log->occurred_at?->format('H:i:s'),
+            ];
+        });
+
+        return [
+            'logs' => $formatted->take(8)->values(),
+            'computed_total_seconds' => $computedTotalSeconds,
+        ];
+    }
+
+    private function emptySoalStatuses(Ujian $ujian): array
+    {
+        return $ujian->soalUjian->values()->map(fn($soal, $index) => [
+            'soal_id' => $soal->id,
+            'nomor_soal' => $index + 1,
+            'is_current' => false,
+            'is_visited' => false,
+            'is_answered' => false,
+            'is_doubt' => false,
+        ])->all();
+    }
+
+    private function formatSoalStatuses(Ujian $ujian, UjianSiswa $ujianSiswa): array
+    {
+        $statusMap = $ujianSiswa->soalStatuses->keyBy('soal_ujian_id');
+
+        return $ujian->soalUjian->values()->map(function ($soal, $index) use ($statusMap, $ujianSiswa) {
+            $status = $statusMap->get($soal->id);
+
+            return [
+                'soal_id' => $soal->id,
+                'nomor_soal' => $status?->nomor_soal ?: $index + 1,
+                'is_current' => (int) $ujianSiswa->current_soal_ujian_id === (int) $soal->id,
+                'is_visited' => (bool) optional($status)->is_visited,
+                'is_answered' => (bool) optional($status)->is_answered,
+                'is_doubt' => (bool) optional($status)->is_doubt,
+            ];
+        })->all();
+    }
+
+    private function remainingSeconds(UjianSiswa $ujianSiswa, Ujian $ujian): ?int
+    {
+        if (!$ujianSiswa->waktu_mulai || $ujian->durasi_menit == 0 || !in_array($ujianSiswa->status, ['sedang_mengerjakan'], true)) {
+            return null;
+        }
+
+        $deadline = $ujianSiswa->waktu_mulai->copy()->addMinutes($ujian->durasi_menit);
+        return max(0, now()->diffInSeconds($deadline, false));
+    }
+
+    private function statusLabel(string $status): string
+    {
+        return match ($status) {
+            'sedang_mengerjakan' => 'Sedang Mengerjakan',
+            'selesai' => 'Dikumpulkan',
+            'dinilai' => 'Sudah Dinilai',
+            default => 'Belum Mulai',
+        };
+    }
+
+    private function pengawasanEventLabel(string $eventType): string
+    {
+        return match ($eventType) {
+            'exam_started' => 'Mulai Ujian',
+            'focus_lost' => 'Keluar Fokus',
+            'focus_returned' => 'Kembali Fokus',
+            'doubt_updated' => 'Ragu-ragu',
+            'exam_submitted' => 'Dikumpulkan',
+            default => 'Aktivitas',
+        };
+    }
+
+    private function relativeTimeId($date): string
+    {
+        return $date ? $date->copy()->locale('id')->diffForHumans() : '-';
     }
 
     private function verifyAccess($guruId, $kelasId, $mapelId)

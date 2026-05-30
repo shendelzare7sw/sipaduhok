@@ -663,6 +663,14 @@
     <script>
         let currentIndex = 0;
         const totalQuestions = {{ $soalList->count() }};
+        const examType = '{{ $ujian->tipe_ujian }}';
+        const monitoringUrl = '{{ route($routePrefix . "monitoring", [$mataPelajaran->id, $ujian->id]) }}';
+        const csrfToken = '{{ csrf_token() }}';
+        const questionMeta = [
+            @foreach($soalList as $index => $soal)
+                { soal_id: {{ $soal->id }}, nomor_soal: {{ $index + 1 }} },
+            @endforeach
+        ];
         const answersState = [
             @foreach($soalList as $soal)
                 @php
@@ -691,6 +699,10 @@
         const storageKey = `doubtState_{{ $ujianSiswa->id }}`;
         const savedDoubts = localStorage.getItem(storageKey);
         const doubtState = savedDoubts ? JSON.parse(savedDoubts) : new Array(totalQuestions).fill(false);
+        const visitedState = new Array(totalQuestions).fill(false);
+        if (totalQuestions > 0) {
+            visitedState[0] = true;
+        }
         
         // Update nav colors on load
         for(let i=0; i<totalQuestions; i++) {
@@ -752,7 +764,11 @@
             document.getElementById(`q-item-${currentIndex}`).style.display = 'none';
             document.getElementById(`q-item-${index}`).style.display = 'block';
             currentIndex = index;
+            visitedState[index] = true;
             updateUI();
+            sendMonitoringEvent('question_opened', {
+                metadata: { source: 'navigation' }
+            });
         }
 
         function nextQuestion() {
@@ -805,20 +821,24 @@
 
             // Auto-save
             if (soalId) {
-                autoSaveAnswer(soalId, value);
+                autoSaveAnswer(soalId, value, index);
             }
         }
 
-        function autoSaveAnswer(soalId, jawaban) {
+        function autoSaveAnswer(soalId, jawaban, index = currentIndex) {
             const url = '{{ route($routePrefix . "autosave", [$mataPelajaran->id, $ujian->id]) }}';
+            const meta = questionMeta[index] || null;
             fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     soal_id: soalId,
+                    nomor_soal: meta ? meta.nomor_soal : null,
                     jawaban: jawaban
                 })
             })
@@ -840,6 +860,11 @@
             localStorage.setItem(storageKey, JSON.stringify(doubtState));
             updateNavColor(currentIndex);
             syncRaguUI();
+            sendMonitoringEvent('doubt_updated', {
+                metadata: {
+                    is_doubt: doubtState[currentIndex]
+                }
+            });
         }
 
         function updateKompleks(soalId, index) {
@@ -878,6 +903,51 @@
             }
         }
 
+        function currentQuestionMeta() {
+            return questionMeta[currentIndex] || null;
+        }
+
+        function buildMonitoringStatuses() {
+            return questionMeta.map((meta, index) => ({
+                soal_id: meta.soal_id,
+                nomor_soal: meta.nomor_soal,
+                is_visited: visitedState[index] || index === currentIndex,
+                is_answered: !!answersState[index],
+                is_doubt: !!doubtState[index]
+            }));
+        }
+
+        function sendMonitoringEvent(eventType, options = {}) {
+            if (examType === 'latihan') return Promise.resolve();
+
+            const meta = currentQuestionMeta();
+            const includeStatuses = ['heartbeat', 'question_opened', 'doubt_updated'].includes(eventType);
+            const payload = {
+                event_type: eventType,
+                current_soal_id: meta ? meta.soal_id : null,
+                current_nomor_soal: meta ? meta.nomor_soal : null,
+                metadata: options.metadata || {}
+            };
+
+            if (includeStatuses) {
+                payload.statuses = buildMonitoringStatuses();
+            }
+
+            return fetch(monitoringUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload),
+                keepalive: ['focus_lost', 'focus_returned'].includes(eventType)
+            }).catch(error => {
+                console.error('Monitoring error:', error);
+            });
+        }
+
         function finishExam() {
             const unanswered = answersState.filter(x => !x).length;
             const doubts = doubtState.filter(x => x).length;
@@ -906,7 +976,7 @@
             msg += '\nApakah Anda yakin ingin menyelesaikan sesi ini?';
 
             Swal.fire({
-                title: 'Konfirmasi Submit',
+                title: 'Konfirmasi Pengumpulan',
                 text: msg,
                 icon: 'question',
                 showCancelButton: true,
@@ -924,6 +994,13 @@
 
         // Initialize
         updateUI();
+        sendMonitoringEvent('question_opened', {
+            metadata: { source: 'initial_load' }
+        });
+        sendMonitoringEvent('heartbeat');
+        setInterval(() => {
+            sendMonitoringEvent('heartbeat');
+        }, 5000);
 
         // Prevent back
         history.pushState(null, null, location.href);
@@ -932,11 +1009,16 @@
         };
         // EXAM LOCKDOWN LOGIC
         let blurCount = 0;
-        const examType = '{{ $ujian->tipe_ujian }}';
+        let focusLostActive = false;
 
-        window.addEventListener('blur', function() {
+        function registerFocusLost(trigger) {
             if (examType !== 'latihan') {
+                if (focusLostActive) return;
+                focusLostActive = true;
                 blurCount++;
+                sendMonitoringEvent('focus_lost', {
+                    metadata: { trigger: trigger }
+                });
                 Swal.fire({
                     title: 'Peringatan Kecurangan!',
                     text: 'Anda dilarang meninggalkan atau berpindah tab saat ujian berlangsung! Percobaan ini telah dicatat sistem.',
@@ -944,6 +1026,31 @@
                     confirmButtonColor: '#dc3545',
                     confirmButtonText: 'Kembali Fokus'
                 });
+            }
+        }
+
+        function registerFocusReturned(trigger) {
+            if (examType !== 'latihan' && focusLostActive) {
+                focusLostActive = false;
+                sendMonitoringEvent('focus_returned', {
+                    metadata: { trigger: trigger }
+                });
+            }
+        }
+
+        window.addEventListener('blur', function() {
+            registerFocusLost('window_blur');
+        });
+
+        window.addEventListener('focus', function() {
+            registerFocusReturned('window_focus');
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                registerFocusLost('visibility_hidden');
+            } else {
+                registerFocusReturned('visibility_visible');
             }
         });
 

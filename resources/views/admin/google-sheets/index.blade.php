@@ -296,10 +296,10 @@
             @if (!$isEnabled || !$credentialsExists)
                 <div class="alert alert-info" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong><i class="fas fa-info-circle"></i> Setup Diperlukan!</strong> Silakan konfigurasi kredensial Google Sheets Anda untuk mengaktifkan sinkronisasi.
+                        <strong><i class="fas fa-info-circle"></i> Pengaturan Diperlukan!</strong> Silakan konfigurasi kredensial Google Sheets Anda untuk mengaktifkan sinkronisasi.
                     </div>
                     <a href="{{ route('admin.google-sheets.setup') }}" class="btn btn-primary" style="margin: 0; white-space: nowrap;">
-                        <i class="fas fa-cog"></i> Setup Wizard
+                        <i class="fas fa-cog"></i> Panduan Pengaturan
                     </a>
                 </div>
             @else
@@ -334,7 +334,7 @@
                                         <div class="sync-info">
                                             <strong><i class="fas fa-arrow-up"></i> Kirim:</strong> {{ $lastSyncs[$moduleKey]['push']->getStatusLabel() }}
                                             <br>
-                                            <small>{{ $lastSyncs[$moduleKey]['push']->synced_at->diffForHumans() }}</small>
+                                            <small>{{ $lastSyncs[$moduleKey]['push']->synced_at->copy()->locale('id')->diffForHumans() }}</small>
                                         </div>
                                     @endif
 
@@ -342,7 +342,7 @@
                                         <div class="sync-info">
                                             <strong><i class="fas fa-arrow-down"></i> Ambil:</strong> {{ $lastSyncs[$moduleKey]['pull']->getStatusLabel() }}
                                             <br>
-                                            <small>{{ $lastSyncs[$moduleKey]['pull']->synced_at->diffForHumans() }}</small>
+                                            <small>{{ $lastSyncs[$moduleKey]['pull']->synced_at->copy()->locale('id')->diffForHumans() }}</small>
                                         </div>
                                     @endif
                                 @else
@@ -404,8 +404,8 @@
                                                     {{ $log->getStatusLabel() }}
                                                 </span>
                                             </td>
-                                            <td>{{ $log->user->name ?? 'System' }}</td>
-                                            <td><small>{{ $log->synced_at->format('d M Y H:i') }}</small></td>
+                                            <td>{{ $log->user->name ?? 'Sistem' }}</td>
+                                            <td><small>{{ $log->synced_at->copy()->locale('id')->translatedFormat('d M Y H:i') }}</small></td>
                                         </tr>
                                     @endforeach
                                 </tbody>

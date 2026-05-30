@@ -125,7 +125,7 @@ class NotificationController extends Controller
 
         // Add human-readable timestamp for display in bell dropdown
         $notifications = $notifications->map(function ($notif) {
-            $notif->created_at_formatted = $notif->created_at->diffForHumans();
+            $notif->created_at_formatted = $notif->created_at->copy()->locale('id')->diffForHumans();
             return $notif;
         });
 

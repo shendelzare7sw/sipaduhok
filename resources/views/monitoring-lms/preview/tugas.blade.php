@@ -45,7 +45,7 @@
             <span><i class="fas fa-play-circle"></i> Mulai: {{ $tugas->tanggal_mulai->locale('id')->translatedFormat('d M Y') }}</span>
         @endif
         @if($tugas->tanggal_deadline)
-            <span><i class="fas fa-flag-checkered"></i> Deadline: {{ $tugas->tanggal_deadline->locale('id')->translatedFormat('d M Y') }}</span>
+            <span><i class="fas fa-flag-checkered"></i> Tenggat: {{ $tugas->tanggal_deadline->locale('id')->translatedFormat('d M Y') }}</span>
         @endif
     </div>
 
@@ -84,7 +84,7 @@
                 <div class="inline-preview-box">
                     <iframe src="{{ $filePreviewUrl }}"
                             class="inline-pdf-frame"
-                            title="Preview PDF Tugas"></iframe>
+                            title="Pratinjau PDF Tugas"></iframe>
                 </div>
             @elseif($isVideo)
                 <div class="inline-preview-box">
@@ -109,7 +109,7 @@
                 </a>
                 <a href="{{ asset('storage/' . $tugas->file_tugas) }}" download
                     class="btn btn-outline-primary" style="border-radius: 8px;">
-                    <i class="fas fa-download me-1"></i>Download
+                    <i class="fas fa-download me-1"></i>Unduh
                 </a>
             </div>
         </div>

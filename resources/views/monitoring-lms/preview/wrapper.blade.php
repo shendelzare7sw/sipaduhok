@@ -1,7 +1,7 @@
 @extends('layouts.sneat')
 
-@section('title', 'Preview - ' . ($previewTitle ?? 'Konten LMS'))
-@section('page-title', 'Mode Preview')
+@section('title', 'Pratinjau - ' . ($previewTitle ?? 'Konten LMS'))
+@section('page-title', 'Mode Pratinjau')
 @section('page-subtitle', 'Tinjauan konten ' . ($kontenLabel ?? '') . ' sebagaimana dilihat siswa')
 
 @section('sidebar-menu')
@@ -404,9 +404,9 @@
         <div class="preview-banner-text">
             <i class="fas fa-eye preview-banner-icon"></i>
             <div>
-                <div class="preview-banner-title">Mode Preview Tinjauan</div>
+                <div class="preview-banner-title">Mode Pratinjau Tinjauan</div>
                 <div class="preview-banner-subtitle">
-                    Anda melihat konten ini sebagaimana akan tampil di sisi siswa. Tombol interaksi (kerjakan / submit) dinonaktifkan.
+                    Anda melihat konten ini sebagaimana akan tampil di sisi siswa. Tombol interaksi (kerjakan / kumpulkan) dinonaktifkan.
                 </div>
             </div>
         </div>
@@ -432,7 +432,7 @@
 <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered" style="justify-content: center;">
         <div class="modal-content" style="background: transparent !important; border: none !important; box-shadow: none !important; align-items: center; width: auto;">
-            <img src="" id="imagePreviewSource" alt="Preview Image" style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <img src="" id="imagePreviewSource" alt="Pratinjau Gambar" style="max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
             <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
                 <i class="fas fa-times"></i> Tutup Gambar
             </button>

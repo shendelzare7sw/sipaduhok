@@ -11,7 +11,7 @@
             <span class="ak-toolbar-icon"><i class="fas fa-newspaper"></i></span>
             <div>
                 <h5>Kelola Berita</h5>
-                <p>Kelola konten berita publik, kategori, status tayang, dan featured.</p>
+                <p>Kelola konten berita publik, kategori, status tayang, dan berita unggulan.</p>
             </div>
         </div>
         <a href="{{ route($routePrefix . '.berita.create') }}" class="ak-btn primary">
@@ -28,13 +28,13 @@
             <i class="fas fa-newspaper"></i>
         </div>
         <div class="ak-stat success">
-            <span>Published</span>
+            <span>Terbit</span>
             <strong>{{ number_format($items->where('status', 'aktif')->count()) }}</strong>
             <small>Tayang di website</small>
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="ak-stat warning">
-            <span>Featured</span>
+            <span>Unggulan</span>
             <strong>{{ number_format($items->where('is_featured', true)->count()) }}</strong>
             <small>Berita unggulan</small>
             <i class="fas fa-star"></i>
@@ -113,7 +113,7 @@
                                     <div class="ak-title">
                                         {{ $item->judul }}
                                         @if($item->is_featured)
-                                            <i class="fas fa-star text-warning ms-1" title="Featured"></i>
+                                            <i class="fas fa-star text-warning ms-1" title="Unggulan"></i>
                                         @endif
                                     </div>
                                     <div class="ak-sub">{{ \Illuminate\Support\Str::limit($item->deskripsi_singkat, 110) }}</div>
@@ -138,7 +138,7 @@
                                         <button type="button"
                                             onclick="openModal('featuredModal{{ $item->id }}')"
                                             class="ak-btn {{ $item->is_featured ? 'warning' : 'secondary' }} ak-icon-btn"
-                                            title="{{ $item->is_featured ? 'Hapus Featured' : 'Jadikan Featured' }}">
+                                            title="{{ $item->is_featured ? 'Hapus dari Unggulan' : 'Jadikan Unggulan' }}">
                                             <i class="{{ $item->is_featured ? 'fas' : 'far' }} fa-star"></i>
                                         </button>
                                         <a href="{{ route($routePrefix . '.berita.edit', $item->id) }}" class="ak-btn secondary ak-icon-btn" title="Edit">
@@ -182,14 +182,14 @@
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title text-warning">
-                        <i class="fas fa-star me-2"></i>Konfirmasi Featured
+                        <i class="fas fa-star me-2"></i>Konfirmasi Unggulan
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <div class="modal-body text-center py-4">
                     <i class="fas fa-star fa-3x text-warning mb-3"></i>
                     <h6 class="fw-bold mb-2">
-                        {{ $item->is_featured ? 'Hapus berita ini dari Featured?' : 'Jadikan berita ini sebagai Featured?' }}
+                        {{ $item->is_featured ? 'Hapus berita ini dari unggulan?' : 'Jadikan berita ini sebagai unggulan?' }}
                     </h6>
                     <p class="text-muted mb-0">{{ $item->judul }}</p>
                 </div>
@@ -198,7 +198,7 @@
                         <i class="fas fa-times"></i>Batal
                     </button>
                     <button type="button" class="ak-btn warning" onclick="confirmFeatured({{ $item->id }})">
-                        <i class="fas fa-star"></i>{{ $item->is_featured ? 'Hapus Featured' : 'Jadikan Featured' }}
+                        <i class="fas fa-star"></i>{{ $item->is_featured ? 'Hapus dari Unggulan' : 'Jadikan Unggulan' }}
                     </button>
                 </div>
             </div>

@@ -37,7 +37,7 @@
         </button>
 
         <!-- Download Button -->
-        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Download File">
+        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Unduh File">
             <i class="fas fa-download"></i>
         </a>
 
@@ -48,16 +48,16 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            <i class="fas fa-image me-2"></i>Preview Gambar
+                            <i class="fas fa-image me-2"></i>Pratinjau Gambar
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center p-0">
-                        <img src="{{ $downloadUrl }}" alt="Preview" class="img-fluid" style="max-height: 80vh;">
+                        <img src="{{ $downloadUrl }}" alt="Pratinjau" class="img-fluid" style="max-height: 80vh;">
                     </div>
                     <div class="modal-footer">
                         <a href="{{ $downloadUrl }}" download class="btn btn-primary">
-                            <i class="fas fa-download me-1"></i>Download Gambar
+                            <i class="fas fa-download me-1"></i>Unduh Gambar
                         </a>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>
@@ -76,7 +76,7 @@
         </button>
 
         <!-- Download Button -->
-        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Download File">
+        <a href="{{ $downloadUrl }}" download class="btn btn-sm btn-outline-primary" title="Unduh File">
             <i class="fas fa-download"></i>
         </a>
 
@@ -87,7 +87,7 @@
                 <div class="modal-content" style="height: 90vh;">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            <i class="fas fa-file-pdf me-2"></i>Preview PDF
+                            <i class="fas fa-file-pdf me-2"></i>Pratinjau PDF
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -96,7 +96,7 @@
                     </div>
                     <div class="modal-footer">
                         <a href="{{ $downloadUrl }}" download class="btn btn-primary">
-                            <i class="fas fa-download me-1"></i>Download PDF
+                            <i class="fas fa-download me-1"></i>Unduh PDF
                         </a>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     </div>
@@ -129,7 +129,7 @@
         <a href="{{ $downloadUrl }}"
            download
            class="{{ $class ?? 'btn btn-sm btn-secondary' }}">
-            <i class="fas fa-download me-1"></i>Download File ({{ strtoupper($extension) }})
+            <i class="fas fa-download me-1"></i>Unduh File ({{ strtoupper($extension) }})
         </a>
     @endif
 </div>

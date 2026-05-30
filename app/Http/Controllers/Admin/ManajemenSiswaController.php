@@ -21,13 +21,14 @@ class ManajemenSiswaController extends Controller
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $taFilterId = $request->tahun_ajaran_id ?: ($tahunAjaranAktif?->id);
         $isHistorical = $taFilterId && $tahunAjaranAktif && $taFilterId != $tahunAjaranAktif->id;
+        $filterNoKelas = !$isHistorical && $request->boolean('no_kelas');
 
         $query = Siswa::with(['user', 'cabang', 'kelas.tahunAjaran']);
 
         // Filter by tahun ajaran — pakai scope yang include snapshot (status_naik_kelas_siswa)
         // Saat TA non-aktif: ambil siswa yang punya snapshot di TA itu (mode historis)
         // Saat TA aktif: ambil siswa yang sekarang ada di kelas TA aktif
-        if ($taFilterId) {
+        if ($taFilterId && !$filterNoKelas) {
             $query->forTahunAjaran($taFilterId);
             // Eager load snapshot agar view bisa render kelas asal
             $query->with(['statusNaikKelas' => fn($q) => $q->where('tahun_ajaran_id', $taFilterId)]);
@@ -39,7 +40,7 @@ class ManajemenSiswaController extends Controller
         }
 
         // Filter by kelas — hanya relevan saat TA aktif (kelas_id menunjuk ke kelas saat ini)
-        if (!$isHistorical && $request->filled('kelas_id')) {
+        if (!$isHistorical && !$filterNoKelas && $request->filled('kelas_id')) {
             $kelasId = $request->kelas_id;
             if (is_array($kelasId)) {
                 $query->whereIn('kelas_id', $kelasId);
@@ -49,7 +50,7 @@ class ManajemenSiswaController extends Controller
         }
 
         // Filter by jenjang (via kelas saat ini)
-        if (!$isHistorical && $request->filled('jenjang')) {
+        if (!$isHistorical && !$filterNoKelas && $request->filled('jenjang')) {
             $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
         }
 
@@ -62,7 +63,7 @@ class ManajemenSiswaController extends Controller
         }
 
         // Filter belum punya kelas — hanya saat TA aktif
-        if (!$isHistorical && $request->filled('no_kelas') && $request->no_kelas == '1') {
+        if ($filterNoKelas) {
             $query->whereNull('kelas_id');
         }
 

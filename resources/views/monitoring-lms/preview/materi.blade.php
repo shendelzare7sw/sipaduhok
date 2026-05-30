@@ -74,7 +74,7 @@
                 <div class="inline-preview-box">
                     <iframe src="{{ $filePreviewUrl }}"
                             class="inline-pdf-frame"
-                            title="Preview PDF Materi"></iframe>
+                            title="Pratinjau PDF Materi"></iframe>
                 </div>
             @elseif($isVideo)
                 <div class="inline-preview-box">
@@ -99,7 +99,7 @@
                 </a>
                 <a href="{{ asset('storage/' . $materi->file_materi) }}" download
                     class="btn btn-outline-primary" style="border-radius: 8px;">
-                    <i class="fas fa-download me-1"></i>Download
+                    <i class="fas fa-download me-1"></i>Unduh
                 </a>
             </div>
         </div>

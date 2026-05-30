@@ -12,7 +12,7 @@
 <div class="media-attachment mt-3">
     @if($isImage)
         <a href="{{ $url }}" target="_blank">
-            <img src="{{ $url }}" alt="Attachment" class="img-fluid rounded border" style="max-height: 400px;">
+            <img src="{{ $url }}" alt="Lampiran" class="img-fluid rounded border" style="max-height: 400px;">
         </a>
     @elseif($isVideo)
         <video controls class="w-100 rounded border" style="max-height: 400px;">
@@ -25,7 +25,7 @@
         </div>
         <div class="mt-1">
             <a href="{{ $url }}" target="_blank" class="btn btn-sm btn-light border">
-                <i class="fas fa-external-link-alt me-1"></i> Buka Fullscreen
+                <i class="fas fa-external-link-alt me-1"></i> Buka Layar Penuh
             </a>
         </div>
     @elseif($isOffice)
@@ -35,12 +35,12 @@
         </div>
         <div class="mt-1">
             <a href="{{ $url }}" download class="btn btn-sm btn-light border">
-                <i class="fas fa-download me-1"></i> Download Dokumen
+                <i class="fas fa-download me-1"></i> Unduh Dokumen
             </a>
         </div>
     @else
         <a href="{{ $url }}" target="_blank" class="btn btn-light border">
-            <i class="fas fa-paperclip me-1"></i> Download {{ strtoupper($extension) }}
+            <i class="fas fa-paperclip me-1"></i> Unduh {{ strtoupper($extension) }}
         </a>
     @endif
 </div>

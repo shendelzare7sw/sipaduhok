@@ -302,7 +302,7 @@
                             @php
                                 $tipeLabels = [
                                     'materi' => 'Materi', 'tugas' => 'Tugas', 'ujian' => 'Ujian',
-                                    'forum' => 'Forum', 'pengumuman' => 'Pengumuman', 'deadline' => 'Deadline',
+                                    'forum' => 'Forum', 'pengumuman' => 'Pengumuman', 'deadline' => 'Tenggat',
                                     'nilai' => 'Nilai', 'izin' => 'Izin', 'catatan' => 'Catatan',
                                     'pembayaran' => 'Keuangan', 'rapor' => 'Rapor', 'sistem' => 'Sistem',
                                     'kelas' => 'Kelas', 'kenaikan' => 'Kenaikan',
@@ -316,8 +316,8 @@
                 </div>
 
                 <div class="notif-meta" onclick="event.stopPropagation()">
-                    <span class="notif-time" title="{{ $notif->created_at->format('d M Y, H:i') }}">
-                        {{ $notif->created_at->diffForHumans() }}
+                    <span class="notif-time" title="{{ $notif->created_at->copy()->locale('id')->translatedFormat('d M Y, H:i') }}">
+                        {{ $notif->created_at->copy()->locale('id')->diffForHumans() }}
                     </span>
                     @if($isUnread)
                         <div class="unread-dot" title="Belum dibaca"></div>

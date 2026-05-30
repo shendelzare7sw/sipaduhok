@@ -23,6 +23,11 @@
         <a href="{{ route($backRoute, [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
         </a>
+        @if(!$isLatihan)
+            <a href="{{ route('guru.lms.ujian.pengawasan', [$kelas->id, $mapel->id, $ujian->id]) }}" class="btn btn-outline-primary btn-sm ms-1">
+                <i class="fas fa-desktop me-1"></i>Pengawasan
+            </a>
+        @endif
     </div>
 
     <div class="row g-3 mb-4">

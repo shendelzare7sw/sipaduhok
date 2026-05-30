@@ -28,7 +28,7 @@
                         <div class="alert alert-primary d-flex align-items-center mb-4" role="alert">
                             <i class="fas fa-info-circle me-3 fs-4"></i>
                             <div>
-                                Aktifkan toggle pada jenjang yang diizinkan untuk mengakses fitur LMS (Tugas, Materi, Ujian Online).
+                                Aktifkan toggle pada jenjang yang diizinkan untuk mengakses fitur LMS (Tugas, Materi, Ujian Daring).
                             </div>
                         </div>
 

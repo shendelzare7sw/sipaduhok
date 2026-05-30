@@ -80,7 +80,7 @@
                     <p class="mb-1"><strong>NISN:</strong></p>
                     <p class="mb-2">{{ $tugasSiswa->siswa->nisn }}</p>
                     
-                    <p class="mb-1"><strong>Waktu Submit:</strong></p>
+                    <p class="mb-1"><strong>Waktu Kumpul:</strong></p>
                     <p class="mb-2">
                         {{ $tugasSiswa->tanggal_submit ? $tugasSiswa->tanggal_submit->format('d M Y H:i') : '-' }}
                         @if($tugasSiswa->isLate())

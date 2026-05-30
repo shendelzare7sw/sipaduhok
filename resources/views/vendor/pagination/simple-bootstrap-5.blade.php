@@ -1,15 +1,15 @@
 @if ($paginator->hasPages())
-    <nav role="navigation" aria-label="Pagination Navigation">
+    <nav role="navigation" aria-label="Navigasi halaman">
         <ul class="pagination">
             {{-- Previous Page Link --}}
             @if ($paginator->onFirstPage())
                 <li class="page-item disabled" aria-disabled="true">
-                    <span class="page-link">{!! __('pagination.previous') !!}</span>
+                    <span class="page-link">Sebelumnya</span>
                 </li>
             @else
                 <li class="page-item">
                     <a class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev">
-                        {!! __('pagination.previous') !!}
+                        Sebelumnya
                     </a>
                 </li>
             @endif
@@ -17,11 +17,11 @@
             {{-- Next Page Link --}}
             @if ($paginator->hasMorePages())
                 <li class="page-item">
-                    <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">{!! __('pagination.next') !!}</a>
+                    <a class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next">Berikutnya</a>
                 </li>
             @else
                 <li class="page-item disabled" aria-disabled="true">
-                    <span class="page-link">{!! __('pagination.next') !!}</span>
+                    <span class="page-link">Berikutnya</span>
                 </li>
             @endif
         </ul>

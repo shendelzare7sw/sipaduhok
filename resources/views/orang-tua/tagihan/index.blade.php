@@ -619,7 +619,7 @@
                                             && $bayar->created_at >= now()->subHours(24);
 
                                         $expiredAt = $bayar->created_at->addHours(24);
-                                        $remainingTime = $expiredAt->diffForHumans(now(), ['parts' => 2]);
+                                        $remainingTime = $expiredAt->copy()->locale('id')->diffForHumans(now(), ['parts' => 2]);
                                     @endphp
                                     <tr>
                                         <td data-label="TANGGAL" class="text-end text-md-start text-nowrap">

@@ -75,7 +75,7 @@
                                 <div class="catatan-reader-name">{{ $pembaca->name }}</div>
                                 <div class="catatan-reader-time">
                                     <i class="far fa-clock me-1"></i>
-                                    Dibaca {{ $pembaca->pivot->dibaca_pada ? \Carbon\Carbon::parse($pembaca->pivot->dibaca_pada)->diffForHumans() : '-' }}
+                                    Dibaca {{ $pembaca->pivot->dibaca_pada ? \Carbon\Carbon::parse($pembaca->pivot->dibaca_pada)->locale('id')->diffForHumans() : '-' }}
                                 </div>
                             </div>
                             <span class="catatan-badge role"><i class="fas fa-check"></i> Sudah dibaca</span>

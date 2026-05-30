@@ -228,7 +228,7 @@
                         <i class="fas fa-calendar"></i> {{ $tugas->tanggal_mulai->format('d M Y') }}
                     </div>
                     <div>
-                        <i class="fas fa-calendar-times"></i> Deadline: {{ $deadline->format('d M Y, H:i') }}
+                        <i class="fas fa-calendar-times"></i> Tenggat: {{ $deadline->copy()->locale('id')->translatedFormat('d M Y, H:i') }}
                     </div>
                 </div>
             </div>

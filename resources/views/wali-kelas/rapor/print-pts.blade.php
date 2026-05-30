@@ -4,29 +4,33 @@
     <meta charset="utf-8">
     <title>Rapor PTS - {{ $rapor->siswa->nama_lengkap }}</title>
     <style>
-        @page { margin: 15mm; size: A4 portrait; }
-        body { font-family: Arial, sans-serif; font-size: 11pt; line-height: 1.4; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 16pt; margin: 5px 0; }
-        .header h2 { font-size: 14pt; margin: 5px 0; font-weight: normal; }
-        .header p { margin: 3px 0; font-size: 9pt; }
-        .info-table { width: 100%; margin-bottom: 15px; }
-        .info-table td { padding: 3px 8px; }
+        @page { margin: 10mm; size: A4 portrait; }
+        body { font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.18; }
+        h3 { font-size: 9.5pt; margin: 6px 0 4px; }
+        .header { text-align: center; margin-bottom: 8px; }
+        .header h1 { font-size: 12pt; margin: 3px 0; }
+        .header h2 { font-size: 10pt; margin: 2px 0; font-weight: normal; }
+        .header p { margin: 2px 0; font-size: 7.5pt; }
+        .header hr { margin: 8px 0 !important; }
+        .info-table { width: 100%; margin-bottom: 7px; }
+        .info-table td { padding: 1px 6px; }
         .info-table td:first-child { width: 150px; font-weight: bold; }
-        .nilai-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
-        .nilai-table th, .nilai-table td { border: 1px solid #000; padding: 4px; text-align: center; font-size: 10pt; }
+        .nilai-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
+        .nilai-table th, .nilai-table td { border: 1px solid #000; padding: 2px 3px; text-align: center; font-size: 8pt; }
         .nilai-table th { background-color: #f0f0f0; font-weight: bold; }
         .nilai-table td:nth-child(2) { text-align: left; }
-        .ekstra-table { width: 60%; border-collapse: collapse; margin-bottom: 20px; }
-        .ekstra-table th, .ekstra-table td { border: 1px solid #000; padding: 6px; }
+        .ekstra-table { width: 60%; border-collapse: collapse; margin-bottom: 8px; }
+        .ekstra-table th, .ekstra-table td { border: 1px solid #000; padding: 2px 3px; }
         .ekstra-table th { background-color: #f0f0f0; }
-        .kehadiran-table { width: 50%; border-collapse: collapse; margin-bottom: 20px; }
-        .kehadiran-table td { border: 1px solid #000; padding: 6px; }
+        .kehadiran-table { width: 50%; border-collapse: collapse; margin-bottom: 8px; }
+        .kehadiran-table td { border: 1px solid #000; padding: 2px 3px; }
         .kehadiran-table td:first-child { font-weight: bold; width: 150px; }
-        .signature { margin-top: 40px; }
+        .signature { margin-top: 12px; }
         .signature table { width: 100%; }
-        .signature td { text-align: center; padding: 10px; vertical-align: top; }
-        .signature .sign-line { border-top: 1px solid #000; margin-top: 60px; padding-top: 5px; }
+        .signature td { text-align: center; padding: 4px; vertical-align: top; }
+        .signature .sign-line { border-top: 1px solid #000; margin-top: 28px; padding-top: 3px; }
+        .signature div[style*="margin-top: 30px"] { margin-top: 10px !important; }
+        .signature div[style*="margin-top: 60px"] { margin-top: 32px !important; }
         @media print {
             * {
                 -webkit-print-color-adjust: exact !important;

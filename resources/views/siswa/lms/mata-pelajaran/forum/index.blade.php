@@ -169,7 +169,7 @@
                     <div class="diskusi-meta">
                         <span class="topik-badge topik-{{ $item->topik }}">{{ ucfirst($item->topik) }}</span>
                         <span class="ms-2">oleh <strong>{{ $item->user->name ?? 'Unknown' }}</strong></span>
-                        <span class="ms-2">• {{ $item->created_at->diffForHumans() }}</span>
+                        <span class="ms-2">• {{ $item->created_at->copy()->locale('id')->diffForHumans() }}</span>
                     </div>
                     <div class="diskusi-excerpt">
                         {{ Str::limit($item->isi, 150) }}

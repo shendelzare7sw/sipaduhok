@@ -279,23 +279,23 @@
 <div class="preview-container">
     <!-- Header -->
     <div class="preview-header">
-        <h2>📊 Data Preview from Google Sheets</h2>
-        <p>Review data before importing to your database</p>
+        <h2>📊 Pratinjau Data dari Google Sheets</h2>
+        <p>Tinjau data sebelum mengimpornya ke database.</p>
         <div class="preview-info">
             <div class="info-item">
-                <span class="info-label">Module</span>
+                <span class="info-label">Modul</span>
                 <span class="info-value">{{ $module }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Sheet Name</span>
+                <span class="info-label">Nama Sheet</span>
                 <span class="info-value">{{ $sheet_name }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Total Rows</span>
+                <span class="info-label">Total Baris</span>
                 <span class="info-value">{{ $total_rows }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Preview Rows</span>
+                <span class="info-label">Baris Pratinjau</span>
                 <span class="info-value">{{ $preview_rows }}</span>
             </div>
         </div>
@@ -304,11 +304,11 @@
     <!-- Warnings -->
     @if ($total_rows === 0)
         <div class="alert alert-warning">
-            ⚠️ The spreadsheet is empty. Make sure you have data in the correct sheet.
+            ⚠️ Spreadsheet kosong. Pastikan data berada di sheet yang benar.
         </div>
     @elseif ($total_rows > 1000)
         <div class="alert alert-info">
-            ℹ️ Large dataset detected ({{ $total_rows }} rows). Only first {{ $preview_rows }} rows shown for performance.
+            ℹ️ Dataset besar terdeteksi ({{ $total_rows }} baris). Untuk menjaga performa, hanya {{ $preview_rows }} baris pertama yang ditampilkan.
         </div>
     @endif
 
@@ -322,7 +322,7 @@
                             <th class="checkbox-cell">
                                 <input type="checkbox" id="selectAll" 
                                        onchange="toggleSelectAll(this)" 
-                                       title="Select all rows">
+                                       title="Pilih semua baris">
                             </th>
                             @foreach ($headers as $header)
                                 <th>{{ $header }}</th>
@@ -340,7 +340,7 @@
                                 @foreach ($row as $cell)
                                     <td>
                                         <span class="cell-truncate" title="{{ $cell ?? '' }}">
-                                            {{ $cell ?? '(empty)' }}
+                                            {{ $cell ?? '(kosong)' }}
                                         </span>
                                     </td>
                                 @endforeach
@@ -353,15 +353,15 @@
             <div style="padding: 16px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280;">
                 <div class="stats">
                     <div class="stat">
-                        <span class="stat-label">Rows selected:</span>
+                        <span class="stat-label">Baris dipilih:</span>
                         <span class="stat-value" id="selectedCount">0</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-label">Total visible:</span>
+                        <span class="stat-label">Total terlihat:</span>
                         <span class="stat-value">{{ count($rows) }}</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-label">Columns:</span>
+                        <span class="stat-label">Kolom:</span>
                         <span class="stat-value">{{ count($headers) }}</span>
                     </div>
                 </div>
@@ -371,8 +371,8 @@
         <div class="preview-table">
             <div class="empty-state">
                 <div class="empty-icon">📭</div>
-                <div class="empty-title">No Data Found</div>
-                <p>The spreadsheet appears to be empty or not configured properly.</p>
+                <div class="empty-title">Data Tidak Ditemukan</div>
+                <p>Spreadsheet tampaknya kosong atau belum dikonfigurasi dengan benar.</p>
             </div>
         </div>
     @endif
@@ -380,12 +380,12 @@
     <!-- Actions -->
     <div class="actions">
         <button type="button" class="btn btn-secondary" onclick="window.history.back();">
-            Cancel
+            Batal
         </button>
 
         @if ($total_rows > 0)
             <button type="button" class="btn btn-success" id="importBtn" onclick="confirmImport()">
-                ✓ Import Selected Data
+                ✓ Impor Data Terpilih
             </button>
         @endif
     </div>
@@ -433,17 +433,17 @@
         const selected = document.querySelectorAll('.row-checkbox:checked').length;
         
         if (selected === 0) {
-            alert('⚠️ Please select at least one row to import');
+            alert('⚠️ Pilih minimal satu baris untuk diimpor');
             return;
         }
 
         const selectedRows = Array.from(document.querySelectorAll('.row-checkbox:checked'))
             .map(cb => parseInt(cb.value));
 
-        if (confirm(`Import ${selected} row(s) to your database?`)) {
+        if (confirm(`Impor ${selected} baris ke database?`)) {
             const importBtn = document.getElementById('importBtn');
             importBtn.disabled = true;
-            importBtn.innerHTML = '<span class="loading"></span>Importing...';
+            importBtn.innerHTML = '<span class="loading"></span>Mengimpor...';
 
             fetch('{{ route("admin.google-sheets.pull", ":module") }}'.replace(':module', MODULE), {
                 method: 'POST',
@@ -459,18 +459,18 @@
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    alert(`✓ Import job queued!\n\n${data.message}`);
+                    alert(`✓ Pekerjaan impor telah masuk antrean!\n\n${data.message}`);
                     window.location.href = '{{ route("admin.google-sheets.index") }}';
                 } else {
-                    alert(`✕ Error: ${data.message}`);
+                    alert(`✕ Kesalahan: ${data.message}`);
                     importBtn.disabled = false;
-                    importBtn.innerHTML = '✓ Import Selected Data';
+                    importBtn.innerHTML = '✓ Impor Data Terpilih';
                 }
             })
             .catch(e => {
-                alert(`✕ Error: ${e.message}`);
+                alert(`✕ Kesalahan: ${e.message}`);
                 importBtn.disabled = false;
-                importBtn.innerHTML = '✓ Import Selected Data';
+                importBtn.innerHTML = '✓ Impor Data Terpilih';
             });
         }
     }

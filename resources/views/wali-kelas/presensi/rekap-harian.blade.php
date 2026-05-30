@@ -92,10 +92,11 @@
             @foreach($dates as $date)
                 @php
                     $tanggalObj = \Carbon\Carbon::parse($date->tanggal);
+                    $tanggalParam = $tanggalObj->toDateString();
                     $persen = $date->total_siswa > 0 ? round(($date->hadir / $date->total_siswa) * 100) : 0;
                 @endphp
                 <div class="col-md-6 col-lg-4">
-                    <a href="{{ route('wali.presensi.show-harian', ['tanggal' => $date->tanggal]) }}" class="text-decoration-none">
+                    <a href="{{ route('wali.presensi.show-harian', ['tanggal' => $tanggalParam]) }}" class="text-decoration-none">
                         <div class="card shadow-sm date-card h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">

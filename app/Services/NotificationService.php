@@ -79,7 +79,7 @@ class NotificationService
                     $siswa->user_id,
                     Notification::TIPE_TUGAS,
                     $label . ' Baru: ' . $tugas->judul_tugas,
-                    'Deadline: ' . $tugas->tanggal_deadline->format('d M Y'),
+                    'Tenggat: ' . $tugas->tanggal_deadline->copy()->locale('id')->translatedFormat('d M Y'),
                     route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]),
                     ['tugas_id' => $tugas->id, 'mapel_id' => $tugas->mata_pelajaran_id, 'jenis' => $tugas->jenis_tugas]
                 );
@@ -94,9 +94,9 @@ class NotificationService
     {
         $siswaList = Siswa::where('kelas_id', $ujian->kelas_id)->get();
 
-        // Determine if this is latihan or ujian based on tipe_ujian
         $isLatihan = $ujian->tipe_ujian === 'latihan';
         $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+        $routeName = $isLatihan ? 'siswa.lms.mapel.latihan.show' : 'siswa.lms.mapel.ujian.show';
 
         foreach ($siswaList as $siswa) {
             if ($siswa->user_id) {
@@ -105,7 +105,7 @@ class NotificationService
                     Notification::TIPE_UJIAN,
                     $tipeLabel . ' Baru: ' . $ujian->judul_ujian,
                     'Jadwal: ' . $ujian->tanggal_mulai->format('d M Y, H:i'),
-                    route('siswa.lms.mapel.ujian.show', [$ujian->mata_pelajaran_id, $ujian->id]),
+                    route($routeName, [$ujian->mata_pelajaran_id, $ujian->id]),
                     ['ujian_id' => $ujian->id, 'mapel_id' => $ujian->mata_pelajaran_id, 'tipe' => $ujian->tipe_ujian]
                 );
             }
@@ -128,7 +128,7 @@ class NotificationService
                 $this->create(
                     $siswa->user_id,
                     Notification::TIPE_DEADLINE,
-                    'Pengingat Deadline',
+                    'Pengingat Tenggat',
                     $tugas->judul_tugas . ' akan berakhir besok!',
                     route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]),
                     ['tugas_id' => $tugas->id]
@@ -573,7 +573,7 @@ class NotificationService
         $query = User::query();
 
         if ($targetRole) {
-            $query->where('role', $targetRole);
+            $query->where('role', $this->normalizeRoleAlias($targetRole));
         } else {
             // Default: notify all siswa
             $query->where('role', 'siswa');
@@ -581,12 +581,19 @@ class NotificationService
 
         $targetUsers = $query->get();
         foreach ($targetUsers as $user) {
+            $route = match ($user->role) {
+                'siswa' => route('siswa.lms.kalender'),
+                'guru_pengajar' => route('guru.dashboard'),
+                'orang_tua' => route('orang-tua.dashboard'),
+                default => route('notifications.index'),
+            };
+
             $this->create(
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
                 'Pengumuman: ' . $kalenderAkademik->judul,
-                'Tanggal: ' . $kalenderAkademik->tanggal_mulai->format('d M Y'),
-                route('siswa.lms.kalender'),
+                'Tanggal: ' . $kalenderAkademik->tanggal_mulai->copy()->locale('id')->translatedFormat('d M Y'),
+                $route,
                 ['kalender_id' => $kalenderAkademik->id]
             );
         }
@@ -842,14 +849,16 @@ class NotificationService
      */
     public function notifyPengumumanBaru($pengumuman)
     {
-        $targetRoles = $pengumuman->target_role ? explode(',', $pengumuman->target_role) : ['siswa', 'guru', 'orang_tua'];
+        $targetRoles = $pengumuman->target_role
+            ? $this->normalizeRoleList(explode(',', $pengumuman->target_role))
+            : ['siswa', 'guru_pengajar', 'orang_tua'];
 
         $targetUsers = User::whereIn('role', $targetRoles)->get();
         foreach ($targetUsers as $user) {
             // Role-specific routes
             $route = match($user->role) {
                 'siswa' => route('siswa.lms.kalender'),
-                'guru' => route('guru.dashboard'),
+                'guru_pengajar' => route('guru.dashboard'),
                 'orang_tua' => route('orang-tua.dashboard'),
                 default => route('notifications.index'),
             };
@@ -874,14 +883,14 @@ class NotificationService
         if (!($berita->is_featured ?? false))
             return;
 
-        $targetRoles = ['siswa', 'guru', 'orang_tua'];
+        $targetRoles = ['siswa', 'guru_pengajar', 'orang_tua'];
         $targetUsers = User::whereIn('role', $targetRoles)->get();
 
         foreach ($targetUsers as $user) {
             // Role-specific routes
             $route = match($user->role) {
                 'siswa' => route('siswa.sia.dashboard'),
-                'guru' => route('guru.dashboard'),
+                'guru_pengajar' => route('guru.dashboard'),
                 'orang_tua' => route('orang-tua.dashboard'),
                 default => route('notifications.index'),
             };
@@ -908,11 +917,11 @@ class NotificationService
         $roleLabel = match($user->role) {
             'admin' => 'Administrator',
             'ketua_pkbm' => 'Ketua PKBM',
-            'waka' => 'Wakil Kepala',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
             'bendahara' => 'Bendahara',
             'sekretaris' => 'Sekretaris',
             'wali_kelas' => 'Wali Kelas',
-            'guru' => 'Guru',
+            'guru_pengajar' => 'Guru Pengajar',
             'orang_tua' => 'Orang Tua',
             'siswa' => 'Siswa',
             default => 'Pengguna',
@@ -922,11 +931,11 @@ class NotificationService
         $route = match($user->role) {
             'admin' => route('admin.dashboard'),
             'ketua_pkbm' => route('ketua.dashboard'),
-            'waka' => route('waka.dashboard'),
+            'wakil_kepala_sekolah' => route('waka.dashboard'),
             'bendahara' => route('bendahara.dashboard'),
             'sekretaris' => route('sekretaris.dashboard'),
             'wali_kelas' => route('wali.dashboard'),
-            'guru' => route('guru.dashboard'),
+            'guru_pengajar' => route('guru.dashboard'),
             'orang_tua' => route('orang-tua.dashboard'),
             'siswa' => route('siswa.sia.dashboard'),
             default => route('notifications.index'),
@@ -1174,8 +1183,8 @@ class NotificationService
             $this->create(
                 $waliKelasAssignment->tenagaPendidik->user_id,
                 Notification::TIPE_RAPOR,
-                'Request Download Rapor',
-                $parentName . ' mengajukan download rapor ' . $siswa->nama_lengkap,
+                'Permintaan Unduh Rapor',
+                $parentName . ' mengajukan permintaan unduh rapor ' . $siswa->nama_lengkap,
                 route('wali.rapor.request-download.index'),
                 ['request_id' => $downloadRequest->id, 'siswa_id' => $siswa->id]
             );
@@ -1193,10 +1202,10 @@ class NotificationService
         $siswaName = $siswa ? $siswa->nama_lengkap : 'anak';
         $isApproved = $downloadRequest->status === 'disetujui';
 
-        $judul = $isApproved ? 'Download Rapor Disetujui' : 'Download Rapor Ditolak';
+        $judul = $isApproved ? 'Unduh Rapor Disetujui' : 'Unduh Rapor Ditolak';
         $pesan = $isApproved
-            ? 'Permintaan download rapor ' . $siswaName . ' telah disetujui. Link berlaku 24 jam.'
-            : 'Permintaan download rapor ' . $siswaName . ' telah ditolak.';
+            ? 'Permintaan unduh rapor ' . $siswaName . ' telah disetujui. Tautan berlaku 24 jam.'
+            : 'Permintaan unduh rapor ' . $siswaName . ' telah ditolak.';
 
         $link = $siswa ? route('orang-tua.rapor.anak', $siswa->id) : route('orang-tua.dashboard');
 
@@ -1288,13 +1297,14 @@ class NotificationService
 
         $isLatihan = $ujian->tipe_ujian === 'latihan';
         $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+        $routeName = $isLatihan ? 'siswa.lms.mapel.latihan.show' : 'siswa.lms.mapel.ujian.show';
 
         $this->create(
             $siswa->user_id,
             Notification::TIPE_NILAI,
             'Nilai ' . $tipeLabel . ' Sudah Keluar',
             $ujian->judul_ujian . ' - Nilai: ' . $ujianSiswa->nilai,
-            route('siswa.lms.mapel.ujian.show', [$ujian->mata_pelajaran_id, $ujian->id]),
+            route($routeName, [$ujian->mata_pelajaran_id, $ujian->id]),
             ['ujian_id' => $ujian->id, 'nilai' => $ujianSiswa->nilai, 'tipe' => $ujian->tipe_ujian]
         );
     }
@@ -1335,14 +1345,14 @@ class NotificationService
     public function notifyAdminTicketPemulihan($ticket)
     {
         $admins = User::where('role', 'admin')->get();
-        $userName = $ticket->user->name ?? 'User';
+        $userName = $ticket->user->name ?? 'Pengguna';
         
         foreach ($admins as $admin) {
             $this->create(
                 $admin->id,
                 Notification::TIPE_RECOVERY,
                 'Tiket Pemulihan: ' . $userName,
-                'User membutuhkan bantuan pemulihan akun.',
+                'Pengguna membutuhkan bantuan pemulihan akun.',
                 route('admin.recovery-tickets.index'),
                 ['ticket_id' => $ticket->id]
             );
@@ -1364,5 +1374,24 @@ class NotificationService
                 ['ticket_id' => $ticket->id]
             );
         }
+    }
+
+    private function normalizeRoleAlias(?string $role): string
+    {
+        $role = trim((string) $role);
+
+        return match ($role) {
+            'guru' => 'guru_pengajar',
+            'waka' => 'wakil_kepala_sekolah',
+            default => $role,
+        };
+    }
+
+    private function normalizeRoleList(array $roles): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            fn ($role) => $this->normalizeRoleAlias($role),
+            $roles
+        ))));
     }
 }

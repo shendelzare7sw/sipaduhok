@@ -536,7 +536,7 @@
                                 @if($item->lampiran_surat)
                                     <i class="fas fa-paperclip item-attachment"></i>
                                 @endif
-                                <span class="item-date">{{ $item->created_at->diffForHumans(null, true) }}</span>
+                                <span class="item-date">{{ $item->created_at->copy()->locale('id')->diffForHumans(null, true) }}</span>
                             </div>
                         </div>
                     </a>

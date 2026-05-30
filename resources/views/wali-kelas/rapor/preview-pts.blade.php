@@ -11,8 +11,8 @@
         
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10.5pt;
+            line-height: 1.32;
             padding: 0;
             background: #f5f5f5;
             overflow-x: hidden;
@@ -31,7 +31,7 @@
             width: 900px;
             margin: 0 auto;
             background: white;
-            padding: 30px;
+            padding: 24px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             position: relative;
             transform-origin: top left;
@@ -63,7 +63,7 @@
 
         /* Header Section - Simple logo + address */
         .header {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .header-logo {
@@ -71,28 +71,28 @@
             max-width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto 8px auto;
+            margin: 0 auto 5px auto;
         }
 
         .header-address {
-            font-size: 10pt;
-            line-height: 1.5;
+            font-size: 9pt;
+            line-height: 1.35;
             color: #374151;
             text-align: center;
         }
 
         .header-separator {
             border-top: 3px solid #000;
-            margin-top: 10px;
-            margin-bottom: 20px;
+            margin-top: 6px;
+            margin-bottom: 10px;
         }
 
         /* Report Title */
         .report-title {
             text-align: center;
-            font-size: 14pt;
+            font-size: 13pt;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             text-transform: uppercase;
         }
 
@@ -100,13 +100,13 @@
         .student-info {
             display: grid;
             grid-template-columns: 3fr 2fr;
-            gap: 20px;
-            margin-bottom: 15px;
-            font-size: 11pt;
+            gap: 16px;
+            margin-bottom: 10px;
+            font-size: 10pt;
         }
 
         .student-info .info-item {
-            margin-bottom: 6px;
+            margin-bottom: 3px;
         }
 
         .student-info .info-label {
@@ -124,14 +124,14 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 11pt;
+            margin-bottom: 10px;
+            font-size: 10pt;
             table-layout: fixed;
         }
 
         table th, table td {
             border: 1px solid #000;
-            padding: 4px 6px;
+            padding: 3px 5px;
             text-align: left;
             background-color: transparent;
         }
@@ -139,7 +139,7 @@
         table th {
             background-color: rgba(229, 231, 235, 0.7);
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
         }
 
         /* Utilities */
@@ -324,16 +324,17 @@
                 margin: 0;
                 padding: 0;
                 background: white;
-                font-size: 10pt;
+                font-size: 8.7pt;
+                line-height: 1.18;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .print-page-frame > thead > tr > td.page-margin-top { height: 10mm; }
-            .print-page-frame > tfoot > tr > td.page-margin-bottom { height: 10mm; }
+            .print-page-frame > thead > tr > td.page-margin-top { height: 6mm; }
+            .print-page-frame > tfoot > tr > td.page-margin-bottom { height: 6mm; }
 
             .rapor-wrapper {
                 box-shadow: none;
-                padding: 0 10mm !important;
+                padding: 0 8mm !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 !important;
@@ -343,12 +344,90 @@
             .rapor-wrapper * { box-sizing: border-box !important; }
             .rapor-wrapper table { width: 100% !important; max-width: 100% !important; }
 
+            .header {
+                margin-bottom: 2mm !important;
+            }
+
+            .header-logo {
+                max-height: 24mm !important;
+                width: auto !important;
+                max-width: 100% !important;
+                object-fit: contain !important;
+                margin-bottom: 1mm !important;
+            }
+
+            .header-address {
+                font-size: 7.3pt !important;
+                line-height: 1.12 !important;
+            }
+
+            .header-separator {
+                border-top-width: 2px !important;
+                margin-top: 1.5mm !important;
+                margin-bottom: 2.5mm !important;
+            }
+
+            .report-title {
+                font-size: 10pt !important;
+                margin-bottom: 2.5mm !important;
+            }
+
+            .student-info {
+                gap: 12px !important;
+                margin-bottom: 2.5mm !important;
+                font-size: 8.2pt !important;
+                line-height: 1.16 !important;
+            }
+
+            .student-info .info-item {
+                margin-bottom: .8mm !important;
+            }
+
+            .student-info .info-label {
+                width: 82px !important;
+            }
+
             table {
-                font-size: 9pt;
+                font-size: 7.8pt;
+                margin-bottom: 2.5mm !important;
             }
 
             table th, table td {
-                padding: 3px 4px;
+                padding: 1.1mm 1.5mm !important;
+            }
+
+            table th {
+                font-size: 7.6pt !important;
+            }
+
+            .rapor-wrapper table[style*="margin-top"] {
+                margin-top: 2.5mm !important;
+            }
+
+            .grade-table tfoot td {
+                padding: 1.1mm 1.5mm !important;
+            }
+
+            td[style*="padding: 10px"],
+            th[style*="padding: 10px"],
+            td[style*="padding: 8px"],
+            th[style*="padding: 8px"],
+            td[style*="padding: 5px"],
+            th[style*="padding: 5px"] {
+                padding: 1.2mm 1.5mm !important;
+            }
+
+            td[style*="height: 120px"] {
+                height: 18mm !important;
+            }
+
+            div[style*="height: 80px"] {
+                height: 14mm !important;
+            }
+
+            div[style*="margin-top: 30px"] {
+                margin-top: 3mm !important;
+                padding-right: 16mm !important;
             }
 
             .btn-print {

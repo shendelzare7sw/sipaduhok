@@ -116,11 +116,11 @@
                 </div>
             </div>
 
-            {{-- Tugas Deadline Terdekat --}}
+            {{-- Tugas Tenggat Terdekat --}}
             <div class="section-container">
                 <div class="section-header">
                     <div class="section-title">
-                        <i class="fas fa-tasks text-warning me-2"></i>Tugas Deadline Terdekat
+                        <i class="fas fa-tasks text-warning me-2"></i>Tugas dengan Tenggat Terdekat
                     </div>
                     <a href="{{ route('siswa.lms.tugas.index') }}" class="btn-link-custom">Lihat Semua</a>
                 </div>
@@ -138,7 +138,7 @@
                                 <p class="task-subject">{{ $tugas->mataPelajaran->nama_mapel ?? '-' }}</p>
                                 <div class="task-footer">
                                     <span class="task-due">
-                                        <i class="far fa-clock me-1"></i> {{ $tugas->tanggal_deadline->diffForHumans() }}
+                                        <i class="far fa-clock me-1"></i> {{ $tugas->tanggal_deadline->copy()->locale('id')->diffForHumans() }}
                                     </span>
                                     <a href="{{ route('siswa.lms.mapel.tugas.show', [$tugas->mata_pelajaran_id, $tugas->id]) }}" class="btn-task-action">
                                         Kerjakan
@@ -204,7 +204,7 @@
                             <h5 class="ann-title mb-2 text-white" style="font-size: 0.95rem;">{{ $ann->judul }}</h5>
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <span class="text-white-50 small" style="font-size: 0.75rem;">
-                                    {{ $ann->created_at->diffForHumans() }}
+                                    {{ $ann->created_at->copy()->locale('id')->diffForHumans() }}
                                 </span>
                                 <a href="{{ route('siswa.lms.pengumuman.show', $ann->id) }}" class="btn btn-sm btn-light py-1 px-3" style="font-size: 0.75rem;">
                                     Lihat

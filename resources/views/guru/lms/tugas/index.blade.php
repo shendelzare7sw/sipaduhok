@@ -24,7 +24,7 @@
                         <th>Judul Tugas</th>
                         <th class="text-center">Mulai</th>
                         <th class="text-center">Deadline</th>
-                        <th class="text-center">Submitted</th>
+                        <th class="text-center">Dikumpulkan</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Aksi</th>
                     </tr>

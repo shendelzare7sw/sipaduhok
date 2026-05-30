@@ -31,7 +31,7 @@
                 <div class="col-md-6 text-md-end">
                     <div class="d-inline-block text-center me-3">
                         <div class="fs-4 fw-bold text-success">{{ $submitted }}</div>
-                        <small class="text-muted">Sudah Submit</small>
+                        <small class="text-muted">Sudah Dikumpulkan</small>
                     </div>
                     <div class="d-inline-block text-center">
                         <div class="fs-4 fw-bold text-warning">{{ $belumDinilai }}</div>
@@ -52,7 +52,7 @@
                     <tr>
                         <th>No</th>
                         <th>Nama Siswa</th>
-                        <th class="text-center">Tanggal Submit</th>
+                        <th class="text-center">Tanggal Kumpul</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Nilai</th>
                         <th class="text-center">Aksi</th>

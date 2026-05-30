@@ -12,6 +12,8 @@ use App\Models\UjianSiswa;
 use App\Models\SoalUjian;
 use App\Models\JawabanSiswa;
 use App\Models\MataPelajaran;
+use App\Models\UjianPengawasanLog;
+use App\Models\UjianSiswaSoalStatus;
 
 class LmsUjianController extends Controller
 {
@@ -56,10 +58,22 @@ class LmsUjianController extends Controller
                 'waktu_mulai' => null,
                 'waktu_selesai' => null,
                 'nilai' => null,
+                'current_soal_ujian_id' => null,
+                'current_nomor_soal' => null,
+                'last_activity_at' => null,
+                'last_heartbeat_at' => null,
+                'answered_count' => 0,
+                'doubt_count' => 0,
+                'visited_count' => 0,
+                'focus_lost_count' => 0,
+                'focus_lost_total_seconds' => 0,
+                'active_focus_lost_at' => null,
             ]);
 
             // Hapus semua jawaban siswa yang sudah dijawab
             JawabanSiswa::where('ujian_siswa_id', $ujianSiswa->id)->delete();
+            $ujianSiswa->soalStatuses()->delete();
+            $ujianSiswa->pengawasanLogs()->delete();
 
             \Log::warning("Ujian ID {$ujianId} ditarik guru. Ujian siswa ID {$ujianSiswa->id} direset ke belum_mulai");
 
@@ -171,14 +185,31 @@ class LmsUjianController extends Controller
                 'siswa_id' => $siswa->id,
                 'waktu_mulai' => now(),
                 'status' => 'sedang_mengerjakan',
+                'last_activity_at' => now(),
+                'last_heartbeat_at' => now(),
             ]);
+            $this->recordPengawasanLog($ujianSiswa, $request, 'exam_started', 'Siswa mulai ujian.');
         } else {
             // Jika sudah ada tapi belum mulai, update status
             if ($ujianSiswa->status !== 'sedang_mengerjakan') {
                 $ujianSiswa->update([
                     'waktu_mulai' => now(),
+                    'waktu_selesai' => null,
                     'status' => 'sedang_mengerjakan',
+                    'current_soal_ujian_id' => null,
+                    'current_nomor_soal' => null,
+                    'last_activity_at' => now(),
+                    'last_heartbeat_at' => now(),
+                    'answered_count' => 0,
+                    'doubt_count' => 0,
+                    'visited_count' => 0,
+                    'focus_lost_count' => 0,
+                    'focus_lost_total_seconds' => 0,
+                    'active_focus_lost_at' => null,
                 ]);
+                $ujianSiswa->soalStatuses()->delete();
+                $ujianSiswa->pengawasanLogs()->delete();
+                $this->recordPengawasanLog($ujianSiswa->fresh(), $request, 'exam_started', 'Siswa mulai ujian.');
             }
         }
 
@@ -276,12 +307,19 @@ class LmsUjianController extends Controller
         }
 
         // 5. Update status ujian siswa
+        $this->syncSubmittedAnswersToMonitoring($ujianSiswa, $jawabanInput);
+        $this->refreshPengawasanCounts($ujianSiswa);
+
         $ujianSiswa->update([
             'waktu_selesai' => now(),
+            'last_activity_at' => now(),
+            'last_heartbeat_at' => now(),
+            'active_focus_lost_at' => null,
             'nilai' => $nilaiNormalized,
             'nilai_terbaik' => $nilaiTerbaik,
             'status' => 'selesai',
         ]);
+        $this->recordPengawasanLog($ujianSiswa->fresh(), null, 'exam_submitted', 'Siswa mengumpulkan ujian.');
 
         // 6. Notifikasi ke Guru
         $ujianSiswa->load(['ujian', 'siswa']);
@@ -348,10 +386,22 @@ class LmsUjianController extends Controller
                 'status' => 'belum_mulai',
                 'waktu_mulai' => null,
                 'waktu_selesai' => null,
+                'current_soal_ujian_id' => null,
+                'current_nomor_soal' => null,
+                'last_activity_at' => null,
+                'last_heartbeat_at' => null,
                 'nilai' => 0,
                 'pengulangan_ke' => $ujianSiswa->pengulangan_ke + 1,
                 'nilai_terbaik' => $nilaiTerbaik,
+                'answered_count' => 0,
+                'doubt_count' => 0,
+                'visited_count' => 0,
+                'focus_lost_count' => 0,
+                'focus_lost_total_seconds' => 0,
+                'active_focus_lost_at' => null,
             ]);
+            $ujianSiswa->soalStatuses()->delete();
+            $ujianSiswa->pengawasanLogs()->delete();
         }
 
         $routePrefix = $ujian->tipe_ujian === 'latihan' ? 'latihan' : 'ujian';
@@ -439,6 +489,270 @@ class LmsUjianController extends Controller
             ]
         );
 
+        $nomorSoal = $request->integer('nomor_soal') ?: null;
+        $this->upsertSoalStatus($ujianSiswa, (int) $soalId, [
+            'nomor_soal' => $nomorSoal,
+            'is_visited' => true,
+            'is_answered' => $this->isJawabanTerisi($jawaban),
+        ]);
+
+        $ujianSiswa->update([
+            'current_soal_ujian_id' => $soalId,
+            'current_nomor_soal' => $nomorSoal,
+            'last_activity_at' => now(),
+            'last_heartbeat_at' => now(),
+        ]);
+        $this->refreshPengawasanCounts($ujianSiswa);
+
         return response()->json(['success' => true]);
+    }
+
+    public function monitoring(Request $request, $mapelId, $ujianId)
+    {
+        $user = Auth::user();
+        $siswa = Siswa::where('user_id', $user->id)->first();
+
+        if (!$siswa) {
+            return response()->json(['success' => false, 'message' => 'Siswa tidak ditemukan'], 404);
+        }
+
+        $ujian = Ujian::where('id', $ujianId)
+            ->where('kelas_id', $siswa->kelas_id)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
+
+        if ($ujian->tipe_ujian === 'latihan') {
+            return response()->json(['success' => true, 'monitoring' => false]);
+        }
+
+        $ujianSiswa = UjianSiswa::where('ujian_id', $ujianId)
+            ->where('siswa_id', $siswa->id)
+            ->where('status', 'sedang_mengerjakan')
+            ->first();
+
+        if (!$ujianSiswa) {
+            return response()->json(['success' => false, 'message' => 'Sesi ujian tidak aktif atau sudah selesai'], 403);
+        }
+
+        $validated = $request->validate([
+            'event_type' => 'required|string|in:heartbeat,question_opened,answer_saved,doubt_updated,focus_lost,focus_returned',
+            'current_soal_id' => 'nullable|integer',
+            'current_nomor_soal' => 'nullable|integer|min:1',
+            'statuses' => 'nullable|array',
+            'statuses.*.soal_id' => 'required_with:statuses|integer',
+            'statuses.*.nomor_soal' => 'nullable|integer|min:1',
+            'statuses.*.is_visited' => 'nullable|boolean',
+            'statuses.*.is_answered' => 'nullable|boolean',
+            'statuses.*.is_doubt' => 'nullable|boolean',
+            'metadata' => 'nullable|array',
+        ]);
+
+        $validSoalIds = SoalUjian::where('ujian_id', $ujianId)->pluck('id')->map(fn($id) => (int) $id)->all();
+        $currentSoalId = isset($validated['current_soal_id']) && in_array((int) $validated['current_soal_id'], $validSoalIds, true)
+            ? (int) $validated['current_soal_id']
+            : null;
+        $currentNomorSoal = $validated['current_nomor_soal'] ?? null;
+
+        foreach ($validated['statuses'] ?? [] as $status) {
+            $soalId = (int) $status['soal_id'];
+            if (!in_array($soalId, $validSoalIds, true)) {
+                continue;
+            }
+
+            $this->upsertSoalStatus($ujianSiswa, $soalId, [
+                'nomor_soal' => $status['nomor_soal'] ?? null,
+                'is_visited' => (bool) ($status['is_visited'] ?? false),
+                'is_answered' => (bool) ($status['is_answered'] ?? false),
+                'is_doubt' => (bool) ($status['is_doubt'] ?? false),
+            ]);
+        }
+
+        if ($currentSoalId) {
+            $this->upsertSoalStatus($ujianSiswa, $currentSoalId, [
+                'nomor_soal' => $currentNomorSoal,
+                'is_visited' => true,
+            ]);
+        }
+
+        $updateData = [
+            'last_activity_at' => now(),
+        ];
+
+        if ($validated['event_type'] === 'heartbeat') {
+            $updateData['last_heartbeat_at'] = now();
+        }
+
+        if ($currentSoalId) {
+            $updateData['current_soal_ujian_id'] = $currentSoalId;
+            $updateData['current_nomor_soal'] = $currentNomorSoal;
+        }
+
+        $ujianSiswa->update($updateData);
+        $ujianSiswa = $ujianSiswa->fresh();
+
+        if ($validated['event_type'] === 'focus_lost') {
+            if (!$ujianSiswa->active_focus_lost_at) {
+                $ujianSiswa->update([
+                    'focus_lost_count' => $ujianSiswa->focus_lost_count + 1,
+                    'active_focus_lost_at' => now(),
+                ]);
+                $this->recordPengawasanLog($ujianSiswa->fresh(), $request, 'focus_lost', 'Halaman ujian kehilangan fokus.', $validated['metadata'] ?? []);
+            }
+        } elseif ($validated['event_type'] === 'focus_returned') {
+            if ($ujianSiswa->active_focus_lost_at) {
+                $duration = (int) round(max(0, $ujianSiswa->active_focus_lost_at->diffInSeconds(now())));
+                $focusLostLog = UjianPengawasanLog::where('ujian_siswa_id', $ujianSiswa->id)
+                    ->where('event_type', 'focus_lost')
+                    ->latest('occurred_at')
+                    ->first();
+
+                if ($focusLostLog) {
+                    $metadata = $focusLostLog->metadata ?: [];
+                    $metadata['duration_seconds'] = $duration;
+                    $focusLostLog->update(['metadata' => $metadata]);
+                }
+
+                $ujianSiswa->update([
+                    'focus_lost_total_seconds' => $ujianSiswa->focus_lost_total_seconds + $duration,
+                    'active_focus_lost_at' => null,
+                ]);
+                $this->recordPengawasanLog($ujianSiswa->fresh(), $request, 'focus_returned', 'Siswa kembali fokus ke halaman ujian.', $validated['metadata'] ?? []);
+            }
+        } elseif (in_array($validated['event_type'], ['question_opened', 'doubt_updated'], true)) {
+            $this->recordPengawasanLog($ujianSiswa, $request, $validated['event_type'], $this->eventDescription($validated['event_type']), array_merge($validated['metadata'] ?? [], [
+                'nomor_soal' => $currentNomorSoal,
+            ]));
+        }
+
+        $this->refreshPengawasanCounts($ujianSiswa);
+        $ujianSiswa = $ujianSiswa->fresh();
+
+        return response()->json([
+            'success' => true,
+            'monitoring' => true,
+            'summary' => [
+                'answered_count' => $ujianSiswa->answered_count,
+                'doubt_count' => $ujianSiswa->doubt_count,
+                'visited_count' => $ujianSiswa->visited_count,
+                'focus_lost_count' => $ujianSiswa->focus_lost_count,
+                'focus_lost_total_seconds' => $ujianSiswa->focus_lost_total_seconds,
+            ],
+        ]);
+    }
+
+    private function upsertSoalStatus(UjianSiswa $ujianSiswa, int $soalId, array $data): void
+    {
+        $existing = UjianSiswaSoalStatus::where('ujian_siswa_id', $ujianSiswa->id)
+            ->where('soal_ujian_id', $soalId)
+            ->first();
+
+        $payload = [
+            'nomor_soal' => $data['nomor_soal'] ?? optional($existing)->nomor_soal,
+            'is_visited' => array_key_exists('is_visited', $data) ? (bool) $data['is_visited'] : (bool) optional($existing)->is_visited,
+            'is_answered' => array_key_exists('is_answered', $data) ? (bool) $data['is_answered'] : (bool) optional($existing)->is_answered,
+            'is_doubt' => array_key_exists('is_doubt', $data) ? (bool) $data['is_doubt'] : (bool) optional($existing)->is_doubt,
+        ];
+
+        if ($payload['is_visited']) {
+            $payload['last_visited_at'] = now();
+        }
+        if ($payload['is_answered']) {
+            $payload['last_answered_at'] = now();
+        }
+        if (array_key_exists('is_doubt', $data)) {
+            $payload['last_doubt_at'] = now();
+        }
+
+        UjianSiswaSoalStatus::updateOrCreate(
+            ['ujian_siswa_id' => $ujianSiswa->id, 'soal_ujian_id' => $soalId],
+            $payload
+        );
+    }
+
+    private function refreshPengawasanCounts(UjianSiswa $ujianSiswa): void
+    {
+        $query = UjianSiswaSoalStatus::where('ujian_siswa_id', $ujianSiswa->id);
+
+        $ujianSiswa->update([
+            'answered_count' => (clone $query)->where('is_answered', true)->count(),
+            'doubt_count' => (clone $query)->where('is_doubt', true)->count(),
+            'visited_count' => (clone $query)->where('is_visited', true)->count(),
+        ]);
+    }
+
+    private function syncSubmittedAnswersToMonitoring(UjianSiswa $ujianSiswa, array $jawabanInput): void
+    {
+        if (empty($jawabanInput)) {
+            return;
+        }
+
+        $nomorMap = SoalUjian::where('ujian_id', $ujianSiswa->ujian_id)
+            ->orderBy('urutan', 'asc')
+            ->orderBy('id', 'asc')
+            ->pluck('id')
+            ->values()
+            ->mapWithKeys(fn($id, $index) => [(int) $id => $index + 1]);
+
+        foreach ($jawabanInput as $soalId => $jawaban) {
+            $soalId = (int) $soalId;
+            if (!$nomorMap->has($soalId)) {
+                continue;
+            }
+
+            $this->upsertSoalStatus($ujianSiswa, $soalId, [
+                'nomor_soal' => $nomorMap[$soalId],
+                'is_visited' => true,
+                'is_answered' => $this->isJawabanTerisi($jawaban),
+            ]);
+        }
+    }
+
+    private function recordPengawasanLog(UjianSiswa $ujianSiswa, ?Request $request, string $eventType, ?string $description = null, array $metadata = []): void
+    {
+        UjianPengawasanLog::create([
+            'ujian_siswa_id' => $ujianSiswa->id,
+            'event_type' => $eventType,
+            'description' => $description,
+            'metadata' => empty($metadata) ? null : $metadata,
+            'ip_address' => $request?->ip(),
+            'user_agent' => $request?->userAgent(),
+            'occurred_at' => now(),
+        ]);
+    }
+
+    private function eventDescription(string $eventType): string
+    {
+        return match ($eventType) {
+            'question_opened' => 'Siswa membuka soal.',
+            'doubt_updated' => 'Siswa mengubah tanda ragu-ragu.',
+            default => 'Aktivitas ujian tercatat.',
+        };
+    }
+
+    private function isJawabanTerisi($jawaban): bool
+    {
+        if (is_array($jawaban)) {
+            return collect($jawaban)->filter(fn($value) => $value !== null && $value !== '' && $value !== '-')->isNotEmpty();
+        }
+
+        if (!is_string($jawaban)) {
+            return $jawaban !== null;
+        }
+
+        $jawaban = trim($jawaban);
+        if ($jawaban === '' || $jawaban === '-') {
+            return false;
+        }
+
+        $decoded = json_decode($jawaban, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return true;
+        }
+
+        if (is_array($decoded)) {
+            return collect($decoded)->filter(fn($value) => $value !== null && $value !== '' && $value !== '-')->isNotEmpty();
+        }
+
+        return $decoded !== null && $decoded !== '';
     }
 }

@@ -59,7 +59,7 @@
                                             </span>
                                         </div>
                                         <div class="forum-meta-right">
-                                            <small class="text-muted">{{ $forum->created_at->diffForHumans() }}</small>
+                                            <small class="text-muted">{{ $forum->created_at->copy()->locale('id')->diffForHumans() }}</small>
                                             <div class="dropdown d-inline-block">
                                                 <button class="btn btn-sm btn-link text-muted p-0 px-1" type="button"
                                                     data-bs-toggle="dropdown" aria-expanded="false">

@@ -354,7 +354,7 @@
                     </div>
                 </div>
                 <div class="stat-footer">
-                    <span>{{ $jumlahNonTunai }} Transaksi Online</span>
+                    <span>{{ $jumlahNonTunai }} Transaksi Daring</span>
                     <i class="fas fa-globe opacity-50"></i>
                 </div>
             </div>

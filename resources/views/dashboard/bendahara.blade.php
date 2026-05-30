@@ -512,7 +512,7 @@
                                         <div class="action-item-sub">
                                             <span>{{ ucwords(str_replace('_', ' ', $item->tagihan->jenis_tagihan ?? '-')) }}</span>
                                             <span>·</span>
-                                            <span>{{ $item->tanggal_validasi ? $item->tanggal_validasi->diffForHumans() : '-' }}</span>
+                                            <span>{{ $item->tanggal_validasi ? $item->tanggal_validasi->copy()->locale('id')->diffForHumans() : '-' }}</span>
                                         </div>
                                     </div>
                                     <div class="action-item-right">
@@ -552,7 +552,7 @@
                                             <span>·</span>
                                             <span>NISN: {{ $item->nisn ?? '-' }}</span>
                                             <span>·</span>
-                                            <span>{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</span>
+                                            <span>{{ \Carbon\Carbon::parse($item->created_at)->locale('id')->diffForHumans() }}</span>
                                         </div>
                                     </div>
                                     <div class="action-item-right">

@@ -101,10 +101,10 @@
 
     <div class="deadline-box {{ $isExpired ? 'expired' : ($diff->days == 0 ? '' : 'safe') }}">
         <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">
-            <i class="fas fa-clock"></i> Deadline
+            <i class="fas fa-clock"></i> Tenggat
         </div>
         <h3 style="margin: 0; font-size: 28px;">
-            {{ $deadline->format('d F Y, H:i') }} WIB
+            {{ $deadline->copy()->locale('id')->translatedFormat('d F Y, H:i') }} WIB
         </h3>
         <div style="font-size: 16px; margin-top: 10px;">
             @if($isExpired)
@@ -127,9 +127,9 @@
             <div style="display: flex; gap: 15px; flex-wrap: wrap; color: #666; font-size: 14px;">
                 <div><i class="fas fa-user-tie"></i> <strong>Guru:</strong> {{ $tugas->guru->nama_lengkap }}</div>
                 <div><i class="fas fa-calendar-plus"></i> <strong>Dibuka:</strong>
-                    {{ $tugas->tanggal_mulai->format('d M Y') }}</div>
+                    {{ $tugas->tanggal_mulai->copy()->locale('id')->translatedFormat('d M Y') }}</div>
                 <div><i class="fas fa-calendar-times"></i> <strong>Ditutup:</strong>
-                    {{ $tugas->tanggal_deadline->format('d M Y, H:i') }}</div>
+                    {{ $tugas->tanggal_deadline->copy()->locale('id')->translatedFormat('d M Y, H:i') }}</div>
                 @if($tugas->bisa_diulang)
                     <div><i class="fas fa-redo-alt"></i> <strong>Sisa Pengeditan:</strong> 
                         @if($tugas->batas_pengulangan)
@@ -191,7 +191,7 @@
                         <p style="margin: 10px 0 0 0;">
                             <strong>Nilai:</strong> {{ $existingSubmission->nilai }}<br>
                             @if($existingSubmission->feedback_guru)
-                                <strong>Feedback Guru:</strong> {{ $existingSubmission->feedback_guru }}
+                                <strong>Umpan Balik Guru:</strong> {{ $existingSubmission->feedback_guru }}
                             @endif
                         </p>
                     </div>
@@ -215,7 +215,7 @@
 
                     <!-- Jawaban Text -->
                     <div class="form-group mb-3">
-                        <label class="form-label">Jawaban (Text)</label>
+                        <label class="form-label">Jawaban (Teks)</label>
                         <textarea name="jawaban_text" rows="8" class="form-control @error('jawaban_text') is-invalid @enderror"
                             placeholder="Tulis jawaban Anda di sini..." {{ $isDisabled ? 'disabled' : '' }}>{{ old('jawaban_text', $existingSubmission->jawaban_text ?? '') }}</textarea>
                         @error('jawaban_text')
@@ -225,11 +225,11 @@
 
                     <!-- Upload File -->
                     <div class="form-group mb-3">
-                        <label class="form-label">Upload File Jawaban (Opsional)</label>
+                        <label class="form-label">Unggah File Jawaban (Opsional)</label>
                         <input type="file" name="file_jawaban" class="form-control @error('file_jawaban') is-invalid @enderror"
                             accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4" {{ $isDisabled ? 'disabled' : '' }}>
                         <small class="form-text text-muted">
-                            Format: PDF, Word, Excel, PowerPoint, Image (JPG/PNG), Video (MP4). Max 10MB.
+                            Format: PDF, Word, Excel, PowerPoint, gambar (JPG/PNG), video (MP4). Maksimal 10MB.
                         </small>
                         @error('file_jawaban')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -249,7 +249,7 @@
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-paper-plane"></i>
-                                    {{ $existingSubmission ? 'Update Jawaban' : 'Kirim Jawaban' }}
+                                    {{ $existingSubmission ? 'Perbarui Jawaban' : 'Kirim Jawaban' }}
                                 </button>
                                 <a href="{{ route('siswa.lms.mapel.show', $mataPelajaran->id) }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Kembali
@@ -267,7 +267,7 @@
                         @endif
                     @else
                         <div class="alert alert-danger" role="alert">
-                            <i class="fas fa-lock"></i> Deadline sudah lewat. Jawaban tidak dapat diubah.
+                            <i class="fas fa-lock"></i> Tenggat sudah lewat. Jawaban tidak dapat diubah.
                         </div>
                     @endif
                 </form>
@@ -276,8 +276,8 @@
                     <div class="alert alert-info mt-3" role="alert">
                         <small>
                             <i class="fas fa-info-circle"></i>
-                            Terakhir disubmit:
-                            {{ $existingSubmission->tanggal_submit ? $existingSubmission->tanggal_submit->format('d F Y, H:i') . ' WIB' : '-' }}
+                            Terakhir dikirim:
+                            {{ $existingSubmission->tanggal_submit ? $existingSubmission->tanggal_submit->copy()->locale('id')->translatedFormat('d F Y, H:i') . ' WIB' : '-' }}
                             @if($existingSubmission->status === 'terlambat')
                                 <span style="color: #dc2626; font-weight: bold;">(Terlambat)</span>
                             @endif
@@ -288,7 +288,7 @@
         @else
             <div class="alert alert-danger" role="alert">
                 <h5 class="alert-heading">
-                    <i class="fas fa-exclamation-triangle"></i> Deadline Sudah Lewat
+                    <i class="fas fa-exclamation-triangle"></i> Tenggat Sudah Lewat
                 </h5>
                 <p style="margin: 0;">
                     Maaf, waktu pengerjaan tugas sudah habis. Anda tidak dapat mengirim jawaban.

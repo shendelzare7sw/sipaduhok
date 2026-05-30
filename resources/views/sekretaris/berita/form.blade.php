@@ -199,7 +199,7 @@
                                 <label style="display: flex; align-items: center; cursor: pointer;">
                                     <input type="checkbox" name="is_featured" value="1" style="width: 16px; height: 16px;"
                                            {{ old('is_featured', $berita->is_featured ?? false) ? 'checked' : '' }}>
-                                    <span style="margin-left: 8px; font-size: 14px; color: #374151;">Jadikan Berita Utama (Featured)</span>
+                                    <span style="margin-left: 8px; font-size: 14px; color: #374151;">Jadikan Berita Utama (Unggulan)</span>
                                 </label>
                             </div>
                         </div>
@@ -239,7 +239,7 @@
                     <ul class="guide-list" style="list-style-type: disc;">
                         <li><strong>Draft:</strong> Disimpan tapi belum muncul di web.</li>
                         <li><strong>Aktif:</strong> Langsung muncul di website.</li>
-                        <li><strong>Featured:</strong> Muncul di slider/bagian atas halaman depan.</li>
+                        <li><strong>Unggulan:</strong> Muncul di slider/bagian atas halaman depan.</li>
                     </ul>
                 </div>
             </div>

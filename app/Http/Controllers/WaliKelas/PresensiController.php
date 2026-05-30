@@ -572,7 +572,19 @@ class PresensiController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
         if (!$kelas) abort(403);
 
-        $tanggal = $request->get('tanggal', now()->toDateString());
+        if (!$request->filled('tanggal')) {
+            return redirect()
+                ->route('wali.presensi.rekap-harian')
+                ->with('error', 'Pilih tanggal presensi dari rekap harian terlebih dahulu.');
+        }
+
+        try {
+            $tanggal = Carbon::parse($request->query('tanggal'))->toDateString();
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('wali.presensi.rekap-harian')
+                ->with('error', 'Format tanggal presensi tidak valid.');
+        }
 
         $siswaList = Siswa::where('kelas_id', $kelas->id)
             ->where('status', 'aktif')

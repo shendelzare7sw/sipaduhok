@@ -33,7 +33,7 @@
 
     $tipeLabels = [
         'materi' => 'Materi', 'tugas' => 'Tugas', 'ujian' => 'Ujian',
-        'forum' => 'Forum', 'pengumuman' => 'Pengumuman', 'deadline' => 'Deadline',
+        'forum' => 'Forum', 'pengumuman' => 'Pengumuman', 'deadline' => 'Tenggat',
         'nilai' => 'Nilai', 'izin' => 'Izin', 'catatan' => 'Catatan',
         'pembayaran' => 'Keuangan', 'rapor' => 'Rapor', 'sistem' => 'Sistem',
         'kelas' => 'Kelas', 'kenaikan' => 'Kenaikan',
@@ -82,8 +82,8 @@
                         </span>
                         <span class="text-muted small">
                             <i class="fas fa-clock me-1"></i>
-                            {{ $notification->created_at->format('d M Y, H:i') }}
-                            <span class="ms-1">({{ $notification->created_at->diffForHumans() }})</span>
+                            {{ $notification->created_at->copy()->locale('id')->translatedFormat('d M Y, H:i') }}
+                            <span class="ms-1">({{ $notification->created_at->copy()->locale('id')->diffForHumans() }})</span>
                         </span>
                     </div>
                     <h5 class="mb-0 fw-bold">{{ $notification->judul }}</h5>

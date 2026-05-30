@@ -295,7 +295,7 @@
             <div class="alert alert-primary d-flex align-items-center rounded-3 shadow-none border-0" role="alert" style="background-color: rgba(67, 97, 238, 0.08); color: var(--primary-dark);">
                 <i class="fas fa-info-circle fs-4 me-3 text-primary"></i>
                 <div style="font-size: 0.9rem;">
-                    <strong>Mode Pengawasan (Read-only):</strong> Anda memiliki akses pengawasan eksklusif. Data yang ditampilkan adalah untuk keperluan analitik dan supervisi. Segala jenis mutasi data harus dilakukan melalui Staff Admin.
+                    <strong>Mode Pengawasan (Hanya Baca):</strong> Anda memiliki akses pengawasan eksklusif. Data yang ditampilkan adalah untuk keperluan analitik dan supervisi. Segala jenis mutasi data harus dilakukan melalui staf admin.
                 </div>
             </div>
 
@@ -317,7 +317,7 @@
                             <div class="activity-title">{{ $login->name }}</div>
                             <div class="activity-meta">
                                 <span class="badge bg-label-primary me-1">{{ $login->roleRelation->role_name ?? 'User' }}</span>
-                                <i class="far fa-clock ms-1 me-1"></i> {{ \Carbon\Carbon::parse($login->last_login_at)->diffForHumans() }}
+                                <i class="far fa-clock ms-1 me-1"></i> {{ \Carbon\Carbon::parse($login->last_login_at)->locale('id')->diffForHumans() }}
                             </div>
                         </div>
                     </div>

@@ -588,7 +588,7 @@
                                         {{-- Desktop: Nama --}}
                                         <td class="desktop-only-cell">
                                             <div style="font-weight: 600; font-size: 15px;">{{ $tp->nama_lengkap }}</div>
-                                            <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $tp->created_at->diffForHumans() }}</small>
+                                            <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $tp->created_at->copy()->locale('id')->diffForHumans() }}</small>
                                         </td>
                                         {{-- Mobile: Card Head --}}
                                         <td class="mobile-only-cell mobile-card-head">
@@ -786,7 +786,7 @@
                                         {{-- Desktop: Nama --}}
                                         <td class="desktop-only-cell">
                                             <div style="font-weight: 600; font-size: 15px;">{{ $ortu->name }}</div>
-                                            <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $ortu->created_at->diffForHumans() }}</small>
+                                            <small style="color: #6b7280; font-size: 12px;">Dibuat: {{ $ortu->created_at->copy()->locale('id')->diffForHumans() }}</small>
                                         </td>
                                         {{-- Mobile: Card Head --}}
                                         <td class="mobile-only-cell mobile-card-head">

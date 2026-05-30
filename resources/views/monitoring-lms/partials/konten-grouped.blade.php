@@ -51,7 +51,7 @@
                             <a href="{{ route($baseRoute . '.preview', [$type, $item->id]) }}"
                                class="btn-konten btn-konten-preview"
                                target="_blank">
-                                <i class="fas fa-eye"></i><span>Preview</span>
+                                <i class="fas fa-eye"></i><span>Pratinjau</span>
                             </a>
                             <button type="button"
                                 class="btn-konten btn-konten-catatan"

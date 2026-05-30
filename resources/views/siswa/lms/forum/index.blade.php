@@ -113,7 +113,7 @@
                     </div>
                     <div class="forum-meta">
                         <span><i class="fas fa-user me-1"></i>{{ $forum->user->name ?? 'Guru' }}</span>
-                        <span><i class="far fa-clock me-1"></i>{{ $forum->created_at->diffForHumans() }}</span>
+                        <span><i class="far fa-clock me-1"></i>{{ $forum->created_at->copy()->locale('id')->diffForHumans() }}</span>
                     </div>
                 </div>
                 <div class="reply-count">

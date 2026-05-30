@@ -582,7 +582,7 @@
                 'type' => 'tugas',
                 'titleField' => 'judul_tugas',
                 'dateField' => 'tanggal_deadline',
-                'dateLabel' => 'Deadline',
+                'dateLabel' => 'Tenggat',
                 'badgeClass' => 'badge-tipe-tugas',
                 'iconClass' => 'fa-tasks',
                 'iconBg' => 'icon-tugas',

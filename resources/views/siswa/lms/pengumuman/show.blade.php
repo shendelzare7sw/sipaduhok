@@ -266,7 +266,7 @@
                         <span>•</span>
                         <span>{{ \Carbon\Carbon::parse($pengumuman->tanggal_pengumuman)->translatedFormat('d F Y') }}</span>
                         <span>•</span>
-                        <span>{{ $pengumuman->created_at->diffForHumans() }}</span>
+                        <span>{{ $pengumuman->created_at->copy()->locale('id')->diffForHumans() }}</span>
                     </div>
                 </div>
             </div>

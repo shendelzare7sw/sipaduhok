@@ -13,9 +13,17 @@
 <style>
     .kelas-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(320px, 364px));
         gap: 24px;
+        justify-content: center;
+        align-items: stretch;
         padding: 0;
+    }
+
+    .pilih-kelas-page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 24px;
     }
 
     .kelas-card {
@@ -170,11 +178,22 @@
         color: #6b7280;
         line-height: 1.6;
     }
+
+    @media (max-width: 575.98px) {
+        .pilih-kelas-page {
+            padding: 16px 12px;
+        }
+
+        .kelas-grid {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 16px;
+        }
+    }
 </style>
 @endsection
 
 @section('content')
-<div style="max-width: 1200px; margin: 0 auto; padding: 24px;">
+<div class="pilih-kelas-page">
     <div class="page-intro">
         <h2>Selamat Datang, {{ $waliKelas->nama_lengkap }}</h2>
         <p>Anda ditugaskan sebagai wali kelas untuk {{ $kelasList->count() }} kelas. Silakan pilih kelas yang ingin Anda kelola.</p>

@@ -25,6 +25,7 @@ class ManajemenSiswaController extends Controller
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $taFilterId = $request->tahun_ajaran_id ?: ($tahunAjaranAktif?->id);
         $isHistorical = $taFilterId && $tahunAjaranAktif && $taFilterId != $tahunAjaranAktif->id;
+        $filterNoKelas = !$isHistorical && $request->boolean('no_kelas');
 
         $query = Siswa::with(['user', 'cabang', 'kelas.tahunAjaran']);
 
@@ -32,7 +33,7 @@ class ManajemenSiswaController extends Controller
         $query->where('cabang_id', $userCabangId);
 
         // Filter by tahun ajaran via scope (mendukung snapshot historis)
-        if ($taFilterId) {
+        if ($taFilterId && !$filterNoKelas) {
             $query->forTahunAjaran($taFilterId);
             $query->with(['statusNaikKelas' => fn($q) => $q->where('tahun_ajaran_id', $taFilterId)]);
         }
@@ -48,12 +49,12 @@ class ManajemenSiswaController extends Controller
         }
 
         // Filter by jenjang — hanya saat TA aktif
-        if (!$isHistorical && $request->filled('jenjang')) {
+        if (!$isHistorical && !$filterNoKelas && $request->filled('jenjang')) {
             $query->whereHas('kelas', fn($q) => $q->where('jenjang', $request->jenjang));
         }
 
         // Filter by kelas — hanya saat TA aktif
-        if (!$isHistorical && $request->filled('kelas_id')) {
+        if (!$isHistorical && !$filterNoKelas && $request->filled('kelas_id')) {
             $kelasId = $request->kelas_id;
             if (is_array($kelasId)) {
                 $query->whereIn('kelas_id', $kelasId);
@@ -70,7 +71,7 @@ class ManajemenSiswaController extends Controller
         }
 
         // Filter no kelas — hanya saat TA aktif
-        if (!$isHistorical && $request->filled('no_kelas') && $request->no_kelas == '1') {
+        if ($filterNoKelas) {
             $query->whereNull('kelas_id');
         }
 
@@ -302,5 +303,4 @@ class ManajemenSiswaController extends Controller
             ->with('success', 'Siswa berhasil dikeluarkan dari kelas');
     }
 }
-
 

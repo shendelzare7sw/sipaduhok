@@ -22,7 +22,7 @@
         <div id="notification-list" class="notif-list-scroll">
             <div class="text-center py-4">
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">Memuat...</span>
                 </div>
             </div>
         </div>

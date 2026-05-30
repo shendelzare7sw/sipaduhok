@@ -1296,6 +1296,8 @@ Route::middleware(['auth'])->group(function () {
 
                 // Hasil & Koreksi Ujian
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
+                Route::get('/{ujian}/pengawasan', [GuruUjianController::class, 'pengawasan'])->name('pengawasan');
+                Route::get('/{ujian}/pengawasan/data', [GuruUjianController::class, 'pengawasanData'])->name('pengawasan.data');
                 Route::get('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiShow'])->name('koreksi.show');
                 Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiStore'])->name('koreksi.store');
                 Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest'); // Added
@@ -1504,6 +1506,7 @@ Route::middleware(['auth'])->group(function () {
                     Route::post('/{ujianId}/submit', [LmsUjianController::class, 'submit'])->name('submit');
                     Route::post('/{ujianId}/retake', [LmsUjianController::class, 'retake'])->name('retake');
                     Route::post('/{ujianId}/autosave', [LmsUjianController::class, 'autosave'])->name('autosave');
+                    Route::post('/{ujianId}/monitoring', [LmsUjianController::class, 'monitoring'])->name('monitoring');
                     Route::get('/{ujianId}/review', [LmsUjianController::class, 'review'])->name('review');
                 });
 

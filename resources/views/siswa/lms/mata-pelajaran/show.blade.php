@@ -268,7 +268,7 @@
                                         <i class="fas fa-clock"></i>
                                         {{ $tugas->tanggal_deadline->format('H:i') }}
                                         @if($tugas->tanggal_deadline->isFuture())
-                                            <span style="color: #10b981;">({{ $tugas->tanggal_deadline->diffForHumans() }})</span>
+                                            <span style="color: #10b981;">({{ $tugas->tanggal_deadline->copy()->locale('id')->diffForHumans() }})</span>
                                         @else
                                             <span style="color: #dc2626;">(Sudah Lewat)</span>
                                         @endif
@@ -529,7 +529,7 @@
                     <small class="text-muted">
                         <i class="fas fa-user me-1"></i>{{ $forum->user->name ?? 'Guru' }}
                         <span class="mx-2">•</span>
-                        <i class="far fa-clock me-1"></i>{{ $forum->created_at->diffForHumans() }}
+                        <i class="far fa-clock me-1"></i>{{ $forum->created_at->copy()->locale('id')->diffForHumans() }}
                     </small>
                 </div>
                 <span class="badge bg-primary" style="font-size: 12px;">

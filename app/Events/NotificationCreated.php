@@ -56,7 +56,7 @@ class NotificationCreated implements ShouldBroadcast
             'link' => $this->notification->link,
             'icon' => $this->notification->icon,
             'color' => $this->notification->color,
-            'created_at' => $this->notification->created_at->diffForHumans(),
+            'created_at' => $this->notification->created_at->copy()->locale('id')->diffForHumans(),
         ];
     }
 }

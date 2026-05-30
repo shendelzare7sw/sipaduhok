@@ -121,7 +121,7 @@
                                     <div id="suggestionsList" class="d-flex flex-wrap gap-2"></div>
                                     <div id="suggestionsLoading" class="text-center py-3" style="display: none;">
                                         <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                            <span class="visually-hidden">Loading...</span>
+                                            <span class="visually-hidden">Memuat...</span>
                                         </div>
                                         <small class="d-block mt-2 text-muted">Mencari kode yang tersedia...</small>
                                     </div>

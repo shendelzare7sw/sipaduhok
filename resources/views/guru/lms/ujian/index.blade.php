@@ -27,7 +27,7 @@
                         <th class="text-center">Tanggal Mulai</th>
                         <th class="text-center">Tanggal Selesai</th>
                         <th class="text-center">Durasi</th>
-                        <th class="text-center" style="width: 120px;">Aksi</th>
+                        <th class="text-center" style="width: 150px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,6 +75,12 @@
                                         class="btn btn-success btn-sm" title="Lihat Hasil">
                                         <i class="fas fa-chart-bar"></i>
                                     </a>
+                                    @if($tipeUjian !== 'latihan')
+                                        <a href="{{ route('guru.lms.ujian.pengawasan', [$kelas->id, $mapel->id, $ujian->id]) }}"
+                                            class="btn btn-primary btn-sm" title="Pengawasan Realtime">
+                                            <i class="fas fa-desktop"></i>
+                                        </a>
+                                    @endif
                                     <a href="{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.soal.manage' : 'guru.lms.ujian.soal.manage', [$kelas->id, $mapel->id, $ujian->id]) }}"
                                         class="btn btn-info btn-sm" title="Kelola Soal">
                                         <i class="fas fa-list-ol"></i>

@@ -4,8 +4,35 @@
     <meta charset="UTF-8">
     <title>Kartu Siswa - {{ $siswa->nama_lengkap }}</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color-adjust: exact;
+        }
+        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; text-align: center; }
+
+        .preview-page {
+            width: min(100%, 760px);
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .print-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 0 auto 22px;
+            padding: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(240, 240, 240, 0.92);
+            backdrop-filter: blur(6px);
+        }
 
         .card-container { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
 
@@ -14,6 +41,7 @@
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             border-radius: 10px; overflow: hidden; position: relative;
             color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            text-align: left;
         }
 
         .student-card.back { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); }
@@ -87,6 +115,7 @@
         .back .card-body {
             flex-direction: column;
             padding: 8px 10px 22px; /* bottom padding agar tidak overlap footer */
+            text-align: center;
         }
         .back .info-section { margin-bottom: 5px; }
         .back .info-section h4 {
@@ -113,21 +142,49 @@
         }
 
         .print-button {
-            position: fixed; top: 20px; right: 20px;
             padding: 10px 20px; background: #3b82f6; color: white;
             border: none; border-radius: 8px; cursor: pointer;
             font-size: 13px; font-weight: bold;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 140px;
+            margin: 0 6px 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .back-button {
-            position: fixed; top: 20px; right: 150px;
             padding: 10px 20px; background: #6b7280; color: white;
             border: none; border-radius: 8px; text-decoration: none; font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 140px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 6px 18px;
         }
         @media (max-width: 575.98px) {
-            .print-button { top: auto; bottom: 20px; right: 20px; }
-            .back-button { top: auto; bottom: 20px; right: 130px; }
+            body { padding: 12px; }
+            .preview-page { width: 100%; }
+            .print-actions {
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 0;
+                margin-bottom: 14px;
+                background: transparent;
+            }
+            .print-button,
+            .back-button {
+                width: calc(50% - 6px);
+                min-width: 0;
+                padding: 10px 12px;
+                margin: 0 3px 14px;
+            }
+            .upload-area {
+                width: 100%;
+                padding: 12px;
+            }
         }
 
         .upload-area {
@@ -144,10 +201,27 @@
         .upload-hint { font-size: 11px; color: #888; margin-top: 6px; }
 
         @media print {
-            body { background: white; padding: 0; }
+            @page { margin: 10mm; size: A4 portrait; }
+            body {
+                background: white;
+                padding: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
             .no-print { display: none !important; }
-            .card-container { gap: 10mm; }
-            .student-card { box-shadow: none; }
+            .preview-page {
+                width: 100%;
+                margin: 0;
+                text-align: center;
+            }
+            .card-container { gap: 8mm; }
+            .student-card {
+                box-shadow: none;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
         }
     </style>
 </head>
@@ -180,7 +254,7 @@
         <i class="fas fa-print"></i> Cetak Kartu
     </button>
 
-    <div style="text-align: center; margin-bottom: 16px;">
+    <div class="preview-page">
         <div class="card-container">
             {{-- Front Card --}}
             <div class="student-card front">

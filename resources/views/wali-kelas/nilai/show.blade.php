@@ -52,9 +52,49 @@
         vertical-align: middle;
     }
     .predikat-badge {
-        font-size: 13px;
-        font-weight: 700;
-        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 6px 10px;
+    }
+    .nilai-show-table {
+        table-layout: fixed;
+    }
+    .nilai-show-table .mapel-col {
+        width: 220px;
+        min-width: 190px;
+    }
+    .nilai-show-table .count-col {
+        width: 56px;
+    }
+    .nilai-show-table .average-col {
+        width: 64px;
+    }
+    .nilai-show-table .exam-col {
+        width: 58px;
+    }
+    .nilai-show-table .final-col {
+        width: 78px;
+    }
+    .nilai-show-table .predikat-col {
+        width: 98px;
+    }
+    .nilai-show-table .status-col {
+        width: 122px;
+    }
+    .nilai-show-table .nilai-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        border-radius: 999px !important;
+        line-height: 1;
+        white-space: nowrap !important;
+        word-break: normal;
+        overflow-wrap: normal;
+        text-align: center;
+    }
+    .nilai-show-table .status-pill {
+        min-width: 104px;
     }
     .rata-cell {
         background: #e9ecef !important;
@@ -69,6 +109,34 @@
     .th-tugas { background: #e3f2fd !important; }
     .th-latihan { background: #fff3e0 !important; }
     .th-uh { background: #fce4ec !important; }
+
+    @media (max-width: 767.98px) {
+        .nilai-show-table {
+            table-layout: auto;
+        }
+        .nilai-show-table .mapel-col,
+        .nilai-show-table .count-col,
+        .nilai-show-table .average-col,
+        .nilai-show-table .exam-col,
+        .nilai-show-table .final-col,
+        .nilai-show-table .predikat-col,
+        .nilai-show-table .status-col {
+            width: auto;
+            min-width: 0;
+        }
+        .nilai-show-table tbody td.nilai-pill-cell {
+            align-items: center;
+        }
+        .nilai-show-table .nilai-pill {
+            min-width: 0;
+            max-width: 100%;
+            padding: 6px 11px;
+            font-size: 11px;
+        }
+        .nilai-show-table .status-pill {
+            min-width: 98px;
+        }
+    }
 </style>
 @endsection
 
@@ -130,27 +198,27 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover wk-card-table mb-0 align-middle">
+                <table class="table table-bordered table-hover wk-card-table nilai-show-table mb-0 align-middle">
                     <thead>
                         <tr>
                             <th rowspan="2" class="text-center" style="width: 40px;">No</th>
-                            <th rowspan="2" style="min-width: 180px;">Mata Pelajaran</th>
+                            <th rowspan="2" class="mapel-col">Mata Pelajaran</th>
                             <th colspan="2" class="text-center th-tugas">Tugas</th>
                             <th colspan="2" class="text-center th-latihan">Latihan</th>
                             <th colspan="2" class="text-center th-uh">UH</th>
-                            <th rowspan="2" class="text-center" style="width: 55px;">PTS</th>
-                            <th rowspan="2" class="text-center" style="width: 55px;">PAS</th>
-                            <th rowspan="2" class="text-center nilai-akhir-cell" style="width: 65px;">N. Akhir</th>
-                            <th rowspan="2" class="text-center" style="width: 70px;">Predikat</th>
-                            <th rowspan="2" class="text-center" style="width: 80px;">Status</th>
+                            <th rowspan="2" class="text-center exam-col">PTS</th>
+                            <th rowspan="2" class="text-center exam-col">PAS</th>
+                            <th rowspan="2" class="text-center nilai-akhir-cell final-col">N. Akhir</th>
+                            <th rowspan="2" class="text-center predikat-col">Predikat</th>
+                            <th rowspan="2" class="text-center status-col">Status</th>
                         </tr>
                         <tr>
-                            <th class="text-center th-tugas" style="width: 50px;">Jml</th>
-                            <th class="text-center th-tugas rata-cell" style="width: 50px;">Rata</th>
-                            <th class="text-center th-latihan" style="width: 50px;">Jml</th>
-                            <th class="text-center th-latihan rata-cell" style="width: 50px;">Rata</th>
-                            <th class="text-center th-uh" style="width: 50px;">Jml</th>
-                            <th class="text-center th-uh rata-cell" style="width: 50px;">Rata</th>
+                            <th class="text-center th-tugas count-col">Jml</th>
+                            <th class="text-center th-tugas rata-cell average-col">Rata</th>
+                            <th class="text-center th-latihan count-col">Jml</th>
+                            <th class="text-center th-latihan rata-cell average-col">Rata</th>
+                            <th class="text-center th-uh count-col">Jml</th>
+                            <th class="text-center th-uh rata-cell average-col">Rata</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,50 +244,50 @@
                                 $isTuntas = $nilai && $nilai->nilai_akhir >= $kkm;
                             @endphp
                             <tr>
-                                <td class="text-center fw-bold">{{ $no++ }}</td>
-                                <td>
+                                <td class="text-center fw-bold" data-label="No">{{ $no++ }}</td>
+                                <td class="wk-main-cell" data-label="Mata Pelajaran">
                                     <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
                                     <small class="text-muted">{{ $mapel->kode_mapel }}</small>
                                 </td>
-                                <td class="text-center">{{ $tugasCount }}/5</td>
-                                <td class="text-center rata-cell">
+                                <td class="text-center" data-label="Tugas Terisi">{{ $tugasCount }}/5</td>
+                                <td class="text-center rata-cell" data-label="Rata Tugas">
                                     {{ $nilai && $nilai->rata_tugas !== null ? number_format($nilai->rata_tugas, 1) : '-' }}
                                 </td>
-                                <td class="text-center">{{ $latihanCount }}/5</td>
-                                <td class="text-center rata-cell">
+                                <td class="text-center" data-label="Latihan Terisi">{{ $latihanCount }}/5</td>
+                                <td class="text-center rata-cell" data-label="Rata Latihan">
                                     {{ $nilai && $nilai->rata_latihan !== null ? number_format($nilai->rata_latihan, 1) : '-' }}
                                 </td>
-                                <td class="text-center">{{ $uhCount }}/5</td>
-                                <td class="text-center rata-cell">
+                                <td class="text-center" data-label="UH Terisi">{{ $uhCount }}/5</td>
+                                <td class="text-center rata-cell" data-label="Rata UH">
                                     {{ $nilai && $nilai->rata_uh !== null ? number_format($nilai->rata_uh, 1) : '-' }}
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" data-label="PTS">
                                     {{ $nilai && $nilai->pts !== null ? number_format($nilai->pts, 0) : '-' }}
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center" data-label="PAS">
                                     {{ $nilai && $nilai->pas !== null ? number_format($nilai->pas, 0) : '-' }}
                                 </td>
-                                <td class="text-center nilai-akhir-cell">
+                                <td class="text-center nilai-akhir-cell" data-label="Nilai Akhir">
                                     {{ $nilai && $nilai->nilai_akhir !== null ? number_format($nilai->nilai_akhir, 2) : '-' }}
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center nilai-pill-cell" data-label="Predikat">
                                     @if($nilai && $nilai->nilai_akhir !== null)
-                                        <span class="badge predikat-badge {{ $nilai->predikat() == 'A' ? 'bg-success' : ($nilai->predikat() == 'B' ? 'bg-primary' : ($nilai->predikat() == 'C' ? 'bg-warning text-dark' : 'bg-danger')) }}">
+                                        <span class="badge predikat-badge nilai-pill {{ $nilai->predikat() == 'A' ? 'bg-success' : ($nilai->predikat() == 'B' ? 'bg-primary' : ($nilai->predikat() == 'C' ? 'bg-warning text-dark' : 'bg-danger')) }}">
                                             {{ $nilai->predikat() }}
                                         </span>
                                     @else
                                         -
                                     @endif
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center nilai-pill-cell" data-label="Status">
                                     @if($nilai && $nilai->nilai_akhir !== null)
                                         @if($isTuntas)
-                                            <span class="badge bg-success">Tuntas</span>
+                                            <span class="badge nilai-pill status-pill bg-success">Tuntas</span>
                                         @else
-                                            <span class="badge bg-danger">Belum Tuntas</span>
+                                            <span class="badge nilai-pill status-pill bg-danger">Belum Tuntas</span>
                                         @endif
                                     @else
-                                        <span class="badge bg-secondary">Belum Ada</span>
+                                        <span class="badge nilai-pill status-pill bg-secondary">Belum Ada</span>
                                     @endif
                                 </td>
                             </tr>
