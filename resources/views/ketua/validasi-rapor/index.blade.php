@@ -8,6 +8,109 @@
     @include('ketua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+<style>
+    .ketua-filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .ketua-bulk-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .ketua-row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .ketua-filter-actions,
+        .ketua-bulk-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .ketua-filter-actions .btn,
+        .ketua-bulk-actions .btn {
+            width: 100%;
+        }
+
+        #dataTable.table {
+            margin-bottom: 0;
+        }
+
+        #dataTable thead {
+            display: none;
+        }
+
+        #dataTable tbody tr {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 2px solid #e5e7eb;
+            background: #fff;
+        }
+
+        #dataTable tbody td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: right !important;
+            white-space: normal;
+        }
+
+        #dataTable tbody td::before {
+            content: attr(data-label);
+            color: #64748b;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            flex-shrink: 0;
+        }
+
+        #dataTable tbody td[data-label="Nama"] {
+            order: -2;
+            align-items: flex-start;
+            background: #f8fafc;
+            text-align: left !important;
+        }
+
+        #dataTable tbody td[data-label="Nama"]::before,
+        #dataTable tbody td[data-label="Aksi"]::before {
+            display: none;
+        }
+
+        #dataTable tbody td[data-label="No"] {
+            display: none;
+        }
+
+        #dataTable tbody td[data-label="Pilih"] {
+            order: -1;
+            justify-content: flex-start;
+            background: #f8fafc;
+        }
+
+        .ketua-row-actions {
+            width: 100%;
+        }
+
+        .ketua-row-actions .btn {
+            flex: 1 1 100%;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid">
 
@@ -75,7 +178,29 @@
         <div class="card-body">
             <form method="GET" action="{{ route('ketua.validasi-rapor.index') }}">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label small fw-bold">Cabang</label>
+                        <select name="cabang_id" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Cabang</option>
+                            @foreach($cabangList as $cabang)
+                                <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
+                                    {{ $cabang->nama_cabang }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <label class="form-label small fw-bold">Jenjang</label>
+                        <select name="jenjang" class="form-select" onchange="this.form.submit()">
+                            <option value="">Semua Jenjang</option>
+                            @foreach($jenjangList as $jenjang)
+                                <option value="{{ $jenjang }}" {{ request('jenjang') == $jenjang ? 'selected' : '' }}>
+                                    {{ $jenjang }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
                         <label class="form-label small fw-bold">Kelas</label>
                         <select name="kelas_id" class="form-select">
                             <option value="">Semua Kelas</option>
@@ -86,7 +211,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-lg-3 col-md-6">
                         <label class="form-label small fw-bold">Status Validasi Ketua</label>
                         <select name="status_ketua" class="form-select">
                             <option value="">Semua Status</option>
@@ -94,12 +219,12 @@
                             <option value="validated" {{ request('status_ketua') == 'validated' ? 'selected' : '' }}>Sudah Divalidasi</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-6">
                         <label class="form-label small fw-bold">Cari Nama / NIS</label>
                         <input type="text" name="search" class="form-control" placeholder="Cari..." value="{{ request('search') }}">
                     </div>
                 </div>
-                <div class="d-flex gap-2 mt-3">
+                <div class="ketua-filter-actions mt-3">
                     <button type="submit" class="btn btn-primary shadow-sm">
                         <i class="fas fa-search me-1"></i> Filter
                     </button>
@@ -115,7 +240,7 @@
     <div class="card shadow mb-4">
         <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Daftar Siswa</h6>
-            <div class="d-flex gap-2">
+            <div class="ketua-bulk-actions">
                 <button type="button" class="btn btn-success btn-sm shadow-sm" onclick="openValidasiSemuaModal()">
                     <i class="fas fa-check-double me-1"></i> Validasi Semua
                 </button>
@@ -144,25 +269,25 @@
                     <tbody>
                         @forelse($siswaList as $siswa)
                         <tr>
-                            <td class="text-center align-middle">
+                            <td class="text-center align-middle" data-label="Pilih">
                                 @if(!$siswa->validasi_rapor_ketua)
                                     <input type="checkbox" class="siswa-checkbox form-check-input" value="{{ $siswa->id }}">
                                 @endif
                             </td>
-                            <td class="text-center align-middle fw-bold text-muted">{{ $loop->iteration }}</td>
-                            <td class="align-middle fw-bold">{{ $siswa->nis }}</td>
-                            <td class="align-middle">
+                            <td class="text-center align-middle fw-bold text-muted" data-label="No">{{ $loop->iteration }}</td>
+                            <td class="align-middle fw-bold" data-label="NIS">{{ $siswa->nis }}</td>
+                            <td class="align-middle" data-label="Nama">
                                 <div class="fw-bold">{{ $siswa->nama_lengkap }}</div>
                             </td>
-                            <td class="align-middle">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                            <td class="text-center align-middle">
+                            <td class="align-middle" data-label="Kelas">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
+                            <td class="text-center align-middle" data-label="Wali Kelas">
                                 @if($siswa->validasi_rapor_wali)
                                     <span class="badge bg-success"><i class="fas fa-check me-1"></i>Sudah</span>
                                 @else
                                     <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Belum</span>
                                 @endif
                             </td>
-                            <td class="text-center align-middle">
+                            <td class="text-center align-middle" data-label="Status Ketua">
                                 @if($siswa->validasi_rapor_ketua)
                                     <span class="badge bg-success"><i class="fas fa-check me-1"></i> Valid</span>
                                     <div><small class="text-muted">{{ $siswa->tanggal_validasi_rapor_ketua ? $siswa->tanggal_validasi_rapor_ketua->format('d/m/Y') : '' }}</small></div>
@@ -170,8 +295,8 @@
                                     <span class="badge bg-warning text-white"><i class="fas fa-clock me-1"></i> Pending</span>
                                 @endif
                             </td>
-                            <td class="text-center align-middle">
-                                <div class="d-flex flex-wrap justify-content-center gap-1">
+                            <td class="text-center align-middle" data-label="Aksi">
+                                <div class="ketua-row-actions">
                                     <a href="{{ route('ketua.validasi-rapor.preview', $siswa->id) }}" class="btn btn-info btn-sm shadow-sm" target="_blank" title="Preview Rapor">
                                         <i class="fas fa-eye me-1"></i> Preview
                                     </a>

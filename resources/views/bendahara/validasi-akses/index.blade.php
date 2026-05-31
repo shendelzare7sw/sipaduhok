@@ -340,6 +340,10 @@
         padding: 1rem;
     }
 
+    .quick-grid .empty-state {
+        grid-column: 1 / -1;
+    }
+
     .period-settings {
         padding: 1.25rem;
     }
@@ -390,6 +394,19 @@
         margin: 0.15rem 0 0.9rem;
     }
 
+    .quick-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.7rem;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: var(--acc-primary);
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
     .empty-state {
         min-height: 260px;
         display: flex;
@@ -417,6 +434,9 @@
         .quick-grid { grid-template-columns: 1fr; }
         .access-card-header { align-items: stretch; }
         .access-card-header > div { width: 100%; }
+        .quick-count-badge {
+            width: fit-content;
+        }
         .filter-wrapper,
         .access-toolbar { flex-direction: column; align-items: stretch; }
         .filter-wrapper .search-box,
@@ -424,6 +444,25 @@
         .filter-wrapper .btn,
         .access-toolbar .btn,
         .access-toolbar > div { width: 100%; }
+        .filter-wrapper .search-box,
+        .filter-wrapper .filter-select {
+            flex: 0 0 auto;
+            min-width: 0;
+        }
+        .filter-wrapper select[name="kelas_id"] {
+            flex-basis: auto;
+        }
+        .filter-wrapper .search-box input,
+        .filter-wrapper .filter-select {
+            min-height: 42px;
+            height: 42px;
+        }
+        .filter-wrapper .search-box i {
+            top: 50%;
+        }
+        .filter-wrapper .btn {
+            min-height: 42px;
+        }
         .access-toolbar .d-flex { justify-content: stretch; }
         .access-toolbar .d-flex .btn { flex: 1 1 100%; }
         .mobile-select-all { display: flex; }
@@ -496,6 +535,7 @@
 @section('content')
 @php
     $hasActiveFilter = request()->hasAny(['search', 'cabang_id', 'jenjang', 'kelas_id', 'status_ujian', 'status_rapor']);
+    $quickClasses = $quickKelasList ?? $kelasList;
 @endphp
 
 <div class="access-shell">
@@ -843,14 +883,18 @@
         <div class="access-card-header">
             <div>
                 <h5 class="access-card-title"><i class="fas fa-bolt" style="color: var(--acc-warning);"></i> Validasi Kilat Per Kelas</h5>
-                <div class="access-card-subtitle">Jalankan validasi massal untuk kelas yang sering diproses.</div>
+                <div class="access-card-subtitle">Jalankan validasi massal sesuai filter cabang, jenjang, dan kelas yang aktif.</div>
             </div>
+            <span class="quick-count-badge">
+                <i class="fas fa-layer-group"></i>
+                {{ $quickClasses->count() }} kelas
+            </span>
         </div>
         <div class="quick-grid">
-            @foreach($kelasList->take(6) as $kelas)
+            @forelse($quickClasses as $kelas)
                 <div class="quick-card">
                     <div class="quick-title">{{ $kelas->nama_kelas }}</div>
-                    <div class="quick-meta">{{ $kelas->jenjang }} | {{ $kelas->siswa->count() }} Siswa</div>
+                    <div class="quick-meta">{{ $kelas->jenjang }} | {{ $kelas->cabang->nama_cabang ?? '-' }} | {{ $kelas->siswa_aktif_count ?? $kelas->siswa->count() }} Siswa</div>
                     <div class="row g-2">
                         <div class="col">
                             <form id="form-ujian-{{ $kelas->id }}" action="{{ route('bendahara.validasi-akses.bulk-validasi-ujian', $kelas->id) }}" method="POST">
@@ -866,7 +910,13 @@
                         </div>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="empty-state">
+                    <i class="fas fa-school"></i>
+                    <h6 class="mb-1">Tidak ada kelas</h6>
+                    <p class="small mb-0">Coba ubah filter cabang atau jenjang.</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

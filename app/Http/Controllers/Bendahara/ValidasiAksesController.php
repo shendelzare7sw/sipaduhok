@@ -29,6 +29,9 @@ class ValidasiAksesController extends Controller
 
         // Filter daftar kelas untuk dropdown
         $kelasList = Kelas::with('cabang')
+            ->withCount(['siswa as siswa_aktif_count' => function ($q) {
+                $q->where('status', 'aktif');
+            }])
             ->when($tahunAjaranAktif, function($q) use ($tahunAjaranAktif) {
                 return $q->where('tahun_ajaran_id', $tahunAjaranAktif->id);
             })
@@ -39,6 +42,10 @@ class ValidasiAksesController extends Controller
                 return $q->where('jenjang', $request->jenjang);
             })
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
+
+        $quickKelasList = $request->filled('kelas_id')
+            ? $kelasList->where('id', (int) $request->kelas_id)->values()
+            : $kelasList;
 
         $query = Siswa::with(['kelas.cabang', 'cabang'])
             ->where('status', 'aktif');
@@ -142,6 +149,7 @@ class ValidasiAksesController extends Controller
         return view('bendahara.validasi-akses.index', [
             'siswa' => $siswaList,
             'kelasList' => $kelasList,
+            'quickKelasList' => $quickKelasList,
             'cabangList' => $cabangList,
             'jenjangList' => $jenjangList,
             'tahunAjaran' => $tahunAjaranAktif,

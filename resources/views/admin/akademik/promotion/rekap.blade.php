@@ -152,8 +152,43 @@
     border-top: 1px solid var(--line);
 }
 
+.promotion-report .promotion-debt-badge {
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.25;
+}
+
 /* Responsive Styles - Mobile Only */
 @media (max-width: 768px) {
+    .promotion-report.container-fluid {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    .promotion-report .card {
+        border-left: 0;
+        border-right: 0;
+        border-radius: 8px;
+    }
+
+    .promotion-report .tab-content {
+        margin-left: -14px;
+        margin-right: -14px;
+    }
+
+    .promotion-report .card-header,
+    .promotion-report .card-body {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .promotion-report .tab-content > .tab-pane > .card {
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+    }
+
     /* Nav tabs scrollable */
     .nav-tabs {
         flex-wrap: nowrap !important;
@@ -267,6 +302,34 @@
         padding: 10px 14px !important; background: #f9fafb;
     }
     .desktop-only-cell { display: none !important; }
+
+    .table-card-mobile tbody td > .mobile-text-end {
+        min-width: 0;
+        max-width: 72%;
+    }
+
+    .table-card-mobile tbody td[data-label="Keuangan"] {
+        align-items: flex-start;
+    }
+
+    .table-card-mobile tbody td[data-label="Keuangan"] > .mobile-text-end {
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+        width: 72%;
+    }
+
+    .promotion-report .promotion-debt-badge {
+        border-radius: 14px;
+        display: inline-block;
+        max-width: 100%;
+        min-width: 0;
+        padding: 7px 10px;
+        text-align: right;
+        white-space: normal !important;
+        word-break: normal;
+        overflow-wrap: anywhere;
+    }
     
     .mobile-text-end { text-align: right; }
     .mobile-text-start { text-align: left; }
@@ -292,7 +355,7 @@
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y promotion-report">
+<div class="container-fluid flex-grow-1 container-p-y promotion-report">
     <!-- Header removed, using layout title -->
 
     <div class="row row-cols-1 row-cols-md-5 g-3 mb-4">
@@ -809,7 +872,7 @@
                                             @if($sim['result']['financial']['status'] == 'LUNAS')
                                                 <span class="badge bg-success">Lunas</span>
                                             @else
-                                                <span class="badge bg-danger mb-1 text-wrap text-break lh-base" style="max-width: 100%; white-space: normal; text-align: left;">Tunggakan: Rp {{ number_format($sim['result']['financial']['unpaid_amount'], 0, ',', '.') }}</span>
+                                                <span class="badge bg-danger mb-1 promotion-debt-badge">Tunggakan: Rp {{ number_format($sim['result']['financial']['unpaid_amount'], 0, ',', '.') }}</span>
                                                 @if($sim['result']['financial']['is_dispensasi'])
                                                     <br><span class="badge bg-warning">Dispensasi OK</span>
                                                 @endif

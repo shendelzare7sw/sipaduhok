@@ -34,6 +34,20 @@ class ValidasiRaporController extends Controller
             });
         }
 
+        // Filter by cabang
+        if ($request->filled('cabang_id')) {
+            $query->whereHas('kelas', function($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
+            });
+        }
+
+        // Filter by jenjang
+        if ($request->filled('jenjang')) {
+            $query->whereHas('kelas', function($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            });
+        }
+
         // Filter by kelas
         if ($request->has('kelas_id') && $request->kelas_id != '') {
             $query->where('kelas_id', $request->kelas_id);
@@ -58,7 +72,8 @@ class ValidasiRaporController extends Controller
 
         $siswaList = $query->orderBy('kelas_id')
                            ->orderBy('nama_lengkap')
-                           ->paginate(50);
+                           ->paginate(50)
+                           ->appends($request->query());
 
         // Stats for cards
         $stats = [
@@ -76,13 +91,31 @@ class ValidasiRaporController extends Controller
             ->when($activeYear, function($q) use ($activeYear) {
                 $q->where('tahun_ajaran_id', $activeYear->id);
             })
+            ->when($request->filled('cabang_id'), function($q) use ($request) {
+                $q->where('cabang_id', $request->cabang_id);
+            })
+            ->when($request->filled('jenjang'), function($q) use ($request) {
+                $q->where('jenjang', $request->jenjang);
+            })
+            ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
+
+        $cabangList = \App\Models\Cabang::orderBy('nama_cabang')->get();
+        $jenjangList = Kelas::select('jenjang')
+            ->when($activeYear, function($q) use ($activeYear) {
+                $q->where('tahun_ajaran_id', $activeYear->id);
+            })
+            ->distinct()
+            ->orderBy('jenjang')
+            ->pluck('jenjang');
 
         return view('ketua.validasi-rapor.index', [
             'siswaList' => $siswaList,
             'stats' => $stats,
             'kelasList' => $kelasList,
+            'cabangList' => $cabangList,
+            'jenjangList' => $jenjangList,
             'activeYear' => $activeYear,
         ]);
     }

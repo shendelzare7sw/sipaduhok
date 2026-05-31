@@ -110,6 +110,14 @@
             background: rgba(0,0,0,0.25); padding: 4px 10px; font-size: 7px;
             display: flex; justify-content: space-between; align-items: center;
         }
+        .card-footer .footer-address {
+            display: block;
+            width: 100%;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         /* Back card */
         .back .card-body {
@@ -310,7 +318,6 @@
                 </div>
                 <div class="card-footer">
                     <span>{{ $siswa->cabang->nama_cabang ?? 'PKBM HOK' }}</span>
-                    <span>Berlaku: {{ $siswa->kelas->tahunAjaran->nama_tahun_ajaran ?? date('Y') }}</span>
                 </div>
             </div>
 
@@ -341,8 +348,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <span>{{ Str::limit($alamatKartu, 40) }}</span>
-                    <span>info@hok.sch.id</span>
+                    <span class="footer-address" title="{{ $alamatKartu }}">{{ Str::limit($alamatKartu, 78) }}</span>
                 </div>
             </div>
         </div>
