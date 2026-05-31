@@ -25,7 +25,7 @@
     .calendar-container {
         background: white;
         border-radius: 12px;
-        padding: 30px;
+        padding: 24px 30px 30px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
@@ -33,15 +33,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 14px;
         flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .calendar-title {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1a4d8f;
+        gap: 12px;
     }
 
     .search-box {
@@ -507,6 +501,8 @@
         .calendar-header {
             flex-direction: column;
             align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
         .search-box {
@@ -514,11 +510,7 @@
         }
 
         .calendar-container {
-            padding: 10px;
-        }
-
-        .calendar-title {
-            font-size: 18px;
+            padding: 12px 10px 10px;
         }
 
         .calendar-page-header {
@@ -651,11 +643,7 @@
         }
 
         .calendar-container {
-            padding: 6px;
-        }
-
-        .calendar-title {
-            font-size: 15px;
+            padding: 8px 6px 6px;
         }
 
         .calendar-table th {
@@ -701,7 +689,7 @@
         }
 
         .calendar-container {
-            padding: 4px;
+            padding: 6px 4px 4px;
         }
 
         .calendar-section {
@@ -862,7 +850,6 @@
 
                     <div class="calendar-container">
                         <div class="calendar-header">
-                            <h1 class="calendar-title">Kalender Akademik</h1>
                             <div class="search-box">
                                 <input type="text" id="searchEvent" placeholder="Cari kegiatan...">
                                 <span class="search-icon"><i class="fas fa-search"></i></span>
