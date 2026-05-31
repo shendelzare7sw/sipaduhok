@@ -230,12 +230,8 @@
                         <input type="hidden" name="ai_model" value="{{ $model }}">
                         <input type="hidden" name="ai_vision_model" value="{{ $visionModel }}">
                         <input type="hidden" name="ai_provider" value="{{ $provider }}">
-                        @if($contextRestrictionEnabled)
-                            <input type="hidden" name="context_restriction_enabled" value="on">
-                        @endif
-                        @if($aiQuestionGeneratorEnabled)
-                            <input type="hidden" name="ai_question_generator_enabled" value="on">
-                        @endif
+                        <input type="hidden" name="context_restriction_enabled" id="context_restriction_enabled_hidden" value="{{ $contextRestrictionEnabled ? '1' : '0' }}">
+                        <input type="hidden" name="ai_question_generator_enabled" id="ai_question_generator_enabled_hidden" value="{{ $aiQuestionGeneratorEnabled ? '1' : '0' }}">
 
                         <div class="row g-3">
                             {{-- Staff Roles (Left Column) --}}
@@ -346,6 +342,30 @@
             const modelSelect = document.getElementById('ai_model');
             const groqField = document.getElementById('groq_field');
             const geminiField = document.getElementById('gemini_field');
+            const contextRestrictionToggle = document.getElementById('context_restriction_enabled');
+            const contextRestrictionHidden = document.getElementById('context_restriction_enabled_hidden');
+            const questionGeneratorToggle = document.getElementById('ai_question_generator_enabled');
+            const questionGeneratorHidden = document.getElementById('ai_question_generator_enabled_hidden');
+
+            function syncBooleanHidden(toggle, hidden) {
+                if (!toggle || !hidden) return;
+                hidden.value = toggle.checked ? '1' : '0';
+            }
+
+            syncBooleanHidden(contextRestrictionToggle, contextRestrictionHidden);
+            syncBooleanHidden(questionGeneratorToggle, questionGeneratorHidden);
+
+            if (contextRestrictionToggle) {
+                contextRestrictionToggle.addEventListener('change', function() {
+                    syncBooleanHidden(contextRestrictionToggle, contextRestrictionHidden);
+                });
+            }
+
+            if (questionGeneratorToggle) {
+                questionGeneratorToggle.addEventListener('change', function() {
+                    syncBooleanHidden(questionGeneratorToggle, questionGeneratorHidden);
+                });
+            }
 
             // Model mapping by provider (Only FREE & Verified working models)
             const modelsByProvider = {

@@ -1764,7 +1764,13 @@ async function sendMessageToApi(message, attachedFiles) {
     const formData = new FormData();
     formData.append('message', message);
     formData.append('model', chatbotState.selectedModel);
-    const cleanHistory = chatbotState.conversationHistory
+    let historyForRequest = chatbotState.conversationHistory;
+    const lastMessage = historyForRequest[historyForRequest.length - 1];
+    if (lastMessage && lastMessage.role === 'user' && lastMessage.content === message) {
+        historyForRequest = historyForRequest.slice(0, -1);
+    }
+
+    const cleanHistory = historyForRequest
         .slice(-10)
         .map(msg => ({ role: msg.role, content: msg.content }));
     formData.append('history', JSON.stringify(cleanHistory));

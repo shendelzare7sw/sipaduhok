@@ -78,8 +78,8 @@ class AiSettingController extends Controller
             'ai_vision_model' => $request->ai_vision_model,
             'ai_provider' => $request->ai_provider,
             'chatbot_enabled_roles' => json_encode($chatbotEnabledRoles),
-            'context_restriction_enabled' => $request->has('context_restriction_enabled') ? '1' : '0',
-            'ai_question_generator_enabled' => $request->has('ai_question_generator_enabled') ? '1' : '0',
+            'context_restriction_enabled' => $request->boolean('context_restriction_enabled') ? '1' : '0',
+            'ai_question_generator_enabled' => $request->boolean('ai_question_generator_enabled') ? '1' : '0',
         ];
 
         foreach ($settings as $key => $value) {

@@ -337,6 +337,36 @@ PROMPT;
     }
 
     /**
+     * Lightweight prompt for open mode and clearly general questions.
+     * Keeping SIPADUHOK KB out of this prompt prevents the model from
+     * over-applying the old "outside context" refusal pattern.
+     */
+    private function buildGeneralOpenPrompt(string $userRole): string
+    {
+        $roleLabel = $this->kb->roleLabel($userRole ?: 'guest');
+
+        return <<<PROMPT
+Anda adalah asisten AI umum yang tersedia di dalam aplikasi SIPADUHOK. Pengguna login dengan role: {$roleLabel}.
+
+MODE TERBUKA AKTIF:
+1. Jawab pertanyaan umum di luar SIPADUHOK secara langsung, natural, ringkas, dan aman dalam Bahasa Indonesia.
+2. JANGAN menolak pertanyaan hanya karena tidak terkait dengan sistem SIPADUHOK.
+3. JANGAN menulis kalimat seperti "pertanyaan Anda tidak terkait dengan sistem SIPADUHOK" saat mode terbuka aktif.
+4. Untuk pertanyaan umum, gunakan "button": null, "related": null, dan "callout": null kecuali ada peringatan penting.
+5. Jika user bertanya tentang menu, fitur, data sekolah, hak akses, atau cara penggunaan SIPADUHOK, jawab bahwa Anda bisa membantu topik SIPADUHOK dan minta user menyebut menu/fitur yang dimaksud jika konteksnya belum jelas.
+
+ATURAN OUTPUT JSON (WAJIB):
+Selalu balas dengan JSON valid (tanpa code fence, tanpa teks pembungkus), schema:
+{
+  "text": "jawaban natural Bahasa Indonesia, max 3 paragraf pendek. Pakai \\n untuk newline. Hindari markdown heading (#).",
+  "callout": "info penting singkat (max 200 char) atau null",
+  "button": null,
+  "related": null
+}
+PROMPT;
+    }
+
+    /**
      * Parse LLM raw output into structured response.
      * Resolves route names → URLs, filters routes not accessible to role.
      */
@@ -423,6 +453,133 @@ PROMPT;
     }
 
     /**
+     * Decide when the SIPADUHOK knowledge base should be injected in open mode.
+     */
+    private function shouldUseSipaduhokContext(string $userMessage): bool
+    {
+        $text = strtolower($userMessage);
+        $keywords = [
+            'sipaduhok',
+            'menu',
+            'fitur',
+            'dashboard',
+            'login',
+            'logout',
+            'akun',
+            'password',
+            'role',
+            'hak akses',
+            'admin',
+            'ketua',
+            'wakil kepala',
+            'sekretaris',
+            'bendahara',
+            'wali kelas',
+            'guru',
+            'siswa',
+            'orang tua',
+            'kelas',
+            'cabang',
+            'tahun ajaran',
+            'jadwal',
+            'presensi',
+            'absensi',
+            'rapor',
+            'nilai',
+            'lms',
+            'materi',
+            'tugas',
+            'ujian',
+            'latihan',
+            'forum',
+            'kalender',
+            'pengumuman',
+            'berita',
+            'ppdb',
+            'tagihan',
+            'pembayaran',
+            'monitoring',
+            'notifikasi',
+        ];
+
+        foreach ($keywords as $keyword) {
+            if (str_contains($text, $keyword)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Keep only useful recent history and remove stale context-refusal answers
+     * when open mode is handling a general question.
+     */
+    private function prepareConversationHistory(array $history, bool $openGeneralMode, string $currentMessage): array
+    {
+        $clean = [];
+        foreach ($history as $msg) {
+            $role = $msg['role'] ?? null;
+            $content = $msg['content'] ?? null;
+
+            if (!in_array($role, ['user', 'assistant'], true) || !is_string($content)) {
+                continue;
+            }
+
+            $content = trim($content);
+            if ($content === '') {
+                continue;
+            }
+
+            $clean[] = ['role' => $role, 'content' => $content];
+        }
+
+        if (!empty($clean)) {
+            $lastIndex = count($clean) - 1;
+            if (
+                $clean[$lastIndex]['role'] === 'user'
+                && $this->normalizeHistoryText($clean[$lastIndex]['content']) === $this->normalizeHistoryText($currentMessage)
+            ) {
+                array_pop($clean);
+            }
+        }
+
+        if ($openGeneralMode) {
+            $clean = array_values(array_filter($clean, function ($msg) {
+                return $msg['role'] !== 'assistant' || !$this->isContextRefusalText($msg['content']);
+            }));
+        }
+
+        return array_slice($clean, -10);
+    }
+
+    private function normalizeHistoryText(string $text): string
+    {
+        return preg_replace('/\s+/', ' ', strtolower(trim($text))) ?? '';
+    }
+
+    private function isContextRefusalText(string $text): bool
+    {
+        $text = strtolower($text);
+        $patterns = [
+            'tidak terkait dengan sistem sipaduhok',
+            'hanya dapat membantu seputar sistem sipaduhok',
+            'di luar konteks sipaduhok',
+            'di luar topik sipaduhok',
+            'belum punya informasi spesifik tentang itu di sipaduhok',
+            'silakan tanyakan tentang menu atau fitur yang ada di sistem',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (str_contains($text, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Build messages array for API
      *
      * @param array $history Conversation history [{role, content}, ...]
@@ -435,15 +592,20 @@ PROMPT;
     private function buildMessagesArray(array $history, string $userMessage, string $userRole, array $files, string $provider): array
     {
         $messages = [];
+        $strict = isContextRestrictionEnabled();
+        $useSipaduhokContext = $strict || $this->shouldUseSipaduhokContext($userMessage);
+        $openGeneralMode = !$strict && !$useSipaduhokContext;
 
         // Add system prompt
         $messages[] = [
             'role' => 'system',
-            'content' => $this->buildSystemPrompt($userRole),
+            'content' => $openGeneralMode
+                ? $this->buildGeneralOpenPrompt($userRole)
+                : $this->buildSystemPrompt($userRole),
         ];
 
         // Add conversation history (trim to last 10 messages = 5 user + 5 assistant exchanges)
-        $trimmedHistory = array_slice($history, -10);
+        $trimmedHistory = $this->prepareConversationHistory($history, $openGeneralMode, $userMessage);
         foreach ($trimmedHistory as $msg) {
             $messages[] = [
                 'role' => $msg['role'],
