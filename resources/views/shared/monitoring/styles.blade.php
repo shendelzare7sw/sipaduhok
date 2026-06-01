@@ -433,6 +433,8 @@
         display: flex;
         gap: 14px;
         justify-content: space-between;
+        min-width: 0;
+        overflow-wrap: anywhere;
         padding: 12px 14px;
         text-align: right !important;
         white-space: normal;
@@ -440,6 +442,15 @@
 
     .monitoring-page .table-clean tbody td > * {
         min-width: 0;
+    }
+
+    .monitoring-page .table-clean tbody td .mobile-cell-value {
+        flex: 1 1 auto;
+        max-width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        text-align: right;
+        word-break: break-word;
     }
 
     .monitoring-page .table-clean tbody td::before {
@@ -585,6 +596,25 @@
 }
 
 @media (max-width: 575.98px) {
+    .monitoring-page {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    .monitoring-page .content-card-body {
+        padding: 12px 10px;
+    }
+
+    .monitoring-page .table-clean tbody td {
+        gap: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .monitoring-page .table-clean tbody td::before {
+        flex-basis: 86px;
+    }
+
     .monitoring-page .assignment-list {
         align-items: stretch;
         flex-direction: column;

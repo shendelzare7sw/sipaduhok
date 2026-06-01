@@ -88,14 +88,14 @@
                     <tbody>
                         @forelse($tenagaPendidik as $tp)
                             <tr>
-                                <td data-label="NIP">{{ $tp->nip ?? '-' }}</td>
+                                <td data-label="NIP"><span class="mobile-cell-value">{{ $tp->nip ?? '-' }}</span></td>
                                 <td data-label="Nama">
-                                    <span class="entity-title">{{ $tp->nama_lengkap }}</span>
+                                    <span class="entity-title mobile-cell-value">{{ $tp->nama_lengkap }}</span>
                                 </td>
                                 <td data-label="Role">
                                     <span class="soft-badge primary">{{ ucwords(str_replace('_', ' ', $tp->user->role ?? '-')) }}</span>
                                 </td>
-                                <td data-label="Email">{{ $tp->email ?? $tp->user->email ?? '-' }}</td>
+                                <td data-label="Email"><span class="mobile-cell-value">{{ $tp->email ?? $tp->user->email ?? '-' }}</span></td>
                                 <td data-label="Status Akun">
                                     @if(optional($tp->user)->is_active)
                                         <span class="soft-badge success"><i class="fas fa-check me-1"></i> Aktif</span>
@@ -165,9 +165,9 @@
                     <tbody>
                         @forelse($siswa as $s)
                             <tr>
-                                <td data-label="NISN">{{ $s->nisn ?? '-' }}</td>
+                                <td data-label="NISN"><span class="mobile-cell-value">{{ $s->nisn ?? '-' }}</span></td>
                                 <td data-label="Nama">
-                                    <span class="entity-title">{{ $s->nama_lengkap }}</span>
+                                    <span class="entity-title mobile-cell-value">{{ $s->nama_lengkap }}</span>
                                 </td>
                                 <td data-label="Kelas">
                                     @if($s->kelas)
