@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <img src="{{ asset('img/homeschool-main.jpg') }}" alt="Homeschooling" class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
+                    <img src="{{ asset('img/hero-img.jpg') }}" alt="Homeschooling" class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                 </div>
             </div>
         </div>

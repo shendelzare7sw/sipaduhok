@@ -1,14 +1,21 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+return new class
 {
+    public $withinTransaction = true;
+
+    protected ?string $connection = null;
+
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
     public function up(): void
     {
-        Schema::table('rapor', function (Blueprint $table) {
+        Schema::table('rapor', function ($table) {
             if (!Schema::hasColumn('rapor', 'catatan_alignment')) {
                 $table->string('catatan_alignment', 12)->default('center')->after('catatan_wali_kelas');
             }
@@ -25,7 +32,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('rapor', function (Blueprint $table) {
+        Schema::table('rapor', function ($table) {
             $columns = array_values(array_filter([
                 Schema::hasColumn('rapor', 'catatan_alignment') ? 'catatan_alignment' : null,
                 Schema::hasColumn('rapor', 'deskripsi_alignment') ? 'deskripsi_alignment' : null,

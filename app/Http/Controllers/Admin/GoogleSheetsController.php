@@ -170,6 +170,8 @@ class GoogleSheetsController extends Controller
             }
 
             try {
+                $this->googleSheetsService->setSpreadsheetId($spreadsheetId);
+
                 // Test the connection
                 $connected = $this->googleSheetsService->testConnection();
 

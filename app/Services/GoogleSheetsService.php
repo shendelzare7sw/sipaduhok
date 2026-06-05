@@ -6,6 +6,8 @@ use Google\Client;
 use Google\Service\Sheets;
 use Google\Service\Drive;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
 class GoogleSheetsService
 {
@@ -18,11 +20,11 @@ class GoogleSheetsService
     public function __construct()
     {
         $this->credentialsPath = env('GOOGLE_SERVICE_ACCOUNT_JSON_PATH', storage_path('app/credentials/google-service-account.json'));
-        $this->spreadsheetId = env('GOOGLE_SHEETS_DEFAULT_SPREADSHEET_ID', '');
+        $this->spreadsheetId = (string) env('GOOGLE_SHEETS_DEFAULT_SPREADSHEET_ID', '');
         
         if (function_exists('config')) {
             $this->credentialsPath = config('google-sheets.credentials_path', $this->credentialsPath);
-            $this->spreadsheetId = config('google-sheets.default_spreadsheet_id', $this->spreadsheetId);
+            $this->spreadsheetId = (string) (config('google-sheets.default_spreadsheet_id', $this->spreadsheetId) ?? '');
         }
         
         $this->initializeClient();
@@ -50,10 +52,24 @@ class GoogleSheetsService
             $this->sheetsService = new Sheets($this->client);
             $this->driveService = new Drive($this->client);
 
-            \Log::info('Google Client initialized successfully');
+            Log::info('Google Client initialized successfully');
         } catch (Exception $e) {
-            \Log::error('Failed to initialize Google Client: ' . $e->getMessage());
+            Log::error('Failed to initialize Google Client: ' . $e->getMessage());
             // Don't throw - allow service to be partially initialized
+        }
+    }
+
+    private function ensureSheetsService(): void
+    {
+        if (!$this->sheetsService || $this->spreadsheetId === '') {
+            throw new RuntimeException('Google Sheets belum dikonfigurasi lengkap.');
+        }
+    }
+
+    private function ensureDriveService(): void
+    {
+        if (!$this->driveService || $this->spreadsheetId === '') {
+            throw new RuntimeException('Google Drive belum dikonfigurasi lengkap.');
         }
     }
 
@@ -63,7 +79,8 @@ class GoogleSheetsService
     public function testConnection(): bool
     {
         try {
-            $spreadsheet = $this->sheetsService->spreadsheets->get($this->spreadsheetId);
+            $this->ensureSheetsService();
+            $this->sheetsService->spreadsheets->get($this->spreadsheetId);
             Log::channel(config('google-sheets.log_channel'))
                 ->info('Google Sheets connection test successful');
             return true;
@@ -80,6 +97,7 @@ class GoogleSheetsService
     public function getSpreadsheetMetadata()
     {
         try {
+            $this->ensureSheetsService();
             return $this->sheetsService->spreadsheets->get($this->spreadsheetId);
         } catch (Exception $e) {
             Log::channel(config('google-sheets.log_channel'))
@@ -115,6 +133,7 @@ class GoogleSheetsService
     public function getSheetData(string $sheetName): array
     {
         try {
+            $this->ensureSheetsService();
             $range = "{$sheetName}!A1:ZZ";
             $response = $this->sheetsService->spreadsheets_values->get($this->spreadsheetId, $range);
             $values = $response->getValues();
@@ -133,6 +152,7 @@ class GoogleSheetsService
     public function getRange(string $range): array
     {
         try {
+            $this->ensureSheetsService();
             $response = $this->sheetsService->spreadsheets_values->get($this->spreadsheetId, $range);
             return $response->getValues() ?? [];
         } catch (Exception $e) {
@@ -148,6 +168,7 @@ class GoogleSheetsService
     public function updateRange(string $range, array $values): bool
     {
         try {
+            $this->ensureSheetsService();
             $body = new Sheets\ValueRange();
             $body->setValues($values);
 
@@ -174,6 +195,7 @@ class GoogleSheetsService
     public function clearSheet(string $sheetName): bool
     {
         try {
+            $this->ensureSheetsService();
             $range = "{$sheetName}!A1:ZZ1000";
             $this->sheetsService->spreadsheets_values->clear(
                 $this->spreadsheetId,
@@ -197,6 +219,7 @@ class GoogleSheetsService
     public function appendRows(string $sheetName, array $rows): bool
     {
         try {
+            $this->ensureSheetsService();
             $body = new Sheets\ValueRange();
             $body->setValues($rows);
 
@@ -223,6 +246,7 @@ class GoogleSheetsService
     public function formatHeader(string $sheetName, int $rowCount): bool
     {
         try {
+            $this->ensureSheetsService();
             $requests = [];
             $spreadsheet = $this->getSpreadsheetMetadata();
             $sheetId = null;
@@ -326,6 +350,7 @@ class GoogleSheetsService
     public function shareSpreadsheet(string $email): bool
     {
         try {
+            $this->ensureDriveService();
             $permission = new Drive\Permission();
             $permission->setType('user');
             $permission->setRole('reader');
@@ -351,6 +376,10 @@ class GoogleSheetsService
      */
     public function getSpreadsheetUrl(): string
     {
+        if ($this->spreadsheetId === '') {
+            return '';
+        }
+
         return "https://docs.google.com/spreadsheets/d/{$this->spreadsheetId}";
     }
 
@@ -367,6 +396,6 @@ class GoogleSheetsService
      */
     public function getSpreadsheetId(): string
     {
-        return $this->spreadsheetId;
+        return (string) $this->spreadsheetId;
     }
 }

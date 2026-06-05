@@ -38,6 +38,11 @@ class SyncModuleToSheet implements ShouldQueue
     public function handle()
     {
         try {
+            if (!config('google-sheets.enabled')) {
+                \Log::info("Google Sheets sync skipped because integration is disabled. Module: '{$this->module}'.");
+                return;
+            }
+
             $service = new GoogleSheetsService();
             $modules = config('google-sheets.modules');
 

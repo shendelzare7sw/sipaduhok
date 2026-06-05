@@ -127,7 +127,7 @@
         <h5 class="fw-bold mb-2"><i class="fas fa-id-card me-2 text-primary"></i>Profil Saya</h5>
         <div class="row g-3">
             <div class="col-md-3">
-                <img src="{{ $siswa->foto ? asset('storage/' . $siswa->foto) : asset('assets/img/avatars/1.png') }}"
+                <img src="{{ $siswa->foto ? asset('storage/' . $siswa->foto) : asset('img/logo.png') }}"
                      alt="Foto" class="rounded shadow-sm"
                      style="width: 100%; max-width: 140px; aspect-ratio: 1/1; object-fit: cover;">
             </div>

@@ -288,18 +288,20 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/history', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'history'])->name('history');
         });
 
-        // Google Sheets Integration
-        Route::prefix('google-sheets')->name('google-sheets.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'index'])->name('index');
-            Route::get('/setup', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'setup'])->name('setup');
-            Route::post('/save-credential', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'saveCredential'])->name('save-credential');
-            Route::post('/test-connection', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'testConnection'])->name('test-connection');
-            Route::post('/push/{module}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'push'])->name('push');
-            Route::get('/pull-preview/{module}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'pullPreview'])->name('pull-preview');
-            Route::post('/pull/{module}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'pull'])->name('pull');
-            Route::get('/status/{module?}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'status'])->name('status');
-            Route::post('/disconnect', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'disconnect'])->name('disconnect');
-        });
+        // Google Sheets Integration (dormant until partner approval)
+        if (config('google-sheets.enabled')) {
+            Route::prefix('google-sheets')->name('google-sheets.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'index'])->name('index');
+                Route::get('/setup', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'setup'])->name('setup');
+                Route::post('/save-credential', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'saveCredential'])->name('save-credential');
+                Route::post('/test-connection', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'testConnection'])->name('test-connection');
+                Route::post('/push/{module}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'push'])->name('push');
+                Route::get('/pull-preview/{module}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'pullPreview'])->name('pull-preview');
+                Route::post('/pull/{module}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'pull'])->name('pull');
+                Route::get('/status/{module?}', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'status'])->name('status');
+                Route::post('/disconnect', [\App\Http\Controllers\Admin\GoogleSheetsController::class, 'disconnect'])->name('disconnect');
+            });
+        }
     });
 
     /*

@@ -320,7 +320,8 @@ class NilaiController extends Controller
                 'selectedMapel',
                 'nilaiData',
                 'wali',
-                'cabang'
+                'cabang',
+                'semester'
             ));
 
         } else {

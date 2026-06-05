@@ -74,7 +74,7 @@ class Flyer extends Model
         if ($this->gambar_flyer) {
             return asset('storage/' . $this->gambar_flyer);
         }
-        return asset('images/default-flyer.png');
+        return asset('img/hero-img.jpg');
     }
 
     /**

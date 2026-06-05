@@ -1,10 +1,18 @@
-@extends('layouts.app')
+@extends('layouts.sneat')
+
+@section('title', 'Template Capaian Kompetensi')
+@section('page-title', 'Template Capaian Kompetensi')
+@section('page-subtitle', 'Kelola template deskripsi capaian untuk rapor')
+
+@section('sidebar-menu')
+    @include('wali-kelas.partials.sneat-sidebar-menu')
+@endsection
 
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">Template Capaian Kompetensi</h1>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createModal">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
             <i class="fas fa-plus"></i> Tambah Template
         </button>
     </div>
@@ -31,7 +39,7 @@
                         <input type="text" name="search" class="form-control" placeholder="Cari nama template..." value="{{ request('search') }}">
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary btn-block">
+                        <button type="submit" class="btn btn-primary w-100">
                             <i class="fas fa-search"></i> Filter
                         </button>
                     </div>
@@ -46,7 +54,7 @@
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
@@ -107,7 +115,7 @@
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah Template</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
@@ -131,7 +139,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
             </form>
@@ -148,7 +156,7 @@
                 @method('PUT')
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Template</h5>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
@@ -170,7 +178,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
@@ -217,7 +225,7 @@ function editTemplate(template) {
     document.getElementById('edit_mata_pelajaran_id').value = template.mata_pelajaran_id;
     document.getElementById('edit_nama_template').value = template.nama_template;
     document.getElementById('edit_template_text').value = template.template_text;
-    $('#editModal').modal('show');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
 }
 
 document.getElementById('hapusTemplateModal')?.addEventListener('show.bs.modal', function(e) {

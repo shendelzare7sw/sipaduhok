@@ -11,9 +11,9 @@
 @section('content')
     <div class="mb-3">
         @if(!empty($pertemuanId))
-            <a href="{{ route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) }}"
+            <a href="{{ route('guru.lms.meeting.index', [$kelas->id, $mapel->id]) }}"
                 class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i>Kembali ke Pertemuan
+                <i class="fas fa-arrow-left me-1"></i>Kembali ke Meeting
             </a>
         @else
             <a href="{{ route('guru.lms.forum.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
@@ -65,7 +65,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-paper-plane me-1"></i>Mulai Diskusi
                     </button>
-                    <a href="{{ !empty($pertemuanId) ? route('guru.lms.pertemuan.show', [$kelas->id, $mapel->id, $pertemuanId]) : route('guru.lms.forum.index', [$kelas->id, $mapel->id]) }}"
+                    <a href="{{ !empty($pertemuanId) ? route('guru.lms.meeting.index', [$kelas->id, $mapel->id]) : route('guru.lms.forum.index', [$kelas->id, $mapel->id]) }}"
                         class="btn btn-secondary">Batal</a>
                 </div>
             </form>

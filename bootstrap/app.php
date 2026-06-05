@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\RejectEmailHeaderInjection::class,
             \App\Http\Middleware\EnsureUserIsActive::class,
             \App\Http\Middleware\CheckAdminSecuritySetup::class,
         ]);
@@ -60,6 +61,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function ($schedule) {
         // Google Sheets Sync Scheduler
+        if (!config('google-sheets.enabled')) {
+            return;
+        }
         
         // Tier 1: Daily sync at 00:30 (6 modules)
         // Modules: siswa, guru, kelas, jadwal_pelajaran, presensi, nilai

@@ -96,7 +96,7 @@
                     <div class="teacher-card bg-white rounded-2xl shadow-lg overflow-hidden"
                         data-category="{{ $staff['category'] ?? 'guru' }}">
                         <div class="relative">
-                            <img src="{{ asset($staff['image'] ?? 'img/default-person.png') }}" alt="{{ $staff['name'] }}"
+                            <img src="{{ asset($staff['image'] ?? 'img/guru-1.png') }}" alt="{{ $staff['name'] }}"
                                 class="w-full h-64 object-cover">
                             <span class="absolute top-4 right-4 text-white px-3 py-1 rounded-full text-xs font-medium"
                                 style="background-color: {{ $badgeColor }}">
