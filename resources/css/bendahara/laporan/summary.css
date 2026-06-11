@@ -1,0 +1,212 @@
+.report-page {
+    margin: 0 auto;
+    max-width: 1400px;
+    padding: 0 1rem;
+}
+
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    height: 100%;
+    overflow: hidden;
+    padding: 24px;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-content {
+    position: relative;
+    z-index: 2;
+}
+
+.stat-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+    text-transform: uppercase;
+}
+
+.stat-number {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.stat-number-lg {
+    font-size: 24px;
+}
+
+.stat-desc,
+.stat-label-sub {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.stat-icon-bg {
+    font-size: 60px;
+    opacity: 0.15;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.stat-icon-bg-lg {
+    font-size: 70px;
+}
+
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.bg-gradient-green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.bg-gradient-orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.bg-gradient-red {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.btn-gradient-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+}
+
+.btn-gradient-green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+}
+
+.btn-blue-text {
+    color: #2563eb;
+}
+
+.table thead th {
+    background: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+    color: #4e73df;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.table-belum-lunas thead th {
+    background: #f9fafb;
+    border-bottom-color: #e5e7eb;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.progress-bar-container,
+.progress-bar-custom {
+    background: #eaecf4;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.progress-bar-custom {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+}
+
+.progress-fill.progress-good {
+    background: #10b981;
+}
+
+.progress-text.progress-good {
+    color: #10b981;
+}
+
+.progress-fill.progress-warning {
+    background: #f59e0b;
+}
+
+.progress-text.progress-warning {
+    color: #f59e0b;
+}
+
+.progress-fill.progress-danger {
+    background: #ef4444;
+}
+
+.progress-text.progress-danger {
+    color: #ef4444;
+}
+
+.currency-font {
+    font-family: "Nunito", sans-serif;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .stat-card {
+        padding: 16px;
+    }
+
+    .stat-number {
+        font-size: 16px;
+    }
+
+    .stat-title {
+        font-size: 11px;
+    }
+
+    .stat-icon-bg,
+    .stat-icon-bg-lg {
+        font-size: 40px;
+        right: 12px;
+    }
+
+    .table thead th {
+        font-size: 10px;
+        padding: 8px 6px;
+    }
+
+    .table td {
+        font-size: 12px;
+        padding: 8px 6px;
+    }
+
+    .currency-font {
+        font-size: 12px;
+    }
+
+    .card-body.py-3 .row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .card-body.py-3 .col-auto {
+        text-align: left;
+    }
+
+    .card-body.py-3 .btn {
+        width: 100%;
+    }
+}
