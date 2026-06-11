@@ -73,6 +73,8 @@ export default defineConfig({
                 'resources/js/ketua/laporan/index.js',
                 'resources/css/ketua/promotion/approval.css',
                 'resources/js/ketua/promotion/approval.js',
+                'resources/css/ketua/validasi-rapor/index.css',
+                'resources/js/ketua/validasi-rapor/index.js',
                 'resources/css/waka/monitoring/guru-pengajar.css',
                 'resources/js/waka/monitoring/guru-pengajar.js',
                 'resources/css/waka/monitoring/siswa.css',
