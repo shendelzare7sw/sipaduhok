@@ -9,8 +9,17 @@
     @include('sekretaris.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/sekretaris/kalender/show.css'])
+@endsection
+
 @section('content')
-<div style="max-width: 1000px; margin: 0 auto; padding: 0 1rem;">
+<div id="calendarShowConfig"
+     data-delete-route-template="{{ route('sekretaris.kalender.destroy', ':id') }}"
+     data-toggle-route-template="{{ route('sekretaris.kalender.toggle-visibility', ':id') }}"
+     data-csrf-token="{{ csrf_token() }}"></div>
+
+<div class="sekretaris-calendar-show-page">
 <div class="card shadow-lg border-0">
     <div class="card-header bg-primary text-white">
         <div class="d-flex justify-content-between align-items-center">
@@ -19,7 +28,11 @@
                 <a href="{{ route('sekretaris.kalender.edit', $kalender->id) }}" class="btn btn-warning btn-sm shadow-sm">
                     <i class="fas fa-edit me-1"></i> Edit
                 </a>
-                <button type="button" class="btn btn-danger btn-sm shadow-sm" onclick="confirmDelete({{ $kalender->id }}, '{{ str_replace('"', '&quot;', $kalender->nama_kegiatan) }}')">
+                <button type="button"
+                        class="btn btn-danger btn-sm shadow-sm"
+                        data-confirm-delete
+                        data-kalender-id="{{ $kalender->id }}"
+                        data-kalender-name="{{ $kalender->nama_kegiatan }}">
                     <i class="fas fa-trash me-1"></i> Hapus
                 </button>
                 <a href="{{ route('sekretaris.kalender.index') }}" class="btn btn-secondary btn-sm shadow-sm">
@@ -40,7 +53,7 @@
                 <div class="mb-3">
                     <label class="fw-bold text-muted small">JENIS KEGIATAN</label>
                     <div>
-                        <span class="badge bg-info" style="font-size: 13px; padding: 8px 12px;">
+                        <span class="badge bg-info calendar-detail-badge">
                             {{ $kalender->jenis_label ?? $kalender->jenis_kegiatan }}
                         </span>
                     </div>
@@ -50,26 +63,28 @@
                     <label class="fw-bold text-muted small">STATUS</label>
                     <div>
                         @if($kalender->status == 'aktif')
-                            <span class="badge bg-success" style="font-size: 13px; padding: 8px 12px;">AKTIF</span>
+                            <span class="badge bg-success calendar-detail-badge">AKTIF</span>
                         @elseif($kalender->status == 'draft')
-                            <span class="badge bg-warning text-white" style="font-size: 13px; padding: 8px 12px;">DRAFT</span>
+                            <span class="badge bg-warning text-white calendar-detail-badge">DRAFT</span>
                         @else
-                            <span class="badge bg-secondary" style="font-size: 13px; padding: 8px 12px;">SELESAI</span>
+                            <span class="badge bg-secondary calendar-detail-badge">SELESAI</span>
                         @endif
                     </div>
                 </div>
+
 
                 <div class="mb-3">
                     <label class="fw-bold text-muted small">VISIBILITAS SISWA</label>
                     <div class="d-flex align-items-center">
                         <div class="form-check form-switch ps-0">
-                            <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" 
+                            <input class="form-check-input ms-0 me-2 calendar-visibility-switch" type="checkbox" role="switch"
                                 id="visibilitySwitch" 
-                                style="cursor: pointer; width: 3em; height: 1.5em;"
+                                data-toggle-visibility
+                                data-kalender-id="{{ $kalender->id }}"
                                 {{ !$kalender->is_hidden_siswa ? 'checked' : '' }}
-                                onchange="toggleVisibility({{ $kalender->id }}, this)">
+                            >
                             <label class="form-check-label d-flex align-items-center" for="visibilitySwitch">
-                                <span id="visibilityLabel" class="badge {{ !$kalender->is_hidden_siswa ? 'bg-primary' : 'bg-secondary' }}" style="font-size: 13px; padding: 8px 12px;">
+                                <span id="visibilityLabel" class="badge calendar-detail-badge {{ !$kalender->is_hidden_siswa ? 'bg-primary' : 'bg-secondary' }}">
                                     <i class="fas {{ !$kalender->is_hidden_siswa ? 'fa-eye' : 'fa-eye-slash' }} me-2"></i>
                                     {{ !$kalender->is_hidden_siswa ? 'TAMPIL DI SISWA' : 'DISEMBUNYIKAN' }}
                                 </span>
@@ -113,7 +128,7 @@
         @if($kalender->keterangan)
         <div class="mb-4">
             <label class="fw-bold text-muted small">KETERANGAN / DESKRIPSI</label>
-            <div class="bg-light p-3 rounded border" style="line-height: 1.6; color: #333;">
+            <div class="bg-light p-3 rounded border calendar-description-box">
                 {!! nl2br(e($kalender->keterangan)) !!}
             </div>
         </div>
@@ -197,87 +212,5 @@
 @endsection
 
 @section('scripts')
-<script>
-    function confirmDelete(id, name) {
-        document.getElementById('deleteKalenderName').textContent = name;
-        document.getElementById('deleteForm').action = '{{ route('sekretaris.kalender.destroy', ':id') }}'.replace(':id', id);
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        deleteModal.show();
-    }
-
-    function toggleVisibility(id, checkbox) {
-        const isChecked = checkbox.checked;
-        const labelBadge = document.getElementById('visibilityLabel');
-        
-        // Optimistic UI update
-        if (isChecked) {
-            labelBadge.className = 'badge bg-primary';
-            labelBadge.innerHTML = '<i class="fas fa-eye me-2"></i> TAMPIL DI SISWA';
-        } else {
-            labelBadge.className = 'badge bg-secondary';
-            labelBadge.innerHTML = '<i class="fas fa-eye-slash me-2"></i> DISEMBUNYIKAN';
-        }
-
-        const baseUrl = "{{ url('sekretaris/kalender') }}";
-            
-        fetch(`${baseUrl}/${id}/toggle-visibility`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: data.message,
-                        showConfirmButton: false,
-                        timer: 3000
-                    });
-                } else {
-                    console.log(data.message);
-                }
-            } else {
-                throw new Error(data.message || 'Gagal update status');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Revert UI on error
-            checkbox.checked = !isChecked;
-            if (!isChecked) { 
-                labelBadge.className = 'badge bg-primary';
-                labelBadge.innerHTML = '<i class="fas fa-eye me-2"></i> TAMPIL DI SISWA';
-            } else { 
-                labelBadge.className = 'badge bg-secondary';
-                labelBadge.innerHTML = '<i class="fas fa-eye-slash me-2"></i> DISEMBUNYIKAN';
-            }
-            
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Gagal mengubah status visibilitas.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
-            } else {
-                alert('Gagal ubah status');
-            }
-        });
-    }
-</script>
+    @vite(['resources/js/sekretaris/kalender/show.js'])
 @endsection

@@ -21,9 +21,8 @@
 <div id="calendarConfig"
      data-show-route-template="{{ route('admin.akademik.kalender.show', ':id') }}"
      data-delete-route-template="{{ route('admin.akademik.kalender.destroy', ':id') }}"
+     data-toggle-route-template="{{ route('admin.akademik.kalender.toggle-visibility', ':id') }}"
      data-print-route="{{ route('admin.akademik.kalender.cetak') }}"
-     data-admin-base-url="{{ url('admin/akademik/kalender') }}"
-     data-sekretaris-base-url="{{ url('sekretaris/kalender') }}"
      data-csrf-token="{{ csrf_token() }}"></div>
 <div class="container-fluid px-4 ak-calendar-skin">
 

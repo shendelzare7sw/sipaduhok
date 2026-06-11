@@ -1,0 +1,97 @@
+.sekretaris-calendar-form-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.sekretaris-calendar-form-page .content-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    padding: 24px;
+}
+
+.sekretaris-calendar-form-page .form-group {
+    margin-bottom: 20px;
+}
+
+.sekretaris-calendar-form-page .form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.sekretaris-calendar-form-page .form-control {
+    border-color: #d1d5db;
+    border-radius: 8px;
+    min-height: 42px;
+}
+
+.sekretaris-calendar-form-page .form-control:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.12);
+}
+
+.sekretaris-calendar-form-page textarea.form-control {
+    min-height: 96px;
+}
+
+.custom-event-group {
+    display: none;
+    margin-top: -8px;
+}
+
+.custom-event-group.is-visible {
+    display: block;
+}
+
+.calendar-form-actions {
+    margin-top: 24px;
+}
+
+.calendar-info-title {
+    margin-bottom: 16px;
+    color: #111827;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.calendar-info-icon {
+    color: #165fac;
+}
+
+.calendar-info-content {
+    color: #666666;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.calendar-info-content ul {
+    margin-bottom: 12px;
+    padding-left: 20px;
+}
+
+.calendar-info-content hr {
+    margin: 16px 0;
+}
+
+.calendar-info-tip {
+    margin-bottom: 0;
+}
+
+.calendar-info-tip-icon {
+    color: #ffc107;
+}
+
+@media (max-width: 991.98px) {
+    .sekretaris-calendar-form-page {
+        padding: 0;
+    }
+
+    .sekretaris-calendar-form-page .content-card {
+        margin-bottom: 18px;
+    }
+}

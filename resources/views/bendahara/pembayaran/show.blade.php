@@ -9,49 +9,11 @@
 @endsection
 
 @section('styles')
-<style>
-    .info-table td { padding: 10px 0; }
-    .info-table td:first-child { color: #64748b; width: 150px; }
-    .student-avatar {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-    }
-    .badge-custom { padding: 6px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; }
-    .validation-card {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-        border: none;
-    }
-    
-    @media (max-width: 768px) {
-        .info-table, .info-table tbody, .info-table tr, .info-table td {
-            display: block; width: 100%;
-        }
-        .info-table td:first-child {
-            width: 100% !important; font-weight: bold; padding-bottom: 2px; border-bottom: none;
-        }
-        .info-table td:last-child {
-            padding-top: 2px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6; text-align: left;
-        }
-        .info-table tr:last-child td:last-child { border-bottom: none; }
-        .student-avatar { flex-shrink: 0; }
-        .card-header { padding: 15px; }
-        .d-flex.gap-3.align-items-start { align-items: center !important; }
-    }
-</style>
+    @vite(['resources/css/bendahara/pembayaran/show.css'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="pembayaran-show-page">
 <div class="container-fluid px-0">
 
     {{-- Breadcrumb --}}
@@ -191,7 +153,7 @@
 
                     <table class="info-table w-100">
                         <tr>
-                            <td style="width: 120px;">Kelas</td>
+                            <td class="student-class-label">Kelas</td>
                             <td>{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }} ({{ $pembayaran->siswa->kelas->jenjang ?? '-' }})</td>
                         </tr>
                         <tr>
@@ -221,7 +183,7 @@
 
     {{-- Info Kadaluarsa --}}
     @if($isKadaluarsa)
-        <div class="card shadow mb-4" style="border-left: 4px solid #6b7280;">
+        <div class="card shadow mb-4 expired-payment-card">
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-ban fa-2x text-secondary me-3"></i>
@@ -247,143 +209,19 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Catatan (Opsional)</label>
-                    <textarea id="catatanValidasi" class="form-control shadow-sm" rows="3"
-                              placeholder="Tambahkan catatan jika diperlukan..." style="background: white;">{{ old('catatan') }}</textarea>
+                    <textarea id="catatanValidasi" class="form-control shadow-sm validation-note-input" rows="3" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
                 </div>
 
                 <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn btn-light shadow-sm fw-bold"
-                            data-bs-toggle="modal" data-bs-target="#setujuiModal">
+                    <button type="button" class="btn btn-light shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#setujuiModal">
                         <i class="fas fa-check me-1"></i> Setujui Pembayaran
                     </button>
-                    <button type="button" class="btn btn-outline-light shadow-sm fw-bold"
-                            data-bs-toggle="modal" data-bs-target="#tolakModal">
+                    <button type="button" class="btn btn-outline-light shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#tolakModal">
                         <i class="fas fa-times me-1"></i> Tolak Pembayaran
                     </button>
                 </div>
             </div>
         </div>
-
-        {{-- Modal Setujui --}}
-        <div class="modal fade" id="setujuiModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title fw-bold text-white">
-                            <i class="fas fa-check-circle me-2"></i>Setujui Pembayaran
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body py-4">
-                        <div class="text-center mb-3">
-                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h6 class="fw-bold mb-1">Setujui pembayaran ini?</h6>
-                            <p class="text-muted small mb-0">
-                                Kode: <strong>{{ $pembayaran->kode_pembayaran }}</strong> &mdash;
-                                {{ $pembayaran->siswa->nama_lengkap ?? '-' }}
-                            </p>
-                        </div>
-                        <div class="alert alert-success bg-light border-success small mb-0">
-                            <ul class="mb-0">
-                                <li>Status pembayaran berubah menjadi <strong>Disetujui</strong></li>
-                                <li>Siswa dapat mengakses fasilitas yang terkait tagihan ini</li>
-                                <li>Kwitansi pembayaran dapat dicetak setelah disetujui</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Batal
-                        </button>
-                        <form action="{{ route('bendahara.pembayaran.validasi', $pembayaran->id) }}" method="POST" class="d-inline" id="formSetujui">
-                            @csrf
-                            <input type="hidden" name="status_validasi" value="disetujui">
-                            <input type="hidden" name="catatan" id="catatanSetujui">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-check me-1"></i> Ya, Setujui
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal Tolak --}}
-        <div class="modal fade" id="tolakModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title fw-bold text-white">
-                            <i class="fas fa-times-circle me-2"></i>Tolak Pembayaran
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body py-4">
-                        <div class="text-center mb-3">
-                            <i class="fas fa-times-circle fa-3x text-danger mb-3"></i>
-                            <h6 class="fw-bold mb-1">Tolak pembayaran ini?</h6>
-                            <p class="text-muted small mb-0">
-                                Kode: <strong>{{ $pembayaran->kode_pembayaran }}</strong> &mdash;
-                                {{ $pembayaran->siswa->nama_lengkap ?? '-' }}
-                            </p>
-                        </div>
-                        <div class="alert alert-danger bg-light border-danger small mb-3">
-                            <ul class="mb-0">
-                                <li>Status pembayaran berubah menjadi <strong>Ditolak</strong></li>
-                                <li>Siswa perlu melakukan pembayaran ulang atau konfirmasi ke bendahara</li>
-                            </ul>
-                        </div>
-                        <label class="form-label fw-bold small">Alasan Penolakan <span class="text-danger">*</span></label>
-                        <textarea id="alasanTolak" class="form-control" rows="3"
-                                  placeholder="Tuliskan alasan penolakan pembayaran ini..."></textarea>
-                        <div class="invalid-feedback" id="alasanTolakError">Alasan penolakan wajib diisi.</div>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Batal
-                        </button>
-                        <form action="{{ route('bendahara.pembayaran.validasi', $pembayaran->id) }}" method="POST" class="d-inline" id="formTolak">
-                            @csrf
-                            <input type="hidden" name="status_validasi" value="ditolak">
-                            <input type="hidden" name="catatan" id="catatanTolak">
-                            <button type="button" class="btn btn-danger" onclick="submitTolak()">
-                                <i class="fas fa-times me-1"></i> Ya, Tolak Pembayaran
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @push('scripts')
-        <script>
-        // Sync catatan dari textarea utama ke form setujui sebelum modal muncul
-        document.getElementById('setujuiModal').addEventListener('show.bs.modal', function() {
-            document.getElementById('catatanSetujui').value = document.getElementById('catatanValidasi').value;
-        });
-
-        // Reset alasan tolak saat modal ditutup
-        document.getElementById('tolakModal').addEventListener('hidden.bs.modal', function() {
-            document.getElementById('alasanTolak').value = '';
-            document.getElementById('alasanTolak').classList.remove('is-invalid');
-        });
-
-        // Validasi & submit form tolak
-        function submitTolak() {
-            const alasan = document.getElementById('alasanTolak').value.trim();
-            if (!alasan) {
-                document.getElementById('alasanTolak').classList.add('is-invalid');
-                return;
-            }
-            document.getElementById('alasanTolak').classList.remove('is-invalid');
-            // Gabungkan catatan utama + alasan tolak
-            const catatanUtama = document.getElementById('catatanValidasi').value.trim();
-            const gabungan = catatanUtama ? `${catatanUtama}\n\nAlasan tolak: ${alasan}` : `Alasan tolak: ${alasan}`;
-            document.getElementById('catatanTolak').value = gabungan;
-            document.getElementById('formTolak').submit();
-        }
-        </script>
-        @endpush
     @endif
 
     {{-- Info Tagihan --}}
@@ -429,4 +267,84 @@
 
 </div>
 </div>
+
+@if($pembayaran->status_validasi === 'pending' && !$isKadaluarsa)
+{{-- Modal Setujui --}}
+<div class="modal fade" id="setujuiModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-check-circle me-2"></i>Konfirmasi Setujui Pembayaran
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4 text-center">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h6 class="fw-bold mb-2">Setujui pembayaran ini?</h6>
+                <p class="text-muted small mb-0">
+                    Status tagihan akan diubah menjadi <strong>Lunas</strong> dan bukti pembayaran diterima.
+                </p>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <form id="formSetujui" action="{{ route('bendahara.pembayaran.validasi', $pembayaran->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="status_validasi" value="disetujui">
+                    <input type="hidden" name="catatan" id="catatanSetujui">
+                    <button type="submit" class="btn btn-success fw-bold">
+                        <i class="fas fa-check me-1"></i> Ya, Setujui
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Tolak --}}
+<div class="modal fade" id="tolakModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold text-white">
+                    <i class="fas fa-times-circle me-2"></i>Konfirmasi Tolak Pembayaran
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h6 class="fw-bold mb-1">Tolak pembayaran ini?</h6>
+                    <p class="text-muted small">Siswa akan diberitahu bahwa pembayarannya ditolak.</p>
+                </div>
+                <div>
+                    <label class="form-label fw-bold">Alasan Penolakan <span class="text-danger">*</span></label>
+                    <textarea id="alasanTolak" class="form-control" rows="3" placeholder="Tuliskan alasan penolakan..."></textarea>
+                    <div class="invalid-feedback" id="alasanError">Alasan penolakan wajib diisi.</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Batal
+                </button>
+                <form id="formTolak" action="{{ route('bendahara.pembayaran.validasi', $pembayaran->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="status_validasi" value="ditolak">
+                    <input type="hidden" name="catatan" id="catatanTolak">
+                    <button type="button" class="btn btn-danger fw-bold" data-submit-tolak>
+                        <i class="fas fa-times me-1"></i> Ya, Tolak
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/bendahara/pembayaran/show.js'])
 @endsection

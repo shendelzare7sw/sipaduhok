@@ -11,89 +11,11 @@
 @endsection
 
 @section('styles')
-    <style>
-        .stat-card-mini {
-            border-radius: 12px;
-            padding: 20px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card-mini h6 {
-            font-size: 12px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .stat-card-mini .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .stat-card-mini .stat-label {
-            font-size: 11px;
-            opacity: 0.8;
-        }
-
-        .stat-card-mini .stat-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 50px;
-            opacity: 0.2;
-        }
-
-        .timeline-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            position: absolute;
-            left: -30px;
-            top: 4px;
-        }
-
-        .timeline-line {
-            position: absolute;
-            left: -25px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #e5e7eb;
-        }
-
-        /* Responsive Table */
-        @media (max-width: 768px) {
-            .table-responsive { border: none; }
-            .table thead { display: none; }
-            .table tbody tr {
-                display: block; margin-bottom: 1rem; background: #fff;
-                border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); padding: 10px; border: 1px solid #e5e7eb;
-            }
-            .table tbody td {
-                display: flex; justify-content: space-between; align-items: center;
-                border: none; padding: 8px 0; border-bottom: 1px dashed #e5e7eb; text-align: right;
-            }
-            .table tbody td > div { text-align: right; }
-            .table tbody td:last-child {
-                border-bottom: none; justify-content: center; gap: 10px; padding-top: 15px;
-            }
-            .table tbody td::before {
-                content: attr(data-label); font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; margin-right: 15px; text-align: left;
-            }
-            
-            /* Make timeline responsive */
-            .timeline-dot { left: -20px; }
-            .timeline-line { left: -15px; }
-            .card-body .position-relative { padding-left: 20px !important; }
-        }
-    </style>
+    @vite(['resources/css/bendahara/pembayaran/riwayat-siswa.css'])
 @endsection
 
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+    <div class="payment-history-page">
         <div class="container-fluid px-0">
 
             {{-- Header Card --}}
@@ -106,7 +28,8 @@
                                 class="btn btn-success shadow-sm">
                                 <i class="fas fa-plus me-1"></i> Input Pembayaran
                             </a>
-                            <a href="{{ route('bendahara.tagihan.show', $siswa->id) }}" class="btn btn-secondary shadow-sm">
+                            <a href="{{ route('bendahara.tagihan.show', $siswa->id) }}"
+                                class="btn btn-secondary shadow-sm">
                                 <i class="fas fa-arrow-left me-1"></i> Kembali
                             </a>
                         </div>
@@ -141,7 +64,7 @@
             {{-- Statistik Cards --}}
             <div class="row mb-4">
                 <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini shadow" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                    <div class="stat-card-mini stat-card-total shadow">
                         <h6>Total Tagihan</h6>
                         <div class="stat-value">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
                         <div class="stat-label">Seluruh tagihan</div>
@@ -149,7 +72,7 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini shadow" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <div class="stat-card-mini stat-card-paid shadow">
                         <h6>Total Terbayar</h6>
                         <div class="stat-value">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</div>
                         <div class="stat-label">Pembayaran disetujui</div>
@@ -157,7 +80,7 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini shadow" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <div class="stat-card-mini stat-card-pending shadow">
                         <h6>Menunggu Validasi</h6>
                         <div class="stat-value">Rp {{ number_format($totalPending, 0, ',', '.') }}</div>
                         <div class="stat-label">Belum divalidasi</div>
@@ -165,7 +88,7 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini shadow" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <div class="stat-card-mini stat-card-remaining shadow">
                         <h6>Sisa Tagihan</h6>
                         <div class="stat-value">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</div>
                         <div class="stat-label">Belum dibayar</div>
@@ -204,7 +127,7 @@
                                                 <code class="small">{{ $bayar->kode_pembayaran }}</code>
                                                 @if($bayar->order_id && $bayar->group_transactions_count > 1)
                                                     <div class="mt-1">
-                                                        <span class="badge bg-info" style="font-size: 10px;" title="Pembayaran ini adalah bagian dari transaksi gabungan ({{ $bayar->group_transactions_count }} item)">
+                                                        <span class="badge bg-info group-badge-small" title="Pembayaran ini adalah bagian dari transaksi gabungan ({{ $bayar->group_transactions_count }} item)">
                                                             <i class="fas fa-layer-group me-1"></i> Gabungan ({{ $bayar->group_transactions_count }})
                                                         </span>
                                                     </div>
@@ -300,7 +223,7 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <div class="position-relative" style="padding-left: 30px;">
+                        <div class="position-relative timeline-wrapper">
                             @foreach($pembayaran->take(10) as $bayar)
                                 <div class="position-relative pb-4">
                                     {{-- Line --}}

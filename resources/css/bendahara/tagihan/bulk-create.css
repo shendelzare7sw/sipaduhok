@@ -1,0 +1,107 @@
+.swal2-popup {
+    font-family: 'Public Sans', sans-serif;
+    border-radius: 1rem;
+}
+
+.swal2-title {
+    font-size: 1.5rem;
+    color: #566a7f;
+}
+
+.swal2-html-container {
+    color: #697a8d;
+}
+
+.bulk-create-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.filter-dropdown .dropdown-menu {
+    min-width: 320px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.kelas-checkbox-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.kelas-checkbox-item:hover {
+    background: #f8fafc;
+}
+
+.kelas-checkbox-item label {
+    cursor: pointer;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.kelas-checkbox-item.is-hidden,
+.empty-state.is-hidden {
+    display: none;
+}
+
+.selected-kelas-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    min-height: 32px;
+}
+
+.badge-kelas {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-kelas .remove-kelas {
+    cursor: pointer;
+    color: #0369a1;
+    font-weight: bold;
+    transition: color 0.2s;
+    border: 0;
+    background: transparent;
+    padding: 0;
+}
+
+.badge-kelas .remove-kelas:hover {
+    color: #dc2626;
+}
+
+.filter-section {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.kelas-list-section {
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+}
+
+.remove-field-button {
+    padding: 2px 8px;
+}
