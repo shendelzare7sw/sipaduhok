@@ -9,35 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .table-rapor thead th {
-        background-color: #f8f9fc;
-        text-align: center;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #4e73df;
-        border-bottom: 2px solid #e3e6f0;
-    }
-    .rata-rata-val {
-        font-size: 1rem;
-        font-weight: 800;
-        color: #165fac;
-    }
-    .badge-status {
-        padding: 0.5rem 0.75rem;
-        border-radius: 5px;
-        font-weight: 700;
-    }
-    .btn-action-group .btn {
-        margin: 2px;
-    }
-</style>
+    @vite(['resources/css/wali-kelas/rapor/index.css', 'resources/js/wali-kelas/rapor/index.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
     @if($error ?? false)
         <div class="alert alert-danger shadow-sm border-start border-danger border-4">
@@ -79,14 +55,14 @@
                     <div class="row align-items-end">
                         <div class="col-md-5">
                             <label class="small fw-bold text-uppercase">Pilih Semester</label>
-                            <select name="semester" class="form-select" onchange="this.form.submit()">
+                            <select name="semester" class="form-select" data-auto-submit>
                                 <option value="ganjil" {{ $semester == 'ganjil' ? 'selected' : '' }}>Semester Ganjil</option>
                                 <option value="genap" {{ $semester == 'genap' ? 'selected' : '' }}>Semester Genap</option>
                             </select>
                         </div>
                         <div class="col-md-5">
                             <label class="small fw-bold text-uppercase">Jenis Rapor</label>
-                            <select name="jenis_rapor" class="form-select" onchange="this.form.submit()">
+                            <select name="jenis_rapor" class="form-select" data-auto-submit>
                                 <option value="akhir_semester" {{ $jenisRapor == 'akhir_semester' ? 'selected' : '' }}>Akhir Semester (PAS)</option>
                                 <option value="tengah_semester" {{ $jenisRapor == 'tengah_semester' ? 'selected' : '' }}>Tengah Semester (PTS)</option>
                             </select>
@@ -619,17 +595,6 @@
     @endif
 </div>
 </div>
-
-@section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var tooltipEls = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipEls.forEach(function (el) {
-            new bootstrap.Tooltip(el);
-        });
-    });
-</script>
-@endsection
 
 {{-- MODAL KONFIRMASI GENERATE ALL --}}
 <div class="modal fade" id="generateAllModal" tabindex="-1" aria-hidden="true">

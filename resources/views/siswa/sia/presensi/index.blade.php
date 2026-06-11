@@ -9,22 +9,7 @@
 @endsection
 
 @section('styles')
-@include('shared.siswa.styles')
-<style>
-    .attendance-week-title {
-        color: var(--s-primary);
-        font-weight: 900;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        font-size: 12px;
-    }
-
-    .attendance-note {
-        color: var(--s-muted);
-        font-size: 12px;
-        line-height: 1.45;
-    }
-</style>
+    @vite(['resources/css/siswa/sia/presensi/index.css', 'resources/js/siswa/sia/presensi/index.js'])
 @endsection
 
 @section('content')

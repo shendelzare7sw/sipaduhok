@@ -9,12 +9,7 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .badge-status { font-weight: 700; border-radius: 5px; text-transform: uppercase; font-size: 10px; }
-    .table-history thead th { font-size: 11px; text-transform: uppercase; background: #f8f9fc; color: #4e73df; }
-    .card-filter { border-top: 4px solid #4e73df; }
-</style>
+    @vite(['resources/css/wali-kelas/presensi/riwayat.css', 'resources/js/wali-kelas/presensi/riwayat.js'])
 @endsection
 
 @section('content')
@@ -175,14 +170,7 @@
                                                         ? null
                                                         : $item->status_validasi;
                                             @endphp
-                                            <select name="status_validasi" class="form-select" onchange="
-                                                let statusSelect = this.closest('.modal-body').querySelector('select[name=status]');
-                                                if (this.value === 'ditolak') {
-                                                    statusSelect.value = 'alpha';
-                                                } else if (this.value === 'disetujui' && statusSelect.value === 'alpha') {
-                                                    statusSelect.value = 'izin';
-                                                }
-                                            ">
+                                            <select name="status_validasi" class="form-select js-status-validasi">
                                                 <option value="" {{ is_null($selectedValidasi) ? 'selected' : '' }}>Valid / Tidak Perlu Validasi</option>
                                                 <option value="pending" {{ $selectedValidasi == 'pending' ? 'selected' : '' }}>Pending</option>
                                                 <option value="disetujui" {{ $selectedValidasi == 'disetujui' ? 'selected' : '' }}>Setujui (Sakit/Izin)</option>

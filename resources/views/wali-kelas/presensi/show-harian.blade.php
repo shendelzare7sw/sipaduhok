@@ -9,18 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .status-badge { padding: 4px 12px; border-radius: 50px; font-weight: 700; font-size: 12px; }
-    @media print {
-        .no-print { display: none !important; }
-        .card { border: none !important; box-shadow: none !important; }
-    }
-</style>
+    @vite(['resources/css/wali-kelas/presensi/show-harian.css', 'resources/js/wali-kelas/presensi/show-harian.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
 
     {{-- Header --}}
@@ -38,7 +31,7 @@
                     <button type="button" id="btnEditMode" class="btn btn-warning btn-sm shadow-sm">
                         <i class="fas fa-edit me-1"></i>Edit
                     </button>
-                    <button onclick="window.print()" class="btn btn-outline-primary btn-sm shadow-sm">
+                    <button type="button" class="btn btn-outline-primary btn-sm shadow-sm" data-print-page>
                         <i class="fas fa-print me-1"></i>Cetak
                     </button>
                     <a href="{{ route('wali.presensi.rekap-harian', ['bulan' => \Carbon\Carbon::parse($tanggal)->month, 'tahun' => \Carbon\Carbon::parse($tanggal)->year]) }}" class="btn btn-secondary btn-sm shadow-sm">
@@ -86,7 +79,7 @@
     </div>
 
     {{-- Detail Table --}}
-    <form id="formEditPresensi" action="{{ route('wali.presensi.input-harian') }}" method="POST" style="display:none;">
+    <form id="formEditPresensi" action="{{ route('wali.presensi.input-harian') }}" method="POST" class="d-none">
         @csrf
         <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
         <input type="hidden" name="tanggal" value="{{ $tanggal }}">
@@ -97,7 +90,7 @@
             <h6 class="m-0 fw-bold text-primary">
                 <i class="fas fa-list me-2"></i>Detail Presensi Siswa
             </h6>
-            <div id="editActions" style="display:none;" class="d-flex gap-2">
+            <div id="editActions" class="d-flex gap-2 d-none">
                 <button type="submit" form="formEditPresensi" class="btn btn-success btn-sm">
                     <i class="fas fa-save me-1"></i>Simpan Perubahan
                 </button>
@@ -146,7 +139,7 @@
                                         @endif
                                     </span>
                                     {{-- Edit Mode --}}
-                                    <span class="edit-mode" style="display:none;">
+                                    <span class="edit-mode d-none">
                                         <input type="hidden" name="presensi[{{ $index }}][siswa_id]" value="{{ $siswa->id }}" form="formEditPresensi" disabled>
                                         <select name="presensi[{{ $index }}][status]" form="formEditPresensi" class="form-select form-select-sm" disabled>
                                             <option value="hadir" {{ $status === 'hadir' ? 'selected' : '' }}>Hadir</option>
@@ -158,7 +151,7 @@
                                 </td>
                                 <td class="align-middle">
                                     <span class="view-mode small text-muted">{{ $p->keterangan ?? '-' }}</span>
-                                    <span class="edit-mode" style="display:none;">
+                                    <span class="edit-mode d-none">
                                         <input type="text" name="presensi[{{ $index }}][keterangan]" form="formEditPresensi" class="form-control form-control-sm" value="{{ $p->keterangan ?? '' }}" placeholder="Keterangan..." disabled>
                                     </span>
                                 </td>
@@ -177,27 +170,4 @@
 </div>
 </div>
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const btnEdit = document.getElementById('btnEditMode');
-    const btnCancel = document.getElementById('btnCancelEdit');
-    const editActions = document.getElementById('editActions');
-    const viewEls = document.querySelectorAll('.view-mode');
-    const editEls = document.querySelectorAll('.edit-mode');
-    const editInputs = document.querySelectorAll('.edit-mode input, .edit-mode select');
-
-    function toggleEditMode(on) {
-        viewEls.forEach(el => el.style.display = on ? 'none' : '');
-        editEls.forEach(el => el.style.display = on ? '' : 'none');
-        editInputs.forEach(el => el.disabled = !on);
-        editActions.style.display = on ? 'flex' : 'none';
-        btnEdit.style.display = on ? 'none' : '';
-    }
-
-    btnEdit.addEventListener('click', () => toggleEditMode(true));
-    btnCancel.addEventListener('click', () => toggleEditMode(false));
-});
-</script>
-@endpush
 @endsection

@@ -1,0 +1,133 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            padding: 15mm;
+        }
+        .header { text-align: center; }
+        .title {
+            text-align: center;
+            margin: 15px 0 10px;
+        }
+        .title h3 {
+            font-size: 14pt;
+            text-decoration: underline;
+            margin-bottom: 4px;
+        }
+        .title p { font-size: 11pt; margin: 2px 0; }
+        .info {
+            margin-bottom: 15px;
+            font-size: 10pt;
+        }
+        .info table { width: 55%; }
+        .info td { padding: 2px 10px 2px 0; }
+        .info td:first-child { width: 130px; }
+        .tagihan-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 9.5pt;
+        }
+        .tagihan-table th, .tagihan-table td {
+            border: 1px solid #000;
+            padding: 5px 7px;
+        }
+        .tagihan-table th {
+            background: #f0f0f0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .tagihan-table .text-right { text-align: right; }
+        .tagihan-table .text-center { text-align: center; }
+        .tagihan-table tfoot td {
+            font-weight: bold;
+            background: #f5f5f5;
+        }
+        .status-lunas { color: green; font-weight: bold; }
+        .status-belum { color: red; }
+        .status-kosong { color: #888; }
+        .summary {
+            margin-top: 15px;
+            border: 1px solid #000;
+            padding: 12px;
+            width: 45%;
+            margin-left: auto;
+            font-size: 10pt;
+        }
+        .summary table { width: 100%; }
+        .summary td { padding: 4px 0; }
+        .summary td:last-child { text-align: right; font-weight: bold; }
+        .summary .grand-total { border-top: 1px solid #000; padding-top: 6px; }
+        .footer {
+            margin-top: 35px;
+            text-align: right;
+        }
+        .footer .sign {
+            display: inline-block;
+            width: 220px;
+            text-align: center;
+        }
+        .footer .sign-line {
+            margin-top: 55px;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+        }
+@media print {
+    body { padding: 10mm; }
+    .no-print { display: none; }
+}
+
+.print-actions {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.print-action-button {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.print-button {
+    background: #3b82f6;
+}
+
+.close-button {
+    background: #6b7280;
+    margin-left: 10px;
+}
+
+.col-no {
+    width: 35px;
+}
+
+.col-nisn {
+    width: 100px;
+}
+
+.col-kelas {
+    width: 120px;
+}
+
+.col-cabang,
+.col-money {
+    width: 110px;
+}
+
+.col-status {
+    width: 80px;
+}
+
+.empty-row {
+    padding: 20px;
+}
+
+.print-meta {
+    margin-top: 20px;
+    font-size: 9pt;
+    color: #666;
+}

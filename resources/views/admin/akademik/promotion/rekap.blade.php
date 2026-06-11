@@ -12,350 +12,12 @@
 @endsection
 
 @section('styles')
-<style>
-.promotion-report {
-    --primary: #4361ee;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --info: #06b6d4;
-    --purple: #8b5cf6;
-    --ink: #1f2937;
-    --muted: #64748b;
-    --line: #e2e8f0;
-    --soft: #f8fafc;
-}
-
-.promotion-report .stat-card,
-.promotion-report .tab-pane > .card {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
-}
-
-.promotion-report .stat-card {
-    height: 100%;
-    padding: 16px;
-}
-
-.promotion-report .stat-icon {
-    align-items: center;
-    border-radius: 10px;
-    display: inline-flex;
-    height: 36px;
-    justify-content: center;
-    margin-bottom: 14px;
-    width: 36px;
-}
-
-.promotion-report .stat-icon.success { background: rgba(16, 185, 129, .12); color: var(--success); }
-.promotion-report .stat-icon.info { background: rgba(6, 182, 212, .12); color: var(--info); }
-.promotion-report .stat-icon.warning { background: rgba(245, 158, 11, .14); color: var(--warning); }
-.promotion-report .stat-icon.primary { background: rgba(67, 97, 238, .12); color: var(--primary); }
-.promotion-report .stat-icon.danger { background: rgba(239, 68, 68, .12); color: var(--danger); }
-
-.promotion-report .stat-card span {
-    color: var(--muted);
-    display: block;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-}
-
-.promotion-report .stat-card strong {
-    color: var(--ink);
-    display: block;
-    font-size: 24px;
-    line-height: 1.2;
-    margin-top: 4px;
-}
-
-.promotion-report .stat-card small {
-    color: var(--muted);
-}
-
-.promotion-report .nav-tabs {
-    border-bottom: 1px solid var(--line);
-    gap: 8px;
-}
-
-.promotion-report .nav-tabs .nav-link {
-    border: 1px solid transparent;
-    border-radius: 10px 10px 0 0;
-    color: var(--muted);
-    font-weight: 800;
-}
-
-.promotion-report .nav-tabs .nav-link.active {
-    background: #fff;
-    border-color: var(--line) var(--line) #fff;
-    color: var(--primary);
-}
-
-.promotion-report .card-header {
-    background: #fff;
-    padding: 18px 20px;
-}
-
-.promotion-report .card-header h5 {
-    color: var(--ink);
-    font-weight: 800;
-}
-
-.promotion-report .card-body {
-    padding: 20px;
-}
-
-.promotion-report #historyFilterForm,
-.promotion-report #simulationFilterForm {
-    background: var(--soft);
-    border: 1px solid #eef2f7;
-    border-radius: 12px;
-    padding: 10px;
-}
-
-.promotion-report .table {
-    margin-bottom: 0;
-}
-
-.promotion-report .table thead th {
-    background: var(--soft);
-    border-bottom: 1px solid var(--line);
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .03em;
-    padding: 14px 16px;
-    text-transform: uppercase;
-}
-
-.promotion-report .table tbody td {
-    border-color: #eef2f7;
-    padding: 14px 16px;
-    vertical-align: middle;
-}
-
-.promotion-report .badge {
-    border-radius: 999px;
-    font-weight: 800;
-}
-
-.promotion-report .dropdown-menu {
-    border: 1px solid var(--line);
-    border-radius: 12px;
-}
-
-.promotion-report .sim-footer-area {
-    background: var(--soft);
-    border-top: 1px solid var(--line);
-}
-
-.promotion-report .promotion-debt-badge {
-    max-width: 100%;
-    white-space: normal;
-    text-align: left;
-    line-height: 1.25;
-}
-
-/* Responsive Styles - Mobile Only */
-@media (max-width: 768px) {
-    .promotion-report.container-fluid {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-    }
-
-    .promotion-report .card {
-        border-left: 0;
-        border-right: 0;
-        border-radius: 8px;
-    }
-
-    .promotion-report .tab-content {
-        margin-left: -14px;
-        margin-right: -14px;
-    }
-
-    .promotion-report .card-header,
-    .promotion-report .card-body {
-        padding-left: 12px;
-        padding-right: 12px;
-    }
-
-    .promotion-report .tab-content > .tab-pane > .card {
-        margin-left: 0;
-        margin-right: 0;
-        width: 100%;
-    }
-
-    /* Nav tabs scrollable */
-    .nav-tabs {
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-
-    .nav-tabs::-webkit-scrollbar {
-        display: none;
-    }
-
-    .nav-tabs .nav-item {
-        flex-shrink: 0;
-    }
-
-    .nav-tabs .nav-link {
-        white-space: nowrap;
-        font-size: 13px;
-        padding: 9px 12px;
-    }
-
-    /* Card headers: stack vertically */
-    .card-header .d-flex.flex-wrap {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-    }
-
-    /* Filter forms: stack vertically */
-    #historyFilterForm,
-    #simulationFilterForm {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-        width: 100%;
-    }
-
-    #historyFilterForm select[style*="width: 140px"],
-    #simulationFilterForm select[style*="width: 140px"] {
-        width: 100% !important;
-    }
-
-    #historyFilterForm .input-group[style*="width: 220px"],
-    #simulationFilterForm .input-group[style*="width: 220px"] {
-        width: 100% !important;
-    }
-
-    #historyFilterForm .dropdown,
-    #simulationFilterForm .dropdown {
-        width: 100%;
-    }
-
-    #historyFilterForm .dropdown .btn,
-    #simulationFilterForm .dropdown .btn {
-        width: 100%;
-        justify-content: space-between;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Mode toggle btn-group */
-    .btn-group[role="group"] {
-        width: 100%;
-    }
-
-    .btn-group[role="group"] .btn {
-        flex: 1;
-        font-size: 12px;
-        padding: 6px 8px;
-    }
-
-    /* Pagination area */
-    .p-3.d-flex.justify-content-between {
-        flex-direction: column !important;
-        gap: 10px;
-    }
-
-    /* Mobile Card Pattern for Tables */
-    .table-responsive.text-nowrap {
-        white-space: normal !important;
-        overflow-x: visible !important;
-    }
-    .table-card-mobile { white-space: normal !important; }
-    .table-card-mobile thead { display: none; }
-    .table-card-mobile tbody tr {
-        display: block; border: 1px solid #e5e7eb; border-radius: 12px;
-        margin-bottom: 12px; overflow: hidden; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
-        background: #fff; position: relative;
-    }
-    .table-card-mobile tbody td {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 10px 14px; border: none !important;
-        border-bottom: 1px solid #f3f4f6 !important; text-align: right;
-        white-space: normal !important; word-break: break-word;
-    }
-    .table-card-mobile tbody td[data-label]::before {
-        content: attr(data-label); font-weight: 700; font-size: 10px;
-        text-transform: uppercase; color: #9ca3af; letter-spacing: 0.5px;
-        text-align: left; flex-shrink: 0; margin-right: 12px;
-    }
-    .table-card-mobile .mobile-card-head {
-        background: #f8fafc;
-        font-weight: 700; font-size: 15px; padding: 14px !important;
-        border-bottom: 1px solid #e2e8f0 !important; display: block !important;
-        text-align: left;
-    }
-    .table-card-mobile .mobile-card-actions {
-        display: flex !important; justify-content: flex-end;
-        padding: 10px 14px !important; background: #f9fafb;
-    }
-    .desktop-only-cell { display: none !important; }
-
-    .table-card-mobile tbody td > .mobile-text-end {
-        min-width: 0;
-        max-width: 72%;
-    }
-
-    .table-card-mobile tbody td[data-label="Keuangan"] {
-        align-items: flex-start;
-    }
-
-    .table-card-mobile tbody td[data-label="Keuangan"] > .mobile-text-end {
-        display: flex;
-        align-items: flex-end;
-        flex-direction: column;
-        width: 72%;
-    }
-
-    .promotion-report .promotion-debt-badge {
-        border-radius: 14px;
-        display: inline-block;
-        max-width: 100%;
-        min-width: 0;
-        padding: 7px 10px;
-        text-align: right;
-        white-space: normal !important;
-        word-break: normal;
-        overflow-wrap: anywhere;
-    }
-    
-    .mobile-text-end { text-align: right; }
-    .mobile-text-start { text-align: left; }
-
-    /* Mobile select all */
-    .mobile-select-all { display: flex !important; }
-
-    /* Promote button area */
-    .sim-footer-area {
-        flex-direction: column !important;
-        gap: 12px;
-        align-items: stretch !important;
-    }
-    .sim-footer-area > div { text-align: center; }
-    .sim-footer-area .btn { width: 100%; }
-    .sim-footer-area nav { justify-content: center; }
-}
-@media (min-width: 769px) {
-    .mobile-only-cell { display: none !important; }
-    .mobile-select-all { display: none !important; }
-}
-</style>
+@vite(['resources/css/admin/akademik/promotion/rekap.css'])
 @endsection
 
 @section('content')
 <div class="container-fluid flex-grow-1 container-p-y promotion-report">
+    <div id="promotionRekapConfig" data-total-active-global="{{ $totalActiveGlobal ?? 0 }}"></div>
     <!-- Header removed, using layout title -->
 
     <div class="row row-cols-1 row-cols-md-5 g-3 mb-4">
@@ -448,7 +110,7 @@
                             <input type="hidden" name="tab" value="history">
 
                             {{-- Tahun Ajaran Selector (Priority) --}}
-                            <select name="tahun_ajaran_id" class="form-select form-select-sm" style="width: 140px;" onchange="this.form.submit()">
+                            <select name="tahun_ajaran_id" class="form-select form-select-sm year-select-sm" data-auto-submit>
                                 @foreach($allTahunAjaran as $ta)
                                     <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
                                         {{ $ta->nama_tahun_ajaran }}
@@ -465,7 +127,7 @@
                                         <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId, $filterStatus])->filter()->count() }}</span>
                                     @endif
                                 </button>
-                                <div class="dropdown-menu p-3 shadow" style="min-width: 280px;">
+                                <div class="dropdown-menu p-3 shadow filter-dropdown-menu">
                                     <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
 
                                     {{-- Filter Cabang (hanya untuk admin) --}}
@@ -535,7 +197,7 @@
                             </div>
 
                             {{-- Search --}}
-                            <div class="input-group" style="width: 220px;">
+                            <div class="input-group search-input-group">
                                 <span class="input-group-text bg-white">
                                     <i class="fas fa-search text-muted"></i>
                                 </span>
@@ -543,7 +205,7 @@
                                        placeholder="Cari nama..." value="{{ $search }}" autocomplete="off">
                                 @if($search)
                                     <button type="button" class="btn btn-outline-secondary btn-sm"
-                                            onclick="this.previousElementSibling.value=''; this.form.submit();"
+                                            data-clear-search
                                             title="Hapus pencarian">
                                         <i class="fas fa-times"></i>
                                     </button>
@@ -578,8 +240,8 @@
                             @endphp
                             <tr>
                                 <td class="mobile-card-head">
-                                    <div class="d-flex justify-content-between align-items-start gap-2" style="width: 100%;">
-                                        <div class="d-flex align-items-center gap-2" style="flex: 1; min-width: 0;">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 student-summary-row">
+                                        <div class="d-flex align-items-center gap-2 student-summary-main">
                                             <span class="text-wrap text-break lh-sm">{{ $data->nama_lengkap }}</span>
                                         </div>
                                         <div class="mobile-only-cell flex-shrink-0 ms-auto">
@@ -679,7 +341,7 @@
                         <input type="hidden" name="sim_mode" value="{{ $simMode ?? 'current' }}">
 
                         {{-- Tahun Ajaran Selector (Priority) --}}
-                        <select name="tahun_ajaran_id" class="form-select form-select-sm" style="width: 140px;" onchange="this.form.submit()">
+                        <select name="tahun_ajaran_id" class="form-select form-select-sm year-select-sm" data-auto-submit>
                             @foreach($allTahunAjaran as $ta)
                                 <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
                                     {{ $ta->nama_tahun_ajaran }}
@@ -696,7 +358,7 @@
                                     <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId])->filter()->count() }}</span>
                                 @endif
                             </button>
-                            <div class="dropdown-menu p-3 shadow" style="min-width: 280px;">
+                            <div class="dropdown-menu p-3 shadow filter-dropdown-menu">
                                 <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
 
                                 {{-- Filter Cabang (hanya untuk admin) --}}
@@ -753,7 +415,7 @@
                         </div>
 
                         {{-- Search --}}
-                        <div class="input-group" style="width: 220px;">
+                        <div class="input-group search-input-group">
                             <span class="input-group-text bg-white">
                                 <i class="fas fa-search text-muted"></i>
                             </span>
@@ -761,7 +423,7 @@
                                    placeholder="Cari nama..." value="{{ $search }}" autocomplete="off">
                             @if($search)
                                 <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        onclick="this.previousElementSibling.value=''; this.form.submit();"
+                                        data-clear-search
                                         title="Hapus pencarian">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -805,7 +467,7 @@
 
                     {{-- Mobile Select All --}}
                     <div class="mobile-select-all mb-2 align-items-center gap-2 px-2">
-                        <input type="checkbox" id="selectAllSimMobile" onclick="toggleAllCheckboxes(this, 'simCheck')">
+                        <input type="checkbox" id="selectAllSimMobile" data-toggle-all-checkboxes data-target-class="simCheck">
                         <label for="selectAllSimMobile" class="form-label mb-0 small fw-bold">Pilih Semua</label>
                     </div>
 
@@ -814,10 +476,10 @@
                     <div id="selectAllBanner" class="alert alert-warning py-2 px-3 mb-2 d-none">
                         <i class="fas fa-info-circle me-1"></i>
                         <span id="bannerText">Semua <strong>{{ $activeStudentsLinks->count() }}</strong> siswa di halaman ini dipilih.</span>
-                        <a href="javascript:void(0)" id="selectAllPagesLink" class="fw-bold ms-1" onclick="enableSelectAllPages()">
+                        <a href="#" id="selectAllPagesLink" class="fw-bold ms-1" data-select-all-pages>
                             Pilih semua <strong>{{ $totalActiveGlobal ?? $activeStudentsLinks->total() }}</strong> siswa di semua halaman
                         </a>
-                        <a href="javascript:void(0)" id="clearSelectAllLink" class="fw-bold ms-1 d-none" onclick="clearSelectAllPages()">
+                        <a href="#" id="clearSelectAllLink" class="fw-bold ms-1 d-none" data-clear-select-all-pages>
                             Batalkan pilih semua halaman
                         </a>
                     </div>
@@ -827,7 +489,7 @@
                         <table class="table table-hover table-card-mobile">
                             <thead>
                                 <tr>
-                                    <th style="width: 30px;"><input type="checkbox" id="selectAllSim" onclick="toggleAllCheckboxes(this, 'simCheck')"></th>
+                                    <th class="table-checkbox-col"><input type="checkbox" id="selectAllSim" data-toggle-all-checkboxes data-target-class="simCheck"></th>
                                     <th>Nama Siswa</th>
                                     <th>Kelas</th>
                                     <th>Status Keuangan</th>
@@ -844,12 +506,12 @@
                                         @endif
                                     </td>
                                     <td class="mobile-card-head">
-                                        <div class="d-flex justify-content-between align-items-start gap-2" style="width: 100%;">
-                                            <div class="d-flex align-items-center gap-2" style="flex: 1; min-width: 0;">
+                                        <div class="d-flex justify-content-between align-items-start gap-2 student-summary-row">
+                                            <div class="d-flex align-items-center gap-2 student-summary-main">
                                                 @if(!$sim['result']['eligible'])
-                                                <input type="checkbox" class="simCheck mobile-only-cell flex-shrink-0" value="{{ $sim['siswa']->id }}" style="margin-top: 2px;">
+                                                <input type="checkbox" class="simCheck mobile-only-cell flex-shrink-0 mobile-sim-checkbox" value="{{ $sim['siswa']->id }}">
                                                 @endif
-                                                <span class="text-wrap text-break lh-sm" style="flex: 1;">{{ $sim['siswa']->nama_lengkap }}</span>
+                                                <span class="text-wrap text-break lh-sm student-name-text">{{ $sim['siswa']->nama_lengkap }}</span>
                                             </div>
                                             <div class="mobile-only-cell flex-shrink-0 ms-auto">
                                                 @if($sim['result']['eligible'])
@@ -1060,7 +722,7 @@
                     </div>
                     
                     {{-- Checklist Status --}}
-                    <div class="mb-3" style="background: #f8f9fa; border-radius: 8px; padding: 12px;">
+                    <div class="mb-3 debt-summary-box">
                         <strong class="d-block mb-2"><i class="fas fa-clipboard-check me-1"></i> Status Persiapan:</strong>
                         <div class="d-flex align-items-center mb-1">
                             <i class="fas fa-check-circle text-success me-2"></i>
@@ -1169,184 +831,5 @@
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-var triggerBtn;
-function updateButtonState() {
-    if (!triggerBtn) triggerBtn = document.querySelector('#promoteSelectedTrigger');
-    var count = document.querySelectorAll('.simCheck:checked').length;
-    var isSelectAll = document.getElementById('selectAllFlag') && document.getElementById('selectAllFlag').value === '1';
-    if(triggerBtn) triggerBtn.disabled = (count === 0 && !isSelectAll);
-}
-
-function toggleAllCheckboxes(source, className) {
-    const checkboxes = document.querySelectorAll('.' + className);
-    checkboxes.forEach(function(checkbox) {
-        checkbox.checked = source.checked;
-    });
-
-    // Sync both select all checkboxes (mobile and desktop)
-    var mobileCb = document.getElementById('selectAllSimMobile');
-    var desktopCb = document.getElementById('selectAllSim');
-    if (mobileCb && mobileCb !== source) mobileCb.checked = source.checked;
-    if (desktopCb && desktopCb !== source) desktopCb.checked = source.checked;
-
-    // Show/hide the "select all across pages" banner
-    var banner = document.getElementById('selectAllBanner');
-    if (banner) {
-        if (source.checked) {
-            banner.classList.remove('d-none');
-            // Reset to page-only state
-            document.getElementById('selectAllPagesLink').classList.remove('d-none');
-            document.getElementById('clearSelectAllLink').classList.add('d-none');
-            document.getElementById('bannerText').innerHTML = 'Semua <strong>' + checkboxes.length + '</strong> siswa di halaman ini dipilih.';
-        } else {
-            banner.classList.add('d-none');
-        }
-    }
-
-    // Reset select_all flag when toggling page checkboxes
-    let flagInput = document.getElementById('selectAllFlag');
-    if (flagInput) {
-        flagInput.value = '0';
-    }
-
-    updateButtonState();
-}
-
-function enableSelectAllPages() {
-    document.getElementById('selectAllFlag').value = '1';
-    var totalData = {{ isset($totalActiveGlobal) ? $totalActiveGlobal : 0 }};
-    document.getElementById('bannerText').innerHTML = 'Semua <strong>' + totalData + '</strong> siswa di semua halaman dipilih.';
-    document.getElementById('selectAllPagesLink').classList.add('d-none');
-    document.getElementById('clearSelectAllLink').classList.remove('d-none');
-    updateButtonState();
-}
-
-function clearSelectAllPages() {
-    document.getElementById('selectAllFlag').value = '0';
-    var checkboxes = document.querySelectorAll('.simCheck');
-    document.getElementById('bannerText').innerHTML = 'Semua <strong>' + checkboxes.length + '</strong> siswa di halaman ini dipilih.';
-    document.getElementById('selectAllPagesLink').classList.remove('d-none');
-    document.getElementById('clearSelectAllLink').classList.add('d-none');
-    updateButtonState();
-}
-
-// Update Modal Count
-document.addEventListener('DOMContentLoaded', function() {
-    // Uncheck selectAllFlag if user manually unchecks a single item
-    document.querySelectorAll('.simCheck').forEach(cb => {
-        cb.addEventListener('change', function() {
-            if (!this.checked) {
-                let flagInput = document.getElementById('selectAllFlag');
-                if (flagInput) flagInput.value = '0';
-
-                // also uncheck header checkboxes
-                var mobileCb = document.getElementById('selectAllSimMobile');
-                var desktopCb = document.getElementById('selectAllSim');
-                if (mobileCb) mobileCb.checked = false;
-                if (desktopCb) desktopCb.checked = false;
-
-                // hide banner
-                var banner = document.getElementById('selectAllBanner');
-                if (banner) banner.classList.add('d-none');
-            }
-            updateButtonState();
-        });
-    });
-
-    var promoteBtn = document.querySelector('[data-bs-target="#promoteSelectedModal"]');
-    if (promoteBtn) {
-        promoteBtn.addEventListener('click', function() {
-            var isSelectAll = document.getElementById('selectAllFlag') && document.getElementById('selectAllFlag').value === '1';
-            var totalData = {{ isset($totalActiveGlobal) ? $totalActiveGlobal : 0 }};
-            var uniqueIds = new Set();
-            document.querySelectorAll('.simCheck:checked').forEach(function(cb) { uniqueIds.add(cb.value); });
-            
-            if (isSelectAll) {
-                document.getElementById('selectedCount').textContent = totalData;
-                var warningEl = document.getElementById('selectAllWarning');
-                if (warningEl) {
-                    warningEl.classList.remove('d-none');
-                    warningEl.classList.add('d-block');
-                }
-            } else {
-                document.getElementById('selectedCount').textContent = uniqueIds.size;
-                var warningEl = document.getElementById('selectAllWarning');
-                if (warningEl) {
-                    warningEl.classList.remove('d-block');
-                    warningEl.classList.add('d-none');
-                }
-            }
-
-            if (uniqueIds.size === 0 && !isSelectAll) {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'warning',
-                    title: 'Pilih siswa terlebih dahulu!',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            }
-        });
-    }
-
-    // Real-time disable/enable button
-    var checkboxes = document.querySelectorAll('.simCheck');
-
-    checkboxes.forEach(cb => cb.addEventListener('change', updateButtonState));
-    // Initial State
-    updateButtonState();
-
-    // Before form submit: copy mobile checkbox values as siswa_ids[]
-    var promoteForm = document.getElementById('promoteSelectedForm');
-    if (promoteForm) {
-        /* Remove default submit intercept as we only submit via modal button */
-        // Also intercept the modal button that triggers submit
-        var modalSubmitBtn = document.getElementById('confirmPromoteBtn');
-        if (modalSubmitBtn) {
-            modalSubmitBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Remove old dynamic inputs
-                promoteForm.querySelectorAll('.dynamic-siswa-id').forEach(el => el.remove());
-                
-                // If not select all, gather checkboxes
-                if (document.getElementById('selectAllFlag').value === '0') {
-                    // Collect unique checked values
-                    var ids = new Set();
-                    document.querySelectorAll('.simCheck:checked').forEach(function(cb) {
-                        ids.add(cb.value);
-                    });
-                    ids.forEach(function(id) {
-                        var input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'siswa_ids[]';
-                        input.value = id;
-                        input.className = 'dynamic-siswa-id';
-                        promoteForm.appendChild(input);
-                    });
-                }
-                promoteForm.submit();
-            });
-        }
-    }
-
-    // Existing Cancel Modal Script
-    var cancelModal = document.getElementById('cancelScheduleModal');
-    if (cancelModal) {
-        cancelModal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget;
-            var url = button.getAttribute('data-url');
-            var date = button.getAttribute('data-date');
-            
-            var form = cancelModal.querySelector('#cancelScheduleForm');
-            var dateText = cancelModal.querySelector('#scheduleDateText');
-            
-            form.action = url;
-            dateText.textContent = date;
-        });
-    }
-});
-</script>
+@vite(['resources/js/admin/akademik/promotion/rekap.js'])
 @endsection

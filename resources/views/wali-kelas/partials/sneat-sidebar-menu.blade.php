@@ -27,18 +27,18 @@
 @if($selectedKelas && $hasMultipleKelas)
 <!-- Current Class Indicator -->
 <li class="menu-item">
-    <div class="px-3 py-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 8px; margin: 8px 12px 8px;">
-        <div style="color: rgba(255,255,255,0.8); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">
+    <div class="px-3 py-2 mx-3 my-2 rounded bg-primary">
+        <div class="text-white-50 small text-uppercase fw-semibold mb-1">
             <i class="fas fa-school me-1"></i> Kelas Aktif
         </div>
-        <div style="color: white; font-weight: 600; font-size: 14px;">
+        <div class="text-white fw-semibold small">
             {{ $selectedKelas->nama_kelas }}
         </div>
-        <div style="color: rgba(255,255,255,0.7); font-size: 12px;">
+        <div class="text-white-50 small">
             {{ $selectedKelas->cabang->nama_cabang ?? '' }} - {{ $selectedKelas->jenjang }}
         </div>
         <a href="{{ route('wali.pilih-kelas') }}" 
-           style="display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 12px; background: rgba(255,255,255,0.2); color: white; font-size: 12px; border-radius: 4px; text-decoration: none; transition: all 0.2s;">
+           class="d-inline-flex align-items-center gap-1 mt-2 px-3 py-1 bg-white bg-opacity-25 text-white small rounded text-decoration-none">
             <i class="fas fa-exchange-alt"></i> Ganti Kelas
         </a>
     </div>
@@ -78,32 +78,32 @@
 
 <!-- Presensi Siswa -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.presensi') ? 'active open' : '' }}">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-clipboard-check"></i>
         <div>Presensi Siswa</div>
     </a>
     <ul class="menu-sub">
         <li class="menu-item {{ $currentRoute == 'wali.presensi.index' ? 'active' : '' }}">
             <a href="{{ route('wali.presensi.index') }}" class="menu-link">
-                <i class="fas fa-edit me-2" style="font-size: 10px;"></i>
+                <i class="fas fa-edit me-2 fa-xs"></i>
                 <div>Input Harian</div>
             </a>
         </li>
         <li class="menu-item {{ $currentRoute == 'wali.presensi.validasi-izin' ? 'active' : '' }}">
             <a href="{{ route('wali.presensi.validasi-izin') }}" class="menu-link">
-                <i class="fas fa-check-circle me-2" style="font-size: 10px;"></i>
+                <i class="fas fa-check-circle me-2 fa-xs"></i>
                 <div>Validasi Izin</div>
             </a>
         </li>
         <li class="menu-item {{ $currentRoute == 'wali.presensi.rekap-harian' || $currentRoute == 'wali.presensi.show-harian' ? 'active' : '' }}">
             <a href="{{ route('wali.presensi.rekap-harian') }}" class="menu-link">
-                <i class="fas fa-calendar-day me-2" style="font-size: 10px;"></i>
+                <i class="fas fa-calendar-day me-2 fa-xs"></i>
                 <div>Rekap Harian</div>
             </a>
         </li>
         <li class="menu-item {{ $currentRoute == 'wali.presensi.riwayat' ? 'active' : '' }}">
             <a href="{{ route('wali.presensi.riwayat') }}" class="menu-link">
-                <i class="fas fa-history me-2" style="font-size: 10px;"></i>
+                <i class="fas fa-history me-2 fa-xs"></i>
                 <div>Riwayat & Edit</div>
             </a>
         </li>

@@ -9,405 +9,11 @@
 @endsection
 
 @section('styles')
-    <style>
-        /* Card & Layout */
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: none;
-            margin-bottom: 24px;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            border-radius: 12px 12px 0 0;
-        }
-
-        /* Styling Tabel & UI */
-        .table thead th {
-            background: #f8f9fc;
-            color: #4e73df;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e3e6f0;
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .currency-font {
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-        }
-
-        .badge-status {
-            padding: 6px 12px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 10px;
-        }
-
-        /* Perbaikan Visual Identitas */
-        .student-name {
-            font-weight: 700;
-            color: #1e293b;
-            display: block;
-        }
-
-        .student-nisn {
-            font-size: 11px;
-            color: #64748b;
-            font-weight: 600;
-        }
-
-        .cabang-badge {
-            font-size: 10px;
-            background: #f1f5f9;
-            color: #475569;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 800;
-            border: 1px solid #e2e8f0;
-        }
-
-        /* Reset Toolbar */
-        .reset-toolbar {
-            position: fixed;
-            bottom: -80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: white;
-            padding: 14px 28px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-width: 90vw;
-        }
-
-        .reset-toolbar.show {
-            bottom: 30px;
-        }
-
-        .reset-toolbar .selected-count {
-            font-weight: 700;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .reset-toolbar .btn-reset {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 13px;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .reset-toolbar .btn-reset:hover {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            transform: scale(1.05);
-        }
-
-        .reset-toolbar .btn-cancel-select {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .reset-toolbar .btn-cancel-select:hover {
-            background: rgba(255,255,255,0.25);
-        }
-
-        .checkbox-cell {
-            width: 40px;
-            text-align: center;
-        }
-
-        .checkbox-cell input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #3b82f6;
-        }
-
-        tr.selected-row {
-            background-color: #eff6ff !important;
-        }
-
-        /* Buttons */
-        .btn-secondary {
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #475569;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-            color: #1e293b;
-            text-decoration: none;
-        }
-
-        /* Search Form */
-        .search-form {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            position: relative;
-        }
-
-        .search-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-input {
-            padding: 8px 36px 8px 36px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 14px;
-            width: 240px;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            color: #94a3b8;
-            pointer-events: none;
-        }
-
-        .clear-search {
-            position: absolute;
-            right: 8px;
-            background: #f1f5f9;
-            border: none;
-            border-radius: 4px;
-            color: #64748b;
-            cursor: pointer;
-            padding: 4px 8px;
-            font-size: 12px;
-            transition: all 0.2s;
-            display: none;
-        }
-
-        .clear-search:hover {
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        .clear-search.show {
-            display: block;
-        }
-
-        /* Filter Dropdown */
-        .filter-dropdown .dropdown-menu {
-            min-width: 320px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 16px;
-        }
-
-        .filter-dropdown .dropdown-header {
-            padding: 0 0 8px 0;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .card-header {
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 16px !important;
-                padding: 16px;
-            }
-
-            #filterForm {
-                flex-direction: column;
-                width: 100%;
-                align-items: stretch !important;
-                gap: 12px !important;
-            }
-
-            .dropdown {
-                width: 100%;
-            }
-
-            .dropdown-toggle {
-                width: 100%;
-                justify-content: space-between;
-                display: flex;
-                align-items: center;
-            }
-
-            .filter-dropdown .dropdown-menu {
-                width: 100%;
-                max-width: none;
-            }
-
-            .search-input-wrapper {
-                width: 100%;
-            }
-
-            .search-input {
-                width: 100% !important;
-            }
-
-            .w-100-mobile {
-                width: 100% !important;
-            }
-
-            .action-group-mobile {
-                flex-wrap: wrap !important;
-                width: 100%;
-            }
-
-            .action-group-mobile > * {
-                flex: 1 1 auto;
-                min-width: 0;
-            }
-
-            .action-group-mobile .btn {
-                font-size: 12px;
-                padding: 6px 10px;
-                white-space: nowrap;
-            }
-
-            .action-group-mobile .btn-group {
-                flex: 1 1 auto;
-            }
-
-            .action-group-mobile .btn-group .btn {
-                width: 100%;
-            }
-
-            .table td, .table th {
-                font-size: 12px;
-                padding: 8px 6px;
-            }
-
-            .currency-font {
-                font-size: 12px;
-            }
-
-            .student-name {
-                font-size: 13px;
-            }
-
-            .badge-status {
-                font-size: 9px;
-                padding: 4px 8px;
-            }
-
-            .btn-group .btn.btn-sm {
-                padding: 4px 8px;
-                font-size: 11px;
-            }
-
-            .table-responsive {
-                border: none !important;
-            }
-            .table-responsive table {
-                border-collapse: separate;
-                border-spacing: 0 1rem;
-            }
-            .table-responsive thead {
-                display: none;
-            }
-            .table-responsive tbody tr {
-                display: block;
-                background: white;
-                border: 1px solid #e2e8f0;
-                border-radius: 12px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                margin-bottom: 1rem;
-            }
-            .table-responsive tbody td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: right !important;
-                padding: 0.75rem 1rem;
-                border: none;
-                border-bottom: 1px dashed #e2e8f0;
-            }
-            .table-responsive tbody td:last-child {
-                border-bottom: none;
-                display: block;
-            }
-            .table-responsive tbody td::before {
-                content: attr(data-label);
-                display: block;
-                font-weight: 700;
-                font-size: 0.75rem;
-                color: #64748b;
-                text-transform: uppercase;
-                margin-right: 1rem;
-                text-align: left;
-            }
-            .table-responsive tbody td .student-name {
-                text-align: right;
-                font-size: 14px;
-            }
-            .table-responsive tbody td .student-nisn {
-                display: block;
-                text-align: right;
-            }
-            .table-responsive tbody td .btn-group {
-                display: flex;
-                width: 100%;
-                gap: 4px;
-            }
-            .table-responsive tbody td .btn-group .btn {
-                flex: 1;
-                border-radius: 6px !important;
-            }
-        }
-    </style>
+    @vite(['resources/css/admin/keuangan/tagihan/index.css'])
 @endsection
 
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+    <div class="tagihan-index-page">
         <div class="container-fluid px-0">
             {{-- ALERT TUNGGAKAN TAHUN SEBELUMNYA --}}
             @if(!empty($tunggakanSummary))
@@ -465,13 +71,13 @@
                                     data-bs-auto-close="outside" data-bs-display="static">
                                     <span><i class="fas fa-filter me-1"></i> Filter</span>
                                 </button>
-                                <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="z-index: 9999;">
+                                <div class="dropdown-menu p-3 shadow-lg border-0 tagihan-filter-menu" aria-labelledby="filterDropdown">
                                     <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
 
                                     {{-- Filter Tahun Ajaran --}}
                                     <div class="mb-2">
                                         <label class="form-label small fw-bold">Tahun Ajaran</label>
-                                        <select name="tahun_ajaran_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <select name="tahun_ajaran_id" class="form-select form-select-sm" data-auto-submit>
                                             @forelse($allTahunAjaran ?? [] as $ta)
                                                 <option value="{{ $ta->id ?? '' }}" {{ optional($selectedYear)->id == ($ta->id ?? null) ? 'selected' : '' }}>
                                                     {{ $ta->nama_tahun_ajaran ?? 'Tahun Ajaran' }} {{ optional($ta)->is_active ? '(Aktif)' : '' }}
@@ -557,8 +163,8 @@
                     @else
                         {{-- Mobile Select All (Only visible on small screens since thead is hidden) --}}
                         <div class="d-md-none p-3 border-bottom d-flex align-items-center bg-light">
-                            <input type="checkbox" id="selectAllMobile" class="me-2" style="width: 18px; height: 18px; accent-color: #3b82f6;" title="Pilih Semua">
-                            <label for="selectAllMobile" class="fw-bold text-gray-700 mb-0" style="cursor: pointer;">Pilih Semua Siswa</label>
+                            <input type="checkbox" id="selectAllMobile" class="me-2 mobile-select-checkbox" title="Pilih Semua" data-select-all-tagihan>
+                            <label for="selectAllMobile" class="fw-bold text-gray-700 mb-0 mobile-select-label">Pilih Semua Siswa</label>
                         </div>
                         
                         <div class="table-responsive">
@@ -566,7 +172,7 @@
                                 <thead>
                                     <tr>
                                         <th class="checkbox-cell">
-                                            <input type="checkbox" id="selectAll" title="Pilih Semua">
+                                            <input type="checkbox" id="selectAll" title="Pilih Semua" data-select-all-tagihan>
                                         </th>
                                         <th width="50">NO</th>
                                         <th class="text-start">IDENTITAS SISWA</th>
@@ -584,20 +190,19 @@
                                     @forelse($siswaList ?? [] as $index => $siswa)
                                         <tr data-siswa-id="{{ $siswa->id ?? '' }}" data-siswa-name="{{ $siswa->nama_lengkap ?? 'Siswa' }}">
                                             <td class="checkbox-cell align-middle" data-label="PILIH UNTUK RESET">
-                                                <input type="checkbox" class="row-checkbox" value="{{ $siswa->id ?? '' }}">
+                                                <input type="checkbox" class="row-checkbox" value="{{ $siswa->id ?? '' }}" data-row-checkbox>
                                             </td>
                                             <td class="text-center align-middle fw-bold text-gray-600" data-label="NO">
                                                 {{ ($siswaList && method_exists($siswaList, 'firstItem')) ? $siswaList->firstItem() + $index : $index + 1 }}</td>
                                             <td class="align-middle" data-label="IDENTITAS SISWA">
-                                                <div style="text-align: right;">
+                                                <div class="student-identity">
                                                     <span class="student-name">{{ $siswa->nama_lengkap }}</span>
                                                     <span class="student-nisn">Siswa Aktif</span>
                                                 </div>
                                             </td>
                                             <td class="text-center align-middle fw-bold text-gray-800" data-label="NISN">{{ $siswa->nisn }}</td>
                                             <td class="text-center align-middle" data-label="KELAS">
-                                                <span class="badge bg-primary px-2 py-1 fw-bold text-uppercase"
-                                                    style="font-size: 10px;">
+                                                <span class="badge bg-primary px-2 py-1 fw-bold text-uppercase tagihan-kelas-badge">
                                                     {{ optional($siswa->kelas)->nama_kelas ?? '-' }}
                                                 </span>
                                             </td>
@@ -669,7 +274,7 @@
             <i class="fas fa-check-square me-1"></i>
             <span id="selectedCount">0</span> siswa dipilih
         </span>
-        <button type="button" class="btn-cancel-select" onclick="clearSelection()">
+        <button type="button" class="btn-cancel-select" data-clear-selection>
             <i class="fas fa-times me-1"></i> Batal
         </button>
         <button type="button" class="btn-reset" data-bs-toggle="modal" data-bs-target="#resetTagihanModal">
@@ -681,7 +286,7 @@
     <div class="modal fade" id="resetTagihanModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white;">
+                <div class="modal-header reset-modal-header">
                     <h5 class="modal-title fw-bold text-white">
                         <i class="fas fa-exclamation-triangle me-2"></i>PERINGATAN: Reset Tagihan
                     </h5>
@@ -689,7 +294,7 @@
                 </div>
                 <div class="modal-body py-4">
                     <div class="text-center mb-3">
-                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3" style="animation: pulse 1.5s infinite;"></i>
+                        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3 reset-warning-icon"></i>
                         <h5 class="fw-bold text-danger mb-2">TINDAKAN BERBAHAYA!</h5>
                     </div>
 
@@ -698,7 +303,7 @@
                             <h6 class="fw-bold small text-uppercase text-muted mb-2">
                                 <i class="fas fa-users me-1"></i> Siswa yang akan direset:
                             </h6>
-                            <div id="resetSiswaList" class="small" style="max-height: 150px; overflow-y: auto;"></div>
+                            <div id="resetSiswaList" class="small reset-siswa-list"></div>
                         </div>
                     </div>
                 </div>
@@ -710,7 +315,7 @@
                         @csrf
                         <input type="hidden" name="siswa_ids" id="resetSiswaIds">
                         <input type="hidden" name="tahun_ajaran_id" value="{{ optional($selectedYear)->id }}">
-                        <button type="button" class="btn btn-danger fw-bold" id="btnExecReset" onclick="executeReset()">
+                        <button type="button" class="btn btn-danger fw-bold" id="btnExecReset" data-execute-reset>
                             <i class="fas fa-trash-restore me-1"></i> Ya, Reset Sekarang
                         </button>
                     </form>
@@ -718,128 +323,8 @@
             </div>
         </div>
     </div>
+@endsection
 
-    <style>
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-    </style>
-
-    <script>
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        const clearSearch = document.getElementById('clearSearch');
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                if (this.value.length > 0) {
-                    clearSearch.classList.add('show');
-                } else {
-                    clearSearch.classList.remove('show');
-                }
-            });
-        }
-
-        if (clearSearch) {
-            clearSearch.addEventListener('click', function() {
-                searchInput.value = '';
-                clearSearch.classList.remove('show');
-                searchInput.focus();
-            });
-        }
-
-        // === Multi-select & Reset Tagihan Logic ===
-        const selectAll = document.getElementById('selectAll');
-        const selectAllMobile = document.getElementById('selectAllMobile');
-        const checkboxes = document.querySelectorAll('.row-checkbox');
-        const resetToolbar = document.getElementById('resetToolbar');
-        const selectedCountEl = document.getElementById('selectedCount');
-
-        function updateToolbar() {
-            const checked = document.querySelectorAll('.row-checkbox:checked');
-            const count = checked.length;
-            selectedCountEl.textContent = count;
-
-            if (count > 0) {
-                resetToolbar.classList.add('show');
-            } else {
-                resetToolbar.classList.remove('show');
-            }
-
-            // Update select all state
-            const isAllSelected = checkboxes.length > 0 && checked.length === checkboxes.length;
-            const isIndeterminate = checked.length > 0 && checked.length < checkboxes.length;
-            
-            if (selectAll) {
-                selectAll.checked = isAllSelected;
-                selectAll.indeterminate = isIndeterminate;
-            }
-            if (selectAllMobile) {
-                selectAllMobile.checked = isAllSelected;
-                selectAllMobile.indeterminate = isIndeterminate;
-            }
-
-            // Highlight selected rows
-            checkboxes.forEach(cb => {
-                const row = cb.closest('tr');
-                if (row) {
-                    row.classList.toggle('selected-row', cb.checked);
-                }
-            });
-        }
-
-        if (selectAll) {
-            selectAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                updateToolbar();
-            });
-        }
-        
-        if (selectAllMobile) {
-            selectAllMobile.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                updateToolbar();
-            });
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateToolbar);
-        });
-
-        function clearSelection() {
-            checkboxes.forEach(cb => cb.checked = false);
-            if (selectAll) selectAll.checked = false;
-            if (selectAllMobile) selectAllMobile.checked = false;
-            updateToolbar();
-        }
-
-        // Modal preparation
-        const resetModal = document.getElementById('resetTagihanModal');
-        if (resetModal) {
-            resetModal.addEventListener('show.bs.modal', function() {
-                const checked = document.querySelectorAll('.row-checkbox:checked');
-                const ids = [];
-                let listHtml = '';
-
-                checked.forEach((cb, i) => {
-                    ids.push(cb.value);
-                    const row = cb.closest('tr');
-                    const nameCell = row ? row.querySelector('.student-name') : null;
-                    const name = nameCell ? nameCell.textContent.trim() : 'Siswa #' + cb.value;
-                    listHtml += `<div class="d-flex align-items-center py-1 ${i > 0 ? 'border-top' : ''}">
-                        <i class="fas fa-user-minus text-danger me-2"></i>
-                        <span>${i + 1}. ${name}</span>
-                    </div>`;
-                });
-
-                document.getElementById('resetSiswaIds').value = JSON.stringify(ids);
-                document.getElementById('resetSiswaList').innerHTML = listHtml;
-            });
-        }
-
-        function executeReset() {
-            document.getElementById('formResetTagihan').submit();
-        }
-    </script>
+@section('scripts')
+    @vite(['resources/js/admin/keuangan/tagihan/index.js'])
 @endsection

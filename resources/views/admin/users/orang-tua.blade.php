@@ -8,719 +8,22 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/users/orang-tua.css'])
+@endsection
+
 @section('content')
-    <style>
-        /* Card & Layout */
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: none;
-            margin-bottom: 24px;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid #e5e7eb;
-            background: white;
-            border-radius: 12px 12px 0 0;
-        }
-
-        /* Table Styles */
-        .table th {
-            background: #f8fafc;
-            color: #64748b;
-            font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            padding: 12px 16px;
-            text-align: left;
-        }
-
-        .table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            vertical-align: middle;
-            color: #334155;
-            font-size: 14px;
-        }
-
-        .table tr:hover td {
-            background: #f8fafc;
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            border: none;
-            font-size: 14px;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-secondary {
-            background: white;
-            border: 1px solid #e2e8f0;
-            color: #475569;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #f8fafc;
-            border-color: #94a3b8;
-            color: #1e293b;
-            text-decoration: none;
-        }
-
-        /* Action Icon Buttons */
-        .action-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .action-btn[style*="background: #eff6ff"]:hover {
-            background: #dbeafe !important;
-        }
-
-        .action-btn[style*="background: #fef3c7"]:hover {
-            background: #fde68a !important;
-        }
-
-        .action-btn.toggle-active {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .action-btn.toggle-active:hover {
-            background: #bbf7d0;
-        }
-
-        .action-btn.toggle-inactive {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .action-btn.toggle-inactive:hover {
-            background: #fef9c7;
-        }
-
-        .action-btn.delete {
-            background: #fef2f2;
-            color: #ef4444;
-        }
-
-        .action-btn.delete:hover {
-            background: #fee2e2;
-        }
-
-        /* Badges */
-        .badge-status {
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-status.aktif {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-status.nonaktif {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-class {
-            background: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* Jenjang Badges */
-        .badge-kb {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-tka {
-            background: #fed7aa;
-            color: #9a3412;
-        }
-
-        .badge-tkb {
-            background: #fecaca;
-            color: #991b1b;
-        }
-
-        .badge-sd {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-smp {
-            background: #e0f2fe;
-            color: #075985;
-        }
-
-        .badge-sma {
-            background: #f3e8ff;
-            color: #7c3aed;
-        }
-
-        /* Search Form */
-        .search-input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-input {
-            padding: 8px 36px 8px 36px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 12px;
-            color: #94a3b8;
-            pointer-events: none;
-        }
-
-        .clear-search {
-            position: absolute;
-            right: 8px;
-            background: #f1f5f9;
-            border: none;
-            border-radius: 4px;
-            color: #64748b;
-            cursor: pointer;
-            padding: 4px 8px;
-            font-size: 12px;
-            transition: all 0.2s;
-            display: none;
-        }
-
-        .clear-search:hover {
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        .clear-search.show {
-            display: block;
-        }
-
-        .btn-search {
-            background: #2563eb;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-search:hover {
-            background: #1d4ed8;
-        }
-
-        .search-info {
-            padding: 12px 16px;
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-            color: #1e40af;
-        }
-
-        .search-info .search-term {
-            font-weight: 600;
-        }
-
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-clear-all:hover {
-            background: #eff6ff;
-            text-decoration: none;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1050;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.2s;
-        }
-
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .modal-dialog {
-            position: relative;
-            width: auto;
-            max-width: 500px;
-            margin: 1.75rem auto;
-            animation: slideDown 0.3s;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal-content {
-            position: relative;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            padding: 0;
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px;
-            border-bottom: 1px solid #e5e7eb;
-            position: relative;
-        }
-
-        .modal-header.bg-danger {
-            background: #dc2626 !important;
-            border-bottom-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-header.bg-warning {
-            background: #f59e0b !important;
-            border-bottom-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .modal-header .modal-title {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
-
-        .modal-header.bg-danger .modal-title,
-        .modal-header.bg-warning .modal-title {
-            color: white;
-        }
-
-        .modal-header .btn-close,
-        .modal-header .btn-close-white {
-            background: transparent;
-            border: none;
-            font-size: 24px;
-            line-height: 1;
-            color: #6b7280;
-            cursor: pointer;
-            padding: 8px;
-            width: 40px;
-            height: 40px;
-            transition: all 0.2s;
-            margin: 0 !important;
-            opacity: 1;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 300;
-        }
-
-        .modal-header .btn-close-white {
-            color: #ffffff !important;
-            opacity: 1 !important;
-            filter: brightness(1.2);
-        }
-
-        .modal-header .btn-close:hover,
-        .modal-header .btn-close-white:hover {
-            opacity: 0.8 !important;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-        }
-
-        .modal-body {
-            padding: 24px;
-            color: #374151;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .modal-body strong {
-            color: #111827;
-        }
-
-        .modal-body .text-muted {
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        .info-box {
-            background: #f9fafb;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 12px 0;
-            border: 1px solid #e5e7eb;
-        }
-
-        .info-box .info-name {
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .info-box .info-details {
-            font-size: 13px;
-            color: #64748b;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .modal-footer {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            padding: 16px 24px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            text-decoration: none;
-        }
-
-        .btn-modal-secondary {
-            background: #f3f4f6;
-            color: #374151;
-        }
-
-        .btn-modal-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-        }
-
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #d97706;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-        }
-
-        /* Alert/Success Messages */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-    /* Responsive Styles */
-        @media (max-width: 768px) {
-            .card-header {
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 16px !important;
-                padding: 16px;
-            }
-
-            .card-header > div {
-                width: 100%;
-                justify-content: space-between;
-                flex-wrap: wrap;
-            }
-
-            /* Title section on mobile */
-            .card-header > div:first-child {
-                margin-bottom: 8px;
-            }
-            
-            .w-100-mobile {
-                width: 100% !important;
-            }
-
-            /* Filter form on mobile */
-            .search-form {
-                flex-direction: column;
-                width: 100%;
-                align-items: stretch !important;
-                gap: 12px !important;
-            }
-
-            .filter-dropdown .dropdown-menu {
-                width: 100%;
-                max-width: none;
-            }
-            
-            .filter-dropdown {
-                width: 100%;
-            }
-            
-            .filter-dropdown .dropdown-toggle {
-                width: 100%;
-                justify-content: space-between;
-                display: flex;
-                align-items: center;
-            }
-
-            .search-input-wrapper {
-                width: 100%;
-            }
-
-            .search-input {
-                width: 100% !important;
-            }
-            
-            .btn-search {
-                width: 100%;
-                justify-content: center;
-            }
-
-            /* Action buttons on mobile */
-            .card-header > div:last-child {
-                flex-direction: row;
-                gap: 8px !important;
-                justify-content: stretch;
-            }
-
-            .card-header > div:last-child .btn,
-            .card-header > div:last-child .btn-group {
-                flex: 1;
-                justify-content: center;
-            }
-            
-            .btn-group {
-                width: auto; 
-                flex: 0 0 auto !important;
-            }
-            
-            /* Make "Tambah" text shorter on mobile if needed or hide icon */
-            /* Removed CSS hack in favor of HTML classes */
-        }
-
-        /* Mobile Card Pattern */
-        @media (max-width: 767.98px) {
-            .table-card-mobile thead { display: none; }
-            .table-card-mobile tbody tr {
-                display: block;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                margin-bottom: 12px;
-                overflow: hidden;
-                box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-                background: #fff;
-            }
-            .table-card-mobile tbody tr:hover td {
-                background: transparent;
-            }
-            .table-card-mobile tbody td {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 10px 14px;
-                border: none !important;
-                border-bottom: 1px solid #f3f4f6 !important;
-            }
-            .table-card-mobile tbody td:last-child {
-                border-bottom: none !important;
-            }
-            .table-card-mobile tbody td[data-label]::before {
-                content: attr(data-label);
-                font-weight: 700;
-                font-size: 10px;
-                text-transform: uppercase;
-                color: #9ca3af;
-                letter-spacing: 0.5px;
-                flex-shrink: 0;
-                margin-right: 12px;
-            }
-            .table-card-mobile .mobile-card-head {
-                background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-                font-weight: 700;
-                font-size: 15px;
-                color: #1e293b;
-                padding: 14px 40px 14px 14px !important;
-                border-bottom: 2px solid #e0e7ff !important;
-            }
-            .table-card-mobile .mobile-card-head::before {
-                display: none !important;
-            }
-            .table-card-mobile .mobile-card-actions {
-                justify-content: center !important;
-                padding: 12px 14px !important;
-                background: #f9fafb;
-            }
-            .table-card-mobile .mobile-card-actions::before {
-                display: none !important;
-            }
-            .table-card-mobile .mobile-hide {
-                display: none !important;
-            }
-            .table-card-mobile tbody tr {
-                position: relative;
-            }
-            .table-card-mobile .mobile-card-checkbox {
-                position: absolute;
-                top: 12px;
-                right: 12px;
-                padding: 0 !important;
-                border: none !important;
-                border-bottom: none !important;
-                background: transparent !important;
-                z-index: 2;
-                display: block !important;
-            }
-            .table-card-mobile .mobile-card-checkbox::before {
-                display: none !important;
-            }
-            .mobile-select-all-bar {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px 14px;
-                background: #f8fafc;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                margin-bottom: 12px;
-                font-size: 13px;
-                color: #475569;
-                font-weight: 600;
-            }
-            .mobile-select-all-bar .form-check-input { margin: 0; }
-        }
-    </style>
-
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="user-list-shell">
         {{-- Success Message --}}
 
         {{-- Import Warnings --}}
         @if(session('import_warnings'))
-            <div class="alert alert-warning" style="background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; display: block;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-weight: 600;">
+            <div class="alert alert-warning import-warning">
+                <div class="import-warning-header">
                     <i class="fas fa-exclamation-triangle"></i>
                     Beberapa data dilewati saat import:
                 </div>
-                <ul style="margin: 0; padding-left: 24px; font-size: 13px;">
+                <ul class="import-warning-list">
                     @foreach(session('import_warnings') as $warning)
                         <li>{{ $warning }}</li>
                     @endforeach
@@ -756,7 +59,7 @@
                                 data-bs-auto-close="outside" data-bs-display="static">
                                 <span><i class="fas fa-filter me-1"></i> Filter</span>
                             </button>
-                            <div class="dropdown-menu p-3 shadow-lg border-0" aria-labelledby="filterDropdown" style="min-width: 300px; z-index: 9999;">
+                            <div class="dropdown-menu p-3 shadow-lg border-0 filter-dropdown-menu" aria-labelledby="filterDropdown">
                                 <h6 class="dropdown-header px-0 text-uppercase small fw-bold text-primary mb-2">Opsi Filter</h6>
 
                                 {{-- Filter Jenjang Anak --}}
@@ -804,7 +107,7 @@
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" name="search" id="searchInput" class="search-input"
                                 placeholder="Cari..." value="{{ request('search') }}"
-                                autocomplete="off" style="width: 200px;">
+                                autocomplete="off">
                             <button type="button" class="clear-search {{ request('search') ? 'show' : '' }}"
                                 id="clearSearch" title="Hapus pencarian">
                                 <i class="fas fa-times"></i>
@@ -815,10 +118,10 @@
 
                 {{-- Right Group: Actions --}}
                 <div class="d-flex gap-2 action-group-mobile">
-                    <form action="{{ route('admin.users.bulk-delete-orang-tua') }}" method="POST" id="bulkDeleteForm" style="display: none;">
+                    <form action="{{ route('admin.users.bulk-delete-orang-tua') }}" method="POST" id="bulkDeleteForm" class="bulk-delete-form">
                         @csrf
                         <input type="hidden" name="ids" id="bulkDeleteIds">
-                        <button type="button" class="btn btn-danger" onclick="showBulkDeleteModal()">
+                        <button type="button" class="btn btn-danger" data-show-bulk-delete-modal>
                             <i class="fas fa-trash"></i>
                         </button>
                     </form>
@@ -845,7 +148,7 @@
                             </li>
                         </ul>
                     </div>
-                    <a href="{{ route('admin.users.orang-tua.create') }}" class="btn-primary" style="white-space: nowrap;">
+                    <a href="{{ route('admin.users.orang-tua.create') }}" class="btn-primary btn-nowrap">
                         <i class="fas fa-plus"></i>
                         <span class="d-none d-md-inline">Tambah Orang Tua</span>
                         <span class="d-md-none">Tambah</span>
@@ -855,22 +158,22 @@
 
                 <div class="d-md-none mobile-select-all-bar">
                     <input type="checkbox" id="selectAllMobile" class="form-check-input">
-                    <label for="selectAllMobile" style="margin: 0; cursor: pointer;">Pilih Semua</label>
+                    <label for="selectAllMobile" class="select-all-label">Pilih Semua</label>
                 </div>
 
-                <div style="overflow-x: auto;">
-                    <table class="table table-card-mobile" style="width: 100%; border-collapse: collapse;">
+                <div class="table-scroll">
+                    <table class="table table-card-mobile">
                         <thead>
                         <tr>
-                            <th style="width: 40px;" class="text-center">
+                            <th class="text-center th-checkbox">
                                 <input type="checkbox" id="selectAll" class="form-check-input">
                             </th>
-                            <th style="width: 60px;">No</th>
+                            <th class="th-number">No</th>
                             <th>Nama Orang Tua</th>
                             <th>Username / Email</th>
                             <th>Anak (Siswa)</th>
-                            <th style="width: 100px;">Status Akun</th>
-                            <th style="text-align: center; width: 170px;">Aksi</th>
+                            <th class="th-status">Status Akun</th>
+                            <th class="th-actions th-actions-wide">Aksi</th>
                         </tr>
                     </thead>
                         <tbody>
@@ -879,25 +182,25 @@
                                 <td class="text-center mobile-card-checkbox">
                                     <input type="checkbox" name="ids[]" class="form-check-input select-item" value="{{ $ortu->id }}">
                                 </td>
-                                <td style="text-align: center; font-weight: 600; color: #64748b;" class="mobile-hide">
+                                <td class="mobile-hide row-number">
                                     {{ $orangTua->firstItem() + $index }}</td>
                                     <td class="mobile-card-head">
-                                        <div style="font-weight: 600; color: #111827;">{{ $ortu->name }}</div>
-                                        <small style="color: #64748b;">
-                                            <i class="fas fa-user-friends" style="font-size: 10px;"></i>
+                                        <div class="parent-name-cell">{{ $ortu->name }}</div>
+                                        <small class="cell-muted">
+                                            <i class="fas fa-user-friends icon-xs"></i>
                                             Orang Tua
                                         </small>
                                     </td>
                                     <td data-label="Username / Email">
-                                        <div style="font-weight: 600; color: #111827; font-family: 'Courier New', monospace;">
+                                        <div class="parent-username">
                                             {{ $ortu->username }}</div>
-                                        <small style="color: #64748b;">{{ $ortu->email }}</small>
+                                        <small class="cell-muted">{{ $ortu->email }}</small>
                                     </td>
                                     <td data-label="Anak">
                                         @if($ortu->studentParents->count() > 0)
-                                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                            <div class="children-list">
                                                 @foreach($ortu->studentParents as $sp)
-                                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                                    <div class="child-row">
                                                         @php
                                                             $jenjangBadge = isset($sp->siswa->kelas->jenjang) ? [
                                                                 'KB' => 'badge-kb',
@@ -910,17 +213,17 @@
                                                         @endphp
                                                         @if($sp->siswa->kelas)
                                                             <span class="badge {{ $jenjangBadge }}"
-                                                                style="padding: 2px 6px; font-size: 10px;">
+                                                                class="child-class-badge">
                                                                 {{ $sp->siswa->kelas->jenjang }}
                                                             </span>
                                                         @endif
                                                         <span
-                                                            style="font-size: 13px; color: #475569;">{{ $sp->siswa->nama_lengkap }}</span>
+                                                            class="child-name">{{ $sp->siswa->nama_lengkap }}</span>
                                                     </div>
                                                 @endforeach
                                             </div>
                                         @else
-                                            <span style="color: #ef4444; font-size: 12px;">
+                                            <span class="orphan-warning">
                                                 <i class="fas fa-exclamation-circle"></i>
                                                 Belum ada anak terdaftar
                                             </span>
@@ -929,20 +232,20 @@
                                     <td data-label="Status">
                                         <span class="badge-status {{ $ortu->is_active ? 'aktif' : 'nonaktif' }}">
                                             <i class="fas fa-{{ $ortu->is_active ? 'check-circle' : 'times-circle' }}"
-                                                style="font-size: 10px;"></i>
+                                                class="icon-xs"></i>
                                             {{ $ortu->is_active ? 'Aktif' : 'Nonaktif' }}
                                         </span>
                                     </td>
                                     <td class="mobile-card-actions">
-                                        <div style="display: flex; justify-content: center; gap: 6px;">
+                                        <div class="action-buttons">
                                             {{-- Detail Button --}}
                                             <a href="{{ route('admin.users.show-orang-tua', $ortu->id) }}" class="action-btn"
-                                                style="background: #eff6ff; color: #1e40af;" title="Lihat Detail">
+                                                title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             {{-- Edit Button --}}
                                             <a href="{{ route('admin.users.edit-orang-tua', $ortu->id) }}" class="action-btn"
-                                                style="background: #fef3c7; color: #92400e;" title="Edit Data">
+                                                title="Edit Data">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             {{-- Toggle Status Button --}}
@@ -962,9 +265,9 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">
-                                        <i class="fas fa-users fa-3x" style="margin-bottom: 12px; opacity: 0.5;"></i>
-                                        <div style="font-size: 16px; font-weight: 500;">
+                                    <td colspan="6" class="empty-table-cell">
+                                        <i class="fas fa-users fa-3x empty-table-icon"></i>
+                                        <div class="empty-table-title">
                                             @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
                                                 Tidak ada data orang tua yang sesuai dengan filter yang dipilih
                                             @else
@@ -974,7 +277,7 @@
                                         <small>
                                             @if(request('search') || request('jenjang') || request('cabang_id') || request('status'))
                                                 Coba filter lain atau <a href="{{ route('admin.users.orang-tua') }}"
-                                                    style="color: #2563eb; text-decoration: underline;">hapus semua filter</a>
+                                                    class="reset-filter-link">hapus semua filter</a>
                                             @else
                                                 Orang tua akan terdaftar otomatis saat menambahkan siswa baru
                                             @endif
@@ -987,7 +290,7 @@
                 </div>
 
                 @if($orangTua->hasPages())
-                    <div style="padding: 20px;">
+                    <div class="pagination-wrap">
                         {{ $orangTua->appends(request()->except('page'))->links() }}
                     </div>
                 @endif
@@ -1000,7 +303,7 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header {{ $ortu->is_active ? 'bg-warning' : 'bg-success' }} text-white">
-                            <h5 class="modal-title fw-bold" style="color: white !important;">
+                            <h5 class="modal-title fw-bold modal-title-white">
                                 <i class="fas fa-{{ $ortu->is_active ? 'ban' : 'check' }} me-2"></i>
                                 Konfirmasi {{ $ortu->is_active ? 'Nonaktifkan' : 'Aktifkan' }} Akun
                             </h5>
@@ -1012,30 +315,30 @@
                             </p>
                             <div class="info-box">
                                 <div class="info-name">
-                                    <i class="fas fa-user" style="color: #3b82f6;"></i>
+                                    <i class="fas fa-user text-primary"></i>
                                     {{ $ortu->name }}
                                 </div>
                                 <div class="info-details">
                                     <div>
-                                        <i class="fas fa-at" style="color: #64748b; font-size: 11px;"></i>
+                                        <i class="fas fa-at detail-icon"></i>
                                         Username: {{ $ortu->username }}
                                     </div>
                                     @if($ortu->studentParents->count() > 0)
                                         <div>
-                                            <i class="fas fa-child" style="color: #64748b; font-size: 11px;"></i>
+                                            <i class="fas fa-child detail-icon"></i>
                                             Anak: {{ $ortu->studentParents->pluck('siswa.nama_lengkap')->join(', ') }}
                                         </div>
                                     @endif
                                 </div>
                             </div>
                             @if($ortu->is_active)
-                                <p style="margin-top: 12px;">
-                                    <i class="fas fa-info-circle" style="color: #f59e0b;"></i>
+                                <p class="modal-note">
+                                    <i class="fas fa-info-circle text-warning"></i>
                                     <small class="text-muted">Orang tua yang dinonaktifkan tidak dapat login ke sistem.</small>
                                 </p>
                             @else
-                                <p style="margin-top: 12px;">
-                                    <i class="fas fa-info-circle" style="color: #10b981;"></i>
+                                <p class="modal-note">
+                                    <i class="fas fa-info-circle text-success"></i>
                                     <small class="text-muted">Orang tua yang diaktifkan dapat login dan mengakses sistem
                                         kembali.</small>
                                 </p>
@@ -1047,10 +350,9 @@
                                 Batal
                             </button>
                             <form action="{{ route('admin.users.toggle-orang-tua-status', $ortu->id) }}" method="POST"
-                                style="display: inline;">
+                                class="d-inline">
                                 @csrf
-                                <button type="submit" class="btn {{ $ortu->is_active ? 'btn-warning' : 'btn-primary' }}"
-                                    style="background: {{ $ortu->is_active ? '#f59e0b' : '#10b981' }};">
+                                <button type="submit" class="btn {{ $ortu->is_active ? 'btn-warning btn-toggle-warning' : 'btn-primary btn-toggle-success' }}">
                                     <i class="fas fa-{{ $ortu->is_active ? 'ban' : 'check' }}"></i>
                                     Ya, {{ $ortu->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                 </button>
@@ -1078,24 +380,24 @@
                             <p>Apakah Anda yakin ingin menghapus akun orang tua:</p>
                             <div class="info-box">
                                 <div class="info-name">
-                                    <i class="fas fa-user" style="color: #3b82f6;"></i>
+                                    <i class="fas fa-user text-primary"></i>
                                     {{ $ortu->name }}
                                 </div>
                                 <div class="info-details">
                                     <div>
-                                        <i class="fas fa-at" style="color: #64748b; font-size: 11px;"></i>
+                                        <i class="fas fa-at detail-icon"></i>
                                         Username: {{ $ortu->username }}
                                     </div>
                                     @if($ortu->studentParents->count() > 0)
                                         <div>
-                                            <i class="fas fa-child" style="color: #64748b; font-size: 11px;"></i>
+                                            <i class="fas fa-child detail-icon"></i>
                                             Anak: {{ $ortu->studentParents->pluck('siswa.nama_lengkap')->join(', ') }}
                                         </div>
                                     @endif
                                 </div>
                             </div>
-                            <p style="margin-top: 12px;">
-                                <i class="fas fa-info-circle" style="color: #dc2626;"></i>
+                            <p class="modal-note">
+                                <i class="fas fa-info-circle text-danger"></i>
                                 <small class="text-muted">Tindakan ini tidak dapat dibatalkan dan akan menghapus akun login
                                     orang tua.</small>
                             </p>
@@ -1106,7 +408,7 @@
                                 Batal
                             </button>
                             <form action="{{ route('admin.users.delete-orang-tua', $ortu->id) }}" method="POST"
-                                style="display: inline;">
+                                class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">
@@ -1119,104 +421,7 @@
                 </div>
             </div>
         @endforeach
-
-        <script>
-            // Search functionality
-            const searchInput = document.getElementById('searchInput');
-            const clearSearch = document.getElementById('clearSearch');
-
-            // Show/hide clear button
-            if (searchInput) {
-                searchInput.addEventListener('input', function () {
-                    if (this.value.length > 0) {
-                        clearSearch.classList.add('show');
-                    } else {
-                        clearSearch.classList.remove('show');
-                    }
-                });
-            }
-
-            // Clear search
-            if (clearSearch) {
-                clearSearch.addEventListener('click', function () {
-                    searchInput.value = '';
-                    clearSearch.classList.remove('show');
-                    searchInput.focus();
-                });
-            }
-
-            // Bulk Selection Logic
-            document.addEventListener('DOMContentLoaded', function() {
-                const selectAll = document.getElementById('selectAll');
-                const selectAllMobile = document.getElementById('selectAllMobile');
-                const selectItems = document.querySelectorAll('.select-item');
-                const bulkDeleteForm = document.getElementById('bulkDeleteForm');
-                const bulkDeleteIds = document.getElementById('bulkDeleteIds');
-
-                function updateBulkDeleteButton() {
-                    const selectedCount = document.querySelectorAll('.select-item:checked').length;
-                    if (selectedCount > 0) {
-                        bulkDeleteForm.style.display = 'block';
-                    } else {
-                        bulkDeleteForm.style.display = 'none';
-                    }
-                }
-
-                function syncSelectAll(checked) {
-                    selectItems.forEach(item => { item.checked = checked; });
-                    if(selectAll) selectAll.checked = checked;
-                    if(selectAllMobile) selectAllMobile.checked = checked;
-                    updateBulkDeleteButton();
-                }
-
-                if(selectAll) {
-                    selectAll.addEventListener('change', function() { syncSelectAll(this.checked); });
-                }
-                if(selectAllMobile) {
-                    selectAllMobile.addEventListener('change', function() { syncSelectAll(this.checked); });
-                }
-
-                selectItems.forEach(item => {
-                    item.addEventListener('change', function() {
-                        const allChecked = document.querySelectorAll('.select-item:checked').length === selectItems.length;
-                        if(selectAll) selectAll.checked = allChecked;
-                        if(selectAllMobile) selectAllMobile.checked = allChecked;
-                        updateBulkDeleteButton();
-                    });
-                });
-            });
-
-            function showBulkDeleteModal() {
-                const selectedItems = document.querySelectorAll('.select-item:checked');
-                if (selectedItems.length === 0) return;
-
-                const modal = new bootstrap.Modal(document.getElementById('bulkDeleteModal'));
-                document.getElementById('selectedCount').textContent = selectedItems.length;
-                modal.show();
-            }
-
-            function submitBulkDelete() {
-                const selectedItems = document.querySelectorAll('.select-item:checked');
-                const ids = Array.from(selectedItems).map(item => item.value);
-                
-                const form = document.getElementById('bulkDeleteForm');
-                // Clear existing hidden inputs for ids
-                const existingInputs = form.querySelectorAll('input[name="ids[]"]');
-                existingInputs.forEach(input => input.remove());
-
-                ids.forEach(id => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'ids[]';
-                    input.value = id;
-                    form.appendChild(input);
-                });
-
-                form.submit();
-            }
-        </script>
-
-    <!-- Modal Konfirmasi Bulk Delete -->
+<!-- Modal Konfirmasi Bulk Delete -->
     <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -1225,13 +430,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus <span id="selectedCount" style="font-weight: bold;"></span> data terpilih? Tindakan ini tidak dapat dibatalkan.</p>
+                    <p>Apakah Anda yakin ingin menghapus <span id="selectedCount" class="selected-count"></span> data terpilih? Tindakan ini tidak dapat dibatalkan.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">Ya, Hapus</button>
+                    <button type="button" class="btn btn-danger" data-submit-bulk-delete>Ya, Hapus</button>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/admin/users/list.js'])
 @endsection

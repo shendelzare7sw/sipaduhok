@@ -8,88 +8,13 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
-{{-- SweetAlert2 --}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
 @section('styles')
-<style>
-    .student-avatar {
-        width: 60px;
-        height: 60px;
-        flex-shrink: 0;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-    }
-    
-    @media (max-width: 768px) {
-        .table-responsive {
-            border: none !important;
-        }
-        .table-responsive table {
-            border-collapse: separate;
-            border-spacing: 0 1rem;
-        }
-        .table-responsive thead {
-            display: none;
-        }
-        .table-responsive tbody tr {
-            display: block;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 1rem;
-        }
-        .table-responsive tbody td {
-            display: block;
-            text-align: left !important;
-            padding: 0.75rem 1rem;
-            border: none;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .table-responsive tbody td:last-child {
-            border-bottom: none;
-        }
-        .table-responsive tbody td::before {
-            content: attr(data-label);
-            display: block;
-            font-weight: 700;
-            font-size: 0.75rem;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-        .input-group, .form-control, .form-select {
-            max-width: 100% !important;
-        }
-    }
-    
-    /* SweetAlert Styling */
-    .swal2-popup {
-        font-family: 'Public Sans', sans-serif;
-        border-radius: 1rem;
-    }
-    
-    .swal2-title {
-        font-size: 1.5rem;
-        color: #566a7f;
-    }
-    
-    .swal2-html-container {
-        color: #697a8d;
-    }
-</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    @vite(['resources/css/admin/keuangan/tagihan/edit.css'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="tagihan-edit-page">
 <div class="container-fluid px-0">
 
     {{-- Breadcrumb --}}
@@ -148,11 +73,11 @@
                         <thead class="table-light">
                             <tr>
                                 <th class="text-center" width="50">No</th>
-                                <th style="min-width: 200px;">Jenis Tagihan</th>
-                                <th style="min-width: 180px;">Tahun Ajaran</th>
-                                <th style="min-width: 200px;">Jumlah (Rp)</th>
-                                <th style="min-width: 150px;">Jatuh Tempo</th>
-                                <th style="min-width: 80px;" class="text-center">Aksi</th>
+                                <th class="col-jenis">Jenis Tagihan</th>
+                                <th class="col-tahun">Tahun Ajaran</th>
+                                <th class="col-jumlah">Jumlah (Rp)</th>
+                                <th class="col-jatuh-tempo">Jatuh Tempo</th>
+                                <th class="col-aksi text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -192,7 +117,7 @@
                                         </select>
                                     </td>
                                     <td class="align-middle" data-label="Jumlah (Rp)">
-                                        <div class="input-group input-group-sm" style="max-width: 250px;">
+                                        <div class="input-group input-group-sm tagihan-amount-input">
                                             <span class="input-group-text bg-white">Rp</span>
                                             @php
                                                 $rawValue = intval($tagihanExist[$key] ?? 0);
@@ -211,9 +136,8 @@
                                     <td class="align-middle" data-label="Jatuh Tempo">
                                         <input type="date"
                                                name="tanggal_jatuh_tempo[{{ $key }}]"
-                                               class="form-control form-control-sm"
                                                value="{{ old('tanggal_jatuh_tempo.'.$key, now()->addMonth()->format('Y-m-d')) }}"
-                                               style="max-width: 200px;"
+                                               class="form-control form-control-sm due-date-input"
                                                {{ $isReadOnly ? 'disabled' : '' }}>
                                     </td>
                                     <td class="align-middle text-center" data-label="Aksi">
@@ -275,101 +199,6 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const currencyInputs = document.querySelectorAll('.currency-input');
-
-        // Format number with thousand separator (Indonesian format: dot)
-        function formatCurrency(value) {
-            // Remove all non-digit characters
-            let numericValue = String(value).replace(/\D/g, '');
-            // Remove leading zeros
-            numericValue = numericValue.replace(/^0+/, '') || '0';
-            // Format with dots as thousand separator
-            return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-
-        // Apply formatting to each currency input
-        currencyInputs.forEach(input => {
-            // Real-time formatting as user types
-            input.addEventListener('input', function(e) {
-                const cursorPos = this.selectionStart;
-                const oldLength = this.value.length;
-                
-                this.value = formatCurrency(this.value);
-                
-                // Adjust cursor position after formatting
-                const newLength = this.value.length;
-                const diff = newLength - oldLength;
-                this.setSelectionRange(cursorPos + diff, cursorPos + diff);
-            });
-
-            // Handle paste event
-            input.addEventListener('paste', function(e) {
-                e.preventDefault();
-                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                this.value = formatCurrency(pastedText);
-            });
-        });
-
-        // Handle delete tagihan with SweetAlert
-        document.querySelectorAll('.delete-tagihan-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const tagihanLabel = this.getAttribute('data-tagihan-label');
-                const tagihanId = this.getAttribute('data-tagihan-id');
-                const deleteUrl = this.getAttribute('data-delete-url');
-
-                Swal.fire({
-                    title: 'Hapus Tagihan?',
-                    html: `Apakah Anda yakin ingin menghapus tagihan <strong>${tagihanLabel}</strong>?<br><small class="text-muted">Aksi ini tidak dapat dibatalkan.</small>`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Hapus',
-                    cancelButtonText: 'Batal',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Submit DELETE request via fetch
-                        fetch(deleteUrl, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire({
-                                    title: 'Terhapus!',
-                                    text: 'Tagihan berhasil dihapus.',
-                                    icon: 'success',
-                                    confirmButtonText: 'OK'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                return response.json().then(data => {
-                                    throw new Error(data.error || 'Gagal menghapus tagihan');
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: error.message || 'Terjadi kesalahan saat menghapus tagihan',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        });
-                    }
-                });
-            });
-        });
-    });
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    @vite(['resources/js/admin/keuangan/tagihan/edit.js'])
 @endsection

@@ -306,7 +306,7 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 ### Catatan / Teguran
 
-**Index view**: `waka/catatan/index.blade.php` → `@include('shared.catatan.index')` · **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
+**Index view**: `waka/catatan/index.blade.php` (standalone per-role, tanpa shared partial) - **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
 
 **Tampilan index**: Toolbar header **Manajemen Catatan** + tombol kanan **+ Buat Catatan** (primary). 4 **stat card**: Total Catatan, Publik (ke semua pengguna), Total Dibaca, Mendesak (prioritas tinggi). Card **Daftar Catatan** (Waka punya parameter `showDirection=true` — beda dgn Ketua/Admin — sehingga tampil arah panah Terkirim/Dari pengirim). List card per catatan: judul, waktu, prioritas, badge target audience (Semua/Role/Individu), excerpt isi, tombol Detail/Hapus.
 

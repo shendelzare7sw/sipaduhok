@@ -1,0 +1,76 @@
+.pembayaran-create-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.tagihan-list-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tagihan-item {
+    transition: background 0.2s;
+}
+
+.tagihan-item:hover {
+    background: #f3f4f6;
+}
+
+.tagihan-checkbox,
+.payment-checkbox-lg {
+    width: 20px;
+    height: 20px;
+}
+
+.nominal-wrapper {
+    width: 160px;
+}
+
+.nominal-input-readonly {
+    background-color: #f3f4f6;
+}
+
+.spp-note {
+    font-size: 10px;
+}
+
+.payment-method-display {
+    font-weight: 600;
+}
+
+.payment-total-input {
+    background: #f9fafb;
+    font-weight: 600;
+    font-size: 18px;
+    color: #059669;
+}
+
+.direct-validation-label {
+    cursor: pointer;
+}
+
+.summary-total-line {
+    border-style: dashed !important;
+}
+
+@media (max-width: 768px) {
+    .tagihan-item .d-flex.align-items-center.justify-content-between.flex-wrap > div {
+        width: 100%;
+    }
+
+    .nominal-wrapper {
+        width: 100% !important;
+        margin-top: 8px;
+    }
+
+    .card-body .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 15px;
+    }
+
+    .card-body .d-flex.justify-content-between.align-items-center > a {
+        width: 100%;
+    }
+}

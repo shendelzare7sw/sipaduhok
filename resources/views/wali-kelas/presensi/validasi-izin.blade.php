@@ -9,24 +9,7 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .izin-empty-icon {
-        width: 54px;
-        height: 54px;
-        margin: 0 auto 14px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(16, 185, 129, .12);
-        color: #10b981;
-    }
-
-    .izin-empty-icon i {
-        font-size: 1.5rem;
-    }
-</style>
+    @vite(['resources/css/wali-kelas/presensi/validasi-izin.css', 'resources/js/wali-kelas/presensi/validasi-izin.js'])
 @endsection
 
 @section('content')
@@ -129,8 +112,7 @@
                                                             <div class="text-center mb-2">
                                                                 <img src="{{ asset('storage/' . $buktiPath) }}"
                                                                      alt="Bukti"
-                                                                     class="img-fluid rounded"
-                                                                     style="max-height: 200px; cursor: pointer;"
+                                                                     class="img-fluid rounded izin-proof-thumb"
                                                                      data-bs-toggle="modal"
                                                                      data-bs-target="#previewModal{{ $presensi->id }}">
                                                             </div>
@@ -231,8 +213,7 @@
                             <div class="modal-body text-center p-0">
                                 <img src="{{ asset('storage/' . $buktiPath) }}"
                                      alt="Bukti"
-                                     class="img-fluid"
-                                     style="max-width: 100%; height: auto;">
+                                     class="img-fluid izin-preview-image">
                             </div>
                             <div class="modal-footer">
                                 <a href="{{ asset('storage/' . $buktiPath) }}"
@@ -251,7 +232,7 @@
             @if($buktiPath && $isPdf)
                 <div class="modal fade" id="previewModalPdf{{ $presensi->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered modal-xl">
-                        <div class="modal-content" style="height: 90vh;">
+                        <div class="modal-content pdf-preview-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">
                                     <i class="fas fa-file-pdf me-2"></i>Preview Bukti PDF - {{ $presensi->siswa->nama_lengkap }}
@@ -259,7 +240,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-0 h-100">
-                                <iframe src="" data-src="{{ route('wali.presensi.preview-bukti', $presensi->id) }}" width="100%" height="100%" style="border:none;"></iframe>
+                                <iframe src="" data-src="{{ route('wali.presensi.preview-bukti', $presensi->id) }}" width="100%" height="100%" class="pdf-preview-frame"></iframe>
                             </div>
                             <div class="modal-footer">
                                 <a href="{{ asset('storage/' . $buktiPath) }}" download class="btn btn-primary">
@@ -341,19 +322,4 @@
     @endif
 
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Lazy load PDF iframes
-        var modals = document.querySelectorAll('.modal');
-        modals.forEach(function(modal) {
-            modal.addEventListener('shown.bs.modal', function() {
-                var iframe = modal.querySelector('iframe');
-                if (iframe && !iframe.getAttribute('src')) {
-                    iframe.setAttribute('src', iframe.getAttribute('data-src'));
-                }
-            });
-        });
-    });
-</script>
 @endsection

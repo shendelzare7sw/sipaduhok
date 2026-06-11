@@ -1,3 +1,25 @@
+function getJadwalConfig() {
+    const configEl = document.getElementById('jp-config');
+
+    if (!configEl) {
+        return window.JP_CONFIG || {};
+    }
+
+    return {
+        bulkUpdateStatusUrl: configEl.dataset.bulkUpdateStatusUrl || '',
+        bulkDeleteUrl: configEl.dataset.bulkDeleteUrl || '',
+        csrfToken: configEl.dataset.csrfToken || '',
+        currentTahunAjaranId: configEl.dataset.currentTahunAjaranId || '',
+        exportExcelBaseUrl: configEl.dataset.exportExcelBaseUrl || '',
+        printBaseUrl: configEl.dataset.printBaseUrl || '',
+    };
+}
+
+function setVisibility(element, visible) {
+    if (!element) return;
+    element.classList.toggle('d-none', !visible);
+}
+
 function filterGuruOptions(jadwalId) {
     const searchInput = document.getElementById('searchGuru' + jadwalId);
     if (!searchInput) return;
@@ -22,9 +44,9 @@ function selectGuruForJadwal(jadwalId, guruId, guruName) {
     if (input) input.value = guruId;
 
     if (guruId === '' || (guruName && guruName.includes('Kosongkan'))) {
-        if (display) display.style.display = 'none';
+        setVisibility(display, false);
     } else {
-        if (display) display.style.display = 'block';
+        setVisibility(display, true);
         if (nameSpan) nameSpan.textContent = guruName;
     }
 }
@@ -33,7 +55,7 @@ function clearGuruSelection(jadwalId) {
     const input = document.getElementById('guruIdBaru' + jadwalId);
     const display = document.getElementById('selectedGuruDisplay' + jadwalId);
     if (input) input.value = '';
-    if (display) display.style.display = 'none';
+    setVisibility(display, false);
 }
 
 function showToast(icon, title) {
@@ -87,10 +109,10 @@ function updateBulkButtons() {
     const selectedCount = document.getElementById('selectedCount');
     const selectedInfo = document.getElementById('selectedInfo');
 
-    if (bulkDeleteBtn) bulkDeleteBtn.style.display = count > 0 ? 'inline-block' : 'none';
-    if (bulkStatusBtn) bulkStatusBtn.style.display = count > 0 ? 'inline-block' : 'none';
+    setVisibility(bulkDeleteBtn, count > 0);
+    setVisibility(bulkStatusBtn, count > 0);
     if (selectedCount) selectedCount.textContent = count;
-    if (selectedInfo) selectedInfo.style.display = count > 0 ? 'flex' : 'none';
+    setVisibility(selectedInfo, count > 0);
 
     // Sync desktop select-all checkbox state
     const selectAll = document.getElementById('select-all-jadwal');
@@ -129,13 +151,13 @@ function bulkDelete() {
     const listEl = document.getElementById('bulkDeleteList');
     if (listEl) {
         listEl.innerHTML = Array.from(checkboxes).map(cb => `
-            <div style="display:flex; align-items:center; gap:10px; background:#f8f9fa; border-radius:8px; padding:10px 12px;">
-                <div style="width:34px; height:34px; background:#fff0f0; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <i class="fas fa-book text-danger" style="font-size:13px;"></i>
+            <div class="jp-flex-center-gap jp-schedule-info">
+                <div class="jp-icon-box jp-icon-box-danger">
+                    <i class="fas fa-book text-danger"></i>
                 </div>
-                <div style="min-width:0; flex:1;">
-                    <div style="font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${cb.dataset.mapel || 'Jadwal'}</div>
-                    <div style="font-size:12px; color:#6c757d;">
+                <div class="jp-min-w-0 flex-grow-1">
+                    <div class="fw-semibold text-truncate">${cb.dataset.mapel || 'Jadwal'}</div>
+                    <div class="text-muted small">
                         <i class="fas fa-school me-1"></i>${cb.dataset.kelas || '-'}
                         &nbsp;&middot;&nbsp;
                         <i class="fas fa-calendar-day me-1"></i>${cb.dataset.hari || '-'}, ${cb.dataset.jam || '-'}
@@ -180,7 +202,7 @@ function bulkUpdateStatus() {
 
 // Submit bulk status update after modal confirmation
 function submitBulkStatus() {
-    const config = window.JP_CONFIG || {};
+    const config = getJadwalConfig();
     const modalEl = document.getElementById('bulkStatusModal');
     if (!modalEl) return;
     
@@ -237,16 +259,16 @@ function filterPrintKelas() {
 
     options.forEach(opt => {
         if (cabangId === "" || opt.getAttribute('data-cabang') == cabangId) {
-            opt.style.display = "";
+            opt.classList.remove('jp-hidden-option');
         } else {
-            opt.style.display = "none";
+            opt.classList.add('jp-hidden-option');
             if (opt.selected) kelasSelect.value = "";
         }
     });
 }
 
 function submitCetakKelas(type) {
-    const config = window.JP_CONFIG || {};
+    const config = getJadwalConfig();
     const kelasId = document.getElementById('printKelasId').value;
     if (!kelasId) {
         showToast('warning', 'Silakan pilih kelas terlebih dahulu!');
@@ -270,3 +292,40 @@ function submitCetakKelas(type) {
         if (modal) modal.hide();
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-auto-submit]').forEach((field) => {
+        field.addEventListener('change', () => field.form?.submit());
+    });
+
+    document.querySelector('[data-toggle-select-all-jadwal]')?.addEventListener('change', toggleSelectAllJadwal);
+    document.querySelector('[data-mobile-toggle-select-all]')?.addEventListener('change', mobileToggleSelectAll);
+
+    document.querySelectorAll('.jadwal-checkbox').forEach((checkbox) => {
+        checkbox.addEventListener('change', updateBulkButtons);
+    });
+
+    document.querySelector('[data-bulk-delete-trigger]')?.addEventListener('click', bulkDelete);
+    document.querySelector('[data-bulk-status-trigger]')?.addEventListener('click', bulkUpdateStatus);
+    document.querySelector('[data-submit-bulk-status]')?.addEventListener('click', submitBulkStatus);
+
+    document.querySelectorAll('[data-guru-search]').forEach((input) => {
+        input.addEventListener('input', () => filterGuruOptions(input.dataset.jadwalId));
+    });
+
+    document.querySelectorAll('[data-clear-guru]').forEach((button) => {
+        button.addEventListener('click', () => clearGuruSelection(button.dataset.jadwalId));
+    });
+
+    document.querySelectorAll('[data-select-guru]').forEach((item) => {
+        item.addEventListener('click', () => {
+            selectGuruForJadwal(item.dataset.jadwalId, item.dataset.guruId || '', item.dataset.guruName || '');
+        });
+    });
+
+    document.querySelector('[data-filter-print-kelas]')?.addEventListener('change', filterPrintKelas);
+
+    document.querySelectorAll('[data-submit-cetak-kelas]').forEach((button) => {
+        button.addEventListener('click', () => submitCetakKelas(button.dataset.submitCetakKelas));
+    });
+});

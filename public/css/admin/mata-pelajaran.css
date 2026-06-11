@@ -50,6 +50,32 @@
     gap: 0.5rem;
 }
 
+.mp-card-title-icon {
+    color: var(--mp-primary);
+}
+
+.filter-reset-btn,
+.delete-modal-action {
+    border-radius: 8px;
+}
+
+.delete-modal-content {
+    border-radius: 16px;
+}
+
+.delete-modal-icon {
+    height: 60px;
+    width: 60px;
+}
+
+.delete-modal-subtitle {
+    font-size: 0.85rem;
+}
+
+.delete-modal-meta {
+    font-size: 0.8rem;
+}
+
 /* Stat Cards - scrollable row */
 .stat-scroll {
     display: flex;
@@ -86,6 +112,14 @@
     letter-spacing: 0.5px;
     margin-bottom: 4px;
 }
+
+.stat-label-total { color: #4361ee; }
+.stat-label-kb { color: #64748b; }
+.stat-label-tka { color: #92400e; }
+.stat-label-tkb { color: #991b1b; }
+.stat-label-sd { color: #166534; }
+.stat-label-smp { color: #075985; }
+.stat-label-sma { color: #7c3aed; }
 
 .stat-chip-value {
     font-size: 1.25rem;

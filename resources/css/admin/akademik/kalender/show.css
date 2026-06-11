@@ -1,0 +1,41 @@
+.admin-calendar-show-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.calendar-detail-badge {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.calendar-visibility-switch {
+    width: 3em;
+    height: 1.5em;
+    cursor: pointer;
+}
+
+.calendar-description-box {
+    color: #333333;
+    line-height: 1.6;
+}
+
+@media (max-width: 767.98px) {
+    .admin-calendar-show-page {
+        padding: 0;
+    }
+
+    .admin-calendar-show-page .card-header .d-flex {
+        align-items: flex-start !important;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .admin-calendar-show-page .btn-group {
+        width: 100%;
+    }
+
+    .admin-calendar-show-page .btn-group .btn {
+        flex: 1 1 auto;
+    }
+}

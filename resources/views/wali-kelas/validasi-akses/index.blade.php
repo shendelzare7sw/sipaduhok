@@ -9,81 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .table-validasi thead th {
-        background-color: #f8f9fc;
-        text-align: center;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #4e73df;
-    }
-    .status-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 5px;
-        padding: 5px 10px;
-        background: #f8f9fc;
-        border-radius: 5px;
-    }
-    .stat-card-custom {
-        border-radius: 10px;
-        border-left: 4px solid;
-    }
-    .wk-access-stats {
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 10px !important;
-    }
-    .wk-access-stats .card {
-        min-height: 82px !important;
-    }
-    .wk-access-stats .card-body {
-        padding: 12px 14px !important;
-    }
-    .wk-access-stats .text-xs {
-        font-size: 13px;
-        line-height: 1.3;
-        margin-bottom: 5px !important;
-    }
-    .wk-access-stats .text-muted {
-        font-size: 12px !important;
-        line-height: 1.35;
-    }
-    .wk-access-stats .h5 {
-        font-size: 24px;
-        line-height: 1.05;
-    }
-    .wk-access-stats .fa-2x {
-        font-size: 1.25rem;
-    }
-    @media (max-width: 767.98px) {
-        .wk-access-stats {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        }
-        .wk-access-stats .col-auto {
-            display: none;
-        }
-        .wk-access-stats .card {
-            min-height: 78px !important;
-        }
-        .wk-access-stats .text-xs {
-            font-size: 12px;
-            line-height: 1.35;
-        }
-        .wk-access-stats .text-muted {
-            font-size: 11.5px !important;
-        }
-        .wk-access-stats .h5 {
-            font-size: 24px;
-        }
-    }
-</style>
+    @vite(['resources/css/wali-kelas/validasi-akses/index.css', 'resources/js/wali-kelas/validasi-akses/index.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
     @if($error ?? false)
         <div class="alert alert-danger shadow-sm border-start border-danger border-4">
@@ -163,7 +93,7 @@
                     </div>
                     <div class="col-md-4 mb-2">
                         <label class="form-label small fw-bold">FILTER STATUS</label>
-                        <select name="filter" class="form-select form-select-sm border-start border-primary border-3 shadow-sm" onchange="this.form.submit()">
+                        <select name="filter" class="form-select form-select-sm border-start border-primary border-3 shadow-sm" data-auto-submit>
                             <option value="">Semua Siswa</option>
                             <option value="ujian_pending" {{ $filterStatus == 'ujian_pending' ? 'selected' : '' }}>Ujian: Belum Akses</option>
                             <option value="ujian_selesai" {{ $filterStatus == 'ujian_selesai' ? 'selected' : '' }}>Ujian: Sudah Akses</option>

@@ -1,0 +1,33 @@
+@page { margin: 20mm; }
+        body { font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 16pt; margin: 5px 0; }
+        .header h2 { font-size: 14pt; margin: 5px 0; font-weight: normal; }
+        .header p { margin: 3px 0; font-size: 9pt; }
+        .info-table { width: 100%; margin-bottom: 15px; }
+        .info-table td { padding: 3px 8px; }
+        .info-table td:first-child { width: 150px; font-weight: bold; }
+        .nilai-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .nilai-table th, .nilai-table td { border: 1px solid #000; padding: 5px; }
+        .nilai-table th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+        .nilai-table td:first-child { text-align: center; width: 40px; }
+        .nilai-table td:nth-child(3) { text-align: center; width: 60px; }
+        .group-header { background-color: #d0d0d0; font-weight: bold; text-align: center; }
+        .ekstra-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        .ekstra-table th, .ekstra-table td { border: 1px solid #000; padding: 5px; }
+        .ekstra-table th { background-color: #f0f0f0; }
+        .kehadiran-table { width: 50%; border-collapse: collapse; margin-bottom: 15px; }
+        .kehadiran-table td { border: 1px solid #000; padding: 5px; }
+        .kehadiran-table td:first-child { font-weight: bold; width: 150px; }
+        .catatan { border: 1px solid #000; padding: 10px; min-height: 80px; margin-bottom: 15px; }
+        .signature { margin-top: 30px; }
+        .signature table { width: 100%; }
+        .signature td { text-align: center; padding: 10px; vertical-align: top; }
+        .signature .sign-line { border-top: 1px solid #000; margin-top: 60px; padding-top: 5px; }
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }

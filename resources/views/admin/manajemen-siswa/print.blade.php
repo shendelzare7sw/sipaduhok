@@ -3,43 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Daftar Siswa {{ $kelas ? '- Kelas ' . $kelas->nama_kelas : '' }}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
-        .container { max-width: 210mm; margin: 0 auto; padding: 15mm; }
-        .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16pt; font-weight: bold; margin-bottom: 5px; }
-        .header h2 { font-size: 14pt; margin-bottom: 10px; }
-        .header p { font-size: 10pt; color: #333; }
-        .title { text-align: center; margin: 25px 0; }
-        .title h3 { font-size: 14pt; text-decoration: underline; margin-bottom: 5px; }
-        .title p { font-size: 11pt; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; }
-        table th { background: #f0f0f0; text-align: center; font-weight: bold; }
-        table td.center { text-align: center; }
-        .summary { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; }
-        .summary h4 { font-size: 11pt; margin-bottom: 10px; }
-        .summary-grid { display: flex; flex-wrap: wrap; gap: 30px; }
-        .summary-item .label { font-size: 9pt; color: #666; }
-        .summary-item .value { font-size: 14pt; font-weight: bold; }
-        .footer { margin-top: 40px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-        .footer-right { text-align: center; }
-        .signature-line { margin-top: 60px; border-bottom: 1px solid #000; width: 200px; margin: 60px auto 0; }
-        .print-date { font-size: 10pt; color: #666; margin-top: 30px; }
-        .table-wrapper { overflow-x: auto; }
-        .print-button { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
-        .back-button { position: fixed; top: 20px; right: 130px; padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
-        @media print { .no-print { display: none !important; } .container { padding: 0; } }
-        @media (max-width: 575.98px) {
-            .print-button { top: auto; bottom: 20px; right: 20px; }
-            .back-button { top: auto; bottom: 20px; right: 110px; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/admin/manajemen-siswa/print.css') }}?v={{ filemtime(public_path('css/admin/manajemen-siswa/print.css')) }}">
+    <script src="{{ asset('js/admin/manajemen-siswa/print.js') }}?v={{ filemtime(public_path('js/admin/manajemen-siswa/print.js')) }}" defer></script>
 </head>
 <body>
-    <a href="{{ route('admin.manajemen-siswa.index') }}" class="back-button no-print">← Kembali</a>
-    <button onclick="window.print()" class="print-button no-print"><i class="fas fa-print"></i> Cetak</button>
+    <a href="{{ route('admin.manajemen-siswa.index') }}" class="back-button no-print">&larr; Kembali</a>
+    <button type="button" class="print-button no-print" data-print-button>
+        <i class="fas fa-print"></i> Cetak
+    </button>
 
     <div class="container">
         @include('partials.print-header', ['cabang' => $cabang ?? null])
@@ -66,45 +37,48 @@
 
         @if($siswaList->count() > 0)
             <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 35px;">No</th>
-                        <th>NISN</th>
-                        <th>NIS</th>
-                        <th>Nama Lengkap</th>
-                        <th style="width: 40px;">JK</th>
-                        <th>Tempat, Tgl Lahir</th>
-                        @if(!$kelas)
-                        <th>Kelas</th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody>
-                    @php $no = 1; $currentKelas = ''; @endphp
-                    @foreach($siswaList as $siswa)
-                        @if($sortBy == 'kelas' && !$kelas && $currentKelas !== ($siswa->kelas->nama_kelas ?? 'Tanpa Kelas'))
-                            @php $currentKelas = $siswa->kelas->nama_kelas ?? 'Tanpa Kelas'; @endphp
-                            <tr style="background: #e5e7eb;">
-                                <td colspan="{{ $kelas ? 6 : 7 }}" style="font-weight: bold;">
-                                    {{ $currentKelas }} {{ $siswa->kelas ? '(' . $siswa->kelas->jenjang . ')' : '' }}
-                                </td>
-                            </tr>
-                        @endif
+                <table>
+                    <thead>
                         <tr>
-                            <td class="center">{{ $no++ }}</td>
-                            <td>{{ $siswa->nisn }}</td>
-                            <td>{{ $siswa->nis ?? '-' }}</td>
-                            <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
-                            <td class="center">{{ $siswa->jenis_kelamin }}</td>
-                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d/m/Y') }}</td>
+                            <th class="col-number">No</th>
+                            <th>NISN</th>
+                            <th>NIS</th>
+                            <th>Nama Lengkap</th>
+                            <th class="col-jk">JK</th>
+                            <th>Tempat, Tgl Lahir</th>
                             @if(!$kelas)
-                            <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
+                                <th>Kelas</th>
                             @endif
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @php
+                            $no = 1;
+                            $currentKelas = '';
+                        @endphp
+                        @foreach($siswaList as $siswa)
+                            @if($sortBy == 'kelas' && !$kelas && $currentKelas !== ($siswa->kelas->nama_kelas ?? 'Tanpa Kelas'))
+                                @php $currentKelas = $siswa->kelas->nama_kelas ?? 'Tanpa Kelas'; @endphp
+                                <tr class="kelas-group-row">
+                                    <td colspan="{{ $kelas ? 6 : 7 }}" class="kelas-group-cell">
+                                        {{ $currentKelas }} {{ $siswa->kelas ? '(' . $siswa->kelas->jenjang . ')' : '' }}
+                                    </td>
+                                </tr>
+                            @endif
+                            <tr>
+                                <td class="center">{{ $no++ }}</td>
+                                <td>{{ $siswa->nisn }}</td>
+                                <td>{{ $siswa->nis ?? '-' }}</td>
+                                <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
+                                <td class="center">{{ $siswa->jenis_kelamin }}</td>
+                                <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d/m/Y') }}</td>
+                                @if(!$kelas)
+                                    <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
+                                @endif
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
 
             <div class="summary">
@@ -125,7 +99,7 @@
                 </div>
             </div>
         @else
-            <p style="text-align: center; padding: 40px; color: #666;">Tidak ada data siswa.</p>
+            <p class="empty-print-state">Tidak ada data siswa.</p>
         @endif
 
         <div class="footer">

@@ -9,49 +9,11 @@
 @endsection
 
 @section('styles')
-<style>
-    .info-table td { padding: 10px 0; }
-    .info-table td:first-child { color: #64748b; width: 150px; }
-    .student-avatar {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-    }
-    .badge-custom { padding: 6px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; }
-    .validation-card {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-        border: none;
-    }
-    
-    @media (max-width: 768px) {
-        .info-table, .info-table tbody, .info-table tr, .info-table td {
-            display: block; width: 100%;
-        }
-        .info-table td:first-child {
-            width: 100% !important; font-weight: bold; padding-bottom: 2px; border-bottom: none;
-        }
-        .info-table td:last-child {
-            padding-top: 2px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6; text-align: left;
-        }
-        .info-table tr:last-child td:last-child { border-bottom: none; }
-        .student-avatar { flex-shrink: 0; }
-        .card-header { padding: 15px; }
-        .d-flex.gap-3.align-items-start { align-items: center !important; }
-    }
-</style>
+    @vite(['resources/css/admin/keuangan/pembayaran/show.css'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="pembayaran-show-page">
 <div class="container-fluid px-0">
 
     {{-- Breadcrumb --}}
@@ -191,7 +153,7 @@
 
                     <table class="info-table w-100">
                         <tr>
-                            <td style="width: 120px;">Kelas</td>
+                            <td class="student-class-label">Kelas</td>
                             <td>{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }} ({{ $pembayaran->siswa->kelas->jenjang ?? '-' }})</td>
                         </tr>
                         <tr>
@@ -218,7 +180,7 @@
 
     {{-- Info Kadaluarsa --}}
     @if($isKadaluarsa)
-        <div class="card shadow mb-4" style="border-left: 4px solid #6b7280;">
+        <div class="card shadow mb-4 expired-payment-card">
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <i class="fas fa-ban fa-2x text-secondary me-3"></i>
@@ -244,7 +206,7 @@
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Catatan (Opsional)</label>
-                    <textarea id="catatanValidasi" class="form-control shadow-sm" rows="3" placeholder="Tambahkan catatan jika diperlukan..." style="background: white;"></textarea>
+                    <textarea id="catatanValidasi" class="form-control shadow-sm validation-note-input" rows="3" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
                 </div>
 
                 <div class="d-flex gap-2 flex-wrap">
@@ -368,7 +330,7 @@
                     @csrf
                     <input type="hidden" name="status_validasi" value="ditolak">
                     <input type="hidden" name="catatan" id="catatanTolak">
-                    <button type="button" class="btn btn-danger fw-bold" onclick="submitTolak()">
+                    <button type="button" class="btn btn-danger fw-bold" data-submit-tolak>
                         <i class="fas fa-times me-1"></i> Ya, Tolak
                     </button>
                 </form>
@@ -381,29 +343,5 @@
 @endsection
 
 @section('scripts')
-<script>
-    // Sync catatan ke modal sebelum terbuka
-    document.getElementById('setujuiModal')?.addEventListener('show.bs.modal', function() {
-        document.getElementById('catatanSetujui').value = document.getElementById('catatanValidasi').value;
-    });
-
-    document.getElementById('tolakModal')?.addEventListener('hidden.bs.modal', function() {
-        const alasan = document.getElementById('alasanTolak');
-        if (alasan) { alasan.value = ''; alasan.classList.remove('is-invalid'); }
-    });
-
-    function submitTolak() {
-        const alasan = document.getElementById('alasanTolak');
-        if (!alasan.value.trim()) {
-            alasan.classList.add('is-invalid');
-            return;
-        }
-        alasan.classList.remove('is-invalid');
-        const catatan = document.getElementById('catatanValidasi').value;
-        document.getElementById('catatanTolak').value = catatan
-            ? catatan + '\n[Alasan Tolak] ' + alasan.value.trim()
-            : '[Alasan Tolak] ' + alasan.value.trim();
-        document.getElementById('formTolak').submit();
-    }
-</script>
+    @vite(['resources/js/admin/keuangan/pembayaran/show.js'])
 @endsection

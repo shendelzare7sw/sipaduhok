@@ -7,23 +7,14 @@
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
-    {{-- SweetAlert2 --}}
+
+@section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <style>
-        .swal2-popup {
-            font-family: 'Public Sans', sans-serif;
-            border-radius: 1rem;
-        }
-        .swal2-title {
-            font-size: 1.5rem;
-            color: #566a7f;
-        }
-        .swal2-html-container {
-            color: #697a8d;
-        }
-    </style>
+    @vite(['resources/css/admin/keuangan/tagihan/duplicate.css'])
+@endsection
+
 @section('content')
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+<div class="duplicate-tagihan-page">
     <div class="container-fluid px-0">
 
         {{-- Breadcrumb --}}
@@ -61,7 +52,7 @@
                             <label for="source_siswa_id" class="form-label fw-bold">
                                 Siswa Sumber (Copy Dari) <span class="text-danger">*</span>
                             </label>
-                            <select name="source_siswa_id" id="source_siswa_id" class="form-select @error('source_siswa_id') is-invalid @enderror" required>
+                            <select name="source_siswa_id" id="source_siswa_id" class="form-select @error('source_siswa_id') is-invalid @enderror" data-preview-url="{{ route('admin.keuangan.tagihan.api.tagihan-preview', ':siswa') }}" required>
                                 <option value="">-- Pilih Siswa Sumber --</option>
                                 @foreach($siswaList as $siswa)
                                     <option value="{{ $siswa->id }}" {{ old('source_siswa_id') == $siswa->id ? 'selected' : '' }}>
@@ -109,12 +100,12 @@
                             <label class="form-label fw-bold">
                                 Siswa Target (Salin Ke) <span class="text-danger">*</span>
                             </label>
-                            <div class="border rounded p-3 bg-white" style="max-height: 300px; overflow-y: auto;">
+                            <div class="border rounded p-3 bg-white target-list-container">
                                 <div class="mb-2">
-                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="selectAll()">
+                                    <button type="button" class="btn btn-sm btn-outline-primary me-2" data-select-targets>
                                         <i class="fas fa-check-double me-1"></i> Pilih Semua
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-deselect-targets>
                                         <i class="fas fa-times me-1"></i> Batal Pilih
                                     </button>
                                 </div>
@@ -183,7 +174,7 @@
                                 <a href="{{ route('admin.keuangan.tagihan.index') }}" class="btn btn-secondary shadow-sm">
                                     <i class="fas fa-times me-1"></i> Batal
                                 </a>
-                                <button type="button" class="btn btn-info shadow-sm fw-bold" onclick="confirmDuplicate()">
+                                <button type="button" class="btn btn-info shadow-sm fw-bold" data-confirm-duplicate>
                                     <i class="fas fa-copy me-1"></i> Duplikasi Tagihan
                                 </button>
                             </div>
@@ -195,136 +186,9 @@
 
     </div>
 </div>
-
-{{-- Confirm Modal Removed (Replaced by SweetAlert2) --}}
-
 @endsection
 
 @section('scripts')
-{{-- SweetAlert2 JS --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sourceSiswaSelect = document.getElementById('source_siswa_id');
-        const filterKelasSelect = document.getElementById('filter_kelas');
-        const previewDiv = document.getElementById('preview_tagihan');
-
-        // Load tagihan preview when source siswa changes
-        sourceSiswaSelect.addEventListener('change', function() {
-            const siswaId = this.value;
-            if (!siswaId) {
-                previewDiv.innerHTML = '<p class="text-muted mb-0"><em>Pilih siswa sumber untuk melihat preview tagihan</em></p>';
-                return;
-            }
-
-            // Load via AJAX
-            previewDiv.innerHTML = '<p class="text-muted mb-0"><i class="fas fa-spinner fa-spin me-2"></i>Memuat tagihan...</p>';
-
-            fetch(`{{ route('admin.keuangan.tagihan.api.tagihan-preview', ':siswa') }}`.replace(':siswa', siswaId))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        previewDiv.innerHTML = '<p class="text-danger mb-0">Siswa ini belum memiliki tagihan</p>';
-                        return;
-                    }
-
-                    let html = '<div class="table-responsive"><table class="table table-sm table-bordered mb-0">';
-                    html += '<thead class="table-light"><tr><th>Jenis Tagihan</th><th>Jumlah</th><th>Status</th></tr></thead><tbody>';
-
-                    data.forEach(tagihan => {
-                        const statusBadge = tagihan.status === 'sudah_bayar' ? 'bg-success' : 'bg-warning';
-                        const statusText = tagihan.status === 'sudah_bayar' ? 'Lunas' : 'Belum Bayar';
-                        html += `<tr>
-                            <td>${tagihan.jenis_tagihan.replace(/_/g, ' ').toUpperCase()}</td>
-                            <td>Rp ${new Intl.NumberFormat('id-ID').format(tagihan.jumlah)}</td>
-                            <td><span class="badge ${statusBadge}">${statusText}</span></td>
-                        </tr>`;
-                    });
-
-                    html += '</tbody></table></div>';
-                    previewDiv.innerHTML = html;
-                })
-                .catch(error => {
-                    previewDiv.innerHTML = '<p class="text-danger mb-0">Gagal memuat tagihan</p>';
-                });
-        });
-
-        // Filter siswa target by kelas
-        filterKelasSelect.addEventListener('change', function() {
-            const kelasId = this.value;
-            const items = document.querySelectorAll('.target-siswa-item');
-
-            items.forEach(item => {
-                if (!kelasId || item.dataset.kelasId == kelasId) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                    // Uncheck hidden items
-                    const checkbox = item.querySelector('.target-siswa-checkbox');
-                    if (checkbox) checkbox.checked = false;
-                }
-            });
-        });
-
-        // Confirm button handler (removed as we use inline onClick for confirmDuplicate calling Swal)
-    });
-
-    function selectAll() {
-        const checkboxes = document.querySelectorAll('.target-siswa-checkbox');
-        checkboxes.forEach(cb => {
-            const item = cb.closest('.target-siswa-item');
-            if (item.style.display !== 'none') {
-                cb.checked = true;
-            }
-        });
-    }
-
-    function deselectAll() {
-        const checkboxes = document.querySelectorAll('.target-siswa-checkbox');
-        checkboxes.forEach(cb => cb.checked = false);
-    }
-
-    function confirmDuplicate() {
-        const form = document.getElementById('duplicateForm');
-        const sourceSiswaSelect = document.getElementById('source_siswa_id');
-        const checkedCount = document.querySelectorAll('.target-siswa-checkbox:checked').length;
-
-        if (!sourceSiswaSelect.value) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Pilih Siswa Sumber',
-                text: 'Silakan pilih siswa sumber terlebih dahulu.',
-                confirmButtonColor: '#696cff'
-            });
-            return;
-        }
-
-        if (checkedCount === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Belum ada target',
-                text: 'Silakan pilih minimal 1 siswa target.',
-                confirmButtonColor: '#696cff'
-            });
-            return;
-        }
-
-        const sourceName = sourceSiswaSelect.options[sourceSiswaSelect.selectedIndex].text;
-
-        Swal.fire({
-            title: 'Konfirmasi Duplikasi',
-            html: `Anda akan menyalin tagihan dari "<strong>${sourceName}</strong>"<br> ke <strong>${checkedCount}</strong> siswa target.<br><br><small class="text-muted">Pastikan data sudah benar sebelum melanjutkan.</small>`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#696cff',
-            cancelButtonColor: '#8592a3',
-            confirmButtonText: 'Ya, Duplikasi',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('duplicateForm').submit();
-            }
-        });
-    }
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @vite(['resources/js/admin/keuangan/tagihan/duplicate.js'])
 @endsection

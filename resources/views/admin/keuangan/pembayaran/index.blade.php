@@ -9,164 +9,7 @@
 @endsection
 
 @section('styles')
-<style>
-    /* ── Reuse dashboard card pattern ─────────────────── */
-    .dashboard-card {
-        background: var(--surface-color);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        overflow: hidden;
-    }
-    .dashboard-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.04); }
-
-    .card-header-clean {
-        background: transparent;
-        border-bottom: 1px solid var(--border-color);
-        padding: 1.1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-    .card-title-clean {
-        font-size: 1rem; font-weight: 600;
-        color: var(--text-main); margin: 0;
-        display: flex; align-items: center; gap: 0.5rem;
-    }
-    .card-title-icon { color: var(--primary-color); }
-
-    /* ── Stat Widget (sama persis dgn dashboard) ──────── */
-    .stat-widget {
-        padding: 1.4rem 1.5rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 1.25rem;
-    }
-    .stat-icon-wrapper {
-        width: 48px; height: 48px;
-        border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.25rem; flex-shrink: 0;
-    }
-    .stat-details { flex-grow: 1; }
-    .stat-value {
-        font-size: 1.75rem; font-weight: 700;
-        color: var(--text-main); line-height: 1.2; margin-bottom: 0.2rem;
-    }
-    .stat-label {
-        font-size: 0.8rem; font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .stat-footer {
-        padding: 0.75rem 1.5rem 1rem;
-        border-top: 1px dashed var(--border-color);
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        display: flex; justify-content: space-between; align-items: center;
-    }
-
-    /* ── Filter Area ──────────────────────────────────── */
-    .filter-area {
-        background: var(--background-color, #f8fafc);
-        padding: 0.85rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    /* ── Search ───────────────────────────────────────── */
-    .search-wrap { position: relative; }
-    .search-wrap input {
-        padding: 0.42rem 2rem 0.42rem 2.1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        font-size: 0.85rem;
-        width: 230px;
-        background: var(--surface-color);
-        color: var(--text-main);
-        transition: all 0.2s;
-    }
-    .search-wrap input:focus {
-        outline: none; border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(67,97,238,0.1);
-    }
-    .search-wrap .si { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 0.75rem; }
-    .search-wrap .cl-btn {
-        position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: var(--text-muted); cursor: pointer; display: none; font-size: 0.75rem;
-    }
-    .search-wrap .cl-btn.show { display: block; }
-
-    /* ── Table ────────────────────────────────────────── */
-    .table-clean { margin: 0; }
-    .table-clean th {
-        background: var(--background-color, #f8fafc);
-        border-bottom: 1px solid var(--border-color);
-        border-top: none;
-        color: var(--text-muted);
-        font-weight: 600;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 0.85rem 1.25rem;
-    }
-    .table-clean td {
-        padding: 0.85rem 1.25rem;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--border-color);
-        border-top: none;
-        color: var(--text-main);
-        font-size: 0.875rem;
-    }
-    .table-clean tbody tr:hover { background-color: var(--background-color, #f8fafc); }
-    .table-clean tbody tr:last-child td { border-bottom: none; }
-
-    /* ── Badges ───────────────────────────────────────── */
-    .badge-pill { padding: 0.3em 0.75em; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
-
-    /* ── Pagination ───────────────────────────────────── */
-    .pagination-area {
-        padding: 0.85rem 1.5rem;
-        border-top: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    /* ── Responsive ───────────────────────────────────── */
-    @media (max-width: 768px) {
-        .stat-value { font-size: 1.35rem; }
-        .stat-widget { padding: 1.1rem; gap: 0.85rem; }
-        .stat-icon-wrapper { width: 40px; height: 40px; font-size: 1.1rem; }
-        .card-header-clean { flex-direction: column; align-items: stretch; }
-        .filter-area { flex-direction: column; align-items: stretch; }
-        .search-wrap input { width: 100%; }
-        .dropdown, .dropdown-toggle { width: 100%; }
-
-        .table-clean thead { display: none; }
-        .table-clean tbody tr { display: flex; flex-direction: column; border-bottom: 2px solid var(--border-color); }
-        .table-clean tbody td {
-            display: flex; justify-content: space-between; align-items: center;
-            border: none; border-bottom: 1px solid var(--border-color); gap: 0.75rem;
-        }
-        .table-clean tbody td::before {
-            content: attr(data-label);
-            font-weight: 600; font-size: 0.7rem; color: var(--text-muted);
-            text-transform: uppercase; flex-shrink: 0;
-        }
-        .table-clean tbody td:last-child { border-bottom: none; justify-content: flex-end; }
-        .table-clean tbody td:last-child::before { display: none; }
-        .pagination-area { flex-direction: column; align-items: center; }
-    }
-</style>
+    @vite(['resources/css/admin/keuangan/pembayaran/index.css'])
 @endsection
 
 @section('content')
@@ -180,7 +23,7 @@
                         <div class="stat-value">{{ $stats['pending'] }}</div>
                         <div class="stat-label">Menunggu Validasi</div>
                     </div>
-                    <div class="stat-icon-wrapper" style="color: #f59e0b; background: #fffbeb;">
+                    <div class="stat-icon-wrapper stat-icon-warning">
                         <i class="fas fa-history"></i>
                     </div>
                 </div>
@@ -197,7 +40,7 @@
                         <div class="stat-value">{{ $stats['disetujui'] }}</div>
                         <div class="stat-label">Pembayaran Disetujui</div>
                     </div>
-                    <div class="stat-icon-wrapper" style="color: #10b981; background: #ecfdf5;">
+                    <div class="stat-icon-wrapper stat-icon-success">
                         <i class="fas fa-check-circle"></i>
                     </div>
                 </div>
@@ -214,7 +57,7 @@
                         <div class="stat-value">{{ $stats['ditolak'] }}</div>
                         <div class="stat-label">Pembayaran Ditolak</div>
                     </div>
-                    <div class="stat-icon-wrapper" style="color: #ef4444; background: #fef2f2;">
+                    <div class="stat-icon-wrapper stat-icon-danger">
                         <i class="fas fa-times-circle"></i>
                     </div>
                 </div>
@@ -233,7 +76,7 @@
                 <h5 class="card-title-clean">
                     <i class="fas fa-list card-title-icon"></i> Rincian Transaksi Masuk
                 </h5>
-                <small style="color: var(--text-muted);">Total: {{ $pembayaranList->total() }} transaksi</small>
+                <small class="payment-total-text">Total: {{ $pembayaranList->total() }} transaksi</small>
             </div>
         </div>
 
@@ -246,8 +89,8 @@
                     data-bs-auto-close="outside" data-bs-display="static">
                     <i class="fas fa-filter"></i> Filter
                 </button>
-                <div class="dropdown-menu p-3 shadow border-0" aria-labelledby="filterDropdown" style="min-width: 300px; z-index: 9999;">
-                    <h6 class="text-uppercase small fw-bold text-primary mb-2 pb-2" style="border-bottom: 1px solid #e5e7eb;">Opsi Filter</h6>
+                <div class="dropdown-menu p-3 shadow border-0 payment-filter-menu" aria-labelledby="filterDropdown">
+                    <h6 class="text-uppercase small fw-bold text-primary mb-2 pb-2 payment-filter-title">Opsi Filter</h6>
                     <div class="mb-2">
                         <label class="form-label small fw-bold mb-1">Status Validasi</label>
                         <select name="status" class="form-select form-select-sm">
@@ -305,7 +148,7 @@
 
         {{-- Table --}}
         @if($pembayaranList->isEmpty())
-            <div class="text-center py-5" style="color: var(--text-muted);">
+            <div class="text-center py-5 payment-empty-state">
                 <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
                 <p class="mb-0">Tidak ada data pembayaran yang ditemukan.</p>
             </div>
@@ -328,15 +171,14 @@
                     <tbody>
                         @foreach($pembayaranList as $index => $pembayaran)
                         <tr>
-                            <td data-label="No" class="text-center fw-bold" style="color: var(--text-muted);">
+                            <td data-label="No" class="text-center fw-bold payment-muted-text">
                                 {{ $pembayaranList->firstItem() + $index }}
                             </td>
                             <td data-label="Kode">
                                 <code class="fw-bold text-primary small">{{ $pembayaran->kode_pembayaran }}</code>
                                 @if($pembayaran->order_id && $pembayaran->group_transactions_count > 1)
                                     <div class="mt-1">
-                                        <span class="badge"
-                                            style="background: #e0f2fe; color: #0284c7; font-size: 10px; border: 1px solid #bae6fd;"
+                                        <span class="badge group-badge"
                                             data-bs-toggle="tooltip"
                                             title="Bagian dari transaksi gabungan ({{ $pembayaran->group_transactions_count }} tagihan)">
                                             <i class="fas fa-layer-group me-1"></i> Gabungan ({{ $pembayaran->group_transactions_count }})
@@ -345,13 +187,13 @@
                                 @endif
                             </td>
                             <td data-label="Siswa">
-                                <div class="fw-semibold" style="color: var(--text-main);">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</div>
-                                <small class="fw-bold text-uppercase" style="color: var(--text-muted);">{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }}</small>
+                                <div class="fw-semibold payment-main-text">{{ $pembayaran->siswa->nama_lengkap ?? '-' }}</div>
+                                <small class="fw-bold text-uppercase payment-muted-text">{{ $pembayaran->siswa->kelas->nama_kelas ?? '-' }}</small>
                             </td>
-                            <td data-label="Jenis Tagihan" class="small fw-semibold" style="color: var(--text-muted);">
+                            <td data-label="Jenis Tagihan" class="small fw-semibold payment-muted-text">
                                 {{ ucwords(str_replace('_', ' ', $pembayaran->tagihan->jenis_tagihan ?? '-')) }}
                             </td>
-                            <td data-label="Jumlah" class="text-end fw-bold" style="color: var(--text-main);">
+                            <td data-label="Jumlah" class="text-end fw-bold payment-main-text">
                                 Rp {{ number_format($pembayaran->jumlah_bayar, 0, ',', '.') }}
                             </td>
                             <td data-label="Metode" class="text-center">
@@ -363,7 +205,7 @@
                                     <span class="badge bg-info badge-pill">MIDTRANS</span>
                                 @endif
                             </td>
-                            <td data-label="Tanggal" class="small fw-semibold" style="color: var(--text-main);">
+                            <td data-label="Tanggal" class="small fw-semibold payment-main-text">
                                 {{ $pembayaran->tanggal_bayar ? $pembayaran->tanggal_bayar->format('d/m/Y') : '-' }}
                             </td>
                             <td data-label="Status" class="text-center">
@@ -386,8 +228,7 @@
                             </td>
                             <td data-label="Aksi" class="text-center">
                                 <a href="{{ route('admin.keuangan.pembayaran.show', $pembayaran->id) }}"
-                                    class="btn btn-sm btn-info text-white" title="Detail / Validasi"
-                                    style="border-radius: 6px; padding: 0.3rem 0.6rem;">
+                                    class="btn btn-sm btn-info text-white payment-action-btn" title="Detail / Validasi">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>
@@ -397,7 +238,7 @@
                 </table>
             </div>
             <div class="pagination-area">
-                <span class="small" style="color: var(--text-muted);">
+                <span class="small payment-muted-text">
                     Menampilkan {{ $pembayaranList->firstItem() ?? 0 }}–{{ $pembayaranList->lastItem() ?? 0 }}
                     dari {{ $pembayaranList->total() }} transaksi
                 </span>
@@ -409,21 +250,5 @@
 @endsection
 
 @section('scripts')
-<script>
-    const searchInput = document.getElementById('searchInput');
-    const clearSearch = document.getElementById('clearSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            clearSearch.classList.toggle('show', this.value.length > 0);
-        });
-    }
-    if (clearSearch) {
-        clearSearch.addEventListener('click', function () {
-            searchInput.value = '';
-            clearSearch.classList.remove('show');
-            searchInput.focus();
-        });
-    }
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
-</script>
+    @vite(['resources/js/admin/keuangan/pembayaran/index.js'])
 @endsection

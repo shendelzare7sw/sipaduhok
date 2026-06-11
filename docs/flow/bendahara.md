@@ -69,9 +69,9 @@ View dir: `resources/views/bendahara/`.
 
 ### Tarik Tunggakan (Carryover)
 
-**Index view**: `bendahara/tagihan/carryover.blade.php` → `@include('keuangan-shared.carryover._content')` · **Controller**: `Bendahara/TagihanController.php`
+**Index view**: `bendahara/tagihan/carryover.blade.php` (standalone, tanpa keuangan-shared partial) - **Controller**: `Bendahara/TagihanController.php`
 
-**Tampilan index**: Halaman tipis yang menampilkan partial **shared** dari `keuangan-shared/carryover/_content.blade.php`. UI: form pilih TA sumber → tombol **Preview Tunggakan** (POST AJAX, hitung daftar siswa & total) → tabel preview hasil → tombol **Eksekusi Carryover** (POST, insert ke TA aktif). Tidak ada filter/search lain — alur step-by-step (preview → execute).
+**Tampilan index**: Halaman standalone untuk carryover tunggakan. UI: form pilih cabang, daftar siswa bertunggakan, tombol **Pratinjau** (POST AJAX, hitung daftar siswa & total), lalu **Eksekusi Carryover** (POST, insert ke TA aktif). Alur tetap dua langkah (preview -> execute).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

@@ -9,101 +9,11 @@
 @endsection
 
 @section('styles')
-    <style>
-        /* === CSS DARI REFERENSI MANAJEMEN CABANG === */
-        .stat-card {
-            padding: 24px;
-            border-radius: 12px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-            height: 100%;
-            color: white;
-            border: none;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .stat-title {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            /* Disesuaikan untuk nominal Rp agar tidak overflow */
-            font-weight: 700;
-            margin-bottom: 4px;
-            line-height: 1.2;
-        }
-
-        .stat-desc {
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .stat-icon-bg {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 70px;
-            opacity: 0.15;
-            z-index: 1;
-        }
-
-        /* Gradients */
-        .bg-gradient-blue {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        }
-
-        .bg-gradient-green {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        }
-
-        .bg-gradient-orange {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-
-        .bg-gradient-red {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-
-        /* Table Styling */
-        .table thead th {
-            background: #f9fafb;
-            color: #4b5563;
-            font-weight: 600;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .progress-bar-custom {
-            height: 8px;
-            border-radius: 4px;
-            background: #e5e7eb;
-            overflow: hidden;
-        }
-    </style>
+    @vite(['resources/css/admin/keuangan/laporan/summary.css'])
 @endsection
 
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
-        {{-- Filter Section --}}
+    <div class="report-page">
         <div class="card mb-4">
             <div class="card-body">
                 <form action="{{ route('admin.keuangan.laporan.belum-lunas') }}" method="GET" class="row align-items-end">
@@ -119,32 +29,27 @@
                         </select>
                     </div>
                     <div class="col-md-8">
-                        <button type="submit" class="btn btn-primary"
-                            style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border:none;">
+                        <button type="submit" class="btn btn-primary btn-gradient-blue">
                             <i class="fas fa-filter me-1"></i> Filter
                         </button>
-                        <a href="{{ route('admin.keuangan.laporan.cetak-belum-lunas', request()->query()) }}"
-                            class="btn btn-success ms-2" target="_blank"
-                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none;">
+                        <a href="{{ route('admin.keuangan.laporan.cetak-belum-lunas', request()->query()) }}" class="btn btn-success btn-gradient-green ms-2" target="_blank">
                             <i class="fas fa-print me-1"></i> Cetak Laporan
                         </a>
-                        <a href="{{ route('admin.keuangan.laporan.belum-lunas') }}"
-                            class="btn btn-outline-secondary border ms-2">Reset</a>
+                        <a href="{{ route('admin.keuangan.laporan.belum-lunas') }}" class="btn btn-outline-secondary border ms-2">Reset</a>
                     </div>
                 </form>
             </div>
         </div>
 
-        {{-- Stats Cards Section (PENERAPAN GAYA REFERENSI) --}}
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
                 <div class="stat-card bg-gradient-red">
                     <div class="stat-content">
                         <div class="stat-title">Siswa Belum Lunas</div>
-                        <div class="stat-number">{{ $siswaList->count() }}</div>
+                        <div class="stat-number stat-number-lg">{{ $siswaList->count() }}</div>
                         <div class="stat-desc">Siswa yang menunggak</div>
                     </div>
-                    <div class="stat-icon-bg">
+                    <div class="stat-icon-bg stat-icon-bg-lg">
                         <i class="fas fa-user-clock"></i>
                     </div>
                 </div>
@@ -154,10 +59,10 @@
                 <div class="stat-card bg-gradient-orange">
                     <div class="stat-content">
                         <div class="stat-title">Total Sisa Tagihan</div>
-                        <div class="stat-number">Rp {{ number_format($siswaList->sum('sisa_tagihan'), 0, ',', '.') }}</div>
+                        <div class="stat-number stat-number-lg">Rp {{ number_format($siswaList->sum('sisa_tagihan'), 0, ',', '.') }}</div>
                         <div class="stat-desc">Piutang berjalan</div>
                     </div>
-                    <div class="stat-icon-bg">
+                    <div class="stat-icon-bg stat-icon-bg-lg">
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
                 </div>
@@ -167,10 +72,10 @@
                 <div class="stat-card bg-gradient-blue">
                     <div class="stat-content">
                         <div class="stat-title">Total Tagihan</div>
-                        <div class="stat-number">Rp {{ number_format($siswaList->sum('total_tagihan'), 0, ',', '.') }}</div>
+                        <div class="stat-number stat-number-lg">Rp {{ number_format($siswaList->sum('total_tagihan'), 0, ',', '.') }}</div>
                         <div class="stat-desc">Target keseluruhan</div>
                     </div>
-                    <div class="stat-icon-bg">
+                    <div class="stat-icon-bg stat-icon-bg-lg">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
                 </div>
@@ -180,17 +85,16 @@
                 <div class="stat-card bg-gradient-green">
                     <div class="stat-content">
                         <div class="stat-title">Total Terbayar</div>
-                        <div class="stat-number">Rp {{ number_format($siswaList->sum('total_bayar'), 0, ',', '.') }}</div>
+                        <div class="stat-number stat-number-lg">Rp {{ number_format($siswaList->sum('total_bayar'), 0, ',', '.') }}</div>
                         <div class="stat-desc">Sudah divalidasi</div>
                     </div>
-                    <div class="stat-icon-bg">
+                    <div class="stat-icon-bg stat-icon-bg-lg">
                         <i class="fas fa-check-circle"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Main Table Section (Field Utuh Sesuai Permintaan) --}}
         <div class="card">
             <div class="card-header">
                 <h5><i class="fas fa-list-ul me-2 text-primary"></i>Daftar Rincian Tunggakan</h5>
@@ -199,7 +103,7 @@
             <div class="card-body p-0">
                 @if($siswaList->count() > 0)
                     <div class="table-responsive">
-                        <table class="table mb-0">
+                        <table class="table table-belum-lunas mb-0">
                             <thead>
                                 <tr>
                                     <th class="text-center" width="50">No</th>
@@ -223,37 +127,26 @@
                                         </td>
                                         <td class="text-center align-middle">{{ $siswa->nisn }}</td>
                                         <td class="align-middle fw-bold text-gray-800">{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
-                                        <td class="align-middle fw-bold">Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}
-                                        </td>
-                                        <td class="align-middle text-success fw-bold">Rp
-                                            {{ number_format($siswa->total_bayar, 0, ',', '.') }}</td>
-                                        <td class="align-middle text-danger fw-bold">Rp
-                                            {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}</td>
+                                        <td class="align-middle fw-bold">Rp {{ number_format($siswa->total_tagihan, 0, ',', '.') }}</td>
+                                        <td class="align-middle text-success fw-bold">Rp {{ number_format($siswa->total_bayar, 0, ',', '.') }}</td>
+                                        <td class="align-middle text-danger fw-bold">Rp {{ number_format($siswa->sisa_tagihan, 0, ',', '.') }}</td>
                                         <td class="align-middle">
                                             @php
                                                 $persentase = $siswa->total_tagihan > 0 ? round(($siswa->total_bayar / $siswa->total_tagihan) * 100, 1) : 0;
-                                                $progColor = $persentase >= 75 ? '#10b981' : ($persentase >= 50 ? '#f59e0b' : '#ef4444');
+                                                $progressClass = $persentase >= 75 ? 'progress-good' : ($persentase >= 50 ? 'progress-warning' : 'progress-danger');
                                             @endphp
                                             <div class="d-flex align-items-center gap-2">
                                                 <div class="progress-bar-custom w-100">
-                                                    <div
-                                                        style="width: {{ $persentase }}%; background: {{ $progColor }}; height: 100%;">
-                                                    </div>
+                                                    <div class="progress-fill {{ $progressClass }}" data-progress-width="{{ $persentase }}"></div>
                                                 </div>
-                                                <span class="small fw-bold"
-                                                    style="color: {{ $progColor }}; min-width: 35px;">{{ $persentase }}%</span>
+                                                <span class="small fw-bold progress-text {{ $progressClass }}">{{ $persentase }}%</span>
                                             </div>
                                         </td>
                                         <td class="text-center align-middle">
                                             <div class="d-flex justify-content-center gap-1">
-                                                <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}"
-                                                    class="btn btn-sm btn-info" title="Detail"><i class="fas fa-eye"></i></a>
-                                                <a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id) }}"
-                                                    class="btn btn-sm btn-success" title="Riwayat"><i
-                                                        class="fas fa-history"></i></a>
-                                                <a href="{{ route('admin.keuangan.pembayaran.create', $siswa->id) }}"
-                                                    class="btn btn-sm btn-warning" title="Input Bayar"><i
-                                                        class="fas fa-plus"></i></a>
+                                                <a href="{{ route('admin.keuangan.tagihan.show', $siswa->id) }}" class="btn btn-sm btn-info" title="Detail"><i class="fas fa-eye"></i></a>
+                                                <a href="{{ route('admin.keuangan.pembayaran.riwayat-siswa', $siswa->id) }}" class="btn btn-sm btn-success" title="Riwayat"><i class="fas fa-history"></i></a>
+                                                <a href="{{ route('admin.keuangan.pembayaran.create', $siswa->id) }}" class="btn btn-sm btn-warning" title="Input Bayar"><i class="fas fa-plus"></i></a>
                                             </div>
                                         </td>
                                     </tr>
@@ -270,4 +163,8 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/admin/keuangan/laporan/progress.js'])
 @endsection

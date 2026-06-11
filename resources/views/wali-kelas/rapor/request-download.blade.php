@@ -7,13 +7,12 @@
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
-
 @section('styles')
-@include('shared.wali-kelas.styles')
+    @vite(['resources/css/wali-kelas/rapor/request-download.css', 'resources/js/wali-kelas/rapor/request-download.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
 
     <div class="alert alert-light border border-primary border-opacity-25 shadow-sm mb-4">
@@ -80,12 +79,24 @@
                                 </td>
                                 <td class="text-center align-middle">
                                     @if($req->status === 'menunggu')
-                                        <button type="button" class="btn btn-success btn-sm" title="Setujui"
-                                                onclick="showDownloadAction('{{ route('wali.rapor.request-download.approve', $req->id) }}', 'Setujui permintaan download dari {{ $req->user->name ?? "" }}?', 'Setujui', 'btn-success', 'bg-success')">
+                                        <button type="button"
+                                                class="btn btn-success btn-sm js-download-action"
+                                                title="Setujui"
+                                                data-action="{{ route('wali.rapor.request-download.approve', $req->id) }}"
+                                                data-message="Setujui permintaan download dari {{ $req->user->name ?? '' }}?"
+                                                data-btn-label="Setujui"
+                                                data-btn-class="btn-success"
+                                                data-header-class="bg-success">
                                             <i class="fas fa-check"></i>
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-sm" title="Tolak"
-                                                onclick="showDownloadAction('{{ route('wali.rapor.request-download.reject', $req->id) }}', 'Tolak permintaan download dari {{ $req->user->name ?? "" }}?', 'Tolak', 'btn-danger', 'bg-danger')">
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm js-download-action"
+                                                title="Tolak"
+                                                data-action="{{ route('wali.rapor.request-download.reject', $req->id) }}"
+                                                data-message="Tolak permintaan download dari {{ $req->user->name ?? '' }}?"
+                                                data-btn-label="Tolak"
+                                                data-btn-class="btn-danger"
+                                                data-header-class="bg-danger">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     @else
@@ -139,22 +150,4 @@
     </div>
 </div>
 
-@endsection
-
-@section('scripts')
-<script>
-function showDownloadAction(action, message, btnLabel, btnClass, headerClass) {
-    document.getElementById('downloadActionForm').action = action;
-    document.getElementById('downloadModalMessage').textContent = message;
-    document.getElementById('downloadModalTitle').innerHTML = '<i class="fas fa-question-circle me-2"></i>' + btnLabel;
-    document.getElementById('downloadModalHeader').className = 'modal-header text-white ' + headerClass;
-    document.getElementById('downloadModalIcon').className = 'fas fa-question-circle fa-3x mb-3 ' + (headerClass.includes('success') ? 'text-success' : 'text-danger');
-
-    const submitBtn = document.getElementById('downloadSubmitBtn');
-    submitBtn.className = 'btn fw-bold ' + btnClass;
-    submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> ' + btnLabel;
-
-    new bootstrap.Modal(document.getElementById('downloadActionModal')).show();
-}
-</script>
 @endsection

@@ -9,142 +9,14 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    @media print {
-        .no-print { display: none !important; }
-        .student-card { border: none !important; box-shadow: none !important; }
-        body { font-size: 10pt; }
-        .table { font-size: 9pt; }
-        /* Hide Sneat layout chrome */
-        .layout-navbar,
-        .layout-menu,
-        .layout-overlay,
-        .menu-vertical,
-        header.navbar,
-        .content-backdrop,
-        .navbar,
-        aside { display: none !important; }
-        /* Reset layout containers */
-        .layout-wrapper,
-        .layout-container,
-        .layout-page,
-        .content-wrapper {
-            display: block !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-        }
-    }
-    .student-card {
-        background: white;
-        border-radius: 20px;
-        border-left: 6px solid #4e73df;
-    }
-    .table thead th {
-        background: #f8f9fc;
-        color: #4e73df;
-        font-weight: 700;
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #e3e6f0;
-        vertical-align: middle;
-    }
-    .predikat-badge {
-        font-size: 11px;
-        font-weight: 800;
-        padding: 6px 10px;
-    }
-    .nilai-show-table {
-        table-layout: fixed;
-    }
-    .nilai-show-table .mapel-col {
-        width: 220px;
-        min-width: 190px;
-    }
-    .nilai-show-table .count-col {
-        width: 56px;
-    }
-    .nilai-show-table .average-col {
-        width: 64px;
-    }
-    .nilai-show-table .exam-col {
-        width: 58px;
-    }
-    .nilai-show-table .final-col {
-        width: 78px;
-    }
-    .nilai-show-table .predikat-col {
-        width: 98px;
-    }
-    .nilai-show-table .status-col {
-        width: 122px;
-    }
-    .nilai-show-table .nilai-pill {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 30px;
-        border-radius: 999px !important;
-        line-height: 1;
-        white-space: nowrap !important;
-        word-break: normal;
-        overflow-wrap: normal;
-        text-align: center;
-    }
-    .nilai-show-table .status-pill {
-        min-width: 104px;
-    }
-    .rata-cell {
-        background: #e9ecef !important;
-        font-weight: 700;
-        color: #165fac;
-    }
-    .nilai-akhir-cell {
-        background: #d4edda !important;
-        font-weight: 800;
-        color: #155724;
-    }
-    .th-tugas { background: #e3f2fd !important; }
-    .th-latihan { background: #fff3e0 !important; }
-    .th-uh { background: #fce4ec !important; }
-
-    @media (max-width: 767.98px) {
-        .nilai-show-table {
-            table-layout: auto;
-        }
-        .nilai-show-table .mapel-col,
-        .nilai-show-table .count-col,
-        .nilai-show-table .average-col,
-        .nilai-show-table .exam-col,
-        .nilai-show-table .final-col,
-        .nilai-show-table .predikat-col,
-        .nilai-show-table .status-col {
-            width: auto;
-            min-width: 0;
-        }
-        .nilai-show-table tbody td.nilai-pill-cell {
-            align-items: center;
-        }
-        .nilai-show-table .nilai-pill {
-            min-width: 0;
-            max-width: 100%;
-            padding: 6px 11px;
-            font-size: 11px;
-        }
-        .nilai-show-table .status-pill {
-            min-width: 98px;
-        }
-    }
-</style>
+    @vite(['resources/css/wali-kelas/nilai/show.css', 'resources/js/wali-kelas/nilai/show.js'])
 @endsection
 
 @section('content')
 @php
     $isKelasAkhir = $kelas->isTingkatAkhir();
 @endphp
-<div style="max-width: 1600px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
     
     {{-- Buttons --}}
@@ -201,7 +73,7 @@
                 <table class="table table-bordered table-hover wk-card-table nilai-show-table mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th rowspan="2" class="text-center" style="width: 40px;">No</th>
+                            <th rowspan="2" class="text-center col-no">No</th>
                             <th rowspan="2" class="mapel-col">Mata Pelajaran</th>
                             <th colspan="2" class="text-center th-tugas">Tugas</th>
                             <th colspan="2" class="text-center th-latihan">Latihan</th>
@@ -311,13 +183,13 @@
                 <table class="table table-bordered table-hover wk-card-table mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 40px;">No</th>
-                            <th style="min-width: 180px;">Mata Pelajaran</th>
-                            <th class="text-center" style="width: 70px;">TO 1</th>
-                            <th class="text-center" style="width: 70px;">TO 2</th>
-                            <th class="text-center" style="width: 70px;">TO 3</th>
-                            <th class="text-center" style="width: 70px;">UPK</th>
-                            <th class="text-center" style="width: 100px;">Ujian Praktek</th>
+                            <th class="text-center col-no">No</th>
+                            <th class="col-mapel-wide">Mata Pelajaran</th>
+                            <th class="text-center col-score">TO 1</th>
+                            <th class="text-center col-score">TO 2</th>
+                            <th class="text-center col-score">TO 3</th>
+                            <th class="text-center col-score">UPK</th>
+                            <th class="text-center col-practice">Ujian Praktek</th>
                         </tr>
                     </thead>
                     <tbody>

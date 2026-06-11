@@ -8,6 +8,10 @@
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/js/wali-kelas/template-capaian/index.js'])
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -77,7 +81,12 @@
                             <td>{{ $template->nama_template }}</td>
                             <td>{{ Str::limit($template->template_text, 100) }}</td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-info btn-sm" onclick="editTemplate({{ json_encode($template) }})">
+                                <button type="button"
+                                        class="btn btn-info btn-sm js-template-edit"
+                                        data-update-url="{{ route('wali.template-capaian.update', $template->id) }}"
+                                        data-mata-pelajaran-id="{{ $template->mata_pelajaran_id }}"
+                                        data-nama-template="{{ $template->nama_template }}"
+                                        data-template-text="{{ $template->template_text }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button type="button" class="btn btn-danger btn-sm"
@@ -218,21 +227,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-function editTemplate(template) {
-    document.getElementById('editForm').action = '/wali/template-capaian/' + template.id;
-    document.getElementById('edit_mata_pelajaran_id').value = template.mata_pelajaran_id;
-    document.getElementById('edit_nama_template').value = template.nama_template;
-    document.getElementById('edit_template_text').value = template.template_text;
-    bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
-}
-
-document.getElementById('hapusTemplateModal')?.addEventListener('show.bs.modal', function(e) {
-    const btn = e.relatedTarget;
-    document.getElementById('formHapusTemplate').action = btn.dataset.action;
-    document.getElementById('namaTemplateDihapus').textContent = btn.dataset.nama;
-});
-</script>
-@endpush
 @endsection

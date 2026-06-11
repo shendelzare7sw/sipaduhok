@@ -736,7 +736,7 @@
         }
     }
 </style>
-@include('shared.akademik.styles')
+@vite('resources/css/sekretaris/kalender/index.css')
 @endsection
 
 @section('content')

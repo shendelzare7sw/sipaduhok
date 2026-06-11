@@ -10,93 +10,11 @@
 @endsection
 
 @section('styles')
-<style>
-.content-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    padding: 24px;
-    margin-bottom: 24px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-    display: block;
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: border-color 0.2s;
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-control.is-invalid {
-    border-color: #ef4444;
-}
-
-.invalid-feedback {
-    color: #ef4444;
-    font-size: 13px;
-    margin-top: 4px;
-    display: block;
-}
-
-.btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.btn-secondary {
-    background: #6b7280;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #4b5563;
-}
-
-.img-thumbnail {
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 4px;
-}
-</style>
+    @vite(['resources/css/admin/akademik/flyer/form.css'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="admin-flyer-form-page">
 <div class="row">
     <div class="col-lg-8">
         <div class="content-card">
@@ -147,12 +65,11 @@
                         <small class="text-muted">(JPG, PNG, max 2MB)</small>
                     </label>
 
-                    <div class="mb-3" id="imagePreviewContainer" style="{{ isset($flyer) && $flyer->gambar_flyer ? '' : 'display: none;' }}">
+                    <div class="mb-3 image-preview-container {{ isset($flyer) && $flyer->gambar_flyer ? 'is-visible' : '' }}" id="imagePreviewContainer">
                         <img id="imagePreview"
                              src="{{ isset($flyer) && $flyer->gambar_flyer ? $flyer->gambar_url : '' }}"
                              alt="Preview"
-                             class="img-thumbnail"
-                             style="max-height: 250px; display: block;">
+                             class="img-thumbnail image-preview-image">
                         <p class="small text-muted mt-2">
                             <span id="previewLabel">{{ isset($flyer) ? 'Upload gambar baru untuk mengganti' : 'Preview gambar yang akan diupload' }}</span>
                         </p>
@@ -163,7 +80,6 @@
                            id="gambar_flyer"
                            name="gambar_flyer"
                            accept="image/*"
-                           onchange="previewImage(this)"
                            {{ isset($flyer) ? '' : 'required' }}>
                     @error('gambar_flyer')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -284,7 +200,7 @@
                 </div>
 
                 <!-- Buttons -->
-                <div class="d-flex justify-content-between" style="margin-top: 24px;">
+                <div class="d-flex justify-content-between flyer-form-actions">
                     <a href="{{ route('admin.akademik.flyer.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Kembali
                     </a>
@@ -299,73 +215,51 @@
     <!-- Info Panel -->
     <div class="col-lg-4">
         <div class="content-card">
-            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
-                <i class="fas fa-info-circle me-2" style="color: #165fac;"></i>Panduan
+            <h3 class="flyer-info-title">
+                <i class="fas fa-info-circle me-2 flyer-info-icon"></i>Panduan
             </h3>
             
-            <div style="font-size: 14px; color: #666; line-height: 1.6;">
+            <div class="flyer-info-content">
                 <p><strong>Organisasi di PKBM HOK:</strong></p>
-                <ul style="padding-left: 20px; margin-bottom: 12px;">
+                <ul>
                     <li>Hear For You</li>
                     <li>HOK EduLab Cafe</li>
                     <li>Taman Bacaan Masyarakat</li>
                 </ul>
                 
-                <hr style="margin: 16px 0;">
+                <hr>
                 
                 <p><strong>Cara Kerja:</strong></p>
-                <ul style="padding-left: 20px; margin-bottom: 12px;">
+                <ul>
                     <li>Flyer tampil sebagai <strong>pop-up</strong> saat siswa login</li>
                     <li>Tampil bergantian sesuai urutan</li>
                     <li>Hanya flyer aktif & dalam periode yang tampil</li>
                 </ul>
                 
-                <hr style="margin: 16px 0;">
+                <hr>
                 
-                <p style="margin-bottom: 0;">
-                    <i class="fas fa-lightbulb" style="color: #ffc107;"></i>
+                <p class="flyer-tip">
+                    <i class="fas fa-lightbulb flyer-tip-icon"></i>
                     <strong> Tips:</strong> Buat gambar dengan rasio 16:9 atau 4:3 untuk hasil terbaik.
                 </p>
             </div>
         </div>
 
-        <div class="content-card" id="sidePreviewCard" style="margin-top: 16px; {{ isset($flyer) && $flyer->gambar_flyer ? '' : 'display: none;' }}">
-            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
-                <i class="fas fa-eye me-2" style="color: #28a745;"></i>Preview
+        <div class="content-card side-preview-card {{ isset($flyer) && $flyer->gambar_flyer ? 'is-visible' : '' }}" id="sidePreviewCard">
+            <h3 class="side-preview-title">
+                <i class="fas fa-eye me-2 side-preview-icon"></i>Preview
             </h3>
             <img id="sidePreviewImage"
                  src="{{ isset($flyer) && $flyer->gambar_flyer ? $flyer->gambar_url : '' }}"
                  alt="Preview"
-                 style="width: 100%; border-radius: 8px;">
+                 class="side-preview-image">
         </div>
     </div>
 </div>
 </div>
 
-<script>
-function previewImage(input) {
-    const previewContainer = document.getElementById('imagePreviewContainer');
-    const previewImage = document.getElementById('imagePreview');
-    const previewLabel = document.getElementById('previewLabel');
-    const sidePreviewCard = document.getElementById('sidePreviewCard');
-    const sidePreviewImage = document.getElementById('sidePreviewImage');
+@endsection
 
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            // Update main preview
-            previewImage.src = e.target.result;
-            previewContainer.style.display = 'block';
-            previewLabel.textContent = 'Preview gambar yang akan diupload';
-
-            // Update side preview
-            sidePreviewImage.src = e.target.result;
-            sidePreviewCard.style.display = 'block';
-        }
-
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-</script>
+@section('scripts')
+    @vite(['resources/js/admin/akademik/flyer/form.js'])
 @endsection

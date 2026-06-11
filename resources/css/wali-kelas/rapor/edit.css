@@ -1,0 +1,1287 @@
+/* Base Wali Kelas layout, extracted from the former shared loader. */
+:root {
+        --wk-primary: #4361ee;
+        --wk-primary-dark: #3651d4;
+        --wk-success: #10b981;
+        --wk-warning: #f59e0b;
+        --wk-danger: #ef4444;
+        --wk-info: #06b6d4;
+        --wk-purple: #8b5cf6;
+        --wk-text: #1e293b;
+        --wk-muted: #64748b;
+        --wk-line: #e2e8f0;
+        --wk-soft: #f8fafc;
+    }
+
+    .container-xxl,
+    .container-fluid.px-0,
+    div[style*="max-width: 1600px"],
+    div[style*="max-width: 1400px"],
+    div[style*="max-width: 1200px"] {
+        max-width: 1280px !important;
+    }
+
+    @media (min-width: 1200px) {
+        .layout-page .container-xxl,
+        .layout-page .container-fluid.px-0,
+        .layout-page .wk-page,
+        .layout-page div[style*="max-width: 1600px"],
+        .layout-page div[style*="max-width: 1400px"],
+        .layout-page div[style*="max-width: 1200px"] {
+            max-width: calc(100% - 4rem) !important;
+            width: 100% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+    }
+
+.card {
+        border: 1px solid var(--wk-line) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05) !important;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: var(--wk-soft) !important;
+        border-bottom: 1px solid var(--wk-line) !important;
+        padding: 16px 18px !important;
+    }
+
+    .card-header h5,
+    .card-header h6,
+    .card-body h4,
+    .card-body h5,
+    .fw-bold.text-primary,
+    h4.fw-bold,
+    h5.fw-bold {
+        color: var(--wk-text) !important;
+    }
+
+    .text-primary,
+    .card-header i.text-primary,
+    .text-info {
+        color: var(--wk-primary) !important;
+    }
+
+    .btn {
+        border-radius: 10px !important;
+        font-weight: 800 !important;
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: normal;
+        line-height: 1.25;
+    }
+
+    .btn-sm {
+        min-height: 34px;
+        padding: 7px 10px;
+    }
+
+    .btn-primary {
+        background: var(--wk-primary) !important;
+        border-color: var(--wk-primary) !important;
+        color: #fff !important;
+        box-shadow: 0 10px 18px rgba(67, 97, 238, .18);
+    }
+
+    .btn-primary:hover {
+        background: var(--wk-primary-dark) !important;
+        border-color: var(--wk-primary-dark) !important;
+    }
+
+    .btn-success {
+        background: var(--wk-success) !important;
+        border-color: var(--wk-success) !important;
+    }
+
+    .btn-warning {
+        background: var(--wk-warning) !important;
+        border-color: var(--wk-warning) !important;
+    }
+
+    .btn-danger {
+        background: var(--wk-danger) !important;
+        border-color: var(--wk-danger) !important;
+    }
+
+    .btn-info {
+        background: var(--wk-info) !important;
+        border-color: var(--wk-info) !important;
+        color: #fff !important;
+    }
+
+    .btn-light,
+    .btn-secondary {
+        background: #f8fafc !important;
+        border-color: #dbe4f0 !important;
+        color: #334155 !important;
+    }
+
+    .form-control,
+    .form-select,
+    .input-group-text {
+        border-color: #dbe4f0 !important;
+        border-radius: 10px !important;
+        color: var(--wk-text);
+        min-height: 40px;
+    }
+
+    .input-group .form-control {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+
+    .input-group .input-group-text {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--wk-primary) !important;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, .12) !important;
+    }
+
+    label,
+    .form-label,
+    .small.fw-bold {
+        color: var(--wk-muted);
+        font-size: 11px;
+        font-weight: 900 !important;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .badge {
+        border-radius: 999px !important;
+        font-weight: 850 !important;
+        white-space: normal;
+        line-height: 1.25;
+    }
+
+    .badge.bg-primary { background: var(--wk-primary) !important; }
+    .badge.bg-success { background: var(--wk-success) !important; }
+    .badge.bg-warning { background: var(--wk-warning) !important; }
+    .badge.bg-danger { background: var(--wk-danger) !important; }
+    .badge.bg-info { background: var(--wk-info) !important; }
+
+    .alert {
+        border-radius: 12px !important;
+        border: 1px solid var(--wk-line) !important;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .04) !important;
+    }
+
+    .table-responsive {
+        border-radius: 0 0 12px 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: var(--wk-soft) !important;
+        color: var(--wk-muted) !important;
+        border-bottom: 1px solid var(--wk-line) !important;
+        font-size: 11px !important;
+        font-weight: 900 !important;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        border-color: #eef2f7 !important;
+        color: #334155;
+        vertical-align: middle;
+        overflow-wrap: anywhere;
+    }
+
+    .wk-page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .wk-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+        margin-bottom: 18px;
+        background: #fff;
+        border: 1px solid var(--wk-line);
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+    }
+
+    .wk-toolbar-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .wk-toolbar-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(135deg, var(--wk-primary) 0%, var(--wk-info) 100%);
+        flex: 0 0 auto;
+    }
+
+    .wk-toolbar h5 {
+        margin: 0;
+        color: var(--wk-text);
+        font-size: 17px;
+        font-weight: 900;
+        line-height: 1.3;
+    }
+
+    .wk-toolbar p {
+        margin: 3px 0 0;
+        color: var(--wk-muted);
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .wk-stat-grid,
+    .row.mb-4:has(.stat-card-custom),
+    .row.mb-2:has(.border-start) {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .wk-stat-grid > [class*="col-"],
+    .row.mb-4:has(.stat-card-custom) > [class*="col-"],
+    .row.mb-2:has(.border-start) > [class*="col-"] {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+        margin: 0 !important;
+    }
+
+    .stat-card-custom,
+    .row.mb-2 .card.border-start {
+        border-left: 0 !important;
+        min-height: 108px;
+    }
+
+    .stat-card-custom .card-body,
+    .row.mb-2 .card.border-start .card-body {
+        padding: 16px !important;
+    }
+
+    .empty-state,
+    .wk-empty {
+        padding: 48px 18px !important;
+        text-align: center;
+        color: var(--wk-muted);
+    }
+
+    .empty-state i,
+    .wk-empty i {
+        color: #cbd5e1;
+        margin-bottom: 12px;
+    }
+
+    .modal-content {
+        position: relative;
+        border-radius: 14px !important;
+        overflow: visible !important;
+    }
+
+    .modal-dialog,
+    .modal .modal-content,
+    .modal .modal-header {
+        overflow: visible !important;
+    }
+
+    .modal .modal-header {
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .modal .modal-body,
+    .modal .modal-footer {
+        position: relative;
+        z-index: 3;
+    }
+
+    .modal .modal-header .btn-close,
+    .modal .modal-header .btn-close.btn-close-white {
+        align-items: center !important;
+        background-color: #fff !important;
+        background-image: none !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        color: transparent !important;
+        display: inline-flex !important;
+        flex: 0 0 auto !important;
+        filter: none !important;
+        height: 28px !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        min-height: 0 !important;
+        opacity: 1 !important;
+        padding: 0 !important;
+        position: absolute !important;
+        right: 5px !important;
+        top: 5px !important;
+        width: 28px !important;
+        z-index: 1 !important;
+    }
+
+    .modal .modal-header .btn-close::before,
+    .modal .modal-header .btn-close.btn-close-white::before {
+        content: "\00d7";
+        display: block;
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        font-weight: 500;
+        line-height: 1;
+        color: #94a3b8;
+        transform: translateY(-1px);
+    }
+
+    .modal .modal-header .btn-close:hover,
+    .modal .modal-header .btn-close.btn-close-white:hover {
+        background-color: #fff !important;
+        border-color: #cbd5e1 !important;
+    }
+
+    .modal .modal-header .btn-close:hover::before,
+    .modal .modal-header .btn-close.btn-close-white:hover::before {
+        color: #64748b;
+    }
+
+    #logoutModal .modal-footer .btn-secondary {
+        background: #8b95a3 !important;
+        border-color: #8b95a3 !important;
+        color: #fff !important;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, .18) !important;
+    }
+
+    #logoutModal .modal-footer .btn-secondary:hover {
+        background: #748091 !important;
+        border-color: #748091 !important;
+        color: #fff !important;
+    }
+
+    .btn-action-group,
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        justify-content: center;
+    }
+
+    .wk-card-table {
+        width: 100%;
+    }
+
+    @media (max-width: 991.98px) {
+        .wk-stat-grid,
+        .row.mb-4:has(.stat-card-custom),
+        .row.mb-2:has(.border-start) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .wk-page,
+        .container-xxl,
+        div[style*="max-width: 1600px"],
+        div[style*="max-width: 1400px"],
+        div[style*="max-width: 1200px"] {
+            padding-left: .75rem !important;
+            padding-right: .75rem !important;
+        }
+
+        .wk-toolbar,
+        .card-header.d-flex,
+        .card-body .row.align-items-center,
+        .card-body .d-flex.justify-content-between {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            text-align: left;
+        }
+
+        .wk-toolbar-title {
+            align-items: flex-start;
+        }
+
+        .wk-toolbar .btn,
+        .card-header .btn,
+        .card-body .btn,
+        .btn-action-group .btn {
+            width: 100%;
+        }
+
+        .row > [class*="col-"] {
+            margin-bottom: 10px;
+        }
+
+        .wk-stat-grid,
+        .row.mb-4:has(.stat-card-custom),
+        .row.mb-2:has(.border-start) {
+            grid-template-columns: 1fr;
+        }
+
+        .table {
+            min-width: 720px;
+        }
+
+        .table.table-rekap,
+        .table.table-jadwal {
+            min-width: 560px;
+        }
+
+        .table-responsive:has(.wk-card-table) {
+            overflow: visible;
+        }
+
+        .wk-card-table {
+            min-width: 0 !important;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .wk-card-table thead {
+            display: none;
+        }
+
+        .wk-card-table,
+        .wk-card-table tbody,
+        .wk-card-table tr,
+        .wk-card-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .wk-card-table tbody {
+            padding: 12px;
+            background: #f8fafc;
+        }
+
+        .wk-card-table tbody tr {
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid var(--wk-line);
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, .04);
+        }
+
+        .wk-card-table tbody tr:last-child {
+            margin-bottom: 0;
+        }
+
+        .wk-card-table tbody td {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 11px 13px !important;
+            border-bottom: 1px solid #eef2f7 !important;
+            text-align: right !important;
+            min-height: 42px;
+            overflow-wrap: anywhere;
+        }
+
+        .wk-card-table tbody td:last-child {
+            border-bottom: 0 !important;
+        }
+
+        .wk-card-table tbody td::before {
+            content: attr(data-label);
+            flex: 0 0 38%;
+            color: var(--wk-muted);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .04em;
+            line-height: 1.3;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .wk-card-table tbody td > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .wk-card-table tbody td[colspan] {
+            display: block;
+            text-align: center !important;
+        }
+
+        .wk-card-table tbody td[colspan]::before {
+            display: none;
+        }
+
+        .wk-card-table tbody td.wk-main-cell,
+        .wk-card-table tbody td:nth-child(2):has(.fw-bold),
+        .wk-card-table tbody td:nth-child(3):has(.fw-bold) {
+            display: block;
+            text-align: left !important;
+            background: #fff;
+        }
+
+        .wk-card-table tbody td.wk-main-cell::before {
+            display: none;
+        }
+
+        .wk-card-table .btn {
+            width: auto !important;
+            min-width: 38px;
+        }
+
+        .wk-card-table td[data-label*="AKSI"],
+        .wk-card-table td[data-label*="Aksi"] {
+            display: block;
+            text-align: left !important;
+        }
+
+        .wk-card-table td[data-label*="AKSI"]::before,
+        .wk-card-table td[data-label*="Aksi"]::before {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .wk-card-table td[data-label*="AKSI"] .btn,
+        .wk-card-table td[data-label*="Aksi"] .btn {
+            flex: 1 1 44%;
+        }
+
+        .table th,
+        .table td {
+            padding: 10px 9px !important;
+            font-size: 12px;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 5px 8px;
+        }
+
+        .presensi-btn-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .card-body,
+        .card-header {
+            padding: 14px !important;
+        }
+
+        .btn {
+            min-height: 36px;
+            font-size: 12px;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 13px;
+        }
+    }
+
+/* Wide layout rules for Wali Kelas pages outside dashboard. */
+@media (min-width: 1200px) {
+        .layout-page > .content-wrapper > .container-xxl > .container-fluid.px-0,
+        .layout-page > .content-wrapper > .container-xxl > .container-xxl,
+        .layout-page > .content-wrapper > .container-xxl > .wk-page,
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width: 1600px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width: 1400px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width: 1200px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width:1600px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width:1400px"],
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width:1200px"] {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] > .container-fluid.px-0,
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] > .container-xxl,
+        .layout-page > .content-wrapper > .container-xxl > div[style*="max-width"] > .wk-page {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+    }
+
+/* Page-specific styles. */
+.alignment-left { text-align: left; }
+.alignment-center { text-align: center; }
+.alignment-right { text-align: right; }
+.alignment-justify { text-align: justify; }
+.modal-header.text-white .modal-title,
+.modal-header.text-white i {
+        color: #fff !important;
+    }
+
+.table thead th {
+        background: #f8f9fc;
+        color: #4e73df;
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e3e6f0;
+        vertical-align: middle;
+    }
+    .total-box {
+        padding: 10px;
+        background: #f0f9ff;
+        border-radius: 8px;
+        margin-top: 26px;
+        text-align: center;
+    }
+    .drag-handle {
+        cursor: grab;
+        color: #adb5bd;
+        font-size: 16px;
+    }
+    .drag-handle:hover { color: #4e73df; }
+    .sortable-ghost { opacity: 0.4; background: #e8f0fe !important; }
+    .sortable-chosen { background: #f0f9ff; }
+    .row-hidden { opacity: 0.5; }
+    .row-hidden td { text-decoration: line-through; }
+    .btn-arrow { padding: 2px 6px; font-size: 11px; line-height: 1; }
+    .nilai-score-cell { background: #f0f9ff; }
+    .nilai-score-value { font-size: 16px; }
+    .kelompok-select {
+        margin: 0 auto;
+        width: 80px;
+    }
+    .default-kelompok-note { font-size: 10px; }
+    .average-row { background: #f3f4f6; }
+    .average-label { padding: 16px; }
+    .average-value { font-size: 18px; }
+    .kelompok-header td {
+        background: #e8f0fe !important;
+        font-weight: 700;
+        color: #4e73df;
+        font-size: 13px;
+        padding: 10px 16px !important;
+    }
+
+    /* ─── Mobile responsive: tabel jadi card per row (compact + drag-friendly) ─── */
+    @media (max-width: 767.98px) {
+        .rapor-edit-page,
+        .rapor-edit-page > .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            box-sizing: border-box;
+        }
+
+        /* Container hapus horizontal scroll */
+        .rapor-edit-page .card-body.p-0 .table-responsive {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+
+        .rapor-edit-page .table {
+            min-width: 0 !important;
+        }
+
+        #nilaiTable,
+        #kegiatanTable {
+            min-width: 0 !important;
+            max-width: 100% !important;
+            table-layout: fixed;
+        }
+
+        #nilaiTable *,
+        #kegiatanTable * {
+            box-sizing: border-box;
+        }
+
+        /* ── Tabel Nilai Mapel: setiap row jadi card ── */
+        #nilaiTable, #nilaiTable tbody, #nilaiTable tfoot {
+            display: block;
+            width: 100% !important;
+        }
+        #nilaiTable thead { display: none; }
+        #nilaiTable tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+        }
+        #nilaiTable tr {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 8px;
+            padding: 10px 12px;
+            border: 1px solid #dbe4f0;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+            position: relative;
+        }
+        #nilaiTable td {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            border: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            min-width: 0;
+            text-align: left !important;
+        }
+        #nilaiTable td::before {
+            content: attr(data-label);
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Cell 1 — Drag handle (LARGE for touch) */
+        #nilaiTable td:nth-child(1) {
+            order: 1;
+            flex: 0 0 32px;
+            align-items: center;
+        }
+        #nilaiTable td:nth-child(1)::before { display: none; }
+        #nilaiTable .drag-handle {
+            font-size: 20px !important;
+            color: #94a3b8;
+            cursor: grab;
+            padding: 6px;
+            touch-action: none;
+        }
+        #nilaiTable .drag-handle:active { cursor: grabbing; color: #4e73df; }
+
+        /* Cell 2 — No (small badge top-right) */
+        #nilaiTable td:nth-child(2) {
+            order: 2;
+            flex: 1 1 auto;
+            align-items: flex-end;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        #nilaiTable td:nth-child(2)::before { display: none; }
+
+        /* Cell 3 — Mata Pelajaran (BIG header) */
+        #nilaiTable td:nth-child(3) {
+            order: 3;
+            flex: 1 1 100%;
+        }
+        #nilaiTable td:nth-child(3)::before { display: none; }
+        #nilaiTable td:nth-child(3) strong { font-size: 14px; color: #1e293b; }
+
+        /* Cell 4 — Nilai (inline pill) */
+        #nilaiTable td:nth-child(4) {
+            order: 4;
+            flex: 0 0 auto;
+            background: #f0f9ff !important;
+            border-radius: 8px;
+            padding: 6px 10px !important;
+            min-height: 50px;
+            justify-content: center;
+        }
+        #nilaiTable td:nth-child(4) strong { font-size: 15px !important; }
+
+        /* Cell 5 — Kelompok (PAS only) atau Tampil (PTS) */
+        #nilaiTable td:nth-child(5) {
+            order: 5;
+            flex: 0 0 auto;
+            background: #f8fafc !important;
+            border-radius: 8px;
+            padding: 6px 10px !important;
+            align-items: center;
+            min-height: 50px;
+            justify-content: center;
+        }
+
+        /* Cell 6 — Tampil (PAS) atau Urutan (PTS) */
+        #nilaiTable td:nth-child(6) {
+            order: 6;
+            flex: 0 0 auto;
+            background: #f8fafc !important;
+            border-radius: 8px;
+            padding: 6px 10px !important;
+            align-items: center;
+            min-height: 50px;
+            justify-content: center;
+        }
+
+        /* Cell 7 — Urutan (PAS) atau Deskripsi (PTS) */
+        #nilaiTable td:nth-child(7) {
+            order: 7;
+            flex: 0 0 auto;
+            background: #f8fafc !important;
+            border-radius: 8px;
+            padding: 6px 10px !important;
+            min-height: 50px;
+            justify-content: center;
+        }
+
+        /* Cell 8 — Deskripsi (PAS only, full width row) */
+        #nilaiTable td:nth-child(8) {
+            order: 8;
+            flex: 1 1 100%;
+            background: #f8fafc !important;
+            padding: 8px !important;
+            border-radius: 8px;
+        }
+
+        /* Force deskripsi (terakhir cell) full width — PTS variation */
+        #nilaiTable td.align-middle:last-child {
+            flex: 1 1 100% !important;
+            background: #f8fafc !important;
+            padding: 8px !important;
+            border-radius: 8px;
+        }
+
+        /* Arrow buttons: side-by-side */
+        #nilaiTable .btn-group-vertical {
+            flex-direction: row !important;
+            gap: 4px;
+        }
+        #nilaiTable .btn-arrow {
+            min-width: 32px;
+            min-height: 32px;
+            padding: 4px 8px !important;
+            font-size: 12px !important;
+        }
+
+        /* Form controls compact */
+        #nilaiTable .form-select,
+        #nilaiTable .form-select-sm {
+            min-width: 60px !important;
+            width: auto !important;
+            font-size: 12px;
+        }
+        #nilaiTable .form-check { padding-left: 0; }
+        #nilaiTable input[type="text"] { font-size: 13px; }
+
+        /* tfoot rata-rata */
+        #nilaiTable tfoot tr {
+            display: flex;
+            justify-content: center;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        #nilaiTable tfoot td:empty,
+        #nilaiTable tfoot td[colspan]:empty { display: none; }
+
+        /* ── Tabel Kegiatan Ekstra ── */
+        #kegiatanTable, #kegiatanTable tbody {
+            display: block;
+            width: 100% !important;
+        }
+        #kegiatanTable thead { display: none; }
+        #kegiatanTable tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+        }
+        #kegiatanTable tr {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 8px;
+            padding: 10px 12px;
+            border: 1px solid #dbe4f0;
+            border-radius: 10px;
+            background: #fff;
+            position: relative;
+        }
+        #kegiatanTable td {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            border: 0 !important;
+            padding: 0 !important;
+            min-width: 0;
+        }
+        #kegiatanTable td::before {
+            content: attr(data-label);
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+        /* No → absolute pojok */
+        #kegiatanTable td:nth-child(1) {
+            position: absolute;
+            top: 4px;
+            right: 42px;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        #kegiatanTable td:nth-child(1)::before { display: none; }
+        #kegiatanTable td:nth-child(2) { flex: 1 1 100%; }  /* Nama */
+        #kegiatanTable td:nth-child(3) { flex: 0 0 90px; }  /* Predikat */
+        #kegiatanTable td:nth-child(4) { flex: 1 1 calc(100% - 100px); }  /* Keterangan */
+        #kegiatanTable td:nth-child(5) {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+        }
+        #kegiatanTable td:nth-child(5)::before { display: none; }
+
+        /* Layout final mobile: fit tanpa geser kanan */
+        #nilaiTable tbody {
+            padding: 10px;
+        }
+
+        #nilaiTable tbody tr {
+            display: grid !important;
+            grid-template-columns: 34px minmax(0, .95fr) minmax(0, 1.15fr) minmax(0, .9fr) minmax(0, .95fr);
+            align-items: stretch;
+            gap: 6px;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 9px;
+            overflow: hidden;
+        }
+
+        #nilaiTable tbody td {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        #nilaiTable td[data-label="Drag"] {
+            grid-column: 1;
+            grid-row: 1 / span 2;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #nilaiTable td[data-label="No"] {
+            display: none !important;
+        }
+
+        #nilaiTable td[data-label="Mata Pelajaran"] {
+            grid-column: 2 / -1;
+            grid-row: 1;
+            justify-content: center;
+            min-height: 32px;
+        }
+
+        #nilaiTable td[data-label="Nilai"],
+        #nilaiTable td[data-label="Kelompok"],
+        #nilaiTable td[data-label="Tampil"],
+        #nilaiTable td[data-label="Urutan"] {
+            grid-row: 2;
+            flex: initial !important;
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: 7px !important;
+            min-height: 58px;
+        }
+
+        #nilaiTable td[data-label="Kelompok"] {
+            padding: 6px !important;
+        }
+
+        #nilaiTable td[data-label="Nilai"] { grid-column: 2; }
+        #nilaiTable td[data-label="Kelompok"] { grid-column: 3; }
+        #nilaiTable td[data-label="Tampil"] { grid-column: 4; }
+        #nilaiTable td[data-label="Urutan"] { grid-column: 5; }
+
+        #nilaiTable tr:not(:has(td[data-label="Kelompok"])) td[data-label="Tampil"] {
+            grid-column: 3;
+        }
+
+        #nilaiTable tr:not(:has(td[data-label="Kelompok"])) td[data-label="Urutan"] {
+            grid-column: 4;
+        }
+
+        #nilaiTable td[data-label="Deskripsi Capaian"] {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            flex: initial !important;
+            padding: 8px !important;
+        }
+
+        #nilaiTable td[data-label="Nilai"] strong {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 auto;
+            min-height: 28px;
+            font-size: 14px !important;
+        }
+
+        #nilaiTable .form-select,
+        #nilaiTable .form-select-sm,
+        #nilaiTable input[type="text"] {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        #nilaiTable td[data-label="Kelompok"] .form-select,
+        #kegiatanTable td[data-label="Predikat"] .form-select {
+            height: 38px !important;
+            min-height: 38px !important;
+            padding: 6px 28px 6px 10px !important;
+            background-position: right 9px center !important;
+            background-size: 12px 10px !important;
+            font-size: 14px !important;
+            font-weight: 800;
+            line-height: 1.2 !important;
+            text-align: center;
+        }
+
+        #nilaiTable .form-check {
+            width: 100%;
+            min-height: 30px;
+            align-items: center;
+            justify-content: center !important;
+            padding-left: 0;
+        }
+
+        #nilaiTable .form-check-input {
+            float: none;
+            margin-left: 0 !important;
+        }
+
+        #nilaiTable .btn-group-vertical {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            width: 100%;
+            gap: 4px;
+        }
+
+        #nilaiTable .btn-arrow {
+            width: 100%;
+            min-width: 0;
+            min-height: 30px;
+            padding: 4px !important;
+        }
+
+        #nilaiTable tfoot tr {
+            display: flex !important;
+            grid-template-columns: none !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #nilaiTable tfoot td {
+            width: auto !important;
+            max-width: none !important;
+        }
+
+        #kegiatanTable tbody {
+            padding: 10px;
+        }
+
+        #kegiatanTable tr {
+            display: grid !important;
+            grid-template-columns: minmax(88px, .42fr) minmax(0, 1fr) 40px;
+            gap: 7px;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 10px;
+            overflow: hidden;
+        }
+
+        #kegiatanTable td {
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+        }
+
+        #kegiatanTable td:nth-child(1) {
+            display: none !important;
+        }
+
+        #kegiatanTable td:nth-child(2) {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+
+        #kegiatanTable td:nth-child(3) {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        #kegiatanTable td:nth-child(4) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+        #kegiatanTable td:nth-child(5) {
+            grid-column: 3;
+            grid-row: 2;
+            align-self: end;
+            justify-self: end;
+        }
+
+        #kegiatanTable td:nth-child(5) .btn {
+            width: 40px !important;
+            min-width: 40px;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        #kegiatanTable .form-control,
+        #kegiatanTable .form-select {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+
+        .rapor-edit-page {
+            --rapor-mobile-gap: clamp(3px, 1.35vw, 6px);
+            --rapor-mobile-pad: clamp(6px, 2vw, 9px);
+            --rapor-control-height: clamp(44px, 14vw, 58px);
+        }
+
+        #nilaiTable tbody {
+            gap: clamp(7px, 2.4vw, 10px);
+            padding: clamp(5px, 2vw, 10px);
+        }
+
+        #nilaiTable tbody tr {
+            grid-template-columns: clamp(24px, 7.5vw, 34px) repeat(4, minmax(0, 1fr));
+            gap: var(--rapor-mobile-gap);
+            padding: var(--rapor-mobile-pad);
+        }
+
+        #nilaiTable td[data-label="Nilai"],
+        #nilaiTable td[data-label="Kelompok"],
+        #nilaiTable td[data-label="Tampil"],
+        #nilaiTable td[data-label="Urutan"] {
+            min-height: var(--rapor-control-height);
+            padding: clamp(4px, 1.4vw, 7px) !important;
+        }
+
+        #nilaiTable td::before,
+        #kegiatanTable td::before {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: clip;
+            white-space: nowrap;
+            word-break: normal;
+            letter-spacing: 0;
+            font-size: clamp(6.5px, 1.95vw, 8px);
+            line-height: 1.05;
+        }
+
+        #nilaiTable td[data-label="Kelompok"]::before { content: "Kel."; }
+        #nilaiTable td[data-label="Urutan"]::before { content: "Urut"; }
+
+        #nilaiTable td[data-label="Nilai"] strong {
+            white-space: nowrap;
+            word-break: normal;
+            overflow-wrap: normal;
+            font-size: clamp(11px, 3.4vw, 14px) !important;
+        }
+
+        #nilaiTable td[data-label="Kelompok"] .form-select,
+        #kegiatanTable td[data-label="Predikat"] .form-select {
+            height: clamp(32px, 9vw, 38px) !important;
+            min-height: clamp(32px, 9vw, 38px) !important;
+            padding-top: clamp(4px, 1.2vw, 6px) !important;
+            padding-bottom: clamp(4px, 1.2vw, 6px) !important;
+            padding-left: clamp(7px, 2.4vw, 10px) !important;
+            padding-right: clamp(22px, 7vw, 28px) !important;
+            background-position: right clamp(6px, 2.5vw, 9px) center !important;
+            font-size: clamp(12px, 3.4vw, 14px) !important;
+        }
+
+        #nilaiTable .drag-handle {
+            font-size: clamp(15px, 5vw, 20px) !important;
+            padding: clamp(2px, 1.3vw, 6px);
+        }
+
+        #nilaiTable .btn-arrow {
+            min-height: clamp(27px, 8.5vw, 30px);
+        }
+
+        #kegiatanTable tr {
+            grid-template-columns: clamp(68px, 24vw, 88px) minmax(0, 1fr) clamp(34px, 11vw, 40px);
+            gap: clamp(5px, 1.8vw, 7px);
+            padding: var(--rapor-mobile-pad);
+        }
+
+        #kegiatanTable tbody {
+            padding: clamp(5px, 2vw, 10px);
+        }
+
+        @media (max-width: 360px) {
+            #nilaiTable tbody tr {
+                grid-template-columns: clamp(22px, 7vw, 28px) repeat(4, minmax(0, 1fr));
+                gap: 3px;
+                padding: 6px;
+            }
+
+            #nilaiTable td[data-label="Nilai"],
+            #nilaiTable td[data-label="Kelompok"],
+            #nilaiTable td[data-label="Tampil"],
+            #nilaiTable td[data-label="Urutan"] {
+                min-height: 42px;
+                padding: 4px !important;
+            }
+
+            #nilaiTable td[data-label="Tampil"]::before { content: "On"; }
+
+            #nilaiTable .btn-group-vertical {
+                gap: 2px;
+            }
+        }
+
+        /* Sticky submit footer */
+        .submit-card {
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid #e2e8f0;
+            margin-bottom: 0 !important;
+        }
+
+        /* Reduce container padding mobile */
+        .container-fluid.px-0 { padding: 0 4px; }
+        .card.shadow.mb-4 { margin-bottom: 10px !important; }
+        .card-body { padding: 10px; }
+        .card-header.py-3 { padding: 10px !important; }
+        .submit-card .card-body {
+            display: grid;
+            gap: 8px;
+        }
+    }

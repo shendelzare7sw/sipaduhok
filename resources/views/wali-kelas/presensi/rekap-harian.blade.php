@@ -9,16 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .date-card { transition: all 0.2s; border-left: 4px solid #4e73df; }
-    .date-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
-    .stat-pill { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 12px; font-weight: 700; }
-</style>
+    @vite(['resources/css/wali-kelas/presensi/rekap-harian.css', 'resources/js/wali-kelas/presensi/rekap-harian.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
 
     {{-- Header --}}
@@ -42,7 +37,7 @@
             <form method="GET" action="{{ route('wali.presensi.rekap-harian') }}" class="row g-2 align-items-end">
                 <div class="col-auto">
                     <label class="form-label fw-bold small mb-1">Semester</label>
-                    <select name="semester" class="form-select form-select-sm" style="width: 160px;" onchange="this.form.submit()">
+                    <select name="semester" class="form-select form-select-sm filter-select-md" data-auto-submit>
                         <option value="">Semua (Per Bulan)</option>
                         <option value="ganjil" {{ ($semester ?? '') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
                         <option value="genap" {{ ($semester ?? '') == 'genap' ? 'selected' : '' }}>Genap</option>
@@ -50,7 +45,7 @@
                 </div>
                 <div class="col-auto">
                     <label class="form-label fw-bold small mb-1">Bulan</label>
-                    <select name="bulan" class="form-select form-select-sm" style="width: 160px;" {{ ($semester ?? '') ? 'disabled' : '' }}>
+                    <select name="bulan" class="form-select form-select-sm filter-select-md" {{ ($semester ?? '') ? 'disabled' : '' }}>
                         @foreach(range(1,12) as $m)
                             <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
                                 {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
@@ -60,7 +55,7 @@
                 </div>
                 <div class="col-auto">
                     <label class="form-label fw-bold small mb-1">Tahun</label>
-                    <select name="tahun" class="form-select form-select-sm" style="width: 100px;" {{ ($semester ?? '') ? 'disabled' : '' }}>
+                    <select name="tahun" class="form-select form-select-sm filter-select-sm" {{ ($semester ?? '') ? 'disabled' : '' }}>
                         @foreach(range(now()->year - 2, now()->year + 1) as $y)
                             <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endforeach
@@ -124,8 +119,8 @@
                                         <i class="fas fa-times me-1"></i>{{ $date->alpha }}
                                     </span>
                                 </div>
-                                <div class="progress mt-2" style="height: 5px;">
-                                    <div class="progress-bar bg-success" style="width: {{ $persen }}%"></div>
+                                <div class="progress mt-2 progress-thinner">
+                                    <div class="progress-bar bg-success" data-progress-width="{{ $persen }}"></div>
                                 </div>
                                 <small class="text-muted">Kehadiran {{ $persen }}%</small>
                             </div>
