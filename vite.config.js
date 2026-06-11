@@ -67,6 +67,8 @@ export default defineConfig({
                 'resources/js/ketua/monitoring/siswa.js',
                 'resources/css/ketua/monitoring/wali-kelas.css',
                 'resources/js/ketua/monitoring/wali-kelas.js',
+                'resources/css/ketua/dispensasi/index.css',
+                'resources/js/ketua/dispensasi/index.js',
                 'resources/css/ketua/promotion/approval.css',
                 'resources/js/ketua/promotion/approval.js',
                 'resources/css/waka/monitoring/guru-pengajar.css',
