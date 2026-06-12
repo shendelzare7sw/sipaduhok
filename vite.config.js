@@ -99,6 +99,8 @@ export default defineConfig({
                 'resources/css/siswa/sia/presensi/index.css',
                 'resources/js/siswa/sia/presensi/index.js',
                 'resources/css/siswa/lms/dashboard.css',
+                'resources/css/siswa/lms/jadwal.css',
+                'resources/js/siswa/lms/jadwal.js',
                 // Wali Kelas scoped page assets
                 'resources/css/wali-kelas/arsip/index.css',
                 'resources/js/wali-kelas/arsip/index.js',
