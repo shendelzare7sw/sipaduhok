@@ -8,7 +8,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/materi/index.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-materi-page">
     <div class="card-custom mb-4">
         <div class="card-body p-3 p-md-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-md-items-center gap-3">
@@ -18,7 +23,7 @@
                 </div>
                 <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
                     <form action="" method="GET" class="d-flex gap-2 flex-grow-1">
-                        <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ request('tanggal') }}" onchange="this.form.submit()">
+                        <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ request('tanggal') }}" data-auto-submit>
                         @if(request('tanggal'))
                             <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary" title="Reset Filter"><i class="fas fa-times"></i></a>
                         @endif
@@ -43,7 +48,7 @@
             @foreach($groupedMateri as $date => $materis)
                 <div class="position-relative mb-4">
                     <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
-                        <div class="bg-primary text-white rounded-pill px-2 px-sm-3 py-1 small fw-bold shadow-sm" style="white-space: nowrap;">
+                        <div class="bg-primary text-white rounded-pill px-2 px-sm-3 py-1 small fw-bold shadow-sm date-pill">
                             {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}
                         </div>
                         <div class="flex-grow-1 d-none d-sm-block border-bottom"></div>
@@ -70,8 +75,8 @@
                                             <div class="min-w-0">
                                                 <h6 class="fw-bold mb-0 text-dark text-truncate fs-6" title="{{ $materi->judul_materi }}">{{ $materi->judul_materi }}</h6>
                                                 <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
-                                                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">{{ strtoupper($materi->tipe_file) }}</span>
-                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                    <span class="badge bg-light text-dark border file-badge">{{ strtoupper($materi->tipe_file) }}</span>
+                                                    <small class="text-muted time-meta">
                                                         <i class="far fa-clock me-1"></i> {{ $materi->created_at->format('H:i') }}
                                                     </small>
                                                 </div>
@@ -79,7 +84,7 @@
                                         </div>
                                     </div>
 
-                                    <p class="text-muted small mb-3 mb-md-4 flex-grow-1" style="line-height: 1.6; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                    <p class="text-muted small mb-3 mb-md-4 flex-grow-1 materi-description">
                                         {{ $materi->deskripsi ?? '' }}
                                     </p>
 
@@ -89,7 +94,7 @@
                                             <i class="fas fa-edit me-md-1"></i> <span class="d-none d-sm-inline">Edit</span>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger px-2 px-md-3 rounded-pill"
-                                            onclick="confirmDelete('{{ route('guru.lms.materi.destroy', [$kelas->id, $mapel->id, $materi->id]) }}')">
+                                            data-delete-url="{{ route('guru.lms.materi.destroy', [$kelas->id, $mapel->id, $materi->id]) }}">
                                             <i class="fas fa-trash me-md-1"></i> <span class="d-none d-sm-inline">Hapus</span>
                                         </button>
                                     </div>
@@ -108,68 +113,12 @@
     @else
         <div class="card-custom text-center py-5 border-0 shadow-sm">
             <div class="mb-3">
-                <i class="fas fa-folder-open text-muted" style="font-size: 64px; opacity: 0.3;"></i>
+                <i class="fas fa-folder-open text-muted empty-icon"></i>
             </div>
             <h5 class="text-muted">Belum ada materi</h5>
             <p class="text-muted small">Mulai dengan menambahkan materi baru untuk kelas ini.</p>
         </div>
     @endif
-
-    <style>
-        .hover-shadow:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-        }
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-
-        /* Mobile responsive adjustments */
-        @media (max-width: 767.98px) {
-            .card-body {
-                padding: 0.75rem !important;
-            }
-
-            .btn-sm {
-                padding: 0.35rem 0.5rem;
-                font-size: 0.8rem;
-            }
-
-            .badge {
-                font-size: 0.65rem !important;
-            }
-
-            .small {
-                font-size: 0.75rem !important;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .w-md-auto {
-                width: auto !important;
-            }
-
-            .w-sm-auto {
-                width: auto !important;
-            }
-
-            .flex-md-row {
-                flex-direction: row;
-            }
-
-            .align-md-items-center {
-                align-items: center;
-            }
-
-            .fs-md-4 {
-                font-size: 1.5rem !important;
-            }
-
-            .w-md-auto {
-                width: auto !important;
-            }
-        }
-    </style>
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -184,7 +133,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+                    <form id="deleteForm" method="POST" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">
@@ -200,16 +149,9 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function confirmDelete(url) {
-            document.getElementById('deleteForm').action = url;
-            // Reset state
-            document.getElementById('hapusTerkaitCheck').checked = false;
-
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        }
-    </script>
-    @endpush
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/materi/index.js'])
+@endpush
