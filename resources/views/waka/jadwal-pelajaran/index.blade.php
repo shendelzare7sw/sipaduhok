@@ -11,14 +11,14 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/jadwal-pelajaran.css') }}">
+@vite(['resources/css/waka/jadwal-pelajaran/index.css'])
 @endsection
 
 @section('content')
 {{-- Stats Row --}}
 <div class="stat-row">
     <div class="stat-widget">
-        <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+        <div class="stat-icon stat-icon-primary">
             <i class="fas fa-calendar"></i>
         </div>
         <div class="stat-details">
@@ -28,7 +28,7 @@
         </div>
     </div>
     <div class="stat-widget">
-        <div class="stat-icon" style="background: #fff7ed; color: #f97316;">
+        <div class="stat-icon stat-icon-warning">
             <i class="fas fa-exclamation-triangle"></i>
         </div>
         <div class="stat-details">
@@ -38,7 +38,7 @@
         </div>
     </div>
     <div class="stat-widget">
-        <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+        <div class="stat-icon stat-icon-success">
             <i class="fas fa-chalkboard-teacher"></i>
         </div>
         <div class="stat-details">
@@ -48,7 +48,7 @@
         </div>
     </div>
     <div class="stat-widget">
-        <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+        <div class="stat-icon stat-icon-purple">
             <i class="fas fa-school"></i>
         </div>
         <div class="stat-details">
@@ -64,7 +64,7 @@
         <div class="jp-card-header">
             <div>
                 <h5 class="jp-card-title">
-                    <i class="fas fa-calendar-week" style="color: #4361ee;"></i> Daftar Jadwal Pelajaran
+                    <i class="fas fa-calendar-week jp-title-icon"></i> Daftar Jadwal Pelajaran
                 </h5>
                 <div class="jp-card-subtitle">Kelola dan atur jadwal mengajar untuk setiap kelas</div>
             </div>
@@ -81,10 +81,10 @@
                         <i class="fas fa-tools me-1"></i> Aksi
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#duplicateModal">
-                            <i class="fas fa-copy me-2 text-info"></i> Duplikasi Jadwal</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#bulkReplaceModal">
-                            <i class="fas fa-random me-2 text-secondary"></i> Ganti Semua Guru</a></li>
+                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#duplicateModal">
+                            <i class="fas fa-copy me-2 text-info"></i> Duplikasi Jadwal</button></li>
+                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#bulkReplaceModal">
+                            <i class="fas fa-random me-2 text-secondary"></i> Ganti Semua Guru</button></li>
                         <li><a class="dropdown-item" href="{{ route('waka.jadwal-pelajaran.import') }}">
                             <i class="fas fa-file-import me-2 text-success"></i> Import Excel</a></li>
                     </ul>
@@ -95,13 +95,13 @@
                         <i class="fas fa-print me-1"></i> Cetak/Export
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="window.open('{{ route('waka.jadwal-pelajaran.export-pdf', request()->query()) }}', '_blank')">
+                        <li><a class="dropdown-item" href="{{ route('waka.jadwal-pelajaran.export-pdf', request()->query()) }}" target="_blank">
                             <i class="fas fa-file-pdf me-2 text-danger"></i> Export PDF (Semua)</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="window.location.href='{{ route('waka.jadwal-pelajaran.export-excel', request()->query()) }}'">
+                        <li><a class="dropdown-item" href="{{ route('waka.jadwal-pelajaran.export-excel', request()->query()) }}">
                             <i class="fas fa-file-excel me-2 text-success"></i> Export Excel (Semua)</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
-                            <i class="fas fa-id-card me-2 text-dark"></i> Cetak Per Kelas</a></li>
+                        <li><button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#cetakKelasModal">
+                            <i class="fas fa-id-card me-2 text-dark"></i> Cetak Per Kelas</button></li>
                     </ul>
                 </div>
             </div>
@@ -110,7 +110,7 @@
         {{-- Filter Section --}}
         <form action="{{ route('waka.jadwal-pelajaran.index') }}" method="GET" class="mb-0">
             <div class="filter-wrapper">
-                    <select name="tahun_ajaran_id" class="form-select" onchange="this.form.submit()" style="width: auto;">
+                    <select name="tahun_ajaran_id" class="form-select filter-select" data-auto-submit>
                         <option value="">Semua Tahun Ajaran</option>
                         @foreach($tahunAjarans as $ta)
                             <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
@@ -119,7 +119,7 @@
                         @endforeach
                     </select>
 
-                    <select name="jenjang" class="form-select" onchange="this.form.submit()" style="width: auto;">
+                    <select name="jenjang" class="form-select filter-select" data-auto-submit>
                         <option value="">Semua Jenjang</option>
                         <option value="KB" {{ request('jenjang') == 'KB' ? 'selected' : '' }}>KB</option>
                         <option value="TKA" {{ request('jenjang') == 'TKA' ? 'selected' : '' }}>TKA</option>
@@ -129,16 +129,16 @@
                         <option value="SMA" {{ request('jenjang') == 'SMA' ? 'selected' : '' }}>SMA</option>
                     </select>
 
-                    <select name="kelas_id" class="form-select" onchange="this.form.submit()" style="width: auto;">
+                    <select name="kelas_id" class="form-select filter-select" data-auto-submit>
                         <option value="">Semua Kelas</option>
                         @foreach($kelasList as $kls)
                             <option value="{{ $kls->id }}" {{ request('kelas_id') == $kls->id ? 'selected' : '' }}>
-                                {{ $kls->nama_kelas }}
+                                {{ $kls->nama_kelas }} - {{ $kls->cabang->nama_cabang }}
                             </option>
                         @endforeach
                     </select>
 
-                    <select name="guru_id" class="form-select" onchange="this.form.submit()" style="width: auto;">
+                    <select name="guru_id" class="form-select filter-select" data-auto-submit>
                         <option value="">Semua Guru</option>
                         @foreach($guruList as $guru)
                             <option value="{{ $guru->id }}" {{ request('guru_id') == $guru->id ? 'selected' : '' }}>
@@ -149,7 +149,7 @@
 
                 @if(request()->hasAny(['jenjang', 'kelas_id', 'guru_id']))
                     <a href="{{ route('waka.jadwal-pelajaran.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}"
-                        class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                        class="btn btn-outline-danger btn-sm px-3 jp-radius-sm">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -165,43 +165,41 @@
                         <div class="d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center gap-2 d-md-none mobile-select-bar">
                                 <input type="checkbox" id="mobile-select-all-jadwal" class="form-check-input"
-                                    style="width:18px;height:18px;cursor:pointer;" onclick="mobileToggleSelectAll()">
-                                <label for="mobile-select-all-jadwal" class="mb-0 small fw-semibold text-secondary" style="cursor:pointer;">
+                                    data-mobile-toggle-select-all>
+                                <label for="mobile-select-all-jadwal" class="mb-0 small fw-semibold text-secondary jp-cursor-pointer">
                                     Semua
                                 </label>
                             </div>
-                            <div id="selectedInfo" class="selected-badge" style="display: none;">
+                            <div id="selectedInfo" class="selected-badge d-none">
                                 <i class="fas fa-check-circle me-1"></i>
                                 <span id="selectedCount">0</span> <span class="d-none d-sm-inline">Jadwal</span> Terpilih
                             </div>
                         </div>
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-danger btn-sm text-white px-3" onclick="bulkDelete()" id="bulkDeleteBtn"
-                                style="display: none;">
+                            <button type="button" class="btn btn-danger btn-sm text-white px-3 d-none" id="bulkDeleteBtn" data-bulk-delete-trigger>
                                 <i class="fas fa-trash me-1"></i> Hapus
                             </button>
-                            <button type="button" class="btn btn-warning text-white btn-sm text-white px-3" onclick="bulkUpdateStatus()" id="bulkStatusBtn"
-                                style="display: none;">
+                            <button type="button" class="btn btn-warning text-white btn-sm text-white px-3 d-none" id="bulkStatusBtn" data-bulk-status-trigger>
                                 <i class="fas fa-sync me-1"></i> Status
                             </button>
                         </div>
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-clean">
+                        <table class="table table-clean">
                             <thead>
                                 <tr>
-                                    <th style="width: 40px;">
+                                    <th class="jp-col-check">
                                         <input type="checkbox" id="select-all-jadwal" class="form-check-input"
-                                            onclick="toggleSelectAllJadwal()">
+                                            data-toggle-select-all-jadwal>
                                     </th>
-                                    <th style="width: 80px;">Hari</th>
-                                    <th style="width: 120px;">Jam</th>
+                                    <th class="jp-col-day">Hari</th>
+                                    <th class="jp-col-time">Jam</th>
                                     <th>Kelas</th>
                                     <th>Mata Pelajaran</th>
                                     <th>Guru Pengajar</th>
-                                    <th style="width: 80px;">Status</th>
-                                    <th style="width: 150px; text-align: center;">Aksi</th>
+                                    <th class="jp-col-status">Status</th>
+                                    <th class="jp-col-actions">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -209,7 +207,7 @@
                                     <tr>
                                         <td class="text-center align-middle mobile-card-checkbox">
                                             <input type="checkbox" name="jadwal_ids[]" value="{{ $jadwal->id }}"
-                                                class="form-check-input jadwal-checkbox" onchange="updateBulkButtons()"
+                                                class="form-check-input jadwal-checkbox"
                                                 data-mapel="{{ $jadwal->mataPelajaran->nama_mapel }}"
                                                 data-kelas="{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}"
                                                 data-hari="{{ $jadwal->hari }}"
@@ -254,7 +252,7 @@
                                                 <span class="status-badge status-kosong">Kosong</span>
                                             @endif
                                         </td>
-                                        <td class="mobile-card-actions" style="text-align: center;">
+                                        <td class="mobile-card-actions text-center">
                                             <div class="btn-group" role="group">
                                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
                                                     data-bs-target="#gantiGuruModal{{ $jadwal->id }}" title="Ganti Guru">
@@ -293,43 +291,43 @@
         {{-- Modal Delete --}}
         <div class="modal fade" id="deleteModal{{ $jadwal->id }}" tabindex="-1"
             aria-labelledby="deleteModalLabel{{ $jadwal->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
-                <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                    <div class="modal-header border-0" style="background: #dc3545; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <div class="modal-dialog modal-dialog-centered jp-dialog-xs">
+                <div class="modal-content border-0 shadow jp-modal">
+                    <div class="modal-header border-0 jp-modal-header jp-modal-header-danger">
                         <h6 class="modal-title fw-semibold mb-0 text-white" id="deleteModalLabel{{ $jadwal->id }}">
                             <i class="fas fa-trash-alt me-2 text-white"></i>Hapus Jadwal Pelajaran
                         </h6>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body px-4 py-3">
-                        <div class="d-flex align-items-start gap-3 p-3 mb-3" style="background: #f8f9fa; border-radius: 10px; border-left: 3px solid #dc3545;">
-                            <div style="width: 38px; height: 38px; background: #fff0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <i class="fas fa-book text-danger" style="font-size: 15px;"></i>
+                        <div class="d-flex align-items-start gap-3 p-3 mb-3 jp-info-box">
+                            <div class="jp-icon-box jp-icon-box-danger">
+                                <i class="fas fa-book text-danger jp-icon-sm"></i>
                             </div>
-                            <div style="min-width: 0;">
+                            <div class="jp-min-w-0">
                                 <div class="fw-semibold mb-1">{{ $jadwal->mataPelajaran->nama_mapel }}</div>
-                                <div class="text-muted" style="font-size: 13px; line-height: 1.7;">
+                                <div class="text-muted jp-muted-copy">
                                     <div><i class="fas fa-school me-1"></i> {{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</div>
-                                    <div><i class="fas fa-calendar-day me-1"></i> {{ $jadwal->hari }}, {{ $jadwal->jam_mulai->format('H:i') }}â€“{{ $jadwal->jam_selesai->format('H:i') }}</div>
+                                    <div><i class="fas fa-calendar-day me-1"></i> {{ $jadwal->hari }}, {{ $jadwal->jam_mulai->format('H:i') }} - {{ $jadwal->jam_selesai->format('H:i') }}</div>
                                     @if($jadwal->guru)
                                         <div><i class="fas fa-user-tie me-1"></i> {{ $jadwal->guru->nama_lengkap }}</div>
                                     @endif
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2 px-1" style="font-size: 13px; color: #b02a37;">
+                        <div class="d-flex align-items-center gap-2 px-1 jp-danger-copy">
                             <i class="fas fa-exclamation-circle"></i>
                             <span>Jadwal ini akan dihapus permanen dan tidak dapat dipulihkan.</span>
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-3 px-4 gap-2">
-                        <button type="button" class="btn btn-light fw-semibold px-4" data-bs-dismiss="modal" style="border-radius: 8px;">
+                        <button type="button" class="btn btn-light fw-semibold px-4 jp-radius-sm" data-bs-dismiss="modal">
                             Batal
                         </button>
                         <form action="{{ route('waka.jadwal-pelajaran.destroy', $jadwal) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger fw-semibold px-4 text-white" style="border-radius: 8px;">
+                            <button type="submit" class="btn btn-danger fw-semibold px-4 text-white jp-radius-sm">
                                 <i class="fas fa-trash me-1"></i> Hapus
                             </button>
                         </form>
@@ -341,12 +339,12 @@
         {{-- Modal Ganti Guru --}}
         <div class="modal fade" id="gantiGuruModal{{ $jadwal->id }}" tabindex="-1"
             aria-labelledby="gantiGuruModalLabel{{ $jadwal->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width: 600px;">
-                <form action="{{ route('waka.jadwal-pelajaran.ganti-guru', $jadwal) }}" method="POST" style="width: 100%;">
+            <div class="modal-dialog modal-dialog-centered jp-dialog-md">
+                <form action="{{ route('waka.jadwal-pelajaran.ganti-guru', $jadwal) }}" method="POST" class="jp-form-full">
                     @csrf
                     <input type="hidden" name="guru_id_baru" id="guruIdBaru{{ $jadwal->id }}" value="">
-                    <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                        <div class="modal-header border-0" style="background: #0dcaf0; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <div class="modal-content border-0 shadow jp-modal">
+                        <div class="modal-header border-0 jp-modal-header jp-modal-header-info">
                             <h6 class="modal-title fw-semibold mb-0 text-white" id="gantiGuruModalLabel{{ $jadwal->id }}">
                                 <i class="fas fa-exchange-alt me-2 text-white"></i>Ganti Guru &middot; {{ $jadwal->mataPelajaran->nama_mapel }}
                             </h6>
@@ -355,7 +353,7 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Informasi Jadwal</label>
-                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; font-size: 13px;">
+                                <div class="jp-schedule-info">
                                     <div><i
                                             class="fas fa-calendar-day me-2 text-primary"></i><strong>{{ $jadwal->hari }}</strong>,
                                         {{ $jadwal->jam_mulai->format('H:i') }} -
@@ -377,51 +375,40 @@
                                 {{-- Search Input --}}
                                 <div class="mb-2">
                                     <input type="text" class="form-control" id="searchGuru{{ $jadwal->id }}"
-                                        placeholder="Cari nama guru..." oninput="filterGuruOptions({{ $jadwal->id }})">
+                                        placeholder="Cari nama guru..." data-guru-search data-jadwal-id="{{ $jadwal->id }}">
                                 </div>
 
                                 {{-- Guru Display Selected --}}
-                                <div id="selectedGuruDisplay{{ $jadwal->id }}" class="mb-2"
-                                    style="display: none;
-                                            background: #d1fae5; border: 1px solid #10b981; padding: 10px 12px; border-radius: 8px;">
-                                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                <div id="selectedGuruDisplay{{ $jadwal->id }}" class="mb-2 d-none jp-selected-guru">
+                                    <div class="jp-flex-between">
+                                        <div class="jp-flex-center-gap">
                                             <i class="fas fa-user-check text-success"></i>
-                                            <span id="selectedGuruName{{ $jadwal->id }}" style="font-weight: 500;"></span>
+                                            <span id="selectedGuruName{{ $jadwal->id }}" class="jp-selected-guru-name"></span>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-outline-danger"
-                                            onclick="clearGuruSelection({{ $jadwal->id }})">
+                                            data-clear-guru data-jadwal-id="{{ $jadwal->id }}">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                 </div>
 
                                 {{-- Guru List --}}
-                                <div id="guruList{{ $jadwal->id }}"
-                                    style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
-                                    <div class="guru-opt-item"
-                                        style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6;"
-                                        onclick="selectGuruForJadwal({{ $jadwal->id }}, '', 'Kosongkan (Menunggu Guru)')"
-                                        onmouseenter="this.style.background='#fef3c7'"
-                                        onmouseleave="this.style.background='white'">
+                                <div id="guruList{{ $jadwal->id }}" class="jp-guru-list">
+                                    <div class="guru-opt-item guru-opt-item-empty"
+                                        data-select-guru data-jadwal-id="{{ $jadwal->id }}" data-guru-id="" data-guru-name="Kosongkan (Menunggu Guru)">
                                         <i class="fas fa-user-slash text-warning me-2"></i>
-                                        <span style="color: #92400e;">-- Kosongkan (Menunggu Guru) --</span>
+                                        <span class="guru-opt-empty-text">-- Kosongkan (Menunggu Guru) --</span>
                                     </div>
                                     @foreach($guruList as $guru)
-                                        <div class="guru-opt-item" data-name="{{ strtolower($guru->nama_lengkap) }}"
+                                        <div class="guru-opt-item guru-opt-item-row {{ $jadwal->guru_id == $guru->id ? 'guru-opt-item-disabled' : '' }}" data-name="{{ strtolower($guru->nama_lengkap) }}"
                                             data-id="{{ $guru->id }}" data-jadwal="{{ $jadwal->id }}"
-                                            style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 10px;
-                                                        {{ $jadwal->guru_id == $guru->id ? 'background: #e5e7eb; opacity: 0.6; pointer-events: none;' : '' }}"
-                                            onclick="selectGuruForJadwal({{ $jadwal->id }}, {{ $guru->id }}, '{{ addslashes($guru->nama_lengkap) }}')"
-                                            onmouseenter="this.style.background='#ecfdf5'"
-                                            onmouseleave="this.style.background='{{ $jadwal->guru_id == $guru->id ? '#e5e7eb' : 'white' }}'">
-                                            <div
-                                                style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">
+                                            data-select-guru data-jadwal-id="{{ $jadwal->id }}" data-guru-id="{{ $guru->id }}" data-guru-name="{{ $guru->nama_lengkap }}">
+                                            <div class="guru-option-avatar">
                                                 {{ substr($guru->nama_lengkap, 0, 2) }}
                                             </div>
                                             <div>
-                                                <div style="font-weight: 500; color: #111827;">{{ $guru->nama_lengkap }}</div>
-                                                <div style="font-size: 11px; color: #6b7280;">
+                                                <div class="guru-option-name">{{ $guru->nama_lengkap }}</div>
+                                                <div class="guru-option-cabang">
                                                     {{ $guru->user->cabang->nama_cabang ?? '-' }}</div>
                                             </div>
                                             @if($jadwal->guru_id == $guru->id)
@@ -439,10 +426,10 @@
                             </div>
                         </div>
                         <div class="modal-footer border-0 pt-0 pb-3 px-4 gap-2">
-                            <button type="button" class="btn btn-light fw-semibold px-4" data-bs-dismiss="modal" style="border-radius: 8px;">
+                            <button type="button" class="btn btn-light fw-semibold px-4 jp-radius-sm" data-bs-dismiss="modal">
                                 Batal
                             </button>
-                            <button type="submit" class="btn btn-info fw-semibold px-4 text-white" style="border-radius: 8px;">
+                            <button type="submit" class="btn btn-info fw-semibold px-4 text-white jp-radius-sm">
                                 <i class="fas fa-exchange-alt me-1"></i> Ganti Guru
                             </button>
                         </div>
@@ -460,8 +447,8 @@
                 @csrf
                 <input type="hidden" name="tahun_ajaran_id"
                     value="{{ request('tahun_ajaran_id', $currentTahunAjaran?->id) }}">
-                <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                    <div class="modal-header border-0" style="background: #6f42c1; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <div class="modal-content border-0 shadow jp-modal">
+                    <div class="modal-header border-0 jp-modal-header jp-modal-header-purple">
                         <h6 class="modal-title fw-semibold mb-0 text-white">
                             <i class="fas fa-random me-2 text-white"></i>Ganti Semua Jadwal Guru
                         </h6>
@@ -498,8 +485,8 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-3 px-3 gap-2">
-                        <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
-                        <button type="submit" class="btn btn-primary fw-semibold" style="border-radius: 8px;">
+                        <button type="button" class="btn btn-light fw-semibold jp-radius-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary fw-semibold jp-radius-sm">
                             <i class="fas fa-random me-1"></i> Ganti Semua Jadwal
                         </button>
                     </div>
@@ -513,8 +500,8 @@
         <div class="modal-dialog">
             <form action="{{ route('waka.jadwal-pelajaran.duplicate') }}" method="POST">
                 @csrf
-                <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                    <div class="modal-header border-0" style="background: #198754; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <div class="modal-content border-0 shadow jp-modal">
+                    <div class="modal-header border-0 jp-modal-header jp-modal-header-success">
                         <h6 class="modal-title fw-semibold mb-0 text-white">
                             <i class="fas fa-copy me-2 text-white"></i>Duplikasi Jadwal
                         </h6>
@@ -554,8 +541,8 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0 pt-0 pb-3 px-3 gap-2">
-                        <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
-                        <button type="submit" class="btn btn-success fw-semibold text-white" style="border-radius: 8px;">
+                        <button type="button" class="btn btn-light fw-semibold jp-radius-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success fw-semibold text-white jp-radius-sm">
                             <i class="fas fa-copy me-1"></i> Duplikasi Jadwal
                         </button>
                     </div>
@@ -566,33 +553,33 @@
 
     {{-- Modal Bulk Delete --}}
     <div class="modal fade" id="bulkDeleteModal" tabindex="-1" aria-labelledby="bulkDeleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
-            <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                <div class="modal-header border-0" style="background: #dc3545; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <div class="modal-dialog modal-dialog-centered jp-dialog-sm">
+            <div class="modal-content border-0 shadow jp-modal">
+                <div class="modal-header border-0 jp-modal-header jp-modal-header-danger">
                     <h6 class="modal-title fw-semibold mb-0 text-white" id="bulkDeleteModalLabel">
                         <i class="fas fa-trash-alt me-2 text-white"></i>
-                        Hapus Massal &middot; <span class="badge" style="background: rgba(255,255,255,0.25); font-size: 12px;" id="bulkDeleteCount">0</span> jadwal dipilih
+                        Hapus Massal &middot; <span class="badge jp-header-badge" id="bulkDeleteCount">0</span> jadwal dipilih
                     </h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    <p class="text-muted mb-3" style="font-size: 14px;">Jadwal berikut akan dihapus secara permanen:</p>
-                    <div id="bulkDeleteList" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                    <p class="text-muted mb-3 jp-small-copy">Jadwal berikut akan dihapus secara permanen:</p>
+                    <div id="bulkDeleteList" class="jp-scroll-column">
                         {{-- Diisi oleh JavaScript --}}
                     </div>
-                    <div class="d-flex align-items-center gap-2 mt-3 px-1" style="font-size: 13px; color: #b02a37;">
+                    <div class="d-flex align-items-center gap-2 mt-3 px-1 jp-danger-copy">
                         <i class="fas fa-exclamation-circle"></i>
                         <span>Tindakan ini tidak dapat dibatalkan!</span>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 pb-3 px-4 gap-2">
-                    <button type="button" class="btn btn-light fw-semibold px-4" data-bs-dismiss="modal" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-light fw-semibold px-4 jp-radius-sm" data-bs-dismiss="modal">
                         Batal
                     </button>
                     <form id="bulk-delete-form" action="{{ route('waka.jadwal-pelajaran.bulk-delete') }}" method="POST" class="d-inline">
                         @csrf
                         <input type="hidden" name="jadwal_ids" id="bulk-delete-ids">
-                        <button type="submit" class="btn btn-danger fw-semibold px-4 text-white" style="border-radius: 8px;">
+                        <button type="submit" class="btn btn-danger fw-semibold px-4 text-white jp-radius-sm">
                             <i class="fas fa-trash me-1"></i> Hapus Semua
                         </button>
                     </form>
@@ -603,9 +590,9 @@
 
     {{-- Modal Bulk Update Status --}}
     <div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-labelledby="bulkStatusModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
-            <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                <div class="modal-header border-0" style="background: #e0a800; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <div class="modal-dialog modal-dialog-centered jp-dialog-xs">
+            <div class="modal-content border-0 shadow jp-modal">
+                <div class="modal-header border-0 jp-modal-header jp-modal-header-warning">
                     <h6 class="modal-title fw-semibold mb-0 text-white" id="bulkStatusModalLabel">
                         <i class="fas fa-toggle-on me-2 text-white"></i>
                         Ubah Status Massal &middot; <span id="bulkStatusCount">0</span> jadwal
@@ -613,64 +600,57 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    <p class="text-muted mb-3" style="font-size: 14px;">Pilih status baru untuk jadwal yang dipilih:</p>
+                    <p class="text-muted mb-3 jp-small-copy">Pilih status baru untuk jadwal yang dipilih:</p>
                     <div class="d-flex gap-3 mb-3">
-                        <label class="d-flex align-items-center gap-2 p-3 rounded cursor-pointer flex-fill" style="border: 2px solid #198754; background: #f0faf5; cursor: pointer;">
+                        <label class="d-flex align-items-center gap-2 p-3 rounded flex-fill jp-status-option-active">
                             <input class="form-check-input mt-0" type="radio" name="status_choice" id="statusAktif" value="aktif" checked>
                             <span class="fw-semibold text-success">AKTIF</span>
                             <i class="fas fa-circle-check text-success ms-auto"></i>
                         </label>
-                        <label class="d-flex align-items-center gap-2 p-3 rounded flex-fill" style="border: 2px solid #dee2e6; background: #f8f9fa; cursor: pointer;">
+                        <label class="d-flex align-items-center gap-2 p-3 rounded flex-fill jp-status-option-empty">
                             <input class="form-check-input mt-0" type="radio" name="status_choice" id="statusKosong" value="kosong">
                             <span class="fw-semibold text-secondary">KOSONG</span>
                             <i class="fas fa-circle text-secondary ms-auto"></i>
                         </label>
                     </div>
-                    <div class="d-flex align-items-center gap-2 p-3" style="background: #e8f4fd; border-radius: 8px; border-left: 3px solid #0d6efd; font-size: 13px;">
+                    <div class="d-flex align-items-center gap-2 p-3 jp-note-box">
                         <i class="fas fa-info-circle text-primary"></i>
                         <span class="text-muted">Status akan diubah untuk semua jadwal yang telah Anda pilih.</span>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 pb-3 px-4 gap-2">
-                    <button type="button" class="btn btn-light fw-semibold px-4" data-bs-dismiss="modal" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-light fw-semibold px-4 jp-radius-sm" data-bs-dismiss="modal">
                         Batal
                     </button>
-                    <button type="button" class="btn btn-warning fw-semibold px-4 text-white" onclick="submitBulkStatus()" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-warning fw-semibold px-4 text-white jp-radius-sm" data-submit-bulk-status>
                         <i class="fas fa-toggle-on me-1"></i> Ubah Status
                     </button>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+    <div id="jp-config"
+        data-bulk-update-status-url="{{ route('waka.jadwal-pelajaran.bulk-update-status') }}"
+        data-bulk-delete-url="{{ route('waka.jadwal-pelajaran.bulk-delete') }}"
+        data-csrf-token="{{ csrf_token() }}"
+        data-current-tahun-ajaran-id="{{ request('tahun_ajaran_id', $currentTahunAjaran?->id) }}"
+        data-export-excel-base-url="{{ url('waka/jadwal-pelajaran/kelas') }}"
+        data-print-base-url="{{ url('waka/jadwal-pelajaran/kelas') }}"></div>
 
-@section('scripts')
-    <script>
-        window.JP_CONFIG = {
-            bulkUpdateStatusUrl: "{{ route('waka.jadwal-pelajaran.bulk-update-status') }}",
-            bulkDeleteUrl: "{{ route('waka.jadwal-pelajaran.bulk-delete') }}",
-            csrfToken: "{{ csrf_token() }}",
-            currentTahunAjaranId: "{{ request('tahun_ajaran_id', $currentTahunAjaran?->id) }}",
-            exportExcelBaseUrl: "{{ url('waka/jadwal-pelajaran/kelas') }}",
-            printBaseUrl: "{{ url('waka/jadwal-pelajaran/kelas') }}"
-        };
-    </script>
-    <script src="{{ asset('js/admin/jadwal-pelajaran.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- Modal Cetak Per Kelas --}}
     <div class="modal fade" id="cetakKelasModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="border-radius: 12px;">
-                <div class="modal-header border-0" style="background: #343a40; padding: 0.875rem 1.25rem; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+            <div class="modal-content border-0 shadow jp-modal">
+                <div class="modal-header border-0 jp-modal-header jp-modal-header-dark">
                     <h6 class="modal-title fw-semibold mb-0 text-white">
                         <i class="fas fa-print me-2 text-white"></i>Cetak Jadwal Pelajaran
                     </h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    <div class="d-flex align-items-center gap-2 p-3 mb-3" style="background: #e8f4fd; border-radius: 8px; border-left: 3px solid #0d6efd; font-size: 13px;">
+                    <div class="d-flex align-items-center gap-2 p-3 mb-3 jp-note-box">
                         <i class="fas fa-info-circle text-primary"></i>
-                        <span class="text-muted">Pilih Cabang dan Kelas untuk mencetak jadwal spesifik.</span>
+                        <span class="text-muted">Pilih kelas pada cabang Anda untuk mencetak jadwal spesifik.</span>
                     </div>
 
                     <div class="mb-3">
@@ -686,11 +666,11 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 pb-3 px-4 gap-2 flex-wrap">
-                    <button type="button" class="btn btn-light fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
-                    <button type="button" class="btn btn-danger fw-semibold text-white" onclick="submitCetakKelas('pdf')" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-light fw-semibold jp-radius-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger fw-semibold text-white jp-radius-sm" data-submit-cetak-kelas="pdf">
                         <i class="fas fa-file-pdf me-1"></i> Cetak PDF
                     </button>
-                    <button type="button" class="btn btn-success fw-semibold text-white" onclick="submitCetakKelas('excel')" style="border-radius: 8px;">
+                    <button type="button" class="btn btn-success fw-semibold text-white jp-radius-sm" data-submit-cetak-kelas="excel">
                         <i class="fas fa-file-excel me-1"></i> Cetak Excel
                     </button>
                 </div>
@@ -700,4 +680,7 @@
 
 @endsection
 
+@section('scripts')
+    @vite(['resources/js/waka/jadwal-pelajaran/index.js'])
+@endsection
 
