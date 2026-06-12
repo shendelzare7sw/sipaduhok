@@ -7,28 +7,82 @@
     @include('waka.partials.sneat-sidebar-menu')
 @endsection
 
-@section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+@section('styles')
+    @vite(['resources/css/waka/akademik/promotion/kkm.css'])
+@endsection
 
-    <div class="card">
-        <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center py-3">
-            <div>
-                <h5 class="mb-0">Daftar Mata Pelajaran & KKM</h5>
-                @if($tahun)
-                    <small class="text-muted">Tahun Ajaran: {{ $tahun->nama ?? $tahun->tahun_ajaran }}</small>
-                @endif
+@section('content')
+@php
+    $routePrefix = 'waka.promotion';
+    $tahunLabel = $tahun->nama_tahun_ajaran ?? $tahun->nama ?? $tahun->tahun_ajaran ?? '-';
+    $totalMapel = $mapelList->count();
+    $configuredCount = collect($existingKKM ?? [])->filter(function ($value) {
+        return $value !== null;
+    })->count();
+    $averageKkm = collect($existingKKM ?? [])->filter(function ($value) {
+        return $value !== null;
+    })->avg();
+@endphp
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="promotion-page">
+        <div class="page-panel mb-4">
+            <div class="panel-main">
+                <span class="panel-kicker">Akademik</span>
+                <h4 class="panel-title">Pengaturan KKM</h4>
+                <p class="panel-subtitle mb-0">Atur nilai minimum kelulusan setiap mata pelajaran untuk tahun ajaran aktif.</p>
             </div>
-            <form action="{{ route('waka.promotion.kkm.index') }}" method="GET">
-                <select name="jenjang" class="form-select form-select-sm" style="min-width: 130px;" onchange="this.form.submit()">
+            <form action="{{ route($routePrefix . '.kkm.index') }}" method="GET" class="panel-action">
+                <label class="form-label mb-1">Jenjang</label>
+                <select name="jenjang" class="form-select" data-auto-submit>
                     <option value="PAUD" {{ $jenjang == 'PAUD' ? 'selected' : '' }}>PAUD</option>
-                    <option value="SD"   {{ $jenjang == 'SD'   ? 'selected' : '' }}>SD</option>
-                    <option value="SMP"  {{ $jenjang == 'SMP'  ? 'selected' : '' }}>SMP</option>
-                    <option value="SMA"  {{ $jenjang == 'SMA'  ? 'selected' : '' }}>SMA</option>
+                    <option value="SD" {{ $jenjang == 'SD' ? 'selected' : '' }}>SD</option>
+                    <option value="SMP" {{ $jenjang == 'SMP' ? 'selected' : '' }}>SMP</option>
+                    <option value="SMA" {{ $jenjang == 'SMA' ? 'selected' : '' }}>SMA</option>
                 </select>
             </form>
         </div>
 
-        <div class="card-body px-3 px-md-4">
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="summary-card">
+                    <div class="summary-icon primary"><i class="fas fa-calendar-alt"></i></div>
+                    <span>Tahun Ajaran</span>
+                    <strong>{{ $tahunLabel }}</strong>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="summary-card">
+                    <div class="summary-icon info"><i class="fas fa-layer-group"></i></div>
+                    <span>Jenjang</span>
+                    <strong>{{ $jenjang }}</strong>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="summary-card">
+                    <div class="summary-icon success"><i class="fas fa-book-open"></i></div>
+                    <span>Mata Pelajaran</span>
+                    <strong>{{ $totalMapel }}</strong>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="summary-card">
+                    <div class="summary-icon warning"><i class="fas fa-bullseye"></i></div>
+                    <span>Rata-rata KKM</span>
+                    <strong>{{ is_null($averageKkm) ? 70 : number_format($averageKkm, 0) }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="content-card-header">
+                <div>
+                    <h5 class="mb-1">Daftar Mata Pelajaran</h5>
+                    <p class="text-muted mb-0">Sudah diatur: {{ $configuredCount }} dari {{ $totalMapel }} mata pelajaran.</p>
+                </div>
+            </div>
+
+            <div class="content-card-body">
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
                     <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
@@ -36,45 +90,48 @@
                 </div>
             @endif
 
-            <form action="{{ route('waka.promotion.kkm.store') }}" method="POST">
+            <form action="{{ route($routePrefix . '.kkm.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
                 <input type="hidden" name="jenjang" value="{{ $jenjang }}">
 
                 @if($mapelList->isEmpty())
-                    <div class="text-center py-5">
-                        <i class="bx bx-book-open fs-1 text-muted"></i>
-                        <p class="mt-2 text-muted">Belum ada mata pelajaran untuk jenjang <strong>{{ $jenjang }}</strong>.</p>
+                    <div class="empty-state">
+                        <i class="bx bx-book-open"></i>
+                        <h6>Belum ada mata pelajaran</h6>
+                        <p>Jenjang <strong>{{ $jenjang }}</strong> belum memiliki mata pelajaran untuk diatur KKM-nya.</p>
                     </div>
                 @else
-                    {{-- Desktop Table --}}
-                    <div class="table-responsive d-none d-md-block">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
+                    <div class="table-responsive">
+                        <table class="table table-clean align-middle mb-0">
+                            <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>No</th>
                                     <th>Mata Pelajaran</th>
                                     <th>Jenjang</th>
                                     <th class="text-center">KKM Saat Ini</th>
-                                    <th>Set KKM Baru</th>
+                                    <th class="text-md-end">Set KKM Baru</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($mapelList as $i => $mapel)
                                 <tr>
-                                    <td class="text-muted">{{ $i + 1 }}</td>
-                                    <td class="fw-medium">{{ $mapel->nama_mapel }}</td>
-                                    <td><span class="badge bg-label-secondary">{{ $mapel->jenjang }}</span></td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-primary fs-6 px-3">
+                                    <td data-label="No" class="text-muted">{{ $i + 1 }}</td>
+                                    <td data-label="Mata Pelajaran">
+                                        <div class="subject-name">{{ $mapel->nama_mapel }}</div>
+                                    </td>
+                                    <td data-label="Jenjang">
+                                        <span class="soft-badge neutral">{{ $mapel->jenjang }}</span>
+                                    </td>
+                                    <td data-label="KKM Saat Ini" class="text-center">
+                                        <span class="kkm-badge">
                                             {{ $existingKKM[$mapel->id] ?? 70 }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Set KKM Baru" class="text-md-end">
                                         <input type="number"
                                                name="kkm[{{ $mapel->id }}]"
-                                               class="form-control form-control-sm"
-                                               style="width: 90px;"
+                                               class="form-control form-control-sm kkm-input @error('kkm.'.$mapel->id) is-invalid @enderror"
                                                value="{{ $existingKKM[$mapel->id] ?? 70 }}"
                                                min="0" max="100" required>
                                     </td>
@@ -84,46 +141,20 @@
                         </table>
                     </div>
 
-                    {{-- Mobile Cards --}}
-                    <div class="d-md-none">
-                        @foreach($mapelList as $i => $mapel)
-                        <div class="d-flex align-items-center justify-content-between border-bottom py-3">
-                            <div class="flex-grow-1 me-3">
-                                <div class="fw-medium">{{ $mapel->nama_mapel }}</div>
-                                <div class="d-flex align-items-center gap-2 mt-1">
-                                    <span class="badge bg-label-secondary small">{{ $mapel->jenjang }}</span>
-                                    <span class="text-muted small">KKM saat ini:
-                                        <strong>{{ $existingKKM[$mapel->id] ?? 70 }}</strong>
-                                    </span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="form-label small text-muted mb-1">KKM</label>
-                                <input type="number"
-                                       name="kkm[{{ $mapel->id }}]"
-                                       class="form-control form-control-sm text-center"
-                                       style="width: 72px;"
-                                       value="{{ $existingKKM[$mapel->id] ?? 70 }}"
-                                       min="0" max="100" required>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary w-100 w-md-auto">
+                    <div class="action-footer">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bx bx-save me-1"></i> Simpan Pengaturan KKM
                         </button>
                     </div>
                 @endif
             </form>
+            </div>
         </div>
     </div>
 </div>
 
-<style>
-@media (min-width: 768px) {
-    .w-md-auto { width: auto !important; }
-}
-</style>
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/waka/akademik/promotion/kkm.js'])
 @endsection

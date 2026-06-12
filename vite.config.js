@@ -199,6 +199,8 @@ export default defineConfig({
                 'resources/css/admin/akademik/promotion/settings.css',
                 'resources/css/admin/akademik/promotion/kkm.css',
                 'resources/js/admin/akademik/promotion/kkm.js',
+                'resources/css/waka/akademik/promotion/kkm.css',
+                'resources/js/waka/akademik/promotion/kkm.js',
                 'resources/css/admin/akademik/promotion/print.css',
                 'resources/js/admin/akademik/promotion/print.js',
                 'resources/css/admin/akademik/promotion/rekap.css',
