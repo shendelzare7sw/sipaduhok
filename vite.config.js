@@ -333,6 +333,8 @@ export default defineConfig({
                 'resources/css/guru/lms/dashboard.css',
                 'resources/css/guru/lms/materi/index.css',
                 'resources/js/guru/lms/materi/index.js',
+                'resources/js/guru/lms/materi/create.js',
+                'resources/js/guru/lms/materi/edit.js',
                 'resources/css/guru/lms/tugas/index.css',
                 'resources/js/guru/lms/tugas/index.js',
                 'resources/css/guru/lms/ujian/index.css',

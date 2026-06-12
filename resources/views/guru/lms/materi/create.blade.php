@@ -8,7 +8,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@php
+    $selectedTipeFile = old('tipe_file');
+@endphp
+
 @section('content')
+<div class="guru-lms-materi-create-page">
     <div class="mb-3">
         <a href="{{ route('guru.lms.materi.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
@@ -52,13 +57,13 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Tipe File <span class="text-danger">*</span></label>
-                        <select name="tipe_file" id="tipeFile" class="form-control @error('tipe_file') is-invalid @enderror" required onchange="toggleFileInput()">
+                        <select name="tipe_file" id="tipeFile" class="form-control @error('tipe_file') is-invalid @enderror" required data-file-type-toggle>
                             <option value="">-- Pilih Tipe --</option>
-                            <option value="pdf" {{ old('tipe_file') == 'pdf' ? 'selected' : '' }}>PDF</option>
-                            <option value="video" {{ old('tipe_file') == 'video' ? 'selected' : '' }}>Video</option>
-                            <option value="ppt" {{ old('tipe_file') == 'ppt' ? 'selected' : '' }}>PowerPoint</option>
-                            <option value="doc" {{ old('tipe_file') == 'doc' ? 'selected' : '' }}>Document</option>
-                            <option value="link" {{ old('tipe_file') == 'link' ? 'selected' : '' }}>Link URL</option>
+                            <option value="pdf" {{ $selectedTipeFile == 'pdf' ? 'selected' : '' }}>PDF</option>
+                            <option value="video" {{ $selectedTipeFile == 'video' ? 'selected' : '' }}>Video</option>
+                            <option value="ppt" {{ $selectedTipeFile == 'ppt' ? 'selected' : '' }}>PowerPoint</option>
+                            <option value="doc" {{ $selectedTipeFile == 'doc' ? 'selected' : '' }}>Document</option>
+                            <option value="link" {{ $selectedTipeFile == 'link' ? 'selected' : '' }}>Link URL</option>
                         </select>
                         @error('tipe_file')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -72,18 +77,18 @@
                     </div>
                 </div>
 
-                <div id="fileInputContainer" class="mb-3">
-                    <label class="form-label">File Materi <span class="text-danger" id="fileRequired">*</span></label>
-                    <input type="file" name="file_materi" id="fileMateri" class="form-control @error('file_materi') is-invalid @enderror">
+                <div id="fileInputContainer" class="mb-3" data-file-input-container @if(!$selectedTipeFile || $selectedTipeFile === 'link') hidden @endif>
+                    <label class="form-label">File Materi <span class="text-danger" id="fileRequired">{{ $selectedTipeFile && $selectedTipeFile !== 'link' ? '*' : '' }}</span></label>
+                    <input type="file" name="file_materi" id="fileMateri" class="form-control @error('file_materi') is-invalid @enderror" data-file-input>
                     <small class="text-muted">Maximum 50MB</small>
                     @error('file_materi')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div id="linkInputContainer" class="mb-3" style="display: none;">
+                <div id="linkInputContainer" class="mb-3" data-link-input-container @if($selectedTipeFile !== 'link') hidden @endif>
                     <label class="form-label">URL Link <span class="text-danger">*</span></label>
-                    <input type="url" name="url_materi" id="urlMateri" class="form-control" placeholder="https://example.com">
+                    <input type="url" name="url_materi" id="urlMateri" class="form-control" placeholder="https://example.com" data-url-input>
                     <small class="text-muted">Contoh: https://youtu.be/... atau link dokumentasi lainnya</small>
                     @error('url_materi')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -103,47 +108,9 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function toggleFileInput() {
-            const tipeFile = document.getElementById('tipeFile').value;
-            const fileInputContainer = document.getElementById('fileInputContainer');
-            const linkInputContainer = document.getElementById('linkInputContainer');
-            const fileMateri = document.getElementById('fileMateri');
-            const urlMateri = document.getElementById('urlMateri');
-            const fileRequired = document.getElementById('fileRequired');
-
-            if (tipeFile === 'link') {
-                // Sembunyikan file input, tampilkan link input
-                fileInputContainer.style.display = 'none';
-                linkInputContainer.style.display = 'block';
-
-                // Set required
-                fileMateri.removeAttribute('required');
-                urlMateri.setAttribute('required', 'required');
-                fileRequired.textContent = '';
-            } else if (tipeFile) {
-                // Tampilkan file input, sembunyikan link input
-                fileInputContainer.style.display = 'block';
-                linkInputContainer.style.display = 'none';
-
-                // Set required
-                fileMateri.setAttribute('required', 'required');
-                urlMateri.removeAttribute('required');
-                fileRequired.textContent = '*';
-            } else {
-                // Tidak ada tipe yang dipilih
-                fileInputContainer.style.display = 'none';
-                linkInputContainer.style.display = 'none';
-                fileMateri.removeAttribute('required');
-                urlMateri.removeAttribute('required');
-            }
-        }
-
-        // Trigger toggle on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            toggleFileInput();
-        });
-    </script>
-    @endpush
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/materi/create.js'])
+@endpush
