@@ -389,6 +389,8 @@ export default defineConfig({
                 'resources/js/guru/lms/ujian/pengawasan.js',
                 'resources/css/guru/lms/ujian/koreksi.css',
                 'resources/js/guru/lms/ujian/koreksi.js',
+                'resources/css/guru/lms/ujian/manage-soal.css',
+                'resources/js/guru/lms/ujian/manage-soal.js',
                 'resources/css/guru/lms/ujian/soal.css',
                 'resources/js/guru/lms/ujian/soal.js',
                 'resources/css/guru/lms/ujian/soal-form.css',

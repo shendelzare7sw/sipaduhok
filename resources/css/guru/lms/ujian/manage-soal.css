@@ -1,0 +1,226 @@
+.guru-lms-ujian-manage-soal-page {
+    background: #ffffff;
+}
+
+.guru-lms-ujian-manage-soal-page .form-label {
+    color: #374151;
+    font-weight: 500;
+}
+
+.guru-lms-ujian-manage-soal-page .form-control:focus,
+.guru-lms-ujian-manage-soal-page .form-select:focus {
+    border-color: #165fac;
+    box-shadow: 0 0 0 0.2rem rgba(22, 95, 172, 0.1);
+}
+
+.guru-lms-ujian-manage-soal-page textarea.question-input {
+    border: 1px solid #d1d5db;
+    resize: vertical;
+}
+
+.guru-lms-ujian-manage-soal-page textarea.question-input:focus {
+    border-color: #165fac;
+    box-shadow: 0 0 0 0.2rem rgba(22, 95, 172, 0.1);
+}
+
+.guru-lms-ujian-manage-soal-page .soal-toolbar-sticky {
+    z-index: 10;
+}
+
+.guru-lms-ujian-manage-soal-page .add-question-card {
+    border: 2px dashed #165fac;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f0f9ff 0%, #f8fbff 100%);
+}
+
+.guru-lms-ujian-manage-soal-page .add-question-card:hover {
+    border-color: #0d3f7a;
+    box-shadow: 0 4px 12px rgba(22, 95, 172, 0.15);
+}
+
+.guru-lms-ujian-manage-soal-page .add-question-icon {
+    color: #165fac;
+    font-size: 24px;
+}
+
+.guru-lms-ujian-manage-soal-page .add-question-title {
+    color: #165fac;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-template-header {
+    padding: 8px 15px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.guru-lms-ujian-manage-soal-page .question-delete-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-accordion-toggle {
+    padding: 8px 0;
+    border: none;
+    background: none;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-summary {
+    min-width: 0;
+    flex: 1;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-number-badge {
+    min-width: 35px;
+    text-align: center;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-type-badge {
+    white-space: nowrap;
+}
+
+.guru-lms-ujian-manage-soal-page .preview-text {
+    max-width: 400px;
+    color: #6c757d !important;
+    font-style: italic;
+}
+
+.guru-lms-ujian-manage-soal-page .image-preview-container,
+.guru-lms-ujian-manage-soal-page .section-pilihan_ganda_kompleks,
+.guru-lms-ujian-manage-soal-page .section-benar_salah,
+.guru-lms-ujian-manage-soal-page .section-isian_singkat,
+.guru-lms-ujian-manage-soal-page .section-uraian {
+    display: none;
+}
+
+.guru-lms-ujian-manage-soal-page .question-preview-img {
+    max-width: 200px;
+    max-height: 150px;
+    object-fit: contain;
+}
+
+.guru-lms-ujian-manage-soal-page .scoring-info,
+.guru-lms-ujian-manage-soal-page .isian-help {
+    font-size: 0.75rem;
+}
+
+.guru-lms-ujian-manage-soal-page .accordion-item {
+    border: 1px solid #e5e7eb;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.guru-lms-ujian-manage-soal-page .accordion-item:hover {
+    border-color: #165fac;
+    box-shadow: 0 2px 8px rgba(22, 95, 172, 0.1);
+}
+
+.guru-lms-ujian-manage-soal-page .soal-item .accordion-button {
+    padding: 0 !important;
+    background-color: transparent;
+    border: none;
+    font-size: 0.95rem;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-item .accordion-button:not(.collapsed) {
+    color: #165fac;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-item .accordion-button:focus {
+    box-shadow: none;
+}
+
+.guru-lms-ujian-manage-soal-page .accordion-body {
+    padding: 20px;
+}
+
+.guru-lms-ujian-manage-soal-page .delete-btn {
+    transition: all 0.2s ease;
+    color: #6c757d;
+    border-color: #dee2e6;
+}
+
+.guru-lms-ujian-manage-soal-page .delete-btn:hover {
+    background-color: #fee2e2 !important;
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+}
+
+.guru-lms-ujian-manage-soal-page .accordion-header .badge {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+}
+
+.guru-lms-ujian-manage-soal-page .soal-card-hidden {
+    display: none;
+}
+
+.guru-lms-ujian-manage-soal-page .partial-attachment-image {
+    max-height: 300px;
+}
+
+@media (max-width: 767px) {
+    .guru-lms-ujian-manage-soal-page .soal-toolbar-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        padding: 10px 12px !important;
+        gap: 8px;
+    }
+
+    .guru-lms-ujian-manage-soal-page .soal-toolbar-header .soal-toolbar-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px !important;
+    }
+
+    .guru-lms-ujian-manage-soal-page .soal-toolbar-header .soal-toolbar-actions .btn {
+        flex: 1 1 auto;
+        font-size: 12px;
+        padding: 5px 8px;
+        min-width: 0;
+    }
+
+    .guru-lms-ujian-manage-soal-page .soal-import-toolbar {
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        gap: 6px !important;
+    }
+
+    .guru-lms-ujian-manage-soal-page .soal-import-toolbar .btn {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+
+    .guru-lms-ujian-manage-soal-page .fs-5-mobile {
+        font-size: 1.05rem !important;
+    }
+
+    .guru-lms-ujian-manage-soal-page .btn-label-long {
+        display: none;
+    }
+
+    .guru-lms-ujian-manage-soal-page .btn-label-short {
+        display: inline !important;
+    }
+
+    .guru-lms-ujian-manage-soal-page .accordion-header {
+        flex-wrap: wrap;
+    }
+
+    .guru-lms-ujian-manage-soal-page .delete-btn {
+        margin-bottom: 8px;
+    }
+}
+
+@media (min-width: 768px) {
+    .guru-lms-ujian-manage-soal-page .btn-label-short {
+        display: none;
+    }
+}
