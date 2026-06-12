@@ -374,6 +374,8 @@ export default defineConfig({
                 'resources/js/guru/lms/tugas/create.js',
                 'resources/css/guru/lms/tugas/edit.css',
                 'resources/js/guru/lms/tugas/edit.js',
+                'resources/css/guru/lms/tugas/koreksi-show.css',
+                'resources/js/guru/lms/tugas/koreksi-show.js',
                 'resources/css/guru/lms/ujian/index.css',
                 'resources/js/guru/lms/ujian/index.js',
                 'resources/css/guru/lms/ujian/create.css',
