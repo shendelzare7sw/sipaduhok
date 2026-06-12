@@ -1,0 +1,184 @@
+.attendance-history-page {
+    --parent-blue: #465fe8;
+    --parent-ink: #25324a;
+    --parent-muted: #6b7890;
+    --parent-line: #dde4f0;
+    --parent-soft: #f6f8fc;
+}
+
+.attendance-history-page .history-heading,
+.attendance-history-page .history-filter,
+.attendance-history-page .history-table-card {
+    background: #fff;
+    border: 1px solid var(--parent-line);
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(37, 50, 74, .06);
+}
+
+.attendance-history-page .history-heading {
+    padding: 22px 24px;
+}
+
+.attendance-history-page .history-title {
+    color: var(--parent-ink);
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.attendance-history-page .history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.attendance-history-page .history-actions .btn,
+.attendance-history-page .filter-actions .btn {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    min-height: 40px;
+    white-space: normal;
+}
+
+.attendance-history-page .history-filter {
+    padding: 18px;
+}
+
+.attendance-history-page .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.attendance-history-page .summary-card {
+    background: #fff;
+    border: 1px solid var(--parent-line);
+    border-radius: 8px;
+    min-height: 96px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.attendance-history-page .summary-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: var(--summary-color);
+}
+
+.attendance-history-page .summary-label {
+    color: var(--parent-muted);
+    font-size: .72rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.attendance-history-page .summary-number {
+    color: var(--parent-ink);
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.attendance-history-page .summary-hadir { --summary-color: #10b981; }
+.attendance-history-page .summary-sakit { --summary-color: #f59e0b; }
+.attendance-history-page .summary-izin { --summary-color: #3b82f6; }
+.attendance-history-page .summary-alpha { --summary-color: #ef4444; }
+
+.attendance-history-page .table-history thead th {
+    background: var(--parent-soft);
+    color: var(--parent-muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--parent-line);
+}
+
+.attendance-history-page .table-history td {
+    color: var(--parent-ink);
+    vertical-align: middle;
+}
+
+.attendance-history-page .attendance-proof-image {
+    max-height: 75vh;
+}
+
+.attendance-history-page .attendance-proof-frame {
+    width: 100%;
+    height: 75vh;
+    border: 0;
+}
+
+@media (max-width: 991.98px) {
+    .attendance-history-page .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .attendance-history-page .history-heading {
+        padding: 20px 16px;
+    }
+
+    .attendance-history-page .history-actions,
+    .attendance-history-page .filter-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+
+    .attendance-history-page .history-actions .btn,
+    .attendance-history-page .filter-actions .btn {
+        width: 100%;
+    }
+
+    .attendance-history-page .table-history thead {
+        display: none;
+    }
+
+    .attendance-history-page .table-history tbody tr {
+        display: block;
+        border-bottom: 1px solid var(--parent-line);
+        padding: 14px 16px;
+    }
+
+    .attendance-history-page .table-history tbody td {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0 !important;
+        text-align: right !important;
+    }
+
+    .attendance-history-page .table-history tbody td::before {
+        content: attr(data-label);
+        color: var(--parent-muted);
+        font-size: 11px;
+        font-weight: 800;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .attendance-history-page .table-history tbody td[data-label="Keterangan"] {
+        display: block;
+        text-align: left !important;
+    }
+
+    .attendance-history-page .table-history tbody td[data-label="Keterangan"]::before {
+        display: block;
+        margin-bottom: 6px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .attendance-history-page .summary-grid,
+    .attendance-history-page .history-actions,
+    .attendance-history-page .filter-actions {
+        grid-template-columns: 1fr;
+    }
+}

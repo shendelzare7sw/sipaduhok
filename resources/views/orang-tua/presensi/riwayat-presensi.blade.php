@@ -8,182 +8,7 @@
 @endsection
 
 @section('styles')
-<style>
-    .attendance-history-page {
-        --parent-blue: #465fe8;
-        --parent-ink: #25324a;
-        --parent-muted: #6b7890;
-        --parent-line: #dde4f0;
-        --parent-soft: #f6f8fc;
-    }
-
-    .history-heading,
-    .history-filter,
-    .history-table-card {
-        background: #fff;
-        border: 1px solid var(--parent-line);
-        border-radius: 8px;
-        box-shadow: 0 8px 22px rgba(37, 50, 74, .06);
-    }
-
-    .history-heading {
-        padding: 22px 24px;
-    }
-
-    .history-title {
-        color: var(--parent-ink);
-        font-size: 1.35rem;
-        font-weight: 800;
-        margin-bottom: 4px;
-    }
-
-    .history-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .history-actions .btn,
-    .filter-actions .btn {
-        align-items: center;
-        display: inline-flex;
-        justify-content: center;
-        min-height: 40px;
-        white-space: normal;
-    }
-
-    .history-filter {
-        padding: 18px;
-    }
-
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 14px;
-        margin-bottom: 18px;
-    }
-
-    .summary-card {
-        background: #fff;
-        border: 1px solid var(--parent-line);
-        border-radius: 8px;
-        min-height: 96px;
-        padding: 16px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .summary-card::before {
-        content: "";
-        position: absolute;
-        inset: 0 auto 0 0;
-        width: 5px;
-        background: var(--summary-color);
-    }
-
-    .summary-label {
-        color: var(--parent-muted);
-        font-size: .72rem;
-        font-weight: 800;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-    }
-
-    .summary-number {
-        color: var(--parent-ink);
-        font-size: 1.8rem;
-        font-weight: 800;
-        line-height: 1;
-    }
-
-    .summary-hadir { --summary-color: #10b981; }
-    .summary-sakit { --summary-color: #f59e0b; }
-    .summary-izin { --summary-color: #3b82f6; }
-    .summary-alpha { --summary-color: #ef4444; }
-
-    .table-history thead th {
-        background: var(--parent-soft);
-        color: var(--parent-muted);
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        border-bottom: 1px solid var(--parent-line);
-    }
-
-    .table-history td {
-        color: var(--parent-ink);
-        vertical-align: middle;
-    }
-
-    @media (max-width: 991.98px) {
-        .summary-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 767.98px) {
-        .history-heading {
-            padding: 20px 16px;
-        }
-
-        .history-actions,
-        .filter-actions {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-        }
-
-        .history-actions .btn,
-        .filter-actions .btn {
-            width: 100%;
-        }
-
-        .table-history thead {
-            display: none;
-        }
-
-        .table-history tbody tr {
-            display: block;
-            border-bottom: 1px solid var(--parent-line);
-            padding: 14px 16px;
-        }
-
-        .table-history tbody td {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 8px 0 !important;
-            text-align: right !important;
-        }
-
-        .table-history tbody td::before {
-            content: attr(data-label);
-            color: var(--parent-muted);
-            font-size: 11px;
-            font-weight: 800;
-            text-align: left;
-            text-transform: uppercase;
-        }
-
-        .table-history tbody td[data-label="Keterangan"] {
-            display: block;
-            text-align: left !important;
-        }
-
-        .table-history tbody td[data-label="Keterangan"]::before {
-            display: block;
-            margin-bottom: 6px;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .summary-grid,
-        .history-actions,
-        .filter-actions {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+    @vite(['resources/css/orang-tua/presensi/riwayat-presensi.css'])
 @endsection
 
 @section('content')
@@ -338,13 +163,12 @@
                                                 <div class="text-center p-3">
                                                     <img src="{{ $buktiUrl }}"
                                                          alt="Lampiran bukti presensi {{ $siswa->nama_lengkap }}"
-                                                         class="img-fluid rounded"
-                                                         style="max-height: 75vh;">
+                                                         class="img-fluid rounded attendance-proof-image">
                                                 </div>
                                             @elseif($isBuktiPdf)
                                                 <iframe src="{{ $buktiUrl }}"
                                                         title="Lampiran bukti presensi {{ $siswa->nama_lengkap }}"
-                                                        style="width: 100%; height: 75vh; border: 0;"></iframe>
+                                                        class="attendance-proof-frame"></iframe>
                                             @else
                                                 <div class="text-center p-5">
                                                     <i class="fas fa-file fa-3x text-muted mb-3"></i>

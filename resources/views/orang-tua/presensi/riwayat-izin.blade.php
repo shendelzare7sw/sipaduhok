@@ -7,8 +7,12 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/orang-tua/presensi/riwayat-izin.css'])
+@endsection
+
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container-xxl flex-grow-1 container-p-y permission-history-page">
 
         <!-- Page Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -154,13 +158,12 @@
                                                 <div class="text-center p-3">
                                                     <img src="{{ $buktiUrl }}"
                                                          alt="Lampiran bukti {{ $siswa->nama_lengkap }}"
-                                                         class="img-fluid rounded"
-                                                         style="max-height: 75vh;">
+                                                         class="img-fluid rounded permission-proof-image">
                                                 </div>
                                             @elseif($isBuktiPdf)
                                                 <iframe src="{{ $buktiUrl }}"
                                                         title="Lampiran bukti {{ $siswa->nama_lengkap }}"
-                                                        style="width: 100%; height: 75vh; border: 0;"></iframe>
+                                                        class="permission-proof-frame"></iframe>
                                             @else
                                                 <div class="text-center p-5">
                                                     <i class="fas fa-file fa-3x text-muted mb-3"></i>
