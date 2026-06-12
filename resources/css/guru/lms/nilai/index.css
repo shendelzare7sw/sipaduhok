@@ -1,0 +1,362 @@
+.guru-lms-nilai-page .semester-select {
+    width: auto;
+    min-width: 130px;
+}
+
+.guru-lms-nilai-page .table-nilai {
+    font-size: 13px;
+}
+
+.guru-lms-nilai-page .table-nilai th {
+    background: #f8f9fc;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.guru-lms-nilai-page .col-no {
+    width: 35px;
+}
+
+.guru-lms-nilai-page .col-student {
+    min-width: 130px;
+}
+
+.guru-lms-nilai-page .col-final-student {
+    min-width: 200px;
+}
+
+.guru-lms-nilai-page .col-score {
+    width: 60px;
+}
+
+.guru-lms-nilai-page .col-score-sm {
+    width: 50px;
+}
+
+.guru-lms-nilai-page .col-score-md {
+    width: 70px;
+}
+
+.guru-lms-nilai-page .col-score-lg {
+    width: 90px;
+}
+
+.guru-lms-nilai-page .col-final {
+    width: 65px;
+}
+
+.guru-lms-nilai-page .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    justify-content: center;
+}
+
+.guru-lms-nilai-page .table-nilai .input-nilai {
+    width: 55px !important;
+    min-width: 55px;
+    padding: 6px 4px;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    -moz-appearance: textfield;
+}
+
+.guru-lms-nilai-page .table-nilai .input-nilai:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.25);
+    outline: none;
+}
+
+.guru-lms-nilai-page .table-nilai .input-nilai::-webkit-outer-spin-button,
+.guru-lms-nilai-page .table-nilai .input-nilai::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.guru-lms-nilai-page input.input-nilai[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.guru-lms-nilai-page .spinner-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.guru-lms-nilai-page .spinner-btn {
+    width: 16px;
+    height: 14px;
+    padding: 0;
+    font-size: 9px;
+    line-height: 1;
+    border: 1px solid #ced4da;
+    background: #f8f9fa;
+    border-radius: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.guru-lms-nilai-page .spinner-btn:hover {
+    background: #e9ecef;
+    border-color: #4e73df;
+    color: #4e73df;
+}
+
+.guru-lms-nilai-page .spinner-btn:active {
+    background: #4e73df;
+    color: white;
+}
+
+.guru-lms-nilai-page .table-nilai .rata-cell {
+    background: #e9ecef;
+    font-weight: 700;
+    color: #165fac;
+}
+
+.guru-lms-nilai-page .table-nilai .nilai-akhir-cell {
+    background: #d4edda;
+    font-weight: 800;
+    color: #155724;
+}
+
+.guru-lms-nilai-page .th-group {
+    background: #4e73df !important;
+    color: white !important;
+}
+
+.guru-lms-nilai-page .th-tugas {
+    background: #e3f2fd !important;
+}
+
+.guru-lms-nilai-page .th-latihan {
+    background: #fff3e0 !important;
+}
+
+.guru-lms-nilai-page .th-uh {
+    background: #fce4ec !important;
+}
+
+.guru-lms-nilai-page .table-nilai .sticky-col {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 3;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.guru-lms-nilai-page .table-nilai .sticky-col-2 {
+    position: sticky;
+    left: 35px;
+    background: white;
+    z-index: 3;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.guru-lms-nilai-page .table-nilai thead th.sticky-col,
+.guru-lms-nilai-page .table-nilai thead th.sticky-col-2 {
+    z-index: 4;
+    background: #f8f9fc;
+}
+
+.guru-lms-nilai-page .student-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.guru-lms-nilai-page .student-nis {
+    font-size: 11px;
+}
+
+@media (max-width: 767.98px) {
+    .guru-lms-nilai-page .table-responsive {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    .guru-lms-nilai-page .table-nilai,
+    .guru-lms-nilai-page .table-nilai tbody,
+    .guru-lms-nilai-page .table-nilai tr {
+        display: block;
+        width: auto;
+    }
+
+    .guru-lms-nilai-page .table-nilai {
+        border: 0;
+        background: transparent;
+        max-width: 100%;
+    }
+
+    .guru-lms-nilai-page .table-nilai thead {
+        display: none;
+    }
+
+    .guru-lms-nilai-page .table-nilai tbody {
+        display: grid;
+        gap: 12px;
+    }
+
+    .guru-lms-nilai-page .table-nilai tr {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        padding: 12px;
+        width: auto;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+        border: 1px solid #dbe4f0;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .guru-lms-nilai-page .table-nilai td {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: auto;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        border: 1px solid #e8eef7 !important;
+        border-radius: 8px;
+        padding: 7px 6px !important;
+        background: #f8fafc;
+        overflow: hidden;
+    }
+
+    .guru-lms-nilai-page .table-nilai tr > * {
+        min-width: 0 !important;
+    }
+
+    .guru-lms-nilai-page .table-nilai td::before {
+        content: attr(data-label);
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1;
+        color: #64748b;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    .guru-lms-nilai-page .table-nilai .sticky-col,
+    .guru-lms-nilai-page .table-nilai .sticky-col-2 {
+        position: static;
+        left: auto;
+        box-shadow: none;
+        z-index: auto;
+    }
+
+    .guru-lms-nilai-page .table-nilai td.sticky-col,
+    .guru-lms-nilai-page .table-nilai td[data-label="No"] {
+        display: none;
+    }
+
+    .guru-lms-nilai-page .table-nilai td.sticky-col-2,
+    .guru-lms-nilai-page .table-nilai td.student-cell {
+        grid-column: 1 / -1;
+        display: block;
+        border: 0 !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        border-radius: 0;
+        padding: 0 0 10px !important;
+        background: #fff;
+    }
+
+    .guru-lms-nilai-page .table-nilai td.sticky-col-2::before,
+    .guru-lms-nilai-page .table-nilai td.student-cell::before {
+        display: none;
+    }
+
+    .guru-lms-nilai-page .student-name {
+        font-size: 15px;
+        line-height: 1.25;
+    }
+
+    .guru-lms-nilai-page .student-nis {
+        font-size: 12px;
+    }
+
+    .guru-lms-nilai-page .input-wrapper {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        gap: 0;
+    }
+
+    .guru-lms-nilai-page .table-nilai .input-nilai {
+        flex: 1 1 100%;
+        width: 100% !important;
+        min-width: 0;
+        height: 34px;
+        padding: 5px 4px;
+        font-size: 12.5px;
+        border-radius: 7px;
+    }
+
+    .guru-lms-nilai-page .spinner-btns {
+        display: none;
+    }
+
+    .guru-lms-nilai-page .table-nilai .rata-cell,
+    .guru-lms-nilai-page .table-nilai .nilai-akhir-cell {
+        grid-column: 1 / -1;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        font-size: 15px;
+    }
+
+    .guru-lms-nilai-page .table-nilai .rata-cell::before,
+    .guru-lms-nilai-page .table-nilai .nilai-akhir-cell::before {
+        align-self: stretch;
+    }
+
+    .guru-lms-nilai-page .table-nilai .nilai-akhir-cell {
+        background: #dcfce7;
+    }
+
+    .guru-lms-nilai-page .nilai-actions {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        display: flex;
+        justify-content: stretch;
+        background: rgba(255, 255, 255, 0.96) !important;
+        backdrop-filter: blur(8px);
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .guru-lms-nilai-page .nilai-actions .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .guru-lms-nilai-page .table-nilai tr {
+        gap: 4px;
+        padding: 10px;
+    }
+
+    .guru-lms-nilai-page .table-nilai td {
+        padding: 6px 4px !important;
+    }
+
+    .guru-lms-nilai-page .table-nilai td::before {
+        font-size: 9px;
+    }
+
+    .guru-lms-nilai-page .table-nilai .input-nilai {
+        height: 32px;
+        padding: 4px 3px;
+        font-size: 11.5px;
+    }
+}

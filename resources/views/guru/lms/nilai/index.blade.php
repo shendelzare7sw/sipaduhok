@@ -9,328 +9,18 @@
 @endsection
 
 @push('styles')
-<style>
-    .table-nilai {
-        font-size: 13px;
-    }
-    .table-nilai th {
-        background: #f8f9fc;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 11px;
-        vertical-align: middle;
-        white-space: nowrap;
-    }
-    
-    /* Input wrapper dengan spinner di luar */
-    .input-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 2px;
-        justify-content: center;
-    }
+    @vite(['resources/css/guru/lms/nilai/index.css'])
+@endpush
 
-    /* Input field */
-    .table-nilai .input-nilai {
-        width: 55px !important;
-        min-width: 55px;
-        padding: 6px 4px;
-        font-size: 13px;
-        text-align: center;
-        border-radius: 4px;
-        border: 1px solid #ced4da;
-        -moz-appearance: textfield;
-    }
-    .table-nilai .input-nilai:focus {
-        border-color: #4e73df;
-        box-shadow: 0 0 0 2px rgba(78,115,223,0.25);
-        outline: none;
-    }
-    
-    /* Hide Default Spinner */
-    .table-nilai .input-nilai::-webkit-outer-spin-button,
-    .table-nilai .input-nilai::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    input.input-nilai[type="number"] {
-        -moz-appearance: textfield;
-    }
-    
-    /* Custom Spinner Buttons */
-    .spinner-btns {
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-    }
-    .spinner-btn {
-        width: 16px;
-        height: 14px;
-        padding: 0;
-        font-size: 9px;
-        line-height: 1;
-        border: 1px solid #ced4da;
-        background: #f8f9fa;
-        border-radius: 2px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-    }
-    .spinner-btn:hover {
-        background: #e9ecef;
-        border-color: #4e73df;
-        color: #4e73df;
-    }
-    .spinner-btn:active {
-        background: #4e73df;
-        color: white;
-    }
-
-    .table-nilai .rata-cell {
-        background: #e9ecef;
-        font-weight: 700;
-        color: #165fac;
-    }
-    .table-nilai .nilai-akhir-cell {
-        background: #d4edda;
-        font-weight: 800;
-        color: #155724;
-    }
-    .th-group {
-        background: #4e73df !important;
-        color: white !important;
-    }
-    .th-tugas { background: #e3f2fd !important; }
-    .th-latihan { background: #fff3e0 !important; }
-    .th-uh { background: #fce4ec !important; }
-    
-    /* Sticky columns - fixed properly */
-    .table-nilai .sticky-col {
-        position: sticky;
-        left: 0;
-        background: white;
-        z-index: 3;
-        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
-    }
-    .table-nilai .sticky-col-2 {
-        position: sticky;
-        left: 35px;
-        background: white;
-        z-index: 3;
-        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
-    }
-    .table-nilai thead th.sticky-col,
-    .table-nilai thead th.sticky-col-2 {
-        z-index: 4;
-        background: #f8f9fc;
-    }
-    
-    /* Student name - larger font */
-    .student-name {
-        font-size: 14px;
-        font-weight: 600;
-    }
-    .student-nis {
-        font-size: 11px;
-    }
-
-    @media (max-width: 767.98px) {
-        .table-responsive {
-            overflow-x: hidden;
-            max-width: 100%;
-        }
-
-        .table-nilai,
-        .table-nilai tbody,
-        .table-nilai tr {
-            display: block;
-            width: auto;
-        }
-
-        .table-nilai {
-            border: 0;
-            background: transparent;
-            max-width: 100%;
-        }
-
-        .table-nilai thead {
-            display: none;
-        }
-
-        .table-nilai tbody {
-            display: grid;
-            gap: 12px;
-        }
-
-        .table-nilai tr {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 6px;
-            padding: 12px;
-            width: auto;
-            max-width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-            border: 1px solid #dbe4f0;
-            border-radius: 10px;
-            background: #fff;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-        }
-
-        .table-nilai td {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            width: auto;
-            max-width: 100%;
-            min-width: 0;
-            box-sizing: border-box;
-            border: 1px solid #e8eef7 !important;
-            border-radius: 8px;
-            padding: 7px 6px !important;
-            background: #f8fafc;
-            overflow: hidden;
-        }
-
-        .table-nilai tr > * {
-            min-width: 0 !important;
-        }
-
-        .table-nilai td::before {
-            content: attr(data-label);
-            font-size: 10px;
-            font-weight: 800;
-            line-height: 1;
-            color: #64748b;
-            text-transform: uppercase;
-            text-align: left;
-        }
-
-        .table-nilai .sticky-col,
-        .table-nilai .sticky-col-2 {
-            position: static;
-            left: auto;
-            box-shadow: none;
-            z-index: auto;
-        }
-
-        .table-nilai td.sticky-col {
-            display: none;
-        }
-
-        .table-nilai td[data-label="No"] {
-            display: none;
-        }
-
-        .table-nilai td.sticky-col-2,
-        .table-nilai td.student-cell {
-            grid-column: 1 / -1;
-            display: block;
-            border: 0 !important;
-            border-bottom: 1px solid #e2e8f0 !important;
-            border-radius: 0;
-            padding: 0 0 10px !important;
-            background: #fff;
-        }
-
-        .table-nilai td.sticky-col-2::before,
-        .table-nilai td.student-cell::before {
-            display: none;
-        }
-
-        .student-name {
-            font-size: 15px;
-            line-height: 1.25;
-        }
-
-        .student-nis {
-            font-size: 12px;
-        }
-
-        .input-wrapper {
-            width: 100%;
-            min-width: 0;
-            justify-content: center;
-            gap: 0;
-        }
-
-        .table-nilai .input-nilai {
-            flex: 1 1 100%;
-            width: 100% !important;
-            min-width: 0;
-            height: 34px;
-            padding: 5px 4px;
-            font-size: 12.5px;
-            border-radius: 7px;
-        }
-
-        .spinner-btns {
-            display: none;
-        }
-
-        .table-nilai .rata-cell,
-        .table-nilai .nilai-akhir-cell {
-            grid-column: 1 / -1;
-            align-items: center;
-            justify-content: center;
-            min-height: 46px;
-            font-size: 15px;
-        }
-
-        .table-nilai .rata-cell::before,
-        .table-nilai .nilai-akhir-cell::before {
-            align-self: stretch;
-        }
-
-        .table-nilai .nilai-akhir-cell {
-            background: #dcfce7;
-        }
-
-        .p-3.text-end.bg-light {
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
-            display: flex;
-            justify-content: stretch;
-            background: rgba(255, 255, 255, 0.96) !important;
-            backdrop-filter: blur(8px);
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .p-3.text-end.bg-light .btn {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 420px) {
-        .table-nilai tr {
-            gap: 4px;
-            padding: 10px;
-        }
-
-        .table-nilai td {
-            padding: 6px 4px !important;
-        }
-
-        .table-nilai td::before {
-            font-size: 9px;
-        }
-
-        .table-nilai .input-nilai {
-            height: 32px;
-            padding: 4px 3px;
-            font-size: 11.5px;
-        }
-    }
-</style>
+@push('scripts')
+    @vite(['resources/js/guru/lms/nilai/index.js'])
 @endpush
 
 @section('content')
 @php
     $isKelasAkhir = $kelas->isTingkatAkhir();
 @endphp
+    <div class="guru-lms-nilai-page">
     <div class="row">
         <div class="col-12">
             <div class="card-custom">
@@ -344,7 +34,7 @@
                             {{-- Semester Selector --}}
                             <form action="{{ route('guru.lms.nilai.index', [$kelas->id, $mapel->id]) }}" method="GET" class="d-flex align-items-center gap-2">
                                 <label class="mb-0 fw-semibold text-nowrap"><i class="fas fa-calendar-alt me-1"></i>Semester:</label>
-                                <select name="semester" class="form-select form-select-sm" style="width: auto; min-width: 130px;" onchange="this.form.submit()">
+                                <select name="semester" class="form-select form-select-sm semester-select" data-auto-submit>
                                     <option value="ganjil" {{ $semester == 'ganjil' ? 'selected' : '' }}>Ganjil (Jul-Des)</option>
                                     <option value="genap" {{ $semester == 'genap' ? 'selected' : '' }}>Genap (Jan-Jun)</option>
                                 </select>
@@ -354,7 +44,7 @@
                             </form>
                             
                             <button type="button" class="btn btn-sm btn-outline-primary"
-                                onclick="confirmRecalculate()">
+                                data-open-recalculate>
                                 <i class="fas fa-sync-alt me-1"></i> Hitung Ulang
                             </button>
                             <form id="recalculateForm" action="{{ route('guru.lms.nilai.recalculate', [$kelas->id, $mapel->id]) }}" method="POST" class="d-none">
@@ -395,28 +85,28 @@
                             <table class="table table-bordered table-hover align-middle mb-0 table-nilai">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" class="text-center sticky-col" style="width: 35px;">No</th>
-                                        <th rowspan="2" class="sticky-col-2" style="min-width: 130px;">Nama Siswa</th>
+                                        <th rowspan="2" class="text-center sticky-col col-no">No</th>
+                                        <th rowspan="2" class="sticky-col-2 col-student">Nama Siswa</th>
                                         <th colspan="6" class="text-center th-tugas">Tugas</th>
                                         <th colspan="6" class="text-center th-latihan">Latihan</th>
                                         <th colspan="6" class="text-center th-uh">Ulangan Harian</th>
-                                        <th rowspan="2" class="text-center" style="width: 60px;">PTS</th>
-                                        <th rowspan="2" class="text-center" style="width: 60px;">PAS</th>
-                                        <th rowspan="2" class="text-center nilai-akhir-cell" style="width: 65px;">N. Akhir</th>
+                                        <th rowspan="2" class="text-center col-score">PTS</th>
+                                        <th rowspan="2" class="text-center col-score">PAS</th>
+                                        <th rowspan="2" class="text-center nilai-akhir-cell col-final">N. Akhir</th>
                                     </tr>
                                     <tr>
                                         @for($i = 1; $i <= 5; $i++)
-                                            <th class="text-center th-tugas" style="width: 60px;">T{{ $i }}</th>
+                                            <th class="text-center th-tugas col-score">T{{ $i }}</th>
                                         @endfor
-                                        <th class="text-center th-tugas rata-cell" style="width: 50px;">Rata</th>
+                                        <th class="text-center th-tugas rata-cell col-score-sm">Rata</th>
                                         @for($i = 1; $i <= 5; $i++)
-                                            <th class="text-center th-latihan" style="width: 60px;">L{{ $i }}</th>
+                                            <th class="text-center th-latihan col-score">L{{ $i }}</th>
                                         @endfor
-                                        <th class="text-center th-latihan rata-cell" style="width: 50px;">Rata</th>
+                                        <th class="text-center th-latihan rata-cell col-score-sm">Rata</th>
                                         @for($i = 1; $i <= 5; $i++)
-                                            <th class="text-center th-uh" style="width: 60px;">UH{{ $i }}</th>
+                                            <th class="text-center th-uh col-score">UH{{ $i }}</th>
                                         @endfor
-                                        <th class="text-center th-uh rata-cell" style="width: 50px;">Rata</th>
+                                        <th class="text-center th-uh rata-cell col-score-sm">Rata</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -442,8 +132,8 @@
                                                             placeholder="-"
                                                             inputmode="decimal">
                                                         <div class="spinner-btns">
-                                                            <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $nilai->id }}_{{ $i }}', 1)">▲</button>
-                                                            <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $nilai->id }}_{{ $i }}', -1)">▼</button>
+                                                            <button type="button" class="spinner-btn" data-adjust-target="tugas_{{ $nilai->id }}_{{ $i }}" data-adjust-delta="1">&uarr;</button>
+                                                            <button type="button" class="spinner-btn" data-adjust-target="tugas_{{ $nilai->id }}_{{ $i }}" data-adjust-delta="-1">&darr;</button>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -464,8 +154,8 @@
                                                             placeholder="-"
                                                             inputmode="decimal">
                                                         <div class="spinner-btns">
-                                                            <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $nilai->id }}_{{ $i }}', 1)">▲</button>
-                                                            <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $nilai->id }}_{{ $i }}', -1)">▼</button>
+                                                            <button type="button" class="spinner-btn" data-adjust-target="latihan_{{ $nilai->id }}_{{ $i }}" data-adjust-delta="1">&uarr;</button>
+                                                            <button type="button" class="spinner-btn" data-adjust-target="latihan_{{ $nilai->id }}_{{ $i }}" data-adjust-delta="-1">&darr;</button>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -486,8 +176,8 @@
                                                             placeholder="-"
                                                             inputmode="decimal">
                                                         <div class="spinner-btns">
-                                                            <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $nilai->id }}_{{ $i }}', 1)">▲</button>
-                                                            <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $nilai->id }}_{{ $i }}', -1)">▼</button>
+                                                            <button type="button" class="spinner-btn" data-adjust-target="uh_{{ $nilai->id }}_{{ $i }}" data-adjust-delta="1">&uarr;</button>
+                                                            <button type="button" class="spinner-btn" data-adjust-target="uh_{{ $nilai->id }}_{{ $i }}" data-adjust-delta="-1">&darr;</button>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -507,8 +197,8 @@
                                                         placeholder="-"
                                                         inputmode="decimal">
                                                     <div class="spinner-btns">
-                                                        <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $nilai->id }}', 1)">▲</button>
-                                                        <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $nilai->id }}', -1)">▼</button>
+                                                        <button type="button" class="spinner-btn" data-adjust-target="pts_{{ $nilai->id }}" data-adjust-delta="1">&uarr;</button>
+                                                        <button type="button" class="spinner-btn" data-adjust-target="pts_{{ $nilai->id }}" data-adjust-delta="-1">&darr;</button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -524,8 +214,8 @@
                                                         placeholder="-"
                                                         inputmode="decimal">
                                                     <div class="spinner-btns">
-                                                        <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $nilai->id }}', 1)">▲</button>
-                                                        <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $nilai->id }}', -1)">▼</button>
+                                                        <button type="button" class="spinner-btn" data-adjust-target="pas_{{ $nilai->id }}" data-adjust-delta="1">&uarr;</button>
+                                                        <button type="button" class="spinner-btn" data-adjust-target="pas_{{ $nilai->id }}" data-adjust-delta="-1">&darr;</button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -545,7 +235,7 @@
                         </div>
 
                         @if($nilaiList->count() > 0)
-                        <div class="p-3 text-end bg-light">
+                        <div class="p-3 text-end bg-light nilai-actions">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-1"></i> Simpan Semua Nilai
                             </button>
@@ -569,13 +259,13 @@
                             <table class="table table-bordered table-hover align-middle mb-0 table-nilai">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" style="width: 50px;">No</th>
-                                        <th style="min-width: 200px;">Nama Siswa</th>
-                                        <th class="text-center th-latihan" style="width: 70px;">TO 1</th>
-                                        <th class="text-center th-latihan" style="width: 70px;">TO 2</th>
-                                        <th class="text-center th-latihan" style="width: 70px;">TO 3</th>
-                                        <th class="text-center th-uh" style="width: 70px;">UPK</th>
-                                        <th class="text-center th-uh" style="width: 90px;">Ujian Praktek</th>
+                                        <th class="text-center col-score-sm">No</th>
+                                        <th class="col-final-student">Nama Siswa</th>
+                                        <th class="text-center th-latihan col-score-md">TO 1</th>
+                                        <th class="text-center th-latihan col-score-md">TO 2</th>
+                                        <th class="text-center th-latihan col-score-md">TO 3</th>
+                                        <th class="text-center th-uh col-score-md">UPK</th>
+                                        <th class="text-center th-uh col-score-lg">Ujian Praktek</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -600,8 +290,8 @@
                                                         placeholder="-"
                                                         inputmode="decimal">
                                                     <div class="spinner-btns">
-                                                        <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $nilai->id }}', 1)">▲</button>
-                                                        <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $nilai->id }}', -1)">▼</button>
+                                                        <button type="button" class="spinner-btn" data-adjust-target="{{ $field }}_{{ $nilai->id }}" data-adjust-delta="1">&uarr;</button>
+                                                        <button type="button" class="spinner-btn" data-adjust-target="{{ $field }}_{{ $nilai->id }}" data-adjust-delta="-1">&darr;</button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -616,7 +306,7 @@
                             </table>
                         </div>
                         @if($nilaiList->count() > 0)
-                        <div class="p-3 text-end bg-light">
+                        <div class="p-3 text-end bg-light nilai-actions">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-1"></i> Simpan Nilai Tingkat Akhir
                             </button>
@@ -634,7 +324,7 @@
                     <ul class="mb-0 small ps-3">
                         <li>Isi nilai <strong>Tugas 1-5</strong>, <strong>Latihan 1-5</strong>, dan <strong>UH 1-5</strong> secara parsial. Rata-rata dihitung otomatis saat disimpan.</li>
                         <li>Kolom kosong <strong>tidak dihitung sebagai 0</strong> dalam perhitungan rata-rata.</li>
-                        <li>Nilai Akhir: <strong>((Rata Tugas × 1) + (Rata Latihan × 1) + (Rata UH × 2) + (PTS × 3) + (PAS × 3)) / 10</strong></li>
+                        <li>Nilai Akhir: <strong>((Rata Tugas x 1) + (Rata Latihan x 1) + (Rata UH x 2) + (PTS x 3) + (PAS x 3)) / 10</strong></li>
                         <li>Klik tombol <strong>"Simpan Semua Nilai"</strong> untuk menyimpan semua perubahan sekaligus.</li>
                     </ul>
                 </div>
@@ -654,7 +344,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('recalculateForm').submit()">Hitung Ulang</button>
+                    <button type="button" class="btn btn-primary" data-submit-form="recalculateForm">Hitung Ulang</button>
                 </div>
             </div>
         </div>
@@ -719,129 +409,5 @@
             </div>
         </div>
     </div>
+    </div>
 @endsection
-
-@push('scripts')
-<script>
-function adjustValue(inputId, delta) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    
-    let currentValue = parseFloat(input.value) || 0;
-    let newValue = currentValue + delta;
-    
-    // Clamp between 0 and 100
-    newValue = Math.max(0, Math.min(100, newValue));
-    
-    // Limit to 2 decimals
-    newValue = Math.round(newValue * 100) / 100;
-    
-    input.value = newValue;
-    // Trigger input event to ensure any listeners pick it up
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('.input-nilai');
-    
-    inputs.forEach(input => {
-        // Validation and Auto-Decimal on Input
-        input.addEventListener('input', function(e) {
-            let value = this.value;
-            
-            if (value === '') return;
-            
-            let num = parseFloat(value);
-            
-            if (num > 100) {
-                // Auto-Decimal Logic:
-                // User input > 100 (e.g., 675). Try to convert to 67.5
-                let strVal = value.toString();
-                
-                // If likely appending a digit to an integer
-                if (!strVal.includes('.')) {
-                    // Try inserting dot before the last digit
-                    let corrected = strVal.slice(0, -1) + '.' + strVal.slice(-1);
-                    
-                    if (parseFloat(corrected) <= 100) {
-                        this.value = corrected;
-                        return; // Successfully auto-corrected
-                    }
-                } 
-                // Case: 67.5 -> user types 4 -> 67.54 (OK)
-                // Case: 100 -> user types 5 -> 1005 -> 100.5 (Revert to 100)
-                
-                // Fallback: Clamp to 100 strict
-                this.value = 100;
-            }
-            
-            // Limit decimal places to 2 if needed (browser often handles this with step, but safe to force?)
-            // If user types 67.543, standard step 0.01 might invalidate it or truncate.
-            // Let's leave strict decimal limiting to step attribute validaton or blur.
-        });
-        
-        // Prevent typing non-numeric keys that might bypass number type (like 'e')
-        input.addEventListener('keydown', function(e) {
-            if (['e', 'E', '-', '+'].includes(e.key)) {
-                e.preventDefault();
-            }
-        });
-        
-        // On Blur: Ensure cleanly formatted (optional)
-        input.addEventListener('blur', function() {
-            let val = parseFloat(this.value);
-            if (!isNaN(val)) {
-                if (val > 100) this.value = 100;
-                if (val < 0) this.value = 0;
-            }
-        });
-    });
-});
-    function confirmRecalculate() {
-        var modal = new bootstrap.Modal(document.getElementById('recalculateModal'));
-        modal.show();
-    }
-
-    // Import Form Validation
-    document.getElementById('importForm')?.addEventListener('submit', function(e) {
-        const fileInput = document.getElementById('importFile');
-        const file = fileInput.files[0];
-
-        if (!file) {
-            e.preventDefault();
-            alert('Pilih file Excel terlebih dahulu!');
-            return;
-        }
-
-        // Validate file extension
-        const allowedExtensions = /(\.xlsx|\.xls)$/i;
-        if (!allowedExtensions.exec(file.name)) {
-            e.preventDefault();
-            alert('File harus berformat .xlsx atau .xls');
-            fileInput.value = '';
-            return;
-        }
-
-        // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            e.preventDefault();
-            alert('Ukuran file maksimal 5MB');
-            fileInput.value = '';
-            return;
-        }
-
-        // Show loading state
-        const importBtn = document.getElementById('importBtn');
-        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Mengimport...';
-        importBtn.disabled = true;
-    });
-
-    // Reset form when modal is closed
-    document.getElementById('importModal')?.addEventListener('hidden.bs.modal', function() {
-        document.getElementById('importForm').reset();
-        const importBtn = document.getElementById('importBtn');
-        importBtn.innerHTML = '<i class="fas fa-upload me-1"></i> Import Nilai';
-        importBtn.disabled = false;
-    });
-</script>
-@endpush
