@@ -1,0 +1,19 @@
+.guru-lms-ujian-hasil-page .summary-card {
+    border-left: 4px solid;
+}
+
+.guru-lms-ujian-hasil-page .summary-card-total {
+    border-left-color: #165fac;
+}
+
+.guru-lms-ujian-hasil-page .summary-card-finished {
+    border-left-color: #10b981;
+}
+
+.guru-lms-ujian-hasil-page .summary-card-average {
+    border-left-color: #f59e0b;
+}
+
+.guru-lms-ujian-hasil-page .summary-card-highest {
+    border-left-color: #dc2626;
+}

@@ -13,7 +13,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/ujian/hasil.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-ujian-hasil-page">
     @php
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
         $backRoute = $isLatihan ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index';
@@ -32,7 +37,7 @@
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card-custom" style="border-left: 4px solid #165fac;">
+            <div class="card-custom summary-card summary-card-total">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-primary">{{ $hasilUjian->count() }}</div>
                     <small class="text-muted">Total Peserta</small>
@@ -40,7 +45,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card-custom" style="border-left: 4px solid #10b981;">
+            <div class="card-custom summary-card summary-card-finished">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-success">
                         {{ $hasilUjian->where('status', 'selesai')->count() }}
@@ -50,7 +55,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card-custom" style="border-left: 4px solid #f59e0b;">
+            <div class="card-custom summary-card summary-card-average">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-warning">
                         {{ number_format($hasilUjian->where('status', 'selesai')->avg('nilai') ?? 0, 1) }}
@@ -60,7 +65,7 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card-custom" style="border-left: 4px solid #dc2626;">
+            <div class="card-custom summary-card summary-card-highest">
                 <div class="p-3 text-center">
                     <div class="fs-4 fw-bold text-danger">
                         {{ number_format($hasilUjian->where('status', 'selesai')->max('nilai') ?? 0, 1) }}
@@ -152,7 +157,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             Belum ada siswa yang mengerjakan {{ strtolower($tipeLabel) }}
                         </td>
                     </tr>
@@ -161,4 +166,5 @@
             </table>
         </div>
     </div>
+</div>
 @endsection
