@@ -1,0 +1,370 @@
+.tahun-ajaran-show-page {
+    margin: 0 auto;
+    max-width: 1400px;
+    padding: 0 1rem;
+}
+
+.tahun-ajaran-show-page .card {
+    background: #fff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.tahun-ajaran-show-page .card-header {
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+}
+
+.tahun-ajaran-show-page .card-header h5 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.tahun-ajaran-show-page .card-body {
+    padding: 20px;
+}
+
+.tahun-ajaran-show-page .card-footer {
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #e5e7eb;
+    padding: 16px 20px;
+}
+
+.show-header-action {
+    padding: 0 12px;
+}
+
+.show-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.tahun-ajaran-show-page .btn {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 500;
+    justify-content: center;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.tahun-ajaran-show-page .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+
+.tahun-ajaran-show-page .btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: #fff;
+}
+
+.tahun-ajaran-show-page .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+}
+
+.tahun-ajaran-show-page .btn-success {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: #fff;
+}
+
+.tahun-ajaran-show-page .btn-secondary {
+    background: #6b7280;
+    border-color: #6b7280;
+    color: #fff;
+}
+
+.tahun-ajaran-show-page .badge {
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 10px;
+}
+
+.tahun-ajaran-show-page .bg-success {
+    background: #10b981 !important;
+    color: #fff;
+}
+
+.tahun-ajaran-show-page .bg-secondary {
+    background: #6b7280 !important;
+    color: #fff;
+}
+
+.table-detail {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table-detail th {
+    border-bottom: 1px solid #f3f4f6;
+    color: #6b7280;
+    padding: 12px 0;
+    text-align: left;
+    width: 35%;
+}
+
+.table-detail td {
+    border-bottom: 1px solid #f3f4f6;
+    color: #111827;
+    font-weight: 500;
+    padding: 12px 0;
+}
+
+.table-detail tr:last-child th,
+.table-detail tr:last-child td {
+    border-bottom: none;
+}
+
+.detail-strong {
+    font-size: 16px;
+}
+
+.duration-note {
+    font-weight: normal;
+}
+
+.semester-header {
+    background: #f0fdf4;
+    border-bottom: 1px solid #bbf7d0;
+}
+
+.semester-header h5 {
+    color: #166534;
+}
+
+.semester-grid,
+.report-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.semester-card {
+    border-radius: 8px;
+    border-left: 4px solid;
+    padding: 16px;
+}
+
+.semester-card.is-ganjil {
+    background: #fef3c7;
+    border-left-color: #f59e0b;
+}
+
+.semester-card.is-genap {
+    background: #dbeafe;
+    border-left-color: #3b82f6;
+}
+
+.semester-card-title {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.semester-card-title.is-ganjil,
+.semester-card-body.is-ganjil {
+    color: #92400e;
+}
+
+.semester-card-title.is-genap,
+.semester-card-body.is-genap {
+    color: #1e40af;
+}
+
+.semester-card-body {
+    font-size: 13px;
+}
+
+.semester-auto-note {
+    background: #f3f4f6;
+    border-radius: 6px;
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 12px;
+    padding: 8px 12px;
+}
+
+.semester-auto-note a,
+.report-footer-note a {
+    color: #16a34a;
+}
+
+.report-divider {
+    border-top: 1px dashed #d1d5db;
+    margin: 16px 0;
+}
+
+.report-heading {
+    align-items: center;
+    color: #155e75;
+    display: flex;
+    font-size: 13px;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.report-heading i {
+    color: #0891b2;
+}
+
+.report-grid {
+    gap: 10px;
+    font-size: 12px;
+}
+
+.report-card {
+    border-left: 3px solid;
+    border-radius: 6px;
+    padding: 10px 12px;
+}
+
+.report-card.is-pts {
+    background: #ecfeff;
+    border-left-color: #0891b2;
+}
+
+.report-card.is-pas-ganjil {
+    background: #fef3c7;
+    border-left-color: #f59e0b;
+}
+
+.report-card.is-pas-genap {
+    background: #dbeafe;
+    border-left-color: #3b82f6;
+}
+
+.report-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.report-card.is-pts,
+.report-card.is-pts .report-title {
+    color: #155e75;
+}
+
+.report-card.is-pas-ganjil,
+.report-card.is-pas-ganjil .report-title {
+    color: #92400e;
+}
+
+.report-card.is-pas-genap,
+.report-card.is-pas-genap .report-title {
+    color: #1e40af;
+}
+
+.report-muted {
+    color: #64748b;
+}
+
+.report-footer-note {
+    color: #6b7280;
+    display: block;
+    font-size: 11px;
+    margin-top: 10px;
+}
+
+.kelas-count-badge {
+    font-size: 11px;
+}
+
+.related-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.related-table thead {
+    background: #f9fafb;
+}
+
+.related-table th,
+.related-table td {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 12px 20px;
+    text-align: left;
+}
+
+.related-table td {
+    border-bottom-color: #f3f4f6;
+}
+
+.empty-related {
+    color: #9ca3af;
+    padding: 40px;
+    text-align: center;
+}
+
+.action-grid {
+    display: grid;
+    gap: 10px;
+}
+
+.action-grid .btn {
+    width: 100%;
+}
+
+.danger-card {
+    border: 1px solid #fca5a5 !important;
+}
+
+.danger-card .card-header {
+    background: #fef2f2;
+    border-bottom: 1px solid #fca5a5;
+}
+
+.danger-card h5 {
+    color: #dc2626;
+}
+
+.danger-card p {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.modal-note {
+    border-left: 4px solid;
+    font-size: 13px;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.modal-note.is-warning {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+    color: #92400e;
+}
+
+.modal-note.is-danger {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+}
+
+.btn-icon {
+    margin-right: 6px;
+}
+
+@media (max-width: 767.98px) {
+    .semester-grid,
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+}
