@@ -351,6 +351,8 @@ export default defineConfig({
                 'resources/css/guru/lms/ujian/hasil.css',
                 'resources/css/guru/lms/ujian/soal.css',
                 'resources/js/guru/lms/ujian/soal.js',
+                'resources/css/guru/lms/ujian/soal-form.css',
+                'resources/js/guru/lms/ujian/soal-form.js',
                 'resources/css/guru/lms/forum/index.css',
                 'resources/js/guru/lms/forum/index.js',
                 'resources/css/guru/lms/meeting/index.css',
