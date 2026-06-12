@@ -331,6 +331,7 @@ export default defineConfig({
                 'resources/css/guru/kelas/mapel.css',
                 'resources/css/guru/jadwal/index.css',
                 'resources/css/guru/lms/dashboard.css',
+                'resources/css/guru/lms/arsip/index.css',
                 'resources/css/guru/lms/materi/index.css',
                 'resources/js/guru/lms/materi/index.js',
                 'resources/js/guru/lms/materi/create.js',

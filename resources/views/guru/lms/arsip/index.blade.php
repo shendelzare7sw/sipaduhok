@@ -9,205 +9,11 @@
 @endsection
 
 @section('styles')
-<style>
-    .arsip-summary {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 14px;
-        margin-bottom: 22px;
-    }
-    .arsip-stat {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 16px 18px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-    }
-    .arsip-stat .icon-circle {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1rem;
-        flex-shrink: 0;
-    }
-    .arsip-stat .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
-    .arsip-stat .value { font-size: 1.5rem; font-weight: 800; line-height: 1.2; color: #1e293b; }
-
-    .filter-bar {
-        background: white;
-        padding: 14px 18px;
-        border-radius: 10px;
-        border: 1px solid #e5e7eb;
-        margin-bottom: 18px;
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        align-items: end;
-    }
-    .filter-bar .form-group { flex: 1; min-width: 160px; }
-    .filter-bar label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px; display: block; }
-
-    .type-tabs {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 18px;
-    }
-    .type-tab {
-        padding: 8px 16px;
-        border-radius: 999px;
-        background: white;
-        border: 1px solid #e5e7eb;
-        font-size: 13px;
-        font-weight: 600;
-        color: #475569;
-        text-decoration: none;
-        transition: all .15s ease;
-    }
-    .type-tab:hover { color: #1e293b; border-color: #cbd5e1; }
-    .type-tab.active {
-        background: #4361ee;
-        color: white;
-        border-color: #4361ee;
-    }
-
-    .arsip-section { margin-bottom: 28px; }
-    .arsip-section-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .arsip-section-title .badge-count {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 2px 10px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .arsip-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 14px;
-    }
-    .arsip-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 16px;
-        transition: transform .15s ease, box-shadow .15s ease;
-        position: relative;
-    }
-    .arsip-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px -2px rgba(0,0,0,0.08);
-        border-color: #cbd5e1;
-    }
-    .arsip-card .card-header-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-    .arsip-card .icon-square {
-        width: 38px;
-        height: 38px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 0.95rem;
-        flex-shrink: 0;
-    }
-    .arsip-card .judul {
-        font-size: 14px;
-        font-weight: 700;
-        color: #1e293b;
-        line-height: 1.35;
-        flex: 1;
-        word-break: break-word;
-    }
-    .arsip-card .meta {
-        font-size: 11px;
-        color: #64748b;
-        line-height: 1.6;
-    }
-    .arsip-card .meta i { color: #94a3b8; margin-right: 4px; }
-    .arsip-card .meta-row { margin-bottom: 4px; }
-
-    .badge-ta {
-        background: rgba(67, 97, 238, 0.08);
-        color: #4361ee;
-        padding: 3px 10px;
-        border-radius: 999px;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .3px;
-        display: inline-block;
-        margin-bottom: 8px;
-    }
-
-    .arsip-actions {
-        display: flex;
-        gap: 6px;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px dashed #e5e7eb;
-    }
-    .btn-arsip {
-        flex: 1;
-        padding: 7px 10px;
-        font-size: 12px;
-        font-weight: 600;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-        background: white;
-        color: #475569;
-        text-decoration: none;
-        text-align: center;
-        transition: all .15s ease;
-    }
-    .btn-arsip:hover { border-color: #4361ee; color: #4361ee; }
-    .btn-arsip-salin {
-        background: #4361ee;
-        color: white;
-        border-color: #4361ee;
-    }
-    .btn-arsip-salin:hover { background: #3651d4; color: white; }
-
-    .empty-state-arsip {
-        text-align: center;
-        padding: 60px 20px;
-        color: #64748b;
-    }
-    .empty-state-arsip i { font-size: 3rem; color: #cbd5e1; margin-bottom: 12px; display: block; }
-
-    @media (max-width: 768px) {
-        .filter-bar { flex-direction: column; align-items: stretch; }
-        .filter-bar .form-group { width: 100%; }
-        .arsip-grid { grid-template-columns: 1fr; }
-        .type-tabs { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
-        .type-tab { white-space: nowrap; }
-    }
-</style>
+    @vite(['resources/css/guru/lms/arsip/index.css'])
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y guru-lms-arsip-index-page">
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
         <div>
@@ -241,19 +47,19 @@
     {{-- Summary --}}
     <div class="arsip-summary">
         <div class="arsip-stat">
-            <div class="icon-circle" style="background: #0284c7;"><i class="fas fa-book-open"></i></div>
+            <div class="icon-circle icon-circle--materi"><i class="fas fa-book-open"></i></div>
             <div><div class="label">Materi</div><div class="value">{{ $arsip['materi']->count() }}</div></div>
         </div>
         <div class="arsip-stat">
-            <div class="icon-circle" style="background: #d97706;"><i class="fas fa-tasks"></i></div>
+            <div class="icon-circle icon-circle--tugas"><i class="fas fa-tasks"></i></div>
             <div><div class="label">Tugas</div><div class="value">{{ $arsip['tugas']->count() }}</div></div>
         </div>
         <div class="arsip-stat">
-            <div class="icon-circle" style="background: #7c3aed;"><i class="fas fa-pencil-ruler"></i></div>
+            <div class="icon-circle icon-circle--latihan"><i class="fas fa-pencil-ruler"></i></div>
             <div><div class="label">Latihan</div><div class="value">{{ $arsip['latihan']->count() }}</div></div>
         </div>
         <div class="arsip-stat">
-            <div class="icon-circle" style="background: #dc2626;"><i class="fas fa-file-alt"></i></div>
+            <div class="icon-circle icon-circle--ujian"><i class="fas fa-file-alt"></i></div>
             <div><div class="label">Ujian</div><div class="value">{{ $arsip['ujian']->count() }}</div></div>
         </div>
     </div>
@@ -331,15 +137,15 @@
             <p class="mb-0">Anda belum pernah membuat materi/tugas/ujian, atau filter terlalu sempit.</p>
         </div>
     @else
-        @foreach(['materi' => ['#0284c7', 'fa-book-open', 'Materi'],
-                  'tugas' => ['#d97706', 'fa-tasks', 'Tugas'],
-                  'latihan' => ['#7c3aed', 'fa-pencil-ruler', 'Latihan'],
-                  'ujian' => ['#dc2626', 'fa-file-alt', 'Ujian']] as $sectionKey => $cfg)
+        @foreach(['materi' => ['fa-book-open', 'Materi'],
+                  'tugas' => ['fa-tasks', 'Tugas'],
+                  'latihan' => ['fa-pencil-ruler', 'Latihan'],
+                  'ujian' => ['fa-file-alt', 'Ujian']] as $sectionKey => $cfg)
             @if($arsip[$sectionKey]->isNotEmpty())
                 <div class="arsip-section">
                     <div class="arsip-section-title">
-                        <span style="color: {{ $cfg[0] }};"><i class="fas {{ $cfg[1] }}"></i></span>
-                        {{ $cfg[2] }}
+                        <span class="section-icon section-icon--{{ $sectionKey }}"><i class="fas {{ $cfg[0] }}"></i></span>
+                        {{ $cfg[1] }}
                         <span class="badge-count">{{ $arsip[$sectionKey]->count() }}</span>
                     </div>
                     <div class="arsip-grid">
@@ -359,11 +165,11 @@
                             <div class="arsip-card">
                                 <span class="badge-ta">
                                     {{ $item->kelas?->tahunAjaran?->nama_tahun_ajaran ?? 'TA -' }}
-                                    @if($isAktif) · Aktif @endif
+                                    @if($isAktif) - Aktif @endif
                                 </span>
                                 <div class="card-header-row">
-                                    <div class="icon-square" style="background: {{ $cfg[0] }};">
-                                        <i class="fas {{ $cfg[1] }}"></i>
+                                    <div class="icon-square icon-square--{{ $sectionKey }}">
+                                        <i class="fas {{ $cfg[0] }}"></i>
                                     </div>
                                     <div class="judul">{{ $judul }}</div>
                                 </div>
