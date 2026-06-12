@@ -568,6 +568,11 @@
     </style>
 
     @vite(['resources/css/components/notification-bell.css'])
+    @auth
+        @if(canAccessChatbot(auth()->user()->role))
+            @vite(['resources/css/components/ai-chatbot.css'])
+        @endif
+    @endauth
     @yield('styles')
     @stack('styles')
 </head>
@@ -1090,6 +1095,7 @@
     {{-- AI Chatbot + Sistem Helper — Dual Mode (Role-based access) --}}
     @auth
         @if(canAccessChatbot(auth()->user()->role))
+            @vite(['resources/js/components/ai-chatbot.js'])
             @include('components.ai-chatbot')
         @endif
     @endauth

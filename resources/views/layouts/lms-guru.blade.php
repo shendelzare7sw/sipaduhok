@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     @vite(['resources/css/components/notification-bell.css'])
+    @auth
+        @if(canAccessChatbot(auth()->user()->role))
+            @vite(['resources/css/components/ai-chatbot.css'])
+        @endif
+    @endauth
     @stack('styles')
 
     <style>
@@ -558,6 +563,7 @@
     {{-- AI Chatbot Integration (Role-based access) --}}
     @auth
         @if(canAccessChatbot(auth()->user()->role))
+            @vite(['resources/js/components/ai-chatbot.js'])
             @include('components.ai-chatbot')
         @endif
     @endauth

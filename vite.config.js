@@ -11,6 +11,8 @@ export default defineConfig({
                 // Component scoped assets
                 'resources/css/components/ai-sidebar.css',
                 'resources/js/components/ai-sidebar.js',
+                'resources/css/components/ai-chatbot.css',
+                'resources/js/components/ai-chatbot.js',
                 'resources/css/components/notification-bell.css',
                 'resources/js/components/notification-bell.js',
                 'resources/css/components/file-preview.css',
