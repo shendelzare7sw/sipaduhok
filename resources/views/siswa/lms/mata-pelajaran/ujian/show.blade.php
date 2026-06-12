@@ -2,6 +2,41 @@
     $layout = ($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan') ? 'layouts.lms-ujian' : 'layouts.lms';
     $isLatihan = request()->routeIs('siswa.lms.mapel.latihan.*') || (isset($ujian) && $ujian->tipe_ujian === 'latihan');
     $routePrefix = $isLatihan ? 'siswa.lms.mapel.latihan.' : 'siswa.lms.mapel.ujian.';
+    $existingAnswers = $existingAnswers ?? [];
+    $soalList = $soalList ?? collect();
+    $questionMeta = $soalList->values()->map(fn ($soal, $index) => [
+        'soal_id' => $soal->id,
+        'nomor_soal' => $index + 1,
+    ])->all();
+    $answersState = $soalList->map(function ($soal) use ($existingAnswers) {
+        if (!isset($existingAnswers[$soal->id])) {
+            return false;
+        }
+
+        $answer = $existingAnswers[$soal->id];
+
+        if (!is_string($answer)) {
+            return false;
+        }
+
+        $decoded = json_decode($answer, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            if ($soal->tipe_soal === 'pilihan_ganda_kompleks') {
+                return count($decoded) > 0;
+            }
+
+            if ($soal->tipe_soal === 'benar_salah') {
+                return count($decoded) > 0 && !in_array(null, $decoded, true);
+            }
+
+            return count($decoded) > 0;
+        }
+
+        return trim($answer) !== '' && trim($answer) !== '-';
+    })->values()->all();
+    $encodedQuestionMeta = base64_encode(json_encode($questionMeta));
+    $encodedAnswersState = base64_encode(json_encode($answersState));
 @endphp
 
 @extends($layout)
@@ -17,39 +52,20 @@
     @endsection
 @endif
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/ujian/show.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/siswa/lms/mata-pelajaran/ujian/show.js'])
+@endpush
+
 @section('content')
 
 @if(!$ujianSiswa || $ujianSiswa->status !== 'sedang_mengerjakan')
     {{-- LAYOUT 1: START SCREEN / RESULT SCREEN --}}
-    <style>
-        .ujian-card {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .info-box {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .info-box i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .info-box h5 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-    </style>
-
-    <div class="container-fluid">
+    <div class="siswa-lms-ujian-show-page">
+        <div class="container-fluid">
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -97,7 +113,7 @@
                                 @if($sisaPengulangan === null || $sisaPengulangan > 0)
                                     <form id="form-retake" action="{{ route($routePrefix . 'retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
                                         @csrf
-                                        <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
+                                        <button type="button" class="btn btn-warning px-4" data-confirm-retake>
                                             <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
                                         </button>
                                     </form>
@@ -116,24 +132,6 @@
                                 <i class="fas fa-arrow-left me-2"></i> Kembali ke Mata Pelajaran
                             </a>
                         </div>
-                        <script>
-                            function confirmRetake() {
-                                Swal.fire({
-                                    title: 'Kerjakan Ulang?',
-                                    text: 'Jawaban dan nilai Anda sebelumnya akan di-reset. Apakah Anda yakin?',
-                                    icon: 'warning',
-                                    showCancelButton: true,
-                                    confirmButtonColor: '#ffc107',
-                                    cancelButtonColor: '#6c757d',
-                                    confirmButtonText: 'Ya, Kerjakan Ulang!',
-                                    cancelButtonText: 'Batal'
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        document.getElementById('form-retake').submit();
-                                    }
-                                });
-                            }
-                        </script>
                      </div>
                 @else
                     <!-- START SCREEN -->
@@ -225,190 +223,22 @@
                 @endif
             </div>
         </div>
+        </div>
     </div>
 
 @else
     {{-- LAYOUT 2: EXAM INTERFACE (FOCUS MODE) - Simple CBT Style --}}
-    <style>
-        body {
-            background: #e9ecef;
-        }
-
-        /* Remove default Bootstrap container padding and use custom */
-        .container-fluid {
-            max-width: 100% !important;
-        }
-
-        /* Question Card - Simple */
-        .question-card {
-            background: white;
-            border-radius: 4px;
-            padding: 25px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            min-height: 400px;
-        }
-
-        .question-header {
-            background: #f8f9fa;
-            padding: 12px 20px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-
-        .question-text {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #212529;
-            margin-bottom: 20px;
-        }
-
-        /* Options - Simple */
-        .option-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 12px 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            background: #fff;
-        }
-
-        .option-item:hover {
-            background: #f8f9fa;
-        }
-
-        .option-item input[type="radio"] {
-            margin-right: 10px;
-            margin-top: 3px;
-            width: 18px;
-            height: 18px;
-        }
-
-        /* Navigation Grid - Smaller */
-        .q-nav-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin-bottom: 15px;
-        }
-
-        .q-nav-item {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 0.875rem;
-            cursor: pointer;
-            background: #6c757d;
-            color: white;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .q-nav-item:hover {
-            opacity: 0.8;
-        }
-
-        .q-nav-item.active {
-            background: #0d6efd;
-            box-shadow: 0 0 0 3px rgba(13,110,253,0.3);
-        }
-
-        .q-nav-item.answered {
-            background: #198754;
-        }
-
-        .q-nav-item.doubt {
-            background: #fd7e14;
-        }
-
-        /* Sidebar - Simple */
-        .exam-sidebar {
-            background: white;
-            border-radius: 4px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* Timer - Simple */
-        .timer-box {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .timer-badge {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: #dc3545;
-        }
-
-        /* Buttons */
-        .btn-nav-q {
-            min-width: 140px;
-        }
-
-        /* Legend */
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-            font-size: 0.875rem;
-        }
-
-        .legend-box {
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-        }
-
-        /* Responsive */
-        @media (max-width: 991px) {
-            .q-nav-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-        }
-
-        @media (max-width: 575px) {
-            .btn-nav-q {
-                min-width: 0;
-                font-size: 11px;
-                padding: 6px 8px;
-            }
-
-            #btn-ragu {
-                font-size: 11px;
-                padding: 6px 8px;
-            }
-
-            .question-card {
-                padding: 16px;
-                min-height: auto;
-            }
-
-            .exam-sidebar {
-                padding: 12px;
-            }
-
-            .q-nav-grid {
-                gap: 4px;
-            }
-
-            .q-nav-item {
-                font-size: 0.75rem;
-            }
-        }
-    </style>
-
+    <div class="siswa-lms-ujian-work-page"
+        data-exam-type="{{ $ujian->tipe_ujian }}"
+        data-total-questions="{{ $soalList->count() }}"
+        data-duration-minutes="{{ $ujian->durasi_menit ?? 0 }}"
+        data-start-time="{{ $ujianSiswa->waktu_mulai->toIso8601String() }}"
+        data-autosave-url="{{ route($routePrefix . 'autosave', [$mataPelajaran->id, $ujian->id]) }}"
+        data-monitoring-url="{{ $isLatihan ? '' : route('siswa.lms.mapel.ujian.monitoring', [$mataPelajaran->id, $ujian->id]) }}"
+        data-csrf-token="{{ csrf_token() }}"
+        data-storage-key="doubtState_{{ $ujianSiswa->id }}"
+        data-question-meta="{{ $encodedQuestionMeta }}"
+        data-answers-state="{{ $encodedAnswersState }}">
     <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
         <div class="container-fluid px-0">
@@ -424,7 +254,7 @@
                         <!-- Timer Mobile -->
                         <div class="d-lg-none">
                             <div class="timer-box d-inline-block px-3 py-2">
-                                <small class="d-block text-muted" style="font-size: 0.75rem;">SISA WAKTU</small>
+                                <small class="d-block text-muted timer-label">SISA WAKTU</small>
                                 <span class="timer-badge mobile-timer">00:00:00</span>
                             </div>
                         </div>
@@ -434,11 +264,11 @@
                     <div class="question-card">
                         @if($soalList->count() > 0)
                             @foreach($soalList as $index => $soal)
-                                <div class="question-item" id="q-item-{{ $index }}" style="display: {{ $index === 0 ? 'block' : 'none' }};">
+                                <div class="question-item {{ $index === 0 ? 'is-active' : '' }}" id="q-item-{{ $index }}">
                                     @if($soal->narasi)
-                                        <div class="narasi-box mb-3" style="background: #f0f7ff; border-left: 4px solid #165fac; border-radius: 4px; padding: 15px;">
+                                        <div class="narasi-box mb-3">
                                             <small class="text-muted fw-bold d-block mb-1"><i class="fas fa-book-open me-1"></i> Bacaan</small>
-                                            <div style="font-size: 0.95rem; line-height: 1.7; color: #333;">
+                                            <div class="narasi-content">
                                                 {!! nl2br(e($soal->narasi)) !!}
                                             </div>
                                         </div>
@@ -450,8 +280,7 @@
                                                 <div class="card-body p-2 text-center">
                                                     <img src="{{ asset('storage/' . $soal->image_path) }}"
                                                          alt="Gambar Soal {{ $index + 1 }}"
-                                                         class="img-fluid rounded"
-                                                         style="max-height: 250px; cursor: pointer;"
+                                                         class="img-fluid rounded soal-image"
                                                          data-bs-toggle="modal" data-bs-target="#imageModal{{$index}}">
                                                     <small class="text-muted d-block mt-2">
                                                         <i class="fas fa-search-plus me-1"></i> Klik gambar untuk memperbesar
@@ -465,7 +294,7 @@
                                             <div class="modal-dialog modal-lg modal-dialog-centered">
                                                 <div class="modal-content bg-transparent border-0">
                                                     <div class="modal-body text-center pt-2 pb-0">
-                                                        <img src="{{ asset('storage/' . $soal->image_path) }}" class="img-fluid rounded shadow-lg" style="max-height: 80vh;">
+                                                        <img src="{{ asset('storage/' . $soal->image_path) }}" alt="Gambar Soal {{ $index + 1 }}" class="img-fluid rounded shadow-lg soal-modal-image">
                                                     </div>
                                                     <div class="modal-footer border-0 justify-content-center">
                                                         <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Tutup Gambar</button>
@@ -491,7 +320,9 @@
                                             @if(is_array($pilihan))
                                                 @foreach($pilihan as $key => $value)
                                                     <label class="option-item">
-                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="selectOption({{ $index }}, '{{ $key }}', {{ $soal->id }})" {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
+                                                        <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}"
+                                                            data-answer-choice data-index="{{ $index }}" data-soal-id="{{ $soal->id }}"
+                                                            {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
                                                         <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                     </label>
                                                 @endforeach
@@ -517,7 +348,7 @@
                                                     @if($key !== 'jawaban_benar')
                                                         <label class="option-item">
                                                             <input type="checkbox" class="kompleks-cb" data-soal-id="{{ $soal->id }}" data-index="{{ $index }}" value="{{ $key }}"
-                                                                onchange="updateKompleks({{ $soal->id }}, {{ $index }})" style="margin-right: 10px; margin-top: 3px; width: 18px; height: 18px;" {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
+                                                                {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
                                                             <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                         </label>
                                                     @endif
@@ -539,14 +370,14 @@
                                                 <div class="mb-3 p-3 border rounded bg-light">
                                                     <p class="mb-2 fw-bold">{{ $item['text'] ?? $item['pernyataan'] ?? '' }}</p>
                                                     <div class="d-flex gap-3">
-                                                        <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
+                                                        <label class="option-item benar-salah-option mb-0 flex-fill text-center">
                                                             <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="true"
-                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1) ? 'checked' : '' }}>
+                                                                data-benar-salah-answer data-soal-id="{{ $soal->id }}" data-total-pernyataan="{{ count($pernyataanList) }}" data-index="{{ $index }}" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1) ? 'checked' : '' }}>
                                                             <span><strong>BENAR</strong></span>
                                                         </label>
-                                                        <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
+                                                        <label class="option-item benar-salah-option mb-0 flex-fill text-center">
                                                             <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="false"
-                                                                onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }}, {{ $index }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0) ? 'checked' : '' }}>
+                                                                data-benar-salah-answer data-soal-id="{{ $soal->id }}" data-total-pernyataan="{{ count($pernyataanList) }}" data-index="{{ $index }}" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0) ? 'checked' : '' }}>
                                                             <span><strong>SALAH</strong></span>
                                                         </label>
                                                     </div>
@@ -555,7 +386,7 @@
 
                                         @else
                                             <textarea name="jawaban[{{ $soal->id }}]" rows="6" class="form-control"
-                                                placeholder="Tulis jawaban Anda..." oninput="selectOption({{ $index }}, this.value, {{ $soal->id }})">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
+                                                placeholder="Tulis jawaban Anda..." data-answer-text data-index="{{ $index }}" data-soal-id="{{ $soal->id }}">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
                                         @endif
                                     </div>
                                 </div>
@@ -573,9 +404,9 @@
                                 @if($ujianSiswa && $ujianSiswa->status === 'sedang_mengerjakan')
                                 <div class="mt-4">
                                     <p class="text-muted mb-3">Anda sedang dalam sesi ujian tanpa ada soal. Pilih aksi di bawah:</p>
-                                    <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" style="display: inline;">
+                                    <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="empty-submit-form">
                                         @csrf
-                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Anda akan mengakhiri ujian tanpa menjawab soal. Lanjutkan?')">
+                                        <button type="submit" class="btn btn-danger" data-confirm-empty-submit>
                                             <i class="fas fa-times-circle"></i> Akhiri Ujian Sekarang
                                         </button>
                                     </form>
@@ -595,18 +426,17 @@
                     </div>
 
                     <!-- Navigation Buttons -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 gap-2 flex-nowrap" style="overflow-x: auto;">
-                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-prev" onclick="prevQuestion()" style="font-size: 0.85rem; padding: 8px 12px;">
+                    <div class="d-flex justify-content-between align-items-center mt-3 gap-2 flex-nowrap exam-nav-actions">
+                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-prev" data-prev-question>
                             <i class="fas fa-chevron-left me-1"></i> <span class="d-none d-sm-inline">SOAL </span>SEBELUMNYA
                         </button>
 
-                        <label class="btn btn-warning d-flex align-items-center justify-content-center m-0 flex-grow-1 text-nowrap" id="label-ragu" 
-                            style="cursor: pointer; padding: 8px 12px; font-size: 0.85rem; border: 1px solid #ffc107; transition: none; color: #000;">
-                            <input type="checkbox" id="cb-ragu" onchange="toggleRagu(this.checked)" style="transform: scale(1.1); margin-right: 6px;">
+                        <label class="btn btn-warning d-flex align-items-center justify-content-center m-0 flex-grow-1 text-nowrap nav-ragu-label" id="label-ragu">
+                            <input type="checkbox" id="cb-ragu" class="ragu-checkbox" data-toggle-doubt>
                             <span class="fw-bold"><i class="fas fa-flag me-1"></i> RAGU-RAGU</span>
                         </label>
 
-                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-next" onclick="nextQuestion()" style="font-size: 0.85rem; padding: 8px 12px;">
+                        <button type="button" class="btn btn-primary btn-nav-q flex-grow-1 text-nowrap" id="btn-next" data-next-question>
                             <span class="d-none d-sm-inline">SOAL </span>SELANJUTNYA <i class="fas fa-chevron-right ms-1"></i>
                         </button>
                     </div>
@@ -617,7 +447,7 @@
                     <div class="exam-sidebar">
                         <!-- Timer Desktop -->
                         <div class="timer-box">
-                            <small class="d-block text-muted mb-1" style="font-size: 0.75rem;">SISA WAKTU</small>
+                            <small class="d-block text-muted mb-1 timer-label">SISA WAKTU</small>
                             <div class="timer-badge" id="timer-display-main">00:00:00</div>
                         </div>
 
@@ -627,7 +457,7 @@
                         <!-- Navigation Grid -->
                         <div class="q-nav-grid mb-3">
                             @foreach($soalList as $index => $soal)
-                                <div class="q-nav-item" id="nav-item-{{ $index }}" onclick="jumpToQuestion({{ $index }})">
+                                <div class="q-nav-item" id="nav-item-{{ $index }}" data-jump-question="{{ $index }}">
                                     {{ $index + 1 }}
                                 </div>
                             @endforeach
@@ -650,7 +480,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="button" class="btn btn-danger w-100 fw-bold" onclick="finishExam()">
+                        <button type="button" class="btn btn-danger w-100 fw-bold" data-finish-exam>
                             SELESAIKAN UJIAN
                         </button>
                     </div>
@@ -658,415 +488,7 @@
             </div>
         </div>
     </form>
-
-    <!-- JS Logic -->
-    <script>
-        let currentIndex = 0;
-        const totalQuestions = {{ $soalList->count() }};
-        const examType = '{{ $ujian->tipe_ujian }}';
-        const monitoringUrl = '{{ route($routePrefix . "monitoring", [$mataPelajaran->id, $ujian->id]) }}';
-        const csrfToken = '{{ csrf_token() }}';
-        const questionMeta = [
-            @foreach($soalList as $index => $soal)
-                { soal_id: {{ $soal->id }}, nomor_soal: {{ $index + 1 }} },
-            @endforeach
-        ];
-        const answersState = [
-            @foreach($soalList as $soal)
-                @php
-                    $isAnswered = false;
-                    if(isset($existingAnswers[$soal->id])) {
-                        $ans = $existingAnswers[$soal->id];
-                        if (is_string($ans)) {
-                            $decoded = json_decode($ans, true);
-                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                                if ($soal->tipe_soal === 'pilihan_ganda_kompleks') {
-                                    $isAnswered = count($decoded) > 0;
-                                } elseif ($soal->tipe_soal === 'benar_salah') {
-                                    $isAnswered = count($decoded) > 0 && !in_array(null, $decoded, true);
-                                } else {
-                                    $isAnswered = count($decoded) > 0;
-                                }
-                            } else {
-                                $isAnswered = trim($ans) !== '' && trim($ans) !== '-';
-                            }
-                        }
-                    }
-                @endphp
-                {{ $isAnswered ? 'true' : 'false' }},
-            @endforeach
-        ];
-        const storageKey = `doubtState_{{ $ujianSiswa->id }}`;
-        const savedDoubts = localStorage.getItem(storageKey);
-        const doubtState = savedDoubts ? JSON.parse(savedDoubts) : new Array(totalQuestions).fill(false);
-        const visitedState = new Array(totalQuestions).fill(false);
-        if (totalQuestions > 0) {
-            visitedState[0] = true;
-        }
-        
-        // Update nav colors on load
-        for(let i=0; i<totalQuestions; i++) {
-            updateNavColor(i);
-        }
-
-
-        // Timer
-        const durasiMenit = {{ $ujian->durasi_menit ?? 0 }};
-        const startTime = new Date("{{ $ujianSiswa->waktu_mulai->toIso8601String() }}").getTime();
-        
-        // Jika durasi 0, berarti tanpa batas waktu
-        const isUnlimited = (durasiMenit === 0);
-        const endTime = isUnlimited ? null : startTime + (durasiMenit * 60 * 1000);
-
-        function updateTimer() {
-            if (isUnlimited) {
-                document.getElementById("timer-display-main").innerHTML = "NO LIMIT";
-                 document.querySelectorAll(".mobile-timer").forEach(el => el.innerHTML = "NO LIMIT");
-                return;
-            }
-
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance < 0) {
-                document.getElementById("timer-display-main").innerHTML = "00:00:00";
-                document.querySelectorAll(".mobile-timer").forEach(el => el.innerHTML = "00:00:00");
-                Swal.fire({
-                    title: 'Waktu Habis!',
-                    text: 'Ujian akan disubmit otomatis.',
-                    icon: 'warning',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    document.getElementById('examForm').submit();
-                });
-                return;
-            }
-
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            const timerStr =
-                (hours < 10 ? "0" + hours : hours) + ":" +
-                (minutes < 10 ? "0" + minutes : minutes) + ":" +
-                (seconds < 10 ? "0" + seconds : seconds);
-
-            document.getElementById("timer-display-main").innerHTML = timerStr;
-            document.querySelectorAll(".mobile-timer").forEach(el => el.innerHTML = timerStr);
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-
-        // Navigation
-        function jumpToQuestion(index) {
-            document.getElementById(`q-item-${currentIndex}`).style.display = 'none';
-            document.getElementById(`q-item-${index}`).style.display = 'block';
-            currentIndex = index;
-            visitedState[index] = true;
-            updateUI();
-            sendMonitoringEvent('question_opened', {
-                metadata: { source: 'navigation' }
-            });
-        }
-
-        function nextQuestion() {
-            if (currentIndex < totalQuestions - 1) {
-                jumpToQuestion(currentIndex + 1);
-            }
-        }
-
-        function prevQuestion() {
-            if (currentIndex > 0) {
-                jumpToQuestion(currentIndex - 1);
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('q-no-display').innerText = currentIndex + 1;
-            document.getElementById('btn-prev').disabled = (currentIndex === 0);
-            document.getElementById('btn-next').disabled = (currentIndex === totalQuestions - 1);
-
-            syncRaguUI();
-
-            document.querySelectorAll('.q-nav-item').forEach((el, idx) => {
-                if (idx === currentIndex) el.classList.add('active');
-                else el.classList.remove('active');
-            });
-        }
-
-        function syncRaguUI() {
-            const cbRagu = document.getElementById('cb-ragu');
-            const labelRagu = document.getElementById('label-ragu');
-            if (cbRagu && labelRagu) {
-                cbRagu.checked = doubtState[currentIndex];
-                if (doubtState[currentIndex]) {
-                    labelRagu.style.filter = 'brightness(0.9) saturate(1.2)';
-                    labelRagu.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.2)';
-                } else {
-                    labelRagu.style.filter = 'none';
-                    labelRagu.style.boxShadow = 'none';
-                }
-            }
-        }
-
-        function selectOption(index, value, soalId) {
-            if(value && value.trim() !== '' && value.trim() !== '-') {
-                answersState[index] = true;
-            } else {
-                answersState[index] = false;
-            }
-            updateNavColor(index);
-
-            // Auto-save
-            if (soalId) {
-                autoSaveAnswer(soalId, value, index);
-            }
-        }
-
-        function autoSaveAnswer(soalId, jawaban, index = currentIndex) {
-            const url = '{{ route($routePrefix . "autosave", [$mataPelajaran->id, $ujian->id]) }}';
-            const meta = questionMeta[index] || null;
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    soal_id: soalId,
-                    nomor_soal: meta ? meta.nomor_soal : null,
-                    jawaban: jawaban
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    console.error('Autosave failed:', data.message);
-                }
-            })
-            .catch(error => console.error('Autosave error:', error));
-        }
-
-        function toggleRagu(isChecked) {
-            if (isChecked === undefined) {
-                doubtState[currentIndex] = !doubtState[currentIndex];
-            } else {
-                doubtState[currentIndex] = isChecked;
-            }
-            localStorage.setItem(storageKey, JSON.stringify(doubtState));
-            updateNavColor(currentIndex);
-            syncRaguUI();
-            sendMonitoringEvent('doubt_updated', {
-                metadata: {
-                    is_doubt: doubtState[currentIndex]
-                }
-            });
-        }
-
-        function updateKompleks(soalId, index) {
-            const checkboxes = document.querySelectorAll(`.kompleks-cb[data-soal-id="${soalId}"]:checked`);
-            const selected = Array.from(checkboxes).map(cb => cb.value);
-            const val = JSON.stringify(selected);
-            document.getElementById(`kompleks-hidden-${soalId}`).value = val;
-            selectOption(index, selected.length > 0 ? val : '', soalId);
-        }
-
-        function updateBenarSalah(soalId, totalPernyataan, index) {
-            const answers = [];
-            let answeredCount = 0;
-            for (let i = 0; i < totalPernyataan; i++) {
-                const radio = document.querySelector(`input[name="bs_${soalId}_${i}"]:checked`);
-                if (radio) {
-                    answers.push(radio.value === 'true');
-                    answeredCount++;
-                } else {
-                    answers.push(null);
-                }
-            }
-            const val = JSON.stringify(answers);
-            document.getElementById(`bs-hidden-${soalId}`).value = val;
-            selectOption(index, answeredCount === totalPernyataan ? val : '', soalId);
-        }
-
-        function updateNavColor(index) {
-            const navItem = document.getElementById(`nav-item-${index}`);
-            navItem.classList.remove('answered', 'doubt');
-
-            if (doubtState[index]) {
-                navItem.classList.add('doubt');
-            } else if (answersState[index]) {
-                navItem.classList.add('answered');
-            }
-        }
-
-        function currentQuestionMeta() {
-            return questionMeta[currentIndex] || null;
-        }
-
-        function buildMonitoringStatuses() {
-            return questionMeta.map((meta, index) => ({
-                soal_id: meta.soal_id,
-                nomor_soal: meta.nomor_soal,
-                is_visited: visitedState[index] || index === currentIndex,
-                is_answered: !!answersState[index],
-                is_doubt: !!doubtState[index]
-            }));
-        }
-
-        function sendMonitoringEvent(eventType, options = {}) {
-            if (examType === 'latihan') return Promise.resolve();
-
-            const meta = currentQuestionMeta();
-            const includeStatuses = ['heartbeat', 'question_opened', 'doubt_updated'].includes(eventType);
-            const payload = {
-                event_type: eventType,
-                current_soal_id: meta ? meta.soal_id : null,
-                current_nomor_soal: meta ? meta.nomor_soal : null,
-                metadata: options.metadata || {}
-            };
-
-            if (includeStatuses) {
-                payload.statuses = buildMonitoringStatuses();
-            }
-
-            return fetch(monitoringUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(payload),
-                keepalive: ['focus_lost', 'focus_returned'].includes(eventType)
-            }).catch(error => {
-                console.error('Monitoring error:', error);
-            });
-        }
-
-        function finishExam() {
-            const unanswered = answersState.filter(x => !x).length;
-            const doubts = doubtState.filter(x => x).length;
-
-            const isLatihan = {{ $ujian->tipe_ujian === 'latihan' ? 'true' : 'false' }};
-
-            if (!isLatihan && (unanswered > 0 || doubts > 0)) {
-                let errorMsg = 'Anda tidak dapat mengumpulkan ujian karena ada soal yang belum selesai.\n';
-                if (unanswered > 0) errorMsg += `\n- Terdapat ${unanswered} soal belum dijawab.`;
-                if (doubts > 0) errorMsg += `\n- Terdapat ${doubts} soal ditandai ragu-ragu.`;
-                errorMsg += '\n\nSilakan lengkapi dan hilangkan tanda ragu-ragu sebelum submit.';
-
-                Swal.fire({
-                    title: 'Peringatan!',
-                    text: errorMsg,
-                    icon: 'error',
-                    confirmButtonColor: '#dc3545',
-                    confirmButtonText: 'Tutup'
-                });
-                return;
-            }
-
-            let msg = '';
-            if (unanswered > 0) msg += `Masih ada ${unanswered} soal belum dijawab.\n`;
-            if (doubts > 0) msg += `Masih ada ${doubts} soal ditandai ragu-ragu.\n`;
-            msg += '\nApakah Anda yakin ingin menyelesaikan sesi ini?';
-
-            Swal.fire({
-                title: 'Konfirmasi Pengumpulan',
-                text: msg,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Selesaikan!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.removeItem(storageKey);
-                    document.getElementById('examForm').submit();
-                }
-            });
-        }
-
-        // Initialize
-        updateUI();
-        sendMonitoringEvent('question_opened', {
-            metadata: { source: 'initial_load' }
-        });
-        sendMonitoringEvent('heartbeat');
-        setInterval(() => {
-            sendMonitoringEvent('heartbeat');
-        }, 5000);
-
-        // Prevent back
-        history.pushState(null, null, location.href);
-        window.onpopstate = function () {
-            history.go(1);
-        };
-        // EXAM LOCKDOWN LOGIC
-        let blurCount = 0;
-        let focusLostActive = false;
-
-        function registerFocusLost(trigger) {
-            if (examType !== 'latihan') {
-                if (focusLostActive) return;
-                focusLostActive = true;
-                blurCount++;
-                sendMonitoringEvent('focus_lost', {
-                    metadata: { trigger: trigger }
-                });
-                Swal.fire({
-                    title: 'Peringatan Kecurangan!',
-                    text: 'Anda dilarang meninggalkan atau berpindah tab saat ujian berlangsung! Percobaan ini telah dicatat sistem.',
-                    icon: 'error',
-                    confirmButtonColor: '#dc3545',
-                    confirmButtonText: 'Kembali Fokus'
-                });
-            }
-        }
-
-        function registerFocusReturned(trigger) {
-            if (examType !== 'latihan' && focusLostActive) {
-                focusLostActive = false;
-                sendMonitoringEvent('focus_returned', {
-                    metadata: { trigger: trigger }
-                });
-            }
-        }
-
-        window.addEventListener('blur', function() {
-            registerFocusLost('window_blur');
-        });
-
-        window.addEventListener('focus', function() {
-            registerFocusReturned('window_focus');
-        });
-
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                registerFocusLost('visibility_hidden');
-            } else {
-                registerFocusReturned('visibility_visible');
-            }
-        });
-
-        // Prevent Right Click & Inspect
-        document.addEventListener('contextmenu', event => {
-            if (examType !== 'latihan') event.preventDefault();
-        });
-
-        document.onkeydown = function(e) {
-            if (examType !== 'latihan') {
-                if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 85 || e.keyCode === 73)) {
-                    return false;
-                }
-            }
-        };
-    </script>
+    </div>
 @endif
 
 @endsection
