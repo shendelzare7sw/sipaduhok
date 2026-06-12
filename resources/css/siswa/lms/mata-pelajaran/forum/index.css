@@ -1,0 +1,125 @@
+.siswa-lms-mapel-forum-index-page .forum-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.siswa-lms-mapel-forum-index-page .forum-heading {
+    color: var(--primary);
+    margin: 0;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-item {
+    padding: 20px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    gap: 16px;
+    transition: background 0.2s;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-item:hover {
+    background: #f9fafb;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-item:last-child {
+    border-bottom: none;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #0d3f7a);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-content {
+    flex: 1;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-title a:hover {
+    color: var(--primary);
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-meta {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-excerpt {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.siswa-lms-mapel-forum-index-page .diskusi-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #6b7280;
+    margin-top: 10px;
+}
+
+.siswa-lms-mapel-forum-index-page .topik-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.siswa-lms-mapel-forum-index-page .topik-materi {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.siswa-lms-mapel-forum-index-page .topik-tugas {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.siswa-lms-mapel-forum-index-page .topik-ujian {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.siswa-lms-mapel-forum-index-page .topik-konsultasi {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.siswa-lms-mapel-forum-index-page .topik-lainnya {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.siswa-lms-mapel-forum-index-page .empty-forum {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.siswa-lms-mapel-forum-index-page .empty-forum-icon {
+    opacity: 0.3;
+}
