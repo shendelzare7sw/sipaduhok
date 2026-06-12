@@ -1,0 +1,797 @@
+.siswa-lms-dashboard-page {
+            --primary-gradient: linear-gradient(135deg, #4f46e5, #3730a3);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --border-radius: 16px;
+        }
+
+        /* Welcome Banner */
+        .siswa-lms-dashboard-page .welcome-banner {
+            background: var(--primary-gradient);
+            border-radius: var(--border-radius);
+            padding: 30px 40px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+        }
+
+        .siswa-lms-dashboard-page .welcome-decoration {
+            position: absolute;
+            right: -20px;
+            bottom: -40px;
+            font-size: 15rem;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+        }
+
+        .siswa-lms-dashboard-page .welcome-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .siswa-lms-dashboard-page .welcome-title {
+            font-weight: 800;
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+
+        .siswa-lms-dashboard-page .welcome-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .siswa-lms-dashboard-page .btn-glass {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .siswa-lms-dashboard-page .btn-glass:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Stats Grid */
+        .siswa-lms-dashboard-page .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .siswa-lms-dashboard-page .stat-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .siswa-lms-dashboard-page .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .siswa-lms-dashboard-page .stat-icon-bg {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .siswa-lms-dashboard-page .stat-icon-bg.primary { background: #e0e7ff; color: #4338ca; }
+        .siswa-lms-dashboard-page .stat-icon-bg.warning { background: #ffedd5; color: #ea580c; }
+        .siswa-lms-dashboard-page .stat-icon-bg.info { background: #cffafe; color: #0891b2; }
+        .siswa-lms-dashboard-page .stat-icon-bg.purple { background: #ede9fe; color: #7c3aed; }
+
+        .siswa-lms-dashboard-page .stat-content {
+            flex-grow: 1;
+        }
+
+        .siswa-lms-dashboard-page .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .siswa-lms-dashboard-page .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .siswa-lms-dashboard-page .text-purple { color: #7c3aed; }
+
+        /* Dashboard Grid Layout */
+        .siswa-lms-dashboard-page .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+
+        .siswa-lms-dashboard-page .dashboard-main {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .siswa-lms-dashboard-page .dashboard-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Section Styling */
+        .siswa-lms-dashboard-page .section-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .siswa-lms-dashboard-page .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .siswa-lms-dashboard-page .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+        }
+
+        .siswa-lms-dashboard-page .badge-date {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .siswa-lms-dashboard-page .btn-link-custom {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .siswa-lms-dashboard-page .btn-link-custom:hover {
+            color: #312e81;
+            text-decoration: underline;
+        }
+
+        /* Timeline Schedule */
+        .siswa-lms-dashboard-page .timeline-container {
+            position: relative;
+            padding-left: 10px;
+        }
+
+        .siswa-lms-dashboard-page .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .siswa-lms-dashboard-page .timeline-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .siswa-lms-dashboard-page .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 87px;
+            top: 25px;
+            bottom: -30px;
+            width: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .siswa-lms-dashboard-page .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .siswa-lms-dashboard-page .timeline-time {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 60px;
+            padding-top: 5px;
+        }
+
+        .siswa-lms-dashboard-page .time-start {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+
+        .siswa-lms-dashboard-page .time-end {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .siswa-lms-dashboard-page .timeline-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid #e0e7ff;
+            z-index: 2;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .siswa-lms-dashboard-page .timeline-content {
+            flex-grow: 1;
+        }
+
+        .siswa-lms-dashboard-page .timeline-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .siswa-lms-dashboard-page .timeline-card:hover {
+            background: white;
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transform: translateX(4px);
+        }
+
+        .siswa-lms-dashboard-page .timeline-subject {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .siswa-lms-dashboard-page .timeline-teacher {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .siswa-lms-dashboard-page .timeline-action {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .siswa-lms-dashboard-page .timeline-card:hover .timeline-action {
+            opacity: 1;
+        }
+
+        /* Task Grid */
+        .siswa-lms-dashboard-page .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .siswa-lms-dashboard-page .task-card-modern {
+            border: 1px solid #f3f4f6;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .siswa-lms-dashboard-page .task-card-modern:hover {
+            box-shadow: var(--card-hover-shadow);
+            border-color: #e5e7eb;
+        }
+
+        .siswa-lms-dashboard-page .task-priority {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 4px;
+        }
+
+        .siswa-lms-dashboard-page .task-priority.urgent { background: #ef4444; }
+        .siswa-lms-dashboard-page .task-priority.normal { background: #10b981; }
+
+        .siswa-lms-dashboard-page .task-details {
+            padding: 16px 16px 16px 24px;
+        }
+
+        .siswa-lms-dashboard-page .task-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .siswa-lms-dashboard-page .badge-blue { background: #e0f2fe; color: #0284c7; }
+        .siswa-lms-dashboard-page .badge-orange { background: #ffedd5; color: #ea580c; }
+
+        .siswa-lms-dashboard-page .task-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .siswa-lms-dashboard-page .task-subject {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .siswa-lms-dashboard-page .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 12px;
+        }
+
+        .siswa-lms-dashboard-page .task-due {
+            font-size: 0.75rem;
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .siswa-lms-dashboard-page .btn-task-action {
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .siswa-lms-dashboard-page .btn-task-action:hover {
+            background: #111827;
+            color: white;
+        }
+
+        /* Courses Grid */
+        .siswa-lms-dashboard-page .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .siswa-lms-dashboard-page .course-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+        }
+
+        .siswa-lms-dashboard-page .course-card:hover {
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .siswa-lms-dashboard-page .course-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .siswa-lms-dashboard-page .course-info {
+            overflow: hidden;
+        }
+
+        .siswa-lms-dashboard-page .course-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .siswa-lms-dashboard-page .course-teacher {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Sidebar Widgets */
+        .siswa-lms-dashboard-page .sidebar-widget {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .siswa-lms-dashboard-page .widget-announcement {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .siswa-lms-dashboard-page .widget-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .siswa-lms-dashboard-page .widget-body {
+            padding: 20px;
+        }
+
+        .siswa-lms-dashboard-page .ann-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .siswa-lms-dashboard-page .ann-text {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            color: #e0e7ff;
+        }
+
+        .siswa-lms-dashboard-page .ann-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .siswa-lms-dashboard-page .btn-ann-action {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .siswa-lms-dashboard-page .btn-ann-action.primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .siswa-lms-dashboard-page .btn-ann-action.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .siswa-lms-dashboard-page .btn-ann-action:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Simple Widget Header */
+        .siswa-lms-dashboard-page .widget-header-simple {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .siswa-lms-dashboard-page .widget-header-simple h6 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #374151;
+        }
+
+        .siswa-lms-dashboard-page .small-link {
+            font-size: 0.75rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Events List */
+        .siswa-lms-dashboard-page .events-list, .siswa-lms-dashboard-page .teachers-list {
+            padding: 10px 0;
+        }
+
+        .siswa-lms-dashboard-page .event-row {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .siswa-lms-dashboard-page .event-row:last-child {
+            border-bottom: none;
+        }
+
+        .siswa-lms-dashboard-page .event-date-box {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 6px 10px;
+            text-align: center;
+            min-width: 50px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .siswa-lms-dashboard-page .event-d {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #1f2937;
+            line-height: 1;
+        }
+
+        .siswa-lms-dashboard-page .event-m {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .siswa-lms-dashboard-page .event-info {
+            flex-grow: 1;
+        }
+
+        .siswa-lms-dashboard-page .event-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .siswa-lms-dashboard-page .event-tag {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .siswa-lms-dashboard-page .tag-red { background: #fee2e2; color: #ef4444; }
+        .siswa-lms-dashboard-page .tag-blue { background: #e0f2fe; color: #0284c7; }
+
+        /* Teachers List */
+        .siswa-lms-dashboard-page .teacher-row {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .siswa-lms-dashboard-page .teacher-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .siswa-lms-dashboard-page .teacher-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .siswa-lms-dashboard-page .teacher-img .initial {
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .siswa-lms-dashboard-page .teacher-detail {
+            overflow: hidden;
+        }
+
+        .siswa-lms-dashboard-page .t-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1px;
+            color: #374151;
+        }
+
+        .siswa-lms-dashboard-page .t-mapel {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+        }
+
+        /* Empty States */
+        .siswa-lms-dashboard-page .empty-mini {
+            padding: 20px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        .siswa-lms-dashboard-page .empty-state {
+            padding: 30px;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+.siswa-lms-dashboard-page .empty-state i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+.siswa-lms-dashboard-page .span-all {
+    grid-column: 1 / -1;
+}
+
+.siswa-lms-dashboard-page .opacity-full {
+    opacity: 1;
+}
+
+.siswa-lms-dashboard-page .announcement-all-link {
+    font-size: 0.8rem;
+}
+
+.siswa-lms-dashboard-page .ann-title-sm {
+    font-size: 0.95rem;
+}
+
+.siswa-lms-dashboard-page .ann-time,
+.siswa-lms-dashboard-page .ann-action-btn {
+    font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+            .siswa-lms-dashboard-page .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .siswa-lms-dashboard-page .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+             .siswa-lms-dashboard-page .welcome-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .siswa-lms-dashboard-page .welcome-actions {
+                width: 100%;
+            }
+            
+            .siswa-lms-dashboard-page .btn-glass {
+                width: 100%;
+                text-align: center;
+                display: block;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .siswa-lms-dashboard-page .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .siswa-lms-dashboard-page .stat-card {
+                padding: 14px 16px;
+            }
+
+            .siswa-lms-dashboard-page .section-container {
+                padding: 16px;
+            }
+
+            .siswa-lms-dashboard-page .welcome-banner {
+                padding: 20px;
+            }
+
+            .siswa-lms-dashboard-page .welcome-title {
+                font-size: 1.3rem;
+            }
+
+            .siswa-lms-dashboard-page .welcome-subtitle {
+                font-size: 0.875rem;
+            }
+
+            .siswa-lms-dashboard-page .timeline-item {
+                gap: 12px;
+            }
+
+            .siswa-lms-dashboard-page .timeline-item::before {
+                left: 77px;
+            }
+
+            .siswa-lms-dashboard-page .task-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .siswa-lms-dashboard-page .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .siswa-lms-dashboard-page .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+        }
