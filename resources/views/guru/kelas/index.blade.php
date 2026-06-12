@@ -9,34 +9,11 @@
 @endsection
 
 @section('styles')
-    <style>
-        .card-kelas {
-            transition: all 0.3s ease;
-            border-top: 4px solid #165fac !important;
-            border-radius: 10px;
-        }
-
-        .card-kelas:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .badge-mapel {
-            font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-
-        .stat-box {
-            padding: 10px;
-            background: #f8f9fc;
-            border-radius: 8px;
-        }
-    </style>
+    @vite(['resources/css/guru/kelas/index.css'])
 @endsection
 
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+    <div class="guru-kelas-page">
         <div class="container-fluid px-0">
 
             <div class="card shadow-sm mb-4 border-start border-primary border-4">
@@ -80,7 +57,7 @@
 
                                     <div class="mb-4">
                                         <p class="fw-bold text-gray-600 mb-2">MATA PELAJARAN:</p>
-                                        <div class="d-flex flex-wrap" style="gap: 5px;">
+                                        <div class="mapel-badge-list">
                                             @foreach($item['mapel'] as $mapel)
                                                 <span class="badge bg-light border text-primary badge-mapel">
                                                     {{ $mapel->nama_mapel }}
