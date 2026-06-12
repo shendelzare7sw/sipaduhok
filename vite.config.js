@@ -75,6 +75,8 @@ export default defineConfig({
                 'resources/js/ketua/monitoring/wali-kelas.js',
                 'resources/css/ketua/dispensasi/index.css',
                 'resources/js/ketua/dispensasi/index.js',
+                'resources/css/admin/laporan/index.css',
+                'resources/js/admin/laporan/index.js',
                 'resources/css/ketua/laporan/index.css',
                 'resources/js/ketua/laporan/index.js',
                 'resources/css/ketua/promotion/approval.css',
