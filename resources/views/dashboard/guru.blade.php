@@ -9,237 +9,11 @@
 @endsection
 
 @section('styles')
-<style>
-    :root {
-        --g-primary: #4361ee;
-        --g-success: #10b981;
-        --g-warning: #f59e0b;
-        --g-danger: #ef4444;
-        --g-info: #06b6d4;
-        --g-purple: #8b5cf6;
-        --g-surface: #ffffff;
-        --g-bg: #f8fafc;
-        --g-border: #e2e8f0;
-        --g-text: #1e293b;
-        --g-muted: #64748b;
-        --g-radius: 12px;
-    }
-    .g-card {
-        background: var(--g-surface);
-        border: 1px solid var(--g-border);
-        border-radius: var(--g-radius);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        overflow: hidden;
-    }
-    .g-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .g-card-header {
-        background: transparent;
-        border-bottom: 1px solid var(--g-border);
-        padding: 1.15rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .g-card-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--g-text);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    /* Stat Cards */
-    .stat-widget {
-        padding: 1.5rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 1.25rem;
-    }
-    .stat-icon-box {
-        width: 48px; height: 48px;
-        border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-    .stat-details { flex-grow: 1; min-width: 0; }
-    .stat-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--g-text);
-        line-height: 1.2;
-        margin-bottom: 0.2rem;
-    }
-    .stat-label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--g-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .stat-footer {
-        margin: 0 1.5rem;
-        padding: 0.85rem 0;
-        border-top: 1px dashed var(--g-border);
-        font-size: 0.8rem;
-        color: var(--g-muted);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    /* Jadwal List */
-    .jadwal-list { padding: 0; margin: 0; list-style: none; }
-    .jadwal-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.9rem 1.5rem;
-        border-bottom: 1px solid var(--g-border);
-        transition: background 0.15s ease;
-    }
-    .jadwal-item:last-child { border-bottom: none; }
-    .jadwal-item:hover { background: var(--g-bg); }
-    .jadwal-time {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--g-primary);
-        white-space: nowrap;
-        min-width: 90px;
-        flex-shrink: 0;
-    }
-    .jadwal-dot {
-        width: 8px; height: 8px;
-        border-radius: 50%;
-        background: var(--g-primary);
-        flex-shrink: 0;
-        opacity: 0.5;
-    }
-    .jadwal-body { flex: 1; min-width: 0; }
-    .jadwal-mapel {
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--g-text);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .jadwal-kelas {
-        font-size: 0.78rem;
-        color: var(--g-muted);
-    }
-
-    /* Kelas Grid */
-    .kelas-grid { padding: 0; margin: 0; list-style: none; }
-    .kelas-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.9rem 1.5rem;
-        border-bottom: 1px solid var(--g-border);
-        transition: background 0.15s ease;
-    }
-    .kelas-item:last-child { border-bottom: none; }
-    .kelas-item:hover { background: var(--g-bg); }
-    .kelas-icon {
-        width: 42px; height: 42px;
-        border-radius: 10px;
-        background: #eff6ff;
-        color: var(--g-primary);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1rem;
-        flex-shrink: 0;
-        font-weight: 700;
-    }
-    .kelas-body { flex: 1; min-width: 0; }
-    .kelas-name {
-        font-weight: 600;
-        font-size: 0.95rem;
-        color: var(--g-text);
-    }
-    .kelas-meta {
-        font-size: 0.78rem;
-        color: var(--g-muted);
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-
-    /* Quick Links */
-    .quick-links-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.85rem;
-        padding: 1.25rem;
-    }
-    .quick-link-item {
-        display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        padding: 1.15rem 0.75rem;
-        border-radius: 10px;
-        border: 1px solid var(--g-border);
-        background: var(--g-surface);
-        color: var(--g-text);
-        text-decoration: none;
-        transition: all 0.2s ease;
-        text-align: center;
-        gap: 0.65rem;
-    }
-    .quick-link-item:hover {
-        background: var(--g-bg);
-        border-color: var(--g-primary);
-        color: var(--g-primary);
-    }
-    .quick-link-item i {
-        font-size: 1.4rem;
-        color: var(--g-muted);
-        transition: color 0.2s ease;
-    }
-    .quick-link-item:hover i { color: var(--g-primary); }
-    .quick-link-text { font-size: 0.8rem; font-weight: 600; line-height: 1.3; }
-
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 2.5rem 1.5rem;
-        color: var(--g-muted);
-    }
-    .empty-state i { font-size: 2rem; opacity: 0.3; margin-bottom: 0.75rem; }
-    .empty-state-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
-    .empty-state-desc { font-size: 0.82rem; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .stat-value { font-size: 1.35rem; }
-        .stat-widget { padding: 1.15rem; gap: 0.85rem; }
-        .stat-icon-box { width: 40px; height: 40px; font-size: 1.1rem; }
-        .stat-footer { margin: 0 1.15rem; font-size: 0.75rem; }
-        .jadwal-item { padding: 0.75rem 1.15rem; gap: 0.75rem; }
-        .jadwal-time { font-size: 0.75rem; min-width: 75px; }
-        .kelas-item { padding: 0.75rem 1.15rem; gap: 0.75rem; }
-        .kelas-icon { width: 36px; height: 36px; font-size: 0.85rem; }
-        .quick-links-grid { padding: 1rem; gap: 0.6rem; }
-        .quick-link-item { padding: 0.85rem 0.5rem; }
-        .quick-link-item i { font-size: 1.2rem; }
-        .quick-link-text { font-size: 0.72rem; }
-        .g-card-header { padding: 1rem 1.15rem; }
-        .g-card-title { font-size: 0.9rem; }
-    }
-    @media (max-width: 480px) {
-        .stat-value { font-size: 1.15rem; }
-        .stat-label { font-size: 0.7rem; }
-        .stat-icon-box { width: 36px; height: 36px; font-size: 1rem; }
-    }
-</style>
+    @vite(['resources/css/dashboard/guru.css'])
 @endsection
 
 @section('content')
+<div class="guru-dashboard-page">
 
     <!-- Quick Stats -->
     <div class="row g-3 mb-4">
@@ -250,7 +24,7 @@
                         <div class="stat-value">{{ $kelasYangDiajar->count() ?? 0 }}</div>
                         <div class="stat-label">Kelas Diampu</div>
                     </div>
-                    <div class="stat-icon-box" style="color: #3b82f6; background: #eff6ff;">
+                    <div class="stat-icon-box stat-icon-primary">
                         <i class="fas fa-school"></i>
                     </div>
                 </div>
@@ -267,7 +41,7 @@
                         <div class="stat-value">{{ $totalSiswa ?? 0 }}</div>
                         <div class="stat-label">Total Siswa</div>
                     </div>
-                    <div class="stat-icon-box" style="color: #10b981; background: #ecfdf5;">
+                    <div class="stat-icon-box stat-icon-success">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
                 </div>
@@ -284,7 +58,7 @@
                         <div class="stat-value">{{ $jadwalHariIni->count() ?? 0 }}</div>
                         <div class="stat-label">Jadwal Hari Ini</div>
                     </div>
-                    <div class="stat-icon-box" style="color: #f59e0b; background: #fffbeb;">
+                    <div class="stat-icon-box stat-icon-warning">
                         <i class="fas fa-calendar-day"></i>
                     </div>
                 </div>
@@ -307,9 +81,9 @@
                 <div class="g-card-header">
                     <h5 class="g-card-title">
                         <i class="fas fa-calendar-day text-warning"></i> Jadwal Mengajar
-                        <span class="badge bg-label-primary ms-1" style="font-size: 0.7rem;">{{ now()->locale('id')->translatedFormat('l') }}</span>
+                        <span class="badge bg-label-primary ms-1 dashboard-day-badge">{{ now()->locale('id')->translatedFormat('l') }}</span>
                     </h5>
-                    <a href="{{ route('guru.jadwal.index') }}" class="text-primary fw-semibold text-decoration-none" style="font-size: 0.8rem;">
+                    <a href="{{ route('guru.jadwal.index') }}" class="text-primary fw-semibold text-decoration-none dashboard-link-sm">
                         Jadwal Lengkap <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -326,7 +100,7 @@
                                     <div class="jadwal-kelas">Kelas {{ $jadwal->kelas->nama_kelas }}</div>
                                 </div>
                                 <a href="{{ route('guru.lms.dashboard', [$jadwal->kelas->id, $jadwal->link_mapel_id]) }}"
-                                   class="btn btn-sm btn-outline-primary px-3" style="font-size: 0.75rem; font-weight: 600; border-radius: 6px; white-space: nowrap;">
+                                   class="btn btn-sm btn-outline-primary px-3 dashboard-action-button">
                                     <i class="fas fa-door-open me-1"></i>Masuk LMS
                                 </a>
                             </li>
@@ -347,7 +121,7 @@
                     <h5 class="g-card-title">
                         <i class="fas fa-chalkboard-teacher text-info"></i> Kelas yang Diampu
                     </h5>
-                    <a href="{{ route('guru.kelas.index') }}" class="text-primary fw-semibold text-decoration-none" style="font-size: 0.8rem;">
+                    <a href="{{ route('guru.kelas.index') }}" class="text-primary fw-semibold text-decoration-none dashboard-link-sm">
                         Lihat Semua <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -365,7 +139,7 @@
                                     </div>
                                 </div>
                                 <a href="{{ route('guru.kelas.mapel', $item['kelas']->id) }}"
-                                   class="btn btn-sm btn-outline-info px-3" style="font-size: 0.75rem; font-weight: 600; border-radius: 6px; white-space: nowrap;">
+                                   class="btn btn-sm btn-outline-info px-3 dashboard-action-button">
                                     <i class="fas fa-arrow-right me-1"></i>Kelola
                                 </a>
                             </li>
@@ -420,4 +194,5 @@
         </div>
     </div>
 
+</div>
 @endsection

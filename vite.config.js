@@ -34,6 +34,7 @@ export default defineConfig({
                 'resources/js/sekretaris/pengumuman/index.js',
                 'resources/css/dashboard/admin.css',
                 'resources/js/dashboard/admin.js',
+                'resources/css/dashboard/guru.css',
                 // Catatan scoped page assets
                 'resources/css/admin/catatan/create.css',
                 'resources/css/admin/catatan/index.css',
