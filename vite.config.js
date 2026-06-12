@@ -11,6 +11,11 @@ export default defineConfig({
                 // Component scoped assets
                 'resources/css/components/ai-sidebar.css',
                 'resources/js/components/ai-sidebar.js',
+                'resources/css/components/notification-bell.css',
+                'resources/js/components/notification-bell.js',
+                'resources/css/components/file-preview.css',
+                'resources/js/components/file-preview.js',
+                'resources/css/components/lms/media-display.css',
                 // Akademik scoped page assets
                 'resources/css/admin/akademik/berita/index.css',
                 'resources/css/admin/akademik/flyer/index.css',

@@ -12,19 +12,26 @@
     $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
     $isPdf = $extension === 'pdf';
 
-    // Direct asset URL for download
     $downloadUrl = asset('storage/' . $path);
 
-    // Preview URL: use integer-based cache ID just like validasi-izin uses database ID
-    // This makes the URL look like /view-document/54321 — no file extension, no suspicious params
+    // Preview URL: use an integer-based cache ID so the URL stays extensionless.
     $previewId = crc32($path . session()->getId()) % 100000;
     if ($previewId < 0) $previewId = abs($previewId);
     \Illuminate\Support\Facades\Cache::put('docview_' . $previewId, $path, now()->addHours(4));
     $previewUrl = url('/view-document/' . $previewId);
 
-    // Unique ID for this component instance
     $modalId = 'filemodal' . md5($path . uniqid());
 @endphp
+
+@once
+    @push('styles')
+        @vite(['resources/css/components/file-preview.css'])
+    @endpush
+
+    @push('scripts')
+        @vite(['resources/js/components/file-preview.js'])
+    @endpush
+@endonce
 
 <div class="d-inline-block">
     @if($isImage)
@@ -43,7 +50,7 @@
 
         <!-- Image Modal -->
         @push('modals')
-        <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+        <div class="modal fade file-preview-modal" id="{{ $modalId }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -53,7 +60,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center p-0">
-                        <img src="{{ $downloadUrl }}" alt="Pratinjau" class="img-fluid" style="max-height: 80vh;">
+                        <img src="{{ $downloadUrl }}" alt="Pratinjau" class="img-fluid file-preview-image">
                     </div>
                     <div class="modal-footer">
                         <a href="{{ $downloadUrl }}" download class="btn btn-primary">
@@ -80,11 +87,11 @@
             <i class="fas fa-download"></i>
         </a>
 
-        <!-- PDF Modal: uses data-src lazy loading exactly like validasi-izin -->
+        <!-- PDF Modal -->
         @push('modals')
-        <div class="modal fade" id="{{ $modalId }}" tabindex="-1" aria-hidden="true" style="z-index: 1055;">
+        <div class="modal fade file-preview-modal" id="{{ $modalId }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content" style="height: 90vh;">
+                <div class="modal-content file-preview-pdf-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             <i class="fas fa-file-pdf me-2"></i>Pratinjau PDF
@@ -92,7 +99,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-0 h-100">
-                        <iframe src="" data-src="{{ $previewUrl }}" width="100%" height="100%" style="border:none;"></iframe>
+                        <iframe src="" data-src="{{ $previewUrl }}" width="100%" height="100%" class="file-preview-frame"></iframe>
                     </div>
                     <div class="modal-footer">
                         <a href="{{ $downloadUrl }}" download class="btn btn-primary">
@@ -104,25 +111,6 @@
             </div>
         </div>
         @endpush
-
-        @once
-        @push('scripts')
-        <script>
-            // Lazy load PDF iframes — identical to validasi-izin pattern
-            document.addEventListener('DOMContentLoaded', function() {
-                var modals = document.querySelectorAll('.modal');
-                modals.forEach(function(modal) {
-                    modal.addEventListener('shown.bs.modal', function() {
-                        var iframe = modal.querySelector('iframe');
-                        if (iframe && !iframe.getAttribute('src')) {
-                            iframe.setAttribute('src', iframe.getAttribute('data-src'));
-                        }
-                    });
-                });
-            });
-        </script>
-        @endpush
-        @endonce
 
     @else
         <!-- Other Files (No Preview, Direct Download) -->

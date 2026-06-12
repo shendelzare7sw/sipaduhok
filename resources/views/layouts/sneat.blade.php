@@ -567,7 +567,9 @@
         }
     </style>
 
+    @vite(['resources/css/components/notification-bell.css'])
     @yield('styles')
+    @stack('styles')
 </head>
 
 <body>
@@ -1046,6 +1048,7 @@
     <!-- Currency Format Script -->
     <script src="{{ asset('js/currency-format.js') }}?v=1.0"></script>
 
+    @vite(['resources/js/components/notification-bell.js'])
     @stack('scripts')
     @yield('scripts')
 
