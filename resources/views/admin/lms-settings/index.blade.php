@@ -9,8 +9,12 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/lms-settings/index.css'])
+@endsection
+
 @section('content')
-    <div class="row g-4">
+    <div class="row g-4 lms-settings-page">
         <!-- Settings Column -->
         <div class="col-12 col-md-8 col-lg-7">
             <div class="card border-0 shadow-sm h-100">
@@ -52,7 +56,7 @@
                                 <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-2 border-bottom">
                                     <div class="d-flex align-items-center">
                                         <div class="avatar avatar-sm me-3">
-                                            <div class="rounded-circle bg-label-{{ $info['color'] }} d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                            <div class="rounded-circle bg-label-{{ $info['color'] }} d-flex align-items-center justify-content-center lms-icon-frame">
                                                 <i class="fas {{ $info['icon'] }}"></i>
                                             </div>
                                         </div>
@@ -64,7 +68,7 @@
                                     <div class="form-check form-switch form-switch-md">
                                         <input class="form-check-input" type="checkbox" name="jenjang[]"
                                             value="{{ $jenjang }}" id="jenjang_{{ $jenjang }}"
-                                            style="cursor: pointer; transform: scale(1.3);"
+                                            class="lms-toggle-input"
                                             {{ $isChecked ? 'checked' : '' }}>
                                     </div>
                                 </div>
@@ -87,7 +91,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start">
                          <div class="avatar me-2">
-                            <div class="rounded bg-label-primary d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                            <div class="rounded bg-label-primary d-flex align-items-center justify-content-center lms-icon-frame">
                                 <i class="fas fa-info-circle"></i>
                             </div>
                         </div>
@@ -103,22 +107,22 @@
                  <div class="card-body">
                     <h6 class="fw-bold mb-3"><i class="fas fa-question-circle text-warning me-2"></i>Dampak Penonaktifan</h6>
                     <ul class="timeline ms-2">
-                        <li class="timeline-item pb-4 border-start border-2 ps-3" style="border-color: #e5e7eb;">
-                            <span class="timeline-indicator-advanced text-danger fw-bold">•</span>
+                        <li class="timeline-item lms-timeline-item pb-4 border-start border-2 ps-3">
+                            <span class="timeline-indicator-advanced text-danger fw-bold">&bull;</span>
                             <div class="ms-2">
                                 <div class="fw-bold text-dark">Menu Hilang</div>
                                 <p class="text-muted small mb-0">Siswa tidak akan melihat menu "Learning Management" di sidebar mereka.</p>
                             </div>
                         </li>
-                        <li class="timeline-item pb-4 border-start border-2 ps-3" style="border-color: #e5e7eb;">
-                            <span class="timeline-indicator-advanced text-danger fw-bold">•</span>
+                        <li class="timeline-item lms-timeline-item pb-4 border-start border-2 ps-3">
+                            <span class="timeline-indicator-advanced text-danger fw-bold">&bull;</span>
                             <div class="ms-2">
                                 <div class="fw-bold text-dark">Akses Terbatas</div>
                                 <p class="text-muted small mb-0">Siswa tidak bisa mengakses halaman Tugas, Materi, dan Ujian.</p>
                             </div>
                         </li>
-                        <li class="timeline-item border-start border-2 ps-3" style="border-color: transparent;">
-                             <span class="timeline-indicator-advanced text-success fw-bold">•</span>
+                        <li class="timeline-item lms-timeline-item-last border-start border-2 ps-3">
+                             <span class="timeline-indicator-advanced text-success fw-bold">&bull;</span>
                             <div class="ms-2">
                                 <div class="fw-bold text-dark">Data Aman</div>
                                 <p class="text-muted small mb-0">Data tugas atau nilai yang sudah ada tidak akan dihapus, hanya disembunyikan.</p>
@@ -130,13 +134,4 @@
         </div>
     </div>
 
-    <style>
-        .timeline-item:last-child {
-            border-left-color: transparent !important;
-        }
-        .form-switch .form-check-input:checked {
-            background-color: #696cff; /* Primary Sneat Color */
-            border-color: #696cff;
-        }
-    </style>
 @endsection
