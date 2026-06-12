@@ -321,6 +321,8 @@ export default defineConfig({
                 'resources/js/profile/index.js',
                 'resources/css/account/settings.css',
                 'resources/js/account/settings.js',
+                'resources/css/orang-tua/presensi/ajukan-izin.css',
+                'resources/css/orang-tua/presensi/edit-izin.css',
                 'resources/css/admin/lms-settings/index.css',
                 'resources/css/admin/keuangan/tagihan/generate-spp.css',
                 'resources/js/admin/keuangan/tagihan/generate-spp.js',

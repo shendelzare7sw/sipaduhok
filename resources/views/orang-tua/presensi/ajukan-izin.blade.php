@@ -7,8 +7,12 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/orang-tua/presensi/ajukan-izin.css'])
+@endsection
+
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y orang-tua-ajukan-izin-page">
 
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -27,13 +31,15 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <div class="avatar avatar-lg" style="width: 60px; height: 60px;">
+                    <div class="avatar avatar-lg permission-avatar">
                         @if($siswa->user && $siswa->user->foto_profil)
-                            <img src="{{ asset('storage/' . $siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $siswa->user->foto_profil) }}" alt="avatar"
+                                class="rounded-circle border border-2 border-white shadow-sm permission-avatar-image">
                         @elseif($siswa->foto)
-                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="avatar"
+                                class="rounded-circle border border-2 border-white shadow-sm permission-avatar-image">
                         @else
-                            <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-2 border-white d-flex align-items-center justify-content-center" style="font-size: 1.8rem; width: 100%; height: 100%;">
+                            <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-2 border-white d-flex align-items-center justify-content-center permission-avatar-initial">
                                 {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
                             </span>
                         @endif
