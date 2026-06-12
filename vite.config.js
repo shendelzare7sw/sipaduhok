@@ -233,6 +233,7 @@ export default defineConfig({
                 'resources/css/admin/tahun-ajaran/index.css',
                 'resources/js/admin/tahun-ajaran/index.js',
                 'resources/css/admin/tahun-ajaran/show.css',
+                'resources/css/waka/dashboard.css',
                 'resources/css/waka/tahun-ajaran/form.css',
                 'resources/css/waka/tahun-ajaran/index.css',
                 'resources/js/waka/tahun-ajaran/index.js',
