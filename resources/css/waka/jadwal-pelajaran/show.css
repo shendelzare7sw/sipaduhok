@@ -1,0 +1,171 @@
+.schedule-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(6, 1fr);
+    gap: 2px;
+    background: #e5e7eb;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 600px;
+}
+
+.schedule-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 16px 12px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 14px;
+}
+
+.schedule-time {
+    background: #f9fafb;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #6b7280;
+    text-align: center;
+    font-family: "Monaco", "Consolas", monospace;
+}
+
+.schedule-cell {
+    background: white;
+    padding: 12px;
+    min-height: 80px;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.schedule-cell:hover {
+    background: #f9fafb;
+    cursor: pointer;
+}
+
+.schedule-cell.has-schedule {
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+}
+
+.schedule-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.schedule-mapel {
+    font-weight: 700;
+    color: #111827;
+    font-size: 14px;
+}
+
+.schedule-guru {
+    font-size: 12px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schedule-guru i {
+    color: #3b82f6;
+}
+
+.schedule-time-badge {
+    font-size: 11px;
+    color: #9ca3af;
+    font-family: "Monaco", "Consolas", monospace;
+}
+
+.schedule-empty {
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 12px;
+    text-align: center;
+}
+
+.status-chip {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.status-kosong {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.kelas-info-card {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.kelas-info-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.kelas-info-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.kelas-info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.schedule-scroll {
+    overflow-x: auto;
+}
+
+.legend-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.legend-box-active {
+    background: #dbeafe;
+    border-left: 4px solid #3b82f6;
+}
+
+.legend-box-empty {
+    background: white;
+    border: 1px solid #e5e7eb;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .schedule-grid {
+        page-break-inside: avoid;
+    }
+
+    .schedule-cell {
+        min-height: 60px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .kelas-info-card {
+        padding: 16px;
+    }
+
+    .kelas-info-title {
+        font-size: 18px;
+    }
+}
