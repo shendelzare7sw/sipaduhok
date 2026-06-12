@@ -1,0 +1,64 @@
+.guru-lms-ujian-koreksi-page .koreksi-question-card {
+    border-left: 4px solid #165fac;
+}
+
+.guru-lms-ujian-koreksi-page .koreksi-question-card.is-manual {
+    border-left-color: #f59e0b;
+}
+
+.guru-lms-ujian-koreksi-page .question-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #2c3e50;
+}
+
+.guru-lms-ujian-koreksi-page .student-answer-box {
+    font-size: 1.05rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+}
+
+.guru-lms-ujian-koreksi-page .student-answer-box-min {
+    min-height: 80px;
+}
+
+.guru-lms-ujian-koreksi-page .btn-ai-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+    transition: all 0.3s ease;
+}
+
+.guru-lms-ujian-koreksi-page .btn-ai-gradient:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.4);
+    color: white;
+}
+
+.guru-lms-ujian-koreksi-page .form-control-lg-custom {
+    font-size: 1.1rem;
+    padding: 0.6rem 1rem;
+}
+
+.guru-lms-ujian-koreksi-page .btn-ai-loading {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    animation: guru-lms-koreksi-pulse-glow 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.guru-lms-ujian-koreksi-page .ai-toast-container {
+    z-index: 1050;
+}
+
+@keyframes guru-lms-koreksi-pulse-glow {
+    0%,
+    100% {
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.7);
+    }
+}

@@ -1,0 +1,335 @@
+.guru-lms-ujian-pengawasan-page .monitor-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-refresh {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 13px;
+    min-width: 0;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-stat {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 96px;
+    min-width: 0;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-stat .value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-stat .label {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 8px;
+    overflow-wrap: anywhere;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-panel {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-panel-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-weight: 700;
+}
+
+.guru-lms-ujian-pengawasan-page .progress {
+    height: 8px;
+    background: #e5e7eb;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table-wrap {
+    overflow-x: auto;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table {
+    min-width: 920px;
+    table-layout: fixed;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table th,
+.guru-lms-ujian-pengawasan-page .monitor-table td {
+    vertical-align: middle;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-name {
+    width: 22%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-status {
+    width: 13%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-progress {
+    width: 20%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-current {
+    width: 10%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-small {
+    width: 8%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-activity {
+    width: 14%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-table .col-action {
+    width: 9%;
+}
+
+.guru-lms-ujian-pengawasan-page .monitor-card-list {
+    display: none;
+    padding: 12px;
+    gap: 12px;
+}
+
+.guru-lms-ujian-pengawasan-page .student-monitor-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+}
+
+.guru-lms-ujian-pengawasan-page .student-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.guru-lms-ujian-pengawasan-page .student-name {
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.guru-lms-ujian-pengawasan-page .student-meta {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.guru-lms-ujian-pengawasan-page .student-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.guru-lms-ujian-pengawasan-page .student-card-metric {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 0;
+}
+
+.guru-lms-ujian-pengawasan-page .student-card-metric .metric-label {
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.guru-lms-ujian-pengawasan-page .student-card-metric .metric-value {
+    font-weight: 800;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+
+.guru-lms-ujian-pengawasan-page .progress-caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.guru-lms-ujian-pengawasan-page .question-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+    gap: 8px;
+}
+
+.guru-lms-ujian-pengawasan-page .question-cell {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    background: #f8fafc;
+}
+
+.guru-lms-ujian-pengawasan-page .question-cell.answered {
+    background: #dcfce7;
+    border-color: #16a34a;
+    color: #166534;
+}
+
+.guru-lms-ujian-pengawasan-page .question-cell.doubt {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.guru-lms-ujian-pengawasan-page .question-cell.visited {
+    background: #e0f2fe;
+    border-color: #0284c7;
+    color: #075985;
+}
+
+.guru-lms-ujian-pengawasan-page .question-cell.current {
+    box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.22);
+    border-color: #165fac;
+}
+
+.guru-lms-ujian-pengawasan-page .question-cell-legend {
+    width: 24px;
+    min-height: 24px;
+}
+
+.guru-lms-ujian-pengawasan-page .log-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 260px;
+    overflow: auto;
+}
+
+.guru-lms-ujian-pengawasan-page .log-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #f8fafc;
+}
+
+.guru-lms-ujian-pengawasan-page .status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.guru-lms-ujian-pengawasan-page .status-dot.online {
+    background: #16a34a;
+}
+
+.guru-lms-ujian-pengawasan-page .status-dot.offline {
+    background: #94a3b8;
+}
+
+.guru-lms-ujian-pengawasan-page .status-dot.warning {
+    background: #f59e0b;
+}
+
+@media (max-width: 992px) {
+    .guru-lms-ujian-pengawasan-page .monitor-table-wrap {
+        display: none;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-card-list {
+        display: grid;
+    }
+}
+
+@media (max-width: 768px) {
+    .guru-lms-ujian-pengawasan-page .monitor-toolbar {
+        align-items: stretch;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-actions,
+    .guru-lms-ujian-pengawasan-page .monitor-refresh {
+        width: 100%;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-actions .btn {
+        flex: 1 1 145px;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-refresh {
+        align-items: flex-start;
+        line-height: 1.45;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-stat {
+        min-height: 88px;
+        padding: 14px;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-stat .value {
+        font-size: 22px;
+    }
+
+    .guru-lms-ujian-pengawasan-page .monitor-panel-header {
+        padding: 12px;
+    }
+
+    .guru-lms-ujian-pengawasan-page .question-grid {
+        grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+        gap: 6px;
+    }
+
+    .guru-lms-ujian-pengawasan-page .question-cell {
+        min-height: 36px;
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 380px) {
+    .guru-lms-ujian-pengawasan-page .monitor-stats-grid,
+    .guru-lms-ujian-pengawasan-page .student-card-grid {
+        grid-template-columns: 1fr;
+    }
+}
