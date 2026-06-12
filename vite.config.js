@@ -103,6 +103,7 @@ export default defineConfig({
                 'resources/js/siswa/lms/jadwal.js',
                 'resources/css/siswa/lms/jadwal-print.css',
                 'resources/js/siswa/lms/jadwal-print.js',
+                'resources/css/siswa/lms/mata-pelajaran/materi.css',
                 // Wali Kelas scoped page assets
                 'resources/css/wali-kelas/arsip/index.css',
                 'resources/js/wali-kelas/arsip/index.js',
