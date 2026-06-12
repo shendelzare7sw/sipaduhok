@@ -8,6 +8,9 @@ export default defineConfig({
                 // App (dashboard)
                 'resources/css/app.css',
                 'resources/js/app.js',
+                // Component scoped assets
+                'resources/css/components/ai-sidebar.css',
+                'resources/js/components/ai-sidebar.js',
                 // Akademik scoped page assets
                 'resources/css/admin/akademik/berita/index.css',
                 'resources/css/admin/akademik/flyer/index.css',

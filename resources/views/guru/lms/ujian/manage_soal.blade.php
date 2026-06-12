@@ -9,11 +9,17 @@
 @endsection
 
 @push('styles')
-    @vite(['resources/css/guru/lms/ujian/manage-soal.css'])
+    @vite([
+        'resources/css/guru/lms/ujian/manage-soal.css',
+        'resources/css/components/ai-sidebar.css',
+    ])
 @endpush
 
 @push('scripts')
-    @vite(['resources/js/guru/lms/ujian/manage-soal.js'])
+    @vite([
+        'resources/js/guru/lms/ujian/manage-soal.js',
+        'resources/js/components/ai-sidebar.js',
+    ])
 @endpush
 
 @section('content')
