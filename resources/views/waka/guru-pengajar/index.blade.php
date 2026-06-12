@@ -11,7 +11,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/guru-pengajar.css') }}">
+@vite('resources/css/waka/guru-pengajar/index.css')
 @endsection
 
 @section('content')
@@ -19,7 +19,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
     <!-- Stats Row -->
     <div class="stat-row">
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+            <div class="stat-icon stat-icon-primary">
                 <i class="fas fa-chalkboard-teacher"></i>
             </div>
             <div class="stat-details">
@@ -30,7 +30,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+            <div class="stat-icon stat-icon-success">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-details">
@@ -41,7 +41,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #f0fdfa; color: #14b8a6;">
+            <div class="stat-icon stat-icon-teal">
                 <i class="fas fa-tasks"></i>
             </div>
             <div class="stat-details">
@@ -52,7 +52,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+            <div class="stat-icon stat-icon-purple">
                 <i class="fas fa-book"></i>
             </div>
             <div class="stat-details">
@@ -68,7 +68,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
         <div class="gp-card-header">
             <div>
                 <h5 class="gp-card-title">
-                    <i class="fas fa-user-tie" style="color: #14b8a6;"></i> Daftar Guru Pengajar
+                    <i class="fas fa-user-tie title-icon-teal"></i> Daftar Guru Pengajar
                 </h5>
                 <div class="gp-card-subtitle">Penugasan guru otomatis dari Jadwal Pelajaran (scope cabang Anda)</div>
             </div>
@@ -87,7 +87,7 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
                     <input type="text" name="search" placeholder="Cari nama, NIP, atau email..." value="{{ request('search') }}">
                 </div>
 
-                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="tahun_ajaran_id" class="form-select filter-select" data-auto-submit>
                     <option value="">Semua Tahun Ajaran</option>
                     @foreach($tahunAjarans as $ta)
                         <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
@@ -96,18 +96,18 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
                     @endforeach
                 </select>
 
-                <select name="status" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="status" class="form-select filter-select" data-auto-submit>
                     <option value="">Status: Aktif</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                 </select>
 
-                <button type="submit" class="btn btn-secondary btn-sm px-3" style="border-radius: 8px;">
+                <button type="submit" class="btn btn-secondary btn-sm px-3 rounded-md">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
 
                 @if(request()->hasAny(['search', 'status']))
-                    <a href="{{ route('waka.guru-pengajar.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                    <a href="{{ route('waka.guru-pengajar.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline-danger btn-sm px-3 rounded-md">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -201,4 +201,8 @@ Kelola penugasan guru pengajar di cabang Anda {{ $currentTahunAjaran ? '- ' . $c
             </div>
         @endif
     </div>
+@endsection
+
+@section('scripts')
+    @vite('resources/js/waka/guru-pengajar/index.js')
 @endsection
