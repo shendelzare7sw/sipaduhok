@@ -8,17 +8,26 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@php
+    $bisaDiulang = old('bisa_diulang');
+@endphp
+
+@push('styles')
+    @vite(['resources/css/guru/lms/ujian/create.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-ujian-create-page">
     <div class="mb-3">
         @if($tipeUjian === 'latihan')
             <a href="{{ route('guru.lms.latihan.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Kembali
-                </a>
-            @else
-                <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Kembali
-                </a>
-            @endif
+                <i class="fas fa-arrow-left me-1"></i>Kembali
+            </a>
+        @else
+            <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Kembali
+            </a>
+        @endif
     </div>
 
     <div class="card-custom">
@@ -141,14 +150,14 @@
 
                         <!-- Pengulangan -->
                         <div class="form-check form-switch mb-2">
-                            <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" onchange="toggleBatasPengulangan()">
+                            <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" data-repeat-toggle {{ $bisaDiulang ? 'checked' : '' }}>
                             <label class="form-check-label fw-bold text-primary" for="bisaDiulang">Bisa Dikerjakan Ulang (Pengulangan)</label>
                         </div>
                         
-                        <div id="batasPengulanganContainer" style="display:none;">
+                        <div id="batasPengulanganContainer" data-repeat-container @if(!$bisaDiulang) hidden @endif>
                             <div class="d-flex align-items-center mt-2 ms-4">
                                 <label class="me-2 text-muted">Diulang</label>
-                                <input type="number" class="form-control form-control-sm text-center" name="batas_pengulangan" style="width: 70px;" value="2" min="0">
+                                <input type="number" class="form-control form-control-sm text-center repeat-limit-input" name="batas_pengulangan" value="{{ old('batas_pengulangan', 2) }}" min="0">
                                 <label class="ms-2 text-muted">kali</label>
                             </div>
                         </div>
@@ -175,22 +184,9 @@
             </form>
         </div>
     </div>
+</div>
 @endsection
 
 @push('scripts')
-    <script>
-        function toggleBatasPengulangan() {
-            var checkbox = document.getElementById('bisaDiulang');
-            var container = document.getElementById('batasPengulanganContainer');
-            if (checkbox.checked) {
-                container.style.display = 'block';
-            } else {
-                container.style.display = 'none';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            toggleBatasPengulangan();
-        });
-    </script>
+    @vite(['resources/js/guru/lms/ujian/create.js'])
 @endpush
