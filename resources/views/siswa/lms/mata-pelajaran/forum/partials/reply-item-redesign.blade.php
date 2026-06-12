@@ -13,7 +13,7 @@
     <div class="post-header">
         <div class="avatar {{ $role }}">
             @if($reply->user && $reply->user->foto_profil)
-                <img src="{{ asset('storage/' . $reply->user->foto_profil) }}" alt="{{ $reply->user->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                <img src="{{ asset('storage/' . $reply->user->foto_profil) }}" alt="{{ $reply->user->name }}">
             @else
                 {{ $isTeacher ? 'G' : substr($reply->user->name, 0, 2) }}
             @endif
@@ -23,7 +23,7 @@
                 <span class="author-name">{{ $reply->user->name }}</span>
                 <span class="badge-role {{ $badgeClass }}">{{ $roleName }}</span>
                 @if($isMe)
-                    <span class="badge bg-secondary" style="font-size: 10px;">Anda</span>
+                    <span class="badge bg-secondary own-reply-badge">Anda</span>
                 @endif
             </div>
             <div class="post-date">
@@ -48,12 +48,12 @@
 
         <!-- Actions (Edit/Delete) - Below Content -->
         @if($isMe)
-            <div class="post-actions d-flex gap-2" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
-                <button class="action-icon text-primary" onclick="toggleReplyForm('edit-form-{{ $uniqueId }}')" title="Edit">
+            <div class="post-actions d-flex gap-2">
+                <button class="action-icon text-primary" data-toggle-reply="edit-form-{{ $uniqueId }}" title="Edit">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
                 <button type="button" class="action-icon text-danger" title="Hapus"
-                    onclick="confirmDeleteReply('{{ route('siswa.lms.mapel.forum.reply.destroy', [$mataPelajaran->id, $diskusi->id, $reply->id]) }}')">
+                    data-delete-url="{{ route('siswa.lms.mapel.forum.reply.destroy', [$mataPelajaran->id, $diskusi->id, $reply->id]) }}">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -80,19 +80,19 @@
                     </div>
                 @endif
 
-                <button type="button" class="attach-btn btn-sm mb-2" onclick="toggleAttachArea(this)">
+                <button type="button" class="attach-btn btn-sm mb-2" data-toggle-attach>
                     <i class="fas fa-plus-circle"></i> Tambah File
                 </button>
 
-                <div class="file-upload-area" style="display: none;">
+                <div class="file-upload-area">
                     <p class="mb-1"><i class="fas fa-cloud-upload-alt fa-2x text-muted"></i></p>
                     <p>Klik untuk memilih file (bisa pilih multiple)</p>
-                    <input type="file" name="attachment[]" multiple style="display: block; width: 100%;">
+                    <input type="file" name="attachment[]" multiple class="forum-file-input">
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-2">
                     <button type="button" class="btn btn-secondary btn-sm"
-                        onclick="toggleReplyForm('edit-form-{{ $uniqueId }}')">Batal</button>
+                        data-toggle-reply="edit-form-{{ $uniqueId }}">Batal</button>
                     <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
                 </div>
             </form>
@@ -100,7 +100,7 @@
     @endif
 
     @if(!$diskusi->is_closed)
-        <button class="reply-btn" onclick="toggleReplyForm('form-{{ $uniqueId }}')">
+        <button class="reply-btn" data-toggle-reply="form-{{ $uniqueId }}">
             <i class="fas fa-reply me-1"></i> REPLY
         </button>
     @endif
@@ -113,20 +113,20 @@
             <input type="hidden" name="parent_id" value="{{ $reply->id }}">
             <textarea name="isi" placeholder="Tulis balasan Anda..." required></textarea>
 
-            <button type="button" class="attach-btn" onclick="toggleAttachArea(this)">
+            <button type="button" class="attach-btn" data-toggle-attach>
                 <i class="fas fa-paperclip"></i> Lampirkan File
             </button>
 
             <div class="file-upload-area">
                 <p class="mb-1"><i class="fas fa-cloud-upload-alt fa-2x text-muted"></i></p>
                 <p>Klik untuk memilih file (bisa pilih multiple)</p>
-                <input type="file" name="attachment[]" multiple style="display: block; width: 100%;">
+                <input type="file" name="attachment[]" multiple class="forum-file-input">
             </div>
 
             <div class="d-flex gap-2 mt-3">
                 <button type="submit" class="btn btn-primary btn-sm px-4">Kirim Balasan</button>
                 <button type="button" class="btn btn-secondary btn-sm"
-                    onclick="toggleReplyForm('form-{{ $uniqueId }}')">Batal</button>
+                    data-toggle-reply="form-{{ $uniqueId }}">Batal</button>
             </div>
         </form>
     </div>

@@ -108,6 +108,8 @@ export default defineConfig({
                 'resources/css/siswa/lms/mata-pelajaran/materi.css',
                 'resources/css/siswa/lms/mata-pelajaran/forum/index.css',
                 'resources/css/siswa/lms/mata-pelajaran/forum/create.css',
+                'resources/css/siswa/lms/mata-pelajaran/forum/show.css',
+                'resources/js/siswa/lms/mata-pelajaran/forum-show.js',
                 'resources/css/siswa/lms/mata-pelajaran/tugas/index.css',
                 'resources/css/siswa/lms/mata-pelajaran/tugas/show.css',
                 'resources/css/siswa/lms/meeting/index.css',
