@@ -329,6 +329,7 @@ export default defineConfig({
                 'resources/css/guru/kelas/index.css',
                 'resources/css/guru/kelas/mapel.css',
                 'resources/css/guru/jadwal/index.css',
+                'resources/css/guru/lms/dashboard.css',
                 'resources/css/profile/index.css',
                 'resources/js/profile/index.js',
                 'resources/css/account/settings.css',
