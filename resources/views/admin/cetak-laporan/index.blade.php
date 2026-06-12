@@ -9,158 +9,24 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/cetak-laporan/index.css'])
+@endsection
+
+@php
+    $kelasJson = $kelasList->map(function ($kelas) {
+        return [
+            'id' => $kelas->id,
+            'nama_kelas' => $kelas->nama_kelas,
+            'jenjang' => $kelas->jenjang,
+            'cabang_id' => $kelas->cabang_id,
+        ];
+    })->values();
+@endphp
+
 @section('content')
-<style>
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-@media (max-width: 1200px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 576px) { .stats-row { grid-template-columns: 1fr; } }
-
-.stat-mini {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.stat-mini-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-}
-
-.stat-mini-icon.blue { background: #eff6ff; }
-.stat-mini-icon.green { background: #f0fdf4; }
-.stat-mini-icon.purple { background: #faf5ff; }
-.stat-mini-icon.orange { background: #fff7ed; }
-
-.stat-mini-info h4 { font-size: 24px; font-weight: 700; color: #111827; margin: 0; }
-.stat-mini-info p { font-size: 13px; color: #6b7280; margin: 0; }
-
-.report-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-@media (max-width: 992px) { .report-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 576px) { .report-grid { grid-template-columns: 1fr; } }
-
-.report-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    overflow: hidden;
-    transition: all 0.3s;
-}
-
-.report-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-}
-
-.report-card-header {
-    padding: 24px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.report-card-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -30%;
-    width: 150px;
-    height: 150px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50%;
-}
-
-.report-card-header.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.report-card-header.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.report-card-header.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.report-card-header.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.report-card-header.teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
-.report-card-header.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
-
-.report-card-icon { font-size: 32px; margin-bottom: 12px; position: relative; z-index: 1; }
-.report-card-title { font-size: 18px; font-weight: 600; margin: 0; position: relative; z-index: 1; }
-
-.report-card-body { padding: 24px; }
-.report-card-desc { font-size: 14px; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
-
-.report-form { display: flex; flex-direction: column; gap: 12px; }
-
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 12px; font-weight: 600; color: #374151; text-transform: uppercase; }
-
-.form-group select, .form-group input {
-    padding: 10px 14px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-
-.form-group select:focus, .form-group input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.btn-print {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: white;
-    margin-top: 8px;
-}
-
-.btn-print.blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-.btn-print.green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-.btn-print.purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-.btn-print.orange { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-.btn-print.teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); }
-.btn-print.pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
-
-.btn-print:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-
-.section-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.section-title i { color: #6b7280; }
-</style>
-
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="admin-cetak-laporan-page">
+    <template id="cetakLaporanKelasData">@json($kelasJson)</template>
     {{-- Quick Stats --}}
     <div class="stats-row">
         <div class="stat-mini">
@@ -214,13 +80,13 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group" id="siswa_jenjang_group" style="display:none;">
+                    <div class="form-group is-hidden" id="siswa_jenjang_group">
                         <label>Jenjang</label>
                         <select name="jenjang" id="siswa_jenjang">
                             <option value="">Semua Jenjang</option>
                         </select>
                     </div>
-                    <div class="form-group" id="siswa_kelas_group" style="display:none;">
+                    <div class="form-group is-hidden" id="siswa_kelas_group">
                         <label>Kelas</label>
                         <select name="kelas_id" id="siswa_kelas">
                             <option value="">Semua Kelas</option>
@@ -434,7 +300,7 @@
 
         {{-- Rekap Akademik per TA (snapshot status_naik_kelas_siswa) --}}
         <div class="report-card">
-            <div class="report-card-header" style="background: linear-gradient(135deg, #16a34a, #15803d); color: white;">
+            <div class="report-card-header academic">
                 <div class="report-card-icon"><i class="fas fa-user-graduate"></i></div>
                 <h4 class="report-card-title">Rekap Akademik per TA</h4>
             </div>
@@ -460,7 +326,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="btn-print" style="background: #16a34a;">
+                    <button type="submit" class="btn-print academic">
                         <i class="fas fa-print"></i> Cetak Rekap Akademik
                     </button>
                 </form>
@@ -469,54 +335,8 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    @php
-        $kelasJson = $kelasList->map(function($k) {
-            return ['id' => $k->id, 'nama_kelas' => $k->nama_kelas, 'jenjang' => $k->jenjang, 'cabang_id' => $k->cabang_id];
-        })->values();
-    @endphp
-    const kelasData = @json($kelasJson);
+@endsection
 
-    const cabangSelect = document.getElementById('siswa_cabang');
-    const jenjangGroup = document.getElementById('siswa_jenjang_group');
-    const jenjangSelect = document.getElementById('siswa_jenjang');
-    const kelasGroup = document.getElementById('siswa_kelas_group');
-    const kelasSelect = document.getElementById('siswa_kelas');
-
-    cabangSelect.addEventListener('change', function() {
-        const cabangId = this.value;
-        jenjangSelect.innerHTML = '<option value="">Semua Jenjang</option>';
-        kelasSelect.innerHTML = '<option value="">Semua Kelas</option>';
-
-        if (cabangId) {
-            const jenjangs = [...new Set(kelasData.filter(k => k.cabang_id == cabangId).map(k => k.jenjang))];
-            jenjangs.sort();
-            jenjangs.forEach(j => {
-                jenjangSelect.innerHTML += `<option value="${j}">${j}</option>`;
-            });
-            jenjangGroup.style.display = 'flex';
-        } else {
-            jenjangGroup.style.display = 'none';
-            kelasGroup.style.display = 'none';
-        }
-    });
-
-    jenjangSelect.addEventListener('change', function() {
-        const cabangId = cabangSelect.value;
-        const jenjang = this.value;
-        kelasSelect.innerHTML = '<option value="">Semua Kelas</option>';
-
-        if (jenjang) {
-            const filtered = kelasData.filter(k => k.cabang_id == cabangId && k.jenjang == jenjang);
-            filtered.forEach(k => {
-                kelasSelect.innerHTML += `<option value="${k.id}">${k.nama_kelas}</option>`;
-            });
-            kelasGroup.style.display = 'flex';
-        } else {
-            kelasGroup.style.display = 'none';
-        }
-    });
-});
-</script>
+@section('scripts')
+    @vite(['resources/js/admin/cetak-laporan/index.js'])
 @endsection
