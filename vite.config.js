@@ -77,6 +77,8 @@ export default defineConfig({
                 'resources/js/ketua/dispensasi/index.js',
                 'resources/css/admin/laporan/index.css',
                 'resources/js/admin/laporan/index.js',
+                'resources/css/admin/ai-settings/index.css',
+                'resources/js/admin/ai-settings/index.js',
                 'resources/css/ketua/laporan/index.css',
                 'resources/js/ketua/laporan/index.js',
                 'resources/css/ketua/promotion/approval.css',

@@ -9,7 +9,12 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/ai-settings/index.css'])
+@endsection
+
 @section('content')
+    <div class="admin-ai-settings-page" data-test-url="{{ route('admin.ai-settings.test') }}" data-csrf-token="{{ csrf_token() }}">
     <div class="row g-4">
         <!-- Settings Column -->
         <div class="col-12 col-md-8 col-lg-7">
@@ -38,8 +43,8 @@
                                     <h6 class="fw-bold mb-1"><i class="fas fa-shield-alt me-2 text-primary"></i>Pembatasan Konteks Chatbot</h6>
                                     <small class="text-muted">Jika diaktifkan, Chatbot <strong>HANYA</strong> menjawab pertanyaan seputar menu &amp; fitur SIPADUHOK. Pertanyaan di luar konteks (cuaca, politik, hiburan, dll) akan ditolak sopan. Disarankan tetap aktif untuk fokus penggunaan.</small>
                                 </div>
-                                <div class="form-check form-switch form-switch-lg mb-0" style="padding-left: 3rem;">
-                                    <input class="form-check-input" type="checkbox" role="switch" name="context_restriction_enabled" id="context_restriction_enabled" style="width: 3rem; height: 1.5rem;" {{ $contextRestrictionEnabled ? 'checked' : '' }}>
+                                <div class="form-check form-switch form-switch-lg mb-0 ai-switch-wrap">
+                                    <input class="form-check-input ai-switch-input" type="checkbox" role="switch" name="context_restriction_enabled" id="context_restriction_enabled" {{ $contextRestrictionEnabled ? 'checked' : '' }}>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
@@ -47,8 +52,8 @@
                                     <h6 class="fw-bold mb-1"><i class="fas fa-pen-fancy me-2 text-primary"></i>AI Question Generator</h6>
                                     <small class="text-muted">Izinkan Guru untuk menggunakan fitur AI Generator Soal Otomatis pada halaman Kelola Soal Ujian dan Latihan.</small>
                                 </div>
-                                <div class="form-check form-switch form-switch-lg mb-0" style="padding-left: 3rem;">
-                                    <input class="form-check-input" type="checkbox" role="switch" name="ai_question_generator_enabled" id="ai_question_generator_enabled" style="width: 3rem; height: 1.5rem;" {{ $aiQuestionGeneratorEnabled ? 'checked' : '' }}>
+                                <div class="form-check form-switch form-switch-lg mb-0 ai-switch-wrap">
+                                    <input class="form-check-input ai-switch-input" type="checkbox" role="switch" name="ai_question_generator_enabled" id="ai_question_generator_enabled" {{ $aiQuestionGeneratorEnabled ? 'checked' : '' }}>
                                 </div>
                             </div>
                         </div>
@@ -57,7 +62,7 @@
                             <label class="form-label fw-bold">
                                 <i class="fas fa-globe me-2 text-primary"></i>AI Provider (GLOBAL)
                             </label>
-                            <select class="form-select form-select-lg" name="ai_provider" id="ai_provider" style="border: 2px solid #3b82f6;">
+                            <select class="form-select form-select-lg ai-provider-select" name="ai_provider" id="ai_provider">
                                 <option value="groq" {{ $provider == 'groq' ? 'selected' : '' }}>
                                     Groq Cloud (Llama / Qwen / Mixtral - FREE)
                                 </option>
@@ -65,7 +70,7 @@
                                     Google Gemini (2.5 Flash - FREE)
                                 </option>
                             </select>
-                            <div class="alert alert-info mt-2 mb-0" style="font-size: 13px;">
+                            <div class="alert alert-info mt-2 mb-0 ai-provider-note">
                                 <i class="fas fa-info-circle me-1"></i>
                                 <strong>Provider ini berlaku untuk SEMUA user</strong> (Admin, Guru, Siswa).
                                 Groq Cloud dan Google Gemini menawarkan Tier Gratis yang generous.
@@ -89,7 +94,7 @@
                         </div>
 
                         <!-- Gemini API Key -->
-                        <div class="mb-3 provider-field" id="gemini_field" style="display: none;">
+                        <div class="mb-3 provider-field is-hidden" id="gemini_field">
                             <label class="form-label fw-bold">Google Gemini API Key</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
@@ -165,7 +170,7 @@
                 <div class="card-body">
                     <div class="d-flex align-items-start">
                          <div class="avatar me-2">
-                            <div class="rounded bg-white text-info d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                            <div class="rounded bg-white text-info d-flex align-items-center justify-content-center ai-brain-icon">
                                 <i class="fas fa-brain"></i>
                             </div>
                         </div>
@@ -181,21 +186,21 @@
                  <div class="card-body">
                     <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>Cara Kerja</h6>
                     <ul class="timeline ms-2">
-                        <li class="timeline-item pb-4 border-start border-2 ps-3" style="border-color: #e5e7eb;">
+                        <li class="timeline-item pb-4 border-start border-2 ps-3 timeline-border">
                             <span class="timeline-indicator-advanced text-primary fw-bold">1</span>
                             <div class="ms-2">
                                 <div class="fw-bold text-dark">Analisis Konteks</div>
                                 <p class="text-muted small mb-0">AI membaca Pertanyaan, Kunci Jawaban, dan Jawaban Siswa.</p>
                             </div>
                         </li>
-                        <li class="timeline-item pb-4 border-start border-2 ps-3" style="border-color: #e5e7eb;">
+                        <li class="timeline-item pb-4 border-start border-2 ps-3 timeline-border">
                             <span class="timeline-indicator-advanced text-primary fw-bold">2</span>
                             <div class="ms-2">
                                 <div class="fw-bold text-dark">Evaluasi Cerdas</div>
                                 <p class="text-muted small mb-0">Model bahasa besar (LLM) mengevaluasi relevansi dan ketepatan jawaban.</p>
                             </div>
                         </li>
-                        <li class="timeline-item border-start border-2 ps-3" style="border-color: transparent;">
+                        <li class="timeline-item border-start border-2 ps-3 timeline-border-transparent">
                              <span class="timeline-indicator-advanced text-success fw-bold">3</span>
                             <div class="ms-2">
                                 <div class="fw-bold text-dark">Rekomendasi</div>
@@ -336,333 +341,9 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const providerSelect = document.getElementById('ai_provider');
-            const modelSelect = document.getElementById('ai_model');
-            const groqField = document.getElementById('groq_field');
-            const geminiField = document.getElementById('gemini_field');
-            const contextRestrictionToggle = document.getElementById('context_restriction_enabled');
-            const contextRestrictionHidden = document.getElementById('context_restriction_enabled_hidden');
-            const questionGeneratorToggle = document.getElementById('ai_question_generator_enabled');
-            const questionGeneratorHidden = document.getElementById('ai_question_generator_enabled_hidden');
+    </div>
+@endsection
 
-            function syncBooleanHidden(toggle, hidden) {
-                if (!toggle || !hidden) return;
-                hidden.value = toggle.checked ? '1' : '0';
-            }
-
-            syncBooleanHidden(contextRestrictionToggle, contextRestrictionHidden);
-            syncBooleanHidden(questionGeneratorToggle, questionGeneratorHidden);
-
-            if (contextRestrictionToggle) {
-                contextRestrictionToggle.addEventListener('change', function() {
-                    syncBooleanHidden(contextRestrictionToggle, contextRestrictionHidden);
-                });
-            }
-
-            if (questionGeneratorToggle) {
-                questionGeneratorToggle.addEventListener('change', function() {
-                    syncBooleanHidden(questionGeneratorToggle, questionGeneratorHidden);
-                });
-            }
-
-            // Model mapping by provider (Only FREE & Verified working models)
-            const modelsByProvider = {
-                groq: [
-                    'qwen/qwen3-32b',
-                    'llama-3.3-70b-versatile',
-                    'llama-3.1-8b-instant',
-                    'openai/gpt-oss-120b',
-                    'allam-2-7b',
-                    'groq/compound'
-                ],
-                gemini: [
-                    'gemini-2.5-flash'
-                ]
-            };
-
-            // Toggle API Key Fields & Filter Models based on Provider
-            function toggleProviderFields() {
-                const provider = providerSelect.value;
-
-                // Show/Hide API Key Fields
-                if (provider === 'groq') {
-                    groqField.style.display = 'block';
-                    geminiField.style.display = 'none';
-                } else if (provider === 'gemini') {
-                    groqField.style.display = 'none';
-                    geminiField.style.display = 'block';
-                }
-
-                // Filter Models
-                filterModels(provider);
-            }
-
-            function filterModels(provider) {
-                const options = modelSelect.querySelectorAll('option');
-                const allowedModels = modelsByProvider[provider] || [];
-
-                options.forEach(option => {
-                    if (allowedModels.includes(option.value)) {
-                        option.style.display = '';
-                    } else {
-                        option.style.display = 'none';
-                    }
-                });
-
-                // Also hide/show optgroups
-                const optgroups = modelSelect.querySelectorAll('optgroup');
-                optgroups.forEach(optgroup => {
-                    const visibleOptions = Array.from(optgroup.querySelectorAll('option')).filter(opt => opt.style.display !== 'none');
-                    optgroup.style.display = visibleOptions.length > 0 ? '' : 'none';
-                });
-
-                // Auto-select first visible option if current selection is hidden
-                const currentOption = modelSelect.querySelector(`option[value="${modelSelect.value}"]`);
-                if (!currentOption || currentOption.style.display === 'none') {
-                    const firstVisible = Array.from(options).find(opt => opt.style.display !== 'none');
-                    if (firstVisible) {
-                        modelSelect.value = firstVisible.value;
-                    }
-                }
-            }
-
-            // Initialize on page load
-            toggleProviderFields();
-
-            // Listen to provider change
-            providerSelect.addEventListener('change', toggleProviderFields);
-
-            // Toggle API Key Visibility - Groq
-            const toggleGroqApiKey = document.getElementById('toggleGroqApiKey');
-            const groqApiKeyInput = document.getElementById('groq_api_key');
-
-            toggleGroqApiKey.addEventListener('click', function() {
-                const type = groqApiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                groqApiKeyInput.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-
-            // Toggle API Key Visibility - Gemini
-            const toggleGeminiApiKey = document.getElementById('toggleGeminiApiKey');
-            const geminiApiKeyInput = document.getElementById('gemini_api_key');
-
-            toggleGeminiApiKey.addEventListener('click', function() {
-                const type = geminiApiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
-                geminiApiKeyInput.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
-            });
-
-            // Test Connection Logic
-            const testBtn = document.getElementById('testConnectionBtn');
-            const alertEl = document.getElementById('connectionAlert');
-            const alertMsg = document.getElementById('connectionMessage');
-            const alertTitle = document.getElementById('connectionTitle');
-            const alertIcon = document.getElementById('connectionIcon');
-
-            // Helper function to hide alert with smooth fade
-            function hideAlertSmooth(element) {
-                element.classList.add('fading-out');
-                setTimeout(() => {
-                    element.classList.add('d-none');
-                    element.classList.remove('fading-out', 'alert-success', 'alert-danger', 'alert-warning');
-                    // Force reflow to reset animation state
-                    void element.offsetWidth;
-                }, 350);
-            }
-
-            // Helper function to show alert with smooth fade-in
-            function showAlertSmooth(element) {
-                // Remove d-none first
-                element.classList.remove('d-none', 'fading-out');
-
-                // Force reflow to ensure transition triggers
-                void element.offsetWidth;
-
-                // Add show class to trigger fade-in
-                element.classList.add('showing');
-            }
-
-            testBtn.addEventListener('click', function() {
-                // Reset Alert FIRST (clear previous state and force immediate hide)
-                alertEl.classList.add('d-none');
-                alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning', 'fading-out', 'showing');
-
-                // Force reflow
-                void alertEl.offsetWidth;
-
-                const provider = providerSelect.value;
-                const apiKey = provider === 'groq' ? groqApiKeyInput.value : geminiApiKeyInput.value;
-
-                if (!apiKey) {
-                    alertEl.classList.add('alert-warning');
-                    alertTitle.textContent = "⚠️ Peringatan!";
-                    alertMsg.textContent = `API Key untuk ${provider === 'groq' ? 'Groq Cloud' : 'Google Gemini'} belum diisi.`;
-                    alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
-
-                    // Show alert with smooth animation
-                    showAlertSmooth(alertEl);
-
-                    // Auto-hide warning after 5 seconds
-                    setTimeout(() => {
-                        hideAlertSmooth(alertEl);
-                    }, 5000);
-
-                    return;
-                }
-
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Testing...';
-                this.disabled = true;
-
-                const data = {
-                    api_key: apiKey,
-                    model: modelSelect.value,
-                    provider: provider,
-                };
-
-                // Use pathname only (relative) to avoid HTTP/HTTPS mixed-content error in production
-                const testUrl = new URL('{{ route("admin.ai-settings.test") }}').pathname;
-
-                // AbortController: cancel fetch after 30 seconds to prevent infinite hang
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-                fetch(testUrl, {
-                    method: 'POST',
-                    signal: controller.signal,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    // Handle non-JSON responses (e.g. HTML 500/419 error pages)
-                    const contentType = response.headers.get('Content-Type') || '';
-                    if (!contentType.includes('application/json')) {
-                        throw new Error('Server error (HTTP ' + response.status + '). Pastikan APP_URL di .env sudah benar dan jalankan php artisan config:clear.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Set content
-                    alertMsg.textContent = data.message;
-
-                    if (data.success) {
-                        alertEl.classList.add('alert-success');
-                        alertTitle.textContent = "✅ Berhasil!";
-                        alertIcon.className = "fas fa-check-circle me-2 fs-4";
-
-                        // Show alert with smooth animation
-                        showAlertSmooth(alertEl);
-
-                        // Auto-hide success alert after 5 seconds with smooth fade
-                        setTimeout(() => {
-                            hideAlertSmooth(alertEl);
-                        }, 5000);
-                    } else {
-                        alertEl.classList.add('alert-danger');
-                        alertTitle.textContent = "❌ Gagal!";
-                        alertIcon.className = "fas fa-times-circle me-2 fs-4";
-
-                        // Show alert with smooth animation
-                        showAlertSmooth(alertEl);
-
-                        // Auto-hide error alert after 6 seconds with smooth fade
-                        setTimeout(() => {
-                            hideAlertSmooth(alertEl);
-                        }, 6000);
-                    }
-                })
-                .catch(error => {
-                    clearTimeout(timeoutId);
-                    alertEl.classList.add('alert-danger');
-                    alertTitle.textContent = "⚠️ Error Sistem";
-                    let errMsg = error.message || 'Terjadi kesalahan tidak diketahui.';
-                    if (error.name === 'AbortError') {
-                        errMsg = 'Request timeout (>30 detik). Server terlalu lama merespons.';
-                    }
-                    alertMsg.textContent = errMsg;
-                    alertIcon.className = "fas fa-exclamation-triangle me-2 fs-4";
-
-                    // Show alert with smooth animation
-                    showAlertSmooth(alertEl);
-
-                    // Auto-hide error after 6 seconds with smooth fade
-                    setTimeout(() => {
-                        hideAlertSmooth(alertEl);
-                    }, 6000);
-                })
-                .finally(() => {
-                    this.innerHTML = originalText;
-                    this.disabled = false;
-                });
-            });
-        });
-    </script>
-
-    <style>
-        .timeline-item:last-child {
-            border-left-color: transparent !important;
-        }
-
-        /* Smooth alert animation */
-        #connectionAlert {
-            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
-        }
-
-        #connectionAlert.d-none {
-            display: none !important;
-            opacity: 0;
-            transform: translateY(-15px);
-        }
-
-        /* Initial state before showing */
-        #connectionAlert:not(.showing):not(.d-none) {
-            opacity: 0;
-            transform: translateY(-15px);
-        }
-
-        /* Showing state */
-        #connectionAlert.showing {
-            display: block !important;
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Alert fade-in animation (smoother) */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Alert fade-out animation */
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-15px);
-            }
-        }
-
-        #connectionAlert.fading-out {
-            animation: fadeOut 0.4s ease-in-out forwards;
-        }
-    </style>
+@section('scripts')
+    @vite(['resources/js/admin/ai-settings/index.js'])
 @endsection
