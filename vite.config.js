@@ -107,6 +107,9 @@ export default defineConfig({
                 'resources/css/siswa/lms/meeting/index.css',
                 'resources/css/siswa/lms/guru.css',
                 'resources/css/siswa/lms/kalender.css',
+                'resources/css/siswa/lms/pengumuman/index.css',
+                'resources/js/siswa/lms/pengumuman/index.js',
+                'resources/css/siswa/lms/pengumuman/show.css',
                 // Wali Kelas scoped page assets
                 'resources/css/wali-kelas/arsip/index.css',
                 'resources/js/wali-kelas/arsip/index.js',
