@@ -1,0 +1,218 @@
+.siswa-lms-mapel-show-page .section-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.siswa-lms-mapel-show-page .mapel-hero-card {
+    background: linear-gradient(135deg, #165fac, #0d3f7a);
+    color: #ffffff;
+}
+
+.siswa-lms-mapel-show-page .mapel-title {
+    margin: 0 0 8px;
+}
+
+.siswa-lms-mapel-show-page .mapel-meta {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.siswa-lms-mapel-show-page .mapel-icon-box {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.siswa-lms-mapel-show-page .section-heading {
+    color: #165fac;
+    margin-bottom: 20px;
+}
+
+.siswa-lms-mapel-show-page .section-heading-inline {
+    color: #165fac;
+    margin: 0;
+}
+
+.siswa-lms-mapel-show-page .section-heading-success {
+    color: #10b981;
+    margin: 0;
+}
+
+.siswa-lms-mapel-show-page .item-list {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 16px 0;
+}
+
+.siswa-lms-mapel-show-page .item-list:last-child {
+    border-bottom: none;
+}
+
+.siswa-lms-mapel-show-page .item-content {
+    flex: 1;
+}
+
+.siswa-lms-mapel-show-page .item-title {
+    margin: 0 0 8px;
+    color: #1a1a1a;
+}
+
+.siswa-lms-mapel-show-page .item-description {
+    margin: 0 0 8px;
+    color: #666666;
+    font-size: 14px;
+}
+
+.siswa-lms-mapel-show-page .item-meta {
+    color: #999999;
+}
+
+.siswa-lms-mapel-show-page .badge-new {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.siswa-lms-mapel-show-page .date-filter-dropdown {
+    background: #f3f4f6;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.siswa-lms-mapel-show-page .date-filter-dropdown label {
+    margin: 0;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.siswa-lms-mapel-show-page .date-filter-dropdown select {
+    flex: 1;
+    min-width: 200px;
+}
+
+.siswa-lms-mapel-show-page .date-group-header {
+    background: #f9fafb;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 16px 0 12px;
+    font-weight: 600;
+    color: #465a6d;
+    border-left: 4px solid #165fac;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.siswa-lms-mapel-show-page .date-group-header:hover {
+    background: #eff6fc;
+}
+
+.siswa-lms-mapel-show-page .date-group-content {
+    display: none;
+    padding-left: 0;
+}
+
+.siswa-lms-mapel-show-page .date-group-content.show {
+    display: block;
+}
+
+.siswa-lms-mapel-show-page .date-group-icon {
+    transition: transform 0.3s ease;
+    display: inline-block;
+    margin-left: auto;
+}
+
+.siswa-lms-mapel-show-page .date-group-icon.open {
+    transform: rotate(180deg);
+}
+
+.siswa-lms-mapel-show-page .no-items-date {
+    text-align: center;
+    padding: 24px;
+    color: #999999;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.siswa-lms-mapel-show-page .empty-text {
+    margin: 0;
+}
+
+.siswa-lms-mapel-show-page .deadline-safe-text {
+    color: #10b981;
+}
+
+.siswa-lms-mapel-show-page .deadline-expired-text {
+    color: #dc2626;
+}
+
+.siswa-lms-mapel-show-page .content-type-badge-latihan {
+    background: #06b6d4;
+    color: #ffffff;
+}
+
+.siswa-lms-mapel-show-page .content-type-badge-ujian {
+    background: #8b5cf6;
+    color: #ffffff;
+}
+
+.siswa-lms-mapel-show-page .btn-disabled-muted {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.siswa-lms-mapel-show-page .forum-preview-link {
+    display: block;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.siswa-lms-mapel-show-page .forum-preview-title {
+    font-weight: 600;
+}
+
+.siswa-lms-mapel-show-page .forum-reply-badge {
+    font-size: 12px;
+}
+
+.siswa-lms-mapel-show-page .empty-preview {
+    text-align: center;
+    padding: 24px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.siswa-lms-mapel-show-page .empty-preview-icon {
+    color: #cccccc;
+}
+
+.siswa-lms-mapel-show-page .empty-preview-text {
+    margin: 0;
+    color: #666666;
+}
+
+.siswa-lms-mapel-show-page .meeting-section-card {
+    border-left: 5px solid #10b981;
+}
+
+.siswa-lms-mapel-show-page .meeting-title {
+    color: #1a1a1a;
+}
