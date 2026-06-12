@@ -14,92 +14,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --primary: #165fac;
-            --primary-dark: #0d3f7a;
-            --secondary: #64748b;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #e9ecef;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Minimal Header */
-        .exam-header {
-            background: var(--primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            height: 60px;
-        }
-
-        .exam-brand {
-            font-weight: 700;
-            font-size: 1.25rem;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .exam-user {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        /* Main Content Wrapper - FULL WIDTH */
-        .exam-wrapper {
-            margin-top: 60px;
-            padding: 1rem;
-            min-height: calc(100vh - 60px);
-        }
-
-        .exam-container {
-            width: 100%;
-            max-width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 575px) {
-            .exam-header {
-                padding: 0.5rem 1rem;
-            }
-
-            .exam-brand {
-                font-size: 1rem;
-            }
-
-            .exam-wrapper {
-                padding: 0.5rem;
-            }
-        }
-    </style>
+    @vite(['resources/css/layouts/lms-latihan.css'])
     @stack('styles')
 </head>
 
@@ -113,7 +28,7 @@
         <div class="exam-user">
             <div class="text-end d-none d-sm-block">
                 <div class="fw-bold">{{ Auth::user()->name }}</div>
-                <small style="opacity: 0.8">
+                <small class="exam-role-label">
                     Latihan
                 </small>
             </div>

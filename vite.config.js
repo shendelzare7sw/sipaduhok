@@ -16,6 +16,10 @@ export default defineConfig({
                 'resources/css/components/file-preview.css',
                 'resources/js/components/file-preview.js',
                 'resources/css/components/lms/media-display.css',
+                'resources/css/components/ai-question-generator-panel.css',
+                'resources/js/components/ai-question-generator-panel.js',
+                'resources/css/layouts/lms-ujian.css',
+                'resources/css/layouts/lms-latihan.css',
                 // Akademik scoped page assets
                 'resources/css/admin/akademik/berita/index.css',
                 'resources/css/admin/akademik/flyer/index.css',
