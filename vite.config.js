@@ -323,6 +323,8 @@ export default defineConfig({
                 'resources/js/account/settings.js',
                 'resources/css/orang-tua/dashboard.css',
                 'resources/js/orang-tua/dashboard.js',
+                'resources/css/orang-tua/pembayaran/snap.css',
+                'resources/js/orang-tua/pembayaran/snap.js',
                 'resources/css/orang-tua/presensi/ajukan-izin.css',
                 'resources/css/orang-tua/presensi/edit-izin.css',
                 'resources/css/orang-tua/presensi/index.css',
