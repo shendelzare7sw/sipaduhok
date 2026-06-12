@@ -16,7 +16,7 @@
         <form method="POST" action="{{ route('logout') }}" class="m-0 p-0">
             @csrf
             <button type="submit" class="menu-link border-0 bg-transparent w-100 text-start"
-                    onclick="return confirm('Yakin ingin logout?')">
+                    data-confirm-submit="Yakin ingin logout?">
                 <i class="menu-icon fas fa-sign-out-alt"></i>
                 <div>Logout</div>
             </button>
@@ -24,66 +24,13 @@
     </li>
 @endsection
 
-@section('styles')
-<style>
-    .alumni-hero {
-        background: linear-gradient(135deg, #16a34a, #15803d);
-        color: white;
-        border-radius: 14px;
-        padding: 28px 24px;
-        margin-bottom: 22px;
-        box-shadow: 0 8px 20px -5px rgba(22, 163, 74, 0.3);
-    }
-    .alumni-hero .greeting { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
-    .alumni-hero .subtext { font-size: 0.92rem; opacity: 0.95; margin-top: 6px; }
+@push('styles')
+    @vite(['resources/css/siswa/alumni/dashboard.css'])
+@endpush
 
-    .alumni-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 14px;
-        margin-bottom: 18px;
-    }
-    .alumni-action-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 18px;
-        text-decoration: none;
-        color: #1e293b;
-        transition: all .15s ease;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-    .alumni-action-card:hover {
-        border-color: #4361ee;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px -2px rgba(0,0,0,.08);
-        color: #1e293b;
-    }
-    .alumni-action-card .icon-circle {
-        width: 48px; height: 48px; border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        color: white; font-size: 1.1rem; flex-shrink: 0;
-    }
-    .alumni-action-card .label { font-weight: 700; font-size: 1rem; }
-    .alumni-action-card .desc { font-size: 12px; color: #64748b; margin-top: 2px; }
-
-    .info-card {
-        background: white; border: 1px solid #e5e7eb;
-        border-radius: 12px; padding: 20px;
-        margin-bottom: 18px;
-    }
-    .rapor-summary {
-        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-        background: #f8fafc; border-radius: 10px; padding: 16px;
-        margin-top: 12px;
-    }
-    .rapor-summary .field { font-size: 13px; }
-    .rapor-summary .field .label { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: .5px; }
-    .rapor-summary .field .value { font-weight: 700; color: #1e293b; }
-</style>
-@endsection
+@push('scripts')
+    @vite(['resources/js/siswa/alumni/dashboard.js'])
+@endpush
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -94,7 +41,7 @@
             <div>
                 <div class="greeting">Selamat, {{ $siswa->nama_lengkap }}!</div>
                 <div class="subtext">
-                    Anda telah dinyatakan <strong>LULUS</strong> dari PKBM. Akses Anda terbatas pada arsip akademik —
+                    Anda telah dinyatakan <strong>LULUS</strong> dari PKBM. Akses Anda terbatas pada arsip akademik -
                     rapor terakhir, riwayat tugas, dan riwayat ujian/latihan.
                 </div>
             </div>
@@ -112,9 +59,8 @@
         <form method="POST" action="{{ route('logout') }}" class="m-0">
             @csrf
             <button type="submit" class="alumni-action-card w-100 border-0 text-start"
-                    style="background: white; cursor: pointer;"
-                    onclick="return confirm('Yakin ingin logout?')">
-                <div class="icon-circle" style="background: #dc2626;"><i class="fas fa-sign-out-alt"></i></div>
+                    data-confirm-submit="Yakin ingin logout?">
+                <div class="icon-circle icon-circle-danger"><i class="fas fa-sign-out-alt"></i></div>
                 <div>
                     <div class="label">Logout</div>
                     <div class="desc">Keluar dari sistem</div>
@@ -128,12 +74,11 @@
         <div class="row g-3">
             <div class="col-md-3">
                 <img src="{{ $siswa->foto ? asset('storage/' . $siswa->foto) : asset('img/logo.png') }}"
-                     alt="Foto" class="rounded shadow-sm"
-                     style="width: 100%; max-width: 140px; aspect-ratio: 1/1; object-fit: cover;">
+                     alt="Foto" class="rounded shadow-sm alumni-photo">
             </div>
             <div class="col-md-9">
                 <table class="table table-sm">
-                    <tr><td class="text-muted" style="width: 140px;">Nama Lengkap</td><td><strong>{{ $siswa->nama_lengkap }}</strong></td></tr>
+                    <tr><td class="text-muted alumni-profile-label">Nama Lengkap</td><td><strong>{{ $siswa->nama_lengkap }}</strong></td></tr>
                     <tr><td class="text-muted">NISN</td><td>{{ $siswa->nisn ?? '-' }}</td></tr>
                     <tr><td class="text-muted">NIS</td><td>{{ $siswa->nis ?? '-' }}</td></tr>
                     <tr><td class="text-muted">Jenis Kelamin</td><td>{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td></tr>
@@ -151,7 +96,7 @@
                 </div>
                 <div class="field">
                     <div class="label">Semester / Jenis</div>
-                    <div class="value">Semester {{ $raporTerakhir->semester }} · {{ $raporTerakhir->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }}</div>
+                    <div class="value">Semester {{ $raporTerakhir->semester }} - {{ $raporTerakhir->jenis_rapor === 'tengah_semester' ? 'PTS' : 'PAS' }}</div>
                 </div>
                 <div class="field">
                     <div class="label">Status</div>

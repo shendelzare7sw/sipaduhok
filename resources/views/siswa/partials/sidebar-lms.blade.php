@@ -12,7 +12,6 @@
 <div class="nav-section-title">MATA PELAJARAN</div>
 @php
     $siswa = auth()->user()->siswa;
-    $siswa = auth()->user()->siswa;
     $mataPelajaran = \App\Models\JadwalPelajaran::whereHas('kelas', function($q) use ($siswa) {
             $q->where('kelas.id', $siswa->kelas_id ?? 0);
         })
@@ -29,7 +28,7 @@
     <i class="bi bi-book"></i> {{ $mapel->nama_mapel }}
 </a>
 @empty
-<div class="nav-link text-muted" style="opacity: 0.5; cursor: default;">
+<div class="nav-link text-muted opacity-50 pe-none">
     <i class="bi bi-info-circle"></i> Belum ada mata pelajaran
 </div>
 @endforelse

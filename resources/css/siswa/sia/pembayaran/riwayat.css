@@ -1,0 +1,117 @@
+.timeline-item {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        position: relative;
+        border-left: 4px solid #165fac;
+    }
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-disetujui { background: #d1fae5; color: #065f46; }
+    .status-ditolak { background: #fee2e2; color: #991b1b; }
+    .metode-badge {
+        background: #dbeafe;
+        color: #1e40af;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .payment-history-page {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .payment-history-heading,
+    .transaction-title {
+        margin: 0;
+        color: #165fac;
+    }
+
+    .summary-card {
+        color: white;
+        text-align: center;
+    }
+
+    .summary-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .summary-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .summary-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .summary-muted {
+        opacity: 0.9;
+    }
+
+    .summary-value {
+        margin: 8px 0;
+    }
+
+    .section-title {
+        margin-bottom: 20px;
+        color: #1a1a1a;
+    }
+
+    .transaction-detail {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+
+    .text-primary-strong {
+        color: #165fac;
+    }
+
+    .validation-info {
+        color: #10b981;
+    }
+
+    .note-box {
+        margin-top: 8px;
+        padding: 8px;
+        background: #f9fafb;
+        border-radius: 6px;
+    }
+
+    .proof-actions {
+        margin-bottom: 12px;
+    }
+
+    .status-alert {
+        margin-top: 12px;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .empty-state-payment {
+        text-align: center;
+        padding: 48px;
+        color: #999;
+    }
+
+    .info-list {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }

@@ -17,7 +17,7 @@
 
 <div class="s-stat-grid">
     <div class="s-stat-card">
-        <div class="s-stat-icon" style="background: rgba(16,185,129,.12); color: #047857;">
+        <div class="s-stat-icon s-stat-icon-success">
             <i class="fas fa-check-circle"></i>
         </div>
         <div>
@@ -27,7 +27,7 @@
     </div>
 
     <div class="s-stat-card">
-        <div class="s-stat-icon" style="background: rgba(245,158,11,.14); color: #b45309;">
+        <div class="s-stat-icon s-stat-icon-warning">
             <i class="fas fa-notes-medical"></i>
         </div>
         <div>
@@ -37,7 +37,7 @@
     </div>
 
     <div class="s-stat-card">
-        <div class="s-stat-icon" style="background: rgba(6,182,212,.12); color: #0e7490;">
+        <div class="s-stat-icon s-stat-icon-info">
             <i class="fas fa-file-alt"></i>
         </div>
         <div>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="s-stat-card">
-        <div class="s-stat-icon" style="background: rgba(239,68,68,.12); color: #b91c1c;">
+        <div class="s-stat-icon s-stat-icon-danger">
             <i class="fas fa-times-circle"></i>
         </div>
         <div>
@@ -136,14 +136,14 @@
                                     class="btn btn-sm btn-outline-primary py-1 px-2 mt-1" 
                                     data-bs-toggle="modal" 
                                     data-bs-target="#modal-bukti-{{ $item->id }}"
-                                    @if($isPdf) onclick="document.getElementById('iframe-{{ $item->id }}').src = '{{ $previewUrl }}'" @endif>
+                                    @if($isPdf) data-pdf-preview-target="iframe-{{ $item->id }}" data-pdf-preview-url="{{ $previewUrl }}" @endif>
                                 <i class="fas fa-eye me-1"></i>Lihat Bukti
                             </button>
 
                             <!-- Modal Preview -->
                             <div class="modal fade" id="modal-bukti-{{ $item->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered {{ $isPdf ? 'modal-xl' : 'modal-lg' }}">
-                                    <div class="modal-content" @if($isPdf) style="height: 90vh;" @endif>
+                                    <div class="modal-content {{ $isPdf ? 'modal-content-presensi-pdf' : '' }}">
                                         <div class="modal-header">
                                             <h5 class="modal-title">
                                                 <i class="fas {{ $isPdf ? 'fa-file-pdf' : 'fa-image' }} me-2"></i>Preview Bukti
@@ -152,9 +152,9 @@
                                         </div>
                                         <div class="modal-body {{ $isPdf ? 'p-0 h-100' : 'text-center bg-light' }}">
                                             @if($isPdf)
-                                                <iframe id="iframe-{{ $item->id }}" src="" width="100%" height="100%" style="border:none;"></iframe>
+                                                <iframe id="iframe-{{ $item->id }}" src="" class="presensi-preview-frame"></iframe>
                                             @elseif($isImage)
-                                                <img src="{{ $downloadUrl }}" alt="Preview" class="img-fluid rounded shadow-sm" style="max-height: 70vh;">
+                                                <img src="{{ $downloadUrl }}" alt="Preview" class="img-fluid rounded shadow-sm presensi-preview-image">
                                             @else
                                                 <div class="py-5 text-center">
                                                     <i class="fas fa-file-download fa-3x text-muted mb-3"></i>

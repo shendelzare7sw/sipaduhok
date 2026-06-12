@@ -24,6 +24,10 @@
         padding: 0 1rem;
     }
 
+    .s-page-narrow {
+        max-width: 1040px;
+    }
+
     .s-card {
         background: var(--s-surface);
         border: 1px solid var(--s-border);
@@ -126,6 +130,11 @@
     .s-chip-info { background: rgba(6, 182, 212, .12); color: #0e7490; }
     .s-chip-danger { background: rgba(239, 68, 68, .12); color: #b91c1c; }
     .s-chip-muted { background: #f1f5f9; color: #475569; }
+
+    .s-stat-icon-primary {
+        background: rgba(67, 97, 238, .12);
+        color: var(--s-primary);
+    }
 
     .s-empty {
         padding: 42px 18px;
@@ -381,6 +390,30 @@
         font-size: 20px;
         font-weight: 900;
         line-height: 1.1;
+    }
+
+    .mini-stat-primary {
+        color: var(--s-primary);
+    }
+
+    .mini-stat-info {
+        color: var(--s-info);
+    }
+
+    .mini-stat-warning {
+        color: var(--s-warning);
+    }
+
+    .mini-stat-danger {
+        color: var(--s-danger);
+    }
+
+    .semester-select {
+        min-width: 160px;
+    }
+
+    .guide-card {
+        background: #f0f9ff;
     }
 
     .predicate-bar {
