@@ -25,11 +25,10 @@
         default                                              => 'partials.sneat-sidebar',
     };
 
-    $colors = [
-        'primary' => '#3b82f6', 'success' => '#10b981', 'danger' => '#ef4444',
-        'warning' => '#f59e0b', 'info' => '#06b6d4', 'secondary' => '#6b7280',
-    ];
-    $bg = $colors[$notification->color ?? 'secondary'] ?? '#6b7280';
+    $notificationColorKeys = ['primary', 'success', 'danger', 'warning', 'info', 'secondary'];
+    $colorKey = in_array($notification->color ?? 'secondary', $notificationColorKeys, true)
+        ? ($notification->color ?? 'secondary')
+        : 'secondary';
 
     $tipeLabels = [
         'materi' => 'Materi', 'tugas' => 'Tugas', 'ujian' => 'Ujian',
@@ -45,6 +44,10 @@
 @section('title', 'Detail Notifikasi')
 @section('page-title', 'Notifikasi')
 @section('page-subtitle', 'Detail pesan')
+
+@push('styles')
+    @vite(['resources/css/notifications/show.css'])
+@endpush
 
 @section('sidebar-menu')
     @include($sidebarPartial)
@@ -62,22 +65,21 @@
     </div>
 
     {{-- Notification Card --}}
-    <div class="card shadow-sm" style="border-radius: 12px; overflow: hidden;">
+    <div class="card shadow-sm notification-detail-card">
 
         {{-- Color Banner --}}
-        <div style="height: 5px; background: {{ $bg }};"></div>
+        <div class="notification-detail-banner notif-tone-bg-{{ $colorKey }}"></div>
 
         <div class="card-body p-4">
 
             {{-- Header row --}}
             <div class="d-flex align-items-center gap-3 mb-4">
-                <div style="width:52px;height:52px;border-radius:50%;background:{{ $bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <div class="notification-detail-icon notif-tone-{{ $colorKey }}">
                     <i class="{{ $notification->icon ?? 'fas fa-bell' }} text-white fa-lg"></i>
                 </div>
                 <div class="flex-grow-1 min-width-0">
                     <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                        <span class="badge rounded-pill px-3 py-1"
-                            style="background: {{ $bg }}20; color: {{ $bg }}; border: 1px solid {{ $bg }}40; font-size: 12px;">
+                        <span class="badge rounded-pill px-3 py-1 notification-detail-badge notif-tone-soft-{{ $colorKey }}">
                             {{ $tipeLabel }}
                         </span>
                         <span class="text-muted small">
@@ -94,7 +96,7 @@
 
             {{-- Message body --}}
             <div class="mb-4">
-                <p class="text-secondary" style="font-size: 15px; line-height: 1.7; white-space: pre-line;">{{ $notification->pesan }}</p>
+                <p class="text-secondary notification-message-text">{{ $notification->pesan }}</p>
             </div>
 
             {{-- Link to source --}}

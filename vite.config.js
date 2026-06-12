@@ -20,6 +20,9 @@ export default defineConfig({
                 'resources/css/components/lms/media-display.css',
                 'resources/css/components/ai-question-generator-panel.css',
                 'resources/js/components/ai-question-generator-panel.js',
+                'resources/css/notifications/index.css',
+                'resources/js/notifications/index.js',
+                'resources/css/notifications/show.css',
                 'resources/css/layouts/lms-ujian.css',
                 'resources/css/layouts/lms-latihan.css',
                 // Akademik scoped page assets
