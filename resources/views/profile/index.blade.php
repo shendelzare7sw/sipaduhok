@@ -25,6 +25,10 @@
     @include($sidebarView)
 @endsection
 
+@section('styles')
+    @vite(['resources/css/profile/index.css'])
+@endsection
+
 @section('content')
     <div class="container-xxl flex-grow-1 container-p-y">
 
@@ -47,12 +51,10 @@
                                 <div class="mb-3 mt-2">
                                     @if($user->foto_profil)
                                         <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="user image"
-                                            class="rounded-circle" height="120" width="120"
-                                            style="object-fit: cover; border: 3px solid #696cff;">
+                                            class="rounded-circle profile-photo" height="120" width="120">
                                     @else
                                         <div class="avatar avatar-xl">
-                                            <span class="avatar-initial rounded-circle bg-label-primary"
-                                                style="font-size: 2.5rem;">
+                                            <span class="avatar-initial rounded-circle bg-label-primary profile-avatar-initial">
                                                 {{ strtoupper(substr($user->name, 0, 1)) }}
                                             </span>
                                         </div>
@@ -72,8 +74,7 @@
                             <form action="{{ route('profile.upload-foto') }}" method="POST" enctype="multipart/form-data"
                                 id="uploadForm">
                                 @csrf
-                                <input type="file" name="foto_profil" id="foto_profil" class="d-none" accept="image/*"
-                                    onchange="document.getElementById('uploadForm').submit()">
+                                <input type="file" name="foto_profil" id="foto_profil" class="d-none" accept="image/*">
                                 <label for="foto_profil" class="btn btn-primary btn-sm">
                                     <i class="bx bx-upload me-1"></i> Ganti Foto
                                 </label>
@@ -113,7 +114,7 @@
                 @if($roleName === 'siswa' && $profileData)
                     <div class="card border-0 shadow-sm">
                         <div class="card-body">
-                            <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Status Akademik</h6>
+                            <h6 class="text-muted text-uppercase fw-bold mb-3 profile-section-label">Status Akademik</h6>
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Tahun Ajaran</span>
                                 <span class="fw-bold">{{ $profileData->kelas->tahunAjaran->nama_tahun_ajaran ?? '-' }}</span>
@@ -181,7 +182,7 @@
                                                 value="{{ old('personal_email', $user->personal_email ?? '') }}"
                                                 placeholder="budi@gmail.com">
                                         </div>
-                                        <small class="text-muted" style="font-size: 0.70rem;">Penting untuk pemulihan akun</small>
+                                        <small class="text-muted profile-help-text">Penting untuk pemulihan akun</small>
                                         @error('personal_email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                                     </div>
 
@@ -265,11 +266,9 @@
                             <!-- Preview foto yang akan dihapus -->
                             <div class="position-relative d-inline-block mb-3">
                                 <img src="{{ asset('storage/' . $user->foto_profil) }}" alt="Foto yang akan dihapus"
-                                    class="rounded-circle"
-                                    style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #dc3545;">
-                                <div class="position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex align-items-center justify-content-center"
-                                    style="background-color: rgba(220, 53, 69, 0.7);">
-                                    <i class="bx bx-trash text-white" style="font-size: 2.5rem;"></i>
+                                    class="rounded-circle profile-delete-photo">
+                                <div class="position-absolute top-0 start-0 w-100 h-100 rounded-circle d-flex align-items-center justify-content-center profile-delete-overlay">
+                                    <i class="bx bx-trash text-white profile-delete-icon"></i>
                                 </div>
                             </div>
                             <h6 class="fw-bold mb-2">Apakah Anda yakin ingin menghapus foto profil?</h6>
@@ -299,4 +298,8 @@
             </div>
         </div>
     @endif
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/profile/index.js'])
 @endsection

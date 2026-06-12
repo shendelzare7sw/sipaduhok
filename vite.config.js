@@ -317,6 +317,8 @@ export default defineConfig({
                 'resources/css/guru/kelas/index.css',
                 'resources/css/guru/kelas/mapel.css',
                 'resources/css/guru/jadwal/index.css',
+                'resources/css/profile/index.css',
+                'resources/js/profile/index.js',
                 'resources/css/admin/keuangan/tagihan/generate-spp.css',
                 'resources/js/admin/keuangan/tagihan/generate-spp.js',
                 'resources/css/admin/keuangan/tagihan/import.css',
