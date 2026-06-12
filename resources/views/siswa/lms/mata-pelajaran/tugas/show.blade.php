@@ -7,65 +7,13 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/tugas/show.css'])
+@endpush
+
 @section('content')
-    <style>
-        .tugas-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .deadline-box {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .deadline-box.expired {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        .deadline-box.safe {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        .status-belum {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .status-dikerjakan {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-dinilai {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-terlambat {
-            background: #fecaca;
-            color: #7f1d1d;
-        }
-
-
-    </style>
-
-    <!-- Breadcrumb -->
+<div class="siswa-lms-tugas-show-page">
+<!-- Breadcrumb -->
     <div class="page-breadcrumb">
         <div class="page-breadcrumb-item">
             <a href="{{ route('siswa.lms.dashboard') }}">
@@ -100,13 +48,13 @@
 @endphp
 
     <div class="deadline-box {{ $isExpired ? 'expired' : ($diff->days == 0 ? '' : 'safe') }}">
-        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">
+        <div class="deadline-label">
             <i class="fas fa-clock"></i> Tenggat
         </div>
-        <h3 style="margin: 0; font-size: 28px;">
+        <h3 class="deadline-date">
             {{ $deadline->copy()->locale('id')->translatedFormat('d F Y, H:i') }} WIB
         </h3>
-        <div style="font-size: 16px; margin-top: 10px;">
+        <div class="deadline-status">
             @if($isExpired)
                 <i class="fas fa-exclamation-circle"></i> Waktu sudah habis!
             @elseif($diff->days == 0 && $diff->h < 24)
@@ -119,12 +67,12 @@
 
     <div class="tugas-card">
         <!-- Header -->
-        <div style="border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 25px;">
-            <h2 style="color: #165fac; margin: 0 0 15px 0;">
+        <div class="assignment-header">
+            <h2 class="assignment-title">
                 <i class="fas fa-tasks"></i> {{ $tugas->judul_tugas }}
             </h2>
 
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; color: #666; font-size: 14px;">
+            <div class="assignment-meta">
                 <div><i class="fas fa-user-tie"></i> <strong>Guru:</strong> {{ $tugas->guru->nama_lengkap }}</div>
                 <div><i class="fas fa-calendar-plus"></i> <strong>Dibuka:</strong>
                     {{ $tugas->tanggal_mulai->copy()->locale('id')->translatedFormat('d M Y') }}</div>
@@ -155,20 +103,19 @@
         </div>
 
         <!-- Deskripsi Tugas -->
-        <div
-            style="background: #f0f9ff; padding: 20px; border-radius: 8px; border-left: 4px solid #165fac; margin-bottom: 25px;">
-            <h4 style="color: #165fac; margin-bottom: 12px;">
+        <div class="description-card">
+            <h4 class="description-title">
                 <i class="fas fa-file-alt"></i> Deskripsi Tugas
             </h4>
-            <div style="color: #333; line-height: 1.8;">
+            <div class="description-body">
                 {{ $tugas->deskripsi }}
             </div>
         </div>
 
         <!-- File Tugas dari Guru -->
         @if($tugas->file_tugas)
-            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-                <h5 style="color: #92400e; margin-bottom: 10px;">
+            <div class="teacher-attachment-card">
+                <h5 class="teacher-attachment-title">
                     <i class="fas fa-paperclip"></i> Lampiran dari Guru
                 </h5>
                 <x-file-preview :path="$tugas->file_tugas" label="Lihat Tugas" />
@@ -177,8 +124,8 @@
 
         <!-- Form Submit Tugas -->
         @if(!$isExpired || $existingSubmission)
-            <div style="background: white; padding: 25px; border: 2px solid #e5e7eb; border-radius: 12px;">
-                <h4 style="color: #165fac; margin-bottom: 20px;">
+            <div class="submission-card">
+                <h4 class="submission-title">
                     <i class="fas fa-pencil-alt"></i>
                     {{ $existingSubmission ? 'Edit Jawaban' : 'Kerjakan Tugas' }}
                 </h4>
@@ -188,7 +135,7 @@
                         <h5 class="alert-heading">
                             <i class="fas fa-check-circle"></i> Tugas Sudah Dinilai
                         </h5>
-                        <p style="margin: 10px 0 0 0;">
+                        <p class="score-summary">
                             <strong>Nilai:</strong> {{ $existingSubmission->nilai }}<br>
                             @if($existingSubmission->feedback_guru)
                                 <strong>Umpan Balik Guru:</strong> {{ $existingSubmission->feedback_guru }}
@@ -279,7 +226,7 @@
                             Terakhir dikirim:
                             {{ $existingSubmission->tanggal_submit ? $existingSubmission->tanggal_submit->copy()->locale('id')->translatedFormat('d F Y, H:i') . ' WIB' : '-' }}
                             @if($existingSubmission->status === 'terlambat')
-                                <span style="color: #dc2626; font-weight: bold;">(Terlambat)</span>
+                                <span class="late-text">(Terlambat)</span>
                             @endif
                         </small>
                     </div>
@@ -290,11 +237,12 @@
                 <h5 class="alert-heading">
                     <i class="fas fa-exclamation-triangle"></i> Tenggat Sudah Lewat
                 </h5>
-                <p style="margin: 0;">
+                <p class="expired-message">
                     Maaf, waktu pengerjaan tugas sudah habis. Anda tidak dapat mengirim jawaban.
                 </p>
             </div>
         @endif
     </div>
 
+</div>
 @endsection

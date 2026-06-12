@@ -1,0 +1,142 @@
+.siswa-lms-tugas-show-page .tugas-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.siswa-lms-tugas-show-page .deadline-box {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.siswa-lms-tugas-show-page .deadline-box.expired {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.siswa-lms-tugas-show-page .deadline-box.safe {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.siswa-lms-tugas-show-page .deadline-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.siswa-lms-tugas-show-page .deadline-date {
+    margin: 0;
+    font-size: 28px;
+}
+
+.siswa-lms-tugas-show-page .deadline-status {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.siswa-lms-tugas-show-page .status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.siswa-lms-tugas-show-page .status-belum {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.siswa-lms-tugas-show-page .status-dikerjakan {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.siswa-lms-tugas-show-page .status-dinilai {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.siswa-lms-tugas-show-page .status-terlambat {
+    background: #fecaca;
+    color: #7f1d1d;
+}
+
+.siswa-lms-tugas-show-page .assignment-header {
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+}
+
+.siswa-lms-tugas-show-page .assignment-title {
+    color: #165fac;
+    margin: 0 0 15px;
+}
+
+.siswa-lms-tugas-show-page .assignment-meta {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    color: #666666;
+    font-size: 14px;
+}
+
+.siswa-lms-tugas-show-page .description-card {
+    background: #f0f9ff;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #165fac;
+    margin-bottom: 25px;
+}
+
+.siswa-lms-tugas-show-page .description-title {
+    color: #165fac;
+    margin-bottom: 12px;
+}
+
+.siswa-lms-tugas-show-page .description-body {
+    color: #333333;
+    line-height: 1.8;
+}
+
+.siswa-lms-tugas-show-page .teacher-attachment-card {
+    background: #fef3c7;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.siswa-lms-tugas-show-page .teacher-attachment-title {
+    color: #92400e;
+    margin-bottom: 10px;
+}
+
+.siswa-lms-tugas-show-page .submission-card {
+    background: #ffffff;
+    padding: 25px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.siswa-lms-tugas-show-page .submission-title {
+    color: #165fac;
+    margin-bottom: 20px;
+}
+
+.siswa-lms-tugas-show-page .score-summary {
+    margin: 10px 0 0;
+}
+
+.siswa-lms-tugas-show-page .late-text {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.siswa-lms-tugas-show-page .expired-message {
+    margin: 0;
+}
