@@ -2,6 +2,10 @@
     Komponen: Isian Singkat
     Props: $soal, $index, $answers (existing answers array), $disabled
 --}}
+@pushOnce('styles', 'siswa-lms-soal-styles')
+    @vite(['resources/css/siswa/lms/partials/soal.css'])
+@endPushOnce
+
 @php
     $existingAnswer = $answers[$soal->id] ?? '';
 @endphp
@@ -41,23 +45,3 @@
         </small>
     </div>
 </div>
-
-<style>
-.isian-input-container {
-    max-width: 500px;
-}
-.isian-input {
-    font-size: 16px;
-    padding: 12px 16px;
-    border-radius: 8px;
-}
-.isian-input:focus {
-    border-color: var(--primary, #165fac);
-    box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.1);
-}
-.isian-input-container .input-group-text {
-    background: var(--primary, #165fac);
-    color: white;
-    border: none;
-}
-</style>

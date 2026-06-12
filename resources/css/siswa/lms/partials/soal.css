@@ -1,0 +1,260 @@
+.soal-item {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.soal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.soal-nomor {
+    background: var(--primary, #165fac);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.soal-pertanyaan {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #1f2937;
+    margin-bottom: 12px;
+}
+
+.soal-hint {
+    font-size: 13px;
+    color: #6b7280;
+    padding: 10px 14px;
+    background: #f0f9ff;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.pilihan-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pilihan-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f9fafb;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pilihan-item:hover:not(.disabled) {
+    background: #f3f4f6;
+    border-color: var(--primary, #165fac);
+}
+
+.pilihan-item.selected {
+    background: #eff6ff;
+    border-color: var(--primary, #165fac);
+}
+
+.pilihan-item.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.pilihan-item input {
+    display: none;
+}
+
+.pilihan-letter {
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.pilihan-item.selected .pilihan-letter {
+    background: var(--primary, #165fac);
+    border-color: var(--primary, #165fac);
+    color: white;
+}
+
+.pilihan-text {
+    flex: 1;
+    color: #374151;
+}
+
+.pilihan-radio-dot {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.pilihan-radio-dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: transparent;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.pilihan-item.selected .pilihan-radio-dot {
+    border-color: var(--primary, #165fac);
+}
+
+.pilihan-item.selected .pilihan-radio-dot::after {
+    background: var(--primary, #165fac);
+}
+
+.pilihan-check {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+}
+
+.pilihan-item.selected .pilihan-check {
+    background: var(--primary, #165fac);
+    border-color: var(--primary, #165fac);
+    color: white;
+}
+
+.pernyataan-table table {
+    margin-bottom: 0;
+}
+
+.pernyataan-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+}
+
+.pernyataan-table td {
+    vertical-align: middle;
+}
+
+.pernyataan-no-col {
+    width: 50px;
+}
+
+.pernyataan-answer-col {
+    width: 100px;
+    text-align: center;
+}
+
+.bs-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.bs-option:hover {
+    border-color: var(--primary, #165fac);
+    background: #f8fafc;
+}
+
+.bs-option.selected {
+    border-color: var(--primary, #165fac);
+    background: #eff6ff;
+}
+
+.bs-option input {
+    display: none;
+}
+
+.bs-option i {
+    font-size: 16px;
+    opacity: 0.3;
+}
+
+.bs-option.selected i {
+    opacity: 1;
+}
+
+.uraian-textarea {
+    font-size: 15px;
+    line-height: 1.7;
+    border-radius: 10px;
+    resize: vertical;
+    min-height: 200px;
+}
+
+.uraian-textarea:focus {
+    border-color: var(--primary, #165fac);
+    box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.1);
+}
+
+.textarea-footer {
+    display: flex;
+    gap: 20px;
+    padding: 8px 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.char-counter,
+.word-counter {
+    padding: 4px 10px;
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.isian-input-container {
+    max-width: 500px;
+}
+
+.isian-input {
+    font-size: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.isian-input:focus {
+    border-color: var(--primary, #165fac);
+    box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.1);
+}
+
+.isian-input-container .input-group-text {
+    background: var(--primary, #165fac);
+    color: white;
+    border: none;
+}

@@ -2,6 +2,14 @@
 Komponen: Uraian / Essay
 Props: $soal, $index, $answers (existing answers array), $disabled, $allowFileUpload
 --}}
+@pushOnce('styles', 'siswa-lms-soal-styles')
+    @vite(['resources/css/siswa/lms/partials/soal.css'])
+@endPushOnce
+
+@pushOnce('scripts', 'siswa-lms-soal-scripts')
+    @vite(['resources/js/siswa/lms/partials/soal.js'])
+@endPushOnce
+
 @php
     $existingAnswer = $answers[$soal->id] ?? [];
     $existingText = is_array($existingAnswer) ? ($existingAnswer['text'] ?? '') : $existingAnswer;
@@ -37,10 +45,10 @@ Props: $soal, $index, $answers (existing answers array), $disabled, $allowFileUp
                 placeholder="Tuliskan jawaban Anda secara lengkap..." {{ $disabled ? 'disabled' : '' }}>{{ $existingText }}</textarea>
             <div class="textarea-footer">
                 <span class="char-counter">
-                    <span id="charCount-{{ $soal->id }}">0</span> karakter
+                    <span data-char-counter>0</span> karakter
                 </span>
                 <span class="word-counter">
-                    <span id="wordCount-{{ $soal->id }}">0</span> kata
+                    <span data-word-counter>0</span> kata
                 </span>
             </div>
         </div>
@@ -72,52 +80,3 @@ Props: $soal, $index, $answers (existing answers array), $disabled, $allowFileUp
         @endif
     </div>
 </div>
-
-<style>
-    .uraian-textarea {
-        font-size: 15px;
-        line-height: 1.7;
-        border-radius: 10px;
-        resize: vertical;
-        min-height: 200px;
-    }
-
-    .uraian-textarea:focus {
-        border-color: var(--primary, #165fac);
-        box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.1);
-    }
-
-    .textarea-footer {
-        display: flex;
-        gap: 20px;
-        padding: 8px 0;
-        font-size: 12px;
-        color: #6b7280;
-    }
-
-    .char-counter,
-    .word-counter {
-        padding: 4px 10px;
-        background: #f3f4f6;
-        border-radius: 4px;
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const textarea = document.querySelector('[name="jawaban[{{ $soal->id }}][text]"]');
-        if (textarea) {
-            const charCounter = document.getElementById('charCount-{{ $soal->id }}');
-            const wordCounter = document.getElementById('wordCount-{{ $soal->id }}');
-
-            function updateCounters() {
-                const text = textarea.value;
-                charCounter.textContent = text.length;
-                wordCounter.textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
-            }
-
-            textarea.addEventListener('input', updateCounters);
-            updateCounters(); // Initial count
-        }
-    });
-</script>

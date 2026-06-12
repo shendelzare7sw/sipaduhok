@@ -2,6 +2,14 @@
     Komponen: Benar/Salah (Tabel Pernyataan)
     Props: $soal, $index, $answers (existing answers array), $disabled
 --}}
+@pushOnce('styles', 'siswa-lms-soal-styles')
+    @vite(['resources/css/siswa/lms/partials/soal.css'])
+@endPushOnce
+
+@pushOnce('scripts', 'siswa-lms-soal-scripts')
+    @vite(['resources/js/siswa/lms/partials/soal.js'])
+@endPushOnce
+
 @php
     $soalData = $soal->pilihan_jawaban ?? [];
     $pernyataan = $soalData['pernyataan'] ?? [];
@@ -31,10 +39,10 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th style="width: 50px;">No</th>
+                    <th class="pernyataan-no-col">No</th>
                     <th>Pernyataan</th>
-                    <th style="width: 100px; text-align: center;">Benar</th>
-                    <th style="width: 100px; text-align: center;">Salah</th>
+                    <th class="pernyataan-answer-col">Benar</th>
+                    <th class="pernyataan-answer-col">Salah</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,8 +60,7 @@
                                    name="jawaban[{{ $soal->id }}][{{ $pIndex }}]" 
                                    value="true"
                                    {{ ($existingValue === true || $existingValue === 'true') ? 'checked' : '' }}
-                                   {{ $disabled ? 'disabled' : '' }}
-                                   onchange="updateBSOption(this)">
+                                   {{ $disabled ? 'disabled' : '' }}>
                             <i class="fas fa-check text-success"></i>
                         </label>
                     </td>
@@ -63,8 +70,7 @@
                                    name="jawaban[{{ $soal->id }}][{{ $pIndex }}]" 
                                    value="false"
                                    {{ ($existingValue === false || $existingValue === 'false') ? 'checked' : '' }}
-                                   {{ $disabled ? 'disabled' : '' }}
-                                   onchange="updateBSOption(this)">
+                                   {{ $disabled ? 'disabled' : '' }}>
                             <i class="fas fa-times text-danger"></i>
                         </label>
                     </td>
@@ -74,56 +80,3 @@
         </table>
     </div>
 </div>
-
-<style>
-.pernyataan-table table {
-    margin-bottom: 0;
-}
-.pernyataan-table th {
-    background: #f8fafc;
-    font-weight: 600;
-    color: #374151;
-    font-size: 13px;
-}
-.pernyataan-table td {
-    vertical-align: middle;
-}
-.bs-option {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: white;
-}
-.bs-option:hover {
-    border-color: var(--primary, #165fac);
-    background: #f8fafc;
-}
-.bs-option.selected {
-    border-color: var(--primary, #165fac);
-    background: #eff6ff;
-}
-.bs-option input {
-    display: none;
-}
-.bs-option i {
-    font-size: 16px;
-    opacity: 0.3;
-}
-.bs-option.selected i {
-    opacity: 1;
-}
-</style>
-
-<script>
-function updateBSOption(input) {
-    const row = input.closest('tr');
-    row.querySelectorAll('.bs-option').forEach(opt => opt.classList.remove('selected'));
-    input.closest('.bs-option').classList.add('selected');
-}
-</script>

@@ -103,6 +103,8 @@ export default defineConfig({
                 'resources/js/siswa/lms/jadwal.js',
                 'resources/css/siswa/lms/jadwal-print.css',
                 'resources/js/siswa/lms/jadwal-print.js',
+                'resources/css/siswa/lms/partials/soal.css',
+                'resources/js/siswa/lms/partials/soal.js',
                 'resources/css/siswa/lms/mata-pelajaran/show.css',
                 'resources/js/siswa/lms/mata-pelajaran/show.js',
                 'resources/css/siswa/lms/mata-pelajaran/materi.css',
