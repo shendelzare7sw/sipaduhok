@@ -8,42 +8,12 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/meeting/index.css'])
+@endpush
+
 @section('content')
-    <style>
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .meeting-item {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-            transition: all 0.3s;
-            background: #fff;
-        }
-
-        .meeting-item:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-color: #d1d5db;
-        }
-
-        .meeting-item.active {
-            border-left: 4px solid #10b981;
-        }
-
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-    </style>
-
+<div class="siswa-lms-meeting-index-page">
     <!-- Breadcrumb -->
     <div class="page-breadcrumb">
         <div class="page-breadcrumb-item">
@@ -61,10 +31,10 @@
         <div class="page-breadcrumb-item active">
             <i class="fas fa-video"></i> Kelas Virtual
         </div>
-    </div>>
+    </div>
 
     <div class="section-card">
-        <h3 style="color: #165fac; margin-bottom: 20px; display: flex; align-items: center;">
+        <h3 class="section-title">
             <i class="fas fa-video me-2"></i> Daftar Kelas Virtual (Meeting)
         </h3>
 
@@ -85,17 +55,17 @@
                                 <span class="status-badge bg-secondary text-white">Selesai</span>
                             @endif
                         </div>
-                        <h5 class="fw-bold mb-1" style="color: #1a1a1a;">
+                        <h5 class="fw-bold mb-1 meeting-title">
                             {{ $meeting->judul }}
                         </h5>
                         <div class="text-muted small mb-2">
                             <i class="far fa-calendar-alt me-1"></i> {{ $meeting->waktu_mulai->translatedFormat('l, d F Y') }}
-                            <span class="mx-2">•</span>
+                            <span class="mx-2">-</span>
                             <i class="far fa-clock me-1"></i> {{ $meeting->waktu_mulai->format('H:i') }} -
                             {{ $meeting->waktu_selesai ? $meeting->waktu_selesai->format('H:i') : 'Selesai' }}
                         </div>
                         @if($meeting->deskripsi)
-                            <p class="mb-0 text-muted small" style="line-height: 1.5;">
+                            <p class="mb-0 text-muted small meeting-description">
                                 {{ $meeting->deskripsi }}
                             </p>
                         @endif
@@ -114,7 +84,7 @@
         @empty
             <div class="text-center py-5">
                 <img src="https://cdni.iconscout.com/illustration/premium/thumb/online-meeting-4450216-3726715.png" alt="Empty"
-                    style="width: 150px; opacity: 0.5;">
+                    class="empty-illustration">
                 <p class="text-muted mt-3 mb-0">Belum ada jadwal meeting yang tersedia.</p>
             </div>
         @endforelse
@@ -123,4 +93,5 @@
             {{ $meetings->links() }}
         </div>
     </div>
+</div>
 @endsection
