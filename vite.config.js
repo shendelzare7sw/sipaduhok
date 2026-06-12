@@ -335,6 +335,8 @@ export default defineConfig({
                 'resources/css/orang-tua/rapor/detail.css',
                 'resources/css/orang-tua/tagihan/index.css',
                 'resources/js/orang-tua/tagihan/index.js',
+                'resources/css/orang-tua/tagihan/invoice.css',
+                'resources/js/orang-tua/tagihan/invoice.js',
                 'resources/css/admin/lms-settings/index.css',
                 'resources/css/admin/keuangan/tagihan/generate-spp.css',
                 'resources/js/admin/keuangan/tagihan/generate-spp.js',
