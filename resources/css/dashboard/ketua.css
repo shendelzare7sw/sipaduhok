@@ -1,0 +1,237 @@
+.ketua-dashboard-page .dashboard-card {
+  background: var(--surface-color, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+  overflow: hidden;
+  transition: all 0.2s ease-in-out;
+}
+
+.ketua-dashboard-page .dashboard-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  transform: translateY(-2px);
+}
+
+.ketua-dashboard-page .card-header-clean {
+  background: transparent;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.ketua-dashboard-page .card-title-clean {
+  align-items: center;
+  color: var(--text-main, #334155);
+  display: flex;
+  font-size: 1rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.ketua-dashboard-page .card-title-icon {
+  color: var(--primary-color, #4361ee);
+  font-size: 1.1rem;
+}
+
+.ketua-dashboard-page .dashboard-section-title {
+  font-size: 1.15rem;
+}
+
+.ketua-dashboard-page .dashboard-date-badge,
+.ketua-dashboard-page .module-tabs-wrapper {
+  border-color: var(--border-color) !important;
+}
+
+.ketua-dashboard-page .stat-widget {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.ketua-dashboard-page .stat-icon-wrapper {
+  align-items: center;
+  border-radius: 12px;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.ketua-dashboard-page .stat-content {
+  flex-grow: 1;
+}
+
+.ketua-dashboard-page .stat-value {
+  color: var(--text-main, #334155);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.25rem;
+}
+
+.ketua-dashboard-page .stat-label {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.ketua-dashboard-page .supervision-alert {
+  background-color: rgba(67, 97, 238, 0.08);
+  color: var(--primary-dark);
+}
+
+.ketua-dashboard-page .supervision-alert-text,
+.ketua-dashboard-page .dashboard-link-button,
+.ketua-dashboard-page .module-tabs {
+  font-size: 0.8rem;
+}
+
+.ketua-dashboard-page .supervision-alert-text {
+  font-size: 0.9rem;
+}
+
+.ketua-dashboard-page .quick-links-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 1.25rem;
+}
+
+.ketua-dashboard-page .quick-link-item {
+  align-items: center;
+  background: var(--background-color, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.ketua-dashboard-page .quick-link-item:hover {
+  background: var(--surface-color, #ffffff);
+  border-color: var(--primary-light, #4895ef);
+  box-shadow: 0 4px 6px -1px rgba(67, 97, 238, 0.1);
+  transform: translateY(-2px);
+}
+
+.ketua-dashboard-page .quick-link-item i {
+  font-size: 1.5rem;
+}
+
+.ketua-dashboard-page .quick-link-text {
+  color: var(--text-main, #334155);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ketua-dashboard-page .badge-alert-dot {
+  border: 2px solid white;
+  height: 14px;
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  width: 14px;
+}
+
+.ketua-dashboard-page .activity-feed {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+
+.ketua-dashboard-page .activity-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ketua-dashboard-page .activity-feed::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.ketua-dashboard-page .activity-feed::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.ketua-dashboard-page .activity-feed::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.ketua-dashboard-page .activity-item {
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+}
+
+.ketua-dashboard-page .activity-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ketua-dashboard-page .activity-avatar {
+  align-items: center;
+  background: var(--primary-color, #4361ee);
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  height: 40px;
+  justify-content: center;
+  width: 40px;
+}
+
+.ketua-dashboard-page .activity-title {
+  color: var(--text-main, #334155);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.ketua-dashboard-page .activity-meta {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.8rem;
+}
+
+.ketua-dashboard-page .module-tabs {
+  gap: 0.25rem;
+}
+
+.ketua-dashboard-page .module-tab-button {
+  font-weight: 600;
+}
+
+.ketua-dashboard-page .module-tab-content {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.ketua-dashboard-page .custom-nav-pills .nav-link {
+  border-radius: 6px;
+  color: var(--text-muted, #94a3b8);
+  transition: all 0.2s;
+}
+
+.ketua-dashboard-page .custom-nav-pills .nav-link:hover {
+  background: rgba(67, 97, 238, 0.05);
+  color: var(--primary-color, #4361ee);
+}
+
+.ketua-dashboard-page .custom-nav-pills .nav-link.active {
+  background-color: var(--primary-light, #4895ef) !important;
+  box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+  color: #fff !important;
+}
