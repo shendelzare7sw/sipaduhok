@@ -9,26 +9,11 @@
 @endsection
 
 @push('styles')
-<style>
-    .forum-list-item { padding: 16px !important; }
-    .forum-list-item .forum-header {
-        display: flex; justify-content: space-between; align-items: flex-start;
-        margin-bottom: 10px; gap: 8px; flex-wrap: wrap;
-    }
-    .forum-list-item .forum-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .forum-list-item .forum-meta-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .forum-list-item h5 { font-size: 15px; margin-bottom: 6px; }
-    .forum-list-item p { font-size: 13px; margin-bottom: 10px; line-height: 1.5; }
-    .forum-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-    @media (max-width: 576px) {
-        .forum-list-item { padding: 14px !important; }
-        .forum-list-item h5 { font-size: 14px; }
-        .forum-meta-right small { display: none; }
-    }
-</style>
+    @vite(['resources/css/guru/lms/forum/index.css'])
 @endpush
 
 @section('content')
+<div class="guru-lms-forum-index-page" data-csrf-token="{{ csrf_token() }}">
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card-custom">
@@ -67,20 +52,20 @@
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li>
-                                                        <button class="dropdown-item" onclick="event.preventDefault(); event.stopPropagation(); confirmSyncForum('{{ route('guru.lms.forum.togglePin', [$kelas->id, $mapel->id, $forum->id]) }}', '{{ $forum->is_pinned ? 'Unpin Diskusi' : 'Pin Diskusi' }}')">
+                                                        <button class="dropdown-item" data-forum-sync-url="{{ route('guru.lms.forum.togglePin', [$kelas->id, $mapel->id, $forum->id]) }}" data-forum-sync-title="{{ $forum->is_pinned ? 'Unpin Diskusi' : 'Pin Diskusi' }}">
                                                             <i class="fas fa-thumbtack me-2 {{ $forum->is_pinned ? 'text-secondary' : 'text-warning' }}"></i>
                                                             {{ $forum->is_pinned ? 'Lepas Pin' : 'Pin Diskusi' }}
                                                         </button>
                                                     </li>
                                                     <li>
-                                                        <button class="dropdown-item" onclick="event.preventDefault(); event.stopPropagation(); confirmSyncForum('{{ route('guru.lms.forum.toggleClose', [$kelas->id, $mapel->id, $forum->id]) }}', '{{ $forum->is_closed ? 'Buka Diskusi' : 'Tutup Diskusi' }}')">
+                                                        <button class="dropdown-item" data-forum-sync-url="{{ route('guru.lms.forum.toggleClose', [$kelas->id, $mapel->id, $forum->id]) }}" data-forum-sync-title="{{ $forum->is_closed ? 'Buka Diskusi' : 'Tutup Diskusi' }}">
                                                             <i class="fas fa-{{ $forum->is_closed ? 'lock-open' : 'lock' }} me-2 {{ $forum->is_closed ? 'text-success' : 'text-secondary' }}"></i>
                                                             {{ $forum->is_closed ? 'Buka Kembali' : 'Tutup Diskusi' }}
                                                         </button>
                                                     </li>
                                                     <li><hr class="dropdown-divider"></li>
                                                     <li>
-                                                        <button class="dropdown-item text-danger" onclick="event.preventDefault(); event.stopPropagation(); confirmDelete('{{ route('guru.lms.forum.destroy', [$kelas->id, $mapel->id, $forum->id]) }}')">
+                                                        <button class="dropdown-item text-danger" data-forum-delete-url="{{ route('guru.lms.forum.destroy', [$kelas->id, $mapel->id, $forum->id]) }}">
                                                             <i class="fas fa-trash me-2"></i>Hapus
                                                         </button>
                                                     </li>
@@ -96,14 +81,13 @@
                                     <div class="forum-footer">
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="d-flex align-items-center gap-2">
-                                                <div class="{{ $forum->isFromTeacher() ? 'bg-success' : 'bg-primary' }} text-white"
-                                                    style="width:22px; height:22px; font-size:10px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                                <div class="forum-avatar {{ $forum->isFromTeacher() ? 'bg-success' : 'bg-primary' }} text-white">
                                                     {{ substr($forum->user->name ?? 'U', 0, 1) }}
                                                 </div>
                                                 <small class="fw-semibold text-secondary">
                                                     {{ $forum->user->name ?? 'Unknown' }}
                                                     @if($forum->isFromTeacher())
-                                                        <span class="badge bg-success ms-1" style="font-size:8px;">Guru</span>
+                                                        <span class="badge bg-success ms-1 teacher-badge">Guru</span>
                                                     @endif
                                                 </small>
                                             </div>
@@ -124,7 +108,7 @@
                         </div>
                     @else
                         <div class="text-center py-5">
-                            <i class="fas fa-comments text-muted" style="font-size: 48px; opacity: 0.2;"></i>
+                            <i class="fas fa-comments text-muted empty-forum-icon"></i>
                             <p class="text-muted mt-3 mb-0">Belum ada diskusi di kelas ini.</p>
                         </div>
                     @endif
@@ -133,120 +117,9 @@
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-
-
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmDelete(url) {
-            Swal.fire({
-                title: 'Konfirmasi Hapus',
-                html: `
-                    <div class="text-start">
-                        <p class="mb-3">Apakah Anda yakin ingin menghapus diskusi ini?</p>
-                        <div class="form-check">
-                            <input class="form-check-input border border-secondary" type="checkbox" id="swal-hapus-terkait" value="1">
-                            <label class="form-check-label text-danger small" for="swal-hapus-terkait">
-                                Hapus juga diskusi ini dari kelas lain? (Jika ada duplikat)
-                            </label>
-                        </div>
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Hapus',
-                cancelButtonText: 'Batal',
-                preConfirm: () => {
-                    return document.getElementById('swal-hapus-terkait').checked;
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    form.style.display = 'none';
-                    
-                    const csrf = document.createElement('input');
-                    csrf.type = 'hidden';
-                    csrf.name = '_token';
-                    csrf.value = '{{ csrf_token() }}';
-                    form.appendChild(csrf);
-
-                    const method = document.createElement('input');
-                    method.type = 'hidden';
-                    method.name = '_method';
-                    method.value = 'DELETE';
-                    form.appendChild(method);
-
-                    if (result.value) {
-                        const hapusTerkait = document.createElement('input');
-                        hapusTerkait.type = 'hidden';
-                        hapusTerkait.name = 'hapus_terkait';
-                        hapusTerkait.value = '1';
-                        form.appendChild(hapusTerkait);
-                    }
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
-
-        function confirmSyncForum(url, title) {
-            Swal.fire({
-                title: title,
-                html: `
-                    <div class="text-start">
-                        <p class="mb-3">Apakah Anda yakin ingin melakukan tindakan ini?</p>
-                        <div class="alert alert-info py-2 mb-0">
-                            <div class="form-check mb-0">
-                                <input class="form-check-input border border-primary border-2" type="checkbox" id="swal-sync-forum" checked>
-                                <label class="form-check-label fw-bold text-primary" for="swal-sync-forum">
-                                    Terapkan juga ke kelas lain?
-                                </label>
-                            </div>
-                            <small class="d-block mt-1 text-muted">
-                                Aksi akan diterapkan pada diskusi dengan judul yang sama di kelas yang Anda ampu (jika ada).
-                            </small>
-                        </div>
-                    </div>
-                `,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#0d6efd',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Lanjutkan',
-                cancelButtonText: 'Batal',
-                preConfirm: () => {
-                    return document.getElementById('swal-sync-forum').checked;
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    form.style.display = 'none';
-                    
-                    const csrf = document.createElement('input');
-                    csrf.type = 'hidden';
-                    csrf.name = '_token';
-                    csrf.value = '{{ csrf_token() }}';
-                    form.appendChild(csrf);
-
-                    const syncKelas = document.createElement('input');
-                    syncKelas.type = 'hidden';
-                    syncKelas.name = 'sync_kelas';
-                    syncKelas.value = result.value ? '1' : '0';
-                    form.appendChild(syncKelas);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
-    </script>
-    @endpush
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/forum/index.js'])
+@endpush

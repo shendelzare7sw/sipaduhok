@@ -1,0 +1,79 @@
+.guru-lms-forum-index-page .forum-list-item {
+    padding: 16px !important;
+}
+
+.guru-lms-forum-index-page .forum-list-item .forum-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.guru-lms-forum-index-page .forum-list-item .forum-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.guru-lms-forum-index-page .forum-list-item .forum-meta-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.guru-lms-forum-index-page .forum-list-item h5 {
+    font-size: 15px;
+    margin-bottom: 6px;
+}
+
+.guru-lms-forum-index-page .forum-list-item p {
+    font-size: 13px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.guru-lms-forum-index-page .forum-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.guru-lms-forum-index-page .forum-avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.guru-lms-forum-index-page .teacher-badge {
+    font-size: 8px;
+}
+
+.guru-lms-forum-index-page .empty-forum-icon {
+    font-size: 48px;
+    opacity: 0.2;
+}
+
+@media (max-width: 576px) {
+    .guru-lms-forum-index-page .forum-list-item {
+        padding: 14px !important;
+    }
+
+    .guru-lms-forum-index-page .forum-list-item h5 {
+        font-size: 14px;
+    }
+
+    .guru-lms-forum-index-page .forum-meta-right small {
+        display: none;
+    }
+}
