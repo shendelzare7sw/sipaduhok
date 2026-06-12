@@ -9,7 +9,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/manajemen-siswa.css') }}?v={{ filemtime(public_path('css/admin/manajemen-siswa.css')) }}">
+    @vite(['resources/css/waka/manajemen-siswa/index.css'])
 @endsection
 
 @section('content')
@@ -17,7 +17,7 @@
     <!-- Stats Row -->
     <div class="stat-row">
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+            <div class="stat-icon stat-icon-total">
                 <i class="fas fa-graduation-cap"></i>
             </div>
             <div class="stat-details">
@@ -28,7 +28,7 @@
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+            <div class="stat-icon stat-icon-classed">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-details">
@@ -39,7 +39,7 @@
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #fff7ed; color: #f59e0b;">
+            <div class="stat-icon stat-icon-unclassed">
                 <i class="fas fa-hourglass-half"></i>
             </div>
             <div class="stat-details">
@@ -50,7 +50,7 @@
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #ecfeff; color: #06b6d4;">
+            <div class="stat-icon stat-icon-male">
                 <i class="fas fa-male"></i>
             </div>
             <div class="stat-details">
@@ -61,7 +61,7 @@
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #fdf2f8; color: #ec4899;">
+            <div class="stat-icon stat-icon-female">
                 <i class="fas fa-female"></i>
             </div>
             <div class="stat-details">
@@ -77,14 +77,14 @@
         <div class="ms-card-header">
             <div>
                 <h5 class="ms-card-title">
-                    <i class="fas fa-user-graduate" style="color: #3b82f6;"></i> Daftar Siswa
+                    <i class="fas fa-user-graduate ms-title-icon"></i> Daftar Siswa
                     @if($cabangs->first())
-                        <span class="badge" style="background: #f3e8ff; color: #6b21a8; font-size: 10px; margin-left: 8px;">
+                        <span class="badge branch-scope-badge">
                             <i class="fas fa-building"></i> {{ $cabangs->first()->nama_cabang }}
                         </span>
                     @endif
                     @if($isHistorical)
-                        <span class="badge" style="background: #e0f2fe; color: #075985; font-size: 10px; margin-left: 4px;">
+                        <span class="badge snapshot-badge">
                             <i class="fas fa-history"></i> Snapshot {{ $tahunAjarans->firstWhere('id', $taFilterId)?->nama_tahun_ajaran }}
                         </span>
                     @endif
@@ -106,26 +106,26 @@
                     <input type="text" name="search" placeholder="Cari nama/NISN/NIS..." value="{{ request('search') }}">
                 </div>
 
-                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()" {{ $isHistorical ? 'disabled' : '' }}>
+                <select name="jenjang" class="form-select filter-select" data-auto-submit {{ $isHistorical ? 'disabled' : '' }}>
                     <option value="">Semua Jenjang</option>
                     @foreach($jenjangs as $j)
                         <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
                     @endforeach
                 </select>
 
-                <div class="dropdown" style="display: inline-block;">
-                    <button class="form-select filter-select d-flex align-items-center justify-content-between" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static" aria-expanded="false" style="min-width: 180px; text-align: left;">
+                <div class="dropdown kelas-filter-dropdown">
+                    <button class="form-select filter-select d-flex align-items-center justify-content-between kelas-filter-button" type="button" id="dropdownKelas" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static" aria-expanded="false">
                         <span id="selectedKelasText">Pilih Kelas</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-kelas-menu p-2" aria-labelledby="dropdownKelas">
                         <li>
                             <div class="px-2 pb-2 border-bottom mb-1">
-                                <input type="text" id="searchKelasInput" class="form-control form-control-sm"
-                                    placeholder="Cari kelas..." autocomplete="off" style="font-size: 12px;">
+                                <input type="text" id="searchKelasInput" class="form-control form-control-sm kelas-search-input"
+                                    placeholder="Cari kelas..." autocomplete="off">
                             </div>
                         </li>
                         <li>
-                            <div class="form-check p-2 border-bottom mb-1" style="padding-left: 2.2rem !important;">
+                            <div class="form-check p-2 border-bottom mb-1 kelas-check-all">
                                 <input class="form-check-input" type="checkbox" id="checkAllKelas">
                                 <label class="form-check-label fw-bold" for="checkAllKelas">Pilih Semua (Terlihat)</label>
                             </div>
@@ -139,31 +139,31 @@
                                     data-jenjang="{{ $k->jenjang }}"
                                     data-cabang-id="{{ $k->cabang_id }}"
                                     data-search="{{ strtolower($k->nama_kelas . ' ' . ($k->cabang->nama_cabang ?? '')) }}">
-                                    <div class="form-check py-1 pe-3" style="padding-left: 2.2rem;">
+                                    <div class="form-check py-1 pe-3 kelas-check-item">
                                         <input class="form-check-input class-checkbox" type="checkbox" name="kelas_id[]" value="{{ $k->id }}" id="kelas_{{ $k->id }}"
                                             {{ (is_array(request('kelas_id')) && in_array($k->id, request('kelas_id'))) || request('kelas_id') == $k->id ? 'checked' : '' }}
                                             {{ $isHistorical ? 'disabled' : '' }}>
-                                        <label class="form-check-label w-100" for="kelas_{{ $k->id }}" style="cursor: pointer;">
+                                        <label class="form-check-label w-100 kelas-check-label" for="kelas_{{ $k->id }}">
                                             {{ $k->nama_kelas }}
                                         </label>
                                     </div>
                                 </li>
                             @endforeach
                         @endforeach
-                        <li id="kelasEmptyState" class="px-3 py-3 text-center text-muted small" style="display: none;">
+                        <li id="kelasEmptyState" class="px-3 py-3 text-center text-muted small kelas-empty-state">
                             <i class="fas fa-search"></i> Tidak ada kelas yang cocok
                         </li>
                     </ul>
                 </div>
 
-                <select name="status" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="status" class="form-select filter-select" data-auto-submit>
                     <option value="aktif" {{ request('status', 'aktif') == 'aktif' ? 'selected' : '' }}>Status: Aktif</option>
                     <option value="lulus" {{ request('status') == 'lulus' ? 'selected' : '' }}>Lulus / Alumni</option>
                     <option value="pindah" {{ request('status') == 'pindah' ? 'selected' : '' }}>Pindah</option>
                     <option value="keluar" {{ request('status') == 'keluar' ? 'selected' : '' }}>Keluar</option>
                 </select>
 
-                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()" title="Filter berdasarkan tahun ajaran kelas">
+                <select name="tahun_ajaran_id" class="form-select filter-select" data-auto-submit title="Filter berdasarkan tahun ajaran kelas">
                     <option value="">TA: Semua</option>
                     @foreach($tahunAjarans as $ta)
                         <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id') == $ta->id ? 'selected' : '' }}>
@@ -173,16 +173,16 @@
                 </select>
 
                 <label class="filter-checkbox">
-                    <input type="checkbox" name="no_kelas" value="1" {{ request('no_kelas') == '1' ? 'checked' : '' }} onchange="this.form.submit()" {{ $isHistorical ? 'disabled' : '' }}>
+                    <input type="checkbox" name="no_kelas" value="1" {{ request('no_kelas') == '1' ? 'checked' : '' }} data-auto-submit {{ $isHistorical ? 'disabled' : '' }}>
                     Belum ada kelas
                 </label>
 
-                <button type="submit" class="btn btn-secondary btn-sm px-3" style="border-radius: 8px;">
+                <button type="submit" class="btn btn-secondary btn-sm px-3 filter-action-btn">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
 
                 @if(request()->hasAny(['search', 'jenjang', 'kelas_id', 'no_kelas', 'tahun_ajaran_id']) || request('status') != 'aktif')
-                    <a href="{{ route('waka.manajemen-siswa.index') }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                    <a href="{{ route('waka.manajemen-siswa.index') }}" class="btn btn-outline-danger btn-sm px-3 filter-action-btn">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -231,7 +231,7 @@
                                         {{ $snapshot->kelas_asal ?? '-' }}
                                     </span>
                                     @if($snapshot->kelas_tujuan)
-                                        <small class="text-muted d-block" style="font-size: 11px;">→ {{ $snapshot->kelas_tujuan }}</small>
+                                        <small class="text-muted d-block snapshot-target">-&gt; {{ $snapshot->kelas_tujuan }}</small>
                                     @endif
                                 @elseif($siswa->kelas)
                                     <span class="kelas-badge">
@@ -302,94 +302,5 @@
 @endsection
 
 @section('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const checkboxes = document.querySelectorAll('.class-checkbox');
-        const checkAll = document.getElementById('checkAllKelas');
-        const buttonText = document.getElementById('selectedKelasText');
-        const jenjangSelect = document.querySelector('select[name="jenjang"]');
-        const searchInput = document.getElementById('searchKelasInput');
-        const emptyState = document.getElementById('kelasEmptyState');
-        const kelasItems = document.querySelectorAll('.kelas-item');
-        const jenjangGroups = document.querySelectorAll('.kelas-jenjang-group');
-
-        function updateButtonText() {
-            const checked = Array.from(checkboxes).filter(cb => cb.checked);
-            if (checked.length === 0) {
-                buttonText.textContent = 'Pilih Kelas';
-                buttonText.style.color = '#94a3b8';
-            } else if (checked.length === checkboxes.length) {
-                buttonText.textContent = 'Semua Kelas (' + checked.length + ')';
-                buttonText.style.color = '#1e293b';
-            } else {
-                buttonText.textContent = checked.length + ' Kelas Dipilih';
-                buttonText.style.color = '#1e293b';
-            }
-        }
-
-        function applyKelasFilter() {
-            const jenjangFilter = jenjangSelect ? jenjangSelect.value : '';
-            const searchText = searchInput ? searchInput.value.trim().toLowerCase() : '';
-            let visibleCount = 0;
-            const visibleJenjangs = new Set();
-
-            kelasItems.forEach(item => {
-                const itemJenjang = item.getAttribute('data-jenjang');
-                const itemSearch = item.getAttribute('data-search') || '';
-
-                const matchJenjang = !jenjangFilter || itemJenjang === jenjangFilter;
-                const matchSearch = !searchText || itemSearch.includes(searchText);
-                const visible = matchJenjang && matchSearch;
-
-                item.style.display = visible ? '' : 'none';
-                if (visible) {
-                    visibleCount++;
-                    visibleJenjangs.add(itemJenjang);
-                }
-            });
-
-            jenjangGroups.forEach(g => {
-                g.style.display = visibleJenjangs.has(g.getAttribute('data-jenjang')) ? '' : 'none';
-            });
-
-            if (emptyState) emptyState.style.display = visibleCount === 0 ? '' : 'none';
-        }
-
-        if (checkAll) {
-            checkAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => {
-                    const li = cb.closest('.kelas-item');
-                    if (li && li.style.display !== 'none') cb.checked = this.checked;
-                });
-                updateButtonText();
-            });
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function() {
-                updateButtonText();
-                if (checkAll) {
-                    const visibleCbs = Array.from(checkboxes).filter(c => {
-                        const li = c.closest('.kelas-item');
-                        return li && li.style.display !== 'none';
-                    });
-                    checkAll.checked = visibleCbs.length > 0 && visibleCbs.every(c => c.checked);
-                }
-            });
-        });
-
-        if (searchInput) {
-            searchInput.addEventListener('input', applyKelasFilter);
-            searchInput.addEventListener('click', e => e.stopPropagation());
-        }
-
-        if (jenjangSelect) jenjangSelect.addEventListener('change', applyKelasFilter);
-
-        applyKelasFilter();
-        updateButtonText();
-        if (checkAll) {
-            checkAll.checked = Array.from(checkboxes).length > 0 && Array.from(checkboxes).every(c => c.checked);
-        }
-    });
-</script>
+    @vite(['resources/js/waka/manajemen-siswa/index.js'])
 @endsection
