@@ -7,10 +7,14 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/orang-tua/rapor/detail.css'])
+@endsection
+
 @include('partials.anti-screenshot')
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y protected-content">
+<div class="container-xxl flex-grow-1 container-p-y protected-content orang-tua-rapor-detail-page">
 
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -66,13 +70,13 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <div class="d-flex align-items-center">
-                                <div class="avatar flex-shrink-0 me-3" style="width: 40px; height: 40px;">
+                                <div class="avatar flex-shrink-0 me-3 rapor-detail-avatar">
                                     @if($rapor->siswa->user && $rapor->siswa->user->foto_profil)
-                                        <img src="{{ asset('storage/' . $rapor->siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="{{ asset('storage/' . $rapor->siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border shadow-sm rapor-detail-avatar-image">
                                     @elseif($rapor->siswa->foto)
-                                        <img src="{{ asset('storage/' . $rapor->siswa->foto) }}" alt="avatar" class="rounded-circle border shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="{{ asset('storage/' . $rapor->siswa->foto) }}" alt="avatar" class="rounded-circle border shadow-sm rapor-detail-avatar-image">
                                     @else
-                                        <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border d-flex align-items-center justify-content-center" style="font-size: 1.2rem; width: 100%; height: 100%;">
+                                        <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border d-flex align-items-center justify-content-center rapor-detail-avatar-initial">
                                             {{ strtoupper(substr($rapor->siswa->nama_lengkap, 0, 1)) }}
                                         </span>
                                     @endif
