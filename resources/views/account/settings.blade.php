@@ -22,8 +22,12 @@
     @include($sidebarView)
 @endsection
 
+@section('styles')
+    @vite(['resources/css/account/settings.css'])
+@endsection
+
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y account-settings-page">
 
     <div class="mb-4">
         <nav aria-label="breadcrumb">
@@ -106,7 +110,8 @@
                             <div class="input-group">
                                 <input type="password" class="form-control @error('current_password') is-invalid @enderror"
                                     id="current_password" name="current_password" placeholder="············">
-                                <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePasswordVisibility('current_password', this)">
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-password-toggle data-target="current_password">
                                     <i class="fas fa-eye-slash"></i>
                                 </button>
                             </div>
@@ -118,7 +123,8 @@
                             <div class="input-group">
                                 <input type="password" class="form-control @error('new_password') is-invalid @enderror"
                                     id="new_password" name="new_password" placeholder="············">
-                                <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePasswordVisibility('new_password', this)">
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-password-toggle data-target="new_password">
                                     <i class="fas fa-eye-slash"></i>
                                 </button>
                             </div>
@@ -131,7 +137,8 @@
                             <div class="input-group">
                                 <input type="password" class="form-control"
                                     id="new_password_confirmation" name="new_password_confirmation" placeholder="············">
-                                <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePasswordVisibility('new_password_confirmation', this)">
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-password-toggle data-target="new_password_confirmation">
                                     <i class="fas fa-eye-slash"></i>
                                 </button>
                             </div>
@@ -139,7 +146,7 @@
 
                         <div class="alert alert-warning border-0 d-flex align-items-center mb-4 mt-2">
                             <i class="fas fa-info-circle me-2 fs-5"></i>
-                            <div style="font-size: 0.85rem;">Sesi akan berakhir otomatis setelah update password.</div>
+                            <div class="account-session-note">Sesi akan berakhir otomatis setelah update password.</div>
                         </div>
 
                         <button type="submit" class="btn btn-warning text-white w-100">
@@ -184,7 +191,8 @@
                                 <label class="form-label">6-Digit PIN Keamanan Baru</label>
                                 <div class="input-group">
                                     <input type="password" id="security_pin" name="security_pin" class="form-control @error('security_pin') is-invalid @enderror" minlength="6" maxlength="6" pattern="\d{6}" placeholder="••••••" required>
-                                    <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePasswordVisibility('security_pin', this)">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button"
+                                        data-password-toggle data-target="security_pin">
                                         <i class="fas fa-eye-slash"></i>
                                     </button>
                                 </div>
@@ -195,7 +203,8 @@
                                 <label class="form-label">Konfirmasi PIN</label>
                                 <div class="input-group">
                                     <input type="password" id="security_pin_confirmation" name="security_pin_confirmation" class="form-control" minlength="6" maxlength="6" pattern="\d{6}" placeholder="••••••" required>
-                                    <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePasswordVisibility('security_pin_confirmation', this)">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button"
+                                        data-password-toggle data-target="security_pin_confirmation">
                                         <i class="fas fa-eye-slash"></i>
                                     </button>
                                 </div>
@@ -208,7 +217,8 @@
                             <label class="form-label text-danger">Otorisasi Pergantian Keamanan</label>
                             <div class="input-group">
                                 <input type="password" id="current_password_security" name="current_password" class="form-control border-danger @error('current_password_security') is-invalid @enderror" placeholder="Masukkan Password Login Anda Saat Ini" required>
-                                <button class="btn btn-outline-danger toggle-password" type="button" onclick="togglePasswordVisibility('current_password_security', this)">
+                                <button class="btn btn-outline-danger toggle-password" type="button"
+                                    data-password-toggle data-target="current_password_security">
                                     <i class="fas fa-eye-slash"></i>
                                 </button>
                             </div>
@@ -229,89 +239,8 @@
     </div>
 </div>
 
-<script>
-    function togglePasswordVisibility(inputId, buttonElement) {
-        const input = document.getElementById(inputId);
-        const icon = buttonElement.querySelector('i');
+@endsection
 
-        if (input.type === 'password') {
-            input.type = 'text';
-            // Ganti icon mata tertutup ke mata terbuka
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        } else {
-            input.type = 'password';
-            // Ganti icon mata terbuka ke mata tertutup
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        }
-    }
-</script>
-
-<style>
-    .toggle-password {
-        border-color: #d9dee3;
-        min-width: 45px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-    .toggle-password:hover {
-        background-color: #f8f9fa;
-        border-color: #adb5bd;
-        color: #495057;
-    }
-
-    .toggle-password:active {
-        background-color: #e9ecef;
-    }
-
-    .toggle-password i {
-        font-size: 16px;
-        display: inline-block;
-        line-height: 1;
-    }
-
-    /* Prevent duplicate icons from browser extensions or other scripts */
-    .toggle-password i:not(:first-child) {
-        display: none !important;
-    }
-
-    /* Ensure only one icon is visible */
-    .toggle-password::before,
-    .toggle-password::after {
-        display: none !important;
-    }
-
-    .input-group .form-control.is-invalid {
-        z-index: 2;
-        border-right: 1px solid #dc3545;
-    }
-
-    .input-group .btn {
-        z-index: 3;
-    }
-
-    .input-group .form-control:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-
-    /* Hide browser default password reveal button */
-    input[type="password"]::-ms-reveal,
-    input[type="password"]::-ms-clear {
-        display: none;
-    }
-
-    input[type="password"]::-webkit-credentials-auto-fill-button,
-    input[type="password"]::-webkit-contacts-auto-fill-button {
-        display: none !important;
-        visibility: hidden;
-        pointer-events: none;
-        position: absolute;
-        right: 0;
-    }
-</style>
+@section('scripts')
+    @vite(['resources/js/account/settings.js'])
 @endsection

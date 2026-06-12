@@ -319,6 +319,8 @@ export default defineConfig({
                 'resources/css/guru/jadwal/index.css',
                 'resources/css/profile/index.css',
                 'resources/js/profile/index.js',
+                'resources/css/account/settings.css',
+                'resources/js/account/settings.js',
                 'resources/css/admin/lms-settings/index.css',
                 'resources/css/admin/keuangan/tagihan/generate-spp.css',
                 'resources/js/admin/keuangan/tagihan/generate-spp.js',
