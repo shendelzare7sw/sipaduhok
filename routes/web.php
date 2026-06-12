@@ -890,7 +890,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/edit', [WakaPengaturanIstirahatController::class, 'edit'])->name('edit');
             Route::put('/{id}', [WakaPengaturanIstirahatController::class, 'update'])->name('update');
             Route::delete('/{id}', [WakaPengaturanIstirahatController::class, 'destroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [WakaPengaturanIstirahatController::class, 'toggleStatus'])->name('toggle-status');
+            Route::patch('/{id}/toggle-status', [WakaPengaturanIstirahatController::class, 'toggleStatus'])->name('toggle-status');
         });
 
         // Promotion System Settings

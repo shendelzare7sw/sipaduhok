@@ -215,7 +215,7 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 | Edit | `waka.pengaturan-istirahat.edit` | GET | `@edit` | `waka/pengaturan-istirahat/edit.blade.php` | Form pre-fill. |
 | Update | `waka.pengaturan-istirahat.update` | PUT | `@update` | redirect | Validasi & update. |
 | Hapus | `waka.pengaturan-istirahat.destroy` | DELETE | `@destroy` | redirect | Hapus pengaturan. |
-| Toggle status | `waka.pengaturan-istirahat.toggle-status` | POST | `@toggleStatus` | redirect | Aktif/non-aktifkan slot istirahat. |
+| Toggle status | `waka.pengaturan-istirahat.toggle-status` | PATCH | `@toggleStatus` | redirect | Aktif/non-aktifkan slot istirahat. |
 
 **Catatan**: Tidak di sidebar utama — diakses lewat tombol **"Istirahat"** (oranye) di halaman index Jadwal Pelajaran. Mirror logika: `admin.pengaturan-istirahat.*`.
 

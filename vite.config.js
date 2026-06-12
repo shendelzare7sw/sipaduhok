@@ -219,6 +219,8 @@ export default defineConfig({
                 'resources/js/waka/jadwal-pelajaran/import.js',
                 'resources/css/waka/jadwal-pelajaran/show.css',
                 'resources/js/waka/jadwal-pelajaran/show.js',
+                'resources/css/admin/pengaturan-istirahat/index.css',
+                'resources/css/waka/pengaturan-istirahat/index.css',
                 'resources/css/admin/kelas/form.css',
                 'resources/js/admin/kelas/form.js',
                 'resources/css/admin/kelas/index.css',

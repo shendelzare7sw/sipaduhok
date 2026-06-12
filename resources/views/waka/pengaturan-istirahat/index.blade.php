@@ -8,6 +8,10 @@
     @include('waka.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/waka/pengaturan-istirahat/index.css'])
+@endsection
+
 @section('content')
     {{-- Breadcrumb / Back Button --}}
     <div class="mb-3">
@@ -165,13 +169,13 @@
                         </div>
                         <div class="modal-body">
                             <p class="mb-3">Apakah Anda yakin ingin menghapus waktu istirahat:</p>
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
-                                <div style="font-weight: 600; font-size: 16px; color: #212529; margin-bottom: 8px;">
+                            <div class="break-delete-summary">
+                                <div class="break-delete-title">
                                     <i class="fas fa-coffee text-danger me-2"></i>
                                     {{ $pengaturan->nama_istirahat }}
                                 </div>
-                                <div style="font-size: 13px; color: #6c757d;">
-                                    <i class="fas fa-layer-group me-1"></i> Jenjang: <strong>{{ $pengaturan->jenjang }}</strong> •
+                                <div class="break-delete-meta">
+                                    <i class="fas fa-layer-group me-1"></i> Jenjang: <strong>{{ $pengaturan->jenjang }}</strong> |
                                     <i class="fas fa-clock me-1"></i> Waktu: <strong>{{ substr($pengaturan->jam_mulai, 0, 5) }} -
                                         {{ substr($pengaturan->jam_selesai, 0, 5) }}</strong>
                                 </div>
