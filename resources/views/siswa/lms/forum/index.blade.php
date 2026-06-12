@@ -8,71 +8,12 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/forum/index.css'])
+@endpush
+
 @section('content')
-    <style>
-        .forum-card {
-            background: white;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-            transition: all 0.2s;
-            border-left: 4px solid transparent;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .forum-card:hover {
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-            transform: translateX(3px);
-            text-decoration: none;
-            color: inherit;
-        }
-
-        @media (max-width: 576px) {
-            .forum-card { padding: 14px; border-radius: 8px; }
-            .forum-title { font-size: 14px; }
-        }
-
-        .forum-card.pinned {
-            border-left-color: #f59e0b;
-            background: #fffbeb;
-        }
-
-        .forum-card.closed {
-            opacity: 0.7;
-            border-left-color: #dc2626;
-        }
-
-        .forum-title {
-            font-weight: 600;
-            font-size: 16px;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .forum-meta {
-            font-size: 13px;
-            color: #666;
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .reply-count {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #e3f2fd;
-            color: #1565c0;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 13px;
-            font-weight: 500;
-        }
-    </style>
-
+<div class="siswa-lms-forum-index-page">
     <!-- Breadcrumb -->
     <div class="page-breadcrumb">
         <div class="page-breadcrumb-item">
@@ -124,7 +65,7 @@
         </a>
     @empty
         <div class="card-custom text-center py-5">
-            <i class="fas fa-comments text-muted" style="font-size: 60px; opacity: 0.3;"></i>
+            <i class="fas fa-comments text-muted forum-empty-icon"></i>
             <h5 class="mt-3 mb-2">Belum ada diskusi</h5>
             <p class="text-muted">Guru belum memulai diskusi untuk mata pelajaran ini.</p>
         </div>
@@ -135,4 +76,5 @@
             {{ $forums->links() }}
         </div>
     @endif
+</div>
 @endsection
