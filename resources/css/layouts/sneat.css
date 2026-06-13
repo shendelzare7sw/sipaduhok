@@ -1,0 +1,581 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import 'boxicons/css/boxicons.min.css';
+@import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css';
+@import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css';
+:root {
+            /* SIPADUHOK Brand Colors (Modern UI) */
+            --bs-primary: #4361ee;
+            --bs-primary-rgb: 67, 97, 238;
+            --primary-color: #4361ee;
+            --primary-dark: #2b4162;
+            --primary-light: #4895ef;
+            
+            /* Global Surface Variables */
+            --secondary-color: #64748b;
+            --surface-color: #ffffff;
+            --background-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #94a3b8;
+        }
+        
+        /* Override Sneat primary color dengan brand SIPADUHOK */
+        .bg-menu-theme {
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark) !important;
+            border-color: var(--primary-dark) !important;
+        }
+
+        /* Menu aktif */
+        .menu-item.active>.menu-link {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            color: #fff !important;
+            font-weight: 600;
+        }
+
+        /* Logo Brand */
+        .app-brand-logo img {
+            max-height: 50px;
+            max-width: 100%;
+        }
+
+        .app-brand-text {
+            color: #fff !important;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Sidebar Menu Items */
+        .menu-item .menu-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: all 0.2s;
+        }
+
+        .menu-item .menu-link:hover {
+            color: #fff !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Navbar User Info */
+        .navbar-nav-right .dropdown-toggle::after {
+            display: none;
+        }
+
+        /* Avatar Circle */
+        .avatar-initial {
+            background-color: var(--primary-color) !important;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        /* Navbar adjustments */
+        .layout-navbar {
+            border-bottom: 1px solid #e7e7e7 !important;
+        }
+
+        /* Navbar Title & Breadcrumb Styling */
+        .navbar-nav-right {
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        /* Page Title Container in Navbar */
+        .navbar-page-title {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 1.5rem;
+            flex: 1;
+        }
+
+        .navbar-page-title h5 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #344054;
+            line-height: 1.3;
+        }
+
+        .navbar-page-title small {
+            font-size: 0.813rem;
+            color: #6c757d;
+            margin-top: 2px;
+        }
+
+        /* Card Hover Effect */
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        /* Disable card hover when modal is open to prevent flickering */
+        body:not(.modal-open) .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Prevent parent elements from receiving pointer events when modal is open */
+        body.modal-open>*:not(.modal):not(.modal-backdrop) {
+            pointer-events: none;
+        }
+
+        /* Re-enable pointer events for modal */
+        body.modal-open .modal,
+        body.modal-open .modal-backdrop {
+            pointer-events: auto;
+        }
+
+        /* Alert Animation */
+        .alert {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Menu Icon Spacing */
+        .menu-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        /* Fix Menu Inner Shadow Overlap */
+        .menu-inner-shadow {
+            display: none !important;
+        }
+
+        /* ==========================================
+           SIDEBAR SCROLL FIX - Flexbox layout
+           Makes menu-inner fill remaining height after
+           app-brand header so it can scroll properly
+           on all screen sizes.
+           ========================================== */
+        .layout-menu {
+            z-index: 1045 !important;
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .layout-menu .app-brand {
+            flex-shrink: 0; /* Brand header never shrinks */
+        }
+
+        .menu-inner {
+            position: relative !important;
+            z-index: 1 !important;
+            flex: 1 1 auto !important;        /* Fill remaining height */
+            min-height: 0 !important;          /* Critical: allow flex child to shrink & scroll */
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding-bottom: 2rem !important;   /* Space so last item isn't cut off */
+            -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
+        }
+
+        /* Menu Header Styling */
+        .menu-header {
+            padding: 0.75rem 1.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .menu-header-text {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6) !important;
+            letter-spacing: 0.5px;
+        }
+
+        /* Footer */
+        .content-footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e7e7e7;
+        }
+
+        /* Pagination Styling - Enhanced & Clear */
+        .pagination {
+            gap: 6px;
+            margin: 0;
+        }
+
+        .pagination .page-link {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #6c757d;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #14b8a6;
+            color: #14b8a6;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #14b8a6;
+            border-color: #14b8a6;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #adb5bd;
+            background-color: #fff;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .pagination .page-item.disabled .page-link:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Icon spacing dalam pagination */
+        .pagination .page-link i {
+            font-size: 0.875rem;
+        }
+
+        /* Modal fixes for Bootstrap 5 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+
+        .modal {
+            z-index: 1050;
+        }
+
+        .modal-dialog {
+            z-index: 1060;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+            border: none;
+        }
+
+        /* Ensure modal header close button is properly positioned */
+        .modal-header .btn-close {
+            padding: 0.5rem;
+            margin: -0.5rem -0.5rem -0.5rem auto;
+        }
+
+        /* CRITICAL FIX: Full Width Content Container */
+        .container-xxl {
+            max-width: 100% !important;
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
+
+        /* Adjust content wrapper padding for better spacing */
+        .content-wrapper {
+            padding: 0 !important;
+        }
+
+        .container-p-y {
+            padding-top: 1.625rem !important;
+            padding-bottom: 1.625rem !important;
+        }
+
+        /* Ensure layout page takes full width */
+        .layout-page {
+            width: 100% !important;
+            background: transparent !important;
+        }
+
+        /* Prevent layout elements from covering sidebar */
+        .layout-wrapper {
+            background: transparent !important;
+        }
+
+        .layout-container {
+            background: transparent !important;
+        }
+
+        /* ==========================================
+           STICKY NAVBAR - FOLLOWS ON SCROLL
+           ========================================== */
+        .layout-navbar {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1040 !important;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.08);
+        }
+
+        /* Add padding to content wrapper to prevent content from jumping behind sticky navbar */
+        .content-wrapper {
+            padding-top: 0 !important;
+        }
+
+        /* ==========================================
+           MOBILE MENU TOGGLE - ONLY MOBILE STYLES
+           ========================================== */
+        @media (max-width: 1199.98px) {
+
+            /* Hide menu off-screen by default */
+            .layout-menu {
+                display: flex !important;         /* Flex column for scroll fix */
+                flex-direction: column !important;
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                height: 100dvh;                   /* Dynamic viewport height (avoids mobile browser chrome) */
+                width: 260px;
+                z-index: 1100;
+                transform: translate3d(-100%, 0, 0) !important;
+                transition: transform 0.3s ease !important;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                will-change: transform;           /* GPU acceleration untuk animasi mulus */
+                visibility: visible !important;
+            }
+
+            /* Show menu when menu-shown class is added */
+            .layout-menu.menu-shown {
+                transform: translate3d(0, 0, 0) !important;
+            }
+
+            /* Overlay backdrop */
+            .layout-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1050;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+                pointer-events: none;
+            }
+
+            .layout-overlay.active {
+                opacity: 1;
+                visibility: visible;
+                pointer-events: auto;
+            }
+
+            /* Hamburger button - transform to X when menu open */
+            .layout-menu-toggle.navbar-nav a {
+                cursor: pointer;
+                transition: all 0.3s;
+                position: relative;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .layout-menu-toggle.navbar-nav a i {
+                transition: all 0.3s;
+            }
+
+            /* Transform hamburger to X when menu is open */
+            .menu-open .layout-menu-toggle.navbar-nav a i.fa-bars::before {
+                content: "\f00d";
+                /* FontAwesome times/X icon */
+            }
+
+            /* Sidebar toggle button styling */
+            .layout-menu-toggle-sidebar {
+                color: #fff !important;
+                opacity: 1 !important;
+            }
+
+            .layout-menu-toggle-sidebar:hover {
+                opacity: 0.8 !important;
+                background-color: rgba(255, 255, 255, 0.1) !important;
+                border-radius: 6px;
+            }
+
+            .layout-menu-toggle-sidebar i {
+                color: #fff !important;
+            }
+
+            /* === MOBILE SIDEBAR SCROLL FIX === */
+            .layout-menu .menu-inner {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch;
+                max-height: none !important;
+                height: auto !important;
+                padding-bottom: 3rem !important;
+            }
+
+            /* Ensure app-brand doesn't grow */
+            .layout-menu .app-brand {
+                flex-shrink: 0 !important;
+                flex-grow: 0 !important;
+            }
+
+            /* Page title responsive */
+            .navbar-page-title h5 {
+                font-size: 1.1rem;
+            }
+
+            .navbar-page-title small {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .container-xxl {
+                padding-left: 1.25rem !important;
+                padding-right: 1.25rem !important;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .container-xxl {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            .container-p-y {
+                padding-top: 1.25rem !important;
+                padding-bottom: 1.25rem !important;
+            }
+
+            .navbar-page-title {
+                padding-left: 0.75rem;
+            }
+
+            .navbar-page-title h5 {
+                font-size: 1rem;
+            }
+
+            .navbar-page-title small {
+                display: none;
+                /* Hide subtitle on mobile for cleaner look */
+            }
+
+            /* Hamburger icon size */
+            .layout-menu-toggle.navbar-nav a i {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .pagination .page-link {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .container-xxl {
+                padding-left: 0.875rem !important;
+                padding-right: 0.875rem !important;
+            }
+
+            /* Adjust navbar padding */
+            .layout-navbar {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+
+            /* Smaller icons on very small screens */
+            .navbar-nav .avatar {
+                width: 36px;
+                height: 36px;
+            }
+
+            .navbar-nav .avatar-initial {
+                font-size: 0.875rem;
+            }
+
+            .navbar-nav .fa-bell {
+                font-size: 1.2rem !important;
+            }
+
+            .layout-menu-toggle.navbar-nav a i {
+                font-size: 1.4rem;
+            }
+
+            .navbar-page-title h5 {
+                font-size: 0.9rem;
+            }
+        }
+
+/* Universal: smooth slide-out for auto-hide (all screen sizes) */
+        #scrollToTop {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        #scrollToTop.fab-hidden-mobile {
+            transform: translateX(80px) !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        /* Mobile: scroll-to-top di bawah chatbot FAB */
+        @media (max-width: 768px) {
+            #scrollToTop {
+                bottom: 24px !important;
+            }
+        }
+.sneat-brand-text {
+    font-size: 1rem;
+}
+
+.sneat-sidebar-toggle {
+    margin-left: 1rem;
+}
+
+.sneat-avatar-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.sneat-scroll-to-top {
+    bottom: 82px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    display: none;
+    z-index: 1050;
+    align-items: center;
+    justify-content: center;
+}
+
+.sneat-logout-body {
+    font-size: 1rem;
+}
+
+.sneat-logout-note {
+    font-size: 0.9rem;
+}
+
+.sneat-logout-action {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+}

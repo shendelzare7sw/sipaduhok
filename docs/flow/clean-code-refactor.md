@@ -121,7 +121,7 @@ Catatan ini dipakai sebagai checkpoint agar refactor views after-login berjalan 
 - `resources/views/admin/keuangan/tagihan/edit.blade.php`
   - CSS dan JS edit tagihan dipindah ke scoped asset via Vite.
   - Delete tagihan dipindah dari inline script ke JS scoped berbasis `data-*`.
-  - Formatter rupiah inline dihapus karena layout sudah memakai `public/js/currency-format.js` untuk `.currency-input`.
+  - Formatter rupiah inline dihapus karena layout Sneat sudah memakai `resources/js/layouts/sneat.js` untuk `.currency-input`.
   - Inline style/script/event handler Blade sudah dibersihkan.
 - `resources/views/admin/keuangan/tagihan/bulk-create.blade.php`
   - CSS dan JS massal tagihan dipindah ke scoped asset via Vite.
@@ -168,6 +168,13 @@ Catatan ini dipakai sebagai checkpoint agar refactor views after-login berjalan 
   - Filter tahun ajaran, tombol print, style statistik, info banner, info box, tabel mobile, modal sinkronisasi, dan laporan print dipindah dari inline handler/style ke asset scoped.
   - Struktur HTML print yang sebelumnya menggantung ditutup ulang agar dokumen cetak valid.
   - Inline style/script/event handler Blade sudah dibersihkan pada seluruh folder guru pengajar.
+- `resources/views/layouts/sneat.blade.php`
+  - CSS layout, Bootstrap, Font Awesome, Boxicons, dan CSS Sneat dipindah ke `resources/css/layouts/sneat.css`.
+  - JS layout, auto-dismiss alert, FAB scroll-to-top, menu mobile/submenu, formatter rupiah, dan unsaved changes warning dipindah ke `resources/js/layouts/sneat.js`.
+  - Dependency CDN diganti menjadi dependency npm/Vite; `public/js/currency-format.js` dihapus karena sudah digabung ke asset layout.
+  - Inline style kecil pada brand, toggle sidebar, avatar, scroll-to-top, dan modal logout diganti class CSS.
+  - Partial `resources/views/partials/sneat-navbar.blade.php` dibersihkan dari inline style.
+  - Karakter non-ASCII yang rawan terlihat mojibake di layout Sneat diganti menjadi teks/entity ASCII.
 - Penghapusan shared views/asset lintas role
   - `resources/views/shared`, `resources/views/keuangan-shared`, `resources/css/shared`, dan `resources/js/shared` sudah dihapus setelah tidak ada referensi runtime tersisa.
   - Wali Kelas, SIA siswa, monitoring, catatan, akademik index, dan carryover keuangan sekarang memakai view/asset per role atau per halaman.

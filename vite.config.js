@@ -27,6 +27,8 @@ export default defineConfig({
                 'resources/css/notifications/index.css',
                 'resources/js/notifications/index.js',
                 'resources/css/notifications/show.css',
+                'resources/css/layouts/sneat.css',
+                'resources/js/layouts/sneat.js',
                 'resources/css/layouts/lms.css',
                 'resources/js/layouts/lms.js',
                 'resources/css/layouts/lms-guru.css',
