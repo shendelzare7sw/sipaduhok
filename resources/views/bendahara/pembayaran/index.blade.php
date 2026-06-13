@@ -14,7 +14,7 @@
 
 @section('content')
 
-    {{-- Stat Widgets â”€ white cards, colored icons â”€â”€â”€â”€â”€â”€â”€ --}}
+    {{-- Stat Widgets --}}
     <div class="row g-4 mb-4">
         <div class="col-md-4">
             <div class="dashboard-card">
@@ -69,7 +69,7 @@
         </div>
     </div>
 
-    {{-- Main Table Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ --}}
+    {{-- Main Table Card --}}
     <div class="dashboard-card">
         <div class="card-header-clean">
             <div>
@@ -239,7 +239,7 @@
             </div>
             <div class="pagination-area">
                 <span class="small payment-muted-text">
-                    Menampilkan {{ $pembayaranList->firstItem() ?? 0 }}â€“{{ $pembayaranList->lastItem() ?? 0 }}
+                    Menampilkan {{ $pembayaranList->firstItem() ?? 0 }} - {{ $pembayaranList->lastItem() ?? 0 }}
                     dari {{ $pembayaranList->total() }} transaksi
                 </span>
                 <div>{{ $pembayaranList->withQueryString()->links() }}</div>
