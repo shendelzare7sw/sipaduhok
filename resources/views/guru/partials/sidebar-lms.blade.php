@@ -1,8 +1,8 @@
 {{-- Context Info --}}
-<div style="padding: 16px 20px; background: rgba(255,255,255,0.1); margin: 0 16px 16px; border-radius: 8px;">
-    <div style="font-size: 12px; opacity: 0.7; margin-bottom: 4px;">Anda Mengajar:</div>
-    <div style="font-weight: 700; font-size: 14px;">{{ $mapel->nama_mapel ?? 'N/A' }}</div>
-    <div style="font-size: 12px; opacity: 0.9;">Kelas {{ $kelas->nama_kelas ?? 'N/A' }}</div>
+<div class="lms-teaching-context">
+    <div class="lms-teaching-context-label">Anda Mengajar:</div>
+    <div class="lms-teaching-context-subject">{{ $mapel->nama_mapel ?? 'N/A' }}</div>
+    <div class="lms-teaching-context-class">Kelas {{ $kelas->nama_kelas ?? 'N/A' }}</div>
 </div>
 
 <div class="nav-section-title">UTAMA</div>

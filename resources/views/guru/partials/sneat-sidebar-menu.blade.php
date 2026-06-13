@@ -93,7 +93,7 @@
                     @if($mapel)
                         <li class="menu-item {{ $isSubActive ? 'active' : '' }}">
                             <a href="{{ route('guru.lms.dashboard', [$kelasId, $mapelId]) }}" class="menu-link">
-                                <div class="text-wrap" style="line-height: 1.2;">{{ $mapel->nama_mapel }}</div>
+                                <div class="text-wrap lh-sm">{{ $mapel->nama_mapel }}</div>
                             </a>
                         </li>
                     @endif
