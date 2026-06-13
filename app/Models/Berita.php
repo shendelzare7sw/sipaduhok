@@ -84,7 +84,9 @@ class Berita extends Model
                 return asset('img/berita/' . $this->gambar_thumbnail);
             }
         }
-        return asset('img/news-1.jpg');
+        
+        $imageId = ($this->id % 5) + 1;
+        return asset('img/news-' . $imageId . '.jpg');
     }
 
     public function getExcerptAttribute()

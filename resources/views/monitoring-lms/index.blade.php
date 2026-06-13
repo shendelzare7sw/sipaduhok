@@ -85,8 +85,15 @@
         font-size: 0.82rem;
         color: var(--text-main);
         margin: 0;
+        padding-left: 0; /* Override Bootstrap .form-check padding */
         cursor: pointer;
         min-width: 0;
+    }
+
+    .filter-toggle .form-check-input {
+        margin: 0; /* Override Bootstrap negative margin */
+        float: none;
+        flex-shrink: 0;
     }
 
     .filter-toggle span { line-height: 1.3; }

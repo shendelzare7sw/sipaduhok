@@ -224,17 +224,60 @@
                     $cardStyle = $isHex ? "border-top-color: $themeColor;" : "";
                     $iconBgStyle = $isHex ? "background-color: {$themeColor}10;" : ""; // ~6% opacity
                     $iconStyle = $isHex ? "color: $themeColor;" : "";
+
+                    $programIconSource = strtolower(($item['title'] ?? '') . ' ' . ($item['link'] ?? ''));
+                    $programIconKey = match (true) {
+                        str_contains($programIconSource, 'inklusi') => 'inklusi',
+                        str_contains($programIconSource, 'kesetaraan') || str_contains($programIconSource, 'sd-sma') => 'kesetaraan',
+                        str_contains($programIconSource, 'konseling') || str_contains($programIconSource, 'terapi') => 'konseling',
+                        str_contains($programIconSource, 'usia dini') || str_contains($programIconSource, 'paud') || str_contains($programIconSource, 'tk') => 'usia_dini',
+                        default => 'program',
+                    };
                 @endphp
                 <div class="card-hover bg-white rounded-2xl shadow-lg p-8 text-center border-t-4 {{ $borderClass }} group" style="{{ $cardStyle }}">
                     <div class="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center {{ $bgIconClass }} {{ $groupHoverIconBgClass }} transition-colors duration-300"
                          style="{{ $iconBgStyle }} {{ $isHex ? 'border: 1px solid '.$themeColor.'20;' : '' }}">
-                        {{-- Icon placeholder --}}
+                        {{-- Custom image icon or relevant program fallback icon. --}}
                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
                              <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Program' }}" class="w-10 h-10 object-contain">
                         @else
-                            <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/>
-                            </svg>
+                            @switch($programIconKey)
+                                @case('inklusi')
+                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21s-7-4.35-7-10a4 4 0 017-2.65A4 4 0 0119 11c0 5.65-7 10-7 10z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v5m-2.5-2.5h5" />
+                                    </svg>
+                                    @break
+
+                                @case('kesetaraan')
+                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16M5 7h14" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 7l-3 6h6L7 7zm10 0l-3 6h6l-3-6z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 20h8" />
+                                    </svg>
+                                    @break
+
+                                @case('konseling')
+                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 14a6 6 0 118 0c-.8.8-1.2 1.6-1.2 2.6H9.2c0-1-.4-1.8-1.2-2.6z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.5 20h5M10.5 8.5h.01M13.5 8.5h.01M10 11.5c1.1.9 2.9.9 4 0" />
+                                    </svg>
+                                    @break
+
+                                @case('usia_dini')
+                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12.5a4 4 0 100-8 4 4 0 000 8z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5.5 21a6.5 6.5 0 0113 0" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 4l.7-1.5L6.4 4 8 4.7l-1.6.7L5.7 7 5 5.4l-1.6-.7L5 4z" />
+                                    </svg>
+                                    @break
+
+                                @default
+                                    <svg class="w-10 h-10 {{ $iconColorClass }} group-hover:text-white transition-colors duration-300" style="{{ $iconStyle }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.5l7 3.5-7 3.5-7-3.5 7-3.5z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 14l7 3.5 7-3.5" />
+                                    </svg>
+                            @endswitch
                         @endif
                     </div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">{{ $item['title'] }}</h3>
