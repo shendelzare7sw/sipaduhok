@@ -638,10 +638,12 @@
 /* Page-specific styles. */
 .kelas-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 364px));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 24px;
         justify-content: center;
         align-items: stretch;
+        max-width: 1120px;
+        margin: 0 auto;
         padding: 0;
     }
 
@@ -812,5 +814,19 @@
         .kelas-grid {
             grid-template-columns: minmax(0, 1fr);
             gap: 16px;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .kelas-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 760px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .kelas-grid {
+            grid-template-columns: minmax(0, 1fr);
+            max-width: 420px;
         }
     }

@@ -27,18 +27,18 @@
 @if($selectedKelas && $hasMultipleKelas)
 <!-- Current Class Indicator -->
 <li class="menu-item">
-    <div class="px-3 py-2 mx-3 my-2 rounded bg-primary">
-        <div class="text-white-50 small text-uppercase fw-semibold mb-1">
+    <div class="wali-active-class-card">
+        <div class="wali-active-class-label">
             <i class="fas fa-school me-1"></i> Kelas Aktif
         </div>
-        <div class="text-white fw-semibold small">
+        <div class="wali-active-class-title">
             {{ $selectedKelas->nama_kelas }}
         </div>
-        <div class="text-white-50 small">
+        <div class="wali-active-class-meta">
             {{ $selectedKelas->cabang->nama_cabang ?? '' }} - {{ $selectedKelas->jenjang }}
         </div>
         <a href="{{ route('wali.pilih-kelas') }}" 
-           class="d-inline-flex align-items-center gap-1 mt-2 px-3 py-1 bg-white bg-opacity-25 text-white small rounded text-decoration-none">
+           class="wali-active-class-switch">
             <i class="fas fa-exchange-alt"></i> Ganti Kelas
         </a>
     </div>
@@ -126,7 +126,7 @@
     </a>
 </li>
 
-<!-- Arsip Kelas Saya (lintas TA — read-only, untuk kelas yang dulu pernah diwalikan) -->
+<!-- Arsip Kelas Saya (lintas TA - read-only, untuk kelas yang dulu pernah diwalikan) -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.arsip') ? 'active' : '' }}">
     <a href="{{ route('wali.arsip.index') }}" class="menu-link">
         <i class="menu-icon fas fa-archive"></i>

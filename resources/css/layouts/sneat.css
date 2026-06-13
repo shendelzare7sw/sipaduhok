@@ -66,6 +66,60 @@
             background-color: rgba(255, 255, 255, 0.1) !important;
         }
 
+        .layout-menu .wali-active-class-card {
+            margin: .5rem 1rem .75rem;
+            padding: .85rem .9rem;
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+        }
+
+        .layout-menu .wali-active-class-label {
+            color: rgba(255, 255, 255, .82);
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            margin-bottom: .35rem;
+            text-transform: uppercase;
+        }
+
+        .layout-menu .wali-active-class-title {
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 800;
+            line-height: 1.25;
+        }
+
+        .layout-menu .wali-active-class-meta {
+            color: rgba(255, 255, 255, .76);
+            font-size: .78rem;
+            line-height: 1.35;
+            margin-top: .15rem;
+        }
+
+        .layout-menu .wali-active-class-switch {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            margin-top: .65rem;
+            max-width: 100%;
+            padding: .38rem .7rem;
+            border-radius: 8px;
+            background: #fff !important;
+            color: var(--primary-color) !important;
+            font-size: .78rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-decoration: none !important;
+        }
+
+        .layout-menu .wali-active-class-switch:hover,
+        .layout-menu .wali-active-class-switch:focus {
+            background: rgba(255, 255, 255, .9) !important;
+            color: var(--primary-dark) !important;
+        }
+
         /* Navbar User Info */
         .navbar-nav-right .dropdown-toggle::after {
             display: none;
@@ -567,6 +621,84 @@
     justify-content: center;
 }
 
+.layout-wrapper .sneat-scroll-to-top.btn {
+    border-radius: 50% !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    width: 48px !important;
+}
+
+.layout-wrapper .sneat-scroll-to-top.btn i {
+    margin: 0 !important;
+}
+
+#logoutModal .modal-content {
+    border: 0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+}
+
+#logoutModal .modal-header {
+    align-items: center !important;
+    background: #fff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 1rem 1.25rem !important;
+}
+
+#logoutModal .modal-title {
+    color: #344054 !important;
+    font-weight: 700 !important;
+}
+
+#logoutModal .modal-header .btn-close,
+#logoutModal .modal-header .btn-close.btn-close-white {
+    background-color: transparent !important;
+    background-image: var(--bs-btn-close-bg) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1em auto !important;
+    border: 0 !important;
+    border-radius: .375rem !important;
+    box-shadow: none !important;
+    display: block !important;
+    filter: none !important;
+    flex: 0 0 auto !important;
+    height: 1em !important;
+    margin: -.5rem -.5rem -.5rem auto !important;
+    min-height: 0 !important;
+    opacity: .5 !important;
+    padding: .5rem !important;
+    position: static !important;
+    width: 1em !important;
+}
+
+#logoutModal .modal-header .btn-close::before,
+#logoutModal .modal-header .btn-close.btn-close-white::before {
+    content: none !important;
+    display: none !important;
+}
+
+#logoutModal .modal-body {
+    padding: 1.25rem !important;
+}
+
+#logoutModal .modal-footer {
+    align-items: center !important;
+    background: #fff !important;
+    border-top: 1px solid #e5e7eb !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: .5rem !important;
+    justify-content: flex-end !important;
+    padding: .9rem 1.25rem !important;
+}
+
+#logoutModal .modal-footer form {
+    display: inline-flex !important;
+    margin: 0 !important;
+}
+
 .sneat-logout-body {
     font-size: 1rem;
 }
@@ -578,4 +710,30 @@
 .sneat-logout-action {
     font-size: 0.95rem;
     padding: 0.5rem 1rem;
+}
+
+#logoutModal .sneat-logout-action,
+#logoutModal .modal-footer .sneat-logout-action {
+    border-radius: .375rem !important;
+    display: inline-flex !important;
+    font-weight: 600 !important;
+    justify-content: center !important;
+    line-height: 1.5 !important;
+    min-height: 0 !important;
+    padding: .5rem 1rem !important;
+    white-space: nowrap !important;
+    width: auto !important;
+}
+
+#logoutModal .modal-footer .btn-secondary.sneat-logout-action {
+    background: #8592a3 !important;
+    border-color: #8592a3 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+#logoutModal .modal-footer .btn-secondary.sneat-logout-action:hover {
+    background: #788393 !important;
+    border-color: #788393 !important;
+    color: #fff !important;
 }
