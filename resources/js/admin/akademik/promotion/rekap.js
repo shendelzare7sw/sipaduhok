@@ -1,3 +1,5 @@
+import Swal from 'sweetalert2';
+
 let triggerBtn;
 
 const getTotalActiveGlobal = () => {

@@ -188,8 +188,8 @@
                 
                 <p><strong>Sinkronisasi:</strong></p>
                 <ul>
-                    <li>Kalender â†’ Pengumuman: <strong>Sinkron</strong></li>
-                    <li>Pengumuman â†’ Kalender: <strong>Tidak sinkron</strong></li>
+                    <li>Kalender -> Pengumuman: <strong>Sinkron</strong></li>
+                    <li>Pengumuman -> Kalender: <strong>Tidak sinkron</strong></li>
                 </ul>
                 <p class="small text-muted">Ubah pengumuman tidak mengubah kalender</p>
                 
