@@ -40,10 +40,17 @@
         <div class="card-body">
             <form id="bulkDeleteForm" method="POST" action="{{ route('admin.recovery-tickets.history.bulk-delete') }}">
                 @csrf
-                <div class="mb-3">
+                <div class="mb-3 d-flex justify-content-between align-items-center">
                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>
                         <i class="bx bx-trash me-1"></i> Hapus Terpilih
                     </button>
+                    
+                    <div class="form-check d-md-none">
+                        <input class="form-check-input" type="checkbox" id="checkAllMobile">
+                        <label class="form-check-label" for="checkAllMobile">
+                            Pilih Semua
+                        </label>
+                    </div>
                 </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover table-card-mobile">
@@ -134,6 +141,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const checkAll = document.getElementById('checkAll');
+        const checkAllMobile = document.getElementById('checkAllMobile');
         const checkboxes = document.querySelectorAll('.ticket-checkbox');
         const btnBulkDelete = document.getElementById('btnBulkDelete');
 
@@ -142,15 +150,29 @@
             if(btnBulkDelete) {
                 btnBulkDelete.disabled = checkedCount === 0;
             }
+            const allChecked = checkedCount === checkboxes.length && checkboxes.length > 0;
             if (checkAll) {
-                checkAll.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+                checkAll.checked = allChecked;
             }
+            if (checkAllMobile) {
+                checkAllMobile.checked = allChecked;
+            }
+        }
+
+        function toggleAll(checked) {
+            checkboxes.forEach(cb => cb.checked = checked);
+            updateButtonState();
         }
 
         if (checkAll) {
             checkAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                updateButtonState();
+                toggleAll(this.checked);
+            });
+        }
+        
+        if (checkAllMobile) {
+            checkAllMobile.addEventListener('change', function() {
+                toggleAll(this.checked);
             });
         }
 
