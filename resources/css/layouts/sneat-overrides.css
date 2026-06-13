@@ -1,0 +1,69 @@
+/* Loaded after page styles to protect shared Sneat layout controls. */
+
+.modal .modal-header .btn-close.btn-close-white {
+    background-color: transparent !important;
+    background-image: var(--bs-btn-close-bg) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1em auto !important;
+    border: 0 !important;
+    border-radius: .375rem !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    display: block !important;
+    filter: invert(1) grayscale(100%) brightness(200%) !important;
+    flex: 0 0 auto !important;
+    height: 1em !important;
+    margin: -.5rem -.5rem -.5rem auto !important;
+    min-height: 0 !important;
+    opacity: 1 !important;
+    padding: .5rem !important;
+    position: static !important;
+    width: 1em !important;
+    z-index: auto !important;
+}
+
+.modal .modal-header .btn-close.btn-close-white::before {
+    content: none !important;
+    display: none !important;
+}
+
+.modal .modal-header .btn-close.btn-close-white:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    opacity: 1 !important;
+}
+
+#logoutModal .modal-header .btn-close {
+    background-color: transparent !important;
+    background-image: var(--bs-btn-close-bg) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1em auto !important;
+    border: 0 !important;
+    border-radius: .375rem !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    display: block !important;
+    filter: none !important;
+    flex: 0 0 auto !important;
+    height: 1em !important;
+    margin: -.5rem -.5rem -.5rem auto !important;
+    min-height: 0 !important;
+    opacity: .5 !important;
+    padding: .5rem !important;
+    position: static !important;
+    width: 1em !important;
+    z-index: auto !important;
+}
+
+#logoutModal .modal-header .btn-close::before {
+    content: none !important;
+    display: none !important;
+}
+
+#logoutModal .modal-header .btn-close:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    opacity: .75 !important;
+}

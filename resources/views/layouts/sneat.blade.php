@@ -34,6 +34,7 @@
     @endauth
     @yield('styles')
     @stack('styles')
+    @vite(['resources/css/layouts/sneat-overrides.css'])
 </head>
 
 <body>

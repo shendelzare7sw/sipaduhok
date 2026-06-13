@@ -28,6 +28,7 @@ export default defineConfig({
                 'resources/js/notifications/index.js',
                 'resources/css/notifications/show.css',
                 'resources/css/layouts/sneat.css',
+                'resources/css/layouts/sneat-overrides.css',
                 'resources/js/layouts/sneat.js',
                 'resources/css/layouts/lms.css',
                 'resources/js/layouts/lms.js',
