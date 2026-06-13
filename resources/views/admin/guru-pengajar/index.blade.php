@@ -11,7 +11,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/guru-pengajar.css') }}">
+    @vite('resources/css/admin/guru-pengajar/index.css')
 @endsection
 
 @section('content')

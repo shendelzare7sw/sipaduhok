@@ -391,6 +391,7 @@ export default defineConfig({
                 'resources/js/admin/cabang/edit.js',
                 'resources/css/admin/cabang/show.css',
                 'resources/js/admin/cabang/show.js',
+                'resources/css/admin/guru-pengajar/index.css',
                 'resources/js/admin/guru-pengajar/index.js',
                 'resources/css/admin/guru-pengajar/show.css',
                 'resources/js/admin/guru-pengajar/show.js',
