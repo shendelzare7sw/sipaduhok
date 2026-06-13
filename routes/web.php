@@ -286,6 +286,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/bulk-reject', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'bulkReject'])->name('bulk-reject');
             Route::post('/admin-wa', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'updateAdminWa'])->name('update-admin-wa');
             Route::get('/history', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'history'])->name('history');
+            Route::post('/history/bulk-delete', [\App\Http\Controllers\Admin\AdminRecoveryTicketController::class, 'bulkDeleteHistory'])->name('history.bulk-delete');
         });
 
         // Google Sheets Integration (dormant until partner approval)

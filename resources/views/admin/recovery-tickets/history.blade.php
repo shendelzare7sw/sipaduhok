@@ -38,10 +38,18 @@
         </div>
         
         <div class="card-body">
+            <form id="bulkDeleteForm" method="POST" action="{{ route('admin.recovery-tickets.history.bulk-delete') }}">
+                @csrf
+                <div class="mb-3">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>
+                        <i class="bx bx-trash me-1"></i> Hapus Terpilih
+                    </button>
+                </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover table-card-mobile">
                     <thead>
                         <tr>
+                            <th style="width: 40px;"><input class="form-check-input" type="checkbox" id="checkAll"></th>
                             <th>No</th>
                             <th>Tanggal Permintaan</th>
                             <th>User</th>
@@ -54,6 +62,7 @@
                     <tbody class="table-border-bottom-0">
                         @forelse($tickets as $key => $ticket)
                         <tr>
+                            <td class="mobile-hide text-center"><input class="form-check-input ticket-checkbox" type="checkbox" name="ids[]" value="{{ $ticket->id }}"></td>
                             <td class="mobile-hide">{{ $tickets->firstItem() + $key }}</td>
                             <td class="desktop-only-cell">{{ $ticket->created_at->format('d M Y H:i') }}</td>
                             <td class="desktop-only-cell">
@@ -61,9 +70,16 @@
                                 <span class="badge bg-label-info">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role ?? '-')) }}</span>
                             </td>
                             <td class="mobile-only-cell mobile-card-head">
-                                <strong>{{ $ticket->user->name ?? '-' }}</strong>
-                                <span class="badge bg-label-info ms-1">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role ?? '-')) }}</span>
-                                <br><small class="text-muted"><i class="bx bx-time-five"></i> {{ $ticket->created_at->format('d M Y H:i') }}</small>
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <div>
+                                        <strong>{{ $ticket->user->name ?? '-' }}</strong>
+                                        <span class="badge bg-label-info ms-1">{{ ucwords(str_replace('_', ' ', $ticket->user->roleRelation->name ?? $ticket->user->role ?? '-')) }}</span>
+                                        <br><small class="text-muted"><i class="bx bx-time-five"></i> {{ $ticket->created_at->format('d M Y H:i') }}</small>
+                                    </div>
+                                    <div class="form-check form-check-inline m-0">
+                                        <input class="form-check-input ticket-checkbox" type="checkbox" name="ids[]" value="{{ $ticket->id }}" style="transform: scale(1.2);">
+                                    </div>
+                                </div>
                             </td>
                             <td data-label="Kendala">
                                 @if($ticket->tipe_recovery == 'lupa_username')
@@ -109,7 +125,55 @@
             <div class="mt-4">
                 {{ $tickets->links() }}
             </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkAll = document.getElementById('checkAll');
+        const checkboxes = document.querySelectorAll('.ticket-checkbox');
+        const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+        function updateButtonState() {
+            const checkedCount = document.querySelectorAll('.ticket-checkbox:checked').length;
+            if(btnBulkDelete) {
+                btnBulkDelete.disabled = checkedCount === 0;
+            }
+            if (checkAll) {
+                checkAll.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+            }
+        }
+
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateButtonState();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateButtonState);
+        });
+    });
+
+    function confirmBulkDelete() {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Riwayat tiket yang dipilih akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#8592a3',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('bulkDeleteForm').submit();
+            }
+        });
+    }
+</script>
 @endsection

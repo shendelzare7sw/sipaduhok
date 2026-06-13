@@ -134,4 +134,18 @@ class AdminRecoveryTicketController extends Controller
 
         return view('admin.recovery-tickets.history', compact('tickets'));
     }
+
+    public function bulkDeleteHistory(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada riwayat tiket yang dipilih.');
+        }
+
+        $count = RecoveryTicket::whereIn('id', $ids)
+            ->whereIn('status', ['resolved', 'rejected'])
+            ->delete();
+
+        return back()->with('success', $count . ' riwayat tiket berhasil dihapus permanen.');
+    }
 }
