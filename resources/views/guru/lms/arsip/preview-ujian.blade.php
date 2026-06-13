@@ -13,12 +13,11 @@
 
 @section('preview-content')
     <h2 class="preview-section-title">
-        <i class="fas {{ $isLatihan ? 'fa-pencil-ruler' : 'fa-file-alt' }} me-2"
-           style="color: {{ $isLatihan ? '#7c3aed' : '#dc2626' }};"></i>{{ $ujian->judul_ujian }}
+        <i class="fas {{ $isLatihan ? 'fa-pencil-ruler' : 'fa-file-alt' }} me-2 {{ $isLatihan ? 'preview-title-icon-latihan' : 'preview-title-icon-ujian' }}"></i>{{ $ujian->judul_ujian }}
     </h2>
 
     <div class="preview-meta-row">
-        <span class="badge" style="background: {{ $isLatihan ? 'rgba(124,58,237,0.1)' : 'rgba(220,38,38,0.1)' }}; color: {{ $isLatihan ? '#5b21b6' : '#b91c1c' }}; font-size: 0.7rem; padding: 4px 10px; border-radius: 999px; font-weight: 600;">
+        <span class="badge preview-type-badge {{ $isLatihan ? 'preview-type-badge-latihan' : 'preview-type-badge-ujian' }}">
             {{ $tipeLabel }}
         </span>
         @if($ujian->mataPelajaran)
@@ -73,8 +72,8 @@
     @endphp
     <div class="preview-section">
         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-            <div class="preview-section-label" style="margin-bottom: 0;">
-                Daftar Soal ({{ $soalList->count() }} soal · Total bobot: {{ $totalBobot }})
+            <div class="preview-section-label preview-label-tight">
+                Daftar Soal ({{ $soalList->count() }} soal - Total bobot: {{ $totalBobot }})
             </div>
             @if($soalList->isNotEmpty())
                 <small class="text-muted">
@@ -84,7 +83,7 @@
         </div>
 
         @if($soalList->isEmpty())
-            <div class="alert alert-warning" style="border-radius: 10px; border: none; background: rgba(217, 119, 6, 0.08); color: #92400e;">
+            <div class="alert alert-warning preview-warning">
                 <i class="fas fa-exclamation-triangle me-1"></i>Belum ada soal di {{ strtolower($kontenLabel) }} ini.
             </div>
         @else
@@ -106,7 +105,7 @@
                         @if($soal->image_path)
                             <div class="soal-image">
                                 <img src="{{ asset('storage/' . $soal->image_path) }}" alt="Gambar soal #{{ $loop->iteration }}"
-                                     style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                     class="soal-image-media">
                             </div>
                         @endif
 
@@ -128,9 +127,9 @@
                                         @php $isBenar = in_array($letter, $kunciNorm); @endphp
                                         <div class="soal-pilihan {{ $isBenar ? 'pilihan-benar' : '' }}">
                                             <span class="pilihan-letter">{{ $letter }}</span>
-                                            <span style="flex: 1;">{{ $pilihan[$letter] }}</span>
+                                            <span class="preview-option-text">{{ $pilihan[$letter] }}</span>
                                             @if($isBenar)
-                                                <i class="fas fa-check-circle ms-auto" style="color: #16a34a;" title="Kunci jawaban"></i>
+                                                <i class="fas fa-check-circle ms-auto preview-success-icon" title="Kunci jawaban"></i>
                                             @endif
                                         </div>
                                     @endif
@@ -143,8 +142,8 @@
                                     @foreach($pernyataanList as $idx2 => $p)
                                         <div class="soal-pilihan">
                                             <span class="pilihan-letter">{{ $idx2 + 1 }}</span>
-                                            <span style="flex: 1;">{{ $p['text'] ?? '' }}</span>
-                                            <span class="badge {{ ($p['benar'] ?? false) ? 'bg-success' : 'bg-secondary' }}" style="font-size: 0.7rem;">
+                                            <span class="preview-option-text">{{ $p['text'] ?? '' }}</span>
+                                            <span class="badge preview-small-badge {{ ($p['benar'] ?? false) ? 'bg-success' : 'bg-secondary' }}">
                                                 Kunci: {{ ($p['benar'] ?? false) ? 'Benar' : 'Salah' }}
                                             </span>
                                         </div>
@@ -164,9 +163,9 @@
                             </div>
                         @else
                             <div class="soal-kunci kunci-essay">
-                                <i class="fas fa-info-circle me-1"></i>Soal essay/uraian — koreksi manual oleh guru.
+                                <i class="fas fa-info-circle me-1"></i>Soal essay/uraian - koreksi manual oleh guru.
                                 @if($soal->kunci_jawaban)
-                                    <div style="margin-top: 6px;">
+                                    <div class="preview-guidance">
                                         <strong>Pedoman jawaban:</strong> {{ \Illuminate\Support\Str::limit($soal->kunci_jawaban, 200) }}
                                     </div>
                                 @endif

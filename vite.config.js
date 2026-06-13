@@ -401,6 +401,7 @@ export default defineConfig({
                 'resources/js/guru/partials/multi-kelas-selector.js',
                 'resources/css/guru/lms/dashboard.css',
                 'resources/css/guru/lms/arsip/index.css',
+                'resources/css/guru/lms/arsip/preview.css',
                 'resources/css/guru/lms/materi/index.css',
                 'resources/js/guru/lms/materi/index.js',
                 'resources/js/guru/lms/materi/create.js',
