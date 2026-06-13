@@ -16,45 +16,35 @@ window.bootstrap = bootstrap;
             let lastScrollY = 0;
             let fabHideTimer = null;
 
-            function setScrollButtonVisible(isVisible) {
-                if (!scrollBtn) {
-                    return;
-                }
-
-                scrollBtn.style.setProperty('display', isVisible ? 'flex' : 'none', 'important');
-            }
-
-            function updateScrollButtonVisibility(scrollY = window.scrollY) {
-                setScrollButtonVisible(scrollY > 300);
-            }
-
-            function showHelpFab() {
+            function showFabsMobile() {
                 const chatFab = document.getElementById('aiChatbotFab');
+                scrollBtn?.classList.remove('fab-hidden-mobile');
                 chatFab?.classList.remove('fab-hidden-mobile');
             }
 
-            function hideHelpFab() {
+            function hideFabsMobile() {
                 const chatFab = document.getElementById('aiChatbotFab');
+                scrollBtn?.classList.add('fab-hidden-mobile');
                 chatFab?.classList.add('fab-hidden-mobile');
             }
-
-            updateScrollButtonVisibility();
 
             window.addEventListener('scroll', function () {
                 const currentScrollY = window.scrollY;
 
-                updateScrollButtonVisibility(currentScrollY);
-
-                // Auto-hide help FAB on scroll down, keep scroll-to-top available.
-                if (currentScrollY > lastScrollY && currentScrollY > 80) {
-                    hideHelpFab();
-                } else if (currentScrollY < lastScrollY) {
-                    showHelpFab();
+                if (scrollBtn) {
+                    scrollBtn.style.display = currentScrollY > 300 ? 'flex' : 'none';
                 }
 
-                // Show help FAB again after scroll stops (1.5s)
+                // All screens: auto-hide both FABs on scroll down.
+                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                    hideFabsMobile();
+                } else if (currentScrollY < lastScrollY) {
+                    showFabsMobile();
+                }
+
+                // Show again after scroll stops (1.5s).
                 clearTimeout(fabHideTimer);
-                fabHideTimer = setTimeout(showHelpFab, 1500);
+                fabHideTimer = setTimeout(showFabsMobile, 1500);
 
                 lastScrollY = currentScrollY;
             });
