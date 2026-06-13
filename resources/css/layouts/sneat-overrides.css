@@ -46,3 +46,7 @@
 .modal .modal-header .btn-close.btn-close-white:hover::before {
     color: #64748b !important;
 }
+
+#logoutModal .modal-header .btn-close {
+    margin: 0 0 0 auto !important;
+}
