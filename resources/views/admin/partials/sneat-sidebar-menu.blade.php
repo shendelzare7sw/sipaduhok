@@ -37,7 +37,7 @@ Compatible dengan Sneat Bootstrap 5 Template
 
 <!-- Manajemen User (dengan Submenu) -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.users') ? 'active open' : '' }}">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-users"></i>
         <div>Manajemen User</div>
     </a>
@@ -308,7 +308,7 @@ Compatible dengan Sneat Bootstrap 5 Template
 
 <!-- Monitoring -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.monitoring') ? 'active open' : '' }}">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-chart-bar"></i>
         <div>Monitoring</div>
     </a>

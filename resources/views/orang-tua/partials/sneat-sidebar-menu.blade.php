@@ -35,7 +35,7 @@
             );
         @endphp
         <li class="menu-item {{ $isChildActive ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <a href="#" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bxs-user-circle"></i>
                 <div data-i18n="{{ $child->nama_lengkap }}">{{ Str::limit($child->nama_lengkap, 20) }}</div>
             </a>
@@ -63,7 +63,7 @@
     @endforeach
 @else
     <li class="menu-item">
-        <a href="javascript:void(0);" class="menu-link disabled">
+        <a href="#" class="menu-link disabled" aria-disabled="true" tabindex="-1">
             <i class="menu-icon tf-icons bx bx-info-circle"></i>
             <div data-i18n="Belum Ada Data Anak">Belum Ada Data Anak</div>
         </a>

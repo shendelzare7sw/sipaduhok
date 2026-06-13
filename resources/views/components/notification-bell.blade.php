@@ -14,7 +14,7 @@
     data-notification-unread-url="{{ url('/notifications/unread-count') }}"
     data-notification-read-url-template="{{ url('/notifications/__ID__/read') }}">
     <a class="nav-link dropdown-toggle hide-arrow position-relative notification-bell-btn"
-        href="javascript:void(0);"
+        href="#"
         id="notificationDropdown"
         data-bs-toggle="dropdown"
         data-notification-trigger

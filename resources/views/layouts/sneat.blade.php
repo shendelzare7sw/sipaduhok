@@ -52,7 +52,7 @@
                     </a>
 
                     <!-- Toggle button in sidebar (mobile only) -->
-                    <a href="javascript:void(0);"
+                    <a href="#"
                         class="layout-menu-toggle-sidebar menu-link text-large d-xl-none sneat-sidebar-toggle"
                         id="sidebarToggle">
                         <i class="fas fa-bars fa-lg"></i>
@@ -73,7 +73,7 @@
                 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
                     id="layout-navbar">
                     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                        <a class="nav-item nav-link px-0 me-xl-4" href="#">
                             <i class="fas fa-bars fa-lg"></i>
                         </a>
                     </div>
@@ -98,7 +98,7 @@
 
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                                <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);"
+                                <a class="nav-link dropdown-toggle hide-arrow p-0" href="#"
                                     data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
                                         @if(auth()->user()->foto_profil)
@@ -155,7 +155,7 @@
                                         <div class="dropdown-divider my-1"></div>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal"
                                             data-bs-target="#logoutModal">
                                             <i class="fas fa-sign-out-alt me-2"></i>
                                             <span class="align-middle">Logout</span>

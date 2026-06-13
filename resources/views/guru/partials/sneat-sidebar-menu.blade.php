@@ -78,7 +78,7 @@
             $isActive = Str::startsWith($currentRoute, 'guru.lms') && request()->route('kelas') == $kelasId;
         @endphp
         <li class="menu-item {{ $isActive ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <a href="#" class="menu-link menu-toggle">
                 <i class="menu-icon fas fa-chalkboard"></i>
                 <div>{{ $kelas->nama_kelas }}</div>
             </a>
