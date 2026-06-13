@@ -69,10 +69,10 @@
         .layout-menu .wali-active-class-card {
             margin: .5rem 1rem .75rem;
             padding: .85rem .9rem;
-            border: 1px solid rgba(255, 255, 255, .22);
+            border: 1px solid rgba(255, 255, 255, .18);
             border-radius: 10px;
-            background: rgba(255, 255, 255, .12);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #6d28d9 100%);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, .35), inset 0 1px 0 rgba(255, 255, 255, .15);
         }
 
         .layout-menu .wali-active-class-label {
@@ -106,8 +106,9 @@
             max-width: 100%;
             padding: .38rem .7rem;
             border-radius: 8px;
-            background: #fff !important;
-            color: var(--primary-color) !important;
+            border: 1px solid rgba(255, 255, 255, .24);
+            background: rgba(255, 255, 255, .18) !important;
+            color: #fff !important;
             font-size: .78rem;
             font-weight: 800;
             line-height: 1.2;
@@ -116,8 +117,8 @@
 
         .layout-menu .wali-active-class-switch:hover,
         .layout-menu .wali-active-class-switch:focus {
-            background: rgba(255, 255, 255, .9) !important;
-            color: var(--primary-dark) !important;
+            background: rgba(255, 255, 255, .26) !important;
+            color: #fff !important;
         }
 
         /* Navbar User Info */
@@ -621,15 +622,23 @@
     justify-content: center;
 }
 
-.layout-wrapper .sneat-scroll-to-top.btn {
-    border-radius: 50% !important;
+#scrollToTop.sneat-scroll-to-top.btn.btn-primary {
+    aspect-ratio: 1 / 1;
+    border-radius: 999px !important;
+    flex: 0 0 48px !important;
+    height: 48px !important;
+    line-height: 1 !important;
+    max-height: 48px !important;
+    max-width: 48px !important;
     min-height: 48px !important;
+    min-width: 48px !important;
+    overflow: hidden !important;
     padding: 0 !important;
     white-space: nowrap !important;
     width: 48px !important;
 }
 
-.layout-wrapper .sneat-scroll-to-top.btn i {
+#scrollToTop.sneat-scroll-to-top.btn i {
     margin: 0 !important;
 }
 
@@ -651,33 +660,7 @@
     font-weight: 700 !important;
 }
 
-#logoutModal .modal-header .btn-close,
-#logoutModal .modal-header .btn-close.btn-close-white {
-    background-color: transparent !important;
-    background-image: var(--bs-btn-close-bg) !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-size: 1em auto !important;
-    border: 0 !important;
-    border-radius: .375rem !important;
-    box-shadow: none !important;
-    display: block !important;
-    filter: none !important;
-    flex: 0 0 auto !important;
-    height: 1em !important;
-    margin: -.5rem -.5rem -.5rem auto !important;
-    min-height: 0 !important;
-    opacity: .5 !important;
-    padding: .5rem !important;
-    position: static !important;
-    width: 1em !important;
-}
 
-#logoutModal .modal-header .btn-close::before,
-#logoutModal .modal-header .btn-close.btn-close-white::before {
-    content: none !important;
-    display: none !important;
-}
 
 #logoutModal .modal-body {
     padding: 1.25rem !important;
@@ -736,4 +719,51 @@
     background: #788393 !important;
     border-color: #788393 !important;
     color: #fff !important;
+}
+/* Keep Bootstrap modal close buttons intact when page CSS is more aggressive. */
+body .modal .modal-header .btn-close,
+body .modal .modal-header .btn-close.btn-close-white {
+    background-color: transparent !important;
+    background-image: var(--bs-btn-close-bg) !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1em auto !important;
+    border: 0 !important;
+    border-radius: .375rem !important;
+    box-sizing: content-box !important;
+    box-shadow: none !important;
+    color: transparent !important;
+    display: block !important;
+    flex: 0 0 auto !important;
+    filter: none !important;
+    height: 1em !important;
+    margin: -.5rem -.5rem -.5rem auto !important;
+    min-height: 0 !important;
+    opacity: .5 !important;
+    padding: .5rem !important;
+    position: static !important;
+    width: 1em !important;
+    z-index: auto !important;
+}
+
+body .modal .modal-header .btn-close.btn-close-white {
+    filter: var(--bs-btn-close-white-filter) !important;
+    opacity: 1 !important;
+}
+
+body .modal .modal-header .btn-close::before,
+body .modal .modal-header .btn-close.btn-close-white::before {
+    content: none !important;
+    display: none !important;
+}
+
+body .modal .modal-header .btn-close:hover,
+body .modal .modal-header .btn-close.btn-close-white:hover {
+    background-color: transparent !important;
+    text-decoration: none !important;
+    opacity: .75 !important;
+}
+
+body .modal .modal-header .btn-close.btn-close-white:hover {
+    opacity: 1 !important;
 }
