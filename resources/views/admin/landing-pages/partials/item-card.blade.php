@@ -18,7 +18,7 @@
     <div class="card-body">
         @php $hasVisual = !empty($visualFields); @endphp
         <div class="row g-4">
-            {{-- Visual Column (Left) — hanya tampil jika ada field visual --}}
+            {{-- Visual Column (Left) - hanya tampil jika ada field visual --}}
             @if($hasVisual)
             <div class="col-md-4 border-end">
                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Tampilan & Icon</h6>
@@ -49,7 +49,7 @@
                                 @endif
 
                                 @if($value && (str_contains($value, '/') || str_contains($value, '.')))
-                                    <img src="{{ asset($value) }}" alt="Preview" class="img-fluid" style="max-height: 80px; object-fit: contain;">
+                                    <img src="{{ asset($value) }}" alt="Preview" class="img-fluid landing-item-preview-img">
                                 @elseif($value && $key === 'icon')
                                     <div class="fs-1 text-primary">
                                         <i class="{{ $value }}"></i>

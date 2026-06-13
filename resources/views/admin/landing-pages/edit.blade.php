@@ -9,6 +9,14 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/landing-pages/edit.css'])
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/admin/landing-pages/edit.js'])
+@endsection
+
 @php
     // Urutan section sesuai tampilan di halaman depan (home.blade.php) & tentang kami
     $sectionOrder = ['hero', 'intro', 'stats', 'program', 'history', 'why_choose_us', 'about', 'visi', 'misi', 'values', 'news_header', 'gallery_section', 'contact_section', 'cta_section'];
@@ -137,7 +145,7 @@
             
             {{-- Sidebar Navigasi --}}
             <div class="col-lg-3 col-md-4 mb-4">
-                <div class="card sticky-top" style="top: 80px; z-index: 100;">
+                <div class="card sticky-top landing-editor-sidebar">
                     <div class="card-header py-3">
                         <h6 class="mb-0 fw-bold">
                             <i class="bx bx-list-ul me-1"></i> Navigasi Section
@@ -245,7 +253,7 @@
                         };
                     @endphp
                     
-                    <div class="card mb-4 section-card {{ $section->is_visible ? '' : 'section-hidden' }}" id="section-{{ $sectionKey }}" style="scroll-margin-top: 90px;">
+                    <div class="card mb-4 section-card {{ $section->is_visible ? '' : 'section-hidden' }}" id="section-{{ $sectionKey }}">
                         <input type="hidden" name="sections[{{ $section->id }}][type]" value="{{ $section->type }}">
                         <input type="hidden" name="sections[{{ $section->id }}][is_visible]" value="0">
 
@@ -301,8 +309,8 @@
                                                         @if($hKey === 'image' || str_contains($hKey, 'image'))
                                                             <div class="input-group">
                                                                 @if($hValue && (str_contains($hValue, '/') || str_contains($hValue, '.')))
-                                                                    <span class="input-group-text p-0 overflow-hidden" style="width: 42px;">
-                                                                        <img src="{{ asset($hValue) }}" alt="Preview" class="w-100 h-100" style="object-fit: cover; min-height: 38px;" onerror="this.parentElement.style.display='none'">
+                                                                    <span class="input-group-text p-0 overflow-hidden landing-preview-thumb-wrap">
+                                                                        <img src="{{ asset($hValue) }}" alt="Preview" class="w-100 h-100 landing-preview-thumb-img" data-hide-parent-on-error="true">
                                                                     </span>
                                                                 @endif
                                                                 {{-- Hidden input to preserve old value when no new file is uploaded --}}
@@ -314,7 +322,7 @@
                                                         @elseif(str_contains($hKey, 'color'))
                                                             <div class="input-group">
                                                                 <input type="color" class="form-control form-control-color" name="sections[{{ $section->id }}][header][{{ $hKey }}]" value="{{ $hValue && str_starts_with($hValue, '#') ? $hValue : '#165fac' }}" title="Pilih warna">
-                                                                <input type="text" class="form-control" value="{{ $hValue }}" readonly style="max-width: 120px; background: #f5f5f9;">
+                                                                <input type="text" class="form-control landing-color-text" value="{{ $hValue }}" readonly>
                                                             </div>
                                                         @elseif(str_contains($hKey, 'description') || str_contains($hKey, 'note') || (is_string($hValue) && strlen($hValue) > 80))
                                                             <textarea class="form-control" name="sections[{{ $section->id }}][header][{{ $hKey }}]" rows="3">{{ $hValue }}</textarea>
@@ -515,8 +523,8 @@
                                                 <div class="input-group">
                                                     @if($value && (str_contains($value, '/') || str_contains($value, '.')))
                                                         <input type="hidden" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value }}">
-                                                        <span class="input-group-text p-0 overflow-hidden" style="width: 42px;">
-                                                            <img src="{{ asset($value) }}" alt="Preview" class="w-100 h-100" style="object-fit: cover; min-height: 38px;" onerror="this.parentElement.style.display='none'">
+                                                        <span class="input-group-text p-0 overflow-hidden landing-preview-thumb-wrap">
+                                                            <img src="{{ asset($value) }}" alt="Preview" class="w-100 h-100 landing-preview-thumb-img" data-hide-parent-on-error="true">
                                                         </span>
                                                     @endif
                                                     <input type="file" class="form-control" name="sections[{{ $section->id }}][{{ $key }}]" accept="image/*">
@@ -525,7 +533,7 @@
                                                 <textarea class="form-control" name="sections[{{ $section->id }}][{{ $key }}]" rows="3">{{ $value }}</textarea>
                                             @elseif(str_contains($key, 'color'))
                                                 <div class="input-group">
-                                                    <input type="color" class="form-control form-control-color" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value && substr($value, 0, 1) === '#' ? $value : '#566a7f' }}" style="max-width: 60px;">
+                                                    <input type="color" class="form-control form-control-color landing-color-input" name="sections[{{ $section->id }}][{{ $key }}]" value="{{ $value && substr($value, 0, 1) === '#' ? $value : '#566a7f' }}">
                                                     <input type="text" class="form-control" name="sections[{{ $section->id }}][{{ $key }}_text]" value="{{ $value }}" placeholder="Hex Color or Class Name">
                                                 </div>
                                             @else
@@ -556,7 +564,7 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
             <div class="modal-body text-center py-4">
-                <i class="bx bx-error-circle text-warning" style="font-size: 4rem;"></i>
+                <i class="bx bx-error-circle text-warning landing-reset-icon"></i>
                 <h5 class="mt-3 mb-2">Reset ke Default?</h5>
                 <p class="text-muted mb-4">Semua perubahan akan hilang dan dikembalikan ke pengaturan awal.</p>
                 <div class="d-flex gap-2 justify-content-center">
@@ -567,195 +575,4 @@
         </div>
     </div>
 </div>
-@endsection
-
-@section('styles')
-<style>
-    html { scroll-behavior: smooth; }
-    
-    .section-card { transition: box-shadow 0.3s ease, opacity 0.2s ease; }
-    .section-card:target,
-    .section-card:focus-within { box-shadow: 0 0 0 3px rgba(105, 108, 255, 0.25); }
-    .section-card.section-hidden { opacity: 0.65; }
-    .section-card.section-hidden .card-header { background-color: #f5f5f9 !important; }
-    .section-nav-link.section-hidden-nav .text-truncate { text-decoration: line-through; opacity: 0.6; }
-
-    .list-group-item.active { background-color: #696cff; border-color: #696cff; color: #fff !important; }
-    .list-group-item.active .badge { background-color: rgba(255,255,255,0.25) !important; color: #fff !important; }
-    .list-group-item.active .text-truncate { color: #fff !important; font-weight: 600; }
-    .list-group-item.active .bx-hide { color: rgba(255,255,255,0.7) !important; }
-    .section-nav-link:not(.active) { color: #566a7f; }
-    .section-nav-link:not(.active) .text-truncate { color: #566a7f; }
-    .section-nav-link:not(.active):hover { background-color: rgba(105, 108, 255, 0.08); color: #696cff; }
-    .section-nav-link:not(.active):hover .text-truncate { color: #696cff; }
-    
-    .item-wrapper { transition: transform 0.2s ease; }
-    .item-wrapper:hover { transform: translateX(4px); }
-    
-    .input-group-text img { border-radius: 0; }
-</style>
-@endsection
-
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    // ===== Event Delegation for Dynamic Content =====
-    document.body.addEventListener('click', function(e) {
-        
-        // --- 1. Handle "Add Item" ---
-        const addButton = e.target.closest('.add-item');
-        if (addButton) {
-            e.preventDefault();
-            
-            const sectionId = addButton.dataset.sectionId;
-            const container = document.querySelector(`.items-container[data-section-id="${sectionId}"]`);
-            const templateContainer = document.querySelector(`.item-template[data-template-for="${sectionId}"]`);
-            
-            if (!templateContainer || !container) {
-                console.error('Template or container not found for section: ' + sectionId);
-                return;
-            }
-            
-            const templateCard = templateContainer.querySelector('.item-wrapper');
-            if (!templateCard) return;
-            
-            // Clone template
-            const clone = templateCard.cloneNode(true);
-            
-            // Calculate new index
-            const index = container.querySelectorAll(':scope > .item-wrapper').length;
-            
-            // Show clone
-            clone.classList.remove('d-none');
-            
-            // Update header number
-            const headerSpan = clone.querySelector('.card-header .fw-bold');
-            if (headerSpan) headerSpan.innerHTML = `Item #${index + 1}`;
-            
-            // Update input names
-            clone.querySelectorAll('input, textarea, select').forEach(input => {
-                if (input.name) {
-                    input.name = input.name.replace(/TEMPLATE_INDEX/g, index);
-                }
-                input.disabled = false;
-            });
-            
-            // Append
-            container.appendChild(clone);
-            
-            // Scroll to view
-            clone.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
-
-        // --- 2. Handle "Remove Item" ---
-        const removeButton = e.target.closest('.remove-item');
-        if (removeButton) {
-            e.preventDefault();
-            
-            Swal.fire({
-                title: 'Hapus item ini?',
-                text: "Tindakan ini tidak dapat dibatalkan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const wrapper = removeButton.closest('.item-wrapper');
-                    const container = wrapper ? wrapper.closest('.items-container') : null;
-                    
-                    if (wrapper) {
-                        wrapper.style.transition = 'all 0.3s ease';
-                        wrapper.style.transform = 'translateX(-100%)';
-                        wrapper.style.opacity = '0';
-                        setTimeout(() => {
-                            wrapper.remove();
-                            if (container) reindexItems(container);
-                        }, 300);
-                    }
-                }
-            });
-            return;
-        }
-    });
-
-    /**
-     * Re-index all items in a container so their name attributes
-     * use sequential indices (0, 1, 2...) with no gaps.
-     */
-    function reindexItems(container) {
-        const items = container.querySelectorAll(':scope > .item-wrapper');
-        items.forEach((item, newIndex) => {
-            const headerSpan = item.querySelector('.card-header .fw-bold');
-            if (headerSpan) headerSpan.innerHTML = `Item #${newIndex + 1}`;
-
-            item.querySelectorAll('input, textarea, select').forEach(input => {
-                if (input.name) {
-                    input.name = input.name.replace(
-                        /\[items\]\[\d+\]/g,
-                        `[items][${newIndex}]`
-                    );
-                }
-            });
-        });
-    }
-
-    // ===== Image Preview on File Change =====
-    document.addEventListener('change', function(e) {
-        const input = e.target;
-        if (input.type !== 'file' || !input.accept || !input.accept.includes('image')) return;
-
-        const file = input.files[0];
-        if (!file || !file.type.startsWith('image/')) return;
-
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const newSrc = event.target.result;
-
-            // Case 1: item-card layout
-            // Preview is the div.bg-light immediately before the file input
-            const prevSibling = input.previousElementSibling;
-            if (prevSibling && prevSibling.classList.contains('text-center') && prevSibling.classList.contains('bg-light')) {
-                prevSibling.innerHTML = `<img src="${newSrc}" alt="Preview" class="img-fluid" style="max-height: 80px; object-fit: contain;">`;
-                return;
-            }
-
-            // Case 2 & 3: input-group layout (header / single section)
-            const inputGroup = input.closest('.input-group');
-            if (inputGroup) {
-                let previewSpan = inputGroup.querySelector('.input-group-text');
-                if (!previewSpan) {
-                    previewSpan = document.createElement('span');
-                    previewSpan.className = 'input-group-text p-0 overflow-hidden';
-                    previewSpan.style.width = '42px';
-                    inputGroup.insertBefore(previewSpan, input);
-                }
-                previewSpan.innerHTML = `<img src="${newSrc}" alt="Preview" class="w-100 h-100" style="object-fit: cover; min-height: 38px;">`;
-            }
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // ===== Active navigation on scroll =====
-    const sections = document.querySelectorAll('.section-card');
-    const navLinks = document.querySelectorAll('.section-nav-link');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                navLinks.forEach(link => link.classList.remove('active'));
-                const activeLink = document.querySelector(`.section-nav-link[href="#${entry.target.id}"]`);
-                if (activeLink) activeLink.classList.add('active');
-            }
-        });
-    }, { rootMargin: '-100px 0px -60% 0px' });
-    
-    sections.forEach(section => observer.observe(section));
-});
-</script>
 @endsection

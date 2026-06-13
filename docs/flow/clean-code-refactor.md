@@ -168,6 +168,12 @@ Catatan ini dipakai sebagai checkpoint agar refactor views after-login berjalan 
   - Filter tahun ajaran, tombol print, style statistik, info banner, info box, tabel mobile, modal sinkronisasi, dan laporan print dipindah dari inline handler/style ke asset scoped.
   - Struktur HTML print yang sebelumnya menggantung ditutup ulang agar dokumen cetak valid.
   - Inline style/script/event handler Blade sudah dibersihkan pada seluruh folder guru pengajar.
+- `resources/views/admin/landing-pages/*`
+  - Index dan edit konten landing page admin memakai scoped asset via Vite.
+  - CSS tabel index, navigasi section sticky, section highlight/hidden state, preview image, input warna, modal reset, dan item wrapper dipindah ke `resources/css/admin/landing-pages`.
+  - JS tambah/hapus item dinamis, reindex input, preview upload gambar, hide preview rusak, dan active navigation on scroll dipindah ke `resources/js/admin/landing-pages/edit.js`.
+  - SweetAlert tidak lagi dari CDN, tetapi dari dependency npm yang sudah ada.
+  - Inline style, inline `onerror`, CDN script, dan komentar non-ASCII di partial item-card sudah dibersihkan.
 - `resources/views/layouts/sneat.blade.php`
   - CSS layout, Bootstrap, Font Awesome, Boxicons, dan CSS Sneat dipindah ke `resources/css/layouts/sneat.css`.
   - JS layout, auto-dismiss alert, FAB scroll-to-top, menu mobile/submenu, formatter rupiah, dan unsaved changes warning dipindah ke `resources/js/layouts/sneat.js`.
