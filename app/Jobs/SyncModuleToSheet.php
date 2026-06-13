@@ -217,7 +217,7 @@ class SyncModuleToSheet implements ShouldQueue
             }
         } elseif ($module === 'rekap_keuangan') {
             // Get financial summary by month
-            $data[] = ['Bulan', 'Total', 'Tunai', 'Transfer', 'Midtrans'];
+            $data[] = ['Bulan', 'Total', 'Tunai', 'Direct Transfer', 'Midtrans'];
 
             $months = \App\Models\Pembayaran::selectRaw("DATE_FORMAT(tanggal_bayar, '%Y-%m') as bulan")
                 ->distinct()

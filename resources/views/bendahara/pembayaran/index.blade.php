@@ -105,7 +105,7 @@
                         <select name="metode" class="form-select form-select-sm">
                             <option value="">Semua Metode</option>
                             <option value="tunai"    {{ ($filters['metode'] ?? '') == 'tunai'    ? 'selected' : '' }}>Tunai</option>
-                            <option value="transfer" {{ ($filters['metode'] ?? '') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                            <option value="transfer" {{ ($filters['metode'] ?? '') == 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
                             <option value="midtrans" {{ ($filters['metode'] ?? '') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
                         </select>
                     </div>
@@ -200,7 +200,7 @@
                                 @if($pembayaran->metode_pembayaran === 'tunai')
                                     <span class="badge bg-primary badge-pill">TUNAI</span>
                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
-                                    <span class="badge bg-success badge-pill">TRANSFER</span>
+                                    <span class="badge bg-success badge-pill">DIRECT TRANSFER</span>
                                 @else
                                     <span class="badge bg-info badge-pill">MIDTRANS</span>
                                 @endif

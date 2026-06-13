@@ -80,8 +80,8 @@
         <div class="card-header-custom">
             <i class="fas fa-chart-bar me-2"></i>Hasil {{ $tipeLabel }} Siswa
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+        <div class="table-responsive hasil-table-responsive">
+            <table class="table table-hover align-middle mb-0 hasil-table">
                 <thead class="table-light">
                     <tr>
                         <th>Peringkat</th>
@@ -97,7 +97,7 @@
                 <tbody>
                     @forelse($hasilUjian as $index => $hasil)
                     <tr>
-                        <td class="text-center">
+                        <td class="text-center hasil-rank-cell" data-label="Peringkat">
                             @if($index == 0 && $hasil->nilai)
                                 <i class="fas fa-trophy text-warning fs-5"></i>
                             @elseif($index == 1 && $hasil->nilai)
@@ -108,14 +108,14 @@
                                 {{ $index + 1 }}
                             @endif
                         </td>
-                        <td><strong>{{ $hasil->siswa->nama_lengkap ?? 'Siswa Tidak Ditemukan (ID: '.$hasil->siswa_id.')' }}</strong></td>
-                        <td class="text-center">
+                        <td class="hasil-student-cell" data-label="Nama Siswa"><strong>{{ $hasil->siswa->nama_lengkap ?? 'Siswa Tidak Ditemukan (ID: '.$hasil->siswa_id.')' }}</strong></td>
+                        <td class="text-center" data-label="Waktu Mulai">
                             {{ $hasil->waktu_mulai ? $hasil->waktu_mulai->format('d M Y H:i') : '-' }}
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-label="Waktu Selesai">
                             {{ $hasil->waktu_selesai ? $hasil->waktu_selesai->format('d M Y H:i') : '-' }}
                         </td>
-                        <td class="text-center">
+                        <td class="text-center hasil-status-cell" data-label="Status">
                             @if($hasil->status == 'belum_mulai')
                                 <span class="badge bg-secondary">Belum Mulai</span>
                             @elseif($hasil->status == 'sedang_mengerjakan')
@@ -126,21 +126,21 @@
                                 <span class="badge bg-primary">Sudah Dinilai</span>
                             @endif
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-label="Nilai Terakhir">
                             @if($hasil->nilai !== null)
                                 <strong class="fs-6 text-secondary">{{ number_format($hasil->nilai, 1) }}</strong>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-label="Nilai Terbaik">
                             @if($hasil->nilai_terbaik !== null)
                                 <strong class="fs-5 text-primary">{{ number_format($hasil->nilai_terbaik, 1) }}/100</strong>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td class="text-center">
+                        <td class="text-center hasil-action-cell" data-label="Aksi">
                             @if(in_array($hasil->status, ['selesai', 'dinilai']))
                                 @php
                                     $isLatihan = request()->routeIs('guru.lms.latihan.*');
@@ -156,8 +156,8 @@
                         </td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                    <tr class="hasil-empty-row">
+                        <td colspan="8" class="text-center text-muted py-4 hasil-empty-cell">
                             Belum ada siswa yang mengerjakan {{ strtolower($tipeLabel) }}
                         </td>
                     </tr>

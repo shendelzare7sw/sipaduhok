@@ -9,9 +9,9 @@
 @endsection
 
 @section('content')
-    <div class="row justify-content-center">
+    <div class="row">
         <!-- Content -->
-        <div class="col-md-10">
+        <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white py-3">
                     <div class="d-flex align-items-center">

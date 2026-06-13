@@ -33,7 +33,7 @@
             </div>
             <div>
                 <div class="stat-value">{{ $hasRekening ? 'Aktif' : 'Belum' }}</div>
-                <div class="stat-label">Transfer Manual</div>
+                <div class="stat-label">Direct Transfer</div>
                 <div class="stat-desc">{{ $hasRekening ? ($infoPembayaran->nama_bank ?? 'Rekening tersimpan') : 'Rekening belum diatur' }}</div>
             </div>
         </div>
@@ -74,7 +74,7 @@
             <div class="pay-card-header">
                 <div>
                     <h5 class="pay-card-title"><i class="fas fa-university pay-card-title-icon-primary"></i> Rekening Bank Tujuan</h5>
-                    <div class="pay-card-subtitle">Ditampilkan untuk instruksi transfer manual.</div>
+                    <div class="pay-card-subtitle">Ditampilkan untuk instruksi Direct Transfer.</div>
                 </div>
                 <button type="button" class="btn btn-outline-primary btn-sm btn-pay-action" data-toggle-edit data-type="rekening">
                     <i class="fas fa-edit"></i> Atur Rekening
@@ -101,7 +101,7 @@
                         <div class="pay-empty">
                             <i class="fas fa-exclamation-triangle"></i>
                             <h6 class="mb-1">Belum ada rekening bank</h6>
-                            <p class="small mb-0">Lengkapi data rekening agar orang tua mendapat instruksi transfer.</p>
+                            <p class="small mb-0">Lengkapi data rekening agar orang tua mendapat instruksi Direct Transfer.</p>
                         </div>
                     @endif
                 </div>
@@ -310,7 +310,7 @@
                                 <i class="fas fa-university"></i>
                             </div>
                             <div>
-                                <div class="pay-status-title">Transfer Manual</div>
+                                <div class="pay-status-title">Direct Transfer</div>
                                 <div class="pay-status-desc">{{ $hasRekening ? 'Kanal aktif' : 'Belum terhubung' }}</div>
                             </div>
                         </div>

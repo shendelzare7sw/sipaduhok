@@ -1,7 +1,8 @@
 .guru-mapel-page {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 1rem;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
 
 .mapel-card {

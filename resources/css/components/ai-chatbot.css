@@ -1,4 +1,4 @@
-﻿/* ==================== FAB (Floating Action Button) ==================== */
+/* ==================== FAB (Floating Action Button) ==================== */
 .ai-chatbot-fab {
     position: fixed;
     bottom: 82px;
@@ -285,11 +285,13 @@
     cursor: pointer;
     max-width: 180px;
     font-weight: 500;
+    direction: rtl;
 }
 
 .model-selector option {
     background: #fff;
     color: #1f2937;
+    direction: ltr;
 }
 
 .btn-icon-header, .btn-icon-sidebar {

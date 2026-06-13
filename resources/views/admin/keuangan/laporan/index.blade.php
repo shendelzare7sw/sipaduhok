@@ -13,6 +13,14 @@
 @endsection
 
 @section('content')
+    @php
+        $metodeLabels = [
+            'tunai' => 'Tunai',
+            'transfer' => 'Direct Transfer',
+            'midtrans' => 'Midtrans',
+        ];
+    @endphp
+
     <div class="dashboard-card mb-4">
         <div class="card-header-clean">
             <h5 class="card-title-clean">
@@ -43,7 +51,7 @@
                         <select name="metode" class="form-select form-select-sm border-start border-primary border-3">
                             <option value="">Semua Metode</option>
                             <option value="tunai" {{ request('metode') == 'tunai' ? 'selected' : '' }}>Tunai</option>
-                            <option value="transfer" {{ request('metode') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                            <option value="transfer" {{ request('metode') == 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
                             <option value="midtrans" {{ request('metode') == 'midtrans' ? 'selected' : '' }}>Midtrans</option>
                         </select>
                     </div>
@@ -106,7 +114,7 @@
                     <div class="active-filters">
                         <span class="active-filter-label">Filter aktif:</span>
                         @if(request('metode'))
-                            <span class="active-filter-badge"><i class="fas fa-credit-card"></i> {{ ucfirst(request('metode')) }}</span>
+                            <span class="active-filter-badge"><i class="fas fa-credit-card"></i> {{ $metodeLabels[request('metode')] ?? ucfirst(request('metode')) }}</span>
                         @endif
                         @if(request('cabang_id'))
                             @php $cabangNama = $cabangList->firstWhere('id', request('cabang_id'))?->nama_cabang; @endphp
@@ -192,7 +200,7 @@
                 <div class="stat-widget">
                     <div class="stat-details">
                         <div class="stat-value">Rp {{ number_format($totalNonTunai, 0, ',', '.') }}</div>
-                        <div class="stat-label">Transfer & Digital</div>
+                        <div class="stat-label">Direct Transfer & Digital</div>
                     </div>
                     <div class="stat-icon-wrapper stat-icon-digital">
                         <i class="fas fa-university"></i>
@@ -279,7 +287,7 @@
                                     @if($bayar->metode_pembayaran === 'tunai')
                                         <span class="badge bg-primary fw-bold method-badge">TUNAI</span>
                                     @elseif($bayar->metode_pembayaran === 'transfer')
-                                        <span class="badge bg-warning text-white fw-bold method-badge">TRANSFER</span>
+                                        <span class="badge bg-warning text-white fw-bold method-badge">DIRECT TRANSFER</span>
                                     @else
                                         <span class="badge bg-success fw-bold method-badge">MIDTRANS</span>
                                     @endif
@@ -336,7 +344,7 @@
                         <i class="fas fa-university"></i>
                     </div>
                     <div class="stat-details">
-                        <div class="stat-label">Manual Transfer</div>
+                        <div class="stat-label">Direct Transfer</div>
                         <div class="stat-value stat-value-compact">Rp {{ number_format($totalTransfer, 0, ',', '.') }}</div>
                         <small class="muted-text">{{ $jumlahTransfer }} Transaksi</small>
                     </div>

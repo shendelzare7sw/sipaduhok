@@ -137,7 +137,7 @@
                         <select name="metode_pembayaran" class="form-select" required>
                             <option value="">-- Pilih Metode --</option>
                             <option value="tunai">Tunai (Bayar di Sekolah)</option>
-                            <option value="transfer">Transfer Bank</option>
+                            <option value="transfer">Direct Transfer</option>
                             <option value="midtrans">Midtrans (Online)</option>
                         </select>
                     </div>
@@ -145,7 +145,7 @@
                     <div class="mb-3">
                         <label class="form-label">Upload Bukti Pembayaran</label>
                         <input type="file" name="bukti_pembayaran" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
-                        <small class="text-muted">Wajib untuk Tunai & Transfer</small>
+                        <small class="text-muted">Wajib untuk Tunai & Direct Transfer</small>
                     </div>
 
                     <div class="mb-3">

@@ -47,7 +47,7 @@
                     </tr>
                     <tr>
                         <td>Metode</td>
-                        <td>: {{ ucfirst($pembayaran->metode_pembayaran) }}</td>
+                        <td>: {{ $pembayaran->metode_pembayaran === 'transfer' ? 'Direct Transfer' : ucfirst($pembayaran->metode_pembayaran) }}</td>
                     </tr>
                     <tr>
                         <td>Status</td>

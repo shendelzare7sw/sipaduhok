@@ -1,10 +1,15 @@
+.guru-lms-arsip-salin-page {
+    width: 100%;
+}
+
 .guru-lms-arsip-salin-page .salin-card {
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 26px;
-    max-width: 720px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
@@ -57,6 +62,7 @@
 
 .guru-lms-arsip-salin-page .target-list {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 8px;
 }
 
@@ -87,16 +93,19 @@
 
 .guru-lms-arsip-salin-page .target-item .info {
     flex: 1;
+    min-width: 0;
 }
 
 .guru-lms-arsip-salin-page .target-item .info .kelas {
     font-weight: 700;
     color: #1e293b;
+    overflow-wrap: anywhere;
 }
 
 .guru-lms-arsip-salin-page .target-item .info .mapel {
     font-size: 12px;
     color: #64748b;
+    overflow-wrap: anywhere;
 }
 
 .guru-lms-arsip-salin-page .switch-row {
@@ -120,4 +129,32 @@
     margin-top: 22px;
     padding-top: 18px;
     border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 767.98px) {
+    .guru-lms-arsip-salin-page .salin-card {
+        padding: 18px;
+    }
+
+    .guru-lms-arsip-salin-page .target-list {
+        grid-template-columns: 1fr;
+    }
+
+    .guru-lms-arsip-salin-page .target-item {
+        align-items: flex-start;
+        padding: 12px;
+    }
+
+    .guru-lms-arsip-salin-page .switch-row {
+        align-items: flex-start;
+    }
+
+    .guru-lms-arsip-salin-page .action-bar {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .guru-lms-arsip-salin-page .action-bar .btn {
+        width: 100%;
+    }
 }

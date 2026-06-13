@@ -58,7 +58,7 @@
                                 @if($pembayaran->metode_pembayaran === 'tunai')
                                     <span class="badge bg-primary badge-custom shadow-sm">TUNAI</span>
                                 @elseif($pembayaran->metode_pembayaran === 'transfer')
-                                    <span class="badge bg-success badge-custom shadow-sm">TRANSFER</span>
+                                    <span class="badge bg-success badge-custom shadow-sm">DIRECT TRANSFER</span>
                                 @else
                                     <span class="badge bg-info badge-custom shadow-sm">MIDTRANS</span>
                                 @endif

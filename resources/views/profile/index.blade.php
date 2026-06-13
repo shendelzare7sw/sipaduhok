@@ -34,7 +34,7 @@
 
         <div class="mb-4">
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb breadcrumb-style1">
+                <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
                     <li class="breadcrumb-item active">Profil Saya</li>
                 </ol>
@@ -136,7 +136,7 @@
                     <div class="card mb-4 border-0 shadow-sm">
                         <div class="card-header d-flex align-items-center justify-content-between">
                             <h5 class="mb-0"><i class="bx bx-user me-2"></i>Informasi Detail</h5>
-                            <a href="{{ route('account.settings') }}" class="btn btn-outline-primary btn-sm">
+                            <a href="{{ route('account.settings') }}" class="btn btn-outline-primary">
                                 <i class="bx bx-cog me-1"></i> Pengaturan Akun
                             </a>
                         </div>
@@ -148,7 +148,7 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Nama Lengkap</label>
-                                        <input type="text" class="form-control bg-light"
+                                        <input type="text" class="form-control"
                                             value="{{ $profileData->nama_lengkap ?? $user->name }}" readonly disabled>
                                     </div>
 
@@ -156,7 +156,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label
                                                 class="form-label text-uppercase">{{ $roleName === 'siswa' ? 'NIS' : 'NIP' }}</label>
-                                            <input type="text" class="form-control bg-light"
+                                            <input type="text" class="form-control"
                                                 value="{{ $profileData->nip ?? $profileData->nis ?? '-' }}" readonly disabled>
                                         </div>
                                     @endif
@@ -188,7 +188,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Jenis Kelamin</label>
-                                        <input type="text" class="form-control bg-light"
+                                        <input type="text" class="form-control"
                                             value="{{ ($profileData->jenis_kelamin ?? '') == 'L' ? 'Laki-laki' : 'Perempuan' }}"
                                             readonly disabled>
                                     </div>
@@ -238,7 +238,7 @@
                             <div class="mt-4 p-3 bg-label-secondary rounded">
                                 <h6><i class="bx bx-cog me-1"></i> Kelola Akun?</h6>
                                 <p class="mb-2">Anda dapat mengubah email dan password melalui menu pengaturan akun.</p>
-                                <a href="{{ route('account.settings') }}" class="btn btn-primary btn-sm">
+                                <a href="{{ route('account.settings') }}" class="btn btn-primary">
                                     Buka Pengaturan Akun
                                 </a>
                             </div>

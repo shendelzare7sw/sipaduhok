@@ -180,6 +180,19 @@
     display: block;
 }
 
+.preview-file-box .preview-action-btn i {
+    color: currentColor;
+    display: inline-block;
+    font-size: 0.85em;
+    margin-bottom: 0;
+}
+
+.preview-file-box .preview-action-btn.btn-primary,
+.preview-file-box .preview-action-btn.btn-primary:hover,
+.preview-file-box .preview-action-btn.btn-primary:focus {
+    color: #ffffff;
+}
+
 .inline-preview-box {
     background: #f8fafc;
     border: 1px solid #e5e7eb;

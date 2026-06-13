@@ -185,7 +185,7 @@
                         @endif
                     </td>
                     <td class="text-right">Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
-                    <td class="text-center">{{ ucfirst($bayar->metode_pembayaran) }}</td>
+                    <td class="text-center">{{ $bayar->metode_pembayaran === 'transfer' ? 'Direct Transfer' : ucfirst($bayar->metode_pembayaran) }}</td>
                 </tr>
             @empty
                 <tr>

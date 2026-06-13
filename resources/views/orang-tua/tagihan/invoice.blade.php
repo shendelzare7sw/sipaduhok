@@ -57,7 +57,7 @@
                             @if($pembayaran->metode_pembayaran == 'midtrans')
                                 Digital Payment (Midtrans)
                             @elseif($pembayaran->metode_pembayaran == 'transfer')
-                                Transfer Bank
+                                Direct Transfer
                             @else
                                 Tunai
                             @endif
@@ -86,7 +86,7 @@
                     @endif
                 </div>
                 @if($pembayaran->metode_pembayaran == 'transfer')
-                    <p class="sub-text transfer-proof-note">Bukti Transfer: Terlampir</p>
+                    <p class="sub-text transfer-proof-note">Bukti Direct Transfer: Terlampir</p>
                 @endif
             </div>
         </div>

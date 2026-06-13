@@ -17,3 +17,146 @@
 .guru-lms-ujian-hasil-page .summary-card-highest {
     border-left-color: #dc2626;
 }
+
+.guru-lms-ujian-hasil-page .hasil-table {
+    min-width: 920px;
+}
+
+.guru-lms-ujian-hasil-page .hasil-table th {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.guru-lms-ujian-hasil-page .hasil-table td {
+    vertical-align: middle;
+}
+
+.guru-lms-ujian-hasil-page .hasil-student-cell {
+    min-width: 220px;
+    max-width: 320px;
+    line-height: 1.45;
+}
+
+.guru-lms-ujian-hasil-page .hasil-status-cell .badge,
+.guru-lms-ujian-hasil-page .hasil-action-cell .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    .guru-lms-ujian-hasil-page .summary-card .p-3 {
+        padding: 0.85rem !important;
+    }
+
+    .guru-lms-ujian-hasil-page .card-header-custom {
+        padding: 16px;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table-responsive {
+        overflow-x: visible;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table {
+        min-width: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table thead {
+        display: none;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table,
+    .guru-lms-ujian-hasil-page .hasil-table tbody,
+    .guru-lms-ujian-hasil-page .hasil-table tr,
+    .guru-lms-ujian-hasil-page .hasil-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin: 12px;
+        padding: 12px 14px;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:first-child {
+        margin-top: 12px;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:last-child {
+        margin-bottom: 12px;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:not(.hasil-empty-row) td {
+        border: 0;
+        padding: 8px 0 !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        text-align: right !important;
+        font-size: 0.9rem;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:not(.hasil-empty-row) td::before {
+        content: attr(data-label);
+        color: #64748b;
+        flex: 0 0 42%;
+        max-width: 42%;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table .hasil-student-cell {
+        max-width: none;
+        border-bottom: 1px solid #eef2f7 !important;
+        margin-bottom: 4px;
+        padding-bottom: 12px !important;
+        text-align: left !important;
+        display: block !important;
+        font-size: 0.98rem;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table .hasil-student-cell::before {
+        display: block;
+        max-width: none !important;
+        margin-bottom: 4px;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-action-cell {
+        padding-top: 12px !important;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-action-cell .btn {
+        width: 100%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-empty-cell {
+        border: 0;
+        padding: 24px 12px !important;
+    }
+}
+
+@media (max-width: 420px) {
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr {
+        margin-left: 8px;
+        margin-right: 8px;
+        padding: 10px 12px;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:not(.hasil-empty-row) td {
+        gap: 10px;
+        font-size: 0.86rem;
+    }
+
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:not(.hasil-empty-row) td::before {
+        flex-basis: 46%;
+        max-width: 46%;
+    }
+}

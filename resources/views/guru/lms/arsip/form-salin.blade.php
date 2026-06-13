@@ -22,7 +22,7 @@
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y guru-lms-arsip-salin-page">
+<div class="guru-lms-arsip-salin-page">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-2">
             <li class="breadcrumb-item"><a href="{{ route('guru.lms.arsip.index') }}">Arsip LMS</a></li>

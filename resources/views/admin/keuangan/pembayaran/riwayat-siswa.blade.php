@@ -147,7 +147,7 @@
                                                 @if($bayar->metode_pembayaran === 'tunai')
                                                     <span class="badge bg-info"><i class="fas fa-money-bill"></i> Tunai</span>
                                                 @elseif($bayar->metode_pembayaran === 'transfer')
-                                                    <span class="badge bg-warning"><i class="fas fa-university"></i> Transfer</span>
+                                                    <span class="badge bg-warning"><i class="fas fa-university"></i> Direct Transfer</span>
                                                 @else
                                                     <span class="badge bg-success"><i class="fas fa-credit-card"></i> Midtrans</span>
                                                 @endif
@@ -241,7 +241,7 @@
                                                 <strong class="text-dark">Rp
                                                     {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</strong>
                                                 <span class="text-muted ms-2">
-                                                    via {{ ucfirst($bayar->metode_pembayaran) }}
+                                                        via {{ $bayar->metode_pembayaran === 'transfer' ? 'Direct Transfer' : ucfirst($bayar->metode_pembayaran) }}
                                                 </span>
                                             </div>
                                             <small class="text-muted">{{ $bayar->tanggal_bayar->format('d M Y') }}</small>

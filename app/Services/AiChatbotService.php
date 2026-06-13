@@ -225,17 +225,20 @@ class AiChatbotService
         $strict = isContextRestrictionEnabled();
         $knowledge = $this->kb->getForRole($userRole);
         $landingPages = $this->kb->getLandingPagesPrompt();
+        $menuSnapshot = $this->kb->getMenuSnapshotForRole($userRole ?: 'guest');
 
         $routeMap = $this->kb->getRouteMapForRole($userRole);
         $routeList = '';
         $routeCount = 0;
         foreach ($routeMap as $name => $url) {
-            if ($routeCount >= 50) break;
+            if ($routeCount >= 140) break;
             $routeList .= "{$name}={$url}\n";
             $routeCount++;
         }
-        if (strlen($routeList) > 1800) {
-            $routeList = substr($routeList, 0, 1800) . "...\n";
+        if (strlen($routeList) > 5000) {
+            $truncatedRouteList = substr($routeList, 0, 5000);
+            $lastNewline = strrpos($truncatedRouteList, "\n");
+            $routeList = substr($truncatedRouteList, 0, $lastNewline !== false ? $lastNewline : 5000) . "\n...\n";
         }
 
         $scopeRule = $strict
@@ -293,6 +296,11 @@ Contoh OWNERSHIP-aware response (user = sekretaris, tanya "cara buat tagihan"):
 {"text":"Pembuatan tagihan (SPP, bulk create, custom) dikelola oleh Bendahara atau Admin. Sebagai Sekretaris, Anda tidak membuat tagihan — silakan koordinasi dengan Bendahara/Admin.","callout":null,"button":null,"related":null}
 
 ═══════════════════════════════════════════════════════════
+PETA MENU AKTUAL ROLE {$roleLabel} - hasil audit sidebar/views + docs/flow:
+{$menuSnapshot}
+
+Gunakan PETA MENU AKTUAL untuk mengenali menu yang benar-benar terlihat oleh role ini. Jika route suatu menu membutuhkan parameter dinamis (kelas, mapel, siswa/anak, tahun ajaran, atau id data), JANGAN mengarang URL; jelaskan agar user membuka menu induk lalu memilih data yang dimaksud. Untuk tombol JSON, hanya gunakan route yang ada di ROUTE URL MAP.
+
 {$knowledgeInstruction}
 ═══════════════════════════════════════════════════════════
 
@@ -467,39 +475,64 @@ PROMPT;
             'logout',
             'akun',
             'password',
+            'pemulihan akun',
+            'tiket pemulihan',
             'role',
             'hak akses',
             'admin',
             'ketua',
             'wakil kepala',
+            'wakasek',
             'sekretaris',
             'bendahara',
             'wali kelas',
             'guru',
             'siswa',
             'orang tua',
+            'wali murid',
             'kelas',
             'cabang',
             'tahun ajaran',
+            'semester',
             'jadwal',
+            'jam istirahat',
             'presensi',
             'absensi',
+            'izin',
             'rapor',
             'nilai',
             'lms',
+            'arsip lms',
+            'salin arsip',
             'materi',
             'tugas',
             'ujian',
             'latihan',
             'forum',
+            'kelas virtual',
+            'meeting',
             'kalender',
             'pengumuman',
             'berita',
+            'flyer',
+            'landing page',
             'ppdb',
             'tagihan',
+            'tunggakan',
+            'tarik tunggakan',
             'pembayaran',
+            'midtrans',
+            'rekening',
+            'dispensasi',
+            'kenaikan kelas',
+            'kkm',
             'monitoring',
+            'catatan',
             'notifikasi',
+            'ai settings',
+            'pengaturan ai',
+            'chatbot',
+            'google sheets',
         ];
 
         foreach ($keywords as $keyword) {

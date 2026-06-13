@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y guru-lms-arsip-index-page">
+<div class="guru-lms-arsip-index-page">
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
         <div>

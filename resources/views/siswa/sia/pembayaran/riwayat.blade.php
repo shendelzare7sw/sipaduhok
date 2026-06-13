@@ -48,7 +48,7 @@
             <select name="metode" class="form-select">
                 <option value="">Semua Metode</option>
                 <option value="tunai" {{ request('metode') === 'tunai' ? 'selected' : '' }}>Tunai</option>
-                <option value="transfer" {{ request('metode') === 'transfer' ? 'selected' : '' }}>Transfer</option>
+                <option value="transfer" {{ request('metode') === 'transfer' ? 'selected' : '' }}>Direct Transfer</option>
                 <option value="midtrans" {{ request('metode') === 'midtrans' ? 'selected' : '' }}>Midtrans</option>
             </select>
         </div>
@@ -121,7 +121,7 @@
                     @endif
                 </span>
                 <span class="metode-badge">
-                    {{ strtoupper($pembayaran->metode_pembayaran) }}
+                    {{ $pembayaran->metode_pembayaran === 'transfer' ? 'DIRECT TRANSFER' : strtoupper($pembayaran->metode_pembayaran) }}
                 </span>
             </div>
 

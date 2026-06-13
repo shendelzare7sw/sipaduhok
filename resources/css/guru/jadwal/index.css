@@ -10,14 +10,15 @@
 }
 
 .guru-page {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 1rem;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
 }
 
 .guru-stat-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     gap: 14px;
     margin-bottom: 18px;
 }
@@ -91,7 +92,7 @@
 
 .guru-day-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
     gap: 16px;
 }
 
@@ -143,8 +144,8 @@
 .guru-lesson {
     border-bottom: 1px solid #eef2f7;
     display: grid;
-    gap: 14px;
-    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 18px;
+    grid-template-columns: minmax(118px, max-content) minmax(0, 1fr);
     padding: 14px 16px;
 }
 
@@ -153,18 +154,22 @@
 }
 
 .guru-time {
+    align-items: baseline;
     color: var(--g-primary);
+    display: inline-flex;
     font-size: 13px;
     font-weight: 900;
+    gap: 4px;
     line-height: 1.25;
+    white-space: nowrap;
 }
 
 .guru-time span {
     color: var(--g-muted);
-    display: block;
+    display: inline;
     font-size: 11px;
     font-weight: 800;
-    margin-top: 2px;
+    margin-top: 0;
 }
 
 .guru-mapel {
@@ -228,18 +233,12 @@
 }
 
 @media (max-width: 991.98px) {
-    .guru-stat-grid,
     .guru-day-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 767.98px) {
-    .guru-page {
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-    }
-
     .guru-stat-grid,
     .guru-day-grid {
         grid-template-columns: 1fr;
@@ -259,10 +258,5 @@
     .guru-lesson {
         grid-template-columns: 1fr;
         gap: 8px;
-    }
-
-    .guru-time span {
-        display: inline;
-        margin-left: 4px;
     }
 }

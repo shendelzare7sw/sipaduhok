@@ -17,8 +17,8 @@
 @endpush
 
 @section('content')
-<div class="row justify-content-center guru-lms-soal-form-page">
-    <div class="col-lg-10">
+<div class="row guru-lms-soal-form-page">
+    <div class="col-12">
         <div class="card-custom">
             <div class="card-header-custom d-flex justify-content-between align-items-center">
                 <span>{{ $soal ? 'Form Edit Soal' : 'Form Soal Baru' }}</span>

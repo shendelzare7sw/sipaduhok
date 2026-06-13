@@ -4,7 +4,7 @@
 @import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/core.css';
 @import 'sneat-bootstrap-html-admin-template-free/assets/vendor/css/theme-default.css';
 :root {
-            /* SIPADUHOK Brand Colors (Modern UI) */
+            /* SIPADUHOK Brand Colors (Modern UI - Restored from production-ready) */
             --bs-primary: #4361ee;
             --bs-primary-rgb: 67, 97, 238;
             --primary-color: #4361ee;
@@ -25,14 +25,32 @@
             background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
         }
 
+        /* Override all primary utility classes that Sneat hardcodes */
+        .text-primary { color: var(--primary-color) !important; }
+        .bg-primary { background-color: var(--primary-color) !important; color: #fff !important; }
+        .bg-label-primary { background-color: var(--primary-light) !important; color: var(--primary-color) !important; }
+        .border-primary { border-color: var(--primary-color) !important; }
+        .form-check-input:checked { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; }
+
         .btn-primary {
             background-color: var(--primary-color) !important;
             border-color: var(--primary-color) !important;
+            color: #fff !important;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
             background-color: var(--primary-dark) !important;
             border-color: var(--primary-dark) !important;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+        }
+        
+        .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+            background-color: var(--primary-color) !important;
+            color: #fff !important;
         }
 
         /* Menu aktif */
@@ -67,12 +85,10 @@
         }
 
         .layout-menu .wali-active-class-card {
-            margin: .5rem 1rem .75rem;
-            padding: .85rem .9rem;
-            border: 1px solid rgba(255, 255, 255, .18);
-            border-radius: 10px;
-            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #6d28d9 100%);
-            box-shadow: 0 4px 15px rgba(124, 58, 237, .35), inset 0 1px 0 rgba(255, 255, 255, .15);
+            margin: 8px 20px 8px 12px;
+            padding: 0.5rem 1rem; /* matches px-3 py-2 roughly */
+            border-radius: 8px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
 
         .layout-menu .wali-active-class-label {
@@ -86,32 +102,26 @@
 
         .layout-menu .wali-active-class-title {
             color: #fff;
-            font-size: .95rem;
-            font-weight: 800;
-            line-height: 1.25;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .layout-menu .wali-active-class-meta {
-            color: rgba(255, 255, 255, .76);
-            font-size: .78rem;
-            line-height: 1.35;
-            margin-top: .15rem;
+            color: rgba(255, 255, 255, .7);
+            font-size: 12px;
         }
 
         .layout-menu .wali-active-class-switch {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            margin-top: .65rem;
-            max-width: 100%;
-            padding: .38rem .7rem;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, .24);
-            background: rgba(255, 255, 255, .18) !important;
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 8px;
+            padding: 6px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, .2) !important;
             color: #fff !important;
-            font-size: .78rem;
-            font-weight: 800;
-            line-height: 1.2;
+            font-size: 12px;
+            font-weight: 600;
             text-decoration: none !important;
         }
 

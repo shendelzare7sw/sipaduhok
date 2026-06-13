@@ -412,7 +412,7 @@
                                         </div>
                                     @endif
 
-                                    {{-- Transfer Option --}}
+                                    {{-- Direct Transfer Option --}}
                                     @if($infoPembayaran->hasRekeningBank())
                                         <div class="col-md-4">
                                             <input type="radio" class="btn-check" name="metode_pembayaran" id="methodTransfer"
@@ -421,7 +421,7 @@
                                                 class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3"
                                                 for="methodTransfer">
                                                 <i class="fas fa-university fa-2x mb-2"></i>
-                                                <span class="small fw-bold">Transfer Bank</span>
+                                                <span class="small fw-bold">Direct Transfer</span>
                                             </label>
                                         </div>
                                     @endif
@@ -466,7 +466,7 @@
                                 </div>
                             </div>
 
-                            {{-- 2. Transfer Info --}}
+                            {{-- 2. Direct Transfer Info --}}
                             @if($infoPembayaran->hasRekeningBank())
                                 <div id="infoTransfer" class="method-info d-none">
                                     <div class="card bg-label-info border border-info mb-3">
@@ -504,11 +504,11 @@
 
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">
-                                            Bukti Transfer <span class="text-danger">*</span>
+                                            Bukti Direct Transfer <span class="text-danger">*</span>
                                         </label>
                                         <input type="file" name="bukti_bayar" id="bulkBuktiInput" class="form-control"
                                             accept="image/*">
-                                        <small class="text-muted">Upload foto bukti transfer total nominal (Max: 10MB).</small>
+                                        <small class="text-muted">Upload foto bukti Direct Transfer total nominal (Max: 10MB).</small>
                                     </div>
                                 </div>
                             @endif
@@ -617,7 +617,7 @@
                                             @if($bayar->metode_pembayaran == 'tunai')
                                                 <span class="badge bg-label-secondary"><i class="fas fa-money-bill-wave me-1"></i> Tunai</span>
                                             @elseif($bayar->metode_pembayaran == 'transfer')
-                                                <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Transfer</span>
+                                                <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Direct Transfer</span>
                                             @elseif($bayar->metode_pembayaran == 'midtrans')
                                                 <span class="badge bg-label-primary"><i class="fas fa-credit-card me-1"></i> Digital</span>
                                             @endif
@@ -650,7 +650,7 @@
                                                     </form>
                                                 @endif
 
-                                                {{-- Tombol Invoice untuk Non-Tunai (Transfer/Midtrans) --}}
+                                                {{-- Tombol Invoice untuk Non-Tunai (Direct Transfer/Midtrans) --}}
                                                 @if($bayar->metode_pembayaran != 'tunai')
                                                     <a href="{{ route('orang-tua.pembayaran.invoice', $bayar->id) }}"
                                                        target="_blank"
