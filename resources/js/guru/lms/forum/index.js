@@ -1,3 +1,6 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 (() => {
     const page = document.querySelector('.guru-lms-forum-index-page');
 
@@ -6,27 +9,6 @@
     }
 
     const csrfToken = page.dataset.csrfToken || '';
-    let sweetAlertPromise = null;
-
-    const ensureSweetAlert = () => {
-        if (window.Swal) {
-            return Promise.resolve(window.Swal);
-        }
-
-        if (sweetAlertPromise) {
-            return sweetAlertPromise;
-        }
-
-        sweetAlertPromise = new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-            script.onload = () => (window.Swal ? resolve(window.Swal) : reject(new Error('SweetAlert gagal dimuat')));
-            script.onerror = () => reject(new Error('SweetAlert gagal dimuat'));
-            document.head.appendChild(script);
-        });
-
-        return sweetAlertPromise;
-    };
 
     const appendHiddenInput = (form, name, value) => {
         const input = document.createElement('input');
@@ -55,7 +37,6 @@
 
     const confirmDelete = async (url) => {
         try {
-            const Swal = await ensureSweetAlert();
             const result = await Swal.fire({
                 title: 'Konfirmasi Hapus',
                 html: `
@@ -90,7 +71,6 @@
 
     const confirmSyncForum = async (url, title) => {
         try {
-            const Swal = await ensureSweetAlert();
             const result = await Swal.fire({
                 title,
                 html: `

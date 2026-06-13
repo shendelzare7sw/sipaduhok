@@ -1,12 +1,10 @@
-function showDialog(options, callback) {
-    if (window.Swal) {
-        window.Swal.fire(options).then((result) => {
-            callback(result.isConfirmed);
-        });
-        return;
-    }
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
-    callback(window.confirm(options.text || options.title || 'Lanjutkan?'));
+function showDialog(options, callback) {
+    Swal.fire(options).then((result) => {
+        callback(result.isConfirmed);
+    });
 }
 
 function submitForm(form) {

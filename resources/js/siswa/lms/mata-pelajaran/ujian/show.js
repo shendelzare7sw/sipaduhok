@@ -1,3 +1,6 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 function parseEncodedJson(value, fallback) {
     if (!value) {
         return fallback;
@@ -12,14 +15,9 @@ function parseEncodedJson(value, fallback) {
 }
 
 function showDialog(options, callback) {
-    if (window.Swal) {
-        window.Swal.fire(options).then((result) => {
-            callback(result.isConfirmed);
-        });
-        return;
-    }
-
-    callback(window.confirm(options.text || options.title || 'Lanjutkan?'));
+    Swal.fire(options).then((result) => {
+        callback(result.isConfirmed);
+    });
 }
 
 function submitForm(form) {

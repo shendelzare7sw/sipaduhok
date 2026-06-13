@@ -1,3 +1,6 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 document.addEventListener('DOMContentLoaded', () => {
     const page = document.querySelector('.siswa-lms-forum-show-page');
 
@@ -70,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = url;
-        form.style.display = 'none';
+        form.className = 'd-none';
 
         const csrf = document.createElement('input');
         csrf.type = 'hidden';
@@ -89,26 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const confirmDeleteReply = async (url) => {
-        if (window.Swal?.fire) {
-            const result = await window.Swal.fire({
-                title: 'Hapus Balasan?',
-                text: 'Balasan yang dihapus tidak dapat dikembalikan!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-            });
+        const result = await Swal.fire({
+            title: 'Hapus Balasan?',
+            text: 'Balasan yang dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+        });
 
-            if (result.isConfirmed) {
-                submitDeleteForm(url);
-            }
-
-            return;
-        }
-
-        if (window.confirm('Hapus balasan ini?')) {
+        if (result.isConfirmed) {
             submitDeleteForm(url);
         }
     };

@@ -1,30 +1,7 @@
-const sweetAlertUrl = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
-const ensureSweetAlert = () => {
-    if (window.Swal?.fire) {
-        return Promise.resolve(window.Swal);
-    }
-
-    const existingScript = document.querySelector('script[src*="sweetalert2"]');
-    if (existingScript) {
-        return new Promise((resolve, reject) => {
-            existingScript.addEventListener('load', () => resolve(window.Swal), { once: true });
-            existingScript.addEventListener('error', reject, { once: true });
-        });
-    }
-
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = sweetAlertUrl;
-        script.async = true;
-        script.dataset.meetingSwal = 'true';
-        script.onload = () => resolve(window.Swal);
-        script.onerror = reject;
-        document.head.appendChild(script);
-    });
-};
-
-const showSuccessNotification = async (button, originalHtml, originalClass) => {
+const showSuccessNotification = (button, originalHtml, originalClass) => {
     button.innerHTML = '<i class="fas fa-check me-1"></i> Tersalin!';
     button.className = 'btn btn-success btn-sm text-white';
 
@@ -33,25 +10,16 @@ const showSuccessNotification = async (button, originalHtml, originalClass) => {
         button.className = originalClass;
     }, 2000);
 
-    try {
-        const Swal = await ensureSweetAlert();
-        if (!Swal?.fire) {
-            return;
-        }
-
-        Swal.fire({
-            toast: true,
-            position: 'bottom-end',
-            icon: 'success',
-            title: 'Link Meeting Tersalin!',
-            text: 'Link telah disalin ke clipboard Anda.',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-        });
-    } catch (error) {
-        console.warn('SweetAlert failed to load:', error);
-    }
+    Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'success',
+        title: 'Link Meeting Tersalin!',
+        text: 'Link telah disalin ke clipboard Anda.',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+    });
 };
 
 const fallbackCopyToClipboard = (link, button, originalHtml, originalClass) => {
