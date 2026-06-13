@@ -1,69 +1,48 @@
-/* Loaded after page styles to protect shared Sneat layout controls. */
+/* Loaded after page styles to protect shared Sneat modal controls. */
 
+.modal .modal-header .btn-close,
 .modal .modal-header .btn-close.btn-close-white {
-    background-color: transparent !important;
-    background-image: var(--bs-btn-close-bg) !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-size: 1em auto !important;
-    border: 0 !important;
-    border-radius: .375rem !important;
+    align-items: center !important;
+    background-color: #fff !important;
+    background-image: none !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 4px !important;
     box-shadow: none !important;
     color: transparent !important;
-    display: block !important;
-    filter: invert(1) grayscale(100%) brightness(200%) !important;
-    flex: 0 0 auto !important;
-    height: 1em !important;
-    margin: -.5rem -.5rem -.5rem auto !important;
-    min-height: 0 !important;
-    opacity: 1 !important;
-    padding: .5rem !important;
-    position: static !important;
-    width: 1em !important;
-    z-index: auto !important;
-}
-
-.modal .modal-header .btn-close.btn-close-white::before {
-    content: none !important;
-    display: none !important;
-}
-
-.modal .modal-header .btn-close.btn-close-white:hover {
-    background-color: transparent !important;
-    border-color: transparent !important;
-    opacity: 1 !important;
-}
-
-#logoutModal .modal-header .btn-close {
-    background-color: transparent !important;
-    background-image: var(--bs-btn-close-bg) !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    background-size: 1em auto !important;
-    border: 0 !important;
-    border-radius: .375rem !important;
-    box-shadow: none !important;
-    color: transparent !important;
-    display: block !important;
+    display: inline-flex !important;
     filter: none !important;
     flex: 0 0 auto !important;
-    height: 1em !important;
+    height: 28px !important;
+    justify-content: center !important;
     margin: -.5rem -.5rem -.5rem auto !important;
     min-height: 0 !important;
-    opacity: .5 !important;
-    padding: .5rem !important;
+    opacity: 1 !important;
+    padding: 0 !important;
     position: static !important;
-    width: 1em !important;
+    width: 28px !important;
     z-index: auto !important;
 }
 
-#logoutModal .modal-header .btn-close::before {
-    content: none !important;
-    display: none !important;
+.modal .modal-header .btn-close::before,
+.modal .modal-header .btn-close.btn-close-white::before {
+    color: #94a3b8 !important;
+    content: "\00d7" !important;
+    display: block !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    transform: translateY(-1px) !important;
 }
 
-#logoutModal .modal-header .btn-close:hover {
-    background-color: transparent !important;
-    border-color: transparent !important;
-    opacity: .75 !important;
+.modal .modal-header .btn-close:hover,
+.modal .modal-header .btn-close.btn-close-white:hover {
+    background-color: #fff !important;
+    border-color: #cbd5e1 !important;
+    opacity: 1 !important;
+}
+
+.modal .modal-header .btn-close:hover::before,
+.modal .modal-header .btn-close.btn-close-white:hover::before {
+    color: #64748b !important;
 }
