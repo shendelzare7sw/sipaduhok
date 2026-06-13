@@ -1,47 +1,7 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 /* Keuangan carryover behavior extracted from the former shared loader. */
-const sweetAlertUrl = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
-const sweetAlertCssUrl = 'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css';
-
-let sweetAlertPromise = null;
-
-const ensureSweetAlert = () => {
-    if (window.Swal?.fire) {
-        return Promise.resolve(window.Swal);
-    }
-
-    if (sweetAlertPromise) {
-        return sweetAlertPromise;
-    }
-
-    const hasCss = document.querySelector(`link[href="${sweetAlertCssUrl}"]`);
-    if (!hasCss) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = sweetAlertCssUrl;
-        link.dataset.carryoverSwalCss = 'true';
-        document.head.appendChild(link);
-    }
-
-    sweetAlertPromise = new Promise((resolve, reject) => {
-        const existingScript = document.querySelector('script[src*="sweetalert2"]');
-
-        if (existingScript) {
-            existingScript.addEventListener('load', () => resolve(window.Swal), { once: true });
-            existingScript.addEventListener('error', reject, { once: true });
-            return;
-        }
-
-        const script = document.createElement('script');
-        script.src = sweetAlertUrl;
-        script.dataset.carryoverSwal = 'true';
-        script.onload = () => resolve(window.Swal);
-        script.onerror = reject;
-        document.body.appendChild(script);
-    });
-
-    return sweetAlertPromise;
-};
-
 const escapeHtml = (value) => {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode(value ?? ''));
@@ -146,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
 
             try {
-                const Swal = await ensureSweetAlert();
 
                 Swal.fire({
                     title: data.nama,
@@ -191,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const Swal = await ensureSweetAlert();
             const result = await Swal.fire({
                 title: 'Yakin Eksekusi?',
                 html: `
@@ -228,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const Swal = await ensureSweetAlert();
             Swal.fire({
                 title: 'Memuat pratinjau...',
                 html: '<div class="spinner-border text-primary"></div>',

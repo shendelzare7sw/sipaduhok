@@ -1,3 +1,6 @@
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
 const monthNames = [
     'Januari',
     'Februari',
@@ -13,22 +16,7 @@ const monthNames = [
     'Desember',
 ];
 
-const stripHtml = (value) => String(value || '').replace(/<[^>]*>/g, '');
-
-const fireAlert = (options) => {
-    if (window.Swal?.fire) {
-        return window.Swal.fire(options);
-    }
-
-    if (options.showCancelButton) {
-        return Promise.resolve({
-            isConfirmed: window.confirm(stripHtml(options.html || options.text || options.title)),
-        });
-    }
-
-    window.alert(options.text || options.title || '');
-    return Promise.resolve({ isConfirmed: false });
-};
+const fireAlert = (options) => Swal.fire(options);
 
 const visibleSiswaCheckboxes = () => Array.from(document.querySelectorAll('[data-siswa-checkbox]'))
     .filter((checkbox) => !checkbox.closest('.siswa-row')?.classList.contains('is-hidden'));

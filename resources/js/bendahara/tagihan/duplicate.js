@@ -1,17 +1,7 @@
-const fireAlert = (options) => {
-    if (window.Swal?.fire) {
-        return window.Swal.fire(options);
-    }
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
-    if (options.showCancelButton) {
-        return Promise.resolve({
-            isConfirmed: window.confirm(String(options.html || options.text || options.title).replace(/<[^>]*>/g, '')),
-        });
-    }
-
-    window.alert(options.text || options.title || '');
-    return Promise.resolve({ isConfirmed: false });
-};
+const fireAlert = (options) => Swal.fire(options);
 
 const createMessage = (className, text, iconClass = null) => {
     const paragraph = document.createElement('p');

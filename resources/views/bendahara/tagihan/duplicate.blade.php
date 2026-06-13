@@ -9,7 +9,6 @@
 @endsection
 
 @section('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     @vite(['resources/css/bendahara/tagihan/duplicate.css'])
 @endsection
 
@@ -203,6 +202,5 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/js/bendahara/tagihan/duplicate.js'])
 @endsection
