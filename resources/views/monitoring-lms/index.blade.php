@@ -38,7 +38,7 @@
                 <i class="fas fa-filter me-1"></i>Terapkan
             </button>
             <label class="filter-toggle form-check">
-                <input type="checkbox" name="only_with_content" value="1" class="form-check-input me-2"
+                <input type="checkbox" name="only_with_content" value="1" class="form-check-input"
                     data-auto-submit-change {{ ($onlyWithContent ?? false) ? 'checked' : '' }}>
                 <span>Hanya tampilkan kelas yang sudah punya konten LMS</span>
             </label>

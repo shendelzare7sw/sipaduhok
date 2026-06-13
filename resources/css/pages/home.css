@@ -120,7 +120,7 @@
     pointer-events: none;
 }
 
-/* Tablet narrow: 641px – 768px — peek side cards pushed to edges */
+/* Tablet narrow: 641px-768px - peek side cards pushed to edges */
 @media (max-width: 768px) {
     .carousel-3d { height: 352px; }
     .carousel-item { width: 240px; height: 320px; border-radius: 1.25rem; }
@@ -144,7 +144,7 @@
     }
 }
 
-/* Mobile: ≤ 640px — center card utuh, side cards peek dari belakang */
+/* Mobile: <= 640px - center card utuh, side cards peek dari belakang */
 @media (max-width: 640px) {
     .carousel-3d { height: 320px; }
     .carousel-item { width: min(72vw, 260px); height: 320px; }
