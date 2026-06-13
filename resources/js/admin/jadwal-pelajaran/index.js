@@ -1,3 +1,5 @@
+import Swal from 'sweetalert2';
+
 function getJadwalConfig() {
     const configEl = document.getElementById('jp-config');
 

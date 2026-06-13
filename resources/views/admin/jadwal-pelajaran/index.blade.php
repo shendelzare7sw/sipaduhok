@@ -11,7 +11,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/jadwal-pelajaran.css') }}">
+    @vite(['resources/css/admin/jadwal-pelajaran/index.css'])
 @endsection
 
 @section('content')
@@ -220,7 +220,7 @@
                                                 data-mapel="{{ $jadwal->mataPelajaran->nama_mapel }}"
                                                 data-kelas="{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}"
                                                 data-hari="{{ $jadwal->hari }}"
-                                                data-jam="{{ $jadwal->jam_mulai->format('H:i') }}-{{ $jadwal->jam_selesai->format('H:i') }}">
+                                                data-jam="{{ $jadwal->jam_mulai->format('H:i') }} - {{ $jadwal->jam_selesai->format('H:i') }}">
                                         </td>
                                         <td class="mobile-card-head">
                                             <span class="hari-badge hari-{{ strtolower($jadwal->hari) }}">
@@ -317,7 +317,7 @@
                                 <div class="fw-semibold mb-1">{{ $jadwal->mataPelajaran->nama_mapel }}</div>
                                 <div class="text-muted jp-muted-copy">
                                     <div><i class="fas fa-school me-1"></i> {{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</div>
-                                    <div><i class="fas fa-calendar-day me-1"></i> {{ $jadwal->hari }}, {{ $jadwal->jam_mulai->format('H:i') }}â€“{{ $jadwal->jam_selesai->format('H:i') }}</div>
+                                    <div><i class="fas fa-calendar-day me-1"></i> {{ $jadwal->hari }}, {{ $jadwal->jam_mulai->format('H:i') }} - {{ $jadwal->jam_selesai->format('H:i') }}</div>
                                     @if($jadwal->guru)
                                         <div><i class="fas fa-user-tie me-1"></i> {{ $jadwal->guru->nama_lengkap }}</div>
                                     @endif
@@ -700,8 +700,7 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/admin/jadwal-pelajaran.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @vite(['resources/js/admin/jadwal-pelajaran/index.js'])
 @endsection
 
 

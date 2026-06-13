@@ -9,7 +9,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/manajemen-siswa.css') }}?v={{ filemtime(public_path('css/admin/manajemen-siswa.css')) }}">
+    @vite(['resources/css/admin/manajemen-siswa/index.css'])
 @endsection
 
 @section('content')
@@ -309,5 +309,5 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/admin/manajemen-siswa.js') }}?v={{ filemtime(public_path('js/admin/manajemen-siswa.js')) }}" defer></script>
+    @vite(['resources/js/admin/manajemen-siswa/index.js'])
 @endsection

@@ -9,7 +9,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/mata-pelajaran.css') }}?v={{ filemtime(public_path('css/admin/mata-pelajaran.css')) }}">
+    @vite(['resources/css/admin/mata-pelajaran/index.css'])
 @endsection
 
 @section('content')
@@ -219,5 +219,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/admin/mata-pelajaran/index.js') }}?v={{ filemtime(public_path('js/admin/mata-pelajaran/index.js')) }}" defer></script>
+    @vite(['resources/js/admin/mata-pelajaran/index.js'])
 @endsection
