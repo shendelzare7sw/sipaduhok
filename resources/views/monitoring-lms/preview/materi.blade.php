@@ -25,7 +25,7 @@
 
 @section('preview-content')
     <h2 class="preview-section-title">
-        <i class="fas fa-book-open me-2" style="color: #0284c7;"></i>{{ $materi->judul_materi }}
+        <i class="fas fa-book-open me-2 preview-title-icon-materi"></i>{{ $materi->judul_materi }}
     </h2>
 
     <div class="preview-meta-row">
@@ -68,7 +68,7 @@
             @if($isImage)
                 <div class="inline-preview-box">
                     <img src="{{ $filePreviewUrl }}" alt="{{ $materi->judul_materi }}"
-                         style="max-width: 100%; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                         class="preview-media-image">
                 </div>
             @elseif($isPdf)
                 <div class="inline-preview-box">
@@ -78,7 +78,7 @@
                 </div>
             @elseif($isVideo)
                 <div class="inline-preview-box">
-                    <video controls style="width: 100%; max-height: 70vh; border-radius: 10px;">
+                    <video controls class="preview-media-video">
                         <source src="{{ $filePreviewUrl }}" type="video/{{ $extension }}">
                         Browser Anda tidak mendukung video.
                     </video>
@@ -86,7 +86,7 @@
             @else
                 <div class="preview-file-box">
                     <i class="fas fa-file-alt"></i>
-                    <div class="preview-section-body" style="margin-bottom: 12px;">
+                    <div class="preview-section-body preview-file-name">
                         {{ basename($materi->file_materi) }} ({{ strtoupper($extension) }})
                     </div>
                 </div>
@@ -94,11 +94,11 @@
 
             <div class="d-flex gap-2 flex-wrap mt-3">
                 <a href="{{ $filePreviewUrl }}" target="_blank" rel="noopener"
-                    class="btn btn-primary" style="border-radius: 8px;">
+                    class="btn btn-primary preview-action-button">
                     <i class="fas fa-external-link-alt me-1"></i>Buka di Tab Baru
                 </a>
                 <a href="{{ asset('storage/' . $materi->file_materi) }}" download
-                    class="btn btn-outline-primary" style="border-radius: 8px;">
+                    class="btn btn-outline-primary preview-action-button">
                     <i class="fas fa-download me-1"></i>Unduh
                 </a>
             </div>
@@ -108,17 +108,17 @@
             <div class="preview-section-label">Link Materi Eksternal</div>
             <div class="preview-file-box">
                 <i class="fas fa-link"></i>
-                <div class="preview-section-body" style="margin-bottom: 12px; word-break: break-all;">
+                <div class="preview-section-body preview-link-text">
                     {{ $materi->url_materi }}
                 </div>
                 <a href="{{ $materi->url_materi }}" target="_blank" rel="noopener"
-                    class="btn btn-primary" style="border-radius: 8px;">
+                    class="btn btn-primary preview-action-button">
                     <i class="fas fa-external-link-alt me-1"></i>Buka Link
                 </a>
             </div>
         </div>
     @else
-        <div class="alert alert-warning" style="border-radius: 10px; border: none; background: rgba(217, 119, 6, 0.08); color: #92400e;">
+        <div class="alert alert-warning preview-alert-warning">
             <i class="fas fa-exclamation-triangle me-1"></i>Belum ada berkas atau link materi yang diunggah.
         </div>
     @endif
