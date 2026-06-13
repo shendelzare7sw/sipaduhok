@@ -1,3 +1,5 @@
+import Chart from 'chart.js/auto';
+
 document.addEventListener('DOMContentLoaded', () => {
     const dataElement = document.getElementById('admin-dashboard-chart-data');
 
