@@ -29,7 +29,7 @@
         aria-labelledby="notificationDropdown">
         <div class="dropdown-header d-flex justify-content-between align-items-center py-2 px-3 bg-light border-bottom">
             <h6 class="mb-0 fw-semibold"><i class="fas fa-bell me-2 text-primary"></i>Notifikasi</h6>
-            <a href="{{ route('notifications.index', $ctx ? ['ctx' => $ctx] : []) }}" class="text-primary small fw-medium">Lihat Semua</a>
+            <a href="{{ route('notifications.index', $ctx ? ['ctx' => $ctx] : []) }}" class="text-primary notif-header-link">Lihat Semua</a>
         </div>
         <div id="notification-list" class="notif-list-scroll">
             <div class="text-center py-4">

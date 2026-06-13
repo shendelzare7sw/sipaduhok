@@ -10,6 +10,19 @@
     animation: notifFadeIn 0.15s ease-out;
 }
 
+.notif-dropdown-menu .notif-header-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.notif-dropdown-menu .notif-header-link:hover,
+.notif-dropdown-menu .notif-header-link:focus {
+    text-decoration: underline;
+}
+
 @keyframes notifFadeIn {
     from {
         opacity: 0;

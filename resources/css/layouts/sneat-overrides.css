@@ -48,5 +48,18 @@
 }
 
 #logoutModal .modal-header .btn-close {
-    margin: 0 0 0 auto !important;
+    margin: 0 !important;
+    position: absolute !important;
+    right: -10px !important;
+    top: -10px !important;
+    z-index: 10 !important;
+}
+
+#logoutModal .modal-content,
+#logoutModal .modal-header {
+    overflow: visible !important;
+}
+
+#logoutModal .modal-header {
+    position: relative !important;
 }

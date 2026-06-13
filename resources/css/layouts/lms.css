@@ -559,7 +559,32 @@ body.sidebar-collapsed .main-content-lms {
 
 .lms-logout-modal {
     border-radius: 16px;
-    overflow: hidden;
+    overflow: visible;
+    position: relative;
+}
+
+.lms-logout-modal .modal-header {
+    overflow: visible;
+    position: relative;
+}
+
+.lms-logout-modal .modal-header .btn-close {
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    box-shadow: none;
+    display: inline-flex;
+    height: 28px;
+    justify-content: center;
+    margin: 0;
+    opacity: 1;
+    padding: 0;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    width: 28px;
+    z-index: 10;
 }
 
 .lms-logout-icon {
