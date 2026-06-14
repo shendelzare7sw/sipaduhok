@@ -31,7 +31,7 @@
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.promotion.approval') ? 'active' : '' }}">
     <a href="{{ route('ketua.promotion.approval.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-double"></i>
-        <div>Dispensasi Kenaikan</div>
+        <div>Approval Dispensasi</div>
     </a>
 </li>
 

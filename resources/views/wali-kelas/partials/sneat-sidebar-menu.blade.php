@@ -129,13 +129,13 @@
         <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') ? 'active' : '' }}">
             <a href="{{ route('wali.nilai.index') }}" class="menu-link">
                 <i class="fas fa-chart-line me-2 fa-xs"></i>
-                <div>Rekap Nilai</div>
+                <div>Nilai Siswa</div>
             </a>
         </li>
         <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.rapor.') && $currentRoute != 'wali.rapor.request-download.index' ? 'active' : '' }}">
             <a href="{{ route('wali.rapor.index') }}" class="menu-link">
                 <i class="fas fa-file-alt me-2 fa-xs"></i>
-                <div>Generate & Terbitkan</div>
+                <div>Kelola Rapor</div>
             </a>
         </li>
         <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.arsip') ? 'active' : '' }}">

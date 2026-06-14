@@ -63,7 +63,7 @@
         </li>
         <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.manajemen-siswa') ? 'active' : '' }}">
             <a href="{{ route('waka.manajemen-siswa.index') }}" class="menu-link">
-                <div>Penempatan Siswa</div>
+                <div>Manajemen Siswa</div>
             </a>
         </li>
     </ul>
@@ -167,6 +167,6 @@
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.catatan') ? 'active' : '' }}">
     <a href="{{ route('waka.catatan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-sticky-note"></i>
-        <div>Kirim Catatan</div>
+        <div>Catatan</div>
     </a>
 </li>

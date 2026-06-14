@@ -189,7 +189,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
         </li>
         <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.manajemen-siswa') ? 'active' : '' }}">
             <a href="{{ route('admin.manajemen-siswa.index') }}" class="menu-link">
-                <div>Penempatan Siswa</div>
+                <div>Manajemen Siswa</div>
             </a>
         </li>
     </ul>
@@ -277,7 +277,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.promotion.validation') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
-        <div>Dispensasi Kenaikan</div>
+        <div>Validasi Dispensasi</div>
     </a>
 </li>
 
@@ -369,12 +369,12 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     <ul class="menu-sub">
         <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.laporan') && !Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
             <a href="{{ route('admin.laporan.index') }}" class="menu-link">
-                <div>Laporan Terpadu</div>
+                <div>Laporan</div>
             </a>
         </li>
         <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.catatan') ? 'active' : '' }}">
             <a href="{{ route('admin.catatan.index') }}" class="menu-link">
-                <div>Kirim Catatan</div>
+                <div>Catatan</div>
             </a>
         </li>
     </ul>

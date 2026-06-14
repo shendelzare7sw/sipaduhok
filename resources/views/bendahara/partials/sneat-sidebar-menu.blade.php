@@ -75,7 +75,7 @@
 <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.promotion.validation') ? 'active' : '' }}">
     <a href="{{ route('bendahara.promotion.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
-        <div>Dispensasi Kenaikan</div>
+        <div>Validasi Dispensasi</div>
     </a>
 </li>
 
