@@ -1,0 +1,171 @@
+@startuml SIPADUHOK_UseCase_39
+' =============================================
+' USE CASE DIAGRAM - SIPADUHOK (39 Use Case Clean)
+' 9 Aktor | 39 Use Case 
+' =============================================
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #E8F4FD
+  BorderColor #1565C0
+}
+
+' AKTOR KIRI
+actor "Admin" as Admin
+actor "Ketua PKBM" as Ketua
+actor "Wakil Kepala\nSekolah" as Waka
+actor "Bendahara" as Bendahara
+actor "Sekretaris" as Sekretaris
+
+' AKTOR KANAN
+actor "Wali Kelas" as WaliKelas
+actor "Guru Pengajar" as Guru
+actor "Orang Tua" as OrangTua
+actor "Siswa" as Siswa
+
+rectangle "Sistem Informasi SIPADUHOK" {
+  
+  package "Sistem & Master Data" {
+    usecase "Kelola Data Pengguna" as UC01
+    usecase "Kelola Tiket Pemulihan" as UC02
+    usecase "Kelola Pengaturan Sistem" as UC03
+    usecase "Kelola Tahun Ajaran" as UC04
+    usecase "Kelola Data Cabang" as UC05
+    usecase "Kelola Kelas & Penugasan" as UC06
+    usecase "Kelola Mata Pelajaran" as UC07
+    usecase "Kelola Jadwal Pelajaran" as UC08
+  }
+
+  package "Informasi & Publikasi" {
+    usecase "Kelola Landing Page" as UC09
+    usecase "Kelola Konten Publikasi" as UC10
+  }
+
+  package "Keuangan" {
+    usecase "Kelola Tagihan & Pembayaran" as UC11
+    usecase "Lihat Laporan Keuangan" as UC12
+    usecase "Melakukan Pembayaran\nTagihan" as UC13
+  }
+
+  package "Dispensasi & Kenaikan Kelas" {
+    usecase "Validasi Akses Ujian\ndan Rapor" as UC14
+    usecase "Memproses Dispensasi\nKeuangan" as UC15
+    usecase "Memproses Dispensasi\nKenaikan Kelas" as UC16
+    usecase "Kelola Pengaturan\nKenaikan" as UC17
+    usecase "Proses Eksekusi\nKenaikan Kelas" as UC18
+  }
+
+  package "Presensi & Rapor" {
+    usecase "Kelola Presensi Siswa" as UC19
+    usecase "Kelola Rapor Siswa" as UC20
+    usecase "Validasi Rapor\nTingkat Akhir" as UC21
+    usecase "Mengelola Permintaan\nUnduh" as UC22
+    usecase "Meminta & Mengunduh\nRapor" as UC23
+    usecase "Melihat Prediksi\nKenaikan" as UC24
+    usecase "Mengajukan Izin\nKehadiran" as UC25
+    usecase "Melihat Riwayat\nPresensi" as UC26
+  }
+
+  package "Pembelajaran LMS" {
+    usecase "Kelola Materi\nPembelajaran" as UC27
+    usecase "Kelola & Koreksi Tugas" as UC28
+    usecase "Kelola Ujian" as UC29
+    usecase "Kelola Latihan" as UC30
+    usecase "Mengikuti Pembelajaran\nLMS" as UC31
+    usecase "Berpartisipasi di\nForum Diskusi" as UC32
+    usecase "Kelola Kelas Virtual" as UC33
+    usecase "Input Nilai Akademik" as UC34
+  }
+
+  package "Monitoring & Umum" {
+    usecase "Monitoring Sistem\nTerpadu" as UC35
+    usecase "Kelola Laporan &\nCatatan" as UC36
+    usecase "Membaca Catatan\nMonitoring" as UC37
+    usecase "Melihat Informasi\nAkademik" as UC38
+    usecase "Melihat Nilai Pribadi" as UC39
+  }
+}
+
+' Relasi Admin (Level 1)
+Admin -- UC01
+Admin -- UC02
+Admin -- UC03
+Admin -- UC04
+Admin -- UC05
+Admin -- UC06
+Admin -- UC07
+Admin -- UC08
+Admin -- UC09
+Admin -- UC10
+Admin -- UC11
+Admin -- UC12
+Admin -- UC14
+Admin -- UC15
+Admin -- UC16
+Admin -- UC17
+Admin -- UC18
+Admin -- UC35
+Admin -- UC36
+
+' Relasi Ketua PKBM (Level 2)
+Ketua -- UC15
+Ketua -- UC16
+Ketua -- UC21
+Ketua -- UC35
+Ketua -- UC36
+
+' Relasi Waka (Level 2)
+Waka -- UC04
+Waka -- UC06
+Waka -- UC07
+Waka -- UC08
+Waka -- UC17
+Waka -- UC18
+Waka -- UC35
+Waka -- UC36
+
+' Relasi Bendahara (Level 2)
+Bendahara -- UC11
+Bendahara -- UC12
+Bendahara -- UC14
+Bendahara -- UC15
+Bendahara -- UC16
+
+' Relasi Sekretaris (Level 3)
+Sekretaris -- UC10
+
+' Relasi Wali Kelas (Level 4)
+UC14 -- WaliKelas
+UC19 -- WaliKelas
+UC20 -- WaliKelas
+UC22 -- WaliKelas
+UC24 -- WaliKelas
+UC37 -- WaliKelas
+UC38 -- WaliKelas
+
+' Relasi Guru Pengajar (Level 4)
+UC27 -- Guru
+UC28 -- Guru
+UC29 -- Guru
+UC30 -- Guru
+UC32 -- Guru
+UC33 -- Guru
+UC34 -- Guru
+UC37 -- Guru
+UC38 -- Guru
+
+' Relasi Orang Tua (Level 5)
+UC13 -- OrangTua
+UC23 -- OrangTua
+UC25 -- OrangTua
+UC26 -- OrangTua
+
+' Relasi Siswa (Level 6)
+UC26 -- Siswa
+UC31 -- Siswa
+UC32 -- Siswa
+UC33 -- Siswa
+UC38 -- Siswa
+UC39 -- Siswa
+
+@enduml

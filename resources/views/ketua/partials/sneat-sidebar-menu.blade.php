@@ -3,6 +3,7 @@
     File: resources/views/ketua/partials/sneat-sidebar-menu.blade.php
 
     Compatible dengan Sneat Bootstrap 5 Template
+    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 --}}
 
 @php
@@ -17,20 +18,24 @@
     </a>
 </li>
 
-<!-- Menu Header - Kenaikan Kelas -->
+<!-- ============================================ -->
+<!-- UC15: Memproses Dispensasi Keuangan          -->
+<!-- UC16: Memproses Dispensasi Kenaikan Kelas    -->
+<!-- UC20: Validasi Rapor Tingkat Akhir           -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Kenaikan Kelas</span>
+    <span class="menu-header-text">Persetujuan & Validasi</span>
 </li>
 
-<!-- Approval Dispensasi -->
+<!-- UC16: Memproses Dispensasi Kenaikan Kelas -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.promotion.approval') ? 'active' : '' }}">
     <a href="{{ route('ketua.promotion.approval.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-double"></i>
-        <div>Approval Dispensasi</div>
+        <div>Dispensasi Kenaikan</div>
     </a>
 </li>
 
-<!-- Validasi Rapor -->
+<!-- UC21: Validasi Rapor Tingkat Akhir -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.validasi-rapor') ? 'active' : '' }}">
     <a href="{{ route('ketua.validasi-rapor.index') }}" class="menu-link">
         <i class="menu-icon fas fa-certificate"></i>
@@ -38,7 +43,7 @@
     </a>
 </li>
 
-<!-- Dispensasi Keuangan -->
+<!-- UC15: Memproses Dispensasi Keuangan -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.dispensasi') ? 'active' : '' }}">
     <a href="{{ route('ketua.dispensasi.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-heart"></i>
@@ -50,68 +55,70 @@
     </a>
 </li>
 
-<!-- Menu Header - Monitoring -->
+<!-- ============================================ -->
+<!-- UC35: Monitoring Sistem Terpadu              -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring</span>
 </li>
 
-<!-- Data Pengguna -->
-<li class="menu-item {{ $currentRoute == 'ketua.monitoring.pengguna' ? 'active' : '' }}">
-    <a href="{{ route('ketua.monitoring.pengguna') }}" class="menu-link">
-        <i class="menu-icon fas fa-users"></i>
-        <div>Data Pengguna</div>
+<!-- UC35: Monitoring Sistem Terpadu -->
+<li class="menu-item {{ $currentRoute == 'ketua.monitoring.pengguna' || $currentRoute == 'ketua.monitoring.wali-kelas' || $currentRoute == 'ketua.monitoring.guru-pengajar' || $currentRoute == 'ketua.monitoring.siswa' || Str::startsWith($currentRoute, 'ketua.monitoring.lms') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-chart-bar"></i>
+        <div>Monitoring Sistem</div>
     </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ $currentRoute == 'ketua.monitoring.pengguna' ? 'active' : '' }}">
+            <a href="{{ route('ketua.monitoring.pengguna') }}" class="menu-link">
+                <div>Data Pengguna</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'ketua.monitoring.wali-kelas' ? 'active' : '' }}">
+            <a href="{{ route('ketua.monitoring.wali-kelas') }}" class="menu-link">
+                <div>Data Wali Kelas</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'ketua.monitoring.guru-pengajar' ? 'active' : '' }}">
+            <a href="{{ route('ketua.monitoring.guru-pengajar') }}" class="menu-link">
+                <div>Data Guru Pengajar</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'ketua.monitoring.siswa' ? 'active' : '' }}">
+            <a href="{{ route('ketua.monitoring.siswa') }}" class="menu-link">
+                <div>Data Siswa</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.monitoring.lms') ? 'active' : '' }}">
+            <a href="{{ route('ketua.monitoring.lms.index') }}" class="menu-link">
+                <div>Monitoring LMS</div>
+            </a>
+        </li>
+    </ul>
 </li>
 
-<!-- Data Wali Kelas -->
-<li class="menu-item {{ $currentRoute == 'ketua.monitoring.wali-kelas' ? 'active' : '' }}">
-    <a href="{{ route('ketua.monitoring.wali-kelas') }}" class="menu-link">
-        <i class="menu-icon fas fa-chalkboard-teacher"></i>
-        <div>Data Wali Kelas</div>
-    </a>
-</li>
-
-<!-- Data Guru Pengajar -->
-<li class="menu-item {{ $currentRoute == 'ketua.monitoring.guru-pengajar' ? 'active' : '' }}">
-    <a href="{{ route('ketua.monitoring.guru-pengajar') }}" class="menu-link">
-        <i class="menu-icon fas fa-user-tie"></i>
-        <div>Data Guru Pengajar</div>
-    </a>
-</li>
-
-<!-- Data Siswa -->
-<li class="menu-item {{ $currentRoute == 'ketua.monitoring.siswa' ? 'active' : '' }}">
-    <a href="{{ route('ketua.monitoring.siswa') }}" class="menu-link">
-        <i class="menu-icon fas fa-user-graduate"></i>
-        <div>Data Siswa</div>
-    </a>
-</li>
-
-<!-- Monitoring LMS -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.monitoring.lms') ? 'active' : '' }}">
-    <a href="{{ route('ketua.monitoring.lms.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-desktop"></i>
-        <div>Monitoring LMS</div>
-    </a>
-</li>
-
-<!-- Menu Header - Laporan & Catatan -->
+<!-- ============================================ -->
+<!-- UC36: Kelola Laporan & Catatan               -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Laporan & Catatan</span>
+    <span class="menu-header-text">Laporan & Komunikasi</span>
 </li>
 
-<!-- Laporan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.laporan') ? 'active' : '' }}">
-    <a href="{{ route('ketua.laporan.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-file-pdf"></i>
-        <div>Cetak Laporan</div>
+<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.laporan') || Str::startsWith($currentRoute, 'ketua.catatan') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-file-alt"></i>
+        <div>Laporan & Catatan</div>
     </a>
-</li>
-
-<!-- Kirim Catatan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.catatan') ? 'active' : '' }}">
-    <a href="{{ route('ketua.catatan.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-sticky-note"></i>
-        <div>Kirim Catatan</div>
-    </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.laporan') ? 'active' : '' }}">
+            <a href="{{ route('ketua.laporan.index') }}" class="menu-link">
+                <div>Cetak Laporan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.catatan') ? 'active' : '' }}">
+            <a href="{{ route('ketua.catatan.index') }}" class="menu-link">
+                <div>Kirim Catatan</div>
+            </a>
+        </li>
+    </ul>
 </li>

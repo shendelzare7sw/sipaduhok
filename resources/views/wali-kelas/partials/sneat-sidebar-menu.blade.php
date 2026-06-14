@@ -3,6 +3,7 @@
     File: resources/views/wali-kelas/partials/sneat-sidebar-menu.blade.php
 
     Compatible dengan Sneat Template (Bootstrap 5)
+    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 --}}
 
 @php
@@ -63,12 +64,13 @@
 </li>
 @endif
 
-<!-- Menu Header - Akademik -->
+<!-- ============================================ -->
+<!-- UC38: Melihat Informasi Akademik             -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Akademik</span>
 </li>
 
-<!-- Jadwal Pelajaran -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.jadwal') ? 'active' : '' }}">
     <a href="{{ route('wali.jadwal.index') }}" class="menu-link">
         <i class="menu-icon fas fa-calendar-week"></i>
@@ -76,11 +78,14 @@
     </a>
 </li>
 
-<!-- Presensi Siswa -->
+<!-- ============================================ -->
+<!-- UC19: Kelola Presensi Siswa                  -->
+<!-- (Input Harian, Validasi Izin, Rekap, Edit)   -->
+<!-- ============================================ -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.presensi') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-clipboard-check"></i>
-        <div>Presensi Siswa</div>
+        <div>Kelola Presensi</div>
     </a>
     <ul class="menu-sub">
         <li class="menu-item {{ $currentRoute == 'wali.presensi.index' ? 'active' : '' }}">
@@ -110,48 +115,55 @@
     </ul>
 </li>
 
-<!-- Nilai Siswa -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') ? 'active' : '' }}">
-    <a href="{{ route('wali.nilai.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-chart-line"></i>
-        <div>Nilai Siswa</div>
-    </a>
-</li>
-
-<!-- Kelola Rapor -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.rapor.') ? 'active' : '' }}">
-    <a href="{{ route('wali.rapor.index') }}" class="menu-link">
+<!-- ============================================ -->
+<!-- UC20: Kelola Rapor Siswa                     -->
+<!-- (Nilai, Rapor, Arsip dalam satu dropdown)    -->
+<!-- UC22: Mengelola Permintaan Unduh Rapor       -->
+<!-- ============================================ -->
+<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') || Str::startsWith($currentRoute, 'wali.rapor') || Str::startsWith($currentRoute, 'wali.arsip') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-file-alt"></i>
         <div>Kelola Rapor</div>
     </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') ? 'active' : '' }}">
+            <a href="{{ route('wali.nilai.index') }}" class="menu-link">
+                <i class="fas fa-chart-line me-2 fa-xs"></i>
+                <div>Rekap Nilai</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.rapor.') && $currentRoute != 'wali.rapor.request-download.index' ? 'active' : '' }}">
+            <a href="{{ route('wali.rapor.index') }}" class="menu-link">
+                <i class="fas fa-file-alt me-2 fa-xs"></i>
+                <div>Generate & Terbitkan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.arsip') ? 'active' : '' }}">
+            <a href="{{ route('wali.arsip.index') }}" class="menu-link">
+                <i class="fas fa-archive me-2 fa-xs"></i>
+                <div>Arsip Kelas Saya</div>
+            </a>
+        </li>
+        <li class="menu-item {{ $currentRoute == 'wali.rapor.request-download.index' ? 'active' : '' }}">
+            <a href="{{ route('wali.rapor.request-download.index') }}" class="menu-link">
+                <i class="fas fa-download me-2 fa-xs"></i>
+                <div>Permintaan Unduh</div>
+                @php $pendingDownload = \App\Models\RequestDownloadRapor::where('status', 'menunggu')->whereHas('siswa', fn($q) => $q->where('kelas_id', session('selected_kelas_id')))->count(); @endphp
+                @if($pendingDownload > 0)
+                    <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingDownload }}</span>
+                @endif
+            </a>
+        </li>
+    </ul>
 </li>
 
-<!-- Arsip Kelas Saya (lintas TA - read-only, untuk kelas yang dulu pernah diwalikan) -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'wali.arsip') ? 'active' : '' }}">
-    <a href="{{ route('wali.arsip.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-archive"></i>
-        <div>Arsip Kelas Saya</div>
-    </a>
-</li>
-
-<!-- Request Download Rapor -->
-<li class="menu-item {{ $currentRoute == 'wali.rapor.request-download.index' ? 'active' : '' }}">
-    <a href="{{ route('wali.rapor.request-download.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-download"></i>
-        <div>Permintaan Unduh</div>
-        @php $pendingDownload = \App\Models\RequestDownloadRapor::where('status', 'menunggu')->whereHas('siswa', fn($q) => $q->where('kelas_id', session('selected_kelas_id')))->count(); @endphp
-        @if($pendingDownload > 0)
-            <span class="badge bg-danger rounded-pill ms-auto">{{ $pendingDownload }}</span>
-        @endif
-    </a>
-</li>
-
-<!-- Menu Header - Kenaikan Kelas -->
+<!-- ============================================ -->
+<!-- UC24: Melihat Prediksi Kenaikan Kelas        -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
 
-<!-- Prediksi Kenaikan -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.promotion.prediction') ? 'active' : '' }}">
     <a href="{{ route('wali.promotion.prediction') }}" class="menu-link">
         <i class="menu-icon fas fa-chart-bar"></i>
@@ -159,12 +171,13 @@
     </a>
 </li>
 
-<!-- Menu Header - Validasi -->
+<!-- ============================================ -->
+<!-- UC14: Validasi Akses Ujian dan Rapor          -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Validasi</span>
 </li>
 
-<!-- Validasi Akses -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.validasi-akses') ? 'active' : '' }}">
     <a href="{{ route('wali.validasi-akses.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-double"></i>
