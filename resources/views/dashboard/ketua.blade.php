@@ -235,7 +235,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <div class="stat-icon-wrapper bg-label-primary">
                         <i class="fas fa-user-graduate"></i>
                     </div>
                     <div class="stat-content">
@@ -248,7 +248,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <div class="stat-icon-wrapper bg-label-success">
                         <i class="fas fa-chalkboard-teacher"></i>
                     </div>
                     <div class="stat-content">
@@ -261,7 +261,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                    <div class="stat-icon-wrapper bg-label-info">
                         <i class="fas fa-school"></i>
                     </div>
                     <div class="stat-content">
@@ -274,7 +274,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper {{ $pendingDispensasi > 0 ? 'bg-warning text-warning' : 'bg-secondary text-secondary' }} bg-opacity-10">
+                    <div class="stat-icon-wrapper {{ $pendingDispensasi > 0 ? 'bg-label-warning' : 'bg-label-secondary' }}">
                         <i class="fas fa-exclamation-circle"></i>
                     </div>
                     <div class="stat-content">

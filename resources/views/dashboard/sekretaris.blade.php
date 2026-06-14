@@ -280,7 +280,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <div class="stat-icon-wrapper bg-label-primary">
                         <i class="fas fa-calendar"></i>
                     </div>
                     <div class="stat-content">
@@ -294,7 +294,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <div class="stat-icon-wrapper bg-label-success">
                         <i class="fas fa-play-circle"></i>
                     </div>
                     <div class="stat-content">
@@ -308,7 +308,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                    <div class="stat-icon-wrapper bg-label-info">
                         <i class="fas fa-bullhorn"></i>
                     </div>
                     <div class="stat-content">
@@ -322,7 +322,7 @@
         <div class="col-sm-6 col-xl-3">
             <div class="dashboard-card border-0 shadow-sm">
                 <div class="stat-widget">
-                    <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+                    <div class="stat-icon-wrapper bg-label-warning">
                         <i class="fas fa-newspaper"></i>
                     </div>
                     <div class="stat-content">

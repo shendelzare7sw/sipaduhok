@@ -208,7 +208,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                            <div class="stat-icon-wrapper bg-label-primary">
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <div class="stat-content">
@@ -222,7 +222,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                            <div class="stat-icon-wrapper bg-label-success">
                                 <i class="fas fa-chalkboard-teacher"></i>
                             </div>
                             <div class="stat-content">
@@ -236,7 +236,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                            <div class="stat-icon-wrapper bg-label-info">
                                 <i class="fas fa-school"></i>
                             </div>
                             <div class="stat-content">
@@ -250,7 +250,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
+                            <div class="stat-icon-wrapper bg-label-secondary">
                                 <i class="fas fa-book"></i>
                             </div>
                             <div class="stat-content">
@@ -264,7 +264,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                            <div class="stat-icon-wrapper bg-label-success">
                                 <i class="fas fa-user-check"></i>
                             </div>
                             <div class="stat-content">
@@ -278,7 +278,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100 {{ $stats['kelasWithoutWali'] > 0 ? 'border border-danger border-2' : '' }}">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper {{ $stats['kelasWithoutWali'] > 0 ? 'bg-danger text-danger' : 'bg-secondary text-secondary' }} bg-opacity-10">
+                            <div class="stat-icon-wrapper {{ $stats['kelasWithoutWali'] > 0 ? 'bg-label-danger' : 'bg-label-secondary' }}">
                                 <i class="fas fa-user-times"></i>
                             </div>
                             <div class="stat-content">
@@ -296,7 +296,7 @@
                 @if($kelasWithoutWali->count() > 0)
                 <div class="col-md-6">
                     <div class="dashboard-card h-100 d-flex flex-column border-danger border-opacity-50">
-                        <div class="card-header-clean d-flex justify-content-between align-items-center bg-danger bg-opacity-10 border-bottom-0">
+                        <div class="card-header-clean d-flex justify-content-between align-items-center bg-label-danger border-bottom-0">
                             <h5 class="card-title-clean text-danger" style="font-size: 0.9rem;">
                                 <i class="fas fa-exclamation-triangle card-title-icon text-danger"></i> Kelas Tanpa Wali
                             </h5>
