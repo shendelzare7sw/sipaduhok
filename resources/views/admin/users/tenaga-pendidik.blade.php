@@ -278,7 +278,14 @@
                     </div>
                     <div class="modal-body">
                         <p>Apakah Anda yakin ingin menghapus data tenaga pendidik:</p>
-                        <div class="teacher-summary-box">`r`n                            <div class="teacher-summary-title">`r`n                                <i class="fas fa-chalkboard-teacher text-primary"></i>`r`n                                {{ $tp->tenagaPendidik->nama_lengkap ?? $tp->name }}`r`n                            </div>`r`n                            <small class="teacher-summary-meta">{{ $tp->role ? ucwords(str_replace('_', ' ', $tp->role)) : '-' }}`r`n                                • {{ $tp->email }}</small>`r`n                        </div>
+                        <div class="teacher-summary-box">
+                            <div class="teacher-summary-title">
+                                <i class="fas fa-chalkboard-teacher text-primary"></i>
+                                {{ $tp->tenagaPendidik->nama_lengkap ?? $tp->name }}
+                            </div>
+                            <small class="teacher-summary-meta">{{ $tp->role ? ucwords(str_replace('_', ' ', $tp->role)) : '-' }}
+                                • {{ $tp->email }}</small>
+                        </div>
                         <p class="modal-danger-note">
                             <i class="fas fa-info-circle"></i>
                             <small class="text-muted">Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait
