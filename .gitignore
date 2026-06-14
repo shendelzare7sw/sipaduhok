@@ -37,3 +37,6 @@ TESTING_QUICK_REFERENCE.md
 VERIFICATION_AND_DELIVERY_REPORT.md
 kontak_html.txt
 groq_models.json
+
+/*.md
+!/README.md
