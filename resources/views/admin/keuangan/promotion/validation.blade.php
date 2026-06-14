@@ -132,7 +132,7 @@
                                 </div>
                             </td>
                             <td data-label="Kelas">
-                                <span class="badge bg-label-primary px-2 py-1">{{ $candidate['siswa']->kelas->nama_kelas ?? '-' }}</span>
+                                <span class="badge bg-primary text-white px-2 py-1">{{ $candidate['siswa']->kelas->nama_kelas ?? '-' }}</span>
                             </td>
                             <td data-label="Akademik">
                                 <span class="badge bg-success px-2 py-1">

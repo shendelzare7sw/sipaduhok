@@ -273,7 +273,7 @@ Kelola penunjukan wali kelas di cabang Anda {{ $currentTahunAjaran ? '- ' . $cur
                                                 <div class="d-flex flex-wrap gap-1 mt-1">
                                                     @foreach($assignedKelasList as $assignment)
                                                         @if($assignment->kelas)
-                                                            <span class="badge bg-label-primary px-2 modal-kelas-badge">Mengajar {{ $assignment->kelas->nama_kelas }}</span>
+                                                            <span class="badge bg-primary text-white px-2 modal-kelas-badge">Mengajar {{ $assignment->kelas->nama_kelas }}</span>
                                                         @endif
                                                     @endforeach
                                                 </div>

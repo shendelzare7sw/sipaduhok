@@ -181,7 +181,7 @@
                                     </div>
                                 </td>
                                 <td data-label="Kelas">
-                                    <span class="badge bg-label-primary px-2 py-1">{{ $s->kelas->nama_kelas ?? '-' }}</span>
+                                    <span class="badge bg-primary text-white px-2 py-1">{{ $s->kelas->nama_kelas ?? '-' }}</span>
                                 </td>
                                 <td data-label="Tagihan">
                                     <span class="currency-font">Rp {{ number_format($s->total_tagihan, 0, ',', '.') }}</span>
