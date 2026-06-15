@@ -76,5 +76,5 @@ Sesuai dengan pemisahan antara Ujian dan Latihan, berikut adalah rancangan **39 
 | 35 | **Monitoring Sistem Terpadu** | Admin, Ketua, Waka| Monitoring Pengguna, Wali, Guru, Siswa, LMS |
 | 36 | **Kelola Laporan & Catatan** | Admin, Ketua, Waka| Cetak Laporan Terpadu, Kirim Catatan |
 | 37 | **Membaca Catatan Monitoring** | Guru, Wali Kelas | Notifikasi/Badge Teguran |
-| 38 | **Melihat Informasi Akademik** | Wali Kelas, Guru, Siswa| Jadwal Mengajar/Pelajaran, Daftar Guru |
+| 38 | **Melihat Jadwal Kelas** | Wali Kelas, Guru, Siswa| Jadwal Mengajar/Pelajaran, Daftar Guru |
 | 39 | **Melihat Nilai Pribadi** | Siswa | Data Penilaian (Read-Only) |

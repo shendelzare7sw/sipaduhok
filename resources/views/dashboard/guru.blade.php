@@ -81,7 +81,7 @@
                 <div class="g-card-header">
                     <h5 class="g-card-title">
                         <i class="fas fa-calendar-day text-warning"></i> Jadwal Mengajar
-                        <span class="badge bg-label-primary ms-1 dashboard-day-badge">{{ now()->locale('id')->translatedFormat('l') }}</span>
+                        <span class="badge bg-primary ms-1 dashboard-day-badge">{{ now()->locale('id')->translatedFormat('l') }}</span>
                     </h5>
                     <a href="{{ route('guru.jadwal.index') }}" class="text-primary fw-semibold text-decoration-none dashboard-link-sm">
                         Jadwal Lengkap <i class="fas fa-arrow-right ms-1"></i>

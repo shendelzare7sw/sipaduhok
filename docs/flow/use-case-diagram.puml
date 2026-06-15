@@ -81,7 +81,7 @@ rectangle "Sistem Informasi SIPADUHOK" {
     usecase "Monitoring Sistem\nTerpadu" as UC35
     usecase "Kelola Laporan &\nCatatan" as UC36
     usecase "Membaca Catatan\nMonitoring" as UC37
-    usecase "Melihat Informasi\nAkademik" as UC38
+    usecase "Melihat Jadwal\nKelas" as UC38
     usecase "Melihat Nilai Pribadi" as UC39
   }
 }
