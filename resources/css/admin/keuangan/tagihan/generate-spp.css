@@ -214,7 +214,7 @@ color: #697a8d;
 @media (max-width: 768px) {
     /* Target Card Header */
     .target-card-header {
-        flex-direction: column !important;
+        flex-direction: column-reverse !important;
         align-items: stretch !important;
         gap: 12px;
     }

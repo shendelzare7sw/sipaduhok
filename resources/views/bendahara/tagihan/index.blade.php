@@ -243,7 +243,7 @@
     </div>
 </div>
 </div>
-
+@endsection
 
 @section('scripts')
     @vite(['resources/js/bendahara/tagihan/index.js'])

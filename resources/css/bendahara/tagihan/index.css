@@ -145,7 +145,7 @@
     /* Responsive Styles */
     @media (max-width: 768px) {
         .card-header {
-            flex-direction: column !important;
+            flex-direction: column-reverse !important;
             align-items: stretch !important;
             gap: 16px !important;
             padding: 16px;
