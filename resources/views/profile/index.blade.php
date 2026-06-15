@@ -63,7 +63,7 @@
 
                                 <div class="user-info text-center">
                                     <h5 class="mb-2 fw-bold">{{ $user->name }}</h5>
-                                    <span class="badge bg-label-primary mb-3">
+                                    <span class="badge bg-dark mb-3">
                                         {{ $user->roleRelation ? $user->roleRelation->display_name : ucwords(str_replace('_', ' ', $user->role)) }}
                                     </span>
                                 </div>

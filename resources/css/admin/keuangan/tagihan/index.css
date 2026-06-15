@@ -299,11 +299,13 @@ tr.selected-row {
         gap: 12px !important;
     }
 
-    .dropdown {
+    .filter-dropdown .dropdown,
+    .tagihan-index-page .dropdown {
         width: 100%;
     }
 
-    .dropdown-toggle {
+    .filter-dropdown .dropdown-toggle,
+    .tagihan-index-page .dropdown-toggle {
         width: 100%;
         justify-content: space-between;
         display: flex;

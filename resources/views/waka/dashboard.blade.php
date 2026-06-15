@@ -52,7 +52,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-primary">
+                            <div class="stat-icon-wrapper bg-label-primary text-primary">
                                 <i class="fas fa-user-graduate"></i>
                             </div>
                             <div class="stat-content">
@@ -66,7 +66,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-success">
+                            <div class="stat-icon-wrapper bg-label-success text-success">
                                 <i class="fas fa-chalkboard-teacher"></i>
                             </div>
                             <div class="stat-content">
@@ -80,7 +80,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-info">
+                            <div class="stat-icon-wrapper bg-label-info text-info">
                                 <i class="fas fa-school"></i>
                             </div>
                             <div class="stat-content">
@@ -94,7 +94,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-secondary">
+                            <div class="stat-icon-wrapper bg-label-secondary text-secondary">
                                 <i class="fas fa-book"></i>
                             </div>
                             <div class="stat-content">
@@ -108,7 +108,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper bg-label-success">
+                            <div class="stat-icon-wrapper bg-label-success text-success">
                                 <i class="fas fa-user-check"></i>
                             </div>
                             <div class="stat-content">
@@ -122,7 +122,7 @@
                 <div class="col-md-4 col-sm-6">
                     <div class="dashboard-card border-0 shadow-sm h-100 {{ $stats['kelasWithoutWali'] > 0 ? 'border border-danger border-2' : '' }}">
                         <div class="stat-widget h-100">
-                            <div class="stat-icon-wrapper {{ $stats['kelasWithoutWali'] > 0 ? 'bg-label-danger' : 'bg-label-secondary' }}">
+                            <div class="stat-icon-wrapper {{ $stats['kelasWithoutWali'] > 0 ? 'bg-label-danger text-danger' : 'bg-label-secondary text-secondary' }}">
                                 <i class="fas fa-user-times"></i>
                             </div>
                             <div class="stat-content">
