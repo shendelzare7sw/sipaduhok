@@ -106,6 +106,9 @@
     height: 42px !important;
     min-width: 42px !important;
     max-width: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    aspect-ratio: 1/1 !important;
     border-radius: 8px;
     display: flex !important;
     align-items: center !important;
