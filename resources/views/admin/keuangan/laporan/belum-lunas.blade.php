@@ -16,10 +16,10 @@
     <div class="report-page">
         <div class="dashboard-card mb-4">
             <div class="filter-area">
-                <form action="{{ route('admin.keuangan.laporan.belum-lunas') }}" method="GET" class="row align-items-end w-100 m-0">
-                    <div class="col-md-4 mb-2 mb-md-0">
-                        <label class="form-label fw-bold small text-muted">KELAS</label>
-                        <select name="kelas_id" class="form-select">
+                <form action="{{ route('admin.keuangan.laporan.belum-lunas') }}" method="GET" class="d-flex align-items-center flex-wrap gap-3 w-100 m-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="form-label fw-bold small text-muted mb-0">KELAS</label>
+                        <select name="kelas_id" class="form-select form-select-sm" style="width: 200px;">
                             <option value="">Semua Kelas</option>
                             @foreach($kelasList as $kelas)
                                 <option value="{{ $kelas->id }}" {{ request('kelas_id') == $kelas->id ? 'selected' : '' }}>
@@ -28,14 +28,14 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-8">
-                        <button type="submit" class="btn btn-primary btn-gradient-blue">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm">
                             <i class="fas fa-filter me-1"></i> Filter
                         </button>
-                        <a href="{{ route('admin.keuangan.laporan.cetak-belum-lunas', request()->query()) }}" class="btn btn-success btn-gradient-green ms-2" target="_blank">
+                        <a href="{{ route('admin.keuangan.laporan.cetak-belum-lunas', request()->query()) }}" class="btn btn-success btn-sm" target="_blank">
                             <i class="fas fa-print me-1"></i> Cetak Laporan
                         </a>
-                        <a href="{{ route('admin.keuangan.laporan.belum-lunas') }}" class="btn btn-outline-secondary border ms-2">Reset</a>
+                        <a href="{{ route('admin.keuangan.laporan.belum-lunas') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
                     </div>
                 </form>
             </div>
