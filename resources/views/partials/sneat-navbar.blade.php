@@ -1,8 +1,8 @@
 <!-- Navbar -->
 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-            <i class="fas fa-bars" style="font-size: 1.5rem;"></i>
+        <a class="nav-item nav-link px-0 me-xl-4" href="#">
+            <i class="fas fa-bars fs-4"></i>
         </a>
     </div>
 
@@ -21,7 +21,7 @@
 
             <!-- Notifications -->
             <li class="nav-item navbar-dropdown dropdown-notifications dropdown me-3 me-xl-2">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                     <i class="fas fa-bell fs-4"></i>
                     <span class="badge bg-danger rounded-pill badge-notifications">3</span>
                 </a>
@@ -82,7 +82,7 @@
                         </ul>
                     </li>
                     <li class="dropdown-menu-footer border-top">
-                        <a href="javascript:void(0);" class="dropdown-item d-flex justify-content-center p-3">
+                        <a href="#" class="dropdown-item d-flex justify-content-center p-3">
                             Lihat semua notifikasi
                         </a>
                     </li>
@@ -92,7 +92,7 @@
 
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="#" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online">
                         <span class="avatar-initial rounded-circle bg-primary">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}

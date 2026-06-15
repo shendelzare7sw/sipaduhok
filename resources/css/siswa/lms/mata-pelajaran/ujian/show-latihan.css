@@ -1,0 +1,200 @@
+.siswa-lms-latihan-show-page .ujian-card {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.siswa-lms-latihan-show-page .info-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+}
+
+.siswa-lms-latihan-show-page .info-box i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.siswa-lms-latihan-show-page .info-box h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.siswa-lms-latihan-work-page {
+    background: #f3f4f6;
+    min-height: 100vh;
+}
+
+.siswa-lms-latihan-work-page .latihan-header {
+    background: white;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 60px;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.siswa-lms-latihan-work-page .latihan-header-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.siswa-lms-latihan-work-page .latihan-header-left h5 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.siswa-lms-latihan-work-page .latihan-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.siswa-lms-latihan-work-page .timer-badge {
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #dc3545;
+    background: #fff;
+    padding: 5px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.siswa-lms-latihan-work-page .latihan-container {
+    max-width: 800px;
+}
+
+.siswa-lms-latihan-work-page .question-card {
+    background: white;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.siswa-lms-latihan-work-page .question-number {
+    background: #165fac;
+    color: white;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.siswa-lms-latihan-work-page .question-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 20px;
+}
+
+.siswa-lms-latihan-work-page .option-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.siswa-lms-latihan-work-page .option-item:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.siswa-lms-latihan-work-page .option-item input[type="radio"] {
+    margin-right: 12px;
+    margin-top: 4px;
+    transform: scale(1.2);
+}
+
+.siswa-lms-latihan-work-page .narasi-box {
+    background: #f0f9ff;
+    border-left: 4px solid #0ea5e9;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.siswa-lms-latihan-work-page .latihan-question-image {
+    max-height: 250px;
+    cursor: pointer;
+}
+
+.siswa-lms-latihan-work-page .latihan-modal-image {
+    max-height: 80vh;
+}
+
+.siswa-lms-latihan-work-page .kompleks-cb {
+    margin-right: 12px;
+    margin-top: 4px;
+    transform: scale(1.2);
+}
+
+.siswa-lms-latihan-work-page .benar-salah-option {
+    justify-content: center;
+}
+
+.siswa-lms-latihan-work-page .benar-salah-option input[type="radio"] {
+    margin-right: 8px;
+}
+
+@media (max-width: 575px) {
+    .siswa-lms-latihan-work-page .latihan-header {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .siswa-lms-latihan-work-page .latihan-header-left h5 {
+        font-size: 0.85rem;
+    }
+
+    .siswa-lms-latihan-work-page .latihan-header-left small {
+        display: none;
+    }
+
+    .siswa-lms-latihan-work-page .timer-badge {
+        font-size: 0.95rem;
+        padding: 4px 8px;
+    }
+
+    .siswa-lms-latihan-work-page .latihan-header-right .btn {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .siswa-lms-latihan-work-page .question-card {
+        padding: 15px;
+        margin-bottom: 14px;
+    }
+
+    .siswa-lms-latihan-work-page .question-text {
+        font-size: 0.95rem;
+    }
+
+    .siswa-lms-latihan-work-page .option-item {
+        padding: 10px 12px;
+    }
+}

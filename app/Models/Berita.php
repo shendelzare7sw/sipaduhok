@@ -85,6 +85,7 @@ class Berita extends Model
             }
         }
         
+        // Fallback dinamis jika gambar terhapus
         $imageId = ($this->id % 5) + 1;
         return asset('img/news-' . $imageId . '.jpg');
     }

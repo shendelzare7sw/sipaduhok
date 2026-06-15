@@ -146,7 +146,7 @@ View dir: `resources/views/ketua/`. Monitoring LMS pakai view `monitoring-lms/`.
 
 ### Kirim Catatan / Teguran
 
-**Index view**: `ketua/catatan/index.blade.php` → `@include('shared.catatan.index')` · **Controller**: `Ketua/KetuaController.php`
+**Index view**: `ketua/catatan/index.blade.php` (standalone per-role, tanpa shared partial) - **Controller**: `Ketua/KetuaController.php`
 
 **Tampilan index**: Toolbar header **Manajemen Catatan** + tombol kanan **+ Buat Catatan** (primary). 4 **stat card**: Total Catatan, Publik (ke semua pengguna), Total Dibaca (akumulasi pembaca), Mendesak (prioritas tinggi). Card **Riwayat Catatan Terkirim** berisi **list card per catatan** (bukan tabel) — tiap card: judul + waktu kirim + badge prioritas + badge target (Semua Pengguna/Role tertentu/Individu) + excerpt isi + tombol Detail/Hapus. Empty state bila kosong.
 

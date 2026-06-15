@@ -1,0 +1,301 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Times New Roman', serif;
+    font-size: 11pt;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 10mm;
+}
+
+.header {
+    text-align: center;
+    border-bottom: 3px double #000;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.header h2 {
+    font-size: 12pt;
+    margin-bottom: 8px;
+}
+
+.header p {
+    font-size: 9pt;
+    color: #333;
+}
+
+.title {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.title h3 {
+    font-size: 12pt;
+    text-decoration: underline;
+    margin-bottom: 5px;
+}
+
+.title p {
+    font-size: 10pt;
+}
+
+.section-title {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 20px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 10pt;
+}
+
+table th,
+table td {
+    border: 1px solid #000;
+    padding: 5px 8px;
+    text-align: left;
+}
+
+.print-rekap table th,
+.print-rekap table td {
+    padding: 6px 10px;
+}
+
+.print-guru-pengajar table th,
+.print-guru-pengajar table td {
+    vertical-align: top;
+}
+
+table th {
+    background: #f0f0f0;
+    text-align: center;
+    font-weight: bold;
+}
+
+table td.center {
+    text-align: center;
+}
+
+table td.right {
+    text-align: right;
+}
+
+.col-no,
+.col-jk {
+    width: 30px;
+}
+
+.col-sm {
+    width: 60px;
+}
+
+.col-md {
+    width: 80px;
+}
+
+.col-lg {
+    width: 100px;
+}
+
+.group-header,
+.total-row {
+    background: #e5e7eb;
+    font-weight: bold;
+}
+
+.summary {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    font-size: 10pt;
+}
+
+.summary-box {
+    background: #f0f9ff;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+}
+
+.summary-grid {
+    display: flex;
+    gap: 30px;
+}
+
+.print-rekap .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-item .label {
+    font-size: 9pt;
+    color: #666;
+}
+
+.summary-item .value {
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+.print-rekap .summary-item .value {
+    font-size: 20pt;
+    color: #1e40af;
+}
+
+.assignment-list {
+    font-size: 9pt;
+    padding-left: 15px;
+    margin: 0;
+}
+
+.assignment-list li {
+    margin-bottom: 2px;
+}
+
+.no-assignment,
+.snapshot-status {
+    color: #666;
+    font-style: italic;
+    font-size: 9pt;
+}
+
+.snapshot-status {
+    font-style: normal;
+}
+
+.role-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9pt;
+}
+
+.role-wali {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.role-guru {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.role-other {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.empty-message {
+    text-align: center;
+    padding: 30px;
+}
+
+.footer {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10pt;
+}
+
+.footer-right {
+    text-align: center;
+}
+
+.signature-line {
+    margin-top: 50px;
+    border-bottom: 1px solid #000;
+    width: 180px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.print-date {
+    font-size: 9pt;
+    color: #666;
+}
+
+.btn-actions {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.btn-print {
+    color: white;
+}
+
+.btn-print-rekap {
+    background: #ec4899;
+}
+
+.btn-print-siswa {
+    background: #3b82f6;
+}
+
+.btn-print-guru {
+    background: #10b981;
+}
+
+.btn-print-kelas {
+    background: #8b5cf6;
+}
+
+.btn-print-wali {
+    background: #f59e0b;
+}
+
+.btn-print-guru-pengajar {
+    background: #14b8a6;
+}
+
+.btn-back {
+    background: #6b7280;
+    color: white;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .container {
+        padding: 0;
+    }
+}

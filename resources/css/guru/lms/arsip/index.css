@@ -1,0 +1,320 @@
+.guru-lms-arsip-index-page {
+    width: 100%;
+}
+
+.guru-lms-arsip-index-page .arsip-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.guru-lms-arsip-index-page .arsip-stat {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.guru-lms-arsip-index-page .arsip-stat .icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.guru-lms-arsip-index-page .icon-circle--materi,
+.guru-lms-arsip-index-page .icon-square--materi {
+    background: #0284c7;
+}
+
+.guru-lms-arsip-index-page .icon-circle--tugas,
+.guru-lms-arsip-index-page .icon-square--tugas {
+    background: #d97706;
+}
+
+.guru-lms-arsip-index-page .icon-circle--latihan,
+.guru-lms-arsip-index-page .icon-square--latihan {
+    background: #7c3aed;
+}
+
+.guru-lms-arsip-index-page .icon-circle--ujian,
+.guru-lms-arsip-index-page .icon-square--ujian {
+    background: #dc2626;
+}
+
+.guru-lms-arsip-index-page .section-icon--materi {
+    color: #0284c7;
+}
+
+.guru-lms-arsip-index-page .section-icon--tugas {
+    color: #d97706;
+}
+
+.guru-lms-arsip-index-page .section-icon--latihan {
+    color: #7c3aed;
+}
+
+.guru-lms-arsip-index-page .section-icon--ujian {
+    color: #dc2626;
+}
+
+.guru-lms-arsip-index-page .arsip-stat .label {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.guru-lms-arsip-index-page .arsip-stat .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #1e293b;
+}
+
+.guru-lms-arsip-index-page .filter-bar {
+    background: white;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 18px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.guru-lms-arsip-index-page .filter-bar .form-group {
+    flex: 1;
+    min-width: 160px;
+}
+
+.guru-lms-arsip-index-page .filter-bar label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.guru-lms-arsip-index-page .type-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.guru-lms-arsip-index-page .type-tab {
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.guru-lms-arsip-index-page .type-tab:hover {
+    color: #1e293b;
+    border-color: #cbd5e1;
+}
+
+.guru-lms-arsip-index-page .type-tab.active {
+    background: #4361ee;
+    color: white;
+    border-color: #4361ee;
+}
+
+.guru-lms-arsip-index-page .arsip-section {
+    margin-bottom: 28px;
+}
+
+.guru-lms-arsip-index-page .arsip-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.guru-lms-arsip-index-page .arsip-section-title .badge-count {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.guru-lms-arsip-index-page .arsip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+}
+
+.guru-lms-arsip-index-page .arsip-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+}
+
+.guru-lms-arsip-index-page .arsip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.guru-lms-arsip-index-page .arsip-card .card-header-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.guru-lms-arsip-index-page .arsip-card .icon-square {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.guru-lms-arsip-index-page .arsip-card .judul {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.35;
+    flex: 1;
+    word-break: break-word;
+}
+
+.guru-lms-arsip-index-page .arsip-card .meta {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.guru-lms-arsip-index-page .arsip-card .meta i {
+    color: #94a3b8;
+    margin-right: 4px;
+}
+
+.guru-lms-arsip-index-page .arsip-card .meta-row {
+    margin-bottom: 4px;
+}
+
+.guru-lms-arsip-index-page .badge-ta {
+    background: rgba(67, 97, 238, 0.08);
+    color: #4361ee;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.guru-lms-arsip-index-page .arsip-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.guru-lms-arsip-index-page .btn-arsip {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: #475569;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.15s ease;
+}
+
+.guru-lms-arsip-index-page .btn-arsip:hover {
+    border-color: #4361ee;
+    color: #4361ee;
+}
+
+.guru-lms-arsip-index-page .btn-arsip:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.guru-lms-arsip-index-page .btn-arsip-salin {
+    background: #4361ee;
+    color: white;
+    border-color: #4361ee;
+}
+
+.guru-lms-arsip-index-page .btn-arsip-salin:hover {
+    background: #3651d4;
+    color: white;
+}
+
+.guru-lms-arsip-index-page .empty-state-arsip {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+}
+
+.guru-lms-arsip-index-page .empty-state-arsip i {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .guru-lms-arsip-index-page .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .guru-lms-arsip-index-page .filter-bar .form-group {
+        width: 100%;
+    }
+
+    .guru-lms-arsip-index-page .arsip-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .guru-lms-arsip-index-page .type-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+
+    .guru-lms-arsip-index-page .type-tab {
+        white-space: nowrap;
+    }
+}

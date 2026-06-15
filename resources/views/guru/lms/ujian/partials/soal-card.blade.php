@@ -7,7 +7,10 @@
                 <span class="badge bg-secondary ms-2" id="badge-{{ $index }}">{{ $soal ? \App\Models\Ujian::getSoalTypeLabels()[$soal->tipe_soal] ?? $soal->tipe_soal : 'Baru' }}</span>
             </span>
         </div>
-        <button type="button" class="btn btn-sm btn-outline-danger z-index-2" onclick="event.stopPropagation(); removeSoal({{ $index }}, {{ $soal ? $soal->id : 'null' }})">
+        <button type="button" class="btn btn-sm btn-outline-danger z-index-2"
+            data-remove-soal
+            data-soal-index="{{ $index }}"
+            data-soal-id="{{ $soal ? $soal->id : '' }}">
             <i class="fas fa-trash"></i>
         </button>
     </div>
@@ -41,7 +44,7 @@
             </div>
 
             <!-- Opsi PG -->
-            <div id="opsiPilihanGanda-{{ $index }}" style="display: none;">
+            <div id="opsiPilihanGanda-{{ $index }}" class="soal-card-hidden">
                 <div class="form-section-title">Pilihan Jawaban</div>
                 @php 
                     $pilihan = [];
@@ -67,7 +70,7 @@
             <div class="mt-3">
                 <div class="form-section-title">Kunci Jawaban</div>
                 
-                <div id="kunciPG-{{ $index }}" style="display: none;">
+                <div id="kunciPG-{{ $index }}" class="soal-card-hidden">
                     <select name="soal[{{ $index }}][kunci_pg]" class="form-select">
                         <option value="">-- Pilih Kunci --</option>
                         @foreach(['A','B','C','D','E'] as $k)
@@ -76,23 +79,23 @@
                     </select>
                 </div>
 
-                <div id="kunciPGKompleks-{{ $index }}" style="display: none;">
+                <div id="kunciPGKompleks-{{ $index }}" class="soal-card-hidden">
                     <input type="text" name="soal[{{ $index }}][kunci_pg_kompleks]" class="form-control" placeholder="Contoh: A, C, E" 
                            value="{{ ($soal && $soal->tipe_soal == 'pilihan_ganda_kompleks') ? trim($soal->kunci_jawaban, '[]"') : '' }}">
                 </div>
 
-                <div id="kunciBenarSalah-{{ $index }}" style="display: none;">
+                <div id="kunciBenarSalah-{{ $index }}" class="soal-card-hidden">
                     <select name="soal[{{ $index }}][kunci_bs]" class="form-select">
                         <option value="benar" {{ ($soal && $soal->kunci_jawaban == 'benar') ? 'selected' : '' }}>Benar</option>
                         <option value="salah" {{ ($soal && $soal->kunci_jawaban == 'salah') ? 'selected' : '' }}>Salah</option>
                     </select>
                 </div>
 
-                <div id="kunciIsian-{{ $index }}" style="display: none;">
+                <div id="kunciIsian-{{ $index }}" class="soal-card-hidden">
                     <input type="text" name="soal[{{ $index }}][kunci_isian]" class="form-control" placeholder="Jawaban singkat" value="{{ $soal->kunci_jawaban ?? '' }}">
                 </div>
 
-                <div id="kunciUraian-{{ $index }}" style="display: none;">
+                <div id="kunciUraian-{{ $index }}" class="soal-card-hidden">
                     <p class="text-muted small fst-italic mb-0">Dinilai manual oleh guru.</p>
                 </div>
             </div>

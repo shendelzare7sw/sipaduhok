@@ -15,38 +15,19 @@
     @endsection
 @endif
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/ujian/show-latihan.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/siswa/lms/mata-pelajaran/ujian/show-latihan.js'])
+@endpush
+
 @section('content')
 
 @if(!$ujianSiswa || $ujianSiswa->status !== 'sedang_mengerjakan')
     {{-- LAYOUT 1: START SCREEN / RESULT SCREEN --}}
-    <style>
-        .ujian-card {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .info-box {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .info-box i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .info-box h5 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-    </style>
-
+    <div class="siswa-lms-latihan-show-page">
     <div class="container-fluid">
 
 
@@ -96,7 +77,7 @@
                                 @if($sisaPengulangan === null || $sisaPengulangan > 0)
                                     <form id="form-retake" action="{{ route('siswa.lms.mapel.latihan.retake', [$mataPelajaran->id, $ujian->id]) }}" method="POST" class="m-0">
                                         @csrf
-                                        <button type="button" class="btn btn-warning px-4" onclick="confirmRetake()">
+                                        <button type="button" class="btn btn-warning px-4" data-confirm-retake>
                                             <i class="fas fa-redo-alt me-2"></i> Kerjakan Ulang @if($sisaPengulangan !== null) (Sisa: {{ $sisaPengulangan }}) @endif
                                         </button>
                                     </form>
@@ -206,188 +187,15 @@
             </div>
         </div>
     </div>
-
-    @if($ujianSiswa && in_array($ujianSiswa->status, ['selesai', 'dinilai']) && $ujian->bisa_diulang)
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmRetake() {
-            Swal.fire({
-                title: 'Kerjakan Ulang?',
-                text: 'Jawaban dan nilai Anda sebelumnya akan di-reset. Apakah Anda yakin?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Kerjakan Ulang',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('form-retake').submit();
-                }
-            });
-        }
-    </script>
-    @endpush
-    @endif
+    </div>
 
 @else
     {{-- LAYOUT 2: LATIHAN INTERFACE (WORKSHEET MODE) --}}
-    <style>
-        body {
-            background: #f3f4f6;
-        }
-
-        .latihan-header {
-            background: white;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e5e7eb;
-            position: sticky;
-            top: 60px; /* Offset for fixed exam-header (60px tall) */
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .latihan-header-left {
-            flex: 1;
-            min-width: 0; /* Allow truncation */
-        }
-
-        .latihan-header-left h5 {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .latihan-header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .timer-badge {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #dc3545;
-            background: #fff;
-            padding: 5px 12px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-
-        .question-card {
-            background: white;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 575px) {
-            .latihan-header {
-                padding: 10px 12px;
-                gap: 8px;
-            }
-
-            .latihan-header-left h5 {
-                font-size: 0.85rem;
-            }
-
-            .latihan-header-left small {
-                display: none;
-            }
-
-            .timer-badge {
-                font-size: 0.95rem;
-                padding: 4px 8px;
-            }
-
-            .latihan-header-right .btn {
-                font-size: 12px;
-                padding: 5px 10px;
-            }
-
-            .latihan-header-right .btn .me-1 + span,
-            .latihan-header-right .btn i ~ * {
-                /* Keep icon, text still shows */
-            }
-
-            .question-card {
-                padding: 15px;
-                margin-bottom: 14px;
-            }
-
-            .question-text {
-                font-size: 0.95rem;
-            }
-
-            .option-item {
-                padding: 10px 12px;
-            }
-        }
-
-        .question-number {
-            background: #165fac;
-            color: white;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .question-text {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: #374151;
-            margin-bottom: 20px;
-        }
-
-        .option-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 12px 15px;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            background: #fff;
-            transition: all 0.2s;
-        }
-
-        .option-item:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-        }
-
-        .option-item input[type="radio"] {
-            margin-right: 12px;
-            margin-top: 4px;
-            transform: scale(1.2);
-        }
-
-        .narasi-box {
-            background: #f0f9ff;
-            border-left: 4px solid #0ea5e9;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-    </style>
-
+    <div class="siswa-lms-latihan-work-page"
+        data-duration-minutes="{{ $ujian->durasi_menit ?? 0 }}"
+        data-start-time="{{ $ujianSiswa->waktu_mulai }}"
+        data-autosave-url="{{ route('siswa.lms.mapel.latihan.autosave', [$mataPelajaran->id, $ujian->id]) }}"
+        data-csrf-token="{{ csrf_token() }}">
     <form action="{{ route('siswa.lms.mapel.latihan.submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
         
@@ -400,13 +208,13 @@
             <div class="latihan-header-right">
                 <i class="fas fa-clock text-secondary d-none d-sm-inline"></i>
                 <div class="timer-badge" id="timer-display">00:00:00</div>
-                <button type="button" class="btn btn-primary fw-bold" onclick="finishExam()">
+                <button type="button" class="btn btn-primary fw-bold" data-finish-exam>
                     <i class="fas fa-paper-plane me-1"></i><span class="d-none d-sm-inline"> SELESAI</span>
                 </button>
             </div>
         </div>
 
-        <div class="container py-4" style="max-width: 800px;">
+        <div class="container py-4 latihan-container">
             @if($soalList->count() > 0)
                 @foreach($soalList as $index => $soal)
                     <div class="question-card">
@@ -426,8 +234,7 @@
                                             <div class="card-body p-2 text-center">
                                                 <img src="{{ asset('storage/' . $soal->image_path) }}"
                                                      alt="Gambar Soal {{ $index + 1 }}"
-                                                     class="img-fluid rounded"
-                                                     style="max-height: 250px; cursor: pointer;"
+                                                     class="img-fluid rounded latihan-question-image"
                                                      data-bs-toggle="modal" data-bs-target="#imageModal{{$index}}">
                                                 <small class="text-muted d-block mt-2">
                                                     <i class="fas fa-search-plus me-1"></i> Klik gambar untuk memperbesar
@@ -441,7 +248,7 @@
                                         <div class="modal-dialog modal-lg modal-dialog-centered">
                                             <div class="modal-content bg-transparent border-0">
                                                 <div class="modal-body text-center pt-2 pb-0">
-                                                    <img src="{{ asset('storage/' . $soal->image_path) }}" class="img-fluid rounded shadow-lg" style="max-height: 80vh;">
+                                                    <img src="{{ asset('storage/' . $soal->image_path) }}" class="img-fluid rounded shadow-lg latihan-modal-image" alt="Gambar Soal {{ $index + 1 }}">
                                                 </div>
                                                 <div class="modal-footer border-0 justify-content-center">
                                                     <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Tutup Gambar</button>
@@ -466,7 +273,7 @@
                                         @if(is_array($pilihan))
                                             @foreach($pilihan as $key => $value)
                                                 <label class="option-item">
-                                                    <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" onchange="autoSaveAnswer({{ $soal->id }}, '{{ $key }}')" {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
+                                                    <input type="radio" name="jawaban[{{ $soal->id }}]" value="{{ $key }}" data-autosave-answer data-soal-id="{{ $soal->id }}" {{ isset($existingAnswers[$soal->id]) && $existingAnswers[$soal->id] == $key ? 'checked' : '' }}>
                                                     <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                 </label>
                                             @endforeach
@@ -492,7 +299,7 @@
                                                 @if($key !== 'jawaban_benar')
                                                     <label class="option-item">
                                                         <input type="checkbox" class="kompleks-cb" data-soal-id="{{ $soal->id }}" value="{{ $key }}"
-                                                            onchange="updateKompleks({{ $soal->id }})" style="margin-right: 12px; margin-top: 4px; transform: scale(1.2);" {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
+                                                            {{ in_array($key, $checkedKompleks) ? 'checked' : '' }}>
                                                         <span><strong>{{ $key }}.</strong> {{ $value }}</span>
                                                     </label>
                                                 @endif
@@ -514,14 +321,14 @@
                                             <div class="mb-3 p-3 border rounded bg-light">
                                                 <p class="mb-2 fw-bold">{{ $item['text'] ?? $item['pernyataan'] ?? '' }}</p>
                                                 <div class="d-flex gap-3">
-                                                    <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
+                                                    <label class="option-item mb-0 flex-fill text-center benar-salah-option">
                                                         <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="true"
-                                                            onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1) ? 'checked' : '' }}>
+                                                            data-benar-salah-answer data-soal-id="{{ $soal->id }}" data-total-pernyataan="{{ count($pernyataanList) }}" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === true || $checkedBS[$pIdx] === 'true' || $checkedBS[$pIdx] === 1) ? 'checked' : '' }}>
                                                         <span><strong>BENAR</strong></span>
                                                     </label>
-                                                    <label class="option-item mb-0 flex-fill text-center" style="justify-content: center;">
+                                                    <label class="option-item mb-0 flex-fill text-center benar-salah-option">
                                                         <input type="radio" name="bs_{{ $soal->id }}_{{ $pIdx }}" value="false"
-                                                            onchange="updateBenarSalah({{ $soal->id }}, {{ count($pernyataanList) }})" style="margin-right: 8px;" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0) ? 'checked' : '' }}>
+                                                            data-benar-salah-answer data-soal-id="{{ $soal->id }}" data-total-pernyataan="{{ count($pernyataanList) }}" {{ isset($checkedBS[$pIdx]) && ($checkedBS[$pIdx] === false || $checkedBS[$pIdx] === 'false' || $checkedBS[$pIdx] === 0) ? 'checked' : '' }}>
                                                         <span><strong>SALAH</strong></span>
                                                     </label>
                                                 </div>
@@ -530,7 +337,7 @@
 
                                     @else
                                         <textarea name="jawaban[{{ $soal->id }}]" rows="4" class="form-control"
-                                            placeholder="Tulis jawaban Anda disini..." oninput="autoSaveAnswer({{ $soal->id }}, this.value)">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
+                                            placeholder="Tulis jawaban Anda disini..." data-autosave-answer data-soal-id="{{ $soal->id }}">{{ $existingAnswers[$soal->id] ?? '' }}</textarea>
                                     @endif
                                 </div>
                             </div>
@@ -545,140 +352,13 @@
             @endif
 
             <div class="text-center mt-4 mb-5">
-                <button type="button" class="btn btn-primary btn-lg px-5 shadow" onclick="finishExam()">
+                <button type="button" class="btn btn-primary btn-lg px-5 shadow" data-finish-exam>
                     <i class="fas fa-check-circle me-2"></i> KIRIM JAWABAN
                 </button>
             </div>
         </div>
     </form>
-
-    <!-- JS Logic -->
-    <script>
-        // Timer Logic
-        const durasiMenit = {{ $ujian->durasi_menit ?? 0 }};
-        const startTime = new Date("{{ $ujianSiswa->waktu_mulai }}").getTime();
-        
-        // Jika durasi 0, berarti tanpa batas waktu
-        const isUnlimited = (durasiMenit === 0);
-        const endTime = isUnlimited ? null : startTime + (durasiMenit * 60 * 1000);
-
-        function updateTimer() {
-            if (isUnlimited) {
-                document.getElementById("timer-display").innerHTML = "NO LIMIT";
-                return;
-            }
-
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance < 0) {
-                document.getElementById("timer-display").innerHTML = "00:00:00";
-                Swal.fire({
-                    title: 'Waktu Habis!',
-                    text: 'Latihan akan disubmit otomatis.',
-                    icon: 'warning',
-                    timer: 2000,
-                    showConfirmButton: false
-                }).then(() => {
-                    document.getElementById('examForm').submit();
-                });
-                return;
-            }
-
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            const timerStr = 
-                (hours < 10 ? "0" + hours : hours) + ":" + 
-                (minutes < 10 ? "0" + minutes : minutes) + ":" + 
-                (seconds < 10 ? "0" + seconds : seconds);
-            
-            document.getElementById("timer-display").innerHTML = timerStr;
-        }
-
-        setInterval(updateTimer, 1000);
-        updateTimer();
-
-        function updateKompleks(soalId) {
-            const checkboxes = document.querySelectorAll(`.kompleks-cb[data-soal-id="${soalId}"]:checked`);
-            const selected = Array.from(checkboxes).map(cb => cb.value);
-            const val = JSON.stringify(selected);
-            document.getElementById(`kompleks-hidden-${soalId}`).value = val;
-            autoSaveAnswer(soalId, val);
-        }
-
-        function updateBenarSalah(soalId, totalPernyataan) {
-            const answers = [];
-            for (let i = 0; i < totalPernyataan; i++) {
-                const radio = document.querySelector(`input[name="bs_${soalId}_${i}"]:checked`);
-                if (radio) {
-                    answers.push(radio.value === 'true');
-                } else {
-                    answers.push(null);
-                }
-            }
-            const val = JSON.stringify(answers);
-            document.getElementById(`bs-hidden-${soalId}`).value = val;
-            autoSaveAnswer(soalId, val);
-        }
-
-        function autoSaveAnswer(soalId, jawaban) {
-            const url = '{{ route("siswa.lms.mapel.latihan.autosave", [$mataPelajaran->id, $ujian->id]) }}';
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    soal_id: soalId,
-                    jawaban: jawaban
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    console.error('Autosave failed:', data.message);
-                }
-            })
-            .catch(error => console.error('Autosave error:', error));
-        }
-
-        function finishExam() {
-            Swal.fire({
-                title: 'Kirim Jawaban?',
-                text: 'Pastikan Anda sudah memeriksa semua jawaban.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#0d6efd',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Kirim!',
-                cancelButtonText: 'Periksa Lagi'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('examForm').submit();
-                }
-            });
-        }
-
-        function confirmRetake() {
-            Swal.fire({
-                title: 'Kerjakan Ulang?',
-                text: 'Jawaban dan nilai Anda sebelumnya akan di-reset. Apakah Anda yakin?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Kerjakan Ulang!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('form-retake').submit();
-                }
-            });
-        }
-    </script>
+    </div>
 @endif
 
 @endsection

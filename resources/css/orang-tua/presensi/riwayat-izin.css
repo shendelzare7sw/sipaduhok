@@ -1,0 +1,9 @@
+.permission-history-page .permission-proof-image {
+    max-height: 75vh;
+}
+
+.permission-history-page .permission-proof-frame {
+    width: 100%;
+    height: 75vh;
+    border: 0;
+}

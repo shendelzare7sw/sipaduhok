@@ -4,7 +4,7 @@
 
 @section('page-title', 'Data Kelas')
 @section('page-subtitle')
-Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahun_ajaran : '' }}
+Kelola data kelas di cabang Anda {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahun_ajaran : '' }}
 @endsection
 
 @section('sidebar-menu')
@@ -12,342 +12,14 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
 @endsection
 
 @section('styles')
-<style>
-    /* Styling variables inherited from Sneat layout or custom */
-    :root {
-        --kls-primary: #4361ee;
-        --kls-success: #10b981;
-        --kls-warning: #f59e0b;
-        --kls-danger: #ef4444;
-        --kls-info: #06b6d4;
-        --kls-purple: #8b5cf6;
-        --kls-surface: #ffffff;
-        --kls-bg: #f8fafc;
-        --kls-border: #e2e8f0;
-        --kls-text: #1e293b;
-        --kls-muted: #64748b;
-        --kls-radius: 12px;
-    }
-
-    .kls-card {
-        background: var(--kls-surface);
-        border: 1px solid var(--kls-border);
-        border-radius: var(--kls-radius);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-    }
-
-    .kls-card-header {
-        background: transparent;
-        border-bottom: 1px solid var(--kls-border);
-        padding: 1.25rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .kls-card-title {
-        font-size: 1.05rem;
-        font-weight: 600;
-        color: var(--kls-text);
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    /* Stat Cards */
-    .stat-row {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .stat-widget {
-        padding: 1.5rem;
-        display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        background: var(--kls-surface);
-        border: 1px solid var(--kls-border);
-        border-radius: var(--kls-radius);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        transition: transform 0.2s ease;
-    }
-
-    .stat-widget:hover {
-        transform: translateY(-2px);
-    }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .stat-details {
-        flex-grow: 1;
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--kls-text);
-        line-height: 1.2;
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--kls-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .stat-desc {
-        font-size: 0.7rem;
-        color: var(--kls-muted);
-        margin-top: 0.2rem;
-    }
-
-    /* Table Improvements */
-    .table-clean {
-        margin: 0;
-    }
-    
-    .table-clean th {
-        background: var(--kls-bg);
-        border-bottom: 1px solid var(--kls-border);
-        color: var(--kls-muted);
-        font-weight: 600;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding: 1rem 1.5rem;
-    }
-
-    .table-clean td {
-        padding: 1rem 1.5rem;
-        vertical-align: middle;
-        border-bottom: 1px solid var(--kls-border);
-        color: var(--kls-text);
-        font-size: 0.9rem;
-    }
-
-    .table-clean tbody tr:hover {
-        background-color: #f8fafc;
-    }
-
-    .table-clean tbody tr:last-child td {
-        border-bottom: none;
-    }
-
-    .badge-jnj {
-        padding: 0.35em 0.6em;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border-radius: 6px;
-    }
-
-    /* Jenjang badges */
-    .bg-jnj-kb { background: #fef3c7; color: #92400e; }
-    .bg-jnj-tka { background: #fed7aa; color: #9a3412; }
-    .bg-jnj-tkb { background: #fecaca; color: #991b1b; }
-    .bg-jnj-sd { background: #dcfce7; color: #166534; }
-    .bg-jnj-smp { background: #e0f2fe; color: #075985; }
-    .bg-jnj-sma { background: #f3e8ff; color: #7c3aed; }
-
-    .action-btns .btn {
-        padding: 0.35rem 0.6rem;
-        font-size: 0.8rem;
-        border-radius: 6px;
-    }
-
-    /* Filters */
-    .filter-wrapper {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-        flex-wrap: wrap;
-        background: var(--kls-bg);
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid var(--kls-border);
-    }
-    
-    .search-box {
-        position: relative;
-        flex-grow: 1;
-        min-width: 200px;
-    }
-    .search-box input {
-        width: 100%;
-        padding: 0.45rem 1rem 0.45rem 2.2rem;
-        border: 1px solid var(--kls-border);
-        border-radius: 8px;
-        font-size: 0.85rem;
-    }
-    .search-box i {
-        position: absolute;
-        left: 0.8rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--kls-muted);
-    }
-
-    .filter-select {
-        min-width: 150px;
-        font-size: 0.85rem;
-        padding: 0.45rem 2rem 0.45rem 0.75rem;
-        border-color: var(--kls-border);
-        border-radius: 8px;
-    }
-
-    /* Kelas styles */
-    .kelas-info {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    .kelas-nama {
-        font-weight: 600;
-        color: var(--kls-text);
-        font-size: 0.95rem;
-    }
-    .kelas-kode {
-        font-size: 0.75rem;
-        color: var(--kls-muted);
-        background: var(--kls-bg);
-        padding: 0.15rem 0.5rem;
-        border-radius: 4px;
-        display: inline-block;
-        width: fit-content;
-        font-family: inherit;
-    }
-
-    /* Wali Kelas */
-    .wali-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
-    }
-    .wali-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: rgba(139, 92, 246, 0.15);
-        color: var(--kls-purple);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        font-weight: 600;
-    }
-
-    /* Kuota progress */
-    .kuota-progress {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        width: 120px;
-    }
-    .kuota-bar {
-        height: 6px;
-        background: var(--kls-border);
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    .kuota-fill {
-        height: 100%;
-        border-radius: 4px;
-    }
-    .kuota-text {
-        font-size: 0.75rem;
-        color: var(--kls-text);
-        text-align: right;
-        font-weight: 600;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 1200px) {
-        .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-    }
-
-    @media (max-width: 768px) {
-        .stat-row { grid-template-columns: 1fr; }
-        .kls-card-header { flex-direction: column; align-items: stretch; }
-        .filter-wrapper { flex-direction: column; align-items: stretch; }
-        
-        /* Actions in header mobile */
-        .header-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .header-actions .btn { flex-grow: 1; justify-content: center; font-size: 0.8rem;}
-
-        /* Mobile Card Table */
-        .table-clean thead { display: none; }
-        .table-clean tbody tr {
-            display: flex;
-            flex-direction: column;
-            border-bottom: 2px solid var(--kls-border);
-            padding: 0;
-            background: #fff;
-        }
-        .table-clean tbody td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border: none;
-            border-bottom: 1px solid #f1f5f9;
-            gap: 1rem;
-        }
-        .table-clean tbody td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            font-size: 0.75rem;
-            color: var(--kls-muted);
-            text-transform: uppercase;
-        }
-        .table-clean tbody td.mobile-card-head {
-            background: var(--kls-bg);
-            flex-direction: column;
-            align-items: flex-start;
-            padding: 1rem;
-        }
-        .table-clean tbody td.mobile-card-head::before { display: none; }
-        .td-actions {
-            margin-top: 0;
-            padding: 1rem !important;
-            justify-content: space-between !important;
-            background: #f8fafc;
-            gap: 1rem;
-        }
-        .kuota-progress { width: 100%; align-items: flex-end; }
-        .wali-wrapper { justify-content: flex-end; }
-    }
-</style>
+    @vite(['resources/css/waka/kelas/index.css'])
 @endsection
 
 @section('content')
-
-    <!-- Stats Row -->
+<div class="kelas-index-page">
     <div class="stat-row">
-        <!-- Total Kelas -->
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+            <div class="stat-icon stat-icon-total">
                 <i class="fas fa-chalkboard"></i>
             </div>
             <div class="stat-details">
@@ -357,9 +29,8 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
             </div>
         </div>
 
-        <!-- Total Siswa -->
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+            <div class="stat-icon stat-icon-siswa">
                 <i class="fas fa-user-graduate"></i>
             </div>
             <div class="stat-details">
@@ -369,9 +40,8 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
             </div>
         </div>
 
-        <!-- Ada Wali -->
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+            <div class="stat-icon stat-icon-wali">
                 <i class="fas fa-user-tie"></i>
             </div>
             <div class="stat-details">
@@ -381,9 +51,8 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
             </div>
         </div>
 
-        <!-- Belum Ada Wali -->
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #fffbeb; color: #f59e0b;">
+            <div class="stat-icon stat-icon-warning">
                 <i class="fas fa-user-clock"></i>
             </div>
             <div class="stat-details">
@@ -394,7 +63,6 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
         </div>
     </div>
 
-    <!-- Main Card -->
     <div class="kls-card">
         <div class="kls-card-header">
             <h5 class="kls-card-title">
@@ -413,15 +81,14 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
             </div>
         </div>
 
-        <!-- Filters Form -->
         <form action="{{ route('waka.kelas.index') }}" method="GET" class="mb-0">
             <div class="filter-wrapper">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" name="search" placeholder="Cari nama atau kode kelas..." value="{{ request('search') }}">
                 </div>
-                
-                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()">
+
+                <select name="tahun_ajaran_id" class="form-select filter-select" data-auto-submit>
                     <option value="">Semua Tahun Ajaran</option>
                     @foreach($tahunAjarans as $ta)
                         <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
@@ -429,20 +96,20 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                         </option>
                     @endforeach
                 </select>
-                
-                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()">
+
+                <select name="jenjang" class="form-select filter-select" data-auto-submit>
                     <option value="">Semua Jenjang</option>
                     @foreach($jenjangs as $j)
                         <option value="{{ $j }}" {{ request('jenjang') == $j ? 'selected' : '' }}>{{ $j }}</option>
                     @endforeach
                 </select>
-                
-                <button type="submit" class="btn btn-secondary btn-sm px-3" style="border-radius: 8px;">
+
+                <button type="submit" class="btn btn-secondary btn-sm px-3 btn-filter">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
-                
+
                 @if(request()->hasAny(['search', 'jenjang']) || (request('tahun_ajaran_id') && request('tahun_ajaran_id') != $currentTahunAjaran?->id))
-                    <a href="{{ route('waka.kelas.index') }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                    <a href="{{ route('waka.kelas.index') }}" class="btn btn-outline-danger btn-sm px-3 btn-reset">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -468,15 +135,21 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                 <span class="kelas-nama">{{ $k->nama_kelas }}</span>
                                 <div class="d-flex align-items-center gap-2 mt-1">
                                     <span class="kelas-kode">{{ $k->kode_kelas }}</span>
-                                    <span class="text-muted" style="font-size: 0.75rem;"><i class="fas fa-building me-1"></i>{{ $k->cabang->nama_cabang ?? '-' }}</span>
+                                    <span class="text-muted cabang-label">
+                                        <i class="fas fa-building me-1"></i>{{ $k->cabang->nama_cabang ?? '-' }}
+                                    </span>
                                 </div>
                             </div>
                         </td>
                         <td data-label="Jenjang">
                             @php
                                 $jenjangClass = [
-                                    'KB' => 'bg-jnj-kb', 'TKA' => 'bg-jnj-tka', 'TKB' => 'bg-jnj-tkb',
-                                    'SD' => 'bg-jnj-sd', 'SMP' => 'bg-jnj-smp', 'SMA' => 'bg-jnj-sma',
+                                    'KB' => 'bg-jnj-kb',
+                                    'TKA' => 'bg-jnj-tka',
+                                    'TKB' => 'bg-jnj-tkb',
+                                    'SD' => 'bg-jnj-sd',
+                                    'SMP' => 'bg-jnj-smp',
+                                    'SMA' => 'bg-jnj-sma',
                                 ][$k->jenjang] ?? 'bg-light text-dark';
                             @endphp
                             <span class="badge {{ $jenjangClass }} badge-jnj">{{ $k->jenjang }}</span>
@@ -487,7 +160,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                 @foreach($k->waliKelasAssignments as $assignment)
                                     <div class="wali-wrapper">
                                         <div class="wali-avatar">{{ strtoupper(substr($assignment->tenagaPendidik->nama_lengkap, 0, 1)) }}</div>
-                                        <span style="font-size: 0.85rem;" class="fw-medium text-dark">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
+                                        <span class="fw-medium text-dark wali-name-small">{{ $assignment->tenagaPendidik->nama_lengkap }}</span>
                                     </div>
                                 @endforeach
                                 </div>
@@ -498,14 +171,14 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                         <td data-label="Kuota Siswa">
                             @php
                                 $percentage = $k->kuota_siswa > 0 ? ($k->siswa_count / $k->kuota_siswa) * 100 : 0;
-                                $barColor = $percentage < 50 ? '#10b981' : ($percentage < 80 ? '#f59e0b' : '#ef4444');
+                                $kuotaStatus = $percentage < 50 ? 'low' : ($percentage < 80 ? 'mid' : 'high');
                             @endphp
                             <div class="kuota-progress">
                                 <span class="kuota-text">
-                                    <span style="color: {{ $barColor }}">{{ $k->siswa_count }}</span> / {{ $k->kuota_siswa ?: '-' }}
+                                    <span class="kuota-count-{{ $kuotaStatus }}">{{ $k->siswa_count }}</span> / {{ $k->kuota_siswa ?: '-' }}
                                 </span>
                                 <div class="kuota-bar">
-                                    <div class="kuota-fill" style="width: {{ min($percentage, 100) }}%; background: {{ $barColor }};"></div>
+                                    <div class="kuota-fill kuota-fill-{{ $kuotaStatus }}" data-kuota-width="{{ min($percentage, 100) }}"></div>
                                 </div>
                             </div>
                         </td>
@@ -517,7 +190,12 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                                 <a href="{{ route('waka.kelas.edit', $k->id) }}" class="btn btn-sm btn-warning text-white" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-danger text-white" onclick="confirmDelete({{ $k->id }}, '{{ addslashes($k->nama_kelas) }}')" title="Hapus">
+                                <button type="button"
+                                        class="btn btn-sm btn-danger text-white"
+                                        data-delete-kelas
+                                        data-delete-url="{{ route('waka.kelas.destroy', $k->id) }}"
+                                        data-delete-name="{{ $k->nama_kelas }}"
+                                        title="Hapus">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -527,7 +205,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                     <tr>
                         <td colspan="5" class="text-center py-5">
                             <div class="d-flex flex-column align-items-center justify-content-center text-muted">
-                                <i class="fas fa-chalkboard fs-1 mb-3" style="color: #e2e8f0;"></i>
+                                <i class="fas fa-chalkboard fs-1 mb-3 empty-table-icon"></i>
                                 <h6 class="mb-1">Tidak Ada Data Kelas</h6>
                                 <p class="small mb-0">Belum ada kelas yang ditambahkan atau tidak ada hasil pencarian.</p>
                                 <a href="{{ route('waka.kelas.create') }}" class="btn btn-primary btn-sm mt-3 px-3 rounded-pill">
@@ -540,7 +218,7 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
                 </tbody>
             </table>
         </div>
-        
+
         @if($kelas->hasPages())
         <div class="border-top p-3 d-flex justify-content-between align-items-center flex-wrap">
             <span class="text-muted small">Menampilkan {{ $kelas->firstItem() ?? 0 }} - {{ $kelas->lastItem() ?? 0 }} dari total {{ $kelas->total() }}</span>
@@ -550,10 +228,8 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
         </div>
         @endif
     </div>
-
 </div>
 
-<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content border-0 shadow">
@@ -562,13 +238,13 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
             </div>
             <div class="modal-body text-center pt-0 pb-4">
                 <div class="mb-3">
-                    <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                    <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center delete-icon-circle">
                         <i class="fas fa-trash-alt fs-3 text-danger"></i>
                     </div>
                 </div>
                 <h5 class="fw-bold mb-1">Hapus Kelas?</h5>
-                <p class="text-muted mb-4" style="font-size: 0.9rem;">Kelas <span id="deleteItemName" class="fw-bold text-dark"></span> akan dihapus permanen.</p>
-                
+                <p class="text-muted mb-4 delete-modal-text">Kelas <span id="deleteItemName" class="fw-bold text-dark"></span> akan dihapus permanen.</p>
+
                 <div class="d-flex justify-content-center gap-2">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
                     <form id="deleteForm" method="POST">
@@ -581,17 +257,8 @@ Kelola data kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran->nama_tahu
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
-<script>
-    function confirmDelete(id, name) {
-        document.getElementById('deleteItemName').textContent = name;
-        const form = document.getElementById('deleteForm');
-        form.action = "{{ route('waka.kelas.index') }}/" + id;
-        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        modal.show();
-    }
-</script>
+    @vite(['resources/js/waka/kelas/index.js'])
 @endsection

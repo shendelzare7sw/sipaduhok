@@ -8,269 +8,216 @@
     @include('waka.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/waka/mata-pelajaran/index.css'])
+@endsection
+
 @section('content')
-    <style>
-        .stats-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }
-        .stat-card {
-            min-width: 100px; flex: 1; background: #fff; border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 14px 10px; text-align: center;
-        }
-        .stat-card .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
-        .stat-card .stat-value { font-size: 20px; font-weight: 700; color: #111827; }
-        .filter-action-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; gap: 12px;
-        }
-        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 
-        @media (max-width: 767.98px) {
-            .stat-card { min-width: 80px; padding: 10px 6px; }
-            .stat-card .stat-value { font-size: 16px; }
-            .filter-action-bar { flex-direction: column; align-items: stretch; }
-            .action-buttons { justify-content: stretch; }
-            .action-buttons .btn { flex: 1; justify-content: center; font-size: 12px; padding: 8px 10px; }
-            .action-buttons .btn .btn-text { display: none; }
-
-            .table-card-mobile thead { display: none; }
-            .table-card-mobile tbody tr {
-                display: block; background: #fff; border-radius: 10px;
-                box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 14px; margin-bottom: 10px;
-            }
-            .table-card-mobile tbody td {
-                display: flex; justify-content: space-between; align-items: center;
-                padding: 6px 0; border: none; font-size: 13px;
-            }
-            .table-card-mobile tbody td::before {
-                content: attr(data-label); font-weight: 600; color: #6b7280; margin-right: 12px; white-space: nowrap;
-            }
-            .table-card-mobile tbody td.td-actions {
-                justify-content: flex-end; padding-top: 10px;
-                border-top: 1px solid #f3f4f6; margin-top: 6px;
-            }
-            .table-card-mobile tbody td.td-actions::before { display: none; }
-        }
-    </style>
-
-    {{-- Stats Cards --}}
-    <div class="stats-scroll mb-4">
-        <div class="stat-card">
-            <div class="stat-label text-primary">Total</div>
-            <div class="stat-value">{{ $stats['total'] }}</div>
+    <!-- Stats Chips -->
+    <div class="stat-scroll">
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-total">Total</div>
+            <div class="stat-chip-value">{{ $stats['total'] }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label text-secondary">KB</div>
-            <div class="stat-value">{{ $stats['kb'] }}</div>
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-kb">KB</div>
+            <div class="stat-chip-value">{{ $stats['kb'] }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label" style="color:#343a40">TKA</div>
-            <div class="stat-value">{{ $stats['tka'] }}</div>
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-tka">TKA</div>
+            <div class="stat-chip-value">{{ $stats['tka'] }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label text-danger">TKB</div>
-            <div class="stat-value">{{ $stats['tkb'] }}</div>
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-tkb">TKB</div>
+            <div class="stat-chip-value">{{ $stats['tkb'] }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label text-success">SD</div>
-            <div class="stat-value">{{ $stats['sd'] }}</div>
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-sd">SD</div>
+            <div class="stat-chip-value">{{ $stats['sd'] }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label text-info">SMP</div>
-            <div class="stat-value">{{ $stats['smp'] }}</div>
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-smp">SMP</div>
+            <div class="stat-chip-value">{{ $stats['smp'] }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-label text-warning">SMA</div>
-            <div class="stat-value">{{ $stats['sma'] }}</div>
+        <div class="stat-chip">
+            <div class="stat-chip-label stat-label-sma">SMA</div>
+            <div class="stat-chip-value">{{ $stats['sma'] }}</div>
         </div>
     </div>
 
-    {{-- Filter & Action Card --}}
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="filter-action-bar">
-                {{-- Filter --}}
-                <form method="GET" class="d-flex gap-2 align-items-center flex-wrap">
-                    <label class="form-label mb-0 me-2">Filter Jenjang:</label>
-                    <select name="jenjang" class="form-select form-select-sm" style="width: auto;"
-                        onchange="this.form.submit()">
-                        <option value="">Semua Jenjang</option>
-                        <option value="KB" {{ $jenjang == 'KB' ? 'selected' : '' }}>KB</option>
-                        <option value="TKA" {{ $jenjang == 'TKA' ? 'selected' : '' }}>TKA</option>
-                        <option value="TKB" {{ $jenjang == 'TKB' ? 'selected' : '' }}>TKB</option>
-                        <option value="SD" {{ $jenjang == 'SD' ? 'selected' : '' }}>SD</option>
-                        <option value="SMP" {{ $jenjang == 'SMP' ? 'selected' : '' }}>SMP</option>
-                        <option value="SMA" {{ $jenjang == 'SMA' ? 'selected' : '' }}>SMA</option>
-                    </select>
-                    @if($jenjang)
-                        <a href="{{ route('waka.mata-pelajaran.index') }}" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-times me-1"></i> Reset
-                        </a>
-                    @endif
-                </form>
-
-                {{-- Action Buttons --}}
-                <div class="action-buttons">
-                    <button type="button" class="btn btn-outline-secondary btn-sm"
-                        onclick="window.open('{{ route('waka.mata-pelajaran.print', request()->only('jenjang')) }}', '_blank')">
-                        <i class="fas fa-print me-1"></i><span class="btn-text"> Cetak</span>
-                    </button>
-                    <a href="{{ route('waka.mata-pelajaran.import') }}" class="btn btn-success btn-sm">
-                        <i class="fas fa-file-import me-1"></i><span class="btn-text"> Import</span>
-                    </a>
-                    <a href="{{ route('waka.mata-pelajaran.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus me-1"></i><span class="btn-text"> Tambah</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Mata Pelajaran Table --}}
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="fas fa-list text-primary me-2"></i>Daftar Mata Pelajaran
+    <!-- Main Card -->
+    <div class="mp-card">
+        <div class="mp-card-header">
+            <h5 class="mp-card-title">
+                <i class="fas fa-book mp-card-title-icon"></i> Daftar Mata Pelajaran
                 @if($jenjang)
-                    <span class="badge bg-primary">{{ $jenjang }}</span>
+                    <span class="badge bg-primary ms-2">{{ $jenjang }}</span>
                 @endif
             </h5>
+            <div class="header-actions d-flex gap-2">
+                <a href="{{ route('waka.mata-pelajaran.print', request()->only('jenjang')) }}" target="_blank" class="btn btn-secondary text-white btn-sm d-flex align-items-center gap-1">
+                    <i class="fas fa-print"></i> <span class="d-none d-sm-inline">Cetak</span>
+                </a>
+                <a href="{{ route('waka.mata-pelajaran.import') }}" class="btn btn-success btn-sm d-flex align-items-center gap-1 text-white">
+                    <i class="fas fa-file-import"></i> <span class="d-none d-sm-inline">Import</span>
+                </a>
+                <a href="{{ route('waka.mata-pelajaran.create') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1">
+                    <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Tambah</span>
+                </a>
+            </div>
         </div>
-        <div class="card-body">
-            @if($mataPelajaranList->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover table-card-mobile">
-                        <thead>
-                            <tr>
-                                <th width="5%">No</th>
-                                <th width="15%">Kode</th>
-                                <th width="30%">Nama Mata Pelajaran</th>
-                                <th width="10%">Jenjang</th>
-                                <th width="25%">Deskripsi</th>
-                                <th width="15%" class="text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($mataPelajaranList as $index => $mapel)
-                                <tr>
-                                    <td data-label="No">{{ $mataPelajaranList->firstItem() + $index }}</td>
-                                    <td data-label="Kode">
-                                        @if($mapel->kode_mapel)
-                                            <span class="badge bg-secondary">{{ $mapel->kode_mapel }}</span>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td data-label="Nama">
-                                        <strong>{{ $mapel->nama_mapel }}</strong>
-                                    </td>
-                                    <td data-label="Jenjang">
-                                        @if($mapel->jenjang == 'KB')
-                                            <span class="badge bg-secondary">KB</span>
-                                        @elseif($mapel->jenjang == 'TKA')
-                                            <span class="badge bg-dark">TKA</span>
-                                        @elseif($mapel->jenjang == 'TKB')
-                                            <span class="badge bg-danger">TKB</span>
-                                        @elseif($mapel->jenjang == 'SD')
-                                            <span class="badge bg-success">SD</span>
-                                        @elseif($mapel->jenjang == 'SMP')
-                                            <span class="badge bg-info">SMP</span>
-                                        @elseif($mapel->jenjang == 'SMA')
-                                            <span class="badge bg-warning">SMA</span>
-                                        @endif
-                                    </td>
-                                    <td data-label="Deskripsi">
-                                        <small class="text-muted">{{ $mapel->deskripsi ? Str::limit($mapel->deskripsi, 50) : '-' }}</small>
-                                    </td>
-                                    <td class="text-center td-actions">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('waka.mata-pelajaran.show', $mapel) }}" class="btn btn-sm btn-info"
-                                                title="Detail">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('waka.mata-pelajaran.edit', $mapel) }}"
-                                                class="btn btn-sm btn-warning" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
-                                                data-bs-target="#deleteModal{{ $mapel->id }}" title="Hapus">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
 
-                {{-- Pagination --}}
-                <div class="mt-3">
-                    {{ $mataPelajaranList->links() }}
-                </div>
-            @else
-                <div class="text-center py-5">
-                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">
-                        @if($jenjang)
-                            Belum ada mata pelajaran untuk jenjang {{ $jenjang }}.
-                        @else
-                            Belum ada data mata pelajaran.
-                        @endif
-                    </p>
-                    <a href="{{ route('waka.mata-pelajaran.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> Tambah Mata Pelajaran Pertama
+        <!-- Filter -->
+        <form method="GET" class="mb-0">
+            <div class="filter-wrapper">
+                <span class="text-muted small fw-semibold">Filter Jenjang:</span>
+                <select name="jenjang" class="form-select filter-select" data-auto-submit>
+                    <option value="">Semua Jenjang</option>
+                    <option value="KB" {{ $jenjang == 'KB' ? 'selected' : '' }}>KB</option>
+                    <option value="TKA" {{ $jenjang == 'TKA' ? 'selected' : '' }}>TKA</option>
+                    <option value="TKB" {{ $jenjang == 'TKB' ? 'selected' : '' }}>TKB</option>
+                    <option value="SD" {{ $jenjang == 'SD' ? 'selected' : '' }}>SD</option>
+                    <option value="SMP" {{ $jenjang == 'SMP' ? 'selected' : '' }}>SMP</option>
+                    <option value="SMA" {{ $jenjang == 'SMA' ? 'selected' : '' }}>SMA</option>
+                </select>
+                @if($jenjang)
+                    <a href="{{ route('waka.mata-pelajaran.index') }}" class="btn btn-outline-danger btn-sm px-3 filter-reset-btn">
+                        <i class="fas fa-times"></i> Reset
                     </a>
+                @endif
+            </div>
+        </form>
+
+        <!-- Table -->
+        @if($mataPelajaranList->count() > 0)
+            <div class="table-responsive">
+                <table class="table table-clean">
+                    <thead>
+                        <tr>
+                            <th width="5%">No</th>
+                            <th width="15%">Kode</th>
+                            <th width="30%">Nama Mata Pelajaran</th>
+                            <th width="10%">Jenjang</th>
+                            <th width="25%">Deskripsi</th>
+                            <th width="15%" class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($mataPelajaranList as $index => $mapel)
+                            <tr>
+                                <td data-label="No">{{ $mataPelajaranList->firstItem() + $index }}</td>
+                                <td data-label="Kode">
+                                    @if($mapel->kode_mapel)
+                                        <span class="kode-badge">{{ $mapel->kode_mapel }}</span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td class="mobile-card-head" data-label="Nama">
+                                    <strong>{{ $mapel->nama_mapel }}</strong>
+                                </td>
+                                <td data-label="Jenjang">
+                                    @php
+                                        $jnjClass = [
+                                            'KB' => 'bg-jnj-kb',
+                                            'TKA' => 'bg-jnj-tka',
+                                            'TKB' => 'bg-jnj-tkb',
+                                            'SD' => 'bg-jnj-sd',
+                                            'SMP' => 'bg-jnj-smp',
+                                            'SMA' => 'bg-jnj-sma',
+                                        ][$mapel->jenjang] ?? 'bg-jnj-kb';
+                                    @endphp
+                                    <span class="badge {{ $jnjClass }} badge-jnj">{{ $mapel->jenjang }}</span>
+                                </td>
+                                <td data-label="Deskripsi">
+                                    <small class="text-muted">{{ $mapel->deskripsi ? Str::limit($mapel->deskripsi, 50) : '-' }}</small>
+                                </td>
+                                <td class="td-actions text-end">
+                                    <div class="d-flex justify-content-end gap-1 action-btns">
+                                        <a href="{{ route('waka.mata-pelajaran.show', $mapel) }}" class="btn btn-sm btn-info text-white" title="Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('waka.mata-pelajaran.edit', $mapel) }}" class="btn btn-sm btn-warning text-white" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal{{ $mapel->id }}" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if($mataPelajaranList->hasPages())
+            <div class="border-top p-3 d-flex justify-content-between align-items-center flex-wrap">
+                <span class="text-muted small">Menampilkan {{ $mataPelajaranList->firstItem() ?? 0 }} - {{ $mataPelajaranList->lastItem() ?? 0 }} dari {{ $mataPelajaranList->total() }} mapel</span>
+                <div class="mt-2 mt-sm-0">
+                    {{ $mataPelajaranList->withQueryString()->links() }}
                 </div>
+            </div>
             @endif
-        </div>
+        @else
+            <div class="empty-state">
+                <i class="fas fa-book"></i>
+                <h3>
+                    @if($jenjang)
+                        Belum ada mata pelajaran untuk jenjang {{ $jenjang }}.
+                    @else
+                        Belum ada data mata pelajaran.
+                    @endif
+                </h3>
+                <a href="{{ route('waka.mata-pelajaran.create') }}" class="btn btn-primary btn-sm mt-3 px-3 rounded-pill">
+                    <i class="fas fa-plus me-1"></i> Tambah Mata Pelajaran Pertama
+                </a>
+            </div>
+        @endif
     </div>
 
     {{-- Delete Modals --}}
     @foreach($mataPelajaranList as $mapel)
-        <div class="modal fade" id="deleteModal{{ $mapel->id }}" tabindex="-1"
-            aria-labelledby="deleteModalLabel{{ $mapel->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="deleteModalLabel{{ $mapel->id }}">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Konfirmasi Hapus
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+        <div class="modal fade" id="deleteModal{{ $mapel->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content border-0 shadow delete-modal-content">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <p class="mb-3">Apakah Anda yakin ingin menghapus mata pelajaran:</p>
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
-                            <div style="font-weight: 600; font-size: 16px; color: #212529; margin-bottom: 8px;">
-                                <i class="fas fa-book text-danger me-2"></i>
-                                {{ $mapel->nama_mapel }}
-                            </div>
-                            <div style="font-size: 13px; color: #6c757d;">
-                                @if($mapel->kode_mapel)
-                                    <i class="fas fa-tag me-1"></i> Kode: <strong>{{ $mapel->kode_mapel }}</strong> •
-                                @endif
-                                <i class="fas fa-layer-group me-1"></i> Jenjang: <strong>{{ $mapel->jenjang }}</strong>
+                    <div class="modal-body text-center pt-0 pb-4">
+                        <div class="mb-3">
+                            <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center delete-modal-icon">
+                                <i class="fas fa-trash fs-3 text-danger"></i>
                             </div>
                         </div>
-                        <p class="mt-3 mb-0">
-                            <i class="fas fa-info-circle text-danger me-1"></i>
-                            <small class="text-muted">Tindakan ini tidak dapat dibatalkan!</small>
+                        <h5 class="fw-bold mb-2">Hapus Mata Pelajaran?</h5>
+                        <p class="text-muted mb-1 delete-modal-subtitle">
+                            <strong>{{ $mapel->nama_mapel }}</strong>
                         </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Batal
-                        </button>
-                        <form action="{{ route('waka.mata-pelajaran.destroy', $mapel) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i> Ya, Hapus
-                            </button>
-                        </form>
+                        <p class="text-muted mb-3 delete-modal-meta">
+                            @if($mapel->kode_mapel) Kode: {{ $mapel->kode_mapel }} &bull; @endif Jenjang: {{ $mapel->jenjang }}
+                        </p>
+                        <p class="text-danger small mb-0"><i class="fas fa-info-circle me-1"></i> Tindakan ini tidak dapat dibatalkan!</p>
+
+                        <div class="d-flex justify-content-center gap-2 mt-4">
+                            <button type="button" class="btn btn-secondary fw-medium px-4 delete-modal-action" data-bs-dismiss="modal">Batal</button>
+                            <form action="{{ route('waka.mata-pelajaran.destroy', $mapel) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger fw-medium px-4 d-flex align-items-center gap-2 text-white delete-modal-action">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     @endforeach
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/waka/mata-pelajaran/index.js'])
 @endsection

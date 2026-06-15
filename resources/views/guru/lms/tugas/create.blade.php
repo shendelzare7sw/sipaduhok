@@ -8,12 +8,16 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/tugas/create.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-tugas-create-page">
     <div class="mb-3">
         <a href="{{ route('guru.lms.tugas.index', [$kelas->id, $mapel->id]) }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i>Kembali
-            </a>
-
+        </a>
     </div>
 
     <div class="card-custom">
@@ -85,37 +89,18 @@
                     <div class="p-3 border rounded bg-light">
                         <!-- Pengulangan (Edit) -->
                         <div class="form-check form-switch mb-2">
-                            <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" onchange="toggleBatasPengulangan()">
+                            <input class="form-check-input" type="checkbox" role="switch" id="bisaDiulang" name="bisa_diulang" value="1" data-repeat-toggle>
                             <label class="form-check-label fw-bold" for="bisaDiulang">Izinkan Siswa Mengedit Jawaban</label>
                         </div>
                         <small class="text-muted d-block mb-3">Jika diaktifkan, siswa dapat mengubah jawabannya sebelum deadline.</small>
 
-                        <div id="batasPengulanganContainer" style="display: none; padding-left: 2.5rem;">
+                        <div id="batasPengulanganContainer" class="repeat-limit-container" data-repeat-container hidden>
                             <label for="batasPengulangan" class="form-label fw-semibold">Batas Edit (Kali)</label>
-                            <input type="number" class="form-control" id="batasPengulangan" name="batas_pengulangan" min="0" placeholder="Kosongkan jika tak terbatas" style="max-width: 200px;">
+                            <input type="number" class="form-control repeat-limit-input" id="batasPengulangan" name="batas_pengulangan" min="0" placeholder="Kosongkan jika tak terbatas" data-repeat-input>
                             <small class="text-muted d-block mt-1">Biarkan kosong agar siswa bisa mengedit tanpa batas (selama belum deadline).</small>
                         </div>
                     </div>
                 </div>
-
-                <script>
-                    function toggleBatasPengulangan() {
-                        const isChecked = document.getElementById('bisaDiulang').checked;
-                        const container = document.getElementById('batasPengulanganContainer');
-                        const input = document.getElementById('batasPengulangan');
-                        
-                        if (isChecked) {
-                            container.style.display = 'block';
-                            if (!input.value) {
-                                input.value = 2; // Default 2 kali
-                            }
-                        } else {
-                            container.style.display = 'none';
-                        }
-                    }
-                    // Run on load to set initial state
-                    document.addEventListener('DOMContentLoaded', toggleBatasPengulangan);
-                </script>
 
                 @include('guru.partials.multi-kelas-selector')
 
@@ -129,4 +114,9 @@
             </form>
         </div>
     </div>
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/tugas/create.js'])
+@endpush

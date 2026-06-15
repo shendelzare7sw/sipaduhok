@@ -8,7 +8,19 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/tugas/koreksi-show.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/tugas/koreksi-show.js'])
+@endpush
+
 @section('content')
+    <div class="guru-lms-tugas-koreksi-show-page"
+        data-ai-suggest-url="{{ route('guru.lms.tugas.koreksi.ai-suggest', [$kelas->id, $mapel->id, $tugas->id, $tugasSiswa->id]) }}"
+        data-csrf-token="{{ csrf_token() }}"
+        data-has-answer="{{ ($tugasSiswa->jawaban_text || $tugasSiswa->file_jawaban) ? 'true' : 'false' }}">
     <div class="mb-3">
         <a href="{{ route('guru.lms.tugas.koreksi', [$kelas->id, $mapel->id, $tugasSiswa->tugas_id]) }}"
            class="btn btn-secondary btn-sm">
@@ -46,7 +58,7 @@
                     @if($tugasSiswa->jawaban_text)
                         <div class="mb-3">
                             <strong>Jawaban Teks:</strong>
-                            <div class="p-3 bg-light rounded mt-2" style="white-space: pre-wrap;">{{ $tugasSiswa->jawaban_text }}</div>
+                            <div class="p-3 bg-light rounded mt-2 answer-text-box">{{ $tugasSiswa->jawaban_text }}</div>
                         </div>
                     @endif
 
@@ -59,7 +71,7 @@
 
                     @if(!$tugasSiswa->jawaban_text && !$tugasSiswa->file_jawaban)
                         <div class="text-center text-muted py-3">
-                            <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.2;"></i>
+                            <i class="fas fa-inbox empty-answer-icon"></i>
                             <p class="mt-2">Tidak ada jawaban</p>
                         </div>
                     @endif
@@ -157,7 +169,7 @@
     </div>
 
     <!-- Toast for AI Result -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div class="position-fixed bottom-0 end-0 p-3 ai-toast-container">
         <div id="aiToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
                 <i class="fas fa-robot text-primary rounded me-2"></i>
@@ -169,133 +181,5 @@
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <style>
-        .btn-ai-gradient {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4), 0 2px 4px -1px rgba(99, 102, 241, 0.2);
-            transition: all 0.3s ease;
-        }
-        .btn-ai-gradient:hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.5), 0 4px 6px -2px rgba(99, 102, 241, 0.3);
-            color: white;
-        }
-        .btn-ai-gradient:active {
-            transform: translateY(0);
-        }
-        .btn-ai-gradient:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-ai-loading {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-            animation: pulse-glow 1.5s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
-            50% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.7); }
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const aiBtn = document.getElementById('aiAssistBtn');
-            if (aiBtn) {
-                const toastEl = document.getElementById('aiToast');
-                const toast = new bootstrap.Toast(toastEl);
-                const toastMsg = document.getElementById('aiToastMessage');
-                let isProcessing = false; // Race condition protection
-
-                aiBtn.addEventListener('click', function() {
-                    // Prevent multiple simultaneous requests
-                    if (isProcessing) return;
-
-                    // Validate if student has submitted answer
-                    const hasAnswer = {{ ($tugasSiswa->jawaban_text || $tugasSiswa->file_jawaban) ? 'true' : 'false' }};
-                    if (!hasAnswer) {
-                        toastMsg.innerHTML = '<i class="fas fa-exclamation-circle text-warning me-1"></i> Belum ada jawaban siswa untuk dianalisis.';
-                        toast.show();
-                        return;
-                    }
-
-                    isProcessing = true;
-
-                    // UI Loading State with live timer
-                    const originalContent = this.innerHTML;
-                    let seconds = 0;
-                    const btnRef = this;
-                    btnRef.disabled = true;
-                    btnRef.classList.add('btn-ai-loading');
-
-                    const updateTimer = () => {
-                        btnRef.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Menganalisis... <span class="badge bg-light text-dark ms-1">${seconds}s</span>`;
-                        toastMsg.innerHTML = `<i class="fas fa-spinner fa-spin text-primary me-1"></i> Sedang menganalisis jawaban (Vision AI)... <strong>${seconds}s</strong>`;
-                    };
-                    updateTimer();
-                    toast.show();
-                    
-                    const timerInterval = setInterval(() => {
-                        seconds++;
-                        updateTimer();
-                    }, 1000);
-
-                    // URL Construction
-                    const url = "{{ route('guru.lms.tugas.koreksi.ai-suggest', [$kelas->id, $mapel->id, $tugas->id, $tugasSiswa->id]) }}";
-
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({}) // Empty body is fine, controller reads DB
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            throw new Error(data.feedback || 'Terjadi kesalahan pada AI.');
-                        }
-
-                        // Populate inputs
-                        const scoreInput = document.getElementById('nilaiInput');
-                        const feedbackInput = document.getElementById('feedbackInput');
-
-                        scoreInput.value = data.score;
-                        // Visual Feedback
-                        scoreInput.classList.add('bg-success', 'text-white', 'bg-opacity-25');
-                        
-                        feedbackInput.value = `[AI Suggestion] ${data.feedback}\n\n` + feedbackInput.value;
-                        feedbackInput.classList.add('bg-info', 'text-white', 'bg-opacity-10');
-
-                        setTimeout(() => {
-                            scoreInput.classList.remove('bg-success', 'text-white', 'bg-opacity-25');
-                            scoreInput.classList.add('transition-fade'); // smooth remove if added css for it
-                            feedbackInput.classList.remove('bg-info', 'text-white', 'bg-opacity-10');
-                        }, 2000);
-
-                        toastMsg.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Analisis selesai dalam <strong>${seconds}s</strong>! Saran skor: <strong>${data.score}</strong>`;
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        toastMsg.innerHTML = `<i class="fas fa-exclamation-triangle text-danger me-1"></i> Gagal (${seconds}s): ${error.message}`;
-                        toast.show();
-                    })
-                    .finally(() => {
-                        clearInterval(timerInterval);
-                        btnRef.innerHTML = originalContent;
-                        btnRef.disabled = false;
-                        btnRef.classList.remove('btn-ai-loading');
-                        isProcessing = false;
-                    });
-                });
-            }
-        });
-    </script>
-    @endpush
+    </div>
 @endsection

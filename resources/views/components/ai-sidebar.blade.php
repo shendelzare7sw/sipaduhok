@@ -27,7 +27,7 @@
             </h5>
             <small class="opacity-90">Generate soal otomatis dengan AI</small>
         </div>
-        <button type="button" class="btn-close btn-close-white" onclick="closeAiSidebar()" title="Tutup sidebar"></button>
+        <button type="button" class="btn-close btn-close-white" data-close-ai-sidebar title="Tutup sidebar"></button>
     </div>
 
     {{-- Sidebar Body (Scrollable) --}}
@@ -44,10 +44,10 @@
         <div class="d-flex align-items-center gap-2 mb-3 px-1" id="aiModelStatusContainer">
             <small class="text-muted"><i class="fas fa-microchip me-1"></i> Model:</small>
             <span class="badge bg-dark bg-opacity-75" id="aiModelStatusBadge" title="{{ $currentModel }}">
-                <i class="fas fa-circle text-success me-1" style="font-size: 0.5rem;"></i>
+                <i class="fas fa-circle text-success me-1 ai-sidebar-model-dot"></i>
                 {{ $modelShortName }}
             </span>
-            <span class="badge bg-light text-muted d-none" id="aiModelSwitchInfo" style="font-size: 0.65rem;">
+            <span class="badge bg-light text-muted d-none ai-sidebar-model-switch-info" id="aiModelSwitchInfo">
                 {{-- Updated dynamically via JS after generation --}}
             </span>
         </div>
@@ -80,10 +80,9 @@
                     Mata Pelajaran
                 </label>
                 <input type="text"
-                       class="form-control"
+                       class="form-control ai-sidebar-subject-input"
                        value="{{ $subjectName }}"
-                       readonly
-                       style="background-color: #f8f9fa;">
+                       readonly>
             </div>
 
             {{-- Question Type --}}
@@ -240,7 +239,7 @@
 </div>
 
 {{-- Backdrop (click to close) --}}
-<div id="aiSidebarBackdrop" class="ai-sidebar-backdrop" onclick="closeAiSidebar()"></div>
+<div id="aiSidebarBackdrop" class="ai-sidebar-backdrop" data-close-ai-sidebar></div>
 
 {{-- Regenerate Confirmation Modal --}}
 <div class="modal fade" id="regenerateConfirmModal" tabindex="-1" aria-labelledby="regenerateConfirmModalLabel" aria-hidden="true">
@@ -279,344 +278,3 @@
 <input type="hidden" id="aiGeneratorUjianId" value="{{ $ujianId }}">
 <input type="hidden" id="aiGeneratorKelasId" value="{{ $kelasId }}">
 <input type="hidden" id="aiGeneratorMapelId" value="{{ $mapelId }}">
-
-<style>
-/* Sidebar Container */
-.ai-sidebar {
-    position: fixed;
-    top: 0;
-    right: -450px; /* Hidden by default */
-    width: 450px; /* Default width - can be resized */
-    min-width: 350px;
-    max-width: 800px;
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height - accounts for mobile browser chrome */
-    background: white;
-    box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2);
-    z-index: 1050;
-    transition: right 0.3s ease-in-out;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
-.ai-sidebar.active {
-    right: 0; /* Slide in */
-}
-
-.ai-sidebar.resizing {
-    transition: none; /* Disable transition during resize */
-}
-
-/* Resize Handle */
-.ai-sidebar-resize-handle {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 8px;
-    height: 100%;
-    cursor: ew-resize;
-    z-index: 11;
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.ai-sidebar-resize-handle:hover {
-    background: rgba(23, 162, 184, 0.1);
-}
-
-.ai-sidebar-resize-handle:hover .resize-indicator {
-    background: #17a2b8;
-}
-
-.resize-indicator {
-    width: 3px;
-    height: 40px;
-    background: rgba(23, 162, 184, 0.3);
-    border-radius: 2px;
-    transition: background 0.2s ease;
-}
-
-/* Backdrop */
-.ai-sidebar-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1040;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-}
-
-.ai-sidebar-backdrop.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Header */
-.ai-sidebar-header {
-    position: sticky;
-    top: 0;
-    flex-shrink: 0; /* Don't shrink in flex container */
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    color: white;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    z-index: 10;
-}
-
-.ai-sidebar-header h5 {
-    font-size: 1.1rem;
-}
-
-.ai-sidebar-header small {
-    font-size: 0.8rem;
-}
-
-.ai-sidebar-header .btn-close-white {
-    filter: brightness(0) invert(1);
-    opacity: 0.9;
-}
-
-.ai-sidebar-header .btn-close-white:hover {
-    opacity: 1;
-}
-
-/* Body */
-.ai-sidebar-body {
-    padding: 1.5rem;
-    overflow-y: auto;
-    flex: 1; /* Fill remaining height after sticky header */
-    min-height: 0; /* Required for flex overflow-y: auto to work */
-    /* Bottom padding to prevent content hiding behind mobile browser nav bar */
-    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
-}
-
-/* Question Card in Sidebar */
-.ai-sidebar .question-card {
-    border-left: 4px solid #17a2b8;
-    transition: all 0.2s ease;
-    margin-bottom: 1rem;
-}
-
-.ai-sidebar .question-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.ai-sidebar .question-card input[type="checkbox"]:checked ~ .card {
-    border-left-color: #28a745;
-    background-color: #f0fff4;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .ai-sidebar {
-        width: 100% !important; /* Full width on mobile - override custom width */
-        min-width: 100%;
-        max-width: 100%;
-        right: -100% !important;
-        height: 100vh;
-        height: 100dvh; /* Dynamic viewport height for mobile browsers */
-    }
-
-    .ai-sidebar.active {
-        right: 0 !important;
-    }
-
-    .ai-sidebar-resize-handle {
-        display: none; /* Hide resize handle on mobile */
-    }
-
-    /* Extra bottom padding on mobile to avoid browser nav bar overlap */
-    .ai-sidebar-body {
-        padding-bottom: max(80px, env(safe-area-inset-bottom, 80px));
-    }
-}
-
-/* Smooth scrollbar */
-.ai-sidebar::-webkit-scrollbar {
-    width: 8px;
-}
-
-.ai-sidebar::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.ai-sidebar::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-.ai-sidebar::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-</style>
-
-<script>
-// Difficulty hints
-const difficultyHints = {
-    easy: 'Fakta dasar & hafalan',
-    medium: 'Aplikasi konsep & perhitungan',
-    hard: 'Analisis & problem solving'
-};
-
-// Estimated time based on count
-const estimatedTimes = {
-    3: '10-15',
-    5: '15-20',
-    7: '20-25',
-    10: '25-30'
-};
-
-// Update difficulty hint
-document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        document.getElementById('difficultyHint').textContent = difficultyHints[this.value];
-    });
-});
-
-// Update estimated time
-document.getElementById('aiQuestionCount').addEventListener('change', function() {
-    document.getElementById('estimatedTime').textContent = estimatedTimes[this.value];
-});
-
-// ==============================
-// SIDEBAR RESIZE FUNCTIONALITY
-// ==============================
-
-(function() {
-    const sidebar = document.getElementById('aiQuestionSidebar');
-    const resizeHandle = document.getElementById('aiSidebarResizeHandle');
-
-    if (!sidebar || !resizeHandle) return;
-
-    let isResizing = false;
-    let startX = 0;
-    let startWidth = 0;
-
-    // Load saved width from localStorage
-    const savedWidth = localStorage.getItem('aiSidebarWidth');
-    if (savedWidth) {
-        const width = parseInt(savedWidth);
-        // Validate width is within bounds
-        if (width >= 350 && width <= 800) {
-            sidebar.style.width = width + 'px';
-            // Update hidden position as well
-            sidebar.style.right = '-' + width + 'px';
-        } else {
-            // Invalid width, clear localStorage
-            localStorage.removeItem('aiSidebarWidth');
-        }
-    }
-
-    // Start resize
-    resizeHandle.addEventListener('mousedown', function(e) {
-        isResizing = true;
-        startX = e.clientX;
-        startWidth = sidebar.offsetWidth;
-        sidebar.classList.add('resizing');
-
-        // Prevent text selection during drag
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = 'ew-resize';
-
-        e.preventDefault();
-    });
-
-    // Perform resize
-    document.addEventListener('mousemove', function(e) {
-        if (!isResizing) return;
-
-        // Calculate new width (drag left = larger, drag right = smaller)
-        const deltaX = startX - e.clientX;
-        let newWidth = startWidth + deltaX;
-
-        // Enforce min/max constraints
-        const minWidth = 350;
-        const maxWidth = 800;
-        newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-
-        // Apply new width
-        sidebar.style.width = newWidth + 'px';
-
-        // If sidebar is active (visible), keep it at right: 0
-        // If sidebar is hidden, update the hidden position
-        if (!sidebar.classList.contains('active')) {
-            sidebar.style.right = '-' + newWidth + 'px';
-        }
-    });
-
-    // End resize
-    document.addEventListener('mouseup', function() {
-        if (isResizing) {
-            isResizing = false;
-            sidebar.classList.remove('resizing');
-
-            // Restore cursor and text selection
-            document.body.style.userSelect = '';
-            document.body.style.cursor = '';
-
-            // Save width to localStorage
-            const currentWidth = sidebar.offsetWidth;
-            localStorage.setItem('aiSidebarWidth', currentWidth);
-
-            // Update hidden position for next open
-            if (!sidebar.classList.contains('active')) {
-                sidebar.style.right = '-' + currentWidth + 'px';
-            }
-        }
-    });
-
-    // CRITICAL FIX: Wait for ai-question-generator.js to load before overriding
-    function initializeResizeOverrides() {
-        // Check if window.openAiSidebar is defined (from ai-question-generator.js)
-        if (typeof window.openAiSidebar !== 'function') {
-            // Not loaded yet, retry after 50ms
-            setTimeout(initializeResizeOverrides, 50);
-            return;
-        }
-
-        // Store original functions
-        const originalOpen = window.openAiSidebar;
-        const originalClose = window.closeAiSidebar;
-
-        // Override openAiSidebar to respect custom width
-        window.openAiSidebar = function() {
-            // Ensure sidebar respects saved width BEFORE opening
-            const savedWidth = localStorage.getItem('aiSidebarWidth');
-            if (savedWidth) {
-                sidebar.style.width = savedWidth + 'px';
-            }
-
-            // CRITICAL FIX: Reset inline right style to allow CSS transition to work
-            sidebar.style.right = '';
-
-            // Call original open function to add 'active' class
-            if (originalOpen) originalOpen();
-        };
-
-        // Override closeAiSidebar - DO NOT manipulate right position during close
-        window.closeAiSidebar = function() {
-            // Call original close function first (removes 'active' class, triggers CSS transition)
-            if (originalClose) originalClose();
-
-            // After closing animation completes, update hidden position for next open
-            setTimeout(() => {
-                const currentWidth = sidebar.offsetWidth;
-                sidebar.style.right = '-' + currentWidth + 'px';
-            }, 300); // Wait for CSS transition to finish (0.3s)
-        };
-    }
-
-    // Start initialization (will retry until ai-question-generator.js loads)
-    initializeResizeOverrides();
-})();
-</script>

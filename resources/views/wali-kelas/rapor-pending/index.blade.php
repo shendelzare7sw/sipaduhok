@@ -9,89 +9,7 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .pending-summary {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-        margin-bottom: 18px;
-    }
-    .pending-stat {
-        background: white; border: 1px solid #e5e7eb;
-        border-radius: 12px; padding: 14px;
-        display: flex; align-items: center; gap: 12px;
-    }
-    .pending-stat .icon-circle {
-        width: 42px; height: 42px; border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        color: white; font-size: 1rem; flex-shrink: 0;
-    }
-    .pending-stat .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
-    .pending-stat .value { font-size: 1.5rem; font-weight: 800; color: #1e293b; }
-
-    .grouped-section { margin-bottom: 28px; }
-    .group-header {
-        background: white; border: 1px solid #e5e7eb;
-        border-bottom: none; border-radius: 10px 10px 0 0;
-        padding: 12px 16px;
-        font-weight: 700; color: #1e293b;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .group-header .badge-ta {
-        background: rgba(67,97,238,.08); color: #4361ee;
-        padding: 2px 10px; border-radius: 999px;
-        font-size: 11px; font-weight: 700;
-    }
-
-    .rapor-item {
-        background: white; border: 1px solid #e5e7eb;
-        border-top: none;
-        padding: 12px 16px;
-        display: flex; gap: 14px; align-items: center;
-    }
-    .rapor-item:last-child { border-radius: 0 0 10px 10px; }
-    .rapor-item .info { flex: 1; }
-    .rapor-item .judul { font-weight: 700; color: #1e293b; font-size: 14px; }
-    .rapor-item .meta { font-size: 11px; color: #64748b; margin-top: 4px; }
-    .rapor-item .meta i { margin-right: 4px; color: #94a3b8; }
-
-    .badge-status {
-        padding: 3px 10px; border-radius: 999px;
-        font-size: 10px; font-weight: 700;
-    }
-    .badge-status.draft { background: rgba(100,116,139,.1); color: #475569; }
-    .badge-status.pending { background: rgba(217,119,6,.1); color: #92400e; }
-    .badge-status.revisi { background: rgba(220,38,38,.1); color: #b91c1c; }
-
-    .empty-state { text-align: center; padding: 42px 20px; color: #64748b; }
-    .empty-state i { font-size: 2.4rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
-
-    @media (max-width: 767.98px) {
-        .pending-summary {
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        .pending-stat {
-            min-height: 78px;
-        }
-
-        .group-header,
-        .rapor-item {
-            align-items: flex-start;
-            flex-direction: column;
-        }
-
-        .group-header .ms-auto {
-            margin-left: 0 !important;
-        }
-
-        .rapor-item .btn {
-            width: 100%;
-        }
-    }
-</style>
+    @vite(['resources/css/wali-kelas/rapor-pending/index.css', 'resources/js/wali-kelas/rapor-pending/index.js'])
 @endsection
 
 @section('content')
@@ -127,15 +45,15 @@
 
     <div class="pending-summary">
         <div class="pending-stat">
-            <div class="icon-circle" style="background: #64748b;"><i class="fas fa-file-alt"></i></div>
+            <div class="icon-circle icon-circle-draft"><i class="fas fa-file-alt"></i></div>
             <div><div class="label">Draft Belum Dikirim</div><div class="value">{{ $totalDraft }}</div></div>
         </div>
         <div class="pending-stat">
-            <div class="icon-circle" style="background: #d97706;"><i class="fas fa-paper-plane"></i></div>
+            <div class="icon-circle icon-circle-pending"><i class="fas fa-paper-plane"></i></div>
             <div><div class="label">Menunggu Ketua</div><div class="value">{{ $totalKirim }}</div></div>
         </div>
         <div class="pending-stat">
-            <div class="icon-circle" style="background: #dc2626;"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="icon-circle icon-circle-revision"><i class="fas fa-exclamation-triangle"></i></div>
             <div><div class="label">Diminta Revisi</div><div class="value">{{ $totalRevisi }}</div></div>
         </div>
     </div>
@@ -171,7 +89,7 @@
                                 @endif
                             </div>
                             @if(!empty($rapor->catatan_revisi_ketua))
-                                <div class="mt-2 p-2" style="background: rgba(220,38,38,.05); border-left: 3px solid #dc2626; border-radius: 6px; font-size: 12px;">
+                                <div class="revision-note mt-2 p-2">
                                     <strong class="text-danger">Catatan Ketua:</strong>
                                     {{ \Illuminate\Support\Str::limit($rapor->catatan_revisi_ketua, 200) }}
                                 </div>

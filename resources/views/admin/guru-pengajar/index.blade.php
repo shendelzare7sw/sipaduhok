@@ -11,7 +11,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/guru-pengajar.css') }}">
+    @vite('resources/css/admin/guru-pengajar/index.css')
 @endsection
 
 @section('content')
@@ -19,7 +19,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
     <!-- Stats Row -->
     <div class="stat-row">
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;">
+            <div class="stat-icon stat-icon-primary">
                 <i class="fas fa-chalkboard-teacher"></i>
             </div>
             <div class="stat-details">
@@ -30,7 +30,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #ecfdf5; color: #10b981;">
+            <div class="stat-icon stat-icon-success">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-details">
@@ -41,7 +41,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #f0fdfa; color: #14b8a6;">
+            <div class="stat-icon stat-icon-teal">
                 <i class="fas fa-tasks"></i>
             </div>
             <div class="stat-details">
@@ -52,7 +52,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
         </div>
 
         <div class="stat-widget">
-            <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">
+            <div class="stat-icon stat-icon-purple">
                 <i class="fas fa-book"></i>
             </div>
             <div class="stat-details">
@@ -68,7 +68,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
         <div class="gp-card-header">
             <div>
                 <h5 class="gp-card-title">
-                    <i class="fas fa-user-tie" style="color: #14b8a6;"></i> Daftar Guru Pengajar
+                    <i class="fas fa-user-tie title-icon-teal"></i> Daftar Guru Pengajar
                 </h5>
                 <div class="gp-card-subtitle">Penugasan guru otomatis dari Jadwal Pelajaran</div>
             </div>
@@ -90,7 +90,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                     <input type="text" name="search" placeholder="Cari nama, NIP, atau email..." value="{{ request('search') }}">
                 </div>
 
-                <select name="tahun_ajaran_id" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="tahun_ajaran_id" class="form-select filter-select" data-auto-submit>
                     <option value="">Semua Tahun Ajaran</option>
                     @foreach($tahunAjarans as $ta)
                         <option value="{{ $ta->id }}" {{ request('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
@@ -99,18 +99,18 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                     @endforeach
                 </select>
 
-                <select name="status" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="status" class="form-select filter-select" data-auto-submit>
                     <option value="">Status: Aktif</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
                     <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
                 </select>
 
-                <button type="submit" class="btn btn-secondary btn-sm px-3" style="border-radius: 8px;">
+                <button type="submit" class="btn btn-secondary btn-sm px-3 rounded-md">
                     <i class="fas fa-filter me-1"></i> Filter
                 </button>
 
                 @if(request()->hasAny(['search', 'status']))
-                    <a href="{{ route('admin.guru-pengajar.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                    <a href="{{ route('admin.guru-pengajar.index', ['tahun_ajaran_id' => request('tahun_ajaran_id')]) }}" class="btn btn-outline-danger btn-sm px-3 rounded-md">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -212,7 +212,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
 {{-- Modal Konfirmasi Sinkronisasi --}}
 <div class="modal fade" id="modalSinkronkan" tabindex="-1" aria-labelledby="modalSinkronkanLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+        <div class="modal-content border-0 shadow sync-modal-content">
             <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top">
                 <h5 class="modal-title fw-bold text-dark m-0 d-flex align-items-center gap-2" id="modalSinkronkanLabel">
                     <i class="fas fa-sync-alt text-warning"></i> Konfirmasi Sinkronisasi
@@ -222,7 +222,7 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
             <div class="modal-body px-4 py-4">
                 <div class="d-flex gap-3 align-items-start">
                     <div class="flex-shrink-0">
-                        <div class="rounded-circle bg-label-warning d-inline-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <div class="rounded-circle bg-label-warning d-inline-flex align-items-center justify-content-center sync-icon-wrap">
                             <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
                         </div>
                     </div>
@@ -233,15 +233,15 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
                 </div>
             </div>
             <div class="modal-footer px-4 py-3 bg-light border-top">
-                <button type="button" class="btn btn-secondary fw-medium" data-bs-dismiss="modal" style="border-radius: 8px;">
+                <button type="button" class="btn btn-secondary fw-medium rounded-md" data-bs-dismiss="modal">
                     Batal
                 </button>
-                <form action="{{ route('admin.guru-pengajar.rebuild') }}" method="POST" style="display: inline;">
+                <form action="{{ route('admin.guru-pengajar.rebuild') }}" method="POST" class="inline-form">
                     @csrf
                     @if(request('tahun_ajaran_id'))
                         <input type="hidden" name="tahun_ajaran_id" value="{{ request('tahun_ajaran_id') }}">
                     @endif
-                    <button type="submit" class="btn btn-warning text-white fw-medium d-flex align-items-center gap-2 text-white" style="border-radius: 8px;">
+                    <button type="submit" class="btn btn-warning text-white fw-medium d-flex align-items-center gap-2 text-white rounded-md">
                         <i class="fas fa-sync-alt"></i> Ya, Sinkronkan
                     </button>
                 </form>
@@ -251,3 +251,6 @@ Kelola penugasan guru pengajar {{ $currentTahunAjaran ? '- ' . $currentTahunAjar
 </div>
 @endsection
 
+@section('scripts')
+    @vite('resources/js/admin/guru-pengajar/index.js')
+@endsection

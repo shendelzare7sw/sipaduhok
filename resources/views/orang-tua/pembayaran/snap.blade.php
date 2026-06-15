@@ -7,8 +7,16 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/orang-tua/pembayaran/snap.css'])
+@endsection
+
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container-xxl flex-grow-1 container-p-y parent-snap-page"
+        data-snap-token="{{ $snapToken }}"
+        data-finish-url="{{ route('orang-tua.pembayaran.snap.finish') }}"
+        data-midtrans-url="https://app.{{ \App\Models\InfoPembayaran::getInstance()->midtrans_is_production ? '' : 'sandbox.' }}midtrans.com/snap/snap.js"
+        data-client-key="{{ $clientKey }}">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow-sm">
@@ -33,7 +41,7 @@
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <span class="small">
                                                 {{ $item->tagihan->getLabelJenis($item->tagihan->jenis_tagihan) }}
-                                                <div class="text-muted fst-italic" style="font-size: 0.85em;">
+                                                <div class="text-muted fst-italic snap-item-note">
                                                     {{ $item->tagihan->nama_tagihan }}</div>
                                             </span>
                                             <span class="fw-bold small">Rp
@@ -94,7 +102,7 @@
                         </p>
                     </div>
                     <div class="modal-footer border-0 justify-content-center">
-                        <button type="button" class="btn btn-primary" onclick="retryPayment()">
+                        <button type="button" class="btn btn-primary" data-retry-payment>
                             <i class="fas fa-redo me-1"></i>
                             Coba Lagi
                         </button>
@@ -126,7 +134,7 @@
                         </p>
                     </div>
                     <div class="modal-footer border-0 justify-content-center">
-                        <button type="button" class="btn btn-primary" onclick="retryPayment()">
+                        <button type="button" class="btn btn-primary" data-retry-payment>
                             <i class="fas fa-redo me-1"></i>
                             Coba Lagi
                         </button>
@@ -143,60 +151,5 @@
 @endsection
 
 @section('scripts')
-    <script
-        src="https://app.{{ \App\Models\InfoPembayaran::getInstance()->midtrans_is_production ? '' : 'sandbox.' }}midtrans.com/snap/snap.js"
-        data-client-key="{{ $clientKey }}"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const payButton = document.getElementById('pay-button');
-            const snapToken = @json($snapToken);
-
-            payButton.addEventListener('click', function () {
-                // Trigger snap payment
-                window.snap.pay(snapToken, {
-                    onSuccess: function (result) {
-                        console.log('Payment success:', result);
-                        window.location.href = '{{ route("orang-tua.pembayaran.snap.finish") }}?order_id=' + result.order_id + '&status_code=' + result.status_code + '&transaction_status=' + result.transaction_status;
-                    },
-                    onPending: function (result) {
-                        console.log('Payment pending:', result);
-                        window.location.href = '{{ route("orang-tua.pembayaran.snap.finish") }}?order_id=' + result.order_id + '&status_code=' + result.status_code + '&transaction_status=' + result.transaction_status;
-                    },
-                    onError: function (result) {
-                        console.log('Payment error:', result);
-                        // Show error modal instead of alert
-                        document.getElementById('errorMessage').textContent = 'Pembayaran gagal: ' + (result.status_message || 'Terjadi kesalahan');
-                        const errorModal = new bootstrap.Modal(document.getElementById('paymentErrorModal'));
-                        errorModal.show();
-                    },
-                    onClose: function () {
-                        console.log('Customer closed the popup without finishing the payment');
-                        // Show cancelled modal instead of alert
-                        const cancelModal = new bootstrap.Modal(document.getElementById('paymentCancelledModal'));
-                        cancelModal.show();
-                    }
-                });
-            });
-
-            // Auto-trigger payment on page load (optional)
-            // Uncomment if you want to auto-open Snap popup
-            // setTimeout(function() {
-            //     payButton.click();
-            // }, 500);
-        });
-
-        // Function to retry payment after cancellation or error
-        function retryPayment() {
-            // Hide any open modals
-            const cancelModal = bootstrap.Modal.getInstance(document.getElementById('paymentCancelledModal'));
-            const errorModal = bootstrap.Modal.getInstance(document.getElementById('paymentErrorModal'));
-
-            if (cancelModal) cancelModal.hide();
-            if (errorModal) errorModal.hide();
-
-            // Re-trigger payment
-            document.getElementById('pay-button').click();
-        }
-    </script>
+    @vite(['resources/js/orang-tua/pembayaran/snap.js'])
 @endsection

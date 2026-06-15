@@ -1,0 +1,15 @@
+.file-preview-modal {
+    z-index: 1055;
+}
+
+.file-preview-image {
+    max-height: 80vh;
+}
+
+.file-preview-pdf-content {
+    height: 90vh;
+}
+
+.file-preview-frame {
+    border: none;
+}

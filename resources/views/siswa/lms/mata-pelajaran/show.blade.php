@@ -7,107 +7,17 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/show.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/siswa/lms/mata-pelajaran/show.js'])
+@endpush
+
 @section('content')
-    <style>
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .item-list {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 16px 0;
-        }
-
-        .item-list:last-child {
-            border-bottom: none;
-        }
-
-        .badge-new {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .date-filter-dropdown {
-            background: #f3f4f6;
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .date-filter-dropdown label {
-            margin: 0;
-            font-weight: 600;
-            color: #374151;
-            white-space: nowrap;
-        }
-
-        .date-filter-dropdown select {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .date-group-header {
-            background: #f9fafb;
-            padding: 12px 16px;
-            border-radius: 6px;
-            margin: 16px 0 12px 0;
-            font-weight: 600;
-            color: #465a6d;
-            border-left: 4px solid #165fac;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            user-select: none;
-            transition: all 0.3s ease;
-        }
-
-        .date-group-header:hover {
-            background: #eff6fc;
-        }
-
-        .date-group-content {
-            display: none;
-            padding-left: 0;
-        }
-
-        .date-group-content.show {
-            display: block;
-        }
-
-        .date-group-icon {
-            transition: transform 0.3s ease;
-            display: inline-block;
-            margin-left: auto;
-        }
-
-        .date-group-icon.open {
-            transform: rotate(180deg);
-        }
-
-        .no-items-date {
-            text-align: center;
-            padding: 24px;
-            color: #999;
-            background: #f9fafb;
-            border-radius: 8px;
-            margin-top: 12px;
-        }
-    </style>
-
-    <!-- Breadcrumb -->
+<div class="siswa-lms-mapel-show-page">
+<!-- Breadcrumb -->
     <div class="page-breadcrumb">
         <div class="page-breadcrumb-item">
             <a href="{{ route('siswa.lms.dashboard') }}">
@@ -121,18 +31,18 @@
     </div>
 
     <!-- Header Info -->
-    <div class="section-card" style="background: linear-gradient(135deg, #165fac, #0d3f7a); color: white;">
+    <div class="section-card mapel-hero-card">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2 style="margin: 0 0 8px 0;">
+                <h2 class="mapel-title">
                     <i class="fas fa-book"></i> {{ $mataPelajaran->nama_mapel }}
                 </h2>
-                <p style="margin: 0; opacity: 0.9;">
+                <p class="mapel-meta">
                     Kode Mapel: {{ $mataPelajaran->kode_mapel }} | Jenjang: {{ $mataPelajaran->jenjang }}
                 </p>
             </div>
             <div class="col-md-4 text-end">
-                <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; display: inline-block;">
+                <div class="mapel-icon-box">
                     <i class="fas fa-graduation-cap fa-2x"></i>
                 </div>
             </div>
@@ -141,7 +51,7 @@
 
     <!-- 1. MATERI -->
     <div class="section-card">
-        <h3 style="color: #165fac; margin-bottom: 20px;">
+        <h3 class="section-heading">
             <i class="fas fa-file-alt"></i> Materi Pembelajaran
         </h3>
 
@@ -170,7 +80,7 @@
         @if(count($materiByDate) > 0)
             @foreach($materiByDate as $dateKey => $data)
                 @php $isToday = strpos($data['label'], 'Hari Ini') === 0; @endphp
-                <div class="date-group-header" onclick="toggleGroup(this)">
+                <div class="date-group-header">
                     <span>{{ $data['label'] }} ({{ count($data['items']) }})</span>
                     <i class="fas fa-chevron-down date-group-icon {{ $isToday ? 'open' : '' }}"></i>
                 </div>
@@ -178,19 +88,19 @@
                     @foreach($data['items'] as $materi)
                         <div class="item-list">
                             <div class="d-flex justify-content-between align-items-start">
-                                <div style="flex: 1;">
-                                    <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
+                                <div class="item-content">
+                                    <h5 class="item-title">
                                         {{ $materi->judul_materi }}
                                         @if($materi->created_at->diffInDays(now()) < 3)
                                             <span class="badge-new">BARU</span>
                                         @endif
                                     </h5>
-                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
+                                    <p class="item-description">
                                         {{ Str::limit($materi->deskripsi, 150) }}
                                     </p>
-                                    <small style="color: #999;">
+                                    <small class="item-meta">
                                         <i class="fas fa-file me-1"></i> {{ strtoupper($materi->tipe_file ?? 'File') }}
-                                        <span class="mx-2">•</span>
+                                        <span class="mx-2">-</span>
                                         <i class="far fa-clock me-1"></i> {{ $materi->created_at->format('H:i') }}
                                     </small>
                                 </div>
@@ -208,14 +118,14 @@
         @else
             <div class="no-items-date">
                 <i class="fas fa-folder-open fa-2x mb-2"></i>
-                <p style="margin: 0;">Belum ada materi yang tersedia</p>
+                <p class="empty-text">Belum ada materi yang tersedia</p>
             </div>
         @endif
     </div>
 
     <!-- 2. TUGAS -->
     <div class="section-card">
-        <h3 style="color: #165fac; margin-bottom: 20px;">
+        <h3 class="section-heading">
             <i class="fas fa-tasks"></i> Tugas
         </h3>
 
@@ -244,7 +154,7 @@
         @if(count($tugasByDate) > 0)
             @foreach($tugasByDate as $dateKey => $data)
                 @php $isToday = strpos($data['label'], 'Hari Ini') === 0; @endphp
-                <div class="date-group-header" onclick="toggleGroup(this)">
+                <div class="date-group-header">
                     <span>{{ $data['label'] }} ({{ count($data['items']) }})</span>
                     <i class="fas fa-chevron-down date-group-icon {{ $isToday ? 'open' : '' }}"></i>
                 </div>
@@ -252,8 +162,8 @@
                     @foreach($data['items'] as $tugas)
                         <div class="item-list">
                             <div class="d-flex justify-content-between align-items-start">
-                                <div style="flex: 1;">
-                                    <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
+                                <div class="item-content">
+                                    <h5 class="item-title">
                                         {{ $tugas->judul_tugas }}
                                         @if($tugas->tanggal_deadline->isFuture())
                                             <span class="badge bg-success">Aktif</span>
@@ -261,16 +171,16 @@
                                             <span class="badge bg-secondary">Ditutup</span>
                                         @endif
                                     </h5>
-                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
+                                    <p class="item-description">
                                         {{ Str::limit($tugas->deskripsi, 150) }}
                                     </p>
-                                    <small style="color: #999;">
+                                    <small class="item-meta">
                                         <i class="fas fa-clock"></i>
                                         {{ $tugas->tanggal_deadline->format('H:i') }}
                                         @if($tugas->tanggal_deadline->isFuture())
-                                            <span style="color: #10b981;">({{ $tugas->tanggal_deadline->copy()->locale('id')->diffForHumans() }})</span>
+                                            <span class="deadline-safe-text">({{ $tugas->tanggal_deadline->copy()->locale('id')->diffForHumans() }})</span>
                                         @else
-                                            <span style="color: #dc2626;">(Sudah Lewat)</span>
+                                            <span class="deadline-expired-text">(Sudah Lewat)</span>
                                         @endif
                                     </small>
                                 </div>
@@ -288,14 +198,14 @@
         @else
             <div class="no-items-date">
                 <i class="fas fa-clipboard-list fa-2x mb-2"></i>
-                <p style="margin: 0;">Belum ada tugas yang tersedia</p>
+                <p class="empty-text">Belum ada tugas yang tersedia</p>
             </div>
         @endif
     </div>
 
     <!-- 3. LATIHAN -->
     <div class="section-card">
-        <h3 style="color: #165fac; margin-bottom: 20px;">
+        <h3 class="section-heading">
             <i class="fas fa-pencil-ruler"></i> Latihan
         </h3>
 
@@ -330,7 +240,7 @@
         @if(count($latihanByDate) > 0)
             @foreach($latihanByDate as $dateKey => $data)
                 @php $isToday = strpos($data['label'], 'Hari Ini') === 0; @endphp
-                <div class="date-group-header" onclick="toggleGroup(this)">
+                <div class="date-group-header">
                     <span>{{ $data['label'] }} ({{ count($data['items']) }})</span>
                     <i class="fas fa-chevron-down date-group-icon {{ $isToday ? 'open' : '' }}"></i>
                 </div>
@@ -338,17 +248,17 @@
                     @foreach($data['items'] as $latihan)
                         <div class="item-list">
                             <div class="d-flex justify-content-between align-items-start">
-                                <div style="flex: 1;">
-                                    <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
+                                <div class="item-content">
+                                    <h5 class="item-title">
                                         {{ $latihan->judul_ujian }}
-                                        <span class="badge" style="background: #06b6d4; color: white;">
+                                        <span class="badge content-type-badge-latihan">
                                             Latihan
                                         </span>
                                     </h5>
-                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
+                                    <p class="item-description">
                                         {{ $latihan->deskripsi ?? 'Latihan pembelajaran interaktif' }}
                                     </p>
-                                    <small style="color: #999;">
+                                    <small class="item-meta">
                                         <i class="fas fa-stopwatch"></i> Durasi:
                                         {{ $latihan->durasi_menit > 0 ? $latihan->durasi_menit . ' menit' : 'Tidak terbatas' }}
                                         | <i class="fas fa-clock"></i> {{ $latihan->tanggal_mulai->format('H:i') }} - {{ $latihan->tanggal_selesai->format('H:i') }}
@@ -356,7 +266,7 @@
                                 </div>
                                 <div>
                                     @if(!$latihan->is_active)
-                                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                        <button class="btn btn-secondary btn-sm btn-disabled-muted" disabled>
                                             <i class="fas fa-lock me-1"></i> Belum Dirilis
                                         </button>
                                     @elseif($latihan->isOngoing())
@@ -389,14 +299,14 @@
         @else
             <div class="no-items-date">
                 <i class="fas fa-pencil-ruler fa-2x mb-2"></i>
-                <p style="margin: 0;">Belum ada latihan yang tersedia</p>
+                <p class="empty-text">Belum ada latihan yang tersedia</p>
             </div>
         @endif
     </div>
 
     <!-- 4. UJIAN -->
     <div class="section-card">
-        <h3 style="color: #165fac; margin-bottom: 20px;">
+        <h3 class="section-heading">
             <i class="fas fa-file-signature"></i> Ujian
         </h3>
 
@@ -425,7 +335,7 @@
         @if(count($ujianByDate) > 0)
             @foreach($ujianByDate as $dateKey => $data)
                 @php $isToday = strpos($data['label'], 'Hari Ini') === 0; @endphp
-                <div class="date-group-header" onclick="toggleGroup(this)">
+                <div class="date-group-header">
                     <span>{{ $data['label'] }} ({{ count($data['items']) }})</span>
                     <i class="fas fa-chevron-down date-group-icon {{ $isToday ? 'open' : '' }}"></i>
                 </div>
@@ -433,17 +343,17 @@
                     @foreach($data['items'] as $ujian)
                         <div class="item-list">
                             <div class="d-flex justify-content-between align-items-start">
-                                <div style="flex: 1;">
-                                    <h5 style="margin: 0 0 8px 0; color: #1a1a1a;">
+                                <div class="item-content">
+                                    <h5 class="item-title">
                                         {{ $ujian->judul_ujian }}
-                                        <span class="badge" style="background: #8b5cf6; color: white;">
+                                        <span class="badge content-type-badge-ujian">
                                             {{ $ujian->tipe_label }}
                                         </span>
                                     </h5>
-                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 14px;">
+                                    <p class="item-description">
                                         {{ $ujian->deskripsi ?? 'Ujian ' . $ujian->tipe_label }}
                                     </p>
-                                    <small style="color: #999;">
+                                    <small class="item-meta">
                                         <i class="fas fa-stopwatch"></i> Durasi:
                                         {{ $ujian->durasi_menit > 0 ? $ujian->durasi_menit . ' menit' : 'Tidak terbatas' }}
                                         | <i class="fas fa-clock"></i> {{ $ujian->tanggal_mulai->format('H:i') }} - {{ $ujian->tanggal_selesai->format('H:i') }}
@@ -451,13 +361,13 @@
                                 </div>
                                 <div>
                                     @if(!$ujian->is_active)
-                                        <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                        <button class="btn btn-secondary btn-sm btn-disabled-muted" disabled>
                                             <i class="fas fa-lock me-1"></i> Belum Dirilis
                                         </button>
                                     @elseif($ujian->isOngoing())
                                         @php $aksesService = app(\App\Services\ValidasiAksesService::class); @endphp
                                         @if($ujian->requiresValidation() && (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali))
-                                            <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                            <button class="btn btn-secondary btn-sm btn-disabled-muted" disabled>
                                                 <i class="fas fa-lock me-1"></i> Belum Memiliki Akses
                                             </button>
                                         @else
@@ -491,7 +401,7 @@
         @else
             <div class="no-items-date">
                 <i class="fas fa-pen-square fa-2x mb-2"></i>
-                <p style="margin: 0;">Belum ada ujian yang tersedia</p>
+                <p class="empty-text">Belum ada ujian yang tersedia</p>
             </div>
         @endif
     </div>
@@ -499,7 +409,7 @@
     <!-- 5. Forum Diskusi -->
     <div class="section-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 style="color: #165fac; margin: 0;">
+            <h3 class="section-heading-inline">
                 <i class="fas fa-comments"></i> Forum Diskusi
             </h3>
             <a href="{{ route('siswa.lms.mapel.forum.index', $mataPelajaran->id) }}" class="btn btn-outline-primary btn-sm">
@@ -519,35 +429,34 @@
 
         @forelse($latestForums as $forum)
             <a href="{{ route('siswa.lms.mapel.forum.show', [$mataPelajaran->id, $forum->id]) }}"
-                class="item-list d-flex justify-content-between align-items-center text-decoration-none text-dark"
-                style="display: block; padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px;">
+                class="item-list forum-preview-link d-flex justify-content-between align-items-center text-decoration-none text-dark">
                 <div>
-                    <h6 class="mb-1" style="font-weight: 600;">
+                    <h6 class="mb-1 forum-preview-title">
                         @if($forum->is_pinned)<i class="fas fa-thumbtack text-warning me-1"></i>@endif
                         {{ Str::limit($forum->judul, 50) }}
                     </h6>
                     <small class="text-muted">
                         <i class="fas fa-user me-1"></i>{{ $forum->user->name ?? 'Guru' }}
-                        <span class="mx-2">•</span>
+                        <span class="mx-2">-</span>
                         <i class="far fa-clock me-1"></i>{{ $forum->created_at->copy()->locale('id')->diffForHumans() }}
                     </small>
                 </div>
-                <span class="badge bg-primary" style="font-size: 12px;">
+                <span class="badge bg-primary forum-reply-badge">
                     <i class="fas fa-comment me-1"></i>{{ $forum->replies->count() }}
                 </span>
             </a>
         @empty
-            <div style="text-align: center; padding: 24px; background: #f9fafb; border-radius: 8px;">
-                <i class="fas fa-comments fa-2x mb-2" style="color: #ccc;"></i>
-                <p style="margin: 0; color: #666;">Belum ada diskusi untuk mata pelajaran ini</p>
+            <div class="empty-preview">
+                <i class="fas fa-comments fa-2x mb-2 empty-preview-icon"></i>
+                <p class="empty-preview-text">Belum ada diskusi untuk mata pelajaran ini</p>
             </div>
         @endforelse
     </div>
 
     <!-- 6. KELAS VIRTUAL (Meeting) -->
-    <div class="section-card" style="border-left: 5px solid #10b981;">
+    <div class="section-card meeting-section-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 style="color: #10b981; margin: 0;">
+            <h3 class="section-heading-success">
                 <i class="fas fa-video"></i> Kelas Virtual (Meeting)
             </h3>
             <a href="{{ route('siswa.lms.mapel.meeting.index', $mataPelajaran->id) }}"
@@ -578,7 +487,7 @@
                             <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Live</span>
                         @endif
 
-                        <h5 class="mt-2 mb-1 fw-bold" style="color: #1a1a1a;">{{ $meeting->judul }}</h5>
+                        <h5 class="mt-2 mb-1 fw-bold meeting-title">{{ $meeting->judul }}</h5>
                         <small class="text-muted">
                             <i class="far fa-calendar-alt me-1"></i> {{ $meeting->waktu_mulai->translatedFormat('d M Y') }}
                             <i class="far fa-clock ms-2 me-1"></i> {{ $meeting->waktu_mulai->format('H:i') }}
@@ -592,20 +501,11 @@
                 </div>
             </div>
         @empty
-            <div style="text-align: center; padding: 24px;">
-                <i class="fas fa-video fa-2x mb-2" style="color: #ccc;"></i>
-                <p style="margin: 0; color: #666;">Belum ada jadwal meeting aktif saat ini</p>
+            <div class="empty-preview">
+                <i class="fas fa-video fa-2x mb-2 empty-preview-icon"></i>
+                <p class="empty-preview-text">Belum ada jadwal meeting aktif saat ini</p>
             </div>
         @endforelse
     </div>
-
-    <script>
-        function toggleGroup(header) {
-            const content = header.nextElementSibling;
-            const icon = header.querySelector('.date-group-icon');
-
-            content.classList.toggle('show');
-            icon.classList.toggle('open');
-        }
-    </script>
+</div>
 @endsection

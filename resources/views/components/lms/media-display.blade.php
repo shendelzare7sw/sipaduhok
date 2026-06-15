@@ -9,13 +9,19 @@
     $isOffice = in_array($extension, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
 @endphp
 
+@once
+    @push('styles')
+        @vite(['resources/css/components/lms/media-display.css'])
+    @endpush
+@endonce
+
 <div class="media-attachment mt-3">
     @if($isImage)
         <a href="{{ $url }}" target="_blank">
-            <img src="{{ $url }}" alt="Lampiran" class="img-fluid rounded border" style="max-height: 400px;">
+            <img src="{{ $url }}" alt="Lampiran" class="img-fluid rounded border lms-media-display-preview">
         </a>
     @elseif($isVideo)
-        <video controls class="w-100 rounded border" style="max-height: 400px;">
+        <video controls class="w-100 rounded border lms-media-display-preview">
             <source src="{{ $url }}" type="video/{{ $extension }}">
             Browser Anda tidak mendukung pemutaran video.
         </video>

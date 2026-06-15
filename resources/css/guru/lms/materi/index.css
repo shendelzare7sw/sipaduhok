@@ -1,0 +1,76 @@
+.guru-lms-materi-page .date-pill {
+    white-space: nowrap;
+}
+
+.guru-lms-materi-page .file-badge {
+    font-size: 0.7rem;
+}
+
+.guru-lms-materi-page .time-meta {
+    font-size: 0.75rem;
+}
+
+.guru-lms-materi-page .materi-description {
+    line-height: 1.6;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.guru-lms-materi-page .empty-icon {
+    font-size: 64px;
+    opacity: 0.3;
+}
+
+.guru-lms-materi-page .delete-form {
+    display: inline;
+}
+
+.guru-lms-materi-page .hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.guru-lms-materi-page .transition-all {
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 767.98px) {
+    .guru-lms-materi-page .card-body {
+        padding: 0.75rem !important;
+    }
+
+    .guru-lms-materi-page .btn-sm {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .guru-lms-materi-page .badge {
+        font-size: 0.65rem !important;
+    }
+
+    .guru-lms-materi-page .small {
+        font-size: 0.75rem !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .guru-lms-materi-page .w-md-auto,
+    .guru-lms-materi-page .w-sm-auto {
+        width: auto !important;
+    }
+
+    .guru-lms-materi-page .flex-md-row {
+        flex-direction: row;
+    }
+
+    .guru-lms-materi-page .align-md-items-center {
+        align-items: center;
+    }
+
+    .guru-lms-materi-page .fs-md-4 {
+        font-size: 1.5rem !important;
+    }
+}

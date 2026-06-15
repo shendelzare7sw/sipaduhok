@@ -1,0 +1,198 @@
+.siswa-lms-jadwal-page .schedule-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 24px;
+}
+
+.siswa-lms-jadwal-page .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 800px;
+}
+
+.siswa-lms-jadwal-page .schedule-table th {
+    background: linear-gradient(135deg, #1565c0, #0d47a1);
+    color: white;
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid #0d47a1;
+}
+
+.siswa-lms-jadwal-page .schedule-time-heading {
+    width: 100px;
+}
+
+.siswa-lms-jadwal-page .schedule-table td {
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+    vertical-align: middle;
+    min-width: 100px;
+}
+
+.siswa-lms-jadwal-page .schedule-table .time-cell {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+    font-family: Monaco, Consolas, monospace;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.siswa-lms-jadwal-page .schedule-table .subject-cell {
+    background: white;
+    transition: all 0.2s;
+}
+
+.siswa-lms-jadwal-page .schedule-table .subject-cell:hover {
+    background: #dbeafe;
+}
+
+.siswa-lms-jadwal-page .schedule-table .break-cell {
+    background: #fef9c3;
+    color: #854d0e;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.siswa-lms-jadwal-page .section-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    height: 100%;
+}
+
+.siswa-lms-jadwal-page .section-header {
+    background: linear-gradient(135deg, #1565c0, #0d47a1);
+    color: white;
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 15px;
+    border-bottom: none;
+}
+
+.siswa-lms-jadwal-page .section-body {
+    padding: 16px;
+}
+
+.siswa-lms-jadwal-page .today-link {
+    display: block;
+    padding: 10px 14px;
+    color: #1565c0;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: #f8fafc;
+}
+
+.siswa-lms-jadwal-page .today-link:hover {
+    background: #dbeafe;
+    color: #0d47a1;
+    transform: translateX(4px);
+}
+
+.siswa-lms-jadwal-page .today-link i {
+    margin-left: 8px;
+    font-size: 11px;
+}
+
+.siswa-lms-jadwal-page .subject-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.siswa-lms-jadwal-page .subject-item {
+    display: inline-block;
+    padding: 8px 14px;
+    background: #f1f5f9;
+    color: #1565c0;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.siswa-lms-jadwal-page .subject-item:hover {
+    background: #dbeafe;
+    color: #0d47a1;
+}
+
+.siswa-lms-jadwal-page .subject-item.is-hidden {
+    display: none;
+}
+
+.siswa-lms-jadwal-page .subject-item-icon {
+    font-size: 10px;
+}
+
+.siswa-lms-jadwal-page .search-input-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.siswa-lms-jadwal-page .search-input-wrapper input {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.siswa-lms-jadwal-page .search-input-wrapper input:focus {
+    border-color: #1565c0;
+}
+
+.siswa-lms-jadwal-page .search-input-wrapper i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+}
+
+.siswa-lms-jadwal-page .empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.siswa-lms-jadwal-page .class-info-header {
+    background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.siswa-lms-jadwal-page .class-info-header h5 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.siswa-lms-jadwal-page .class-info-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.siswa-lms-jadwal-page .class-info-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

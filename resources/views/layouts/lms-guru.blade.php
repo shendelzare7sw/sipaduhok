@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -8,362 +8,16 @@
 
     <title>@yield('title', 'LMS Guru') - HOK Teaching</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    @stack('styles')
-
-    <style>
-        :root {
-            --primary: #165fac;
-            --primary-dark: #0d3f7a;
-            --accent-orange: #ea580c;
-            --sidebar-width: 280px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f8f9fa;
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        /* Sidebar */
-        .sidebar-lms {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar-logo {
-            padding: 24px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-        }
-
-        .sidebar-logo img {
-            width: 80px;
-            height: 60px;
-            object-fit: contain;
-        }
-
-        .sidebar-logo h4 {
-            margin-top: 12px;
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-
-        .nav-section-title {
-            padding: 8px 20px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.6;
-            margin-top: 16px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: rgba(255, 255, 255, 0.85);
-            text-decoration: none;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
-        }
-
-        .nav-link i {
-            width: 24px;
-            margin-right: 12px;
-        }
-
-        .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left-color: var(--accent-orange);
-        }
-
-        .nav-link.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-left-color: white;
-            font-weight: 600;
-        }
-
-        .badge-notif {
-            margin-left: auto;
-            background: #dc2626;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-        }
-
-        /* Main Content */
-        .main-content-lms {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            width: calc(100% - var(--sidebar-width));
-        }
-
-        /* Header */
-        .header-lms {
-            background: white;
-            padding: 20px 32px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .header-left h1 {
-            font-size: 24px;
-            color: var(--primary);
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .header-left p {
-            font-size: 13px;
-            color: #666;
-            margin: 4px 0 0 0;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-
-        /* Content */
-        .content-lms {
-            padding: 32px;
-            flex: 1;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        }
-
-        .stat-card .stat-label {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .stat-card .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .cursor-pointer {
-            cursor: pointer;
-            transition: all 0.2s ease;
-            padding: 4px 12px;
-            border-radius: 8px;
-        }
-
-        .cursor-pointer:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        /* Card Custom */
-        .card-custom {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 24px;
-        }
-
-        .card-header-custom {
-            padding: 20px 24px;
-            background: #f9fafb;
-            border-bottom: 1px solid #e5e7eb;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        /* Sidebar Toggle Button */
-        .sidebar-toggle {
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            margin-right: 16px;
-            transition: color 0.3s;
-        }
-
-        .sidebar-toggle:hover {
-            color: var(--primary-dark);
-        }
-
-        /* Desktop Collapse State */
-        @media (min-width: 769px) {
-            body.sidebar-collapsed .sidebar-lms {
-                transform: translateX(-100%);
-            }
-
-            body.sidebar-collapsed .main-content-lms {
-                margin-left: 0;
-                width: 100%;
-            }
-        }
-
-        /* Mobile specific adjustments */
-        @media (max-width: 992px) {
-            :root {
-                --sidebar-width: 260px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar-lms {
-                transform: translateX(-100%);
-            }
-
-            .sidebar-lms.active {
-                transform: translateX(0) !important;
-            }
-
-            .main-content-lms {
-                margin-left: 0 !important;
-                width: 100% !important;
-                min-width: 100%;
-            }
-
-            .sidebar-toggle {
-                display: block;
-            }
-
-            /* Reduce header padding on mobile */
-            .header-lms {
-                padding: 12px 16px;
-            }
-
-            /* Reduce content padding on mobile */
-            .content-lms {
-                padding: 16px;
-            }
-
-            /* Header title smaller on mobile */
-            .header-left h1 {
-                font-size: 18px;
-            }
-
-            .header-left p {
-                font-size: 12px;
-            }
-
-            /* Stats cards: single column */
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .stat-card {
-                padding: 16px;
-            }
-
-            .stat-card .stat-value {
-                font-size: 24px;
-            }
-
-            /* Tables scrollable on mobile */
-            .table-responsive {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            /* Modals: keep auto margin for horizontal centering */
-            .modal-dialog {
-                margin: 0.5rem auto;
-            }
-        }
-
-        /* Overlay for mobile */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar-overlay.active {
-                display: block;
-            }
-        }
-
-    </style>
-
+    @vite([
+        'resources/css/layouts/lms-guru.css',
+        'resources/css/components/notification-bell.css',
+        'resources/css/guru/partials/sidebar-lms.css',
+    ])
+    @auth
+        @if(canAccessChatbot(auth()->user()->role))
+            @vite(['resources/css/components/ai-chatbot.css'])
+        @endif
+    @endauth
     @stack('styles')
 </head>
 
@@ -403,13 +57,13 @@
                         <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown"
                             aria-expanded="false">
                             <div class="d-none d-md-flex flex-column text-end">
-                                <span class="fw-semibold" style="font-size: 14px;">{{ auth()->user()->name }}</span>
-                                <small class="text-muted" style="font-size: 12px;">Guru</small>
+                                <span class="fw-semibold layout-user-name">{{ auth()->user()->name }}</span>
+                                <small class="text-muted layout-user-role">Guru</small>
                             </div>
                             <div class="user-avatar">
                                 @if(auth()->user()->foto_profil)
                                     <img src="{{ asset('storage/' . auth()->user()->foto_profil) }}" alt="Avatar"
-                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                        class="layout-user-avatar-img">
                                 @else
                                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                                 @endif
@@ -466,77 +120,25 @@
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Disable Popper for the notification dropdown. The notification-bell
-            // component positions the dropdown via inline `!important` styles, but
-            // Popper writes to .style.top / .style.left on scroll/resize, which
-            // strips the `!important` markers (CSSOM behavior) and snaps the
-            // dropdown back to Bootstrap's default dropdown-menu-end position —
-            // visible as a sudden shrink on scroll under our sticky header.
-            // Sneat doesn't hit this because its navbar isn't sticky on mobile.
-            const notifTrigger = document.getElementById('notificationDropdown');
-            if (notifTrigger) {
-                notifTrigger.setAttribute('data-bs-display', 'static');
-            }
-
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const body = document.body;
-
-            function toggleSidebar() {
-                if (window.innerWidth > 768) {
-                    // Desktop: Toggle collapse on body
-                    body.classList.toggle('sidebar-collapsed');
-                } else {
-                    // Mobile: Toggle active on sidebar and overlay
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                }
-            }
-
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', toggleSidebar);
-            }
-
-            if (overlay) {
-                overlay.addEventListener('click', toggleSidebar);
-            }
-
-            // Clean up state on resize
-            window.addEventListener('resize', function() {
-                if (window.innerWidth > 768) {
-                    // If resizing to desktop, remove active class from sidebar and overlay
-                    // to prevent them from getting stuck in "mobile open" state
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                }
-            });
-        });
-    </script>
-
     <!-- Logout Modal -->
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-content border-0 shadow-lg lms-logout-modal">
                 <div class="modal-header border-0 pb-0 px-4 pt-4">
                     <div class="d-flex align-items-center gap-2">
-                        <div style="width:36px;height:36px;background:#fee2e2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <i class="fas fa-sign-out-alt" style="color:#dc2626;font-size:16px;"></i>
+                        <div class="lms-logout-icon">
+                            <i class="fas fa-sign-out-alt lms-logout-icon-symbol"></i>
                         </div>
-                        <h5 class="modal-title mb-0 fw-bold" id="logoutModalLabel" style="font-size:16px;">Konfirmasi Logout</h5>
+                        <h5 class="modal-title mb-0 fw-bold lms-logout-title" id="logoutModalLabel">Konfirmasi Logout</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    <p class="mb-1" style="font-size:14px;">Apakah Anda yakin ingin keluar dari sistem LMS?</p>
+                    <p class="mb-1 lms-logout-text">Apakah Anda yakin ingin keluar dari sistem LMS?</p>
                     <small class="text-muted">Anda perlu login kembali untuk mengakses panel Guru.</small>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2 flex-nowrap">
-                    <button type="button" class="btn btn-light btn-sm fw-semibold flex-fill" data-bs-dismiss="modal" style="border:1px solid #e5e7eb;">
+                    <button type="button" class="btn btn-light btn-sm fw-semibold flex-fill lms-logout-cancel" data-bs-dismiss="modal">
                         <i class="fas fa-times me-1"></i> Batal
                     </button>
                     <form action="{{ route('logout') }}" method="POST" class="flex-fill d-flex">
@@ -550,12 +152,17 @@
         </div>
     </div>
 
+    @vite([
+        'resources/js/layouts/lms-guru.js',
+        'resources/js/components/notification-bell.js',
+    ])
     @stack('modals')
     @stack('scripts')
 
     {{-- AI Chatbot Integration (Role-based access) --}}
     @auth
         @if(canAccessChatbot(auth()->user()->role))
+            @vite(['resources/js/components/ai-chatbot.js'])
             @include('components.ai-chatbot')
         @endif
     @endauth

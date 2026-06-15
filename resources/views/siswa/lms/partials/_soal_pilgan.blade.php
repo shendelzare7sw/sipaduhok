@@ -2,6 +2,14 @@
     Komponen: Pilihan Ganda Biasa (Single Answer)
     Props: $soal, $index, $answers (existing answers array), $disabled
 --}}
+@pushOnce('styles', 'siswa-lms-soal-styles')
+    @vite(['resources/css/siswa/lms/partials/soal.css'])
+@endPushOnce
+
+@pushOnce('scripts', 'siswa-lms-soal-scripts')
+    @vite(['resources/js/siswa/lms/partials/soal.js'])
+@endPushOnce
+
 @php
     $soalData = $soal->pilihan_jawaban ?? [];
     $options = is_array($soalData) ? $soalData : [];
@@ -29,8 +37,7 @@
                    name="jawaban[{{ $soal->id }}]" 
                    value="{{ $letter }}"
                    {{ $existingAnswer == $letter ? 'checked' : '' }}
-                   {{ $disabled ? 'disabled' : '' }}
-                   onchange="updateRadio(this)">
+                   {{ $disabled ? 'disabled' : '' }}>
             <span class="pilihan-letter">{{ $letter }}</span>
             <span class="pilihan-text">{{ $optionText }}</span>
             <span class="pilihan-radio-dot"></span>
@@ -38,40 +45,3 @@
         @endforeach
     </div>
 </div>
-
-<style>
-.pilihan-radio-dot {
-    width: 22px;
-    height: 22px;
-    border: 2px solid #d1d5db;
-    border-radius: 50%;
-    position: relative;
-    flex-shrink: 0;
-}
-.pilihan-radio-dot::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    background: transparent;
-    border-radius: 50%;
-    transition: all 0.2s;
-}
-.pilihan-item.selected .pilihan-radio-dot {
-    border-color: var(--primary, #165fac);
-}
-.pilihan-item.selected .pilihan-radio-dot::after {
-    background: var(--primary, #165fac);
-}
-</style>
-
-<script>
-function updateRadio(input) {
-    const container = input.closest('.pilihan-list');
-    container.querySelectorAll('.pilihan-item').forEach(item => item.classList.remove('selected'));
-    input.closest('.pilihan-item').classList.add('selected');
-}
-</script>

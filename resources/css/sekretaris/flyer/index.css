@@ -1,0 +1,545 @@
+/* Akademik index styles extracted from the former shared loader. */
+.ak-page {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .ak-toolbar,
+    .ak-panel,
+    .ak-card,
+    .ak-filter {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+    }
+
+    .ak-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        margin-bottom: 18px;
+    }
+
+    .ak-toolbar-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .ak-toolbar-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        background: linear-gradient(135deg, #4361ee 0%, #06b6d4 100%);
+        flex: 0 0 auto;
+    }
+
+    .ak-toolbar h5,
+    .ak-panel h5 {
+        margin: 0;
+        color: #1e293b;
+        font-size: 17px;
+        font-weight: 900;
+        line-height: 1.3;
+    }
+
+    .ak-toolbar p {
+        margin: 3px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .ak-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .ak-stats.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ak-stat {
+        position: relative;
+        overflow: hidden;
+        min-height: 108px;
+        padding: 18px;
+        border-radius: 12px;
+        color: #ffffff;
+        box-shadow: 0 12px 26px rgba(67, 97, 238, .14);
+    }
+
+    .ak-stat.primary { background: linear-gradient(135deg, #4361ee 0%, #3b82f6 100%); }
+    .ak-stat.success { background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); }
+    .ak-stat.warning { background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); }
+    .ak-stat.purple { background: linear-gradient(135deg, #8b5cf6 0%, #4361ee 100%); }
+
+    .ak-stat span {
+        display: block;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        opacity: .9;
+    }
+
+    .ak-stat strong {
+        display: block;
+        margin-top: 8px;
+        font-size: 30px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .ak-stat small {
+        display: block;
+        margin-top: 6px;
+        font-size: 12px;
+        opacity: .86;
+    }
+
+    .ak-stat i {
+        position: absolute;
+        right: 16px;
+        bottom: 12px;
+        font-size: 44px;
+        opacity: .18;
+    }
+
+    .ak-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 38px;
+        padding: 8px 13px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 850;
+        text-decoration: none;
+        transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .ak-btn:hover {
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .ak-btn.primary {
+        background: #4361ee;
+        color: #ffffff;
+        box-shadow: 0 10px 18px rgba(67, 97, 238, .22);
+    }
+
+    .ak-btn.primary:hover { color: #ffffff; background: #3651d4; }
+
+    .ak-btn.secondary {
+        background: #f8fafc;
+        color: #334155;
+        border-color: #dbe4f0;
+    }
+
+    .ak-btn.secondary:hover { color: #1e293b; background: #eef2f7; }
+
+    .ak-btn.warning {
+        background: #fffbeb;
+        color: #b45309;
+        border-color: #fde68a;
+    }
+
+    .ak-btn.danger {
+        background: #fff7f7;
+        color: #ef4444;
+        border-color: #fecaca;
+    }
+
+    .ak-btn.danger:hover { color: #dc2626; background: #fee2e2; }
+
+    .ak-icon-btn {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        flex: 0 0 auto;
+    }
+
+    .ak-panel {
+        overflow: hidden;
+    }
+
+    .ak-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 17px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .ak-panel-body {
+        padding: 18px;
+    }
+
+    .ak-filter {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .ak-input,
+    .ak-select {
+        min-height: 40px;
+        padding: 9px 12px;
+        border: 1px solid #dbe4f0;
+        border-radius: 10px;
+        color: #1e293b;
+        background: #ffffff;
+        font-size: 13px;
+    }
+
+    .ak-input:focus,
+    .ak-select:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, .12);
+    }
+
+    .ak-table-wrap {
+        overflow-x: auto;
+    }
+
+    .ak-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .ak-table thead th {
+        padding: 12px 14px;
+        color: #64748b;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .ak-table tbody td {
+        padding: 14px;
+        border-bottom: 1px solid #eef2f7;
+        color: #334155;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .ak-title {
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 900;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .ak-sub {
+        margin-top: 4px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .ak-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 100%;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 900;
+        line-height: 1.2;
+        text-transform: uppercase;
+        overflow-wrap: normal;
+        white-space: nowrap;
+    }
+
+    .ak-badge.primary { color: #3651d4; background: #eef2ff; border: 1px solid #c7d2fe; }
+    .ak-badge.success { color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; }
+    .ak-badge.warning { color: #b45309; background: #fffbeb; border: 1px solid #fde68a; }
+    .ak-badge.danger { color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; }
+    .ak-badge.info { color: #0e7490; background: #ecfeff; border: 1px solid #a5f3fc; }
+    .ak-badge.muted { color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; }
+
+    .ak-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .ak-table th:last-child,
+    .ak-table td:last-child {
+        width: 148px;
+        min-width: 148px;
+    }
+
+    .ak-table th.text-center,
+    .ak-table td.text-center {
+        min-width: 112px;
+    }
+
+    .ak-empty {
+        padding: 44px 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .ak-empty i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 62px;
+        height: 62px;
+        margin-bottom: 14px;
+        border-radius: 18px;
+        color: #4361ee;
+        background: #eef2ff;
+        font-size: 25px;
+    }
+
+    .ak-empty h5 {
+        margin-bottom: 7px;
+        color: #1e293b;
+        font-weight: 900;
+    }
+
+    .ak-pagination {
+        display: flex;
+        justify-content: center;
+        padding: 16px;
+        border-top: 1px solid #e2e8f0;
+        background: #ffffff;
+    }
+
+    .ak-thumb {
+        width: 84px;
+        height: 62px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .ak-flyer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 340px));
+        justify-content: start;
+        align-items: start;
+        gap: 16px;
+    }
+
+    .ak-flyer-card {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
+    }
+
+    .ak-flyer-media {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        background: #f8fafc;
+    }
+
+    .ak-flyer-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ak-flyer-status {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    }
+
+    .ak-flyer-body {
+        padding: 15px;
+    }
+
+    .ak-flyer-meta {
+        display: grid;
+        gap: 7px;
+        margin: 13px 0;
+        padding: 11px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .ak-calendar-skin .calendar-container,
+    .ak-calendar-skin .card,
+    .ak-calendar-skin .legend-card {
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .05) !important;
+    }
+
+    .ak-calendar-skin .calendar-table {
+        border-color: #dbe4f0 !important;
+        border-radius: 12px !important;
+    }
+
+    .ak-calendar-skin .calendar-table th {
+        background: #4361ee !important;
+    }
+
+    .ak-calendar-skin .calendar-title,
+    .ak-calendar-skin .calendar-nav .month-title,
+    .ak-calendar-skin .legend-header {
+        color: #1e293b !important;
+    }
+
+    @media (max-width: 991.98px) {
+        .ak-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ak-stats.three {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ak-flyer-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .ak-page {
+            padding: 0;
+        }
+
+        .ak-toolbar,
+        .ak-panel-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .ak-toolbar-title {
+            align-items: flex-start;
+        }
+
+        .ak-toolbar .ak-btn,
+        .ak-panel-header .ak-btn,
+        .ak-filter .ak-btn,
+        .ak-input,
+        .ak-select {
+            width: 100%;
+        }
+
+        .ak-stats,
+        .ak-stats.three,
+        .ak-flyer-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ak-stat {
+            min-height: 92px;
+            padding: 15px;
+        }
+
+        .ak-stat strong {
+            font-size: 24px;
+        }
+
+        .ak-panel-body {
+            padding: 14px;
+        }
+
+        .ak-table-wrap {
+            overflow: visible;
+        }
+
+        .ak-table thead {
+            display: none;
+        }
+
+        .ak-table,
+        .ak-table tbody,
+        .ak-table tr,
+        .ak-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .ak-table tbody tr {
+            margin-bottom: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .ak-table tbody td {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 11px 13px;
+            border-bottom: 1px solid #eef2f7;
+            text-align: right;
+        }
+
+        .ak-table tbody td::before {
+            content: attr(data-label);
+            flex: 0 0 34%;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .04em;
+            text-align: left;
+            text-transform: uppercase;
+        }
+
+        .ak-table tbody td.ak-main-cell {
+            display: block;
+            text-align: left;
+            background: #f8fafc;
+        }
+
+        .ak-table tbody td.ak-main-cell::before {
+            display: none;
+        }
+
+        .ak-actions {
+            width: 100%;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            white-space: normal;
+        }
+    }

@@ -5,57 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekap Nilai {{ $selectedMapel->nama_mapel }} - {{ $kelas->nama_kelas }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; background: #f0f2f5; color: #000; }
-
-        @media screen {
-            .ctrl-bar {
-                position: fixed; top: 0; left: 0; right: 0; height: 46px;
-                background: #2c3340; color: #fff; display: flex; align-items: center;
-                justify-content: space-between; padding: 0 14px; z-index: 9999; gap: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,.4);
-            }
-            .btn-c {
-                background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.28);
-                padding: 7px 14px; border-radius: 5px; cursor: pointer; font-size: 14px;
-                font-weight: 700; line-height: 1; display: inline-flex; align-items: center; gap: 5px;
-            }
-            .btn-print { background: #dc3545 !important; border-color: #dc3545 !important; }
-            .zoom-group { display: flex; align-items: center; gap: 6px; }
-            .zoom-label { min-width: 46px; text-align: center; font-size: 12px; font-weight: 700; color: #d0d0d0; }
-            body { padding-top: 54px; }
-            #scaleWrapper { display: flex; justify-content: center; overflow-x: auto; padding: 20px 10px 50px; min-height: calc(100vh - 54px); }
-            .page-container { background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.15); width: 1058px; min-height: 750px; padding: 18px 22px; flex-shrink: 0; }
-        }
-
-        @media print {
-            @page { size: A4 landscape; margin: 6mm; }
-            .ctrl-bar { display: none !important; }
-            body { background: #fff; padding: 0; font-size: 8.5pt; }
-            #scaleWrapper { display: block; padding: 0; }
-            .page-container { box-shadow: none; padding: 0; width: 100%; min-height: auto; zoom: 1 !important; }
-            tr { page-break-inside: avoid; }
-        }
-
-        .info-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #ccc; font-size: 8.5pt;
-        }
-        .semester-badge {
-            display: inline-block; background: #e3f2fd; border: 1px solid #90caf9;
-            color: #1565c0; border-radius: 4px; padding: 2px 10px; font-size: 8pt; font-weight: bold;
-        }
-        table.data { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
-        table.data th, table.data td { border: 1px solid #444; padding: 4px 3px; vertical-align: middle; }
-        table.data th { background: #e9ecef; text-align: center; font-weight: bold; font-size: 8pt; text-transform: uppercase; }
-        .rata { background: #e8f5e9; }
-        .nilai-akhir { background: #e3f2fd; font-weight: bold; }
-        .footer { margin-top: 16px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 8.5pt; }
-        .print-date { font-style: italic; color: #555; font-size: 7.5pt; }
-        .signature-area { text-align: center; }
-        .signature-line { border-top: 1px solid #000; margin-top: 48px; width: 210px; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/wali-kelas/nilai/print-detail.css') }}">
 </head>
 <body>
     @php
@@ -64,12 +14,12 @@
 
     <div class="ctrl-bar">
         <div class="zoom-group">
-            <button class="btn-c" onclick="zoomOut()" title="Perkecil">-</button>
+            <button class="btn-c" data-zoom-action="out" title="Perkecil">-</button>
             <span class="zoom-label" id="zoomLabel">100%</span>
-            <button class="btn-c" onclick="zoomIn()" title="Perbesar">+</button>
-            <button class="btn-c" onclick="fitScreen()" title="Sesuaikan layar" style="font-size:11px; padding:7px 10px;">Fit</button>
+            <button class="btn-c" data-zoom-action="in" title="Perbesar">+</button>
+            <button class="btn-c" data-zoom-action="fit" title="Sesuaikan layar" style="font-size:11px; padding:7px 10px;">Fit</button>
         </div>
-        <button class="btn-c btn-print" onclick="window.print()">
+        <button class="btn-c btn-print" data-print-page>
             <i class="bi bi-printer-fill"></i> Cetak / PDF
         </button>
     </div>
@@ -161,31 +111,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        const NATIVE_W = 1058;
-        let zoomLevel = 1;
-
-        function baseScale() {
-            const avail = window.innerWidth - 20;
-            return avail < NATIVE_W ? avail / NATIVE_W : 1;
-        }
-
-        function applyScale() {
-            const el = document.getElementById('pageContainer');
-            const lbl = document.getElementById('zoomLabel');
-            if (!el) return;
-            const scale = Math.round(baseScale() * zoomLevel * 1000) / 1000;
-            el.style.zoom = scale;
-            if (lbl) lbl.textContent = Math.round(scale * 100) + '%';
-        }
-
-        function zoomIn() { zoomLevel = Math.min(+(zoomLevel + 0.15).toFixed(2), 4); applyScale(); }
-        function zoomOut() { zoomLevel = Math.max(+(zoomLevel - 0.15).toFixed(2), 0.1); applyScale(); }
-        function fitScreen() { zoomLevel = 1; applyScale(); }
-
-        window.addEventListener('load', applyScale);
-        window.addEventListener('resize', () => { zoomLevel = 1; applyScale(); });
-    </script>
+    <script src="{{ asset('js/wali-kelas/nilai/print-detail.js') }}"></script>
 </body>
 </html>

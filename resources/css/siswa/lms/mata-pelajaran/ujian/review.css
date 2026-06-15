@@ -1,0 +1,442 @@
+.siswa-lms-ujian-review-page {
+    --rv: #1a1a2e;
+    --ac: #165fac;
+    --ok: #059669;
+    --no: #dc2626;
+    --gr: #64748b;
+    --bg: #f8fafc;
+    --bd: #e2e8f0;
+}
+
+.siswa-lms-ujian-review-page .rv-hero {
+    background: var(--rv);
+    border-radius: 16px;
+    padding: 28px 32px;
+    color: #fff;
+    margin-bottom: 28px;
+}
+
+.siswa-lms-ujian-review-page .rv-hero h4 {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.siswa-lms-ujian-review-page .rv-hero-sub {
+    opacity: .7;
+    font-size: .88rem;
+}
+
+.siswa-lms-ujian-review-page .rv-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.siswa-lms-ujian-review-page .rv-stat {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    border: 1px solid var(--bd);
+}
+
+.siswa-lms-ujian-review-page .rv-stat h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 4px 0 2px;
+}
+
+.siswa-lms-ujian-review-page .rv-stat small {
+    color: var(--gr);
+    font-size: .78rem;
+    font-weight: 500;
+}
+
+.siswa-lms-ujian-review-page .rv-stat.s1 h2 {
+    color: var(--ac);
+}
+
+.siswa-lms-ujian-review-page .rv-stat.s2 h2 {
+    color: var(--ok);
+}
+
+.siswa-lms-ujian-review-page .rv-stat.s3 h2 {
+    color: var(--no);
+}
+
+.siswa-lms-ujian-review-page .rv-stat.s4 h2 {
+    color: var(--gr);
+}
+
+.siswa-lms-ujian-review-page .rv-card {
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--bd);
+    overflow: hidden;
+}
+
+.siswa-lms-ujian-review-page .rv-strip {
+    height: 4px;
+}
+
+.siswa-lms-ujian-review-page .rv-strip.ok {
+    background: var(--ok);
+}
+
+.siswa-lms-ujian-review-page .rv-strip.no {
+    background: var(--no);
+}
+
+.siswa-lms-ujian-review-page .rv-strip.sk {
+    background: var(--gr);
+}
+
+.siswa-lms-ujian-review-page .rv-strip.pt {
+    background: #d97706;
+}
+
+.siswa-lms-ujian-review-page .rv-head {
+    padding: 16px 20px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.siswa-lms-ujian-review-page .rv-body {
+    padding: 16px 20px 20px;
+}
+
+.siswa-lms-ujian-review-page .rv-n {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .82rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.siswa-lms-ujian-review-page .rv-n.ok {
+    background: var(--ok);
+}
+
+.siswa-lms-ujian-review-page .rv-n.no {
+    background: var(--no);
+}
+
+.siswa-lms-ujian-review-page .rv-n.sk {
+    background: var(--gr);
+}
+
+.siswa-lms-ujian-review-page .rv-n.pt {
+    background: #d97706;
+}
+
+.siswa-lms-ujian-review-page .rv-tp {
+    font-size: .72rem;
+    background: #f1f5f9;
+    color: var(--gr);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.siswa-lms-ujian-review-page .rv-sc {
+    font-size: .82rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 8px;
+}
+
+.siswa-lms-ujian-review-page .rv-sc.ok {
+    background: #ecfdf5;
+    color: var(--ok);
+}
+
+.siswa-lms-ujian-review-page .rv-sc.no {
+    background: #fef2f2;
+    color: var(--no);
+}
+
+.siswa-lms-ujian-review-page .rv-sc.pt {
+    background: #fffbeb;
+    color: #92400e;
+}
+
+.siswa-lms-ujian-review-page .rv-sc.sk {
+    background: #f8fafc;
+    color: var(--gr);
+}
+
+.siswa-lms-ujian-review-page .rv-q {
+    font-size: .95rem;
+    line-height: 1.65;
+    color: #1e293b;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border-radius: 10px;
+}
+
+.siswa-lms-ujian-review-page .rv-nar {
+    font-size: .85rem;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.siswa-lms-ujian-review-page .rv-nar-label {
+    font-size: .75rem;
+    color: var(--gr);
+}
+
+.siswa-lms-ujian-review-page .rv-img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.siswa-lms-ujian-review-page .rv-o {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    font-size: .9rem;
+    line-height: 1.5;
+    border: 1.5px solid transparent;
+}
+
+.siswa-lms-ujian-review-page .rv-ol {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .78rem;
+    flex-shrink: 0;
+    background: #f1f5f9;
+    color: var(--gr);
+}
+
+.siswa-lms-ujian-review-page .rv-o.neu {
+    background: #fafafa;
+}
+
+.siswa-lms-ujian-review-page .rv-o.sc {
+    background: #ecfdf5;
+    border-color: var(--ok);
+}
+
+.siswa-lms-ujian-review-page .rv-o.sc .rv-ol {
+    background: var(--ok);
+    color: #fff;
+}
+
+.siswa-lms-ujian-review-page .rv-o.sw {
+    background: #fef2f2;
+    border-color: var(--no);
+}
+
+.siswa-lms-ujian-review-page .rv-o.sw .rv-ol {
+    background: var(--no);
+    color: #fff;
+}
+
+.siswa-lms-ujian-review-page .rv-o.ik {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.siswa-lms-ujian-review-page .rv-o.ik .rv-ol {
+    background: var(--ok);
+    color: #fff;
+}
+
+.siswa-lms-ujian-review-page .rv-tag {
+    font-size: .7rem;
+    font-weight: 700;
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+.siswa-lms-ujian-review-page .rv-tb {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: .88rem;
+}
+
+.siswa-lms-ujian-review-page .rv-tb th {
+    background: #f8fafc;
+    color: var(--gr);
+    font-weight: 600;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bd);
+}
+
+.siswa-lms-ujian-review-page .rv-tb td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bd);
+    vertical-align: middle;
+}
+
+.siswa-lms-ujian-review-page .rv-tb tr:last-child td {
+    border-bottom: none;
+}
+
+.siswa-lms-ujian-review-page .bsok {
+    background: #f0fdf4;
+}
+
+.siswa-lms-ujian-review-page .bsno {
+    background: #fef2f2;
+}
+
+.siswa-lms-ujian-review-page .rv-cmp {
+    display: grid;
+    gap: 10px;
+}
+
+.siswa-lms-ujian-review-page .rv-cb {
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.siswa-lms-ujian-review-page .rv-cl {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.siswa-lms-ujian-review-page .rv-cv {
+    font-size: .9rem;
+    line-height: 1.6;
+}
+
+.siswa-lms-ujian-review-page .rv-cs {
+    background: #f0f4ff;
+}
+
+.siswa-lms-ujian-review-page .rv-cs .rv-cl {
+    color: var(--ac);
+}
+
+.siswa-lms-ujian-review-page .rv-cc {
+    background: #ecfdf5;
+}
+
+.siswa-lms-ujian-review-page .rv-cc .rv-cl {
+    color: var(--ok);
+}
+
+.siswa-lms-ujian-review-page .rv-fb {
+    background: #fffbeb;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: .85rem;
+    color: #92400e;
+    margin-top: 12px;
+}
+
+.siswa-lms-ujian-review-page .rv-ft {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid var(--bd);
+    text-align: center;
+    margin-top: 8px;
+}
+
+.siswa-lms-ujian-review-page .rv-ft p {
+    color: var(--gr);
+    font-size: .88rem;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 767.98px) {
+    .siswa-lms-ujian-review-page .rv-hero {
+        padding: 20px 16px;
+        border-radius: 12px;
+    }
+
+    .siswa-lms-ujian-review-page .rv-hero h4 {
+        font-size: 1.05rem;
+    }
+
+    .siswa-lms-ujian-review-page .rv-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .siswa-lms-ujian-review-page .rv-stat {
+        padding: 14px 10px;
+    }
+
+    .siswa-lms-ujian-review-page .rv-stat h2 {
+        font-size: 1.4rem;
+    }
+
+    .siswa-lms-ujian-review-page .rv-head {
+        padding: 12px 14px 0;
+    }
+
+    .siswa-lms-ujian-review-page .rv-body {
+        padding: 12px 14px 16px;
+    }
+
+    .siswa-lms-ujian-review-page .rv-q {
+        padding: 10px 12px;
+        font-size: .88rem;
+    }
+
+    .siswa-lms-ujian-review-page .rv-o {
+        padding: 8px 10px;
+        font-size: .84rem;
+    }
+
+    .siswa-lms-ujian-review-page .rv-ol {
+        min-width: 24px;
+        height: 24px;
+        font-size: .72rem;
+    }
+
+    .siswa-lms-ujian-review-page .rv-cmp {
+        grid-template-columns: 1fr;
+    }
+
+    .siswa-lms-ujian-review-page .rv-tb {
+        font-size: .82rem;
+    }
+
+    .siswa-lms-ujian-review-page .rv-tb th,
+    .siswa-lms-ujian-review-page .rv-tb td {
+        padding: 8px;
+    }
+}
+
+@media (min-width: 768px) {
+    .siswa-lms-ujian-review-page .rv-cmp {
+        grid-template-columns: 1fr 1fr;
+    }
+}

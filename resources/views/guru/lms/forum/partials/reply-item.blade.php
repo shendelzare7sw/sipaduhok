@@ -7,7 +7,7 @@
     $uniqueId = 'reply-' . $reply->id;
 @endphp
 
-<div class="post {{ $level > 0 ? 'reply-node' : '' }}" style="{{ $marginLeft }}" data-author="{{ $reply->user->name }}"
+<div class="post {{ $level > 0 ? 'reply-level-' . min($level, 5) : '' }}" data-author="{{ $reply->user->name }}"
     data-role="{{ $role }}" data-content="{{ strtolower($reply->content) }}">
 
     <div class="post-header">
@@ -30,8 +30,7 @@
         @if($reply->attachment)
             <div class="media-attachment">
                 @if(Str::startsWith($reply->attachment_type, 'image/'))
-                    <img src="{{ asset('storage/' . $reply->attachment) }}" alt="Attachment"
-                        style="max-width: 100%; border-radius: 4px;">
+                    <img src="{{ asset('storage/' . $reply->attachment) }}" alt="Attachment" class="forum-attachment-image">
                 @else
                     <a href="{{ asset('storage/' . $reply->attachment) }}" target="_blank"
                         class="btn btn-sm btn-outline-primary">
@@ -50,7 +49,7 @@
     </div>
 
     @if(!$forum->is_closed)
-        <button class="reply-btn" onclick="toggleReplyForm('form-{{ $uniqueId }}')">REPLY</button>
+        <button type="button" class="reply-btn" data-toggle-reply="form-{{ $uniqueId }}">REPLY</button>
     @endif
 
     <!-- Reply Form -->
@@ -70,7 +69,7 @@
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary btn-sm">Kirim Balasan</button>
                 <button type="button" class="btn btn-secondary btn-sm"
-                    onclick="toggleReplyForm('form-{{ $uniqueId }}')">Batal</button>
+                    data-toggle-reply="form-{{ $uniqueId }}">Batal</button>
             </div>
         </form>
     </div>

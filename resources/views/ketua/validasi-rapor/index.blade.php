@@ -9,110 +9,16 @@
 @endsection
 
 @section('styles')
-<style>
-    .ketua-filter-actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .ketua-bulk-actions {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .ketua-row-actions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.25rem;
-    }
-
-    @media (max-width: 768px) {
-        .ketua-filter-actions,
-        .ketua-bulk-actions {
-            width: 100%;
-            flex-direction: column;
-        }
-
-        .ketua-filter-actions .btn,
-        .ketua-bulk-actions .btn {
-            width: 100%;
-        }
-
-        #dataTable.table {
-            margin-bottom: 0;
-        }
-
-        #dataTable thead {
-            display: none;
-        }
-
-        #dataTable tbody tr {
-            display: flex;
-            flex-direction: column;
-            border-bottom: 2px solid #e5e7eb;
-            background: #fff;
-        }
-
-        #dataTable tbody td {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #f1f5f9;
-            text-align: right !important;
-            white-space: normal;
-        }
-
-        #dataTable tbody td::before {
-            content: attr(data-label);
-            color: #64748b;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: left;
-            flex-shrink: 0;
-        }
-
-        #dataTable tbody td[data-label="Nama"] {
-            order: -2;
-            align-items: flex-start;
-            background: #f8fafc;
-            text-align: left !important;
-        }
-
-        #dataTable tbody td[data-label="Nama"]::before,
-        #dataTable tbody td[data-label="Aksi"]::before {
-            display: none;
-        }
-
-        #dataTable tbody td[data-label="No"] {
-            display: none;
-        }
-
-        #dataTable tbody td[data-label="Pilih"] {
-            order: -1;
-            justify-content: flex-start;
-            background: #f8fafc;
-        }
-
-        .ketua-row-actions {
-            width: 100%;
-        }
-
-        .ketua-row-actions .btn {
-            flex: 1 1 100%;
-        }
-    }
-</style>
+    @vite(['resources/css/ketua/validasi-rapor/index.css'])
 @endsection
 
 @section('content')
 <div class="container-fluid">
+    <div
+        id="validasiRaporConfig"
+        data-bulk-route="{{ route('ketua.validasi-rapor.bulk-validasi') }}"
+        data-csrf="{{ csrf_token() }}"
+    ></div>
 
     {{-- ALUR INFO --}}
     <div class="alert alert-light border border-primary border-opacity-25 shadow-sm mb-4">
@@ -180,7 +86,7 @@
                 <div class="row g-3">
                     <div class="col-lg-3 col-md-6">
                         <label class="form-label small fw-bold">Cabang</label>
-                        <select name="cabang_id" class="form-select" onchange="this.form.submit()">
+                        <select name="cabang_id" class="form-select" data-auto-submit>
                             <option value="">Semua Cabang</option>
                             @foreach($cabangList as $cabang)
                                 <option value="{{ $cabang->id }}" {{ request('cabang_id') == $cabang->id ? 'selected' : '' }}>
@@ -191,7 +97,7 @@
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <label class="form-label small fw-bold">Jenjang</label>
-                        <select name="jenjang" class="form-select" onchange="this.form.submit()">
+                        <select name="jenjang" class="form-select" data-auto-submit>
                             <option value="">Semua Jenjang</option>
                             @foreach($jenjangList as $jenjang)
                                 <option value="{{ $jenjang }}" {{ request('jenjang') == $jenjang ? 'selected' : '' }}>
@@ -241,10 +147,10 @@
         <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h6 class="m-0 fw-bold text-primary"><i class="fas fa-list me-2"></i>Daftar Siswa</h6>
             <div class="ketua-bulk-actions">
-                <button type="button" class="btn btn-success btn-sm shadow-sm" onclick="openValidasiSemuaModal()">
+                <button type="button" class="btn btn-success btn-sm shadow-sm" id="btnValidasiSemua">
                     <i class="fas fa-check-double me-1"></i> Validasi Semua
                 </button>
-                <button type="button" class="btn btn-info btn-sm shadow-sm" onclick="openValidasiTerpilihModal()">
+                <button type="button" class="btn btn-info btn-sm shadow-sm" id="btnValidasiTerpilih">
                     <i class="fas fa-check me-1"></i> Validasi Terpilih
                 </button>
             </div>
@@ -535,77 +441,8 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-// Check all functionality
-document.getElementById('checkAll').addEventListener('change', function() {
-    document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = this.checked);
-});
+@endsection
 
-// Populate reusable Validasi modal via data-attributes
-document.getElementById('validasiModal').addEventListener('show.bs.modal', function(e) {
-    const btn = e.relatedTarget;
-    document.getElementById('validasiNamaSiswa').textContent = btn.dataset.name;
-    document.getElementById('validasiForm').action = btn.dataset.action;
-});
-
-// Populate reusable Batalkan modal via data-attributes
-document.getElementById('batalkanModal').addEventListener('show.bs.modal', function(e) {
-    const btn = e.relatedTarget;
-    document.getElementById('batalkanNamaSiswa').textContent = btn.dataset.name;
-    document.getElementById('batalkanForm').action = btn.dataset.action;
-});
-
-// Validasi Terpilih
-function openValidasiTerpilihModal() {
-    const selected = Array.from(document.querySelectorAll('.siswa-checkbox:checked'));
-
-    if (selected.length === 0) {
-        new bootstrap.Modal(document.getElementById('peringatanModal')).show();
-        return;
-    }
-
-    document.getElementById('jumlahTerpilih').textContent = selected.length;
-    new bootstrap.Modal(document.getElementById('validasiTerpilihModal')).show();
-}
-
-// Submit bulk validasi terpilih
-document.getElementById('btnKonfirmasiTerpilih').addEventListener('click', function() {
-    const selected = Array.from(document.querySelectorAll('.siswa-checkbox:checked')).map(cb => cb.value);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '{{ route("ketua.validasi-rapor.bulk-validasi") }}';
-
-    const csrf = document.createElement('input');
-    csrf.type = 'hidden';
-    csrf.name = '_token';
-    csrf.value = '{{ csrf_token() }}';
-    form.appendChild(csrf);
-
-    selected.forEach(id => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'siswa_ids[]';
-        input.value = id;
-        form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
-});
-
-// Populate Revisi modal
-document.getElementById('revisiModal').addEventListener('show.bs.modal', function(e) {
-    const btn = e.relatedTarget;
-    document.getElementById('revisiNamaSiswa').textContent = btn.dataset.name;
-    document.getElementById('revisiForm').action = btn.dataset.action;
-});
-
-// Validasi Semua
-function openValidasiSemuaModal() {
-    new bootstrap.Modal(document.getElementById('validasiSemuaModal')).show();
-}
-</script>
-@endpush
+@section('scripts')
+    @vite(['resources/js/ketua/validasi-rapor/index.js'])
 @endsection

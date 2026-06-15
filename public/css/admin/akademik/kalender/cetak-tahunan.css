@@ -1,0 +1,107 @@
+@page {
+    margin: 15mm;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+}
+
+.header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #3b82f6;
+    text-align: center;
+}
+
+.header h1 {
+    margin-bottom: 5px;
+    color: #1e40af;
+    font-size: 18pt;
+}
+
+.header p {
+    color: #6b7280;
+}
+
+.month-section {
+    margin-bottom: 25px;
+    page-break-inside: avoid;
+}
+
+.month-title {
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    border-radius: 6px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 13pt;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    margin-bottom: 15px;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 10px;
+    border-bottom: 2px solid #d1d5db;
+    background: #f3f4f6;
+    font-size: 10pt;
+    text-align: left;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.col-kegiatan { width: 35%; }
+.col-tanggal { width: 25%; }
+.col-jenis { width: 20%; }
+.col-waktu { width: 20%; }
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 8pt;
+    font-weight: 600;
+}
+
+.badge-field_trip { background: #cffafe; color: #0e7490; }
+.badge-outing { background: #d1fae5; color: #065f46; }
+.badge-live_in { background: #ede9fe; color: #6b21a8; }
+.badge-hokfest { background: #fed7aa; color: #9a3412; }
+.badge-pts { background: #fef3c7; color: #92400e; }
+.badge-pas { background: #fecaca; color: #991b1b; }
+.badge-libur { background: #e5e7eb; color: #374151; }
+.badge-ujian { background: #fce7f3; color: #9f1239; }
+.badge-acara_sekolah { background: #ccfbf1; color: #115e59; }
+
+.muted-desc {
+    color: #6b7280;
+}
+
+.empty-mark {
+    color: #9ca3af;
+}
+
+.empty-state {
+    padding: 20px;
+    color: #9ca3af;
+    font-style: italic;
+    text-align: center;
+}
+
+.footer {
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 2px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 9pt;
+    text-align: right;
+}

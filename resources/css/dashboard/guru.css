@@ -1,0 +1,363 @@
+.guru-dashboard-page {
+  --g-bg: #f8fafc;
+  --g-border: #e2e8f0;
+  --g-danger: #ef4444;
+  --g-info: #06b6d4;
+  --g-muted: #64748b;
+  --g-primary: #4361ee;
+  --g-purple: #8b5cf6;
+  --g-radius: 12px;
+  --g-success: #10b981;
+  --g-surface: #ffffff;
+  --g-text: #1e293b;
+  --g-warning: #f59e0b;
+}
+
+.guru-dashboard-page .g-card {
+  background: var(--g-surface);
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guru-dashboard-page .g-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.guru-dashboard-page .g-card-header {
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid var(--g-border);
+  display: flex;
+  justify-content: space-between;
+  padding: 1.15rem 1.5rem;
+}
+
+.guru-dashboard-page .g-card-title {
+  align-items: center;
+  color: var(--g-text);
+  display: flex;
+  font-size: 1rem;
+  font-weight: 600;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.guru-dashboard-page .stat-widget {
+  align-items: flex-start;
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.guru-dashboard-page .stat-icon-box {
+  align-items: center;
+  border-radius: 10px;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.guru-dashboard-page .stat-icon-primary {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.guru-dashboard-page .stat-icon-success {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.guru-dashboard-page .stat-icon-warning {
+  background: #fffbeb;
+  color: #f59e0b;
+}
+
+.guru-dashboard-page .stat-details,
+.guru-dashboard-page .jadwal-body,
+.guru-dashboard-page .kelas-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.guru-dashboard-page .stat-value {
+  color: var(--g-text);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.2rem;
+}
+
+.guru-dashboard-page .stat-label {
+  color: var(--g-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.guru-dashboard-page .stat-footer {
+  align-items: center;
+  border-top: 1px dashed var(--g-border);
+  color: var(--g-muted);
+  display: flex;
+  font-size: 0.8rem;
+  justify-content: space-between;
+  margin: 0 1.5rem;
+  padding: 0.85rem 0;
+}
+
+.guru-dashboard-page .jadwal-list,
+.guru-dashboard-page .kelas-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.guru-dashboard-page .jadwal-item,
+.guru-dashboard-page .kelas-item {
+  align-items: center;
+  border-bottom: 1px solid var(--g-border);
+  display: flex;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  transition: background 0.15s ease;
+}
+
+.guru-dashboard-page .jadwal-item:last-child,
+.guru-dashboard-page .kelas-item:last-child {
+  border-bottom: none;
+}
+
+.guru-dashboard-page .jadwal-item:hover,
+.guru-dashboard-page .kelas-item:hover {
+  background: var(--g-bg);
+}
+
+.guru-dashboard-page .jadwal-time {
+  color: var(--g-primary);
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.guru-dashboard-page .jadwal-dot {
+  background: var(--g-primary);
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 8px;
+  opacity: 0.5;
+  width: 8px;
+}
+
+.guru-dashboard-page .jadwal-mapel {
+  color: var(--g-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guru-dashboard-page .jadwal-kelas {
+  color: var(--g-muted);
+  font-size: 0.78rem;
+}
+
+.guru-dashboard-page .kelas-icon {
+  align-items: center;
+  background: #eff6ff;
+  border-radius: 10px;
+  color: var(--g-primary);
+  display: flex;
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.guru-dashboard-page .kelas-name {
+  color: var(--g-text);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.guru-dashboard-page .kelas-meta {
+  align-items: center;
+  color: var(--g-muted);
+  display: flex;
+  font-size: 0.78rem;
+  gap: 0.5rem;
+}
+
+.guru-dashboard-page .quick-links-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, 1fr);
+  padding: 1.25rem;
+}
+
+.guru-dashboard-page .quick-link-item {
+  align-items: center;
+  background: var(--g-surface);
+  border: 1px solid var(--g-border);
+  border-radius: 10px;
+  color: var(--g-text);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  justify-content: center;
+  padding: 1.15rem 0.75rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.guru-dashboard-page .quick-link-item:hover {
+  background: var(--g-bg);
+  border-color: var(--g-primary);
+  color: var(--g-primary);
+}
+
+.guru-dashboard-page .quick-link-item i {
+  color: var(--g-muted);
+  font-size: 1.4rem;
+  transition: color 0.2s ease;
+}
+
+.guru-dashboard-page .quick-link-item:hover i {
+  color: var(--g-primary);
+}
+
+.guru-dashboard-page .quick-link-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.guru-dashboard-page .empty-state {
+  color: var(--g-muted);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.guru-dashboard-page .empty-state i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.3;
+}
+
+.guru-dashboard-page .empty-state-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.guru-dashboard-page .empty-state-desc {
+  font-size: 0.82rem;
+}
+
+.guru-dashboard-page .dashboard-day-badge {
+  font-size: 0.7rem;
+}
+
+.guru-dashboard-page .dashboard-link-sm {
+  font-size: 0.8rem;
+}
+
+.guru-dashboard-page .dashboard-action-button {
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .guru-dashboard-page .stat-value {
+    font-size: 1.35rem;
+  }
+
+  .guru-dashboard-page .stat-widget {
+    gap: 0.85rem;
+    padding: 1.15rem;
+  }
+
+  .guru-dashboard-page .stat-icon-box {
+    font-size: 1.1rem;
+    height: 40px;
+    width: 40px;
+  }
+
+  .guru-dashboard-page .stat-footer {
+    font-size: 0.75rem;
+    margin: 0 1.15rem;
+  }
+
+  .guru-dashboard-page .jadwal-item,
+  .guru-dashboard-page .kelas-item {
+    gap: 0.75rem;
+    padding: 0.75rem 1.15rem;
+  }
+
+  .guru-dashboard-page .jadwal-time {
+    font-size: 0.75rem;
+    min-width: 75px;
+  }
+
+  .guru-dashboard-page .kelas-icon {
+    font-size: 0.85rem;
+    height: 36px;
+    width: 36px;
+  }
+
+  .guru-dashboard-page .quick-links-grid {
+    gap: 0.6rem;
+    padding: 1rem;
+  }
+
+  .guru-dashboard-page .quick-link-item {
+    padding: 0.85rem 0.5rem;
+  }
+
+  .guru-dashboard-page .quick-link-item i {
+    font-size: 1.2rem;
+  }
+
+  .guru-dashboard-page .quick-link-text {
+    font-size: 0.72rem;
+  }
+
+  .guru-dashboard-page .g-card-header {
+    padding: 1rem 1.15rem;
+  }
+
+  .guru-dashboard-page .g-card-title {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .guru-dashboard-page .stat-value {
+    font-size: 1.15rem;
+  }
+
+  .guru-dashboard-page .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .guru-dashboard-page .stat-icon-box {
+    font-size: 1rem;
+    height: 36px;
+    width: 36px;
+  }
+}

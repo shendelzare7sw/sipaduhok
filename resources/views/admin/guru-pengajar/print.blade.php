@@ -3,45 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Daftar Guru Pengajar - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
-        .container { max-width: 210mm; margin: 0 auto; padding: 15mm; }
-        .header { text-align: center; border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { font-size: 16pt; font-weight: bold; margin-bottom: 5px; }
-        .header h2 { font-size: 14pt; margin-bottom: 10px; }
-        .header p { font-size: 10pt; color: #333; }
-        .title { text-align: center; margin: 25px 0; }
-        .title h3 { font-size: 14pt; text-decoration: underline; margin-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        table th, table td { border: 1px solid #000; padding: 8px 10px; text-align: left; vertical-align: top; }
-        table th { background: #f0f0f0; text-align: center; vertical-align: middle; }
-        table td.center { text-align: center; }
-        .assignment-list { font-size: 10pt; padding-left: 15px; margin: 0; }
-        .assignment-list li { margin-bottom: 3px; }
-        .no-assignment { color: #666; font-style: italic; font-size: 10pt; }
-        .summary { margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd; }
-        .summary h4 { font-size: 11pt; margin-bottom: 10px; }
-        .summary-grid { display: flex; gap: 30px; flex-wrap: wrap; }
-        .table-wrapper { overflow-x: auto; }
-        .summary-item .label { font-size: 9pt; color: #666; }
-        .summary-item .value { font-size: 14pt; font-weight: bold; }
-        .footer { margin-top: 40px; display: flex; justify-content: space-between; }
-        .footer-right { text-align: center; }
-        .signature-line { margin-top: 60px; border-bottom: 1px solid #000; width: 200px; margin: 60px auto 0; }
-        .print-date { font-size: 10pt; color: #666; margin-top: 30px; }
-        .print-button { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #14b8a6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
-        .back-button { position: fixed; top: 20px; right: 130px; padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 8px; text-decoration: none; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; }
-        @media print { .no-print { display: none !important; } .container { padding: 0; } }
-        @media (max-width: 575.98px) {
-            .print-button { top: auto; bottom: 20px; right: 20px; font-size: 13px; padding: 8px 14px; }
-            .back-button { top: auto; bottom: 20px; right: 110px; font-size: 13px; padding: 8px 14px; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/admin/guru-pengajar/print.css') }}">
 </head>
 <body>
-    <a href="{{ route('admin.guru-pengajar.index') }}" class="back-button no-print">← Kembali</a>
-    <button onclick="window.print()" class="print-button no-print"><i class="fas fa-print"></i> Cetak</button>
+    <a href="{{ route('admin.guru-pengajar.index') }}" class="back-button no-print">&larr; Kembali</a>
+    <button type="button" class="print-button no-print" data-print-button><i class="fas fa-print"></i> Cetak</button>
 
     <div class="container">
         @include('partials.print-header', ['cabang' => $cabang ?? null])
@@ -56,7 +22,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 35px;">No</th>
+                        <th class="col-no">No</th>
                         <th>Nama Guru</th>
                         <th>NIP</th>
                         <th>Telepon</th>
@@ -105,7 +71,7 @@
                 </div>
             </div>
         @else
-            <p style="text-align: center; padding: 40px; color: #666;">Tidak ada data guru pengajar.</p>
+            <p class="empty-message">Tidak ada data guru pengajar.</p>
         @endif
 
         <div class="footer">
@@ -116,4 +82,9 @@
                 <p>Tangerang Selatan, {{ now()->format('d F Y') }}</p>
                 <p>Kepala PKBM House of Knowledge</p>
                 <div class="signature-line"></div>
-           
+            </div>
+        </div>
+    </div>
+    <script src="{{ asset('js/admin/guru-pengajar/print.js') }}"></script>
+</body>
+</html>

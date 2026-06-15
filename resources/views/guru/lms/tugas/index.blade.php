@@ -8,7 +8,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/tugas/index.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-tugas-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Daftar Tugas & Latihan</h4>
         <a href="{{ route('guru.lms.tugas.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary">
@@ -67,7 +72,7 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button type="button" class="btn btn-danger btn-sm" title="Hapus"
-                                    onclick="confirmDelete('{{ route('guru.lms.tugas.destroy', [$kelas->id, $mapel->id, $tugas->id]) }}')">
+                                    data-delete-url="{{ route('guru.lms.tugas.destroy', [$kelas->id, $mapel->id, $tugas->id]) }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -83,7 +88,7 @@
         </div>
     @else
         <div class="card-custom text-center py-5">
-            <i class="fas fa-inbox text-muted" style="font-size: 64px; opacity: 0.2;"></i>
+            <i class="fas fa-inbox text-muted empty-icon"></i>
             <p class="text-muted mt-3">Belum ada tugas. Klik "Buat Tugas Baru" untuk memulai.</p>
         </div>
     @endif
@@ -101,7 +106,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+                    <form id="deleteForm" method="POST" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">
@@ -117,14 +122,9 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function confirmDelete(url) {
-            document.getElementById('deleteForm').action = url;
-            document.getElementById('hapusTerkaitCheck').checked = false;
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        }
-    </script>
-    @endpush
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/tugas/index.js'])
+@endpush

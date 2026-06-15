@@ -8,7 +8,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/ujian/soal.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-ujian-soal-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <a href="{{ route('guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}" class="btn btn-outline-secondary mb-2">
@@ -60,7 +65,7 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <div class="text-truncate" style="max-width: 400px;">
+                                                    <div class="text-truncate question-preview">
                                                         {{ strip_tags($soal->pertanyaan) }}
                                                     </div>
                                                 </td>
@@ -71,12 +76,8 @@
                                                             class="btn btn-sm btn-warning" title="Edit Soal">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
-                                                        <a href="{{ route('guru.lms.ujian.soal.edit', [$kelas->id, $mapel->id, $ujian->id, $soal->id]) }}"
-                                                            class="btn btn-sm btn-warning" title="Edit Soal">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
                                                         <button type="button" class="btn btn-sm btn-danger" title="Hapus Soal"
-                                                            onclick="confirmDelete('{{ route('guru.lms.ujian.soal.destroy', [$kelas->id, $mapel->id, $ujian->id, $soal->id]) }}')">
+                                                            data-delete-url="{{ route('guru.lms.ujian.soal.destroy', [$kelas->id, $mapel->id, $ujian->id, $soal->id]) }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </div>
@@ -90,14 +91,13 @@
         </div>
     @else
         <div class="card-custom text-center py-5">
-            <i class="fas fa-clipboard-list text-muted" style="font-size: 64px; opacity: 0.2;"></i>
+            <i class="fas fa-clipboard-list text-muted empty-icon"></i>
             <h5 class="mt-3 text-muted">Belum ada soal ujian</h5>
             <p class="text-muted mb-4">Mulai tambahkan soal untuk ujian ini</p>
             <a href="{{ route('guru.lms.ujian.soal.create', [$kelas->id, $mapel->id, $ujian->id]) }}" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Buat Soal Pertama
             </a>
         </div>
-    @endif
     @endif
 
     <!-- Delete Confirmation Modal -->
@@ -113,7 +113,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+                    <form id="deleteForm" method="POST" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Hapus</button>
@@ -123,13 +123,9 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function confirmDelete(url) {
-            document.getElementById('deleteForm').action = url;
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        }
-    </script>
-    @endpush
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/ujian/soal.js'])
+@endpush

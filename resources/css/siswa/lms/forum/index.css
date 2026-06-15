@@ -1,0 +1,72 @@
+.siswa-lms-forum-index-page .forum-card {
+    background: white;
+    border-left: 4px solid transparent;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    color: inherit;
+    display: block;
+    margin-bottom: 12px;
+    padding: 16px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.siswa-lms-forum-index-page .forum-card:hover {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    color: inherit;
+    text-decoration: none;
+    transform: translateX(3px);
+}
+
+.siswa-lms-forum-index-page .forum-card.pinned {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+}
+
+.siswa-lms-forum-index-page .forum-card.closed {
+    border-left-color: #dc2626;
+    opacity: 0.7;
+}
+
+.siswa-lms-forum-index-page .forum-title {
+    color: #1a1a1a;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.siswa-lms-forum-index-page .forum-meta {
+    color: #666;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 13px;
+    gap: 16px;
+}
+
+.siswa-lms-forum-index-page .reply-count {
+    align-items: center;
+    background: #e3f2fd;
+    border-radius: 16px;
+    color: #1565c0;
+    display: flex;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 6px;
+    padding: 4px 12px;
+}
+
+.siswa-lms-forum-index-page .forum-empty-icon {
+    font-size: 60px;
+    opacity: 0.3;
+}
+
+@media (max-width: 576px) {
+    .siswa-lms-forum-index-page .forum-card {
+        border-radius: 8px;
+        padding: 14px;
+    }
+
+    .siswa-lms-forum-index-page .forum-title {
+        font-size: 14px;
+    }
+}

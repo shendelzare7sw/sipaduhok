@@ -4,39 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor - {{ $rapor->siswa->nama_lengkap }}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Times New Roman', Times, serif; padding: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #000; padding-bottom: 20px; }
-        .header h1 { font-size: 20px; margin-bottom: 8px; }
-        .header h2 { font-size: 16px; margin-bottom: 5px; }
-        .header p { font-size: 11px; }
-        .info-section { margin: 20px 0; }
-        .info-row { display: flex; margin-bottom: 8px; }
-        .info-label { width: 200px; }
-        .info-colon { width: 20px; }
-        .info-value { flex: 1; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        table th, table td { padding: 8px; border: 1px solid #000; font-size: 11px; }
-        table th { background: #f0f0f0; font-weight: bold; text-align: left; }
-        .text-center { text-align: center; }
-        .catatan-section { margin: 20px 0; padding: 15px; border: 1px solid #000; }
-        .kehadiran-section { margin: 20px 0; }
-        .kehadiran-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .signature-section { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 60px; }
-        .signature-box { text-align: center; }
-        .signature-line { margin-top: 70px; border-top: 1px solid #000; padding-top: 5px; display: inline-block; min-width: 200px; }
-        .ketua-section { margin-top: 40px; text-align: center; }
-        @media print {
-            body { padding: 15mm; }
-            @page { margin: 15mm; size: A4; }
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/wali-kelas/rapor/print.css') }}">
 </head>
 <body>
     <div class="header">
@@ -156,9 +124,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        window.print();
-    </script>
+    <script src="{{ asset('js/wali-kelas/rapor/print.js') }}"></script>
 </body>
 </html>

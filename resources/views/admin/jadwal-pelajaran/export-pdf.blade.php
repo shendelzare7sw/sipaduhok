@@ -5,197 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jadwal Pelajaran - {{ $tahunAjaran ? $tahunAjaran->nama_tahun_ajaran : '' }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @media print {
-            @page {
-                size: A4 landscape;
-                margin: 15mm;
-            }
-
-            body {
-                margin: 0;
-                padding: 0;
-            }
-
-            .no-print {
-                display: none;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Arial', sans-serif;
-            font-size: 11px;
-            line-height: 1.4;
-            color: #000;
-            background: #fff;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #333;
-            padding-bottom: 15px;
-        }
-
-        .header-school {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 90px;
-            margin-bottom: 10px;
-        }
-
-        .school-logo-img {
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 70px;
-            width: auto;
-        }
-
-        .school-name { font-size: 15px; font-weight: bold; margin-bottom: 2px; }
-        .school-sub { font-size: 11px; margin-bottom: 2px; }
-        .school-address { font-size: 10px; color: #555; }
-
-        .header h1 {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        .header h2 {
-            font-size: 14px;
-            font-weight: normal;
-            color: #555;
-            margin-bottom: 3px;
-        }
-
-        .header p {
-            font-size: 10px;
-            color: #666;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        table th {
-            background-color: #333;
-            color: #fff;
-            padding: 8px 6px;
-            text-align: left;
-            font-weight: bold;
-            border: 1px solid #000;
-            font-size: 10px;
-        }
-
-        table td {
-            padding: 6px;
-            border: 1px solid #666;
-            vertical-align: top;
-            font-size: 10px;
-        }
-
-        table tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        table tbody tr:hover {
-            background-color: #f0f0f0;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .footer {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 10px;
-        }
-
-        .footer p {
-            margin-bottom: 50px;
-        }
-
-        .signature {
-            margin-top: 10px;
-            border-top: 1px solid #000;
-            display: inline-block;
-            padding-top: 5px;
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
-
-        .print-button:hover {
-            background-color: #c82333;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 9px;
-            font-weight: bold;
-        }
-
-        .badge-senin { background: #e3f2fd; color: #1565c0; }
-        .badge-selasa { background: #f3e5f5; color: #6a1b9a; }
-        .badge-rabu { background: #e8f5e9; color: #2e7d32; }
-        .badge-kamis { background: #fff3e0; color: #e65100; }
-        .badge-jumat { background: #fce4ec; color: #c2185b; }
-        .badge-sabtu { background: #f1f8e9; color: #558b2f; }
-
-        .istirahat-row {
-            background-color: #fff9c4 !important;
-        }
-
-        .istirahat-row td {
-            font-style: italic;
-            color: #795548;
-        }
-
-        .hari-header {
-            background-color: #e3f2fd !important;
-            font-weight: bold;
-        }
-
-        .hari-header td {
-            font-weight: bold;
-            color: #1565c0;
-            padding: 10px 6px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/admin/jadwal-pelajaran/export-pdf.css') }}">
 </head>
 <body>
-    <button class="print-button no-print" onclick="window.print()">
+    <button class="print-button no-print" type="button" data-print-page>
         <i class="fas fa-print"></i> Cetak / Simpan PDF
     </button>
 
@@ -211,7 +24,7 @@
         <h1>Jadwal Pelajaran</h1>
         <h2>{{ $tahunAjaran ? $tahunAjaran->nama_tahun_ajaran : 'Semua Tahun Ajaran' }}</h2>
         @if($filterInfo['cabang'] || $filterInfo['jenjang'] || $filterInfo['kelas'] || $filterInfo['guru'])
-        <p style="font-size: 11px; color: #333; margin-top: 5px; font-weight: bold;">
+        <p class="filter-info">
             Filter:
             @if($filterInfo['cabang'])
                 Cabang: {{ $filterInfo['cabang'] }}
@@ -256,21 +69,21 @@
     @endphp
 
     @if($jadwalList->isEmpty())
-        <div style="text-align: center; padding: 40px; color: #999;">
-            <p style="font-size: 14px;">Tidak ada data jadwal pelajaran</p>
+        <div class="empty-data">
+            <p>Tidak ada data jadwal pelajaran</p>
         </div>
     @else
         <table>
             <thead>
                 <tr>
-                    <th class="text-center" style="width: 30px;">No</th>
-                    <th style="width: 80px;">Kelas</th>
-                    <th style="width: 150px;">Cabang</th>
-                    <th style="width: 70px;">Hari</th>
-                    <th class="text-center" style="width: 60px;">Jam Mulai</th>
-                    <th class="text-center" style="width: 60px;">Jam Selesai</th>
+                    <th class="text-center col-no">No</th>
+                    <th class="col-kelas">Kelas</th>
+                    <th class="col-cabang">Cabang</th>
+                    <th class="col-hari">Hari</th>
+                    <th class="text-center col-time">Jam Mulai</th>
+                    <th class="text-center col-time">Jam Selesai</th>
                     <th>Mata Pelajaran</th>
-                    <th style="width: 130px;">Guru Pengajar</th>
+                    <th class="col-guru">Guru Pengajar</th>
                 </tr>
             </thead>
             <tbody>
@@ -328,7 +141,7 @@
                                         'Sabtu' => 'badge-sabtu',
                                     ][$hari] ?? '';
                                 @endphp
-                                <span class="badge {{ $hariClass }}" style="font-size: 11px; padding: 4px 10px;">{{ $hari }}</span>
+                                <span class="badge badge-lg {{ $hariClass }}">{{ $hari }}</span>
                             </td>
                         </tr>
 
@@ -338,7 +151,7 @@
                                 <tr>
                                     <td class="text-center">{{ $rowNumber++ }}</td>
                                     <td><strong>{{ $jadwal->kelas->pluck('nama_kelas')->join(', ') }}</strong></td>
-                                    <td style="font-size: 9px;">{{ $jadwal->kelas->pluck('cabang.nama_cabang')->unique()->join(', ') }}</td>
+                                    <td class="cabang-cell">{{ $jadwal->kelas->pluck('cabang.nama_cabang')->unique()->join(', ') }}</td>
                                     <td>
                                         <span class="badge {{ $hariClass }}">{{ $jadwal->hari }}</span>
                                     </td>
@@ -372,13 +185,6 @@
             </div>
         </div>
     @endif
-
-    <script>
-        // Auto print on load (optional - user can also use the button)
-        window.onload = function() {
-            // Uncomment line below to auto-print on page load
-            // setTimeout(() => window.print(), 500);
-        }
-    </script>
+    <script src="{{ asset('js/admin/jadwal-pelajaran/print.js') }}"></script>
 </body>
 </html>

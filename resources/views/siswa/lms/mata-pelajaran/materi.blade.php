@@ -7,72 +7,12 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
-@section('content')
-<style>
-    .materi-card {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .materi-header {
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 20px;
-        margin-bottom: 25px;
-    }
-    .materi-meta {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-top: 15px;
-    }
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #666;
-        font-size: 14px;
-    }
-    .meta-item i {
-        color: #165fac;
-    }
-    .file-preview {
-        background: #f9fafb;
-        border: 2px dashed #d1d5db;
-        border-radius: 12px;
-        padding: 40px;
-        text-align: center;
-        margin: 25px 0;
-    }
-    .file-icon {
-        font-size: 64px;
-        color: #165fac;
-        margin-bottom: 15px;
-    }
-    .download-btn {
-        background: linear-gradient(135deg, #10b981, #059669);
-        color: white;
-        padding: 12px 32px;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.3s;
-    }
-    .download-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(16, 185, 129, 0.3);
-        color: white;
-    }
-    .content-section {
-        background: white;
-        padding: 25px;
-        border-radius: 8px;
-        border-left: 4px solid #165fac;
-        margin: 20px 0;
-    }
-</style>
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/materi.css'])
+@endpush
 
+@section('content')
+<div class="siswa-lms-materi-page">
 <!-- Breadcrumb -->
 <div class="page-breadcrumb">
     <div class="page-breadcrumb-item">
@@ -95,7 +35,7 @@
 <div class="materi-card">
     <!-- Header -->
     <div class="materi-header">
-        <h2 style="color: #165fac; margin: 0 0 10px 0;">
+        <h2 class="materi-title">
             <i class="fas fa-book-open"></i> {{ $materi->judul_materi }}
         </h2>
         
@@ -120,10 +60,10 @@
     <!-- Deskripsi -->
     @if($materi->deskripsi)
     <div class="content-section">
-        <h4 style="color: #165fac; margin-bottom: 15px;">
+        <h4 class="content-title">
             <i class="fas fa-align-left"></i> Deskripsi Materi
         </h4>
-        <p style="color: #333; line-height: 1.8; margin: 0;">
+        <p class="content-text">
             {{ $materi->deskripsi }}
         </p>
     </div>
@@ -136,8 +76,8 @@
             <div class="file-icon">
                 <i class="fas fa-link"></i>
             </div>
-            <h4 style="color: #1a1a1a; margin-bottom: 10px;">Link Materi</h4>
-            <p style="color: #666; margin-bottom: 20px;">Link eksternal ke materi pembelajaran</p>
+            <h4 class="file-link-title">Link Materi</h4>
+            <p class="file-link-description">Link eksternal ke materi pembelajaran</p>
             <a href="{{ $materi->file_materi }}" target="_blank" class="download-btn">
                 <i class="fas fa-external-link-alt"></i> Buka Link
             </a>
@@ -152,7 +92,7 @@
     @endif
 
     <!-- Navigation -->
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+    <div class="materi-actions">
         <a href="{{ route('siswa.lms.mapel.show', $materi->mata_pelajaran_id) }}" 
            class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Kembali ke Mata Pelajaran
@@ -165,12 +105,12 @@
     <h5 class="alert-heading">
         <i class="fas fa-lightbulb"></i> Tips Belajar
     </h5>
-    <ul style="margin-bottom: 0; padding-left: 20px;">
+    <ul class="tips-list">
         <li>Baca materi dengan seksama sebelum mengerjakan tugas</li>
         <li>Catat hal-hal penting untuk memudahkan belajar</li>
         <li>Jika ada yang tidak dipahami, tanyakan di forum diskusi</li>
         <li>Download materi untuk dipelajari secara offline</li>
     </ul>
 </div>
-
+</div>
 @endsection

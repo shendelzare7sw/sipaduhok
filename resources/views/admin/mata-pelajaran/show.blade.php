@@ -8,29 +8,17 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/mata-pelajaran/show.css'])
+@endsection
+
 @section('content')
-    <style>
-        @media (max-width: 767.98px) {
-            .table-card-mobile thead { display: none; }
-            .table-card-mobile tbody tr {
-                display: block; background: #fff; border-radius: 10px;
-                box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 14px; margin-bottom: 10px;
-            }
-            .table-card-mobile tbody td {
-                display: flex; justify-content: space-between; align-items: center;
-                padding: 6px 0; border: none; font-size: 13px;
-            }
-            .table-card-mobile tbody td::before {
-                content: attr(data-label); font-weight: 600; color: #6b7280; margin-right: 12px; white-space: nowrap;
-            }
-        }
-    </style>
 <div class="row">
     <div class="col-xl-4">
         {{-- Info Card --}}
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0" style="color: white;">
+                <h5 class="mb-0 table-card-title">
                     <i class="fas fa-book me-2"></i>Informasi Mata Pelajaran
                 </h5>
             </div>
@@ -119,8 +107,8 @@
                         <span>Total Jadwal:</span>
                         <strong>{{ $stats['totalJadwal'] }}</strong>
                     </div>
-                    <div class="progress" style="height: 5px;">
-                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                    <div class="progress progress-thin">
+                        <div class="progress-bar bg-primary progress-fill-full"></div>
                     </div>
                 </div>
 
@@ -129,8 +117,8 @@
                         <span>Kelas Menggunakan:</span>
                         <strong>{{ $stats['totalKelas'] }}</strong>
                     </div>
-                    <div class="progress" style="height: 5px;">
-                        <div class="progress-bar bg-success" style="width: {{ $stats['totalKelas'] > 0 ? 100 : 0 }}%"></div>
+                    <div class="progress progress-thin">
+                        <div class="progress-bar bg-success {{ $stats['totalKelas'] > 0 ? 'progress-fill-full' : 'progress-fill-empty' }}"></div>
                     </div>
                 </div>
 
@@ -139,8 +127,8 @@
                         <span>Guru Mengajar:</span>
                         <strong>{{ $stats['totalGuru'] }}</strong>
                     </div>
-                    <div class="progress" style="height: 5px;">
-                        <div class="progress-bar bg-info" style="width: {{ $stats['totalGuru'] > 0 ? 100 : 0 }}%"></div>
+                    <div class="progress progress-thin">
+                        <div class="progress-bar bg-info {{ $stats['totalGuru'] > 0 ? 'progress-fill-full' : 'progress-fill-empty' }}"></div>
                     </div>
                 </div>
             </div>

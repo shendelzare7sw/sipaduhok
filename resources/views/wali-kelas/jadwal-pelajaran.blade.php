@@ -9,123 +9,7 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-/* Sama dengan admin show.blade.php styles */
-.schedule-grid {
-    display: grid;
-    grid-template-columns: 100px repeat(6, 1fr);
-    gap: 2px;
-    background: #e5e7eb;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.schedule-header {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    padding: 16px 12px;
-    font-weight: 600;
-    text-align: center;
-    font-size: 14px;
-}
-
-.schedule-time {
-    background: #f9fafb;
-    padding: 12px;
-    font-weight: 600;
-    font-size: 13px;
-    color: #6b7280;
-    text-align: center;
-    font-family: 'Monaco', 'Consolas', monospace;
-}
-
-.schedule-cell {
-    background: white;
-    padding: 12px;
-    min-height: 80px;
-}
-
-.schedule-cell.has-schedule {
-    background: #dbeafe;
-    border-left: 4px solid #3b82f6;
-}
-
-.schedule-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.schedule-mapel {
-    font-weight: 700;
-    color: #111827;
-    font-size: 14px;
-}
-
-.schedule-guru {
-    font-size: 12px;
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.schedule-guru i {
-    color: #3b82f6;
-}
-
-.schedule-time-badge {
-    font-size: 11px;
-    color: #9ca3af;
-    font-family: 'Monaco', 'Consolas', monospace;
-}
-
-.schedule-empty {
-    color: #9ca3af;
-    font-style: italic;
-    font-size: 12px;
-    text-align: center;
-}
-
-.kelas-info-card {
-    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-    color: white;
-    padding: 24px;
-    border-radius: 12px;
-    margin-bottom: 24px;
-}
-
-.kelas-info-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.kelas-info-meta {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.kelas-info-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-@media print {
-    .no-print {
-        display: none !important;
-    }
-    .schedule-grid {
-        page-break-inside: avoid;
-    }
-}
-</style>
+    @vite(['resources/css/wali-kelas/jadwal-pelajaran.css', 'resources/js/wali-kelas/jadwal-pelajaran.js'])
 @endsection
 
 @section('content')
@@ -163,7 +47,7 @@
 <div class="card mb-4 no-print">
     <div class="card-body">
         <div class="d-flex justify-content-end">
-            <button onclick="window.print()" class="btn btn-success">
+            <button type="button" class="btn btn-success" data-print-page>
                 <i class="fas fa-print me-1"></i> Cetak Jadwal
             </button>
         </div>
@@ -245,11 +129,11 @@
         <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i>Keterangan</h6>
         <div class="d-flex gap-4 flex-wrap">
             <div class="d-flex align-items-center gap-2">
-                <div style="width: 20px; height: 20px; background: #dbeafe; border-left: 4px solid #3b82f6; border-radius: 4px;"></div>
+                <div class="legend-box legend-box-schedule"></div>
                 <span>Jadwal Pelajaran</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <div style="width: 20px; height: 20px; background: white; border: 1px solid #e5e7eb; border-radius: 4px;"></div>
+                <div class="legend-box legend-box-empty"></div>
                 <span>Kosong</span>
             </div>
         </div>

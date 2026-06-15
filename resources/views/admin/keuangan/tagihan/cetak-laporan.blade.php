@@ -5,94 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Rekap Tagihan - {{ $selectedYear->nama_tahun_ajaran ?? '-' }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.4;
-            padding: 15mm;
-        }
-        .header { text-align: center; }
-        .title {
-            text-align: center;
-            margin: 15px 0 10px;
-        }
-        .title h3 {
-            font-size: 14pt;
-            text-decoration: underline;
-            margin-bottom: 4px;
-        }
-        .title p { font-size: 11pt; margin: 2px 0; }
-        .info {
-            margin-bottom: 15px;
-            font-size: 10pt;
-        }
-        .info table { width: 55%; }
-        .info td { padding: 2px 10px 2px 0; }
-        .info td:first-child { width: 130px; }
-        .tagihan-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 9.5pt;
-        }
-        .tagihan-table th, .tagihan-table td {
-            border: 1px solid #000;
-            padding: 5px 7px;
-        }
-        .tagihan-table th {
-            background: #f0f0f0;
-            font-weight: bold;
-            text-align: center;
-        }
-        .tagihan-table .text-right { text-align: right; }
-        .tagihan-table .text-center { text-align: center; }
-        .tagihan-table tfoot td {
-            font-weight: bold;
-            background: #f5f5f5;
-        }
-        .status-lunas { color: green; font-weight: bold; }
-        .status-belum { color: red; }
-        .status-kosong { color: #888; }
-        .summary {
-            margin-top: 15px;
-            border: 1px solid #000;
-            padding: 12px;
-            width: 45%;
-            margin-left: auto;
-            font-size: 10pt;
-        }
-        .summary table { width: 100%; }
-        .summary td { padding: 4px 0; }
-        .summary td:last-child { text-align: right; font-weight: bold; }
-        .summary .grand-total { border-top: 1px solid #000; padding-top: 6px; }
-        .footer {
-            margin-top: 35px;
-            text-align: right;
-        }
-        .footer .sign {
-            display: inline-block;
-            width: 220px;
-            text-align: center;
-        }
-        .footer .sign-line {
-            margin-top: 55px;
-            border-top: 1px solid #000;
-            padding-top: 5px;
-        }
-        @media print {
-            body { padding: 10mm; }
-            .no-print { display: none; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/admin/keuangan/tagihan/cetak-laporan.css') }}?v={{ filemtime(public_path('css/admin/keuangan/tagihan/cetak-laporan.css')) }}">
 </head>
 <body>
-    <div class="no-print" style="margin-bottom: 20px; text-align: center;">
-        <button onclick="window.print()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
+    <div class="no-print print-actions">
+        <button type="button" class="print-action-button print-button" data-print-page>
             <i class="fas fa-print"></i> Cetak
         </button>
-        <button onclick="window.close()" style="padding: 10px 20px; background: #6b7280; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;">
+        <button type="button" class="print-action-button close-button" data-close-page>
             <i class="fas fa-times"></i> Tutup
         </button>
     </div>
@@ -140,15 +60,15 @@
     <table class="tagihan-table">
         <thead>
             <tr>
-                <th style="width: 35px;">No</th>
+                <th class="col-no">No</th>
                 <th>Nama Siswa</th>
-                <th style="width: 100px;">NISN</th>
-                <th style="width: 120px;">Kelas</th>
-                <th style="width: 110px;">Cabang</th>
-                <th class="text-right" style="width: 110px;">Total Tagihan</th>
-                <th class="text-right" style="width: 110px;">Terbayar</th>
-                <th class="text-right" style="width: 110px;">Sisa</th>
-                <th style="width: 80px;">Status</th>
+                <th class="col-nisn">NISN</th>
+                <th class="col-kelas">Kelas</th>
+                <th class="col-cabang">Cabang</th>
+                <th class="text-right col-money">Total Tagihan</th>
+                <th class="text-right col-money">Terbayar</th>
+                <th class="text-right col-money">Sisa</th>
+                <th class="col-status">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -174,7 +94,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center" style="padding: 20px;">
+                    <td colspan="9" class="text-center empty-row">
                         Tidak ada data siswa sesuai filter yang dipilih.
                     </td>
                 </tr>
@@ -233,8 +153,9 @@
         </div>
     </div>
 
-    <div style="margin-top: 20px; font-size: 9pt; color: #666;">
+    <div class="print-meta">
         <em>Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }}</em>
     </div>
+    <script src="{{ asset('js/admin/keuangan/tagihan/cetak-laporan.js') }}?v={{ filemtime(public_path('js/admin/keuangan/tagihan/cetak-laporan.js')) }}"></script>
 </body>
 </html>

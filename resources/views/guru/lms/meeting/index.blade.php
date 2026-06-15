@@ -8,7 +8,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/meeting/index.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-meeting-page">
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <div>
@@ -29,10 +34,9 @@
                                 <h5 class="card-title fw-bold mb-1">
                                     {{ $meeting->judul }}
                                     @if($meeting->is_active)
-                                        <span class="badge bg-success ms-2" style="font-size: 0.7em;">Aktif</span>
+                                        <span class="badge bg-success ms-2 meeting-status-badge">Aktif</span>
                                     @else
-                                        <span class="badge bg-secondary ms-2"
-                                            style="font-size: 0.7em;">Selesai/Non-aktif</span>
+                                        <span class="badge bg-secondary ms-2 meeting-status-badge">Selesai/Non-aktif</span>
                                     @endif
                                 </h5>
                                 <div class="mb-2">
@@ -58,8 +62,7 @@
                                         <i class="fas fa-external-link-alt me-1"></i> Mulai Meeting
                                     </a>
                                     <button class="btn btn-outline-secondary btn-sm" type="button"
-                                        data-link="{{ $meeting->link_meeting }}"
-                                        onclick="copyLink(this)">
+                                        data-copy-link="{{ $meeting->link_meeting }}">
                                         <i class="far fa-copy me-1"></i> Copy Link
                                     </button>
                                 </div>
@@ -80,7 +83,7 @@
                                     </li>
                                     <li>
                                         <button class="dropdown-item text-danger" type="button"
-                                            onclick="confirmDelete('{{ route('guru.lms.meeting.destroy', [$kelas->id, $mapel->id, $meeting->id]) }}')">
+                                            data-delete-url="{{ route('guru.lms.meeting.destroy', [$kelas->id, $mapel->id, $meeting->id]) }}">
                                             <i class="fas fa-trash-alt me-2"></i> Hapus
                                         </button>
                                     </li>
@@ -92,7 +95,7 @@
             @empty
                 <div class="text-center py-5">
                     <img src="https://cdni.iconscout.com/illustration/premium/thumb/online-meeting-4450216-3726715.png"
-                        alt="Empty" style="width: 150px; opacity: 0.5;">
+                        alt="Empty" class="empty-illustration">
                     <p class="text-muted mt-3">Belum ada jadwal meeting/kelas virtual.</p>
                     <a href="{{ route('guru.lms.meeting.create', [$kelas->id, $mapel->id]) }}"
                         class="btn btn-outline-primary btn-sm">
@@ -107,89 +110,6 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function copyLink(btnElement) {
-            const link = btnElement.getAttribute('data-link');
-            
-            if (!link) {
-                alert('Link tidak ditemukan');
-                return;
-            }
-            
-            // Simpan state original
-            const originalHtml = btnElement.innerHTML;
-            const originalClass = btnElement.className;
-            
-            // Try using modern Clipboard API
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(link).then(() => {
-                    showSuccessNotification(btnElement, originalHtml, originalClass);
-                }).catch(err => {
-                    console.warn('Clipboard API failed, using fallback:', err);
-                    fallbackCopyToClipboard(link, btnElement, originalHtml, originalClass);
-                });
-            } else {
-                // Fallback untuk browser lama atau HTTP
-                fallbackCopyToClipboard(link, btnElement, originalHtml, originalClass);
-            }
-        }
-
-        function fallbackCopyToClipboard(link, btnElement, originalHtml, originalClass) {
-            const textarea = document.createElement('textarea');
-            textarea.value = link;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            
-            try {
-                textarea.select();
-                document.execCommand('copy');
-                showSuccessNotification(btnElement, originalHtml, originalClass);
-            } catch (err) {
-                console.error('Fallback copy failed:', err);
-                alert('Gagal menyalin link ke clipboard');
-            } finally {
-                document.body.removeChild(textarea);
-            }
-        }
-
-        function showSuccessNotification(btnElement, originalHtml, originalClass) {
-            // Update button UI
-            btnElement.innerHTML = '<i class="fas fa-check me-1"></i> Tersalin!';
-            btnElement.className = 'btn btn-success btn-sm text-white';
-            
-            // Reset button setelah 2 detik
-            setTimeout(() => {
-                btnElement.innerHTML = originalHtml;
-                btnElement.className = originalClass;
-            }, 2000);
-
-            // Try SweetAlert jika tersedia
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    toast: true,
-                    position: 'bottom-end',
-                    icon: 'success',
-                    title: 'Link Meeting Tersalin!',
-                    text: 'Link telah disalin ke clipboard Anda.',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            }
-        }
-
-        function confirmDelete(url) {
-            document.getElementById('deleteForm').action = url;
-            document.getElementById('hapusTerkaitCheck').checked = false;
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @endpush
-
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -203,7 +123,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+                    <form id="deleteForm" method="POST" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">
@@ -218,4 +138,9 @@
             </div>
         </div>
     </div>
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/meeting/index.js'])
+@endpush

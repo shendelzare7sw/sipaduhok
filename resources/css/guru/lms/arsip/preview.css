@@ -1,0 +1,441 @@
+.preview-wrapper {
+    padding: 0;
+}
+
+.preview-banner {
+    background: linear-gradient(135deg, #4361ee, #3651d4);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: 0 8px 20px -5px rgba(67, 97, 238, 0.3);
+}
+
+.preview-banner-text {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 240px;
+}
+
+.preview-banner-icon {
+    font-size: 1.4rem;
+    opacity: 0.95;
+    flex-shrink: 0;
+}
+
+.preview-banner-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.preview-banner-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.92;
+    line-height: 1.4;
+}
+
+.btn-banner-salin {
+    background: white;
+    color: #4361ee;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.btn-banner-salin:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    color: #3651d4;
+}
+
+.preview-content {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 26px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.preview-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px;
+}
+
+.preview-title-icon-materi {
+    color: #0284c7;
+}
+
+.preview-title-icon-tugas {
+    color: #d97706;
+}
+
+.preview-title-icon-latihan {
+    color: #7c3aed;
+}
+
+.preview-title-icon-ujian {
+    color: #dc2626;
+}
+
+.preview-meta-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e5e7eb;
+    align-items: center;
+}
+
+.preview-meta-row i {
+    color: #4361ee;
+    margin-right: 4px;
+}
+
+.preview-type-badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.preview-type-badge-warning {
+    background: rgba(217, 119, 6, 0.1);
+    color: #92400e;
+}
+
+.preview-type-badge-latihan {
+    background: rgba(124, 58, 237, 0.1);
+    color: #5b21b6;
+}
+
+.preview-type-badge-ujian {
+    background: rgba(220, 38, 38, 0.1);
+    color: #b91c1c;
+}
+
+.preview-section {
+    margin-bottom: 22px;
+}
+
+.preview-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.preview-label-tight {
+    margin-bottom: 0;
+}
+
+.preview-section-body {
+    color: #1e293b;
+    line-height: 1.7;
+    font-size: 0.9rem;
+}
+
+.preview-section-body-spaced {
+    margin-bottom: 12px;
+}
+
+.preview-link-body {
+    margin-bottom: 12px;
+    word-break: break-all;
+}
+
+.preview-file-box {
+    background: #f8fafc;
+    border: 2px dashed #e5e7eb;
+    border-radius: 10px;
+    padding: 22px;
+    text-align: center;
+    margin: 12px 0;
+}
+
+.preview-file-box i {
+    font-size: 2.2rem;
+    color: #4361ee;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.preview-file-box .preview-action-btn i {
+    color: currentColor;
+    display: inline-block;
+    font-size: 0.85em;
+    margin-bottom: 0;
+}
+
+.preview-file-box .preview-action-btn.btn-primary,
+.preview-file-box .preview-action-btn.btn-primary:hover,
+.preview-file-box .preview-action-btn.btn-primary:focus {
+    color: #ffffff;
+}
+
+.inline-preview-box {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.inline-pdf-frame {
+    width: 100%;
+    height: 75vh;
+    min-height: 500px;
+    border: none;
+    border-radius: 8px;
+    background: white;
+}
+
+.preview-image {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.preview-video {
+    width: 100%;
+    max-height: 70vh;
+    border-radius: 10px;
+}
+
+.preview-action-btn {
+    border-radius: 8px;
+}
+
+.preview-warning {
+    border-radius: 10px;
+    border: none;
+    background: rgba(217, 119, 6, 0.08);
+    color: #92400e;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #1e293b;
+}
+
+.setting-item i {
+    color: #4361ee;
+}
+
+.soal-list {
+    display: grid;
+    gap: 14px;
+}
+
+.soal-card {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.soal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.soal-nomor {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.88rem;
+}
+
+.soal-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.soal-badge {
+    background: rgba(67, 97, 238, 0.08);
+    color: #4361ee;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.soal-bobot {
+    background: rgba(217, 119, 6, 0.08);
+    color: #92400e;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.soal-narasi {
+    background: white;
+    border-left: 3px solid #4361ee;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+
+.soal-image {
+    margin-bottom: 12px;
+}
+
+.soal-image-media {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.soal-pertanyaan {
+    font-size: 0.92rem;
+    color: #1e293b;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.soal-pilihan-list {
+    display: grid;
+    gap: 6px;
+}
+
+.soal-pilihan {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 13px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #1e293b;
+}
+
+.pilihan-benar {
+    background: rgba(22, 163, 74, 0.05);
+    border-color: rgba(22, 163, 74, 0.4);
+    color: #15803d;
+    font-weight: 600;
+}
+
+.pilihan-letter {
+    width: 26px;
+    height: 26px;
+    background: #4361ee;
+    color: white;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+}
+
+.pilihan-benar .pilihan-letter {
+    background: #16a34a;
+}
+
+.preview-option-text {
+    flex: 1;
+}
+
+.preview-success-icon {
+    color: #16a34a;
+}
+
+.preview-small-badge {
+    font-size: 0.7rem;
+}
+
+.soal-kunci {
+    background: rgba(22, 163, 74, 0.05);
+    border: 1px solid rgba(22, 163, 74, 0.3);
+    color: #15803d;
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+}
+
+.kunci-essay {
+    background: rgba(217, 119, 6, 0.05);
+    border-color: rgba(217, 119, 6, 0.3);
+    color: #92400e;
+}
+
+.kunci-label {
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+.preview-guidance {
+    margin-top: 6px;
+}
+
+@media (max-width: 768px) {
+    .inline-pdf-frame {
+        height: 60vh;
+        min-height: 400px;
+    }
+
+    .preview-banner {
+        padding: 14px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .preview-banner-text {
+        min-width: 0;
+    }
+
+    .btn-banner-salin {
+        width: 100%;
+        padding: 11px;
+    }
+
+    .preview-content {
+        padding: 18px;
+    }
+}

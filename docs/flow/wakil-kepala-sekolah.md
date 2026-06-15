@@ -215,7 +215,7 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 | Edit | `waka.pengaturan-istirahat.edit` | GET | `@edit` | `waka/pengaturan-istirahat/edit.blade.php` | Form pre-fill. |
 | Update | `waka.pengaturan-istirahat.update` | PUT | `@update` | redirect | Validasi & update. |
 | Hapus | `waka.pengaturan-istirahat.destroy` | DELETE | `@destroy` | redirect | Hapus pengaturan. |
-| Toggle status | `waka.pengaturan-istirahat.toggle-status` | POST | `@toggleStatus` | redirect | Aktif/non-aktifkan slot istirahat. |
+| Toggle status | `waka.pengaturan-istirahat.toggle-status` | PATCH | `@toggleStatus` | redirect | Aktif/non-aktifkan slot istirahat. |
 
 **Catatan**: Tidak di sidebar utama — diakses lewat tombol **"Istirahat"** (oranye) di halaman index Jadwal Pelajaran. Mirror logika: `admin.pengaturan-istirahat.*`.
 
@@ -306,7 +306,7 @@ Pengelola **akademik operasional** dengan ruang lingkup biasanya **dibatasi per 
 
 ### Catatan / Teguran
 
-**Index view**: `waka/catatan/index.blade.php` → `@include('shared.catatan.index')` · **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
+**Index view**: `waka/catatan/index.blade.php` (standalone per-role, tanpa shared partial) - **Controller**: `WakilKepalaSekolah/WakilKepalaSekolahController.php`
 
 **Tampilan index**: Toolbar header **Manajemen Catatan** + tombol kanan **+ Buat Catatan** (primary). 4 **stat card**: Total Catatan, Publik (ke semua pengguna), Total Dibaca, Mendesak (prioritas tinggi). Card **Daftar Catatan** (Waka punya parameter `showDirection=true` — beda dgn Ketua/Admin — sehingga tampil arah panah Terkirim/Dari pengirim). List card per catatan: judul, waktu, prioritas, badge target audience (Semua/Role/Individu), excerpt isi, tombol Detail/Hapus.
 

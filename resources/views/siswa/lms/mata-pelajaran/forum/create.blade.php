@@ -7,17 +7,13 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
-@section('content')
-    <style>
-        .form-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/forum/create.css'])
+@endpush
 
-    <!-- Breadcrumb -->
+@section('content')
+<div class="siswa-lms-mapel-forum-create-page">
+<!-- Breadcrumb -->
     <div class="page-breadcrumb">
         <div class="page-breadcrumb-item">
             <a href="{{ route('siswa.lms.dashboard') }}">
@@ -43,7 +39,7 @@
     </div>
 
     <div class="form-card">
-        <h4 style="color: var(--primary); margin-bottom: 24px;">
+        <h4 class="form-heading">
             <i class="fas fa-question-circle me-2"></i>Buat Pertanyaan Baru
         </h4>
 
@@ -54,12 +50,11 @@
                 <label class="form-label fw-bold">Topik <span class="text-danger">*</span></label>
                 <select name="topik" class="form-select @error('topik') is-invalid @enderror" required>
                     <option value="">-- Pilih Topik --</option>
-                    <option value="materi" {{ old('topik') == 'materi' ? 'selected' : '' }}>📚 Materi Pembelajaran</option>
-                    <option value="tugas" {{ old('topik') == 'tugas' ? 'selected' : '' }}>📝 Tugas & Latihan</option>
-                    <option value="ujian" {{ old('topik') == 'ujian' ? 'selected' : '' }}>📋 Ujian</option>
-                    <option value="konsultasi" {{ old('topik') == 'konsultasi' ? 'selected' : '' }}>💬 Konsultasi Umum
-                    </option>
-                    <option value="lainnya" {{ old('topik') == 'lainnya' ? 'selected' : '' }}>📌 Lainnya</option>
+                    <option value="materi" {{ old('topik') == 'materi' ? 'selected' : '' }}>Materi Pembelajaran</option>
+                    <option value="tugas" {{ old('topik') == 'tugas' ? 'selected' : '' }}>Tugas & Latihan</option>
+                    <option value="ujian" {{ old('topik') == 'ujian' ? 'selected' : '' }}>Ujian</option>
+                    <option value="konsultasi" {{ old('topik') == 'konsultasi' ? 'selected' : '' }}>Konsultasi Umum</option>
+                    <option value="lainnya" {{ old('topik') == 'lainnya' ? 'selected' : '' }}>Lainnya</option>
                 </select>
                 @error('topik')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -103,4 +98,5 @@
         </form>
     </div>
 
+</div>
 @endsection

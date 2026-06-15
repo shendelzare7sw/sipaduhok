@@ -3,6 +3,7 @@
     File: resources/views/guru/partials/sneat-sidebar-menu.blade.php
 
     Compatible dengan Sneat Bootstrap 5 Template
+    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 --}}
 
 @php
@@ -17,25 +18,37 @@
     </a>
 </li>
 
-<!-- Jadwal Mengajar -->
-<li class="menu-item {{ $currentRoute == 'guru.jadwal.index' ? 'active' : '' }}">
-    <a href="{{ route('guru.jadwal.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-calendar-alt"></i>
-        <div>Jadwal Mengajar</div>
-    </a>
+<!-- ============================================ -->
+<!-- UC38: Melihat Informasi Akademik             -->
+<!-- ============================================ -->
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Akademik</span>
 </li>
 
-<!-- Pembelajaran Section -->
+<li class="menu-item {{ $currentRoute == 'guru.jadwal.index' || Str::startsWith($currentRoute, 'guru.kelas') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
+        <i class="menu-icon fas fa-calendar-alt"></i>
+        <div>Informasi Akademik</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ $currentRoute == 'guru.jadwal.index' ? 'active' : '' }}">
+            <a href="{{ route('guru.jadwal.index') }}" class="menu-link">
+                <div>Jadwal Mengajar</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'guru.kelas') ? 'active' : '' }}">
+            <a href="{{ route('guru.kelas.index') }}" class="menu-link">
+                <div>Semua Kelas</div>
+            </a>
+        </li>
+    </ul>
+</li>
+
+<!-- ============================================ -->
+<!-- UC27: Kelola Materi Pembelajaran (Arsip)     -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Pembelajaran</span>
-</li>
-
-<!-- Semua Kelas -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'guru.kelas') ? 'active' : '' }}">
-    <a href="{{ route('guru.kelas.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-list"></i>
-        <div>Semua Kelas</div>
-    </a>
 </li>
 
 <!-- Arsip LMS (lintas TA) -->
@@ -46,6 +59,9 @@
     </a>
 </li>
 
+<!-- ============================================ -->
+<!-- UC37: Membaca Catatan Monitoring             -->
+<!-- ============================================ -->
 <!-- Catatan Monitoring -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'guru.lms.catatan-monitoring') ? 'active' : '' }}">
     <a href="{{ route('guru.lms.catatan-monitoring.index') }}" class="menu-link">
@@ -66,7 +82,9 @@
     </a>
 </li>
 
-<!-- Kelas Saya (Dynamic) -->
+<!-- ============================================ -->
+<!-- Kelas Saya (Akses Cepat ke LMS)              -->
+<!-- ============================================ -->
 @if(isset($sidebarKelas) && count($sidebarKelas) > 0)
     <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Kelas Saya (Akses Cepat)</span>
@@ -78,7 +96,7 @@
             $isActive = Str::startsWith($currentRoute, 'guru.lms') && request()->route('kelas') == $kelasId;
         @endphp
         <li class="menu-item {{ $isActive ? 'active open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <a href="#" class="menu-link menu-toggle">
                 <i class="menu-icon fas fa-chalkboard"></i>
                 <div>{{ $kelas->nama_kelas }}</div>
             </a>
@@ -93,7 +111,7 @@
                     @if($mapel)
                         <li class="menu-item {{ $isSubActive ? 'active' : '' }}">
                             <a href="{{ route('guru.lms.dashboard', [$kelasId, $mapelId]) }}" class="menu-link">
-                                <div class="text-wrap" style="line-height: 1.2;">{{ $mapel->nama_mapel }}</div>
+                                <div class="text-wrap lh-sm">{{ $mapel->nama_mapel }}</div>
                             </a>
                         </li>
                     @endif

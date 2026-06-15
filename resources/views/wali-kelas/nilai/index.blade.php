@@ -9,44 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    /* Styling Tabel Nilai agar tetap Rapi */
-    .table-nilai thead th {
-        background-color: #f8f9fc;
-        text-align: center;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        vertical-align: middle;
-        color: #4e73df;
-        border-bottom: 2px solid #e3e6f0;
-    }
-    .nilai-akhir {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: #165fac;
-    }
-    .badge-predikat {
-        width: 32px;
-        height: 32px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-weight: 800;
-        color: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        font-size: 0.85rem;
-    }
-    .col-siswa {
-        min-width: 200px;
-    }
-</style>
+    @vite(['resources/css/wali-kelas/nilai/index.css', 'resources/js/wali-kelas/nilai/index.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
     @if($error ?? false)
         <div class="alert alert-danger shadow-sm border-start border-danger border-4">
@@ -86,7 +53,7 @@
                         {{-- Semester Selector --}}
                         <div class="col-md-3">
                             <label class="form-label fw-semibold"><i class="fas fa-calendar-alt me-1"></i>Semester</label>
-                            <select name="semester" class="form-select border-start border-success border-4 shadow-sm" onchange="this.form.submit()">
+                            <select name="semester" class="form-select border-start border-success border-4 shadow-sm" data-auto-submit>
                                 <option value="ganjil" {{ ($semester ?? 'genap') == 'ganjil' ? 'selected' : '' }}>Ganjil (Jul-Des)</option>
                                 <option value="genap" {{ ($semester ?? 'genap') == 'genap' ? 'selected' : '' }}>Genap (Jan-Jun)</option>
                             </select>
@@ -94,7 +61,7 @@
                         {{-- Mata Pelajaran Selector --}}
                         <div class="col-md-6">
                             <label class="form-label fw-semibold"><i class="fas fa-book me-1"></i>Mata Pelajaran</label>
-                            <select name="mata_pelajaran_id" class="form-select border-start border-primary border-4 shadow-sm" onchange="this.form.submit()">
+                            <select name="mata_pelajaran_id" class="form-select border-start border-primary border-4 shadow-sm" data-auto-submit>
                                 <option value="">-- Lihat Semua (Ringkasan Siswa) --</option>
                                 @foreach($mataPelajaranList as $mapel)
                                     <option value="{{ $mapel->id }}" {{ ($selectedMapelId ?? null) == $mapel->id ? 'selected' : '' }}>
@@ -264,10 +231,10 @@
 
                                     <td class="text-center align-middle">
                                         <div class="d-flex gap-1 justify-content-center">
-                                            <a href="{{ route('wali.nilai.show', $siswa->id) }}?semester={{ $semester }}" class="btn btn-info btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="Lihat Profil Nilai">
+                                            <a href="{{ route('wali.nilai.show', $siswa->id) }}?semester={{ $semester }}" class="btn btn-info btn-sm rounded-circle shadow-sm nilai-action-btn" title="Lihat Profil Nilai">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('wali.nilai.edit', $siswa->id) }}?semester={{ $semester }}" class="btn {{ $guruBaruUpdate ? 'btn-warning' : 'btn-primary' }} btn-sm rounded-circle shadow-sm" style="width: 32px; height: 32px;" title="{{ $guruBaruUpdate ? 'Ada update guru — buka untuk preview & sinkron' : 'Edit nilai semua mapel' }}">
+                                            <a href="{{ route('wali.nilai.edit', $siswa->id) }}?semester={{ $semester }}" class="btn {{ $guruBaruUpdate ? 'btn-warning' : 'btn-primary' }} btn-sm rounded-circle shadow-sm nilai-action-btn" title="{{ $guruBaruUpdate ? 'Ada update guru — buka untuk preview & sinkron' : 'Edit nilai semua mapel' }}">
                                                 <i class="fas {{ $guruBaruUpdate ? 'fa-bell' : 'fa-edit' }}"></i>
                                             </a>
                                         </div>

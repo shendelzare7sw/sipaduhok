@@ -3,6 +3,8 @@
 @php
     $isLatihan = request()->routeIs('guru.lms.latihan.*');
     $tipeLabel = $isLatihan ? 'Latihan' : 'Ujian';
+    $aiRouteName = $isLatihan ? 'guru.lms.latihan.koreksi.ai-suggest' : 'guru.lms.ujian.koreksi.ai-suggest';
+    $aiUrlTemplate = route($aiRouteName, [$kelas->id, $mapel->id, $ujian->id, 'SOAL_ID_PLACEHOLDER']);
 @endphp
 
 @section('title', 'Koreksi Jawaban Siswa')
@@ -13,7 +15,18 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/ujian/koreksi.css'])
+@endpush
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/ujian/koreksi.js'])
+@endpush
+
 @section('content')
+    <div class="guru-lms-ujian-koreksi-page"
+        data-ai-url-template="{{ $aiUrlTemplate }}"
+        data-csrf-token="{{ csrf_token() }}">
     <div class="mb-3">
         @php
             $backRoute = $isLatihan ? 'guru.lms.latihan.hasil' : 'guru.lms.ujian.hasil';
@@ -72,13 +85,13 @@
                 @php
                     $jawaban = $ujianSiswa->jawabanSiswa->where('soal_ujian_id', $soal->id)->first();
                     $isAutoGraded = !in_array($soal->tipe_soal, ['uraian', 'essay', 'isian_singkat']);
-                    $bgColor = $isAutoGraded ? 'bg-light' : 'bg-white border-warning';
+                    $cardClass = $isAutoGraded ? 'bg-light koreksi-question-card' : 'bg-white border-warning koreksi-question-card is-manual';
                     if (!$isAutoGraded && $jawaban && $jawaban->nilai_soal === null) {
-                        $bgColor = 'bg-warning bg-opacity-10 border-warning'; // Highlight un-graded manual questions
+                        $cardClass = 'bg-warning bg-opacity-10 border-warning koreksi-question-card is-manual';
                     }
                 @endphp
 
-                <div class="card mb-3 {{ $bgColor }}" style="border-left: 4px solid {{ $isAutoGraded ? '#165fac' : '#f59e0b' }};">
+                <div class="card mb-3 {{ $cardClass }}">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <h6 class="fw-bold">Soal No. {{ $index + 1 }} <span class="badge bg-secondary ms-2">{{ \App\Models\SoalUjian::getTipeSoalLabel($soal->tipe_soal) }}</span></h6>
@@ -145,7 +158,7 @@
                             {{-- Tampilan Manual Grading --}}
                             <div class="mb-3">
                                 <label class="small text-muted fw-bold mb-1">Jawaban Siswa:</label>
-                                <div class="p-3 border rounded student-answer-box mb-3" style="min-height: 80px;">
+                                <div class="p-3 border rounded student-answer-box student-answer-box-min mb-3">
                                     @if(isset($jawaban->jawaban) && $jawaban->jawaban)
                                         {!! nl2br(e($jawaban->jawaban)) !!}
                                     @else
@@ -199,7 +212,7 @@
     </form>
 
     <!-- Toast for AI Result -->
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div class="position-fixed bottom-0 end-0 p-3 ai-toast-container">
         <div id="aiToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
                 <i class="fas fa-robot text-primary rounded me-2"></i>
@@ -211,151 +224,5 @@
             </div>
         </div>
     </div>
-
-    @push('styles')
-    <style>
-        .question-text {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #2c3e50;
-        }
-        .student-answer-box {
-            font-size: 1.05rem;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-        }
-        .btn-ai-gradient {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
-            transition: all 0.3s ease;
-        }
-        .btn-ai-gradient:hover {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.4);
-            color: white;
-        }
-        .form-control-lg-custom {
-            font-size: 1.1rem;
-            padding: 0.6rem 1rem;
-        }
-        .btn-ai-loading {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-            animation: pulse-glow 1.5s ease-in-out infinite;
-            pointer-events: none;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
-            50% { box-shadow: 0 4px 20px rgba(139, 92, 246, 0.7); }
-        }
-    </style>
-    @endpush
-
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const aiButtons = document.querySelectorAll('.ai-assist-btn');
-            const toastEl = document.getElementById('aiToast');
-            const toast = new bootstrap.Toast(toastEl);
-            const toastMsg = document.getElementById('aiToastMessage');
-            const processingButtons = new Set(); // Race condition protection
-
-            aiButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const soalId = this.dataset.soalId;
-
-                    // Prevent multiple simultaneous requests for same button
-                    if (processingButtons.has(soalId)) return;
-
-                    const answer = this.dataset.answer;
-                    const maxScore = parseFloat(this.dataset.maxScore);
-
-                    if (!answer || answer === '-') {
-                        toastMsg.textContent = 'Belum ada jawaban siswa untuk dianalisis.';
-                        toast.show();
-                        return;
-                    }
-
-                    processingButtons.add(soalId);
-
-                    // UI Loading State with live timer
-                    const originalContent = this.innerHTML;
-                    let seconds = 0;
-                    const btnRef = this;
-                    btnRef.disabled = true;
-                    btnRef.classList.add('btn-ai-loading');
-
-                    const updateTimer = () => {
-                        btnRef.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i> Menganalisis... <span class="badge bg-light text-dark ms-1">${seconds}s</span>`;
-                    };
-                    updateTimer();
-                    const timerInterval = setInterval(() => {
-                        seconds++;
-                        updateTimer();
-                    }, 1000);
-
-                    // Determine route based on context
-                    const isLatihan = {{ request()->routeIs('guru.lms.latihan.*') ? 'true' : 'false' }};
-
-                    // Use route helper with placeholder for dynamic soalId
-                    @php
-                        $routeName = request()->routeIs('guru.lms.latihan.*') ? 'guru.lms.latihan.koreksi.ai-suggest' : 'guru.lms.ujian.koreksi.ai-suggest';
-                        $urlTemplate = route($routeName, [$kelas->id, $mapel->id, $ujian->id, 'SOAL_ID_PLACEHOLDER']);
-                    @endphp
-                    const url = "{{ $urlTemplate }}".replace('SOAL_ID_PLACEHOLDER', soalId);
-
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ answer: answer })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            throw new Error(data.feedback || 'Terjadi kesalahan pada AI.');
-                        }
-
-                        // Populate inputs
-                        const scoreInput = document.getElementById(`nilai_${soalId}`);
-                        const feedbackInput = document.getElementById(`feedback_${soalId}`);
-
-                        // Animate changed values
-                        scoreInput.value = data.score;
-                        scoreInput.classList.add('bg-success', 'text-white', 'bg-opacity-25');
-
-                        // Prepend AI feedback (consistent with tugas behavior)
-                        const existingFeedback = feedbackInput.value.trim();
-                        feedbackInput.value = `[AI Suggestion] ${data.feedback}${existingFeedback ? '\n\n' + existingFeedback : ''}`;
-                        feedbackInput.classList.add('bg-info', 'text-white', 'bg-opacity-10');
-
-                        setTimeout(() => {
-                            scoreInput.classList.remove('bg-success', 'text-white', 'bg-opacity-25');
-                            feedbackInput.classList.remove('bg-info', 'text-white', 'bg-opacity-10');
-                        }, 2000);
-
-                        toastMsg.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Analisis selesai dalam <strong>${seconds}s</strong>! Saran skor: <strong>${data.score}</strong>`;
-                        toast.show();
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        toastMsg.innerHTML = `<i class="fas fa-exclamation-triangle text-danger me-1"></i> Gagal (${seconds}s): ${error.message}`;
-                        toast.show();
-                    })
-                    .finally(() => {
-                        clearInterval(timerInterval);
-                        btnRef.innerHTML = originalContent;
-                        btnRef.disabled = false;
-                        btnRef.classList.remove('btn-ai-loading');
-                        processingButtons.delete(soalId);
-                    });
-                });
-            });
-        });
-    </script>
-    @endpush
+    </div>
 @endsection

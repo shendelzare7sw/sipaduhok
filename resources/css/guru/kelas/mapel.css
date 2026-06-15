@@ -1,0 +1,22 @@
+.guru-mapel-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mapel-card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.mapel-card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-5px);
+}
+
+.icon-circle {
+    flex-shrink: 0;
+    height: 48px;
+    width: 48px;
+}

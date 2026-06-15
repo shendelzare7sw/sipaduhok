@@ -9,46 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .card-hari {
-        border: none;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-    .header-hari {
-        background-color: #f8f9fc;
-        border-bottom: 2px solid #e3e6f0;
-        padding: 15px 20px;
-    }
-    .table-jadwal thead th {
-        background: #f1f4f9;
-        text-transform: uppercase;
-        font-size: 11px;
-        color: #4e73df;
-        letter-spacing: 1px;
-    }
-    .jam-badge {
-        background: #eef2ff;
-        color: #4e73df;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 700;
-        display: inline-block;
-    }
-    @media (max-width: 576px) {
-        .header-hari { padding: 10px 14px; }
-        .header-hari h5 { font-size: 14px; }
-        .jam-badge { font-size: 11px; padding: 3px 7px; }
-        .table-jadwal th, .table-jadwal td { font-size: 11px; padding: 6px 6px; }
-        .card-body .row .col-auto { width: 100%; margin-top: 10px; }
-        .card-body .row .col-auto .btn { width: 100%; }
-    }
-</style>
+    @vite(['resources/css/wali-kelas/jadwal/index.css', 'resources/js/wali-kelas/jadwal/index.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
 
     @if($error ?? false)

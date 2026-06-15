@@ -7,8 +7,12 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/orang-tua/rapor/index.css'])
+@endsection
+
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y orang-tua-rapor-index-page">
 
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -32,13 +36,13 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-auto">
-                    <div class="avatar avatar-lg" style="width: 60px; height: 60px;">
+                    <div class="avatar avatar-lg rapor-student-avatar">
                         @if($siswa->user && $siswa->user->foto_profil)
-                            <img src="{{ asset('storage/' . $siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $siswa->user->foto_profil) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm rapor-student-avatar-image">
                         @elseif($siswa->foto)
-                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $siswa->foto) }}" alt="avatar" class="rounded-circle border border-2 border-white shadow-sm rapor-student-avatar-image">
                         @else
-                            <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-2 border-white d-flex align-items-center justify-content-center" style="font-size: 1.8rem; width: 100%; height: 100%;">
+                            <span class="avatar-initial rounded-circle bg-primary text-white shadow-sm fw-bold border border-2 border-white d-flex align-items-center justify-content-center rapor-student-avatar-initial">
                                 {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
                             </span>
                         @endif
@@ -122,14 +126,14 @@
                                                 @endphp
                                                 <strong class="{{ $colorClass }}">{{ number_format($r->nilai_rata_rata, 2) }}</strong>
                                             </div>
-                                            <div class="progress" style="height: 8px;">
+                                            <div class="progress rapor-score-progress">
                                                 @php
                                                     $percentage = ($r->nilai_rata_rata / 100) * 100;
                                                     $barColor = $avg >= 85 ? 'bg-success' : ($avg >= 70 ? 'bg-primary' : ($avg >= 60 ? 'bg-warning' : 'bg-danger'));
                                                 @endphp
                                                 <div class="progress-bar {{ $barColor }}"
                                                      role="progressbar"
-                                                     style="width: {{ $percentage }}%"
+                                                     data-rapor-progress="{{ $percentage }}"
                                                      aria-valuenow="{{ $r->nilai_rata_rata }}"
                                                      aria-valuemin="0"
                                                      aria-valuemax="100">
@@ -153,4 +157,8 @@
     </div>
 
 </div>
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/orang-tua/rapor/index.js'])
 @endsection

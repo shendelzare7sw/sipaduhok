@@ -16,6 +16,45 @@ use App\Imports\KelasImport;
 
 class KelasController extends Controller
 {
+    private function getUserCabangId()
+    {
+        $cabangId = auth()->user()->cabang_id;
+
+        if (!$cabangId) {
+            abort(403, 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
+        }
+
+        return $cabangId;
+    }
+
+    private function ensureKelasInUserCabang(Kelas $kelas): void
+    {
+        if ((int) $kelas->cabang_id !== (int) $this->getUserCabangId()) {
+            abort(403, 'Anda tidak berhak mengakses kelas dari cabang lain.');
+        }
+    }
+
+    private function ensureWaliKelasInUserCabang(?int $waliKelasId): void
+    {
+        if (!$waliKelasId) {
+            return;
+        }
+
+        $userCabangId = $this->getUserCabangId();
+
+        $exists = TenagaPendidik::where('id', $waliKelasId)
+            ->whereHas('user', function ($query) use ($userCabangId) {
+                $query->where('cabang_id', $userCabangId)
+                    ->where('is_active', true)
+                    ->whereIn('role', ['wali_kelas', 'guru_pengajar']);
+            })
+            ->exists();
+
+        if (!$exists) {
+            abort(403, 'Wali kelas harus berasal dari cabang Anda.');
+        }
+    }
+
     public function index(Request $request)
     {
         $userCabangId = auth()->user()->cabang_id;
@@ -89,11 +128,13 @@ class KelasController extends Controller
     public function create()
     {
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+        $userCabangId = $this->getUserCabangId();
         $userCabang = auth()->user()->cabang;
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) {
+        $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) use ($userCabangId) {
             $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
-                ->where('is_active', true);
+                ->where('is_active', true)
+                ->where('cabang_id', $userCabangId);
         })->orderBy('nama_lengkap')->get();
 
         return view('waka.kelas.create', compact('tahunAjarans', 'userCabang', 'jenjangs', 'waliKelasOptions'));
@@ -110,8 +151,10 @@ class KelasController extends Controller
             'kuota_siswa' => 'required|integer|min:1',
         ]);
 
+        $this->ensureWaliKelasInUserCabang($validated['wali_kelas_id'] ?? null);
+
         // Force cabang from authenticated user (security: ignore submitted cabang_id)
-        $validated['cabang_id'] = auth()->user()->cabang_id;
+        $validated['cabang_id'] = $this->getUserCabangId();
 
         // Generate kode_kelas otomatis
         $cabang = Cabang::find($validated['cabang_id']);
@@ -150,6 +193,8 @@ class KelasController extends Controller
 
     public function show(Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $kelas->load(['cabang', 'tahunAjaran', 'waliKelas']);
 
         // Get siswa with pagination
@@ -171,12 +216,16 @@ class KelasController extends Controller
 
     public function edit(Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
+        $userCabangId = $this->getUserCabangId();
         $userCabang = auth()->user()->cabang;
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
-        $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) {
+        $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) use ($userCabangId) {
             $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
-                ->where('is_active', true);
+                ->where('is_active', true)
+                ->where('cabang_id', $userCabangId);
         })->orderBy('nama_lengkap')->get();
 
         return view('waka.kelas.edit', compact('kelas', 'tahunAjarans', 'userCabang', 'jenjangs', 'waliKelasOptions'));
@@ -184,6 +233,8 @@ class KelasController extends Controller
 
     public function update(Request $request, Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $validated = $request->validate([
             'nama_kelas' => 'required|string|max:255',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
@@ -192,6 +243,8 @@ class KelasController extends Controller
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
             'kuota_siswa' => 'required|integer|min:1',
         ]);
+
+        $this->ensureWaliKelasInUserCabang($validated['wali_kelas_id'] ?? null);
 
         // Preserve the existing cabang (waka cannot change it)
         $validated['cabang_id'] = $kelas->cabang_id;
@@ -231,6 +284,8 @@ class KelasController extends Controller
 
     public function destroy(Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         try {
             // Check if there are any students in this class
             if ($kelas->siswa()->count() > 0) {
@@ -247,9 +302,13 @@ class KelasController extends Controller
 
     public function assignWaliKelas(Request $request, Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $validated = $request->validate([
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id',
         ]);
+
+        $this->ensureWaliKelasInUserCabang($validated['wali_kelas_id'] ?? null);
 
         $kelas->update(['wali_kelas_id' => $validated['wali_kelas_id']]);
 
@@ -272,6 +331,8 @@ class KelasController extends Controller
 
     public function manageSiswa(Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $kelas->load(['siswa', 'tahunAjaran', 'cabang', 'waliKelas']);
 
         // Students currently in this class
@@ -300,33 +361,63 @@ class KelasController extends Controller
 
     public function addSiswa(Request $request, Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id'
+            'siswa_ids' => 'nullable|array',
+            'siswa_ids.*' => 'exists:siswa,id',
+            'siswa_id' => 'nullable|exists:siswa,id',
         ]);
 
-        $siswa = Siswa::findOrFail($validated['siswa_id']);
+        $siswaIds = collect($validated['siswa_ids'] ?? [])
+            ->when(isset($validated['siswa_id']), fn($ids) => $ids->push($validated['siswa_id']))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($siswaIds->isEmpty()) {
+            return redirect()->route('waka.kelas.manage-siswa', $kelas)
+                ->with('error', 'Pilih siswa yang akan ditambahkan');
+        }
 
         // Check if kelas is full
         $currentCount = $kelas->siswa()->count();
-        if ($currentCount >= $kelas->kuota_siswa) {
+        if (($currentCount + $siswaIds->count()) > $kelas->kuota_siswa) {
             return redirect()->route('waka.kelas.manage-siswa', $kelas)
                 ->with('error', 'Kelas sudah penuh, kuota tercapai');
         }
 
-        $siswa->kelas_id = $kelas->id;
-        $siswa->save();
+        $eligibleIds = Siswa::whereIn('id', $siswaIds->all())
+            ->where('status', 'aktif')
+            ->where('cabang_id', $kelas->cabang_id)
+            ->whereNull('kelas_id')
+            ->pluck('id');
+
+        if ($eligibleIds->count() !== $siswaIds->count()) {
+            return redirect()->route('waka.kelas.manage-siswa', $kelas)
+                ->with('error', 'Pastikan siswa aktif, berasal dari cabang yang sama, dan belum memiliki kelas');
+        }
+
+        Siswa::whereIn('id', $eligibleIds->all())->update(['kelas_id' => $kelas->id]);
 
         return redirect()->route('waka.kelas.manage-siswa', $kelas)
-            ->with('success', 'Siswa berhasil ditambahkan ke kelas');
+            ->with('success', $eligibleIds->count() . ' siswa berhasil ditambahkan ke kelas');
     }
 
     public function removeSiswa(Request $request, Kelas $kelas)
     {
+        $this->ensureKelasInUserCabang($kelas);
+
         $validated = $request->validate([
             'siswa_id' => 'required|exists:siswa,id'
         ]);
 
         $siswa = Siswa::findOrFail($validated['siswa_id']);
+        if ((int) $siswa->kelas_id !== (int) $kelas->id) {
+            return redirect()->route('waka.kelas.manage-siswa', $kelas)
+                ->with('error', 'Siswa tersebut tidak terdaftar di kelas ini');
+        }
+
         $siswa->kelas_id = null;
         $siswa->save();
 
@@ -336,6 +427,7 @@ class KelasController extends Controller
 
     public function print(Request $request)
     {
+        $userCabangId = $this->getUserCabangId();
         $query = Kelas::with(['cabang', 'tahunAjaran', 'waliKelas'])->withCount('siswa');
 
         // Apply same filters as index
@@ -353,7 +445,7 @@ class KelasController extends Controller
         }
 
         // Mandatory filter by user's assigned cabang
-        $query->where('cabang_id', auth()->user()->cabang_id);
+        $query->where('cabang_id', $userCabangId);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -377,12 +469,14 @@ class KelasController extends Controller
 
     public function import()
     {
+        $this->getUserCabangId();
+
         return view('waka.kelas.import');
     }
 
     public function downloadTemplate()
     {
-        return Excel::download(new KelasTemplate, 'template_kelas.xlsx');
+        return Excel::download(new KelasTemplate($this->getUserCabangId()), 'template_kelas.xlsx');
     }
 
     public function importStore(Request $request)
@@ -391,7 +485,7 @@ class KelasController extends Controller
             'file' => 'required|mimes:xlsx,xls|max:5120',
         ]);
 
-        $import = new KelasImport;
+        $import = new KelasImport($this->getUserCabangId());
 
         try {
             Excel::import($import, $request->file('file'));

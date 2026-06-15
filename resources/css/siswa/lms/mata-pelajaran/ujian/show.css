@@ -1,0 +1,275 @@
+.siswa-lms-ujian-show-page .ujian-card {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.siswa-lms-ujian-show-page .info-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+}
+
+.siswa-lms-ujian-show-page .info-box i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.siswa-lms-ujian-show-page .info-box h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.siswa-lms-ujian-work-page {
+    background: #e9ecef;
+    min-height: 100vh;
+}
+
+.siswa-lms-ujian-work-page .container-fluid {
+    max-width: 100% !important;
+}
+
+.siswa-lms-ujian-work-page .question-card {
+    background: white;
+    border-radius: 4px;
+    padding: 25px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-height: 400px;
+}
+
+.siswa-lms-ujian-work-page .question-header {
+    background: #f8f9fa;
+    padding: 12px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.siswa-lms-ujian-work-page .question-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #212529;
+    margin-bottom: 20px;
+}
+
+.siswa-lms-ujian-work-page .question-item {
+    display: none;
+}
+
+.siswa-lms-ujian-work-page .question-item.is-active {
+    display: block;
+}
+
+.siswa-lms-ujian-work-page .narasi-box {
+    background: #f0f7ff;
+    border-left: 4px solid #165fac;
+    border-radius: 4px;
+    padding: 15px;
+}
+
+.siswa-lms-ujian-work-page .narasi-content {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #333;
+}
+
+.siswa-lms-ujian-work-page .soal-image {
+    max-height: 250px;
+    cursor: pointer;
+}
+
+.siswa-lms-ujian-work-page .soal-modal-image {
+    max-height: 80vh;
+}
+
+.siswa-lms-ujian-work-page .option-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    background: #fff;
+}
+
+.siswa-lms-ujian-work-page .option-item:hover {
+    background: #f8f9fa;
+}
+
+.siswa-lms-ujian-work-page .option-item input[type="radio"] {
+    margin-right: 10px;
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+}
+
+.siswa-lms-ujian-work-page .kompleks-cb {
+    margin-right: 10px;
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+}
+
+.siswa-lms-ujian-work-page .benar-salah-option {
+    justify-content: center;
+}
+
+.siswa-lms-ujian-work-page .benar-salah-option input[type="radio"] {
+    margin-right: 8px;
+}
+
+.siswa-lms-ujian-work-page .q-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.siswa-lms-ujian-work-page .q-nav-item {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    background: #6c757d;
+    color: white;
+    border: none;
+    transition: all 0.2s;
+}
+
+.siswa-lms-ujian-work-page .q-nav-item:hover {
+    opacity: 0.8;
+}
+
+.siswa-lms-ujian-work-page .q-nav-item.active {
+    background: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.3);
+}
+
+.siswa-lms-ujian-work-page .q-nav-item.answered {
+    background: #198754;
+}
+
+.siswa-lms-ujian-work-page .q-nav-item.doubt {
+    background: #fd7e14;
+}
+
+.siswa-lms-ujian-work-page .exam-sidebar {
+    background: white;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.siswa-lms-ujian-work-page .timer-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.siswa-lms-ujian-work-page .timer-label {
+    font-size: 0.75rem;
+}
+
+.siswa-lms-ujian-work-page .timer-badge {
+    font-family: "Courier New", monospace;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #dc3545;
+}
+
+.siswa-lms-ujian-work-page .btn-nav-q {
+    min-width: 140px;
+}
+
+.siswa-lms-ujian-work-page .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.875rem;
+}
+
+.siswa-lms-ujian-work-page .legend-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+}
+
+.siswa-lms-ujian-work-page .empty-submit-form {
+    display: inline;
+}
+
+.siswa-lms-ujian-work-page .exam-nav-actions {
+    overflow-x: auto;
+}
+
+.siswa-lms-ujian-work-page .exam-nav-actions .btn-nav-q,
+.siswa-lms-ujian-work-page .nav-ragu-label {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+}
+
+.siswa-lms-ujian-work-page .nav-ragu-label {
+    cursor: pointer;
+    border: 1px solid #ffc107;
+    transition: none;
+    color: #000;
+}
+
+.siswa-lms-ujian-work-page .nav-ragu-label.is-selected {
+    filter: brightness(0.9) saturate(1.2);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.siswa-lms-ujian-work-page .ragu-checkbox {
+    transform: scale(1.1);
+    margin-right: 6px;
+}
+
+@media (max-width: 991px) {
+    .siswa-lms-ujian-work-page .q-nav-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 575px) {
+    .siswa-lms-ujian-work-page .btn-nav-q {
+        min-width: 0;
+        font-size: 11px;
+        padding: 6px 8px;
+    }
+
+    .siswa-lms-ujian-work-page .nav-ragu-label {
+        font-size: 11px;
+        padding: 6px 8px;
+    }
+
+    .siswa-lms-ujian-work-page .question-card {
+        padding: 16px;
+        min-height: auto;
+    }
+
+    .siswa-lms-ujian-work-page .exam-sidebar {
+        padding: 12px;
+    }
+
+    .siswa-lms-ujian-work-page .q-nav-grid {
+        gap: 4px;
+    }
+
+    .siswa-lms-ujian-work-page .q-nav-item {
+        font-size: 0.75rem;
+    }
+}

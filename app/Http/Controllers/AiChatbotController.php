@@ -203,49 +203,57 @@ class AiChatbotController extends Controller
             $userRole = auth()->user()->role;
 
             $quickActions = match ($userRole) {
-                'guru' => [
-                    'Cara input nilai?',
-                    'Panduan LMS',
+                'guru_pengajar' => [
+                    'Cara salin Arsip LMS?',
+                    'Cara buat materi/tugas/ujian?',
                     'Cara generate soal AI?',
                 ],
 
                 'admin' => [
                     'Cara kelola pengguna?',
+                    'Pengaturan AI chatbot?',
+                    'Validasi akses ujian/rapor?',
                 ],
 
                 'bendahara' => [
-                    'Cara catat pembayaran?',
-                    'Laporan keuangan?',
+                    'Cara generate tagihan?',
+                    'Cara validasi pembayaran?',
+                    'Laporan belum lunas?',
                 ],
 
                 'wali_kelas' => [
-                    'Cara isi rapor?',
-                    'Panduan presensi',
+                    'Cara input presensi?',
+                    'Cara kelola rapor?',
+                    'Validasi akses ujian/rapor?',
                 ],
 
                 'wakil_kepala_sekolah' => [
-                    'Monitoring akademik?',
-                    'Laporan kinerja?',
+                    'Cara atur jadwal pelajaran?',
+                    'Pengaturan KKM/kenaikan?',
+                    'Monitoring LMS?',
                 ],
 
-                'ketua' => [
-                    'Dashboard overview?',
-                    'Laporan lengkap?',
+                'ketua_pkbm' => [
+                    'Cara validasi rapor?',
+                    'Approval dispensasi?',
+                    'Cetak laporan?',
                 ],
 
                 'sekretaris' => [
-                    'Kelola dokumen?',
-                    'Arsip data?',
+                    'Kelola kalender akademik?',
+                    'Buat pengumuman?',
+                    'Kelola berita/flyer?',
                 ],
 
                 'orang_tua' => [
-                    'Cara cek nilai anak?',
+                    'Cara ajukan izin anak?',
                     'Cara bayar SPP?',
+                    'Cara lihat rapor anak?',
                 ],
 
                 'siswa' => [
-                    'Cara cek nilai saya?',
-                    'Cara cek tagihan SPP?',
+                    'Cara mengerjakan tugas/ujian?',
+                    'Cara lihat Data Penilaian?',
                     'Jadwal pelajaran saya?',
                 ],
 

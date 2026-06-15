@@ -1,0 +1,114 @@
+.pulse-warning {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 62, 29, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 62, 29, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 62, 29, 0); }
+}
+
+/* Mobile Card Pattern */
+@media (max-width: 767.98px) {
+    .table-card-mobile thead { display: none; }
+    .table-card-mobile tbody tr {
+        display: block;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        background: #fff;
+        position: relative;
+    }
+    .table-card-mobile tbody tr:hover td { background: transparent; }
+    .table-card-mobile tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border: none !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        white-space: normal;
+        text-align: right;
+    }
+    .table-card-mobile tbody td:last-child { border-bottom: none !important; }
+    .table-card-mobile tbody td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-right: 12px;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
+        font-weight: 700;
+        font-size: 15px;
+        color: #1e293b;
+        padding: 14px 40px 14px 14px !important;
+        border-bottom: 2px solid #e0e7ff !important;
+        display: block !important;
+        text-align: left;
+    }
+    .table-card-mobile .mobile-card-head::before { display: none !important; }
+    .table-card-mobile .mobile-card-actions {
+        justify-content: center !important;
+        padding: 12px 14px !important;
+        background: #f9fafb;
+        flex-wrap: wrap;
+    }
+    .table-card-mobile .mobile-card-actions::before { display: none !important; }
+    .table-card-mobile .mobile-card-actions .d-flex { justify-content: center; }
+    .table-card-mobile .mobile-hide { display: none !important; }
+    .table-card-mobile .mobile-card-checkbox {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 0 !important;
+        border: none !important;
+        border-bottom: none !important;
+        background: transparent !important;
+        z-index: 2;
+        display: block !important;
+    }
+    .table-card-mobile .mobile-card-checkbox::before { display: none !important; }
+    .mobile-select-all-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #475569;
+        font-weight: 600;
+    }
+    .mobile-select-all-bar .form-check-input { margin: 0; }
+    .desktop-only-cell { display: none !important; }
+}
+@media (min-width: 768px) {
+    .mobile-only-cell { display: none !important; }
+}
+.admin-wa-icon { width: 48px; height: 48px; background-color: #dcfce7; }
+.admin-wa-icon i { color: #16a34a; }
+.admin-wa-input-group { max-width: 360px; }
+.admin-wa-input { font-size: 1.1rem; letter-spacing: 0.5px; }
+.bulk-toolbar { background: #eff6ff; border: 1px solid #bfdbfe; }
+.mobile-select-all-label { margin: 0; cursor: pointer; }
+.ticket-checkbox-col { width: 40px; }
+.recovery-modal-dialog { max-width: 400px; padding: 0 15px; }
+.recovery-resend-dialog { max-width: 440px; padding: 0 15px; }
+.recovery-modal-content { border-radius: 12px; }
+.recovery-modal-close { margin-top: -10px; margin-right: -5px; }
+.recovery-modal-text { font-size: 0.95rem; line-height: 1.5; color: #6b7280; }
+.recovery-modal-email { color: #111827; }
+.recovery-info-alert { word-break: break-word; border-radius: 8px; font-size: 0.875rem; }
+.recovery-info-icon { margin-top: 1px; }
+.empty-ticket-icon { font-size: 5rem; }
+.hidden-bulk-form { display: none; }
+.recovery-toast { position: fixed; top: 25px; right: 25px; z-index: 9999; transition: opacity 0.4s; min-width: 250px; max-width: 90vw; }

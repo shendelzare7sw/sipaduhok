@@ -51,10 +51,10 @@ class MataPelajaranController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_mapel' => 'required|string|max:255',
-            'kode_mapel' => 'required|string|max:50|unique:mata_pelajaran,kode_mapel',
+            'nama_mapel' => 'required|string|max:100',
+            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
-            'kategori' => 'nullable|in:wajib,pilihan,muatan_lokal',
+            'kelompok' => 'nullable|in:A,B',
             'deskripsi' => 'nullable|string'
         ]);
 
@@ -87,10 +87,10 @@ class MataPelajaranController extends Controller
     public function update(Request $request, MataPelajaran $mataPelajaran)
     {
         $validated = $request->validate([
-            'nama_mapel' => 'required|string|max:255',
-            'kode_mapel' => 'required|string|max:50|unique:mata_pelajaran,kode_mapel,' . $mataPelajaran->id,
+            'nama_mapel' => 'required|string|max:100',
+            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,' . $mataPelajaran->id,
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
-            'kategori' => 'nullable|in:wajib,pilihan,muatan_lokal',
+            'kelompok' => 'nullable|in:A,B',
             'deskripsi' => 'nullable|string'
         ]);
 

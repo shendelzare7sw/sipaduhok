@@ -3,6 +3,7 @@
     File: resources/views/sekretaris/partials/sneat-sidebar-menu.blade.php
 
     Compatible dengan Sneat Bootstrap 5 Template
+    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 --}}
 
 @php
@@ -17,39 +18,39 @@
     </a>
 </li>
 
-<!-- Menu Header - Manajemen Konten -->
+<!-- ============================================ -->
+<!-- UC10: Kelola Konten Publikasi                -->
+<!-- (Kalender, Pengumuman, Flyer, Berita)        -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Konten</span>
 </li>
 
-<!-- Kalender Akademik -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.kalender') ? 'active' : '' }}">
-    <a href="{{ route('sekretaris.kalender.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-calendar-alt"></i>
-        <div>Kalender Akademik</div>
-    </a>
-</li>
-
-<!-- Pengumuman -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.pengumuman') ? 'active' : '' }}">
-    <a href="{{ route('sekretaris.pengumuman.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.kalender') || Str::startsWith($currentRoute, 'sekretaris.pengumuman') || Str::startsWith($currentRoute, 'sekretaris.flyer') || Str::startsWith($currentRoute, 'sekretaris.berita') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-bullhorn"></i>
-        <div>Pengumuman</div>
+        <div>Konten Publikasi</div>
     </a>
-</li>
-
-<!-- Flyer / Iklan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.flyer') ? 'active' : '' }}">
-    <a href="{{ route('sekretaris.flyer.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-image"></i>
-        <div>Flyer / Iklan</div>
-    </a>
-</li>
-
-<!-- Kelola Berita -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.berita') ? 'active' : '' }}">
-    <a href="{{ route('sekretaris.berita.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-newspaper"></i>
-        <div>Kelola Berita</div>
-    </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.kalender') ? 'active' : '' }}">
+            <a href="{{ route('sekretaris.kalender.index') }}" class="menu-link">
+                <div>Kalender Akademik</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.pengumuman') ? 'active' : '' }}">
+            <a href="{{ route('sekretaris.pengumuman.index') }}" class="menu-link">
+                <div>Pengumuman</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.flyer') ? 'active' : '' }}">
+            <a href="{{ route('sekretaris.flyer.index') }}" class="menu-link">
+                <div>Flyer / Iklan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'sekretaris.berita') ? 'active' : '' }}">
+            <a href="{{ route('sekretaris.berita.index') }}" class="menu-link">
+                <div>Kelola Berita</div>
+            </a>
+        </li>
+    </ul>
 </li>

@@ -1,0 +1,275 @@
+.admin-cetak-laporan-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.admin-cetak-laporan-page .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.admin-cetak-laporan-page .stat-mini {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-cetak-laporan-page .stat-mini-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.admin-cetak-laporan-page .stat-mini-icon.blue {
+    background: #eff6ff;
+}
+
+.admin-cetak-laporan-page .stat-mini-icon.green {
+    background: #f0fdf4;
+}
+
+.admin-cetak-laporan-page .stat-mini-icon.purple {
+    background: #faf5ff;
+}
+
+.admin-cetak-laporan-page .stat-mini-icon.orange {
+    background: #fff7ed;
+}
+
+.admin-cetak-laporan-page .stat-mini-info h4 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+
+.admin-cetak-laporan-page .stat-mini-info p {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.admin-cetak-laporan-page .report-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.admin-cetak-laporan-page .report-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.admin-cetak-laporan-page .report-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.admin-cetak-laporan-page .report-card-header {
+    padding: 24px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-cetak-laporan-page .report-card-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.admin-cetak-laporan-page .report-card-header.blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.admin-cetak-laporan-page .report-card-header.green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.admin-cetak-laporan-page .report-card-header.purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.admin-cetak-laporan-page .report-card-header.orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.admin-cetak-laporan-page .report-card-header.teal {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+.admin-cetak-laporan-page .report-card-header.pink {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.admin-cetak-laporan-page .report-card-header.academic {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    color: white;
+}
+
+.admin-cetak-laporan-page .report-card-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-cetak-laporan-page .report-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-cetak-laporan-page .report-card-body {
+    padding: 24px;
+}
+
+.admin-cetak-laporan-page .report-card-desc {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.admin-cetak-laporan-page .report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-cetak-laporan-page .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-cetak-laporan-page .form-group.is-hidden {
+    display: none;
+}
+
+.admin-cetak-laporan-page .form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+}
+
+.admin-cetak-laporan-page .form-group select,
+.admin-cetak-laporan-page .form-group input {
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.admin-cetak-laporan-page .form-group select:focus,
+.admin-cetak-laporan-page .form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.admin-cetak-laporan-page .btn-print {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+    margin-top: 8px;
+}
+
+.admin-cetak-laporan-page .btn-print.blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.admin-cetak-laporan-page .btn-print.green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.admin-cetak-laporan-page .btn-print.purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.admin-cetak-laporan-page .btn-print.orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.admin-cetak-laporan-page .btn-print.teal {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+.admin-cetak-laporan-page .btn-print.pink {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.admin-cetak-laporan-page .btn-print.academic {
+    background: #16a34a;
+}
+
+.admin-cetak-laporan-page .btn-print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.admin-cetak-laporan-page .section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-cetak-laporan-page .section-title i {
+    color: #6b7280;
+}
+
+@media (max-width: 1200px) {
+    .admin-cetak-laporan-page .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .admin-cetak-laporan-page .report-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-cetak-laporan-page .stats-row,
+    .admin-cetak-laporan-page .report-grid {
+        grid-template-columns: 1fr;
+    }
+}

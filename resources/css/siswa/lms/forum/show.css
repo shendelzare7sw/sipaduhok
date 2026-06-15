@@ -1,0 +1,368 @@
+.siswa-lms-forum-show-page .forum-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    max-width: 100%;
+    padding: 20px;
+}
+
+.siswa-lms-forum-show-page .forum-heading {
+    color: #2c5282;
+    margin-bottom: 20px;
+}
+
+.siswa-lms-forum-show-page .post {
+    background: white;
+    border: 1px solid #e8eaed;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    margin-bottom: 14px;
+    padding: 18px;
+    position: relative;
+}
+
+.siswa-lms-forum-show-page .post:hover {
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.09);
+}
+
+.siswa-lms-forum-show-page .post-header {
+    align-items: center;
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.siswa-lms-forum-show-page .avatar {
+    align-items: center;
+    background: #16a34a;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 15px;
+    font-weight: bold;
+    height: 44px;
+    justify-content: center;
+    margin-right: 12px;
+    overflow: hidden;
+    text-transform: uppercase;
+    width: 44px;
+}
+
+.siswa-lms-forum-show-page .avatar.teacher {
+    background: #16a34a;
+}
+
+.siswa-lms-forum-show-page .avatar.student {
+    background: #0ea5e9;
+}
+
+.siswa-lms-forum-show-page .avatar img {
+    border-radius: 50%;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.siswa-lms-forum-show-page .post-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.siswa-lms-forum-show-page .author-name {
+    color: #1a1a1a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.siswa-lms-forum-show-page .badge-role {
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+    padding: 2px 10px;
+}
+
+.siswa-lms-forum-show-page .badge-siswa {
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+}
+
+.siswa-lms-forum-show-page .badge-guru {
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.siswa-lms-forum-show-page .own-reply-badge {
+    font-size: 10px;
+}
+
+.siswa-lms-forum-show-page .post-date {
+    color: #999;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.siswa-lms-forum-show-page .post-content {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    padding-left: 56px;
+}
+
+.siswa-lms-forum-show-page .post-actions {
+    border-top: 1px solid #f0f0f0;
+    margin-top: 12px;
+    padding-top: 12px;
+}
+
+.siswa-lms-forum-show-page .reply-btn {
+    align-items: center;
+    background: #16a34a;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 5px;
+    padding: 6px 16px;
+    position: absolute;
+    right: 16px;
+    top: 18px;
+    transition: background 0.2s;
+}
+
+.siswa-lms-forum-show-page .reply-btn:hover {
+    background: #15803d;
+}
+
+.siswa-lms-forum-show-page .reply-node {
+    border-left: 3px solid #e0e0e0;
+    margin-left: 36px;
+    padding-left: 16px;
+}
+
+.siswa-lms-forum-show-page .reply-form,
+.siswa-lms-forum-show-page .edit-form {
+    display: none;
+}
+
+.siswa-lms-forum-show-page .reply-form {
+    background: #f8f9fa;
+    border: 1px solid #e8eaed;
+    border-radius: 8px;
+    margin-top: 14px;
+    padding: 14px;
+}
+
+.siswa-lms-forum-show-page .reply-form.is-active,
+.siswa-lms-forum-show-page .reply-form--visible,
+.siswa-lms-forum-show-page .edit-form.is-active {
+    display: block;
+}
+
+.siswa-lms-forum-show-page .reply-form textarea {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 10px;
+    min-height: 80px;
+    padding: 10px;
+    resize: vertical;
+    width: 100%;
+}
+
+.siswa-lms-forum-show-page .reply-form textarea:focus {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+    outline: none;
+}
+
+.siswa-lms-forum-show-page .attach-btn {
+    align-items: center;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #555;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 13px;
+    gap: 5px;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    transition: all 0.2s;
+}
+
+.siswa-lms-forum-show-page .attach-btn:hover,
+.siswa-lms-forum-show-page .attach-btn.active {
+    background: #f0fdf4;
+    border-color: #16a34a;
+    color: #16a34a;
+}
+
+.siswa-lms-forum-show-page .file-upload-area {
+    background: #fafafa;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    display: none;
+    margin-bottom: 10px;
+    padding: 18px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.siswa-lms-forum-show-page .file-upload-area:hover {
+    background: #f0fdf4;
+    border-color: #16a34a;
+}
+
+.siswa-lms-forum-show-page .file-upload-area.show {
+    display: block;
+}
+
+.siswa-lms-forum-show-page .forum-file-input {
+    display: block;
+    width: 100%;
+}
+
+.siswa-lms-forum-show-page .action-icon {
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.45;
+    padding: 4px;
+    transition: opacity 0.2s;
+}
+
+.siswa-lms-forum-show-page .action-icon:hover {
+    opacity: 1;
+}
+
+.siswa-lms-forum-show-page .search-filter-bar {
+    background: white;
+    border: 1px solid #e8eaed;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 18px;
+    padding: 14px;
+}
+
+.siswa-lms-forum-show-page .forum-filter-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.siswa-lms-forum-show-page .forum-search-input {
+    flex: 1;
+    min-width: 200px;
+}
+
+.siswa-lms-forum-show-page .search-filter-bar input,
+.siswa-lms-forum-show-page .search-filter-bar select {
+    background: #f9fafb;
+    border: 1px solid #e8eaed !important;
+    border-radius: 6px;
+    font-size: 14px;
+    padding: 9px 12px;
+}
+
+.siswa-lms-forum-show-page .search-filter-bar input:focus,
+.siswa-lms-forum-show-page .search-filter-bar select:focus {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+    outline: none;
+}
+
+.siswa-lms-forum-show-page .search-filter-bar button {
+    background: #16a34a;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    transition: background 0.2s;
+}
+
+.siswa-lms-forum-show-page .search-filter-bar button:hover {
+    background: #15803d;
+}
+
+.siswa-lms-forum-show-page #searchResults {
+    color: #666;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.siswa-lms-forum-show-page .is-hidden {
+    display: none !important;
+}
+
+.siswa-lms-forum-show-page .forum-attachment-preview {
+    max-height: 300px;
+}
+
+.siswa-lms-forum-show-page .forum-attachment-frame {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+@keyframes siswaLmsForumHighlightFade {
+    0% {
+        background-color: #fef9c3;
+    }
+
+    100% {
+        background-color: white;
+    }
+}
+
+.siswa-lms-forum-show-page .highlight {
+    animation: siswaLmsForumHighlightFade 2s ease-out;
+}
+
+@media (max-width: 768px) {
+    .siswa-lms-forum-show-page .forum-container {
+        padding: 12px;
+    }
+
+    .siswa-lms-forum-show-page .post {
+        padding: 14px;
+    }
+
+    .siswa-lms-forum-show-page .post-content {
+        padding-left: 0;
+    }
+
+    .siswa-lms-forum-show-page .reply-btn {
+        margin-top: 10px;
+        position: static;
+    }
+
+    .siswa-lms-forum-show-page .reply-node {
+        margin-left: 14px;
+        padding-left: 12px;
+    }
+
+    .siswa-lms-forum-show-page .search-filter-bar {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .siswa-lms-forum-show-page .reply-node {
+        margin-left: 8px;
+        padding-left: 8px;
+    }
+}

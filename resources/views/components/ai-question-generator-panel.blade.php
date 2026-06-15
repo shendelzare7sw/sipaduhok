@@ -10,8 +10,18 @@
     ])
 --}}
 
-<div class="card shadow-sm mb-4 border-start border-info border-4" id="aiQuestionGeneratorPanel">
-    <div class="card-header bg-gradient-info text-white" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#aiGeneratorCollapse">
+@once
+    @push('styles')
+        @vite(['resources/css/components/ai-question-generator-panel.css'])
+    @endpush
+
+    @push('scripts')
+        @vite(['resources/js/components/ai-question-generator-panel.js'])
+    @endpush
+@endonce
+
+<div class="card shadow-sm mb-4 border-start border-info border-4 ai-question-generator-panel" id="aiQuestionGeneratorPanel">
+    <div class="card-header bg-gradient-info text-white ai-question-generator-panel-header" data-bs-toggle="collapse" data-bs-target="#aiGeneratorCollapse">
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h5 class="mb-0 fw-bold">
@@ -57,10 +67,9 @@
                                 Mata Pelajaran
                             </label>
                             <input type="text"
-                                   class="form-control"
+                                   class="form-control ai-question-generator-panel-subject"
                                    value="{{ $subjectName }}"
-                                   readonly
-                                   style="background-color: #f8f9fa;">
+                                   readonly>
                         </div>
                     </div>
                 </div>
@@ -226,75 +235,3 @@
 <input type="hidden" id="aiGeneratorUjianId" value="{{ $ujianId }}">
 <input type="hidden" id="aiGeneratorKelasId" value="{{ $kelasId }}">
 <input type="hidden" id="aiGeneratorMapelId" value="{{ $mapelId }}">
-
-<style>
-    #aiQuestionGeneratorPanel .collapse.show ~ .card-header #collapseIcon {
-        transform: rotate(180deg);
-    }
-
-    .transition {
-        transition: all 0.3s ease;
-    }
-
-    .bg-gradient-info {
-        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    }
-
-    .question-card {
-        border-left: 4px solid #17a2b8;
-        transition: all 0.2s ease;
-    }
-
-    .question-card:hover {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        transform: translateX(4px);
-    }
-
-    .question-card input[type="checkbox"]:checked ~ .card {
-        border-left-color: #28a745;
-        background-color: #f0fff4;
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Difficulty hints
-        const difficultyHints = {
-            easy: 'Fakta dasar & hafalan (C1-C2)',
-            medium: 'Aplikasi konsep & perhitungan (C3-C4)',
-            hard: 'Analisis & problem solving (C5-C6)'
-        };
-
-        // Estimated time based on count
-        const estimatedTimes = {
-            3: '10-15',
-            5: '15-20',
-            7: '20-25',
-            10: '25-30'
-        };
-
-        // Set initial difficulty hint
-        const defaultDifficulty = document.querySelector('input[name="difficulty"]:checked');
-        if (defaultDifficulty) {
-            const hintEl = document.getElementById('difficultyHint');
-            if (hintEl) hintEl.textContent = difficultyHints[defaultDifficulty.value];
-        }
-
-        // Update difficulty hint on change
-        document.querySelectorAll('input[name="difficulty"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const hintEl = document.getElementById('difficultyHint');
-                if (hintEl) hintEl.textContent = difficultyHints[this.value];
-            });
-        });
-
-        // Update estimated time
-        const countSelector = document.getElementById('aiQuestionCount');
-        if (countSelector) {
-            countSelector.addEventListener('change', function() {
-                const timeEl = document.getElementById('estimatedTime');
-                if (timeEl) timeEl.textContent = estimatedTimes[this.value] || '15-20';
-            });
-        }
-    });
-</script>

@@ -1,0 +1,195 @@
+.siswa-lms-kalender-detail-page .date-header-card {
+    background: linear-gradient(135deg, #165fac, #0d3f7a);
+    color: white;
+    margin-bottom: 20px;
+}
+
+.siswa-lms-kalender-detail-page .date-header-inner {
+    padding: 20px;
+    text-align: center;
+}
+
+.siswa-lms-kalender-detail-page .date-day,
+.siswa-lms-kalender-detail-page .date-weekday {
+    margin: 0;
+}
+
+.siswa-lms-kalender-detail-page .date-day,
+.siswa-lms-kalender-detail-page .date-month {
+    color: white;
+}
+
+.siswa-lms-kalender-detail-page .date-month {
+    margin: 5px 0;
+}
+
+.siswa-lms-kalender-detail-page .date-weekday {
+    opacity: 0.9;
+}
+
+.siswa-lms-kalender-detail-page .section-heading {
+    color: #1a1a1a;
+    margin-bottom: 15px;
+}
+
+.siswa-lms-kalender-detail-page .section-heading--spaced {
+    margin: 30px 0 15px;
+}
+
+.siswa-lms-kalender-detail-page .event-card {
+    background: white;
+    border-left: 4px solid #165fac;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.siswa-lms-kalender-detail-page .event-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.siswa-lms-kalender-detail-page .event-card--exam {
+    border-left-color: #ef4444;
+}
+
+.siswa-lms-kalender-detail-page .event-title {
+    color: #165fac;
+    margin: 0 0 8px;
+}
+
+.siswa-lms-kalender-detail-page .event-time,
+.siswa-lms-kalender-detail-page .event-duration,
+.siswa-lms-kalender-detail-page .mapel-teacher,
+.siswa-lms-kalender-detail-page .mapel-time {
+    color: #666;
+}
+
+.siswa-lms-kalender-detail-page .event-time,
+.siswa-lms-kalender-detail-page .mapel-time {
+    text-align: right;
+}
+
+.siswa-lms-kalender-detail-page .event-duration {
+    font-size: 14px;
+}
+
+.siswa-lms-kalender-detail-page .event-note {
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px;
+}
+
+.siswa-lms-kalender-detail-page .event-note-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.siswa-lms-kalender-detail-page .event-note-text {
+    color: #1a1a1a;
+    line-height: 1.6;
+    margin: 5px 0 0;
+}
+
+.siswa-lms-kalender-detail-page .event-badge {
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+}
+
+.siswa-lms-kalender-detail-page .badge-field_trip {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.siswa-lms-kalender-detail-page .badge-outing {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.siswa-lms-kalender-detail-page .badge-live_in {
+    background: #fce7f3;
+    color: #9f1239;
+}
+
+.siswa-lms-kalender-detail-page .badge-hokfest,
+.siswa-lms-kalender-detail-page .badge-acara_sekolah {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.siswa-lms-kalender-detail-page .badge-pts {
+    background: #fed7aa;
+    color: #9a3412;
+}
+
+.siswa-lms-kalender-detail-page .badge-pas,
+.siswa-lms-kalender-detail-page .badge-ujian {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.siswa-lms-kalender-detail-page .badge-libur {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.siswa-lms-kalender-detail-page .badge-lainnya {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.siswa-lms-kalender-detail-page .jadwal-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.siswa-lms-kalender-detail-page .mapel-item {
+    align-items: center;
+    background: #f9fafb;
+    border-radius: 8px;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    margin-bottom: 8px;
+    padding: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.siswa-lms-kalender-detail-page .mapel-item:hover {
+    background: #f3f4f6;
+    transform: translateX(4px);
+}
+
+.siswa-lms-kalender-detail-page .mapel-content {
+    flex: 1;
+}
+
+.siswa-lms-kalender-detail-page .mapel-name {
+    color: #165fac;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.siswa-lms-kalender-detail-page .empty-state {
+    color: #999;
+    padding: 48px;
+    text-align: center;
+}
+
+.siswa-lms-kalender-detail-page .empty-state--compact {
+    padding: 32px;
+}
+
+.siswa-lms-kalender-detail-page .empty-text {
+    margin: 0;
+}

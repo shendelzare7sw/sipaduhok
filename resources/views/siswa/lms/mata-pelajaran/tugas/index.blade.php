@@ -7,118 +7,36 @@
     @include('siswa.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/siswa/lms/mata-pelajaran/tugas/index.css'])
+@endpush
+
 @section('content')
-<style>
-    .tugas-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border-left: 4px solid #165fac;
-        transition: all 0.3s;
-    }
-    .tugas-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
-    .deadline-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    .deadline-urgent { background: #fee2e2; color: #991b1b; }
-    .deadline-warning { background: #fef3c7; color: #92400e; }
-    .deadline-safe { background: #d1fae5; color: #065f46; }
-    .deadline-expired { background: #f3f4f6; color: #6b7280; }
-    .status-badge {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    .status-belum { background: #fee2e2; color: #991b1b; }
-    .status-dikerjakan { background: #fef3c7; color: #92400e; }
-    .status-dinilai { background: #d1fae5; color: #065f46; }
-    .status-terlambat { background: #fecaca; color: #7f1d1d; }
-    .filter-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .summary-box {
-        background: linear-gradient(135deg, #165fac, #0d3f7a);
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-        text-align: center;
-    }
-
-    @media (max-width: 767px) {
-        /* Make summary boxes 2-column on mobile */
-        .row.mb-4 > [class*="col-md-3"] {
-            flex: 0 0 50%;
-            max-width: 50%;
-            margin-bottom: 12px;
-        }
-
-        /* Wrap badges in tugas card header */
-        .tugas-card .d-flex.align-items-center.gap-2.mb-2 {
-            flex-wrap: wrap;
-        }
-
-        /* Action button column: left-align on mobile */
-        .tugas-card .col-md-4.text-end {
-            text-align: left !important;
-            margin-top: 10px;
-        }
-
-        .tugas-card {
-            padding: 16px;
-        }
-
-        .filter-card {
-            padding: 16px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        /* Full-width summary boxes on very small screens */
-        .row.mb-4 > [class*="col-md-3"] {
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-    }
-</style>
-
+<div class="siswa-lms-tugas-index-page">
 <!-- Summary Stats -->
-<div class="row mb-4">
+<div class="row mb-4 summary-row">
     <div class="col-md-3">
-        <div class="summary-box" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-            <h3 style="margin: 0; font-size: 32px;">{{ $tugasBelum }}</h3>
-            <small style="opacity: 0.9;">Belum Dikerjakan</small>
+        <div class="summary-box summary-box--pending">
+            <h3 class="summary-count">{{ $tugasBelum }}</h3>
+            <small class="summary-label">Belum Dikerjakan</small>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="summary-box" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-            <h3 style="margin: 0; font-size: 32px;">{{ $tugasProses }}</h3>
-            <small style="opacity: 0.9;">Sedang Dikerjakan</small>
+        <div class="summary-box summary-box--process">
+            <h3 class="summary-count">{{ $tugasProses }}</h3>
+            <small class="summary-label">Sedang Dikerjakan</small>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="summary-box" style="background: linear-gradient(135deg, #10b981, #059669);">
-            <h3 style="margin: 0; font-size: 32px;">{{ $tugasSelesai }}</h3>
-            <small style="opacity: 0.9;">Sudah Dinilai</small>
+        <div class="summary-box summary-box--done">
+            <h3 class="summary-count">{{ $tugasSelesai }}</h3>
+            <small class="summary-label">Sudah Dinilai</small>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="summary-box" style="background: linear-gradient(135deg, #6b7280, #4b5563);">
-            <h3 style="margin: 0; font-size: 32px;">{{ $tugasTerlambat }}</h3>
-            <small style="opacity: 0.9;">Terlambat</small>
+        <div class="summary-box summary-box--late">
+            <h3 class="summary-count">{{ $tugasTerlambat }}</h3>
+            <small class="summary-label">Terlambat</small>
         </div>
     </div>
 </div>
@@ -162,7 +80,7 @@
 </div>
 
 <!-- Daftar Tugas -->
-<h4 style="margin-bottom: 20px; color: #1a1a1a;">
+<h4 class="section-heading">
     <i class="fas fa-tasks"></i> Daftar Tugas
 </h4>
 
@@ -202,7 +120,7 @@
         <div class="col-md-8">
             <!-- Header -->
             <div class="d-flex align-items-center gap-2 mb-2">
-                <h5 style="margin: 0; color: #165fac;">
+                <h5 class="subject-title">
                     <i class="fas fa-book"></i> {{ $tugas->mataPelajaran->nama_mapel }}
                 </h5>
                 <span class="deadline-badge {{ $deadlineClass }}">
@@ -214,12 +132,12 @@
             </div>
 
             <!-- Title -->
-            <h6 style="margin: 8px 0; color: #1a1a1a;">
+            <h6 class="assignment-title">
                 {{ $tugas->judul_tugas }}
             </h6>
 
             <!-- Info -->
-            <div style="color: #666; font-size: 14px; margin-top: 8px;">
+            <div class="assignment-meta">
                 <div class="d-flex gap-3 flex-wrap">
                     <div>
                         <i class="fas fa-user-tie"></i> {{ $tugas->guru->nama_lengkap }}
@@ -235,14 +153,14 @@
 
             <!-- Description -->
             @if($tugas->deskripsi)
-            <p style="margin: 12px 0 0 0; color: #666; font-size: 14px; line-height: 1.6;">
+            <p class="assignment-description">
                 {{ Str::limit($tugas->deskripsi, 120) }}
             </p>
             @endif
 
             <!-- Nilai jika sudah dinilai -->
             @if($submission && $submission->status === 'dinilai' && $submission->nilai !== null)
-            <div class="alert alert-success" style="margin-top: 12px; padding: 10px;">
+            <div class="alert alert-success submission-score-alert">
                 <strong><i class="fas fa-star"></i> Nilai:</strong> {{ $submission->nilai }}
                 @if($submission->feedback_guru)
                 <br><small>{{ Str::limit($submission->feedback_guru, 80) }}</small>
@@ -284,7 +202,7 @@
 </div>
 @empty
 <div class="tugas-card">
-    <div style="text-align: center; padding: 48px; color: #999;">
+    <div class="empty-state">
         <i class="fas fa-tasks fa-3x mb-3"></i>
         <h4>Belum Ada Tugas</h4>
         <p>Belum ada tugas yang tersedia saat ini</p>
@@ -305,7 +223,7 @@
 <!-- Info Box -->
 <div class="alert alert-info mt-4" role="alert">
     <h5 class="alert-heading"><i class="fas fa-info-circle"></i> Informasi</h5>
-    <ul style="margin-bottom: 0; padding-left: 20px;">
+    <ul class="info-list">
         <li><strong>Belum Dikerjakan:</strong> Tugas yang belum Anda kerjakan</li>
         <li><strong>Dikerjakan:</strong> Tugas yang sudah Anda submit, menunggu penilaian</li>
         <li><strong>Dinilai:</strong> Tugas yang sudah dinilai oleh guru</li>
@@ -314,4 +232,5 @@
     </ul>
 </div>
 
+</div>
 @endsection

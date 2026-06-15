@@ -9,7 +9,7 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
+    @vite(['resources/css/wali-kelas/promotion/index.css', 'resources/js/wali-kelas/promotion/index.js'])
 @endsection
 
 @section('content')
@@ -51,7 +51,7 @@
                     </div>
                     <div class="col-md-4 col-lg-3">
                         <label class="form-label">Status Prediksi</label>
-                        <select name="status_filter" class="form-select" onchange="this.form.submit()">
+                        <select name="status_filter" class="form-select" data-auto-submit>
                             <option value="">Semua Status</option>
                             <option value="aman" {{ request('status_filter') == 'aman' ? 'selected' : '' }}>Aman / Naik Kelas</option>
                             <option value="rawan" {{ request('status_filter') == 'rawan' ? 'selected' : '' }}>Rawan / Tertunda</option>

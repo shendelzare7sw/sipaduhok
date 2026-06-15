@@ -8,7 +8,12 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@push('styles')
+    @vite(['resources/css/guru/lms/ujian/index.css'])
+@endpush
+
 @section('content')
+<div class="guru-lms-ujian-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0"><i class="fas fa-file-alt me-2"></i>Daftar {{ $tipeUjian === 'latihan' ? 'Latihan' : 'Ujian' }}</h4>
         <a href="{{ $tipeUjian === 'latihan' ? route('guru.lms.latihan.create', [$kelas->id, $mapel->id]) : route('guru.lms.ujian.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary">
@@ -21,13 +26,13 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th class="text-center" style="width: 50px;">No</th>
+                        <th class="text-center col-no">No</th>
                         <th>Judul Ujian</th>
                         <th class="text-center">Tipe</th>
                         <th class="text-center">Tanggal Mulai</th>
                         <th class="text-center">Tanggal Selesai</th>
                         <th class="text-center">Durasi</th>
-                        <th class="text-center" style="width: 150px;">Aksi</th>
+                        <th class="text-center col-actions">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -90,7 +95,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button type="button" class="btn btn-danger btn-sm" title="Hapus"
-                                        onclick="confirmDelete('{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.destroy' : 'guru.lms.ujian.destroy', [$kelas->id, $mapel->id, $ujian->id]) }}')">
+                                        data-delete-url="{{ route($tipeUjian === 'latihan' ? 'guru.lms.latihan.destroy' : 'guru.lms.ujian.destroy', [$kelas->id, $mapel->id, $ujian->id]) }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -129,7 +134,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" style="display: inline;">
+                    <form id="deleteForm" method="POST" class="delete-form">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">
@@ -145,14 +150,9 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        function confirmDelete(url) {
-            document.getElementById('deleteForm').action = url;
-            document.getElementById('hapusTerkaitCheck').checked = false;
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
-        }
-    </script>
-    @endpush
+</div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/ujian/index.js'])
+@endpush

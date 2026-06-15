@@ -1,0 +1,144 @@
+.payment-history-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.stat-card-mini {
+    border-radius: 12px;
+    padding: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-total {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.stat-card-paid {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-card-pending {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.stat-card-remaining {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.stat-card-mini h6 {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+}
+
+.stat-card-mini .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-card-mini .stat-label {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.stat-card-mini .stat-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 50px;
+    opacity: 0.2;
+}
+
+.group-badge-small {
+    font-size: 10px;
+}
+
+.timeline-wrapper {
+    padding-left: 30px;
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    left: -30px;
+    top: 4px;
+}
+
+.timeline-line {
+    position: absolute;
+    left: -25px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        border: none;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: none;
+        padding: 8px 0;
+        border-bottom: 1px dashed #e5e7eb;
+        text-align: right;
+    }
+
+    .table tbody td > div {
+        text-align: right;
+    }
+
+    .table tbody td:last-child {
+        border-bottom: none;
+        justify-content: center;
+        gap: 10px;
+        padding-top: 15px;
+    }
+
+    .table tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-right: 15px;
+        text-align: left;
+    }
+
+    .timeline-dot {
+        left: -20px;
+    }
+
+    .timeline-line {
+        left: -15px;
+    }
+
+    .timeline-wrapper {
+        padding-left: 20px !important;
+    }
+}

@@ -7,102 +7,12 @@
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
-{{-- SweetAlert2 --}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<style>
-    .swal2-popup {
-        font-family: 'Public Sans', sans-serif;
-        border-radius: 1rem;
-    }
+@section('styles')
+    @vite(['resources/css/admin/keuangan/tagihan/bulk-create.css'])
+@endsection
 
-    .swal2-title {
-        font-size: 1.5rem;
-        color: #566a7f;
-    }
-
-    .swal2-html-container {
-        color: #697a8d;
-    }
-
-    /* Filter Dropdown Styles */
-    .filter-dropdown .dropdown-menu {
-        min-width: 320px;
-        max-height: 500px;
-        overflow-y: auto;
-    }
-
-    .kelas-checkbox-item {
-        padding: 8px 12px;
-        cursor: pointer;
-        transition: background 0.2s;
-        border-radius: 6px;
-        margin-bottom: 4px;
-    }
-
-    .kelas-checkbox-item:hover {
-        background: #f8fafc;
-    }
-
-    .kelas-checkbox-item label {
-        cursor: pointer;
-        margin-bottom: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-    }
-
-    .selected-kelas-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-        min-height: 32px;
-    }
-
-    .badge-kelas {
-        background: #e0f2fe;
-        color: #0369a1;
-        border: 1px solid #bae6fd;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .badge-kelas .remove-kelas {
-        cursor: pointer;
-        color: #0369a1;
-        font-weight: bold;
-        transition: color 0.2s;
-    }
-
-    .badge-kelas .remove-kelas:hover {
-        color: #dc2626;
-    }
-
-    .filter-section {
-        padding: 12px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .kelas-list-section {
-        padding: 12px;
-        max-height: 300px;
-        overflow-y: auto;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 20px;
-        color: #94a3b8;
-    }
-</style>
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+    <div class="bulk-create-page">
         <div class="container-fluid px-0">
 
             {{-- Breadcrumb --}}
@@ -193,10 +103,10 @@
 
                                             <!-- Buttons -->
                                             <div class="d-flex gap-2 mt-2">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" onclick="clearKelasSelection()">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary flex-fill" data-clear-kelas-selection>
                                                     <i class="fas fa-times me-1"></i>Clear
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-primary flex-fill" onclick="selectAllKelas()">
+                                                <button type="button" class="btn btn-sm btn-primary flex-fill" data-select-all-kelas>
                                                     <i class="fas fa-check-double me-1"></i>Pilih Semua
                                                 </button>
                                             </div>
@@ -225,7 +135,7 @@
                                                     </label>
                                                 </div>
                                             @endforeach
-                                            <div class="empty-state" id="emptyState" style="display: none;">
+                                            <div class="empty-state is-hidden" id="emptyState">
                                                 <i class="fas fa-inbox fa-2x mb-2"></i>
                                                 <p class="mb-0 small">Tidak ada kelas yang sesuai dengan filter</p>
                                             </div>
@@ -270,7 +180,7 @@
                             <h5 class="mb-0 text-gray-800">
                                 <i class="fas fa-money-bill-wave text-warning me-2"></i>Nominal Tagihan
                             </h5>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTagihanField()">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-add-tagihan-field data-default-date="{{ now()->addMonth()->format('Y-m-d') }}">
                                 <i class="fas fa-plus me-1"></i> Tambah Jenis Tagihan
                             </button>
                         </div>
@@ -295,8 +205,7 @@
                                                 class="form-control form-control-sm jatuh-tempo-input"
                                                 value="{{ old('tanggal_jatuh_tempo.' . $key, now()->addMonth()->format('Y-m-d')) }}">
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
-                                            onclick="removeTagihanField(this)" style="padding: 2px 8px;">
+                                        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 remove-field-button" data-remove-field>
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -337,223 +246,8 @@
         </div>
     </div>
 
-    {{-- Confirm Modal Removed (Replaced by SweetAlert2) --}}
-
 @endsection
 
 @section('scripts')
-    {{-- SweetAlert2 JS --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        let customFieldCounter = 0;
-        let fieldToRemove = null;
-
-        function addTagihanField() {
-            customFieldCounter++;
-            const container = document.getElementById('tagihan-fields-container');
-            const defaultDate = document.getElementById('globalJatuhTempo').value || '{{ now()->addMonth()->format('Y-m-d') }}';
-
-            const fieldHTML = `
-                    <div class="col-md-6 col-lg-4 tagihan-field-item" data-type="custom">
-                        <div class="p-3 bg-light rounded shadow-sm position-relative border border-primary">
-                            <label class="form-label fw-bold small mb-2">
-                                <input type="text"
-                                       name="custom_jenis_tagihan[${customFieldCounter}]"
-                                       class="form-control form-control-sm mb-2"
-                                       placeholder="Nama Jenis Tagihan (contoh: Les Tambahan)"
-                                       required>
-                            </label>
-                            <div class="input-group mb-2">
-                                <span class="input-group-text bg-white">Rp</span>
-                                <input type="text"
-                                       name="custom_tagihan[${customFieldCounter}]"
-                                       class="form-control currency-input"
-                                       placeholder="0">
-                            </div>
-                            <div>
-                                <label class="form-label small mb-1">Jatuh Tempo</label>
-                                <input type="date"
-                                       name="custom_tanggal_jatuh_tempo[${customFieldCounter}]"
-                                       class="form-control form-control-sm jatuh-tempo-input"
-                                       value="${defaultDate}">
-                            </div>
-                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2"
-                                    onclick="removeTagihanField(this)" style="padding: 2px 8px;">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <small class="text-muted d-block mt-1">
-                                <i class="fas fa-info-circle me-1"></i>Jenis tagihan custom
-                            </small>
-                        </div>
-                    </div>
-                `;
-
-            container.insertAdjacentHTML('beforeend', fieldHTML);
-
-            // Re-initialize currency formatter for new field
-            if (typeof currencyFormatter !== 'undefined' && currencyFormatter.bindInputs) {
-                currencyFormatter.bindInputs();
-            }
-        }
-
-        function removeTagihanField(button) {
-            fieldToRemove = button.closest('.tagihan-field-item');
-
-            Swal.fire({
-                title: 'Hapus Field?',
-                text: "Anda yakin ingin menghapus jenis tagihan ini?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#8592a3',
-                confirmButtonText: 'Ya, Hapus',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    if (fieldToRemove) {
-                        fieldToRemove.remove();
-                        fieldToRemove = null;
-                        Swal.fire('Terhapus!', 'Field tagihan telah dihapus.', 'success');
-                    }
-                }
-            });
-        }
-
-        // Handle form submission
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('form');
-
-            form.addEventListener('submit', function (e) {
-                // Validate at least one kelas is selected
-                const selectedKelas = document.querySelectorAll('.kelas-checkbox:checked');
-                if (selectedKelas.length === 0) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Perhatian!',
-                        text: 'Pilih minimal satu kelas untuk membuat tagihan',
-                        icon: 'warning',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
-
-                // Parse all currency inputs
-                const currencyInputs = form.querySelectorAll('.currency-input');
-                currencyInputs.forEach(input => {
-                    const rawValue = input.value.replace(/\./g, '');
-                    input.value = rawValue || '0';
-                });
-            });
-
-            // Confirm remove field button handler (removed as we use inline onClick/Swal callback)
-        });
-
-        // Kelas Selection Management
-        const kelasCheckboxes = document.querySelectorAll('.kelas-checkbox');
-        const selectedBadgesContainer = document.getElementById('selectedKelasBadges');
-        const kelasDropdownLabel = document.getElementById('kelasDropdownLabel');
-        const filterCabang = document.getElementById('filterCabang');
-        const filterJenjang = document.getElementById('filterJenjang');
-        const kelasItems = document.querySelectorAll('.kelas-checkbox-item');
-        const emptyState = document.getElementById('emptyState');
-
-        // Update selected kelas display
-        function updateSelectedKelas() {
-            const selected = Array.from(kelasCheckboxes).filter(cb => cb.checked);
-            const count = selected.length;
-
-            // Update dropdown label
-            kelasDropdownLabel.innerHTML = `<i class="fas fa-school me-2"></i>Pilih Kelas (${count} dipilih)`;
-
-            // Update badges
-            selectedBadgesContainer.innerHTML = '';
-            selected.forEach(checkbox => {
-                const badge = document.createElement('span');
-                badge.className = 'badge-kelas';
-                badge.innerHTML = `
-                    <span>${checkbox.dataset.nama} (${checkbox.dataset.jenjang})</span>
-                    <span class="remove-kelas" onclick="removeKelas(${checkbox.value})">&times;</span>
-                `;
-                selectedBadgesContainer.appendChild(badge);
-            });
-        }
-
-        // Remove kelas from selection
-        function removeKelas(kelasId) {
-            const checkbox = document.querySelector(`.kelas-checkbox[value="${kelasId}"]`);
-            if (checkbox) {
-                checkbox.checked = false;
-                updateSelectedKelas();
-            }
-        }
-
-        // Filter kelas list
-        function filterKelasList() {
-            const cabangId = filterCabang.value;
-            const jenjang = filterJenjang.value;
-            let visibleCount = 0;
-
-            kelasItems.forEach(item => {
-                const itemCabangId = item.dataset.cabangId;
-                const itemJenjang = item.dataset.jenjang;
-
-                let show = true;
-
-                if (cabangId && itemCabangId !== cabangId) {
-                    show = false;
-                }
-
-                if (jenjang && itemJenjang !== jenjang) {
-                    show = false;
-                }
-
-                item.style.display = show ? 'block' : 'none';
-                if (show) visibleCount++;
-            });
-
-            // Show/hide empty state
-            emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
-
-        // Clear all selections
-        function clearKelasSelection() {
-            kelasCheckboxes.forEach(cb => cb.checked = false);
-            updateSelectedKelas();
-        }
-
-        // Select all visible kelas
-        function selectAllKelas() {
-            kelasItems.forEach(item => {
-                if (item.style.display !== 'none') {
-                    const checkbox = item.querySelector('.kelas-checkbox');
-                    if (checkbox) checkbox.checked = true;
-                }
-            });
-            updateSelectedKelas();
-        }
-
-        // Event listeners
-        kelasCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateSelectedKelas);
-        });
-
-        filterCabang.addEventListener('change', filterKelasList);
-        filterJenjang.addEventListener('change', filterKelasList);
-
-        // Initialize
-        updateSelectedKelas();
-
-        // Global Jatuh Tempo Sync
-        const globalJatuhTempo = document.getElementById('globalJatuhTempo');
-        if (globalJatuhTempo) {
-            globalJatuhTempo.addEventListener('change', function() {
-                const value = this.value;
-                if (value) {
-                    document.querySelectorAll('.jatuh-tempo-input').forEach(input => {
-                        input.value = value;
-                    });
-                }
-            });
-        }
-    </script>
+    @vite(['resources/js/admin/keuangan/tagihan/bulk-create.js'])
 @endsection

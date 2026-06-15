@@ -8,81 +8,28 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
-<style>
-    /* Global Improvements for Manage Soal Page */
-    .manage-soal-container {
-        background: #ffffff;
-    }
+@push('styles')
+    @vite([
+        'resources/css/guru/lms/ujian/manage-soal.css',
+        'resources/css/components/ai-sidebar.css',
+    ])
+@endpush
 
-    .form-label {
-        color: #374151;
-        font-weight: 500;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #165fac;
-        box-shadow: 0 0 0 0.2rem rgba(22, 95, 172, 0.1);
-    }
-
-    textarea.question-input {
-        border: 1px solid #d1d5db;
-        resize: vertical;
-    }
-
-    textarea.question-input:focus {
-        border-color: #165fac;
-        box-shadow: 0 0 0 0.2rem rgba(22, 95, 172, 0.1);
-    }
-
-    /* === Mobile Responsive Toolbar === */
-    @media (max-width: 767px) {
-        /* Header: stack vertically on mobile */
-        .soal-toolbar-header {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            padding: 10px 12px !important;
-            gap: 8px;
-        }
-        .soal-toolbar-header .soal-toolbar-actions {
-            width: 100%;
-            flex-wrap: wrap;
-            gap: 6px !important;
-        }
-        .soal-toolbar-header .soal-toolbar-actions .btn {
-            flex: 1 1 auto;
-            font-size: 12px;
-            padding: 5px 8px;
-            min-width: 0;
-        }
-        /* Import/Export toolbar: wrap on mobile */
-        .soal-import-toolbar {
-            flex-wrap: wrap !important;
-            justify-content: flex-start !important;
-            padding-left: 12px !important;
-            padding-right: 12px !important;
-            gap: 6px !important;
-        }
-        .soal-import-toolbar .btn {
-            font-size: 12px;
-            padding: 5px 8px;
-        }
-        /* Hide long text labels on extra-small screens, show short labels */
-        .fs-5-mobile { font-size: 1.05rem !important; }
-        .btn-label-long { display: none; }
-        .btn-label-short { display: inline !important; }
-    }
-    @media (min-width: 768px) {
-        .btn-label-short { display: none; }
-    }
-</style>
+@push('scripts')
+    @vite([
+        'resources/js/guru/lms/ujian/manage-soal.js',
+        'resources/js/components/ai-sidebar.js',
+    ])
+@endpush
 
 @section('content')
-    <div class="manage-soal-container">
+    <div class="manage-soal-container guru-lms-ujian-manage-soal-page"
+        data-related-count="{{ $relatedUjianCount ?? 0 }}"
+        data-storage-base-url="{{ asset('storage') }}"
+        data-ai-generator-src="{{ asset('js/ai-question-generator.js') }}?v=1.1">
 
     {{-- Header & Controls (Outside Form) --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm soal-toolbar-header"
-        style="z-index: 10;">
+    <div class="d-flex justify-content-between align-items-center mb-4 sticky-top bg-white py-3 px-4 border-bottom shadow-sm soal-toolbar-header soal-toolbar-sticky">
         <div class="d-flex align-items-center gap-2">
             <a href="{{ route(($tipeUjian ?? 'ujian') === 'latihan' ? 'guru.lms.latihan.index' : 'guru.lms.ujian.index', [$kelas->id, $mapel->id]) }}"
                 class="btn btn-outline-secondary btn-sm py-1 px-2">
@@ -97,7 +44,10 @@
         <div class="d-flex gap-2 soal-toolbar-actions">
             {{-- Rilis / Tarik Toggle --}}
             <button type="button" class="btn btn-sm {{ $ujian->is_active ? 'btn-outline-danger' : 'btn-outline-success' }}"
-                onclick="confirmSyncAction('toggleStatusForm', '{{ $ujian->is_active ? 'Tarik Kembali ' . (ucfirst($tipeUjian ?? 'ujian')) : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}', 'Mengubah status...')"
+                data-sync-action
+                data-sync-form="toggleStatusForm"
+                data-sync-title="{{ $ujian->is_active ? 'Tarik Kembali ' . (ucfirst($tipeUjian ?? 'ujian')) : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}"
+                data-sync-message="Mengubah status..."
                 title="{{ $ujian->is_active ? 'Klik untuk menyembunyikan dari siswa' : 'Klik untuk menampilkan ke siswa' }}">
                 <i class="fas {{ $ujian->is_active ? 'fa-eye-slash' : 'fa-eye' }} me-1"></i>
                 <span class="btn-label-long">{{ $ujian->is_active ? 'Tarik Kembali' : 'Rilis ' . (ucfirst($tipeUjian ?? 'ujian')) }}</span>
@@ -107,7 +57,11 @@
 
 
             {{-- SIMPAN SEMUA --}}
-            <button type="button" class="btn btn-sm btn-primary" onclick="confirmSyncAction('mainForm', 'Simpan Semua Soal', 'Menyimpan perubahan soal...')"
+            <button type="button" class="btn btn-sm btn-primary"
+                data-sync-action
+                data-sync-form="mainForm"
+                data-sync-title="Simpan Semua Soal"
+                data-sync-message="Menyimpan perubahan soal..."
                 title="Simpan semua perubahan soal">
                 <i class="fas fa-save me-1"></i>
                 <span class="btn-label-long">Simpan Semua</span>
@@ -132,7 +86,7 @@
 
         {{-- AI Generator Sidebar Trigger --}}
         @if($aiQuestionGeneratorEnabled)
-            <button type="button" class="btn btn-info btn-sm" onclick="openAiSidebar()" title="Buka AI Question Generator">
+            <button type="button" class="btn btn-info btn-sm" data-open-ai-sidebar title="Buka AI Question Generator">
                 <i class="fas fa-robot me-1"></i>
                 <span class="btn-label-long">AI Question Generator</span>
                 <span class="btn-label-short">AI</span>
@@ -155,11 +109,9 @@
             {{-- Items will be injected here via JS --}}
         </div>
 
-        <div class="text-center py-4 border-2 rounded bg-gradient" style="border: 2px dashed #165fac; cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #f0f9ff 0%, #f8fbff 100%);"
-            onclick="addQuestion()" onmouseover="this.style.borderColor='#0d3f7a'; this.style.boxShadow='0 4px 12px rgba(22, 95, 172, 0.15)';"
-            onmouseout="this.style.borderColor='#165fac'; this.style.boxShadow='none';">
-            <i class="fas fa-plus-circle me-2" style="color: #165fac; font-size: 24px;"></i>
-            <h5 class="mb-2" style="color: #165fac;"><strong>Tambah Soal Baru</strong></h5>
+        <div class="text-center py-4 border-2 rounded bg-gradient add-question-card" data-add-question>
+            <i class="fas fa-plus-circle me-2 add-question-icon"></i>
+            <h5 class="mb-2 add-question-title"><strong>Tambah Soal Baru</strong></h5>
             <small class="text-muted">Klik untuk menambah soal ke nomor selanjutnya</small>
         </div>
 
@@ -221,7 +173,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" onclick="confirmRemoveVal()">Hapus</button>
+                    <button type="button" class="btn btn-danger" data-confirm-remove>Hapus</button>
                 </div>
             </div>
         </div>
@@ -273,25 +225,25 @@
             <input type="hidden" name="soal[{INDEX}][id]" value="{ID}">
 
             <!-- Header with Delete Button Outside Accordion -->
-            <div class="d-flex align-items-center gap-2" style="padding: 8px 15px; background-color: #f8f9fa; border-bottom: 1px solid #e5e7eb;">
+            <div class="d-flex align-items-center gap-2 soal-template-header">
                 <!-- Delete Button Icon (Samping Dropdown) -->
-                <button type="button" class="btn btn-sm btn-outline-danger delete-btn p-1"
-                    onclick="removeQuestion(event, this)" title="Hapus Soal" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <button type="button" class="btn btn-sm btn-outline-danger delete-btn question-delete-btn p-1"
+                    data-remove-question title="Hapus Soal">
                     <i class="fas fa-trash"></i>
                 </button>
 
                 <!-- Accordion Toggle -->
                 <h2 class="accordion-header flex-grow-1 mb-0" id="heading{INDEX}">
-                    <button class="accordion-button collapsed d-flex align-items-center" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapse{INDEX}" style="padding: 8px 0; border: none; background: none;">
+                    <button class="accordion-button collapsed d-flex align-items-center soal-accordion-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse{INDEX}">
 
                         <!-- Left: Number & Type -->
-                        <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
-                            <span class="badge bg-info text-dark fw-bold" style="min-width: 35px; text-align: center;">
+                        <div class="d-flex align-items-center gap-2 soal-summary">
+                            <span class="badge bg-info text-dark fw-bold soal-number-badge">
                                 <span class="soal-number">{NUMBER}</span>
                             </span>
-                            <span class="badge bg-secondary soal-type-badge" style="white-space: nowrap;">Pilihan Ganda</span>
-                            <span class="text-muted small preview-text text-truncate" style="max-width: 400px; color: #6c757d !important;">
+                            <span class="badge bg-secondary soal-type-badge">Pilihan Ganda</span>
+                            <span class="text-muted small preview-text text-truncate">
                                 (Masukan pertanyaan...)
                             </span>
                         </div>
@@ -299,15 +251,14 @@
                 </h2>
             </div>
 
-            <h2 class="accordion-header" id="heading{INDEX}" style="display: none;"></h2>
+            <h2 class="accordion-header d-none" id="headingHidden{INDEX}"></h2>
             <div id="collapse{INDEX}" class="accordion-collapse collapse" data-bs-parent="#soalAccordion">
                 <div class="accordion-body bg-light">
 
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Tipe Soal</label>
-                            <select name="soal[{INDEX}][tipe_soal]" class="form-select form-select-sm type-select"
-                                onchange="changeType(this)">
+                            <select name="soal[{INDEX}][tipe_soal]" class="form-select form-select-sm type-select">
                                 <option value="pilihan_ganda">Pilihan Ganda</option>
                                 <option value="pilihan_ganda_kompleks">Pilihan Ganda Kompleks</option>
                                 <option value="benar_salah">Benar - Salah</option>
@@ -334,7 +285,7 @@
                             Gambar Soal <span class="text-muted fw-normal">(Opsional)</span>
                         </label>
                         <input type="file" name="soal[{INDEX}][image]" class="form-control form-control-sm image-upload"
-                            accept="image/png,image/jpeg,image/jpg,image/gif" onchange="previewImage(this, {INDEX})">
+                            accept="image/png,image/jpeg,image/jpg,image/gif" data-preview-image="{INDEX}">
                         <small class="text-muted">
                             <i class="fas fa-info-circle"></i> Upload gambar untuk soal (maks 2MB). Format: JPG, PNG, GIF
                         </small>
@@ -343,12 +294,12 @@
                         <input type="hidden" name="soal[{INDEX}][existing_image]" class="existing-image-path" value="{IMAGE_PATH}">
 
                         <!-- Image Preview Area -->
-                        <div class="image-preview-container mt-2" id="imagePreview{INDEX}" style="display: none;">
+                        <div class="image-preview-container mt-2" id="imagePreview{INDEX}">
                             <div class="card border-info">
                                 <div class="card-body p-2">
                                     <div class="d-flex align-items-start gap-2">
-                                        <img src="" alt="Preview" class="preview-img img-thumbnail" style="max-width: 200px; max-height: 150px; object-fit: contain;">
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeImage({INDEX})" title="Hapus gambar">
+                                        <img src="" alt="Preview" class="preview-img img-thumbnail question-preview-img">
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-remove-image="{INDEX}" title="Hapus gambar">
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
@@ -361,7 +312,7 @@
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Pertanyaan</label>
                         <textarea name="soal[{INDEX}][pertanyaan]" class="form-control question-input" rows="3"
-                            placeholder="Tuliskan pertanyaan..." oninput="updatePreview(this)">{PERTANYAAN}</textarea>
+                            placeholder="Tuliskan pertanyaan..." data-update-preview>{PERTANYAAN}</textarea>
                     </div>
 
                     <div class="card card-body p-3 bg-white border">
@@ -371,10 +322,10 @@
                         <div class="type-section section-pilihan_ganda">
                             <div class="pg-options-container"></div>
                             <div class="d-flex gap-2 mt-2">
-                                <button type="button" class="btn btn-xs btn-outline-success" onclick="addPgOption(this, 'pilgan')" title="Tambah Opsi">
+                                <button type="button" class="btn btn-xs btn-outline-success" data-add-pg-option="pilgan" title="Tambah Opsi">
                                     <i class="fas fa-plus me-1"></i>Opsi
                                 </button>
-                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePgOption(this, 'pilgan')" title="Kurangi Opsi">
+                                <button type="button" class="btn btn-xs btn-outline-danger" data-remove-pg-option="pilgan" title="Kurangi Opsi">
                                     <i class="fas fa-minus me-1"></i>Opsi
                                 </button>
                                 <small class="text-muted align-self-center">(Min 3, Maks 5)</small>
@@ -382,16 +333,16 @@
                         </div>
 
                         {{-- 2. PILGAN KOMPLEKS --}}
-                        <div class="type-section section-pilihan_ganda_kompleks" style="display:none;">
-                            <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.75rem;">
+                        <div class="type-section section-pilihan_ganda_kompleks">
+                            <div class="alert alert-info py-1 px-2 mb-2 scoring-info">
                                 <i class="fas fa-info-circle me-1"></i> Penilaian parsial: <strong class="text-success">+Poin</strong> untuk opsi benar, <strong class="text-danger">-Poin</strong> untuk opsi salah (min. 0).
                             </div>
                             <div class="pgk-options-container"></div>
                             <div class="d-flex gap-2 mt-2">
-                                <button type="button" class="btn btn-xs btn-outline-success" onclick="addPgOption(this, 'kompleks')" title="Tambah Opsi">
+                                <button type="button" class="btn btn-xs btn-outline-success" data-add-pg-option="kompleks" title="Tambah Opsi">
                                     <i class="fas fa-plus me-1"></i>Opsi
                                 </button>
-                                <button type="button" class="btn btn-xs btn-outline-danger" onclick="removePgOption(this, 'kompleks')" title="Kurangi Opsi">
+                                <button type="button" class="btn btn-xs btn-outline-danger" data-remove-pg-option="kompleks" title="Kurangi Opsi">
                                     <i class="fas fa-minus me-1"></i>Opsi
                                 </button>
                                 <small class="text-muted align-self-center">(Min 3, Maks 5)</small>
@@ -399,7 +350,7 @@
                         </div>
 
                         {{-- 3. BENAR SALAH --}}
-                        <div class="type-section section-benar_salah" style="display:none;">
+                        <div class="type-section section-benar_salah">
                             <table class="table table-sm table-bordered mb-2">
                                 <thead>
                                     <tr>
@@ -411,22 +362,22 @@
                                     {{-- Rows injected by JS for existing data, or default 1 row --}}
                                 </tbody>
                             </table>
-                            <button type="button" class="btn btn-xs btn-outline-secondary" onclick="addBsRow(this)">+
+                            <button type="button" class="btn btn-xs btn-outline-secondary" data-add-bs-row>+
                                 Baris</button>
                         </div>
 
                         {{-- 4. ISIAN --}}
-                        <div class="type-section section-isian_singkat" style="display:none;">
+                        <div class="type-section section-isian_singkat">
                             <label class="form-label small">Kunci Jawaban</label>
                             <input type="text" name="soal[{INDEX}][kunci_jawaban_isian]"
                                 class="form-control form-control-sm" placeholder="Jawaban singkat...">
-                            <small class="text-muted fst-italic" style="font-size: 0.75rem;">
+                            <small class="text-muted fst-italic isian-help">
                                 *AI Assistant tersedia saat koreksi untuk membantu menilai jawaban yang mirip.
                             </small>
                         </div>
 
                         {{-- 5. URAIAN --}}
-                        <div class="type-section section-uraian" style="display:none;">
+                        <div class="type-section section-uraian">
                             <div class="alert alert-info py-2 mb-0 small">Soal uraian dikoreksi manual.</div>
                         </div>
 
@@ -450,568 +401,6 @@
         </tr>
     </template>
 
+    <template id="soalDataTemplate">@json($soalList)</template>
+
 @endsection
-
-    @push('scripts')
-    {{-- AI Question Generator JavaScript --}}
-    <script src="{{ asset('js/ai-question-generator.js') }}?v=1.1"></script>
-
-    <script>
-        // === Global LMS Toast Notification ===
-        function showLmsToast(type, message) {
-            let container = document.getElementById('lmsToastContainer');
-            if (!container) {
-                container = document.createElement('div');
-                container.id = 'lmsToastContainer';
-                container.className = 'toast-container position-fixed top-0 end-0 p-3';
-                container.style.zIndex = '9999';
-                document.body.appendChild(container);
-            }
-
-            const bgClass = type === 'error' || type === 'danger' ? 'bg-danger' : type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning text-dark' : 'bg-info';
-            const icon = type === 'error' || type === 'danger' ? 'fa-exclamation-circle' : type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
-            const closeClass = type === 'warning' ? 'btn-close' : 'btn-close btn-close-white';
-
-            const toastHtml = `
-                <div class="toast align-items-center text-white ${bgClass} border-0 shadow-lg" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="fas ${icon} me-2"></i>${message}
-                        </div>
-                        <button type="button" class="${closeClass} me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-
-            container.insertAdjacentHTML('beforeend', toastHtml);
-            const toastEl = container.lastElementChild;
-            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
-            toast.show();
-            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Variables initialized after DOM load
-            const container = document.getElementById('soalAccordion');
-            let templateEl = document.getElementById('soalTemplate');
-            let bsTemplateEl = document.getElementById('bsRowTemplate');
-
-            if (!container || !templateEl || !bsTemplateEl) {
-                console.error("Templates or Container not found!");
-                return;
-            }
-
-            const template = templateEl.innerHTML;
-            const bsTemplate = bsTemplateEl.innerHTML;
-
-            // Global counters to prevent index collisions on delete/add
-            let questionCounter = 0;
-            let bsRowCounters = {};
-
-            // Existing Data
-            const existingData = @json($soalList);
-
-            // Expose functions globally for onclick handlers
-            window.addQuestion = function (data = null) {
-                let index = questionCounter++;
-                let number = document.querySelectorAll('.soal-item').length + 1;
-
-                let contentRaw = data ? (data.pertanyaan || '') : '';
-
-                let html = template
-                    .replace(/{INDEX}/g, index)
-                    .replace(/{NUMBER}/g, number)
-                    .replace(/{ID}/g, data ? data.id : '')
-                    .replace(/{PERTANYAAN}/g, '') // We set value via JS to be safe
-                    .replace(/{IMAGE_PATH}/g, data && data.image_path ? data.image_path : '');
-
-                // Insert HTML
-                container.insertAdjacentHTML('beforeend', html);
-
-                // Get the newly added element
-                let el = container.lastElementChild;
-
-                // Set Pertanyaan safely
-                el.querySelector('.question-input').value = contentRaw;
-
-                // Set Narasi if exists
-                if (data && data.narasi) {
-                    el.querySelector('.narasi-input').value = data.narasi;
-                }
-
-                // Set Image Preview if exists
-                if (data && data.image_path) {
-                    const previewContainer = el.querySelector('#imagePreview' + index);
-                    const previewImg = previewContainer.querySelector('.preview-img');
-                    previewImg.src = '{{ asset('storage') }}/' + data.image_path;
-                    previewContainer.style.display = 'block';
-                }
-
-                if (data) {
-                    // Set fields
-                    el.querySelector('.type-select').value = data.tipe_soal;
-                    el.querySelector('input[name="soal[' + index + '][bobot_nilai]"]').value = data.bobot_nilai;
-
-                    // Trigger type change to show correct section
-                    changeType(el.querySelector('.type-select'));
-
-                    // Populate Section Data (this will create the option rows from data)
-                    populateSectionData(el, index, data);
-                } else {
-                    // New question: initialize default 5 options for PG and PGK
-                    initDefaultPgOptions(el, index, 'pilgan', 5);
-                    initDefaultPgOptions(el, index, 'kompleks', 5);
-                    // Default 1 BS row if new
-                    addBsRow(el.querySelector('button[onclick="addBsRow(this)"]'));
-                }
-
-                updateTotalBadge();
-                updatePreview(el.querySelector('.question-input'));
-            };
-
-            let itemToDelete = null;
-
-            window.removeQuestion = function (e, btn) {
-                e.stopPropagation(); // Prevent accordion toggle
-                
-                // Allow direct removal if it's a new question without ID to save clicks
-                itemToDelete = btn.closest('.soal-item');
-                let idInput = itemToDelete.querySelector('input[name*="[id]"]');
-                if (!idInput || !idInput.value) {
-                    itemToDelete.remove();
-                    renumberQuestions();
-                    updateTotalBadge();
-                    itemToDelete = null;
-                    return;
-                }
-
-                var deleteModal = new bootstrap.Modal(document.getElementById('deleteQuestionModal'));
-                deleteModal.show();
-            };
-
-            window.confirmRemoveVal = function() {
-                if (itemToDelete) {
-                    itemToDelete.remove();
-                    renumberQuestions();
-                    updateTotalBadge();
-                    itemToDelete = null;
-                }
-                var modalEl = document.getElementById('deleteQuestionModal');
-                var modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-            };
-
-            window.renumberQuestions = function () {
-                let items = document.querySelectorAll('.soal-item');
-                items.forEach((item, idx) => {
-                    let newNum = idx + 1;
-                    item.querySelector('.soal-number').textContent = newNum;
-                });
-            };
-
-            window.changeType = function (select) {
-                let item = select.closest('.soal-item');
-                let type = select.value;
-
-                // Update Badge
-                let badge = item.querySelector('.soal-type-badge');
-                badge.textContent = select.options[select.selectedIndex].text;
-
-                // Show/Hide Sections
-                item.querySelectorAll('.type-section').forEach(el => el.style.display = 'none');
-                item.querySelector('.section-' + type).style.display = 'block';
-            };
-
-            window.updatePreview = function (textarea) {
-                let val = textarea.value;
-                let item = textarea.closest('.soal-item');
-                let preview = item.querySelector('.preview-text');
-                preview.textContent = val ? '(' + val.substring(0, 40) + '...)' : '(Masukan pertanyaan...)';
-            };
-
-            window.updateTotalBadge = function () {
-                let count = document.querySelectorAll('.soal-item').length;
-                document.getElementById('totalSoalBadge').textContent = count + ' Soal';
-            };
-
-            window.addBsRow = function (btn) {
-                let tbody = btn.previousElementSibling.querySelector('tbody');
-                let item = btn.closest('.soal-item');
-                let index = item.getAttribute('data-index');
-                
-                if (typeof bsRowCounters[index] === 'undefined') {
-                    bsRowCounters[index] = 0;
-                }
-                let rowIdx = bsRowCounters[index]++;
-
-                let html = bsTemplate
-                    .replace(/{INDEX}/g, index)
-                    .replace(/{ROW}/g, rowIdx);
-
-                tbody.insertAdjacentHTML('beforeend', html);
-            };
-
-            window.populateSectionData = function (el, index, data) {
-                let type = data.tipe_soal;
-
-                if (type === 'pilihan_ganda') {
-                    let opts = data.pilihan_jawaban || {};
-                    // Filter out non-letter keys like 'jawaban_benar'
-                    let optKeys = Object.keys(opts).filter(k => /^[A-E]$/.test(k));
-                    let count = Math.max(optKeys.length, 3); // at least 3
-                    count = Math.min(count, 5); // at most 5
-
-                    // Initialize option rows
-                    initDefaultPgOptions(el, index, 'pilgan', count);
-
-                    // Fill values
-                    if (typeof opts === 'object' && opts !== null) {
-                        for (let k in opts) {
-                            let input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_pilgan][${k}]"]`);
-                            if (input) input.value = opts[k];
-                        }
-                    }
-                    if (data.kunci_jawaban) {
-                        let radio = el.querySelector(`input[name="soal[${index}][kunci_jawaban_pilgan]"][value="${data.kunci_jawaban}"]`);
-                        if (radio) radio.checked = true;
-                    }
-                }
-                else if (type === 'pilihan_ganda_kompleks') {
-                    let opts = data.pilihan_jawaban || {};
-                    let optKeys = Object.keys(opts).filter(k => /^[A-E]$/.test(k));
-                    let count = Math.max(optKeys.length, 3);
-                    count = Math.min(count, 5);
-
-                    initDefaultPgOptions(el, index, 'kompleks', count);
-
-                    if (typeof opts === 'object' && opts !== null) {
-                        for (let k in opts) {
-                            let input = el.querySelector(`input[name="soal[${index}][pilihan_jawaban_kompleks][${k}]"]`);
-                            if (input) input.value = opts[k];
-                        }
-                    }
-                    let keys = data.kunci_jawaban || [];
-                    if (typeof keys === 'string') {
-                        try { keys = JSON.parse(keys); } catch(e) { keys = []; }
-                    }
-                    if (Array.isArray(keys)) {
-                        keys.forEach(k => {
-                            let cb = el.querySelector(`input[name="soal[${index}][kunci_jawaban_kompleks][]"][value="${k}"]`);
-                            if (cb) cb.checked = true;
-                        });
-                    }
-                    // Also init PG defaults for when user switches type
-                    initDefaultPgOptions(el, index, 'pilgan', count);
-                }
-                else if (type === 'benar_salah') {
-                    // Init default PG/PGK options for type switching
-                    initDefaultPgOptions(el, index, 'pilgan', 5);
-                    initDefaultPgOptions(el, index, 'kompleks', 5);
-
-                    let rows = [];
-                    if (data.pilihan_jawaban && data.pilihan_jawaban.pernyataan) {
-                        rows = data.pilihan_jawaban.pernyataan;
-                    }
-
-                    let tbody = el.querySelector('.bs-tbody');
-                    if (rows.length > 0) {
-                        rows.forEach((row, rIdx) => {
-                            let text = row.pernyataan || row.text || '';
-                            let isTrue = row.benar === true || row.kunci === 'B';
-                            let keyChar = isTrue ? 'B' : 'S';
-
-                            let html = bsTemplate
-                                .replace(/{INDEX}/g, index)
-                                .replace(/{ROW}/g, rIdx);
-                            tbody.insertAdjacentHTML('beforeend', html);
-
-                            let rowEl = tbody.lastElementChild;
-                            rowEl.querySelector('input').value = text;
-                            rowEl.querySelector('select').value = keyChar;
-                        });
-                    } else {
-                        window.addBsRow(el.querySelector('button[onclick="addBsRow(this)"]'));
-                    }
-                }
-                else if (type === 'isian_singkat' || type === 'uraian') {
-                    // Init default PG/PGK options for type switching
-                    initDefaultPgOptions(el, index, 'pilgan', 5);
-                    initDefaultPgOptions(el, index, 'kompleks', 5);
-
-                    if (type === 'isian_singkat') {
-                        let val = data.kunci_jawaban || '';
-                        el.querySelector(`input[name="soal[${index}][kunci_jawaban_isian]"]`).value = val;
-                    }
-                }
-            };
-
-            // === DYNAMIC PG OPTION FUNCTIONS ===
-            const allLetters = ['A', 'B', 'C', 'D', 'E'];
-
-            /**
-             * Create a single PG option row HTML
-             */
-            function createPgOptionHtml(index, letter, mode) {
-                let inputType = mode === 'pilgan' ? 'radio' : 'checkbox';
-                let namePrefix = mode === 'pilgan' ? 'pilihan_jawaban_pilgan' : 'pilihan_jawaban_kompleks';
-                let keyName = mode === 'pilgan'
-                    ? `soal[${index}][kunci_jawaban_pilgan]`
-                    : `soal[${index}][kunci_jawaban_kompleks][]`;
-
-                return `<div class="input-group input-group-sm mb-2 pg-option-row" data-letter="${letter}">
-                    <div class="input-group-text">
-                        <input class="form-check-input mt-0" type="${inputType}"
-                            name="${keyName}" value="${letter}">
-                        <span class="ms-2 fw-bold">${letter}</span>
-                    </div>
-                    <input type="text" name="soal[${index}][${namePrefix}][${letter}]"
-                        class="form-control" placeholder="Opsi ${letter}">
-                </div>`;
-            }
-
-            /**
-             * Initialize default PG options for a question
-             */
-            window.initDefaultPgOptions = function(el, index, mode, count) {
-                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
-                let container = el.querySelector(containerClass);
-                if (!container) return;
-
-                // Clear existing
-                container.innerHTML = '';
-
-                // Add options
-                for (let i = 0; i < count; i++) {
-                    container.insertAdjacentHTML('beforeend', createPgOptionHtml(index, allLetters[i], mode));
-                }
-            };
-
-            /**
-             * Add a PG/PGK option (max 5)
-             */
-            window.addPgOption = function(btn, mode) {
-                let item = btn.closest('.soal-item');
-                let index = item.getAttribute('data-index');
-                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
-                let container = item.querySelector(containerClass);
-                let currentCount = container.querySelectorAll('.pg-option-row').length;
-
-                if (currentCount >= 5) {
-                    showLmsToast('warning', 'Maksimal 5 opsi jawaban (A-E).');
-                    return;
-                }
-
-                let nextLetter = allLetters[currentCount];
-                container.insertAdjacentHTML('beforeend', createPgOptionHtml(index, nextLetter, mode));
-            };
-
-            /**
-             * Remove last PG/PGK option (min 3)
-             */
-            window.removePgOption = function(btn, mode) {
-                let item = btn.closest('.soal-item');
-                let containerClass = mode === 'pilgan' ? '.pg-options-container' : '.pgk-options-container';
-                let container = item.querySelector(containerClass);
-                let rows = container.querySelectorAll('.pg-option-row');
-
-                if (rows.length <= 3) {
-                    showLmsToast('warning', 'Minimal 3 opsi jawaban (A-C).');
-                    return;
-                }
-
-                // Remove last row
-                rows[rows.length - 1].remove();
-            };
-
-            // Initialize
-            if (existingData && existingData.length > 0) {
-                existingData.forEach((soal, idx) => {
-                    window.addQuestion(soal);
-                });
-            } else {
-                window.addQuestion();
-            }
-
-            // --- SYNC ACTIONS LOGIC ---
-            let targetFormId = null;
-            let relatedCount = {{ $relatedUjianCount ?? 0 }};
-
-            window.confirmSyncAction = function(formId, title, message) {
-                targetFormId = formId;
-                
-                // If no related classes, just submit directly
-                if (relatedCount === 0) {
-                    document.getElementById(formId).submit();
-                    return;
-                }
-
-                // Show Modal
-                document.getElementById('syncModalTitle').textContent = title;
-                document.getElementById('syncModalMessage').textContent = message || "Lanjutkan aksi ini?";
-                
-                // Reset checkbox default to true
-                let cb = document.getElementById('syncConfirmCheckbox');
-                if(cb) cb.checked = true;
-
-                var syncModal = new bootstrap.Modal(document.getElementById('syncConfirmModal'));
-                syncModal.show();
-            };
-
-            document.getElementById('btnConfirmSync').addEventListener('click', function() {
-                if (!targetFormId) return;
-
-                let form = document.getElementById(targetFormId);
-                let cb = document.getElementById('syncConfirmCheckbox');
-                let shouldSync = cb && cb.checked ? 1 : 0;
-
-                // Find the specific hidden input for this form
-                let inputName = '';
-                if (targetFormId === 'mainForm') inputName = 'sync_kelas_main';
-                else if (targetFormId === 'toggleStatusForm') inputName = 'sync_kelas_status';
-                else if (targetFormId === 'toggleResultForm') inputName = 'sync_kelas_result';
-                
-                let input = document.getElementById(inputName);
-                if (input) input.value = shouldSync;
-
-                // Submit
-                form.submit();
-                
-                // Close modal
-                var modalEl = document.getElementById('syncConfirmModal');
-                var modal = bootstrap.Modal.getInstance(modalEl);
-                modal.hide();
-            });
-
-            // --- IMAGE HANDLING FUNCTIONS ---
-
-            /**
-             * Preview image when file is selected
-             */
-            window.previewImage = function(input, index) {
-                const previewContainer = document.getElementById('imagePreview' + index);
-                const previewImg = previewContainer.querySelector('.preview-img');
-
-                if (input.files && input.files[0]) {
-                    const file = input.files[0];
-
-                    // Validate file size (max 2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                        showLmsToast('error', 'Ukuran gambar terlalu besar! Maksimal 2MB.');
-                        input.value = '';
-                        return;
-                    }
-
-                    // Validate file type
-                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-                    if (!validTypes.includes(file.type)) {
-                        showLmsToast('error', 'Format gambar tidak valid! Gunakan JPG, PNG, atau GIF.');
-                        input.value = '';
-                        return;
-                    }
-
-                    // Read and preview image
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImg.src = e.target.result;
-                        previewContainer.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    previewContainer.style.display = 'none';
-                }
-            };
-
-            /**
-             * Remove image preview and clear file input
-             */
-            window.removeImage = function(index) {
-                const soalItem = document.querySelector(`.soal-item[data-index="${index}"]`);
-                if (!soalItem) return;
-
-                const fileInput = soalItem.querySelector('.image-upload');
-                const existingImageInput = soalItem.querySelector('.existing-image-path');
-                const previewContainer = document.getElementById('imagePreview' + index);
-
-                // Clear file input
-                if (fileInput) fileInput.value = '';
-
-                // Clear existing image path (to delete on save)
-                if (existingImageInput) existingImageInput.value = '';
-
-                // Hide preview
-                if (previewContainer) previewContainer.style.display = 'none';
-            };
-
-        });
-    </script>
-    <style>
-        /* Accordion Items Styling */
-        .accordion-item {
-            border: 1px solid #e5e7eb;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .accordion-item:hover {
-            border-color: #165fac;
-            box-shadow: 0 2px 8px rgba(22, 95, 172, 0.1);
-        }
-
-        .soal-item .accordion-button {
-            padding: 0 !important;
-            background-color: transparent;
-            border: none;
-            font-size: 0.95rem;
-        }
-
-        .soal-item .accordion-button:not(.collapsed) {
-            color: #165fac;
-        }
-
-        .soal-item .accordion-button:focus {
-            box-shadow: none;
-        }
-
-        .accordion-body {
-            padding: 20px;
-        }
-
-        /* Delete Button Styling */
-        .delete-btn {
-            transition: all 0.2s ease;
-            color: #6c757d;
-            border-color: #dee2e6;
-        }
-
-        .delete-btn:hover {
-            background-color: #fee2e2 !important;
-            border-color: #dc2626 !important;
-            color: #dc2626 !important;
-        }
-
-        /* Preview text color */
-        .preview-text {
-            color: #6c757d !important;
-            font-style: italic;
-        }
-
-        /* Badge styling */
-        .accordion-header .badge {
-            font-size: 0.8rem;
-            padding: 4px 8px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .accordion-header {
-                flex-wrap: wrap;
-            }
-
-            .delete-btn {
-                margin-bottom: 8px;
-            }
-        }
-    </style>
-@endpush

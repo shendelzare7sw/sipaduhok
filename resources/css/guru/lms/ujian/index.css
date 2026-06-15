@@ -1,0 +1,11 @@
+.guru-lms-ujian-page .col-no {
+    width: 50px;
+}
+
+.guru-lms-ujian-page .col-actions {
+    width: 150px;
+}
+
+.guru-lms-ujian-page .delete-form {
+    display: inline;
+}

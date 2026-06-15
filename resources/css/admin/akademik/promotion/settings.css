@@ -1,0 +1,130 @@
+.promotion-page {
+    --primary: #4361ee;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --info: #06b6d4;
+    --ink: #1f2937;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --soft: #f8fafc;
+}
+
+.page-panel,
+.content-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.page-panel {
+    padding: 20px;
+}
+
+.panel-kicker {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.panel-title {
+    margin-bottom: 4px;
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.panel-subtitle {
+    color: var(--muted);
+}
+
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+}
+
+.info-icon.primary { background: rgba(67, 97, 238, 0.12); color: var(--primary); }
+.info-icon.success { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+.info-icon.warning { background: rgba(245, 158, 11, 0.14); color: var(--warning); }
+
+.content-card {
+    overflow: hidden;
+}
+
+.content-card-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+}
+
+.content-card-header h5,
+.info-item h6 {
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.content-card-body {
+    padding: 20px;
+}
+
+.form-block {
+    margin-bottom: 16px;
+    padding: 16px;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    background: var(--soft);
+}
+
+.form-label {
+    color: #334155;
+    font-weight: 800;
+}
+
+.action-footer {
+    margin: 20px -20px -20px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--line);
+    background: #ffffff;
+    text-align: right;
+}
+
+.info-list {
+    display: grid;
+    gap: 14px;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    background: var(--soft);
+}
+
+.info-item p {
+    margin-bottom: 0;
+    color: var(--muted);
+}
+
+@media (max-width: 767.98px) {
+    .page-panel,
+    .content-card-body {
+        padding: 16px;
+    }
+
+    .action-footer {
+        margin: 16px -16px -16px;
+    }
+
+    .action-footer .btn {
+        width: 100%;
+    }
+}

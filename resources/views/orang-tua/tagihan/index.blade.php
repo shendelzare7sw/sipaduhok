@@ -8,28 +8,11 @@
 @endsection
 
 @section('styles')
-<style>
-    .paid-bill-row {
-        --bs-table-bg: #ecfdf5;
-        --bs-table-striped-bg: #ecfdf5;
-        --bs-table-hover-bg: #d1fae5;
-        background-color: #ecfdf5 !important;
-        color: #14532d !important;
-    }
-
-    .paid-bill-row td {
-        background-color: transparent !important;
-        color: #14532d !important;
-    }
-
-    .paid-bill-row .fw-bold {
-        color: #064e3b !important;
-    }
-</style>
+    @vite(['resources/css/orang-tua/tagihan/index.css'])
 @endsection
 
 @section('content')
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container-xxl flex-grow-1 container-p-y orang-tua-tagihan-index-page">
 
         <!-- Page Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -181,9 +164,9 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Keterangan</th>
-                                                <th class="text-nowrap" style="width: 150px;">Jatuh Tempo</th>
-                                                <th class="text-end text-nowrap" style="width: 150px;">Tagihan</th>
-                                                <th class="text-center" style="width: 130px;">Status</th>
+                                                <th class="text-nowrap tagihan-col-date">Jatuh Tempo</th>
+                                                <th class="text-end text-nowrap tagihan-col-amount">Tagihan</th>
+                                                <th class="text-center tagihan-col-status-sm">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -191,7 +174,7 @@
                                                 @php
                                                     $isPartial = $item->sisa_tagihan < $item->jumlah;
                                                 @endphp
-                                                <tr style="background: #fef2f2;">
+                                                <tr class="arrears-unavailable-row">
                                                     <td data-label="KETERANGAN">
                                                         <div class="fw-bold text-danger">
                                                             {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
@@ -245,8 +228,8 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Keterangan</th>
-                                                <th class="text-end text-nowrap" style="width: 160px;">Jumlah Asli</th>
-                                                <th class="text-center" style="width: 180px;">Status</th>
+                                                <th class="text-end text-nowrap tagihan-col-original-amount">Jumlah Asli</th>
+                                                <th class="text-center tagihan-col-status-lg">Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -291,13 +274,13 @@
                                 <table class="table table-hover align-middle">
                                     <thead class="table-light">
                                         <tr>
-                                            <th style="width: 50px;" class="text-center">
+                                            <th class="text-center tagihan-col-select">
                                                 Pilih
                                             </th>
                                             <th>Keterangan</th>
-                                            <th class="text-nowrap" style="width: 150px;">Jatuh Tempo</th>
-                                            <th class="text-end text-nowrap" style="width: 150px;">Tagihan</th>
-                                            <th class="text-center" style="width: 100px;">Status</th>
+                                            <th class="text-nowrap tagihan-col-date">Jatuh Tempo</th>
+                                            <th class="text-end text-nowrap tagihan-col-amount">Tagihan</th>
+                                            <th class="text-center tagihan-col-status-xs">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -323,7 +306,7 @@
                                                         {{ $item->keterangan ?: ucwords(str_replace('_', ' ', $item->jenis_tagihan)) }}
                                                     </div>
                                                     @if($item->tagihan_asal_id && $item->tagihanAsal)
-                                                        <span class="badge bg-label-warning text-warning mt-1" style="font-size: 0.7rem;">
+                                                        <span class="badge bg-label-warning text-warning mt-1 tagihan-badge-sm">
                                                             <i class="fas fa-exchange-alt me-1"></i>
                                                             Tunggakan dari TA {{ $item->tagihanAsal->tahunAjaran->nama_tahun_ajaran ?? '-' }}
                                                         </span>
@@ -332,8 +315,7 @@
                                                 <td data-label="JATUH TEMPO" class="text-end text-md-start text-nowrap">
                                                     <div>{{ \Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->format('d M Y') }}</div>
                                                     @if(\Carbon\Carbon::parse($item->tanggal_jatuh_tempo)->isPast() && !$isPaid)
-                                                        <span class="badge bg-label-danger text-danger"
-                                                            style="font-size: 0.7rem;">Terlambat</span>
+                                                        <span class="badge bg-label-danger text-danger tagihan-badge-sm">Terlambat</span>
                                                     @endif
                                                 </td>
                                                 <td data-label="TAGIHAN" class="text-end">
@@ -365,8 +347,7 @@
         </div>
 
         <!-- Sticky Footer for Bulk Payment -->
-        <div id="bulkPaymentFooter" class="fixed-bottom bg-white border-top shadow-lg p-3 d-none"
-            style="z-index: 1030; box-shadow: 0 -0.5rem 1rem rgba(0,0,0,0.15)!important;">
+        <div id="bulkPaymentFooter" class="fixed-bottom bg-white border-top shadow-lg p-3 d-none bulk-payment-footer">
             <div class="container-xxl">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -405,8 +386,7 @@
 
                             <div class="mb-4">
                                 <h6 class="fw-bold mb-3 border-bottom pb-2">Rincian Pembayaran</h6>
-                                <ul class="list-group list-group-flush mb-3" id="paymentSummaryList"
-                                    style="max-height: 200px; overflow-y: auto;">
+                                <ul class="list-group list-group-flush mb-3 payment-summary-list" id="paymentSummaryList">
                                     <!-- filled by JS -->
                                 </ul>
                                 <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded fw-bold">
@@ -432,7 +412,7 @@
                                         </div>
                                     @endif
 
-                                    {{-- Transfer Option --}}
+                                    {{-- Direct Transfer Option --}}
                                     @if($infoPembayaran->hasRekeningBank())
                                         <div class="col-md-4">
                                             <input type="radio" class="btn-check" name="metode_pembayaran" id="methodTransfer"
@@ -441,7 +421,7 @@
                                                 class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3"
                                                 for="methodTransfer">
                                                 <i class="fas fa-university fa-2x mb-2"></i>
-                                                <span class="small fw-bold">Transfer Bank</span>
+                                                <span class="small fw-bold">Direct Transfer</span>
                                             </label>
                                         </div>
                                     @endif
@@ -453,8 +433,8 @@
                                             id="methodTunaiDummy" disabled>
                                         {{-- Styled label to look like others but keeping 'btn-outline-warning' style --}}
                                         <label
-                                            class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3"
-                                            for="methodTunaiDummy" style="opacity: 1; cursor: default;">
+                                            class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 cash-method-disabled"
+                                            for="methodTunaiDummy">
                                             <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
                                             <span class="small fw-bold">Tunai (Sekolah)</span>
                                         </label>
@@ -476,7 +456,7 @@
                             {{-- CONTENT SECTIONS --}}
 
                             {{-- 1. Midtrans Info --}}
-                            <div id="infoMidtrans" class="method-info" style="display: none;">
+                            <div id="infoMidtrans" class="method-info d-none">
                                 <div class="alert alert-primary d-flex align-items-center" role="alert">
                                     <i class="fas fa-info-circle me-2 text-primary"></i>
                                     <div class="small">
@@ -486,9 +466,9 @@
                                 </div>
                             </div>
 
-                            {{-- 2. Transfer Info --}}
+                            {{-- 2. Direct Transfer Info --}}
                             @if($infoPembayaran->hasRekeningBank())
-                                <div id="infoTransfer" class="method-info" style="display: none;">
+                                <div id="infoTransfer" class="method-info d-none">
                                     <div class="card bg-label-info border border-info mb-3">
                                         <div class="card-body">
                                             <h6 class="fw-bold text-info mb-3"><i class="fas fa-university me-2"></i>Rekening
@@ -505,7 +485,8 @@
                                                     <span
                                                         class="fs-5 font-monospace text-primary me-2 fw-bold">{{ $infoPembayaran->rekening_bank }}</span>
                                                     <button type="button" class="btn btn-xs btn-outline-primary rounded-pill"
-                                                        onclick="copyRekening(event, '{{ $infoPembayaran->rekening_bank }}', this)"
+                                                        data-copy-rekening
+                                                        data-copy-text="{{ $infoPembayaran->rekening_bank }}"
                                                         data-bs-toggle="tooltip" data-bs-placement="top"
                                                         title="Salin No. Rekening">
                                                         <i class="fas fa-copy me-1"></i> Salin
@@ -523,11 +504,11 @@
 
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">
-                                            Bukti Transfer <span class="text-danger">*</span>
+                                            Bukti Direct Transfer <span class="text-danger">*</span>
                                         </label>
                                         <input type="file" name="bukti_bayar" id="bulkBuktiInput" class="form-control"
                                             accept="image/*">
-                                        <small class="text-muted">Upload foto bukti transfer total nominal (Max: 10MB).</small>
+                                        <small class="text-muted">Upload foto bukti Direct Transfer total nominal (Max: 10MB).</small>
                                     </div>
                                 </div>
                             @endif
@@ -636,7 +617,7 @@
                                             @if($bayar->metode_pembayaran == 'tunai')
                                                 <span class="badge bg-label-secondary"><i class="fas fa-money-bill-wave me-1"></i> Tunai</span>
                                             @elseif($bayar->metode_pembayaran == 'transfer')
-                                                <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Transfer</span>
+                                                <span class="badge bg-label-info"><i class="fas fa-university me-1"></i> Direct Transfer</span>
                                             @elseif($bayar->metode_pembayaran == 'midtrans')
                                                 <span class="badge bg-label-primary"><i class="fas fa-credit-card me-1"></i> Digital</span>
                                             @endif
@@ -659,22 +640,22 @@
                                             @endif
                                         </td>
                                         <td data-label="AKSI" class="text-center">
-                                            <div class="d-flex justify-content-center justify-content-md-center gap-2" style="width: 100%;">
+                                            <div class="d-flex justify-content-center justify-content-md-center gap-2 payment-history-actions">
                                                 @if($canContinue)
                                                     <form action="{{ route('orang-tua.pembayaran.continue', $bayar->id) }}" method="POST">
                                                         @csrf
-                                                        <button type="submit" class="btn btn-sm btn-primary" title="Lanjutkan Pembayaran" style="width: 100%;">
+                                                        <button type="submit" class="btn btn-sm btn-primary payment-history-action" title="Lanjutkan Pembayaran">
                                                             <i class="fas fa-credit-card"></i> Pay
                                                         </button>
                                                     </form>
                                                 @endif
 
-                                                {{-- Tombol Invoice untuk Non-Tunai (Transfer/Midtrans) --}}
+                                                {{-- Tombol Invoice untuk Non-Tunai (Direct Transfer/Midtrans) --}}
                                                 @if($bayar->metode_pembayaran != 'tunai')
-                                                    <a href="{{ route('orang-tua.pembayaran.invoice', $bayar->id) }}" 
-                                                       target="_blank" 
-                                                       class="btn btn-sm btn-outline-secondary" 
-                                                       title="Lihat Invoice" style="width: 100%;">
+                                                    <a href="{{ route('orang-tua.pembayaran.invoice', $bayar->id) }}"
+                                                       target="_blank"
+                                                       class="btn btn-sm btn-outline-secondary payment-history-action"
+                                                       title="Lihat Invoice">
                                                         <i class="fas fa-file-invoice"></i> Invoice
                                                     </a>
                                                 @endif
@@ -692,293 +673,6 @@
     </div>
 @endsection
 
-@section('styles')
-    <style>
-        /* Prevent modal flickering */
-        .modal {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .modal.fade {
-            transition: opacity 0.15s linear;
-        }
-
-        .modal.fade:not(.show) {
-            opacity: 0;
-        }
-
-        .payment-input:disabled {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            color: #adb5bd;
-        }
-
-        /* Responsive Table */
-        @media (max-width: 768px) {
-            .table-responsive { border: none; }
-            .table thead { display: none; }
-            .table tbody tr {
-                display: block; margin-bottom: 1rem; background: #fff;
-                border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); padding: 10px; border: 1px solid #e5e7eb;
-            }
-            .table tbody td {
-                display: flex; justify-content: space-between; align-items: center;
-                border: none; padding: 8px 0; border-bottom: 1px dashed #e5e7eb; text-align: right;
-            }
-            .table tbody td > div { text-align: right; }
-            .table tbody td:last-child {
-                border-bottom: none; justify-content: center; gap: 10px; padding-top: 15px;
-            }
-            .table tbody td::before {
-                content: attr(data-label); font-weight: 600; color: #64748b; font-size: 0.75rem; text-transform: uppercase; margin-right: 15px; text-align: left; flex-shrink: 0; width: 40%;
-            }
-            
-            /* Bulk Payment Footer Adjustments */
-            #bulkPaymentFooter h4 { font-size: 1.25rem; }
-            #bulkPaymentFooter .btn { padding: 8px 16px; font-size: 0.9rem; }
-        }
-
-        /* Offset footer agar tidak tertutup sidebar di desktop */
-        @media (min-width: 1200px) {
-            #bulkPaymentFooter {
-                margin-left: 260px;
-            }
-        }
-    </style>
-@endsection
-
 @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            // -- ELEMENT SELECTORS --
-            const checkAllGroups = document.querySelectorAll('.select-all-group');
-            const itemCheckboxes = document.querySelectorAll('.item-checkbox');
-            const paymentInputs = document.querySelectorAll('.payment-input');
-            const footer = document.getElementById('bulkPaymentFooter');
-            const selectedCountSpan = document.getElementById('selectedCount');
-            const grandTotalDisplay = document.getElementById('grandTotalDisplay');
-            const btnPaySelected = document.getElementById('btnPaySelected');
-            const modalBulkPay = document.getElementById('modalBulkPay');
-            const bulkModalBs = new bootstrap.Modal(modalBulkPay);
-
-            // -- STATE --
-            let totalBayar = 0;
-
-            // -- FUNCTIONS --
-
-            function formatRupiah(num) {
-                return 'Rp ' + num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-            }
-
-            function parseRupiah(str) {
-                return parseInt(str.replace(/[^0-9]/g, '')) || 0;
-            }
-
-            function updateTotal() {
-                let count = 0;
-                let total = 0;
-
-                itemCheckboxes.forEach(cb => {
-                    if (cb.checked) {
-                        count++;
-                        total += parseInt(cb.dataset.amount) || 0;
-                    }
-                });
-
-                totalBayar = total;
-                selectedCountSpan.textContent = count;
-                grandTotalDisplay.textContent = formatRupiah(total);
-
-                if (count > 0) {
-                    footer.classList.remove('d-none');
-                } else {
-                    footer.classList.add('d-none');
-                }
-            }
-
-            // -- EVENT LISTENERS --
-
-            // 1. Group Select All
-            checkAllGroups.forEach(cb => {
-                cb.addEventListener('change', function () {
-                    const group = this.dataset.group;
-                    const targets = document.querySelectorAll('.item-checkbox.group-' + group);
-                    targets.forEach(t => {
-                        t.checked = this.checked;
-                        // toggleInput removed
-                    });
-                    updateTotal();
-                });
-            });
-
-            // 2. Individual Checkbox
-            itemCheckboxes.forEach(cb => {
-                cb.addEventListener('change', function () {
-                    const groupClass = Array.from(this.classList).find(c => c.startsWith('group-'));
-                    if (groupClass) {
-                        const group = groupClass.replace('group-', '');
-                        const selectAllVal = document.querySelector(`.select-all-group[data-group="${group}"]`);
-                        if (!this.checked && selectAllVal) selectAllVal.checked = false;
-                    }
-                    updateTotal();
-                });
-            });
-
-            // 3. Toggle Input State (REMOVED)
-            // 4. Input Formatting & Live Total (REMOVED)
-
-            // 5. Pay Button -> Show Modal
-            btnPaySelected.addEventListener('click', function () {
-                const summaryList = document.getElementById('paymentSummaryList');
-                const container = document.getElementById('hiddenInputsContainer');
-                const totalDisplay = document.getElementById('modalTotalDisplay');
-                const inputTotal = document.getElementById('inputTotalBayar');
-
-                summaryList.innerHTML = '';
-                container.innerHTML = '';
-
-                let validItems = 0;
-
-                itemCheckboxes.forEach((cb, index) => {
-                    if (cb.checked) {
-                        const amount = parseInt(cb.dataset.amount);
-
-                        if (amount > 0) {
-                            validItems++;
-
-                            // Add visual list item
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item d-flex justify-content-between align-items-center px-0';
-                            li.innerHTML = `
-                                                    <span>${cb.dataset.label}</span>
-                                                    <span class="fw-semibold">Rp ${amount.toLocaleString('id-ID')}</span>
-                                                `;
-                            summaryList.appendChild(li);
-
-                            // Add hidden inputs for form submission
-                            // items[index][tagihan_id]
-                            const inputId = document.createElement('input');
-                            inputId.type = 'hidden';
-                            inputId.name = `items[${index}][tagihan_id]`;
-                            inputId.value = cb.value;
-                            container.appendChild(inputId);
-
-                            // items[index][jumlah_bayar]
-                            const inputAmt = document.createElement('input');
-                            inputAmt.type = 'hidden';
-                            inputAmt.name = `items[${index}][jumlah_bayar]`;
-                            inputAmt.value = amount;
-                            container.appendChild(inputAmt);
-                        }
-                    }
-                });
-
-                if (validItems === 0) {
-                    alert('Silakan pilih tagihan yang akan dibayar.');
-                    return;
-                }
-
-                totalDisplay.textContent = formatRupiah(totalBayar);
-                inputTotal.value = totalBayar;
-
-                bulkModalBs.show();
-            });
-
-            // 6. Payment Method Logic (Toggle sections)
-            const methodRadios = document.querySelectorAll('input[name="metode_pembayaran"]');
-            const infoSections = document.querySelectorAll('.method-info');
-            const btnSubmit = document.getElementById('btnSubmitBulk');
-            const buktiInput = document.getElementById('bulkBuktiInput');
-
-            function handleMethodChange() {
-                // Hide all info sections first
-                infoSections.forEach(el => el.style.display = 'none');
-
-                // Reset required for file input
-                if (buktiInput) buktiInput.required = false;
-
-                // Create a clear state
-                let selectedValue = null;
-                methodRadios.forEach(radio => {
-                    if (radio.checked) selectedValue = radio.value;
-                });
-
-                if (selectedValue === 'midtrans') {
-                    document.getElementById('infoMidtrans').style.display = 'block';
-                    btnSubmit.classList.remove('d-none');
-                } else if (selectedValue === 'transfer') {
-                    const transferDiv = document.getElementById('infoTransfer');
-                    if (transferDiv) transferDiv.style.display = 'block';
-                    if (buktiInput) buktiInput.required = true;
-                    btnSubmit.classList.remove('d-none');
-                }
-
-                // Tunai logic removed from here as it is no longer distinct radio
-            }
-
-            methodRadios.forEach(radio => {
-                radio.addEventListener('change', handleMethodChange);
-            });
-
-            // File Size Validation
-            if (buktiInput) {
-                buktiInput.addEventListener('change', function() {
-                    if (this.files && this.files[0]) {
-                        const fileSize = this.files[0].size / 1024 / 1024; // in MB
-                        if (fileSize > 10) {
-                            alert('Ukuran file terlalu besar! Maksimal 10MB. File Anda: ' + fileSize.toFixed(2) + 'MB');
-                            this.value = ''; // Clear input
-                        }
-                    }
-                });
-            }
-
-            // Copy Helper
-            window.copyRekening = function (event, text, btn) {
-                // Prevent form submission and event bubbling
-                event.preventDefault();
-                event.stopPropagation();
-
-                // Create temporary input element (input works better than textarea in some browsers)
-                const tempInput = document.createElement('input');
-                tempInput.setAttribute('type', 'text');
-                tempInput.setAttribute('value', text);
-                tempInput.style.cssText = 'position:absolute;left:-9999px;top:-9999px;opacity:0;';
-
-                // Append to modal body for better focus handling
-                const modalBody = btn.closest('.modal-body') || document.body;
-                modalBody.appendChild(tempInput);
-
-                // Select and copy
-                tempInput.select();
-                tempInput.setSelectionRange(0, 99999); // For mobile devices
-
-                let success = false;
-                try {
-                    success = document.execCommand('copy');
-                } catch (err) {
-                    console.error('Copy failed:', err);
-                }
-
-                // Remove temporary element
-                modalBody.removeChild(tempInput);
-
-                // Show feedback
-                if (success) {
-                    const originalHtml = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i>';
-                    btn.classList.remove('btn-outline-primary');
-                    btn.classList.add('btn-success');
-                    setTimeout(function () {
-                        btn.innerHTML = originalHtml;
-                        btn.classList.remove('btn-success');
-                        btn.classList.add('btn-outline-primary');
-                    }, 2000);
-                }
-                return false;
-            };
-        });
-    </script>
+    @vite(['resources/js/orang-tua/tagihan/index.js'])
 @endsection

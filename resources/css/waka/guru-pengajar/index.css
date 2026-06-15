@@ -1,0 +1,369 @@
+/* ============================================
+   Waka - Guru Pengajar Index
+   Page-scoped CSS (Bootstrap-based, no Tailwind)
+   Matches minimalist wali-kelas design system
+   ============================================ */
+
+:root {
+    --gp-primary: #4361ee;
+    --gp-success: #10b981;
+    --gp-warning: #f59e0b;
+    --gp-danger: #ef4444;
+    --gp-info: #06b6d4;
+    --gp-purple: #8b5cf6;
+    --gp-teal: #14b8a6;
+    --gp-surface: #ffffff;
+    --gp-bg: #f8fafc;
+    --gp-border: #e2e8f0;
+    --gp-text: #1e293b;
+    --gp-muted: #64748b;
+    --gp-radius: 12px;
+}
+
+/* Card */
+.gp-card {
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.gp-card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--gp-border);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.gp-card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--gp-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gp-card-subtitle {
+    font-size: 0.8rem;
+    color: var(--gp-muted);
+    margin-top: 0.25rem;
+}
+
+/* Stat Cards */
+.stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-widget {
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--gp-surface);
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease;
+}
+
+.stat-widget:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.stat-icon-primary {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.stat-icon-success {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.stat-icon-teal {
+    background: #f0fdfa;
+    color: #14b8a6;
+}
+
+.stat-icon-purple {
+    background: #f5f3ff;
+    color: #8b5cf6;
+}
+
+.title-icon-teal {
+    color: #14b8a6;
+}
+
+.rounded-md {
+    border-radius: 8px;
+}
+
+.stat-details { flex-grow: 1; }
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gp-text);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gp-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-desc {
+    font-size: 0.7rem;
+    color: var(--gp-muted);
+    margin-top: 0.2rem;
+}
+
+/* Filter */
+.filter-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--gp-bg);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--gp-border);
+}
+
+.search-box {
+    position: relative;
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.45rem 1rem 0.45rem 2.2rem;
+    border: 1px solid var(--gp-border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gp-muted);
+}
+
+.filter-select {
+    min-width: 130px;
+    max-width: 180px;
+    font-size: 0.85rem;
+    padding: 0.45rem 2rem 0.45rem 0.75rem;
+    border-color: var(--gp-border);
+    border-radius: 8px;
+}
+
+/* Table */
+.table-clean { margin: 0; }
+
+.table-clean th {
+    background: var(--gp-bg);
+    border-bottom: 1px solid var(--gp-border);
+    color: var(--gp-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.5rem;
+}
+
+.table-clean td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gp-border);
+    color: var(--gp-text);
+    font-size: 0.9rem;
+}
+
+.table-clean tbody tr:hover { background-color: #f8fafc; }
+.table-clean tbody tr:last-child td { border-bottom: none; }
+
+/* Guru Info */
+.guru-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.guru-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(20, 184, 166, 0.15);
+    color: var(--gp-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.guru-details { display: flex; flex-direction: column; }
+.guru-name { font-weight: 600; color: var(--gp-text); font-size: 0.9rem; }
+.guru-nip { font-size: 0.75rem; color: var(--gp-muted); }
+
+/* Assignment Chips */
+.assignment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 350px;
+}
+
+.assignment-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--gp-bg);
+    border: 1px solid var(--gp-border);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--gp-text);
+}
+
+.assignment-chip .mapel { font-weight: 600; color: var(--gp-teal); }
+.assignment-chip .kelas { color: var(--gp-muted); }
+
+.no-assignment {
+    color: var(--gp-muted);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.more-assignments {
+    font-size: 0.7rem;
+    color: var(--gp-muted);
+    background: var(--gp-bg);
+    border: 1px solid var(--gp-border);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Action buttons */
+.action-btns .btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--gp-border);
+}
+
+.empty-state h3 {
+    font-size: 1.1rem;
+    color: var(--gp-muted);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--gp-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stat-row { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .filter-select { flex-grow: 1; max-width: unset; }
+}
+
+@media (max-width: 768px) {
+    .stat-row { grid-template-columns: 1fr; }
+    .gp-card-header { flex-direction: column; align-items: stretch; }
+    .filter-wrapper { flex-direction: column; align-items: stretch; }
+    .header-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .header-actions .btn { flex-grow: 1; justify-content: center; font-size: 0.8rem; }
+
+    /* Mobile Card Table */
+    .table-clean thead { display: none; }
+    .table-clean tbody tr {
+        display: flex;
+        flex-direction: column;
+        border-bottom: 2px solid var(--gp-border);
+        padding: 0;
+        background: #fff;
+    }
+    .table-clean tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 1rem;
+    }
+    .table-clean tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--gp-muted);
+        text-transform: uppercase;
+    }
+    .table-clean tbody td.mobile-card-head {
+        background: var(--gp-bg);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+    .table-clean tbody td.mobile-card-head::before { display: none; }
+    .table-clean tbody td.mobile-card-full {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .table-clean tbody td.mobile-card-full::before { min-width: unset; }
+    .td-actions {
+        margin-top: 0;
+        padding: 1rem !important;
+        justify-content: flex-end !important;
+        background: #f8fafc;
+    }
+    .assignment-list { max-width: 100% !important; }
+}

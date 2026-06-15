@@ -9,7 +9,7 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('css/admin/mata-pelajaran.css') }}">
+    @vite(['resources/css/admin/mata-pelajaran/index.css'])
 @endsection
 
 @section('content')
@@ -17,31 +17,31 @@
     <!-- Stats Chips -->
     <div class="stat-scroll">
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #4361ee;">Total</div>
+            <div class="stat-chip-label stat-label-total">Total</div>
             <div class="stat-chip-value">{{ $stats['total'] }}</div>
         </div>
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #64748b;">KB</div>
+            <div class="stat-chip-label stat-label-kb">KB</div>
             <div class="stat-chip-value">{{ $stats['kb'] }}</div>
         </div>
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #92400e;">TKA</div>
+            <div class="stat-chip-label stat-label-tka">TKA</div>
             <div class="stat-chip-value">{{ $stats['tka'] }}</div>
         </div>
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #991b1b;">TKB</div>
+            <div class="stat-chip-label stat-label-tkb">TKB</div>
             <div class="stat-chip-value">{{ $stats['tkb'] }}</div>
         </div>
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #166534;">SD</div>
+            <div class="stat-chip-label stat-label-sd">SD</div>
             <div class="stat-chip-value">{{ $stats['sd'] }}</div>
         </div>
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #075985;">SMP</div>
+            <div class="stat-chip-label stat-label-smp">SMP</div>
             <div class="stat-chip-value">{{ $stats['smp'] }}</div>
         </div>
         <div class="stat-chip">
-            <div class="stat-chip-label" style="color: #7c3aed;">SMA</div>
+            <div class="stat-chip-label stat-label-sma">SMA</div>
             <div class="stat-chip-value">{{ $stats['sma'] }}</div>
         </div>
     </div>
@@ -50,16 +50,15 @@
     <div class="mp-card">
         <div class="mp-card-header">
             <h5 class="mp-card-title">
-                <i class="fas fa-book" style="color: #4361ee;"></i> Daftar Mata Pelajaran
+                <i class="fas fa-book mp-card-title-icon"></i> Daftar Mata Pelajaran
                 @if($jenjang)
                     <span class="badge bg-primary ms-2">{{ $jenjang }}</span>
                 @endif
             </h5>
             <div class="header-actions d-flex gap-2">
-                <button type="button" class="btn btn-secondary text-white btn-sm d-flex align-items-center gap-1"
-                    onclick="window.open('{{ route('admin.mata-pelajaran.print', request()->only('jenjang')) }}', '_blank')">
+                <a href="{{ route('admin.mata-pelajaran.print', request()->only('jenjang')) }}" target="_blank" class="btn btn-secondary text-white btn-sm d-flex align-items-center gap-1">
                     <i class="fas fa-print"></i> <span class="d-none d-sm-inline">Cetak</span>
-                </button>
+                </a>
                 <a href="{{ route('admin.mata-pelajaran.import') }}" class="btn btn-success btn-sm d-flex align-items-center gap-1 text-white">
                     <i class="fas fa-file-import"></i> <span class="d-none d-sm-inline">Import</span>
                 </a>
@@ -73,7 +72,7 @@
         <form method="GET" class="mb-0">
             <div class="filter-wrapper">
                 <span class="text-muted small fw-semibold">Filter Jenjang:</span>
-                <select name="jenjang" class="form-select filter-select" onchange="this.form.submit()">
+                <select name="jenjang" class="form-select filter-select" data-auto-submit>
                     <option value="">Semua Jenjang</option>
                     <option value="KB" {{ $jenjang == 'KB' ? 'selected' : '' }}>KB</option>
                     <option value="TKA" {{ $jenjang == 'TKA' ? 'selected' : '' }}>TKA</option>
@@ -83,7 +82,7 @@
                     <option value="SMA" {{ $jenjang == 'SMA' ? 'selected' : '' }}>SMA</option>
                 </select>
                 @if($jenjang)
-                    <a href="{{ route('admin.mata-pelajaran.index') }}" class="btn btn-outline-danger btn-sm px-3" style="border-radius: 8px;">
+                    <a href="{{ route('admin.mata-pelajaran.index') }}" class="btn btn-outline-danger btn-sm px-3 filter-reset-btn">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -183,31 +182,31 @@
     @foreach($mataPelajaranList as $mapel)
         <div class="modal fade" id="deleteModal{{ $mapel->id }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-sm">
-                <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+                <div class="modal-content border-0 shadow delete-modal-content">
                     <div class="modal-header border-bottom-0 pb-0">
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center pt-0 pb-4">
                         <div class="mb-3">
-                            <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <div class="rounded-circle bg-label-danger d-inline-flex align-items-center justify-content-center delete-modal-icon">
                                 <i class="fas fa-trash fs-3 text-danger"></i>
                             </div>
                         </div>
                         <h5 class="fw-bold mb-2">Hapus Mata Pelajaran?</h5>
-                        <p class="text-muted mb-1" style="font-size: 0.85rem;">
+                        <p class="text-muted mb-1 delete-modal-subtitle">
                             <strong>{{ $mapel->nama_mapel }}</strong>
                         </p>
-                        <p class="text-muted mb-3" style="font-size: 0.8rem;">
-                            @if($mapel->kode_mapel) Kode: {{ $mapel->kode_mapel }} â€¢ @endif Jenjang: {{ $mapel->jenjang }}
+                        <p class="text-muted mb-3 delete-modal-meta">
+                            @if($mapel->kode_mapel) Kode: {{ $mapel->kode_mapel }} &bull; @endif Jenjang: {{ $mapel->jenjang }}
                         </p>
                         <p class="text-danger small mb-0"><i class="fas fa-info-circle me-1"></i> Tindakan ini tidak dapat dibatalkan!</p>
 
                         <div class="d-flex justify-content-center gap-2 mt-4">
-                            <button type="button" class="btn btn-secondary fw-medium px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Batal</button>
+                            <button type="button" class="btn btn-secondary fw-medium px-4 delete-modal-action" data-bs-dismiss="modal">Batal</button>
                             <form action="{{ route('admin.mata-pelajaran.destroy', $mapel) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger fw-medium px-4 d-flex align-items-center gap-2 text-white" style="border-radius: 8px;">
+                                <button type="submit" class="btn btn-danger fw-medium px-4 d-flex align-items-center gap-2 text-white delete-modal-action">
                                     <i class="fas fa-trash"></i> Hapus
                                 </button>
                             </form>
@@ -217,4 +216,8 @@
             </div>
         </div>
     @endforeach
+@endsection
+
+@section('scripts')
+    @vite(['resources/js/admin/mata-pelajaran/index.js'])
 @endsection

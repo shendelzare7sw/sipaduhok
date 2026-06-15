@@ -7,6 +7,10 @@
     @include('ketua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/ketua/promotion/approval.css'])
+@endsection
+
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Ketua PKBM /</span> Approval Dispensasi</h4>
@@ -15,10 +19,10 @@
         <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
             <h5 class="mb-0 fs-6">Permintaan Izin Khusus (Dispensasi)</h5>
             <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-success btn-sm" id="btnBulkApprove" style="display: none !important;" data-bs-toggle="modal" data-bs-target="#modalBulkApprove">
+                <button type="button" class="btn btn-success btn-sm approval-bulk-action is-hidden" id="btnBulkApprove" data-bs-toggle="modal" data-bs-target="#modalBulkApprove">
                     <i class='bx bx-check'></i> <span class="d-none d-sm-inline">Setujui</span> Terpilih (<span id="approveCount">0</span>)
                 </button>
-                <button type="button" class="btn btn-danger btn-sm" id="btnBulkReject" style="display: none !important;" data-bs-toggle="modal" data-bs-target="#modalBulkReject">
+                <button type="button" class="btn btn-danger btn-sm approval-bulk-action is-hidden" id="btnBulkReject" data-bs-toggle="modal" data-bs-target="#modalBulkReject">
                     <i class='bx bx-x'></i> <span class="d-none d-sm-inline">Tolak</span> Terpilih (<span id="rejectCount">0</span>)
                 </button>
                 <a href="{{ route('ketua.promotion.approval.history') }}" class="btn btn-primary btn-sm">
@@ -30,7 +34,7 @@
             <table class="table table-sm align-middle mb-0">
                 <thead>
                     <tr>
-                        <th width="40" class="ps-3"><input type="checkbox" id="select-all" class="form-check-input" onclick="toggleSelectAll()"></th>
+                        <th width="40" class="ps-3"><input type="checkbox" id="select-all" class="form-check-input"></th>
                         <th>Siswa</th>
                         <th class="d-none d-md-table-cell">Kelas</th>
                         <th class="d-none d-lg-table-cell">Diajukan Oleh</th>
@@ -43,7 +47,7 @@
                     @forelse($requests as $req)
                     <tr>
                         <td class="ps-3">
-                            <input type="checkbox" class="form-check-input req-checkbox" value="{{ $req->id }}" onchange="updateSelectedCount()">
+                            <input type="checkbox" class="form-check-input req-checkbox" value="{{ $req->id }}">
                         </td>
                         <td>
                             <div class="fw-semibold">{{ $req->nama_siswa }}</div>
@@ -52,7 +56,7 @@
                         </td>
                         <td class="d-none d-md-table-cell">{{ $req->nama_kelas }}</td>
                         <td class="d-none d-lg-table-cell">{{ $req->pengaju }}</td>
-                        <td class="d-none d-xl-table-cell" style="max-width: 220px; white-space: normal;">
+                        <td class="d-none d-xl-table-cell approval-reason-cell">
                             <small>{{ \Illuminate\Support\Str::limit($req->alasan_pengajuan, 80) }}</small>
                         </td>
                         <td class="d-none d-sm-table-cell">
@@ -204,50 +208,5 @@
 @endsection
 
 @section('scripts')
-<script>
-function toggleSelectAll() {
-    const isChecked = document.getElementById('select-all').checked;
-    document.querySelectorAll('.req-checkbox').forEach(cb => cb.checked = isChecked);
-    updateSelectedCount();
-}
-
-function updateSelectedCount() {
-    const checked = document.querySelectorAll('.req-checkbox:checked');
-    const all = document.querySelectorAll('.req-checkbox');
-    const count = checked.length;
-
-    document.getElementById('approveCount').textContent = count;
-    document.getElementById('rejectCount').textContent = count;
-
-    const btnApprove = document.getElementById('btnBulkApprove');
-    const btnReject = document.getElementById('btnBulkReject');
-    btnApprove.style.display = count > 0 ? 'inline-flex' : 'none';
-    btnReject.style.display = count > 0 ? 'inline-flex' : 'none';
-
-    document.getElementById('select-all').indeterminate = count > 0 && count < all.length;
-    document.getElementById('select-all').checked = all.length > 0 && count === all.length;
-}
-
-function injectIds(containerId, countId) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    const checked = document.querySelectorAll('.req-checkbox:checked');
-    document.getElementById(countId).textContent = checked.length;
-    checked.forEach(cb => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'ids[]';
-        input.value = cb.value;
-        container.appendChild(input);
-    });
-}
-
-document.getElementById('modalBulkApprove').addEventListener('show.bs.modal', function () {
-    injectIds('bulk-approve-ids', 'modalApproveCount');
-});
-
-document.getElementById('modalBulkReject').addEventListener('show.bs.modal', function () {
-    injectIds('bulk-reject-ids', 'modalRejectCount');
-});
-</script>
+    @vite(['resources/js/ketua/promotion/approval.js'])
 @endsection

@@ -9,107 +9,16 @@
 @endsection
 
 @section('styles')
-@include('shared.siswa.styles')
-<style>
-    .subject-card {
-        background: #fff;
-        border: 1px solid var(--s-border);
-        border-radius: var(--s-radius);
-        box-shadow: 0 10px 24px rgba(15, 23, 42, .05);
-        overflow: hidden;
-        margin-bottom: 16px;
-    }
-
-    .subject-header {
-        padding: 16px 18px;
-        background: var(--s-bg);
-        border-bottom: 1px solid var(--s-border);
-    }
-
-    .score-grid {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 12px;
-    }
-
-    .mini-stat-card {
-        min-height: 78px;
-        padding: 13px;
-        border-radius: 10px;
-        border: 1px solid #e5edf7;
-        background: #f8fafc;
-    }
-
-    .mini-stat-label {
-        color: var(--s-muted);
-        font-size: 10px;
-        font-weight: 900;
-        line-height: 1.25;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        margin-bottom: 6px;
-    }
-
-    .mini-stat-val {
-        color: var(--s-text);
-        font-size: 20px;
-        font-weight: 900;
-        line-height: 1.1;
-    }
-
-    .predicate-bar {
-        width: 100%;
-        padding: 10px 12px;
-        background: #fff;
-        border-radius: 10px;
-        border: 1px solid var(--s-border);
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .student-summary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 16px;
-    }
-
-    @media (max-width: 991.98px) {
-        .score-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 767.98px) {
-        .student-summary {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
-        .student-summary form,
-        .student-summary select {
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .score-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
+    @vite(['resources/css/siswa/sia/penilaian/index.css', 'resources/js/siswa/sia/penilaian/index.js'])
 @endsection
 
 @section('content')
-<div class="s-page" style="max-width: 1040px;">
+<div class="s-page s-page-narrow">
 
     <div class="s-card mb-4">
         <div class="student-summary">
             <div class="d-flex align-items-center">
-                <div class="s-stat-icon me-3" style="background: rgba(67,97,238,.12); color: var(--s-primary);">
+                <div class="s-stat-icon s-stat-icon-primary me-3">
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div>
@@ -122,7 +31,7 @@
             </div>
 
             <form method="GET" action="">
-                <select name="semester" class="form-select bg-light fw-bold text-primary" style="min-width: 160px;" onchange="this.form.submit()">
+                <select name="semester" class="form-select bg-light fw-bold text-primary semester-select" data-auto-submit>
                     <option value="ganjil" {{ $semester == 'ganjil' ? 'selected' : '' }}>Semester Ganjil</option>
                     <option value="genap" {{ $semester == 'genap' ? 'selected' : '' }}>Semester Genap</option>
                 </select>
@@ -150,31 +59,31 @@
                 <div>
                     <div class="mini-stat-card">
                         <div class="mini-stat-label">Rata Tugas (10%)</div>
-                        <div class="mini-stat-val" style="color: var(--s-primary);">{{ $nilai->rata_tugas ? number_format($nilai->rata_tugas, 1) : '-' }}</div>
+                        <div class="mini-stat-val mini-stat-primary">{{ $nilai->rata_tugas ? number_format($nilai->rata_tugas, 1) : '-' }}</div>
                     </div>
                 </div>
                 <div>
                     <div class="mini-stat-card">
                         <div class="mini-stat-label">Rata Latihan (10%)</div>
-                        <div class="mini-stat-val" style="color: var(--s-info);">{{ $nilai->rata_latihan ? number_format($nilai->rata_latihan, 1) : '-' }}</div>
+                        <div class="mini-stat-val mini-stat-info">{{ $nilai->rata_latihan ? number_format($nilai->rata_latihan, 1) : '-' }}</div>
                     </div>
                 </div>
                 <div>
                     <div class="mini-stat-card">
                         <div class="mini-stat-label">Rata UH (20%)</div>
-                        <div class="mini-stat-val" style="color: var(--s-info);">{{ $nilai->rata_uh ? number_format($nilai->rata_uh, 1) : '-' }}</div>
+                        <div class="mini-stat-val mini-stat-info">{{ $nilai->rata_uh ? number_format($nilai->rata_uh, 1) : '-' }}</div>
                     </div>
                 </div>
                 <div>
                     <div class="mini-stat-card">
                         <div class="mini-stat-label">Nilai PTS (30%)</div>
-                        <div class="mini-stat-val" style="color: var(--s-warning);">{{ $nilai->pts ? number_format($nilai->pts, 1) : '-' }}</div>
+                        <div class="mini-stat-val mini-stat-warning">{{ $nilai->pts ? number_format($nilai->pts, 1) : '-' }}</div>
                     </div>
                 </div>
                 <div>
                     <div class="mini-stat-card">
                         <div class="mini-stat-label">Nilai PAS (30%)</div>
-                        <div class="mini-stat-val" style="color: var(--s-danger);">{{ $nilai->pas ? number_format($nilai->pas, 1) : '-' }}</div>
+                        <div class="mini-stat-val mini-stat-danger">{{ $nilai->pas ? number_format($nilai->pas, 1) : '-' }}</div>
                     </div>
                 </div>
             </div>
@@ -213,7 +122,7 @@
     </div>
     @endforelse
 
-    <div class="s-card mb-5" style="background: #f0f9ff;">
+    <div class="s-card mb-5 guide-card">
         <div class="card-body py-3">
             <h6 class="fw-bold text-info small mb-2"><i class="fas fa-info-circle me-1"></i>PANDUAN PENILAIAN</h6>
             <div class="row">

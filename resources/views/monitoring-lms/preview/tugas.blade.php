@@ -25,11 +25,11 @@
 
 @section('preview-content')
     <h2 class="preview-section-title">
-        <i class="fas fa-tasks me-2" style="color: #d97706;"></i>{{ $tugas->judul_tugas }}
+        <i class="fas fa-tasks me-2 preview-title-icon-tugas"></i>{{ $tugas->judul_tugas }}
     </h2>
 
     <div class="preview-meta-row">
-        <span class="badge" style="background: rgba(217, 119, 6, 0.1); color: #92400e; font-size: 0.7rem; padding: 4px 10px; border-radius: 999px; font-weight: 600;">
+        <span class="badge preview-type-badge preview-type-tugas">
             Tugas
         </span>
         @if($tugas->guru)
@@ -78,7 +78,7 @@
             @if($isImage)
                 <div class="inline-preview-box">
                     <img src="{{ $filePreviewUrl }}" alt="{{ $tugas->judul_tugas }}"
-                         style="max-width: 100%; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                         class="preview-media-image">
                 </div>
             @elseif($isPdf)
                 <div class="inline-preview-box">
@@ -88,7 +88,7 @@
                 </div>
             @elseif($isVideo)
                 <div class="inline-preview-box">
-                    <video controls style="width: 100%; max-height: 70vh; border-radius: 10px;">
+                    <video controls class="preview-media-video">
                         <source src="{{ $filePreviewUrl }}" type="video/{{ $extension }}">
                         Browser Anda tidak mendukung video.
                     </video>
@@ -96,7 +96,7 @@
             @else
                 <div class="preview-file-box">
                     <i class="fas fa-file-alt"></i>
-                    <div class="preview-section-body" style="margin-bottom: 12px;">
+                    <div class="preview-section-body preview-file-name">
                         {{ basename($tugas->file_tugas) }} ({{ strtoupper($extension) }})
                     </div>
                 </div>
@@ -104,11 +104,11 @@
 
             <div class="d-flex gap-2 flex-wrap mt-3">
                 <a href="{{ $filePreviewUrl }}" target="_blank" rel="noopener"
-                    class="btn btn-primary" style="border-radius: 8px;">
+                    class="btn btn-primary preview-action-button">
                     <i class="fas fa-external-link-alt me-1"></i>Buka di Tab Baru
                 </a>
                 <a href="{{ asset('storage/' . $tugas->file_tugas) }}" download
-                    class="btn btn-outline-primary" style="border-radius: 8px;">
+                    class="btn btn-outline-primary preview-action-button">
                     <i class="fas fa-download me-1"></i>Unduh
                 </a>
             </div>

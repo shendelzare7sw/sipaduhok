@@ -5,6 +5,7 @@
     $roleName = $isTeacher ? 'Guru' : 'Siswa';
     $badgeClass = $isTeacher ? 'badge-guru' : 'badge-siswa';
     $uniqueId = 'reply-' . $reply->id;
+    $thread = $diskusi ?? $forum ?? $thread ?? null;
 @endphp
 
 <div class="post {{ $level > 0 ? 'reply-node' : '' }}" data-author="{{ $reply->user->name }}"
@@ -23,7 +24,7 @@
                 <span class="author-name">{{ $reply->user->name }}</span>
                 <span class="badge-role {{ $badgeClass }}">{{ $roleName }}</span>
                 @if($isMe)
-                    <span class="badge bg-success" style="font-size: 10px;">Anda</span>
+                    <span class="badge bg-success own-reply-badge">Anda</span>
                 @endif
             </div>
             <div class="post-date">
@@ -42,16 +43,16 @@
             <div class="mt-3">
                 @if(Str::startsWith($reply->attachment_type, 'image/'))
                     <a href="{{ asset('storage/' . $reply->attachment) }}" target="_blank">
-                        <img src="{{ asset('storage/' . $reply->attachment) }}" alt="Attachment" class="img-fluid rounded"
-                            style="max-height: 300px;">
+                        <img src="{{ asset('storage/' . $reply->attachment) }}" alt="Attachment"
+                            class="img-fluid rounded forum-attachment-preview">
                     </a>
                 @elseif(Str::startsWith($reply->attachment_type, 'video/'))
-                    <video controls class="w-100 rounded" style="max-height: 300px;">
+                    <video controls class="w-100 rounded forum-attachment-preview">
                         <source src="{{ asset('storage/' . $reply->attachment) }}" type="{{ $reply->attachment_type }}">
                     </video>
                 @elseif(Str::endsWith(strtolower($reply->attachment), '.pdf'))
                     <iframe src="{{ asset('storage/' . $reply->attachment) }}" width="100%" height="400px"
-                        style="border: 1px solid #ddd; border-radius: 4px;"></iframe>
+                        class="forum-attachment-frame"></iframe>
                 @else
                     <div class="p-2 border rounded bg-light d-flex align-items-center">
                         <i class="fas fa-file me-2 text-secondary"></i>
@@ -70,12 +71,12 @@
 
         <!-- Actions (Edit/Delete) -->
         @if($isMe)
-            <div class="d-flex gap-2" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
-                <button class="action-icon text-primary" onclick="toggleEditForm('{{ $uniqueId }}')" title="Edit">
+            <div class="d-flex gap-2 post-actions">
+                <button class="action-icon text-primary" data-toggle-edit="{{ $uniqueId }}" title="Edit">
                     <i class="fas fa-pencil-alt"></i>
                 </button>
                 <button type="button" class="action-icon text-danger" title="Hapus"
-                    onclick="confirmDeleteReply('{{ route('siswa.lms.mapel.forum.reply.destroy', [$mataPelajaran->id, $diskusi->id, $reply->id]) }}')">
+                    data-delete-url="{{ route('siswa.lms.mapel.forum.reply.destroy', [$mataPelajaran->id, $thread->id, $reply->id]) }}">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -84,15 +85,15 @@
 
     <!-- Edit Form (Hidden) -->
     @if($isMe)
-        <div id="edit-{{ $uniqueId }}" class="edit-form" style="display: none;">
-            <form action="{{ route('siswa.lms.mapel.forum.reply.update', [$mataPelajaran->id, $diskusi->id, $reply->id]) }}"
+        <div id="edit-{{ $uniqueId }}" class="edit-form">
+            <form action="{{ route('siswa.lms.mapel.forum.reply.update', [$mataPelajaran->id, $thread->id, $reply->id]) }}"
                 method="POST">
                 @csrf @method('PUT')
-                <div class="reply-form" style="display: block;">
+                <div class="reply-form reply-form--visible">
                     <textarea name="isi" class="form-control" rows="3" required>{{ $reply->content }}</textarea>
                     <div class="d-flex justify-content-end gap-2 mt-2">
                         <button type="button" class="btn btn-secondary btn-sm"
-                            onclick="toggleEditForm('{{ $uniqueId }}')">Batal</button>
+                            data-toggle-edit="{{ $uniqueId }}">Batal</button>
                         <button type="submit" class="btn btn-primary btn-sm">Simpan Perubahan</button>
                     </div>
                 </div>
@@ -100,34 +101,34 @@
         </div>
     @endif
 
-    @if(!$diskusi->is_closed)
-        <button class="reply-btn" onclick="toggleReplyForm('form-{{ $uniqueId }}')">
+    @if($thread && !$thread->is_closed)
+        <button class="reply-btn" data-toggle-reply="form-{{ $uniqueId }}">
             <i class="fas fa-reply me-1"></i> REPLY
         </button>
     @endif
 
     <!-- Reply Form -->
     <div id="form-{{ $uniqueId }}" class="reply-form">
-        <form action="{{ route('siswa.lms.mapel.forum.reply', [$mataPelajaran->id, $diskusi->id]) }}" method="POST"
+        <form action="{{ route('siswa.lms.mapel.forum.reply', [$mataPelajaran->id, $thread->id]) }}" method="POST"
             enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="parent_id" value="{{ $reply->id }}">
             <textarea name="isi" placeholder="Tulis balasan Anda..." required></textarea>
 
-            <button type="button" class="attach-btn" onclick="toggleAttachArea(this)">
+            <button type="button" class="attach-btn" data-toggle-attach>
                 <i class="fas fa-paperclip"></i> Lampirkan File
             </button>
 
             <div class="file-upload-area">
                 <p class="mb-1"><i class="fas fa-cloud-upload-alt fa-2x text-muted"></i></p>
                 <p>Klik untuk memilih file</p>
-                <input type="file" name="attachment" style="display: block; width: 100%;">
+                <input type="file" name="attachment" class="forum-file-input">
             </div>
 
             <div class="d-flex gap-2 mt-3">
                 <button type="submit" class="btn btn-primary btn-sm px-4">Kirim Balasan</button>
                 <button type="button" class="btn btn-secondary btn-sm"
-                    onclick="toggleReplyForm('form-{{ $uniqueId }}')">Batal</button>
+                    data-toggle-reply="form-{{ $uniqueId }}">Batal</button>
             </div>
         </form>
     </div>

@@ -4,244 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Wali Kelas - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.5;
-            color: #000;
-            background: #fff;
-        }
-        
-        .container {
-            max-width: 210mm;
-            margin: 0 auto;
-            padding: 15mm;
-        }
-        
-        .header {
-            text-align: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .header h1 {
-            font-size: 16pt;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .header h2 {
-            font-size: 14pt;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 10pt;
-            color: #333;
-        }
-        
-        .title {
-            text-align: center;
-            margin: 25px 0;
-        }
-        
-        .title h3 {
-            font-size: 14pt;
-            font-weight: bold;
-            text-decoration: underline;
-            margin-bottom: 5px;
-        }
-        
-        .title p {
-            font-size: 11pt;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        table th,
-        table td {
-            border: 1px solid #000;
-            padding: 8px 10px;
-            text-align: left;
-            vertical-align: middle;
-        }
-        
-        table th {
-            background: #f0f0f0;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        table td.center {
-            text-align: center;
-        }
-        
-        table tr:nth-child(even) {
-            background: #fafafa;
-        }
-
-        .jenjang-header {
-            background: #e0e0e0 !important;
-            font-weight: bold;
-        }
-        
-        .summary {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-        }
-        
-        .summary h4 {
-            font-size: 11pt;
-            margin-bottom: 10px;
-        }
-        
-        .summary-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .summary-item {
-            flex: 1;
-            min-width: 100px;
-        }
-        
-        .summary-item .label {
-            font-size: 9pt;
-            color: #666;
-        }
-        
-        .summary-item .value {
-            font-size: 14pt;
-            font-weight: bold;
-        }
-        
-        .footer {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .footer-left,
-        .footer-right {
-            width: 45%;
-        }
-        
-        .footer-right {
-            text-align: center;
-        }
-        
-        .signature-line {
-            margin-top: 60px;
-            border-bottom: 1px solid #000;
-            width: 200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .print-date {
-            font-size: 10pt;
-            color: #666;
-            margin-top: 30px;
-            text-align: right;
-        }
-        
-        @media print {
-            body {
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
-            }
-            
-            .no-print {
-                display: none !important;
-            }
-            
-            .container {
-                padding: 0;
-            }
-        }
-        
-        .print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #8b5cf6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-        }
-
-        .print-button:hover {
-            background: #7c3aed;
-        }
-
-        .back-button {
-            position: fixed;
-            top: 20px;
-            right: 130px;
-            padding: 10px 20px;
-            background: #6b7280;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-        }
-
-        .back-button:hover {
-            background: #4b5563;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        @media (max-width: 575.98px) {
-            .print-button {
-                top: auto;
-                bottom: 20px;
-                right: 20px;
-                font-size: 13px;
-                padding: 8px 14px;
-            }
-            .back-button {
-                top: auto;
-                bottom: 20px;
-                right: 110px;
-                font-size: 13px;
-                padding: 8px 14px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/admin/wali-kelas/print.css') }}?v={{ filemtime(public_path('css/admin/wali-kelas/print.css')) }}">
 </head>
 <body>
     <a href="{{ route('admin.wali-kelas.index') }}" class="back-button no-print">
         ← Kembali
     </a>
-    <button onclick="window.print()" class="print-button no-print">
+    <button type="button" class="print-button no-print" data-print-page>
         <i class="fas fa-print"></i> Cetak
     </button>
 
@@ -258,13 +27,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">No</th>
+                        <th class="col-no">No</th>
                         <th>Kelas</th>
                         <th>Jenjang</th>
                         <th>Cabang</th>
                         <th>Wali Kelas</th>
                         <th>NIP</th>
-                        <th style="width: 70px;">Jml Siswa</th>
+                        <th class="col-students">Jml Siswa</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -320,7 +89,7 @@
                 </div>
             </div>
         @else
-            <p style="text-align: center; padding: 40px; color: #666;">
+            <p class="empty-print-state">
                 Tidak ada data wali kelas untuk ditampilkan.
             </p>
         @endif
@@ -337,5 +106,6 @@
             </div>
         </div>
     </div>
+    <script src="{{ asset('js/admin/wali-kelas/print.js') }}?v={{ filemtime(public_path('js/admin/wali-kelas/print.js')) }}"></script>
 </body>
 </html>

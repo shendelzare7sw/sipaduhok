@@ -9,27 +9,11 @@
 @endsection
 
 @section('styles')
-    <style>
-        .mapel-card {
-            transition: all 0.3s ease;
-            border-radius: 10px;
-        }
-
-        .mapel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .icon-circle {
-            width: 48px;
-            height: 48px;
-            flex-shrink: 0;
-        }
-    </style>
+    @vite(['resources/css/guru/kelas/mapel.css'])
 @endsection
 
 @section('content')
-    <div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+    <div class="guru-mapel-page">
         <div class="container-fluid px-0">
 
             <div class="mb-4">

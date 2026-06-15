@@ -1,0 +1,8 @@
+.approval-bulk-action.is-hidden {
+    display: none !important;
+}
+
+.approval-reason-cell {
+    max-width: 220px;
+    white-space: normal;
+}

@@ -19,7 +19,7 @@
             <span class="app-brand-text demo menu-text fw-bolder ms-2">SIPADUHOK</span>
         </a>
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+        <a href="#" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
             <i class="fas fa-times align-middle"></i>
         </a>
     </div>

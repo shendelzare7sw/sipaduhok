@@ -1,0 +1,18 @@
+.guru-lms-meeting-page .meeting-status-badge {
+    font-size: 0.7em;
+}
+
+.guru-lms-meeting-page .empty-illustration {
+    width: 150px;
+    opacity: 0.5;
+}
+
+.guru-lms-meeting-page .delete-form {
+    display: inline;
+}
+
+.guru-lms-meeting-page .clipboard-buffer {
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+}

@@ -294,7 +294,7 @@ class PembayaranController extends Controller
     }
 
     /**
-     * Input pembayaran manual (tunai/transfer manual)
+     * Input pembayaran kasir (tunai)
      */
     public function create($siswaId)
     {

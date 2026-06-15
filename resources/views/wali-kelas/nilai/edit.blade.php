@@ -6,340 +6,8 @@
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
 @endsection
-
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-/* ─── Table base ─────────────────────────────────────── */
-.table-nilai {
-    font-size: 13px;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-.table-nilai th {
-    font-weight: 700;
-    font-size: 11.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    vertical-align: middle;
-    white-space: nowrap;
-    background: #f8f9fc;
-}
-.table-nilai td {
-    vertical-align: middle;
-    padding: 6px 4px;
-}
-
-.sticky-no {
-    min-width: 36px;
-}
-.sticky-mapel {
-    min-width: 190px;
-    max-width: 220px;
-}
-.mapel-cell-header {
-    min-width: 0;
-}
-.mapel-name {
-    display: -webkit-box;
-    overflow: hidden;
-    font-size: 13.25px;
-    line-height: 1.25;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-.mapel-code {
-    font-size: 11px;
-}
-.mapel-status-badge {
-    font-size: 9px;
-    padding: 3px 5px;
-}
-.mapel-action-btn {
-    width: 30px !important;
-    height: 30px !important;
-    font-size: 17px !important;
-    border-radius: 8px;
-}
-.mapel-action-btn .bx {
-    font-size: 17px;
-    line-height: 1;
-}
-.mapel-action-label {
-    display: none;
-}
-
-/* ─── Group header colours ───────────────────────────── */
-.th-tugas   { background: #e3f2fd !important; }
-.th-latihan { background: #fff3e0 !important; }
-.th-uh      { background: #fce4ec !important; }
-.th-akhir   { background: #e8f5e9 !important; }
-
-/* ─── Rata / Nilai Akhir cells ───────────────────────── */
-.rata-cell {
-    background: #e9ecef;
-    font-weight: 700;
-    color: #165fac;
-    text-align: center;
-    min-width: 50px;
-}
-.nilai-akhir-cell {
-    background: #d4edda;
-    font-weight: 800;
-    color: #155724;
-    text-align: center;
-    min-width: 68px;
-}
-
-/* ─── Input + spinner ────────────────────────────────── */
-.input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    justify-content: center;
-}
-.input-nilai {
-    width: 56px;
-    min-width: 56px;
-    padding: 6px 4px;
-    font-size: 13px;
-    text-align: center;
-    border-radius: 8px;
-    border: 1px solid #ced4da;
-    -moz-appearance: textfield;
-}
-.input-nilai::-webkit-outer-spin-button,
-.input-nilai::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.input-nilai:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 0 2px rgba(78,115,223,.2);
-    outline: none;
-}
-.spinner-btns { display: flex; flex-direction: column; gap: 1px; }
-.spinner-btn {
-    width: 17px; height: 15px;
-    padding: 0; font-size: 9px; line-height: 1;
-    border: 1px solid #ced4da; background: #f8f9fa;
-    border-radius: 2px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #666;
-}
-.spinner-btn:hover { background: #e9ecef; border-color: #4e73df; color: #4e73df; }
-.spinner-btn:active { background: #4e73df; color: white; }
-
-/* ─── Scroll wrapper ─────────────────────────────────── */
-.scroll-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    position: relative; /* needed so sticky is relative to this container */
-}
-
-/* ─── Mobile: shrink mapel column ───────────────────── */
-@media (max-width: 991.98px) {
-    .sticky-mapel { min-width: 180px; max-width: 210px; }
-    .mapel-action-btn { width: 32px !important; height: 32px !important; font-size: 18px !important; }
-}
-
-/* Mobile: turn the dense score table into per-subject input cards. */
-@media (max-width: 767.98px) {
-    .scroll-wrapper {
-        overflow-x: hidden;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .table-nilai,
-    .table-nilai tbody,
-    .table-nilai tr {
-        display: block;
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    .table-nilai {
-        border: 0;
-        background: transparent;
-        max-width: 100% !important;
-    }
-
-    .table-nilai thead {
-        display: none;
-    }
-
-    .table-nilai tbody {
-        display: grid;
-        gap: 12px;
-    }
-
-    .table-nilai tr {
-        display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-        gap: 6px;
-        padding: 12px;
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box;
-        overflow: hidden;
-        border: 1px solid #dbe4f0;
-        border-radius: 10px;
-        background: #fff;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-    }
-
-    .table-nilai td {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        width: auto !important;
-        max-width: 100%;
-        min-width: 0 !important;
-        box-sizing: border-box;
-        border: 1px solid #e8eef7 !important;
-        border-radius: 8px;
-        padding: 7px 6px !important;
-        background: #f8fafc;
-        overflow: hidden;
-    }
-
-    .table-nilai tr > * {
-        min-width: 0 !important;
-    }
-
-    .table-nilai td::before {
-        content: attr(data-label);
-        font-size: 10px;
-        font-weight: 800;
-        line-height: 1;
-        color: #64748b;
-        text-transform: uppercase;
-    }
-
-    .table-nilai td.sticky-no {
-        display: none;
-    }
-
-    .table-nilai td.sticky-mapel {
-        grid-column: 1 / -1;
-        display: block;
-        width: 100% !important;
-        min-width: 0 !important;
-        max-width: none !important;
-        border: 0 !important;
-        border-bottom: 1px solid #e2e8f0 !important;
-        border-radius: 0;
-        padding: 0 0 10px !important;
-        background: #fff;
-    }
-
-    .table-nilai td.sticky-mapel::before {
-        display: none;
-    }
-
-    .mapel-cell-header {
-        align-items: center !important;
-        flex-wrap: wrap;
-        gap: 10px !important;
-    }
-
-    .mapel-name {
-        font-size: 15px !important;
-    }
-
-    .mapel-code {
-        font-size: 12px !important;
-    }
-
-    .mapel-actions {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        width: 100%;
-        gap: 8px !important;
-    }
-
-    .mapel-action-btn {
-        width: 100% !important;
-        height: 36px !important;
-        gap: 5px;
-        font-size: 18px !important;
-        border-radius: 10px;
-    }
-
-    .mapel-action-btn .bx {
-        font-size: 18px;
-    }
-
-    .mapel-action-label {
-        display: inline;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-    .input-wrapper {
-        width: 100%;
-        min-width: 0;
-        justify-content: center;
-        gap: 0;
-    }
-
-    .input-nilai {
-        flex: 1 1 100%;
-        width: 100% !important;
-        min-width: 0;
-        height: 34px;
-        padding: 5px 4px;
-        font-size: 12.5px;
-        border-radius: 7px;
-    }
-
-    .spinner-btns {
-        display: none;
-    }
-
-    .rata-cell,
-    .nilai-akhir-cell {
-        grid-column: 1 / -1;
-        align-items: center;
-        justify-content: center;
-        min-height: 46px;
-        font-size: 15px;
-    }
-
-    .rata-cell::before,
-    .nilai-akhir-cell::before {
-        align-self: stretch;
-        text-align: left;
-    }
-    .card-footer {
-        position: sticky;
-        bottom: 0;
-        z-index: 5;
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(8px);
-        border-top: 1px solid #e2e8f0;
-    }
-}
-
-@media (max-width: 420px) {
-    .table-nilai tr {
-        gap: 4px;
-        padding: 10px;
-    }
-
-    .table-nilai td {
-        padding: 6px 4px !important;
-    }
-
-    .table-nilai td::before {
-        font-size: 9px;
-    }
-
-    .input-nilai {
-        height: 32px;
-        padding: 4px 3px;
-        font-size: 11.5px;
-    }
-}
-</style>
+    @vite(['resources/css/wali-kelas/nilai/edit.css', 'resources/js/wali-kelas/nilai/edit.js'])
 @endsection
 
 @section('content')
@@ -355,7 +23,7 @@
             <a href="{{ route('wali.nilai.index') }}?semester={{ $semester }}" class="btn btn-light btn-sm border fw-semibold">
                 <i class="bx bx-arrow-back me-1"></i> Kembali ke Daftar Nilai
             </a>
-            <span class="badge {{ $semester === 'ganjil' ? 'bg-label-warning' : 'bg-label-info' }} fw-semibold px-3 py-2" style="font-size:12px;">
+            <span class="badge {{ $semester === 'ganjil' ? 'bg-label-warning' : 'bg-label-info' }} fw-semibold px-3 py-2 semester-badge">
                 <i class="bx bx-calendar me-1"></i> Semester {{ ucfirst($semester) }}
                 @if($semester === $currentSemester) <span class="ms-1 text-success">(Aktif)</span> @endif
             </span>
@@ -474,9 +142,9 @@
                                 <th colspan="6" class="text-center th-tugas">Tugas</th>
                                 <th colspan="6" class="text-center th-latihan">Latihan</th>
                                 <th colspan="6" class="text-center th-uh">Ulangan Harian</th>
-                                <th class="text-center" rowspan="2" style="min-width:80px;">PTS</th>
-                                <th class="text-center" rowspan="2" style="min-width:80px;">PAS</th>
-                                <th class="text-center nilai-akhir-cell" rowspan="2" style="min-width:72px;">Nilai Akhir</th>
+                                <th class="text-center score-col-md" rowspan="2">PTS</th>
+                                <th class="text-center score-col-md" rowspan="2">PAS</th>
+                                <th class="text-center nilai-akhir-cell" rowspan="2">Nilai Akhir</th>
                                 @if($isKelasAkhir)
                                 <th colspan="5" class="text-center th-akhir">Tingkat Akhir</th>
                                 @endif
@@ -484,26 +152,26 @@
                             <tr>
                                 {{-- Tugas --}}
                                 @for($i=1;$i<=5;$i++)
-                                <th class="text-center th-tugas" style="min-width:80px;">T{{ $i }}</th>
+                                <th class="text-center th-tugas score-col-md">T{{ $i }}</th>
                                 @endfor
                                 <th class="text-center th-tugas rata-cell">Rata</th>
                                 {{-- Latihan --}}
                                 @for($i=1;$i<=5;$i++)
-                                <th class="text-center th-latihan" style="min-width:62px;">L{{ $i }}</th>
+                                <th class="text-center th-latihan score-col-sm">L{{ $i }}</th>
                                 @endfor
                                 <th class="text-center th-latihan rata-cell">Rata</th>
                                 {{-- UH --}}
                                 @for($i=1;$i<=5;$i++)
-                                <th class="text-center th-uh" style="min-width:62px;">UH{{ $i }}</th>
+                                <th class="text-center th-uh score-col-sm">UH{{ $i }}</th>
                                 @endfor
                                 <th class="text-center th-uh rata-cell">Rata</th>
                                 {{-- Tingkat Akhir sub-headers --}}
                                 @if($isKelasAkhir)
-                                <th class="text-center th-akhir" style="min-width:62px;">TO 1</th>
-                                <th class="text-center th-akhir" style="min-width:62px;">TO 2</th>
-                                <th class="text-center th-akhir" style="min-width:62px;">TO 3</th>
-                                <th class="text-center th-akhir" style="min-width:62px;">UPK</th>
-                                <th class="text-center th-akhir" style="min-width:80px;">Ujian Praktek</th>
+                                <th class="text-center th-akhir score-col-sm">TO 1</th>
+                                <th class="text-center th-akhir score-col-sm">TO 2</th>
+                                <th class="text-center th-akhir score-col-sm">TO 3</th>
+                                <th class="text-center th-akhir score-col-sm">UPK</th>
+                                <th class="text-center th-akhir score-col-md">Ujian Praktek</th>
                                 @endif
                             </tr>
                         </thead>
@@ -526,7 +194,7 @@
                                         $waliEditDiff = $hasDiff && $nilai->wali_terakhir_edit_at && !$guruBaru;
                                     @endphp
                                     <div class="mapel-cell-header d-flex align-items-start justify-content-between gap-2">
-                                        <div class="flex-grow-1" style="min-width:0;">
+                                        <div class="flex-grow-1 mapel-info">
                                             <div class="mapel-name fw-semibold lh-sm">{{ $mapel->nama_mapel }}</div>
                                             <small class="mapel-code text-muted">{{ $mapel->kode_mapel }}</small>
                                             @if($guruBaru)
@@ -554,8 +222,7 @@
                                                     <span class="mapel-action-label">Preview</span>
                                                 </button>
                                                 <button type="button"
-                                                        class="btn {{ $guruBaru ? 'btn-warning' : 'btn-outline-secondary' }} p-0 d-flex align-items-center justify-content-center mapel-action-btn"
-                                                        style="{{ !$guruBaru ? 'opacity:0.55; cursor:not-allowed;' : '' }}"
+                                                        class="btn {{ $guruBaru ? 'btn-warning' : 'btn-outline-secondary is-disabled-soft' }} p-0 d-flex align-items-center justify-content-center mapel-action-btn"
                                                         @if($guruBaru) data-bs-toggle="modal" data-bs-target="#syncGuruModal{{ $nilai->id }}" @else disabled @endif
                                                         title="{{ $guruBaru ? 'Sinkronisasi dari guru' : 'Tidak ada update guru baru — tidak perlu sinkronisasi' }}">
                                                     <i class="bx bx-sync"></i>
@@ -577,8 +244,8 @@
                                             value="{{ $nilai && $nilai->{'tugas_'.$j} !== null ? $nilai->{'tugas_'.$j} : '' }}"
                                             placeholder="-">
                                         <div class="spinner-btns">
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $mapel->id }}_{{ $j }}', 1)">▲</button>
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('tugas_{{ $mapel->id }}_{{ $j }}', -1)">▼</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="tugas_{{ $mapel->id }}_{{ $j }}" data-adjust-delta="1">▲</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="tugas_{{ $mapel->id }}_{{ $j }}" data-adjust-delta="-1">▼</button>
                                         </div>
                                     </div>
                                 </td>
@@ -598,8 +265,8 @@
                                             value="{{ $nilai && $nilai->{'latihan_'.$j} !== null ? $nilai->{'latihan_'.$j} : '' }}"
                                             placeholder="-">
                                         <div class="spinner-btns">
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $mapel->id }}_{{ $j }}', 1)">▲</button>
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('latihan_{{ $mapel->id }}_{{ $j }}', -1)">▼</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="latihan_{{ $mapel->id }}_{{ $j }}" data-adjust-delta="1">▲</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="latihan_{{ $mapel->id }}_{{ $j }}" data-adjust-delta="-1">▼</button>
                                         </div>
                                     </div>
                                 </td>
@@ -619,8 +286,8 @@
                                             value="{{ $nilai && $nilai->{'uh_'.$j} !== null ? $nilai->{'uh_'.$j} : '' }}"
                                             placeholder="-">
                                         <div class="spinner-btns">
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $mapel->id }}_{{ $j }}', 1)">▲</button>
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('uh_{{ $mapel->id }}_{{ $j }}', -1)">▼</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="uh_{{ $mapel->id }}_{{ $j }}" data-adjust-delta="1">▲</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="uh_{{ $mapel->id }}_{{ $j }}" data-adjust-delta="-1">▼</button>
                                         </div>
                                     </div>
                                 </td>
@@ -639,8 +306,8 @@
                                             value="{{ $nilai && $nilai->pts !== null ? $nilai->pts : '' }}"
                                             placeholder="-">
                                         <div class="spinner-btns">
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $mapel->id }}', 1)">▲</button>
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('pts_{{ $mapel->id }}', -1)">▼</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="pts_{{ $mapel->id }}" data-adjust-delta="1">▲</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="pts_{{ $mapel->id }}" data-adjust-delta="-1">▼</button>
                                         </div>
                                     </div>
                                 </td>
@@ -655,8 +322,8 @@
                                             value="{{ $nilai && $nilai->pas !== null ? $nilai->pas : '' }}"
                                             placeholder="-">
                                         <div class="spinner-btns">
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $mapel->id }}', 1)">▲</button>
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('pas_{{ $mapel->id }}', -1)">▼</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="pas_{{ $mapel->id }}" data-adjust-delta="1">▲</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="pas_{{ $mapel->id }}" data-adjust-delta="-1">▼</button>
                                         </div>
                                     </div>
                                 </td>
@@ -678,8 +345,8 @@
                                             value="{{ $nilai && $nilai->$field !== null ? $nilai->$field : '' }}"
                                             placeholder="-">
                                         <div class="spinner-btns">
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $mapel->id }}', 1)">▲</button>
-                                            <button type="button" class="spinner-btn" onclick="adjustValue('{{ $field }}_{{ $mapel->id }}', -1)">▼</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="{{ $field }}_{{ $mapel->id }}" data-adjust-delta="1">▲</button>
+                                            <button type="button" class="spinner-btn" data-adjust-target="{{ $field }}_{{ $mapel->id }}" data-adjust-delta="-1">▼</button>
                                         </div>
                                     </div>
                                 </td>
@@ -732,9 +399,9 @@
             <div class="modal fade" id="previewDiffModal{{ $nilai->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-info" style="color:#fff !important;">
-                            <h5 class="modal-title fw-bold" style="color:#fff !important;">
-                                <i class="bx bx-show me-2" style="color:#fff !important;"></i>Preview Nilai: {{ $mapel->nama_mapel }}
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title fw-bold text-white">
+                                <i class="bx bx-show me-2 text-white"></i>Preview Nilai: {{ $mapel->nama_mapel }}
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
@@ -811,9 +478,9 @@
             <div class="modal fade" id="syncGuruModal{{ $nilai->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content border-0 shadow-lg">
-                        <div class="modal-header bg-warning" style="color:#fff !important;">
-                            <h5 class="modal-title fw-bold" style="color:#fff !important;">
-                                <i class="bx bx-sync me-2" style="color:#fff !important;"></i>Sinkronisasi dari Guru
+                        <div class="modal-header bg-warning text-white">
+                            <h5 class="modal-title fw-bold text-white">
+                                <i class="bx bx-sync me-2 text-white"></i>Sinkronisasi dari Guru
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
@@ -892,96 +559,4 @@
     </div>
 </div>
 
-@endsection
-
-@section('scripts')
-<script>
-function adjustValue(inputId, delta) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    let val = parseFloat(input.value) || 0;
-    val = Math.max(0, Math.min(100, Math.round((val + delta) * 100) / 100));
-    input.value = val;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-
-    /* ── Input validation ── */
-    document.querySelectorAll('.input-nilai').forEach(input => {
-        input.addEventListener('input', function () {
-            if (this.value === '') return;
-            let num = parseFloat(this.value);
-            if (num > 100) {
-                const s = this.value.toString();
-                if (!s.includes('.')) {
-                    const corrected = s.slice(0, -1) + '.' + s.slice(-1);
-                    if (parseFloat(corrected) <= 100) { this.value = corrected; return; }
-                }
-                this.value = 100;
-            }
-        });
-        input.addEventListener('keydown', e => { if (['e','E','-','+'].includes(e.key)) e.preventDefault(); });
-        input.addEventListener('blur', function () {
-            const v = parseFloat(this.value);
-            if (!isNaN(v)) {
-                if (v > 100) this.value = 100;
-                if (v < 0)   this.value = 0;
-            }
-        });
-    });
-
-    /* ── Per-mapel live recalculation ── */
-    @foreach($mataPelajaranList as $mapel)
-    (function () {
-        const mid = {{ $mapel->id }};
-
-        const tugasInputs   = document.querySelectorAll(`.tugas-input-${mid}`);
-        const latihanInputs = document.querySelectorAll(`.latihan-input-${mid}`);
-        const uhInputs      = document.querySelectorAll(`.uh-input-${mid}`);
-        const ptsInput      = document.querySelector(`.pts-input-${mid}`);
-        const pasInput      = document.querySelector(`.pas-input-${mid}`);
-
-        const rataTugasEl   = document.getElementById(`rata_tugas_${mid}`);
-        const rataLatihanEl = document.getElementById(`rata_latihan_${mid}`);
-        const rataUhEl      = document.getElementById(`rata_uh_${mid}`);
-        const nilaiAkhirEl  = document.getElementById(`nilai_akhir_${mid}`);
-
-        function avg(inputs) {
-            let sum = 0, count = 0;
-            inputs.forEach(inp => {
-                const v = parseFloat(inp.value);
-                if (!isNaN(v) && inp.value.trim() !== '') { sum += v; count++; }
-            });
-            return count > 0 ? sum / count : null;
-        }
-
-        function recalc() {
-            const rt = avg(tugasInputs);
-            const rl = avg(latihanInputs);
-            const ru = avg(uhInputs);
-            const pts = parseFloat(ptsInput?.value) || 0;
-            const pas = parseFloat(pasInput?.value) || 0;
-
-            rataTugasEl.textContent   = rt !== null ? rt.toFixed(1) : '-';
-            rataLatihanEl.textContent = rl !== null ? rl.toFixed(1) : '-';
-            rataUhEl.textContent      = ru !== null ? ru.toFixed(1) : '-';
-
-            if (rt || rl || ru || pts || pas) {
-                const na = ((rt||0)*1 + (rl||0)*1 + (ru||0)*2 + pts*3 + pas*3) / 10;
-                nilaiAkhirEl.textContent = na.toFixed(2);
-            } else {
-                nilaiAkhirEl.textContent = '-';
-            }
-        }
-
-        tugasInputs.forEach(i => i.addEventListener('input', recalc));
-        latihanInputs.forEach(i => i.addEventListener('input', recalc));
-        uhInputs.forEach(i => i.addEventListener('input', recalc));
-        ptsInput?.addEventListener('input', recalc);
-        pasInput?.addEventListener('input', recalc);
-    })();
-    @endforeach
-});
-</script>
 @endsection

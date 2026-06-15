@@ -1,0 +1,278 @@
+.tahun-ajaran-form-page {
+    margin: 0 auto;
+    max-width: 1400px;
+    padding: 0 1rem;
+}
+
+.tahun-ajaran-form-page .card {
+    background: #fff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+
+.tahun-ajaran-form-page .card-header {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+}
+
+.tahun-ajaran-form-page .card-header h5 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.tahun-ajaran-form-page .card-body {
+    padding: 20px;
+}
+
+.tahun-ajaran-form-page .card-footer {
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #e5e7eb;
+    padding: 16px 20px;
+}
+
+.tahun-ajaran-form-page .form-label {
+    color: #374151;
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.tahun-ajaran-form-page .form-control {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: #212529;
+    display: block;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 8px 12px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    width: 100%;
+}
+
+.tahun-ajaran-form-page .form-control:focus {
+    border-color: var(--ta-focus, #86b7fe);
+    box-shadow: 0 0 0 0.25rem var(--ta-focus-shadow, rgba(13, 110, 253, 0.25));
+    outline: 0;
+}
+
+.tahun-ajaran-form-page.is-edit {
+    --ta-focus: #f59e0b;
+    --ta-focus-shadow: rgba(245, 158, 11, 0.25);
+}
+
+.tahun-ajaran-form-page .is-invalid {
+    border-color: #dc3545;
+}
+
+.tahun-ajaran-form-page .btn {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 500;
+    justify-content: center;
+    line-height: 1.5;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.15s ease-in-out;
+}
+
+.tahun-ajaran-form-page .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+
+.tahun-ajaran-form-page .btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: #fff;
+}
+
+.tahun-ajaran-form-page .btn-secondary {
+    background: #6b7280;
+    border-color: #6b7280;
+    color: #fff;
+}
+
+.required-mark {
+    color: #dc3545;
+}
+
+.form-error {
+    color: #dc3545;
+    display: block;
+    margin-top: 4px;
+}
+
+.form-hint {
+    color: #6b7280;
+    display: block;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.ta-divider {
+    border-top: 1px solid #e5e7eb;
+    margin: 16px 0;
+}
+
+.ta-divider.is-dashed {
+    border-top-style: dashed;
+    border-top-color: #d1d5db;
+    margin: 14px 0;
+}
+
+.semester-settings {
+    background: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.setting-heading {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.setting-heading i {
+    color: #16a34a;
+}
+
+.setting-heading strong {
+    color: #166534;
+}
+
+.pts-heading {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.pts-heading i {
+    color: #0891b2;
+}
+
+.pts-heading strong {
+    color: #155e75;
+    font-size: 13px;
+}
+
+.setting-description {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.setting-description.is-small {
+    font-size: 12px;
+}
+
+.label-icon-success {
+    color: #16a34a;
+    margin-right: 4px;
+}
+
+.label-icon-info {
+    color: #0891b2;
+    margin-right: 4px;
+}
+
+.checkbox-row {
+    align-items: flex-start;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+}
+
+.checkbox-row input {
+    height: 18px;
+    margin-top: 2px;
+    width: 18px;
+}
+
+.checkbox-row strong {
+    color: #374151;
+}
+
+.checkbox-row small {
+    color: #6b7280;
+    display: block;
+    line-height: 1.4;
+}
+
+.info-box {
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.info-box-blue {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    color: #1e3a8a;
+}
+
+.info-box-yellow {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+}
+
+.info-box-orange {
+    background: #fff7ed;
+    border-left: 4px solid #f97316;
+    color: #9a3412;
+}
+
+.info-title {
+    align-items: center;
+    display: flex;
+    font-weight: 600;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.info-box p,
+.info-box ul,
+.notes-list {
+    line-height: 1.6;
+    margin: 0;
+}
+
+.info-box ul,
+.notes-list {
+    padding-left: 20px;
+}
+
+.meta-list {
+    color: #6b7280;
+    display: block;
+    margin-top: 16px;
+}
+
+.notes-title {
+    color: #374151;
+}
+
+.btn-icon {
+    margin-right: 6px;
+}

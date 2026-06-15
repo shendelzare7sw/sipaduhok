@@ -9,8 +9,12 @@
     @include('admin.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/akademik/pengumuman/form.css'])
+@endsection
+
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="admin-announcement-form-page">
 <div class="row">
     <div class="col-lg-8">
         <div class="content-card">
@@ -157,7 +161,7 @@
                 </div>
 
                 <!-- Buttons -->
-                <div class="d-flex justify-content-between" style="margin-top: 24px;">
+                <div class="d-flex justify-content-between announcement-form-actions">
                     <a href="{{ route('admin.akademik.pengumuman.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Kembali
                     </a>
@@ -172,27 +176,27 @@
     <!-- Info Panel -->
     <div class="col-lg-4">
         <div class="content-card">
-            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
-                <i class="fas fa-info-circle me-2" style="color: #165fac;"></i>Informasi
+            <h3 class="announcement-info-title">
+                <i class="fas fa-info-circle me-2 announcement-info-icon"></i>Informasi
             </h3>
             
-            <div style="font-size: 14px; color: #666; line-height: 1.6;">
+            <div class="announcement-info-content">
                 <p><strong>Auto-Generate:</strong></p>
                 <p>Pengumuman otomatis dibuat <strong>3 hari sebelum</strong> kegiatan di kalender akademik.</p>
                 
-                <hr style="margin: 16px 0;">
+                <hr>
                 
                 <p><strong>Sinkronisasi:</strong></p>
-                <ul style="padding-left: 20px; margin-bottom: 12px;">
+                <ul>
                     <li>Kalender → Pengumuman: <strong>Sinkron</strong></li>
                     <li>Pengumuman → Kalender: <strong>Tidak sinkron</strong></li>
                 </ul>
                 <p class="small text-muted">Ubah pengumuman tidak mengubah kalender</p>
                 
-                <hr style="margin: 16px 0;">
+                <hr>
                 
                 <p><strong>Prioritas:</strong></p>
-                <ul style="padding-left: 20px; margin-bottom: 0;">
+                <ul class="announcement-priority-list">
                     <li><strong>Biasa:</strong> Info umum</li>
                     <li><strong>Penting:</strong> Perlu perhatian</li>
                     <li><strong>Mendesak:</strong> Segera dibaca</li>

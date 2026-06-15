@@ -9,40 +9,11 @@
 @endsection
 
 @section('styles')
-@include('shared.wali-kelas.styles')
-<style>
-    .status-select { font-weight: 700; border-radius: 5px; }
-    .rekap-cell { font-weight: 700; text-align: center; }
-    .table-rekap thead th { vertical-align: middle; text-align: center; font-size: 11px; text-transform: uppercase; }
-    .bg-hadir { background-color: #f6fff9 !important; }
-    .bg-sakit { background-color: #fffdf0 !important; }
-    .bg-izin  { background-color: #f0f7ff !important; }
-    .bg-alpha { background-color: #fff5f5 !important; }
-    select option.text-success { color: #1cc88a; }
-    select option.text-warning { color: #f6c23e; }
-    select option.text-primary { color: #4e73df; }
-    select option.text-danger  { color: #e74a3b; }
-
-    /* ── Responsive button grid for header actions ─────── */
-    .presensi-btn-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* 2-col on mobile */
-        gap: 8px;
-        width: 100%;
-    }
-    @media (min-width: 576px) {
-        .presensi-btn-grid {
-            display: flex;           /* single row on sm+ */
-            flex-wrap: nowrap;
-            gap: 8px;
-            width: auto;
-        }
-    }
-</style>
+    @vite(['resources/css/wali-kelas/presensi/index.css', 'resources/js/wali-kelas/presensi/index.js'])
 @endsection
 
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="wk-page">
 <div class="container-fluid px-0">
     @if($error ?? false)
         <div class="alert alert-danger shadow-sm border-start border-danger border-4">
@@ -102,11 +73,11 @@
                 <div class="row align-items-end">
                     <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">TANGGAL PRESENSI</label>
-                        <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" onchange="this.form.submit()">
+                        <input type="date" name="tanggal" class="form-control" value="{{ $tanggal }}" data-auto-submit>
                     </div>
                     <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">SEMESTER</label>
-                        <select name="semester" class="form-select" onchange="this.form.submit()">
+                        <select name="semester" class="form-select" data-auto-submit>
                             <option value="">Semua (Per Bulan)</option>
                             <option value="ganjil" {{ ($semester ?? '') == 'ganjil' ? 'selected' : '' }}>Ganjil</option>
                             <option value="genap" {{ ($semester ?? '') == 'genap' ? 'selected' : '' }}>Genap</option>
@@ -114,7 +85,7 @@
                     </div>
                     <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">LIHAT BULAN</label>
-                        <select name="bulan" class="form-select" onchange="this.form.submit()" {{ ($semester ?? '') ? 'disabled' : '' }}>
+                        <select name="bulan" class="form-select" data-auto-submit {{ ($semester ?? '') ? 'disabled' : '' }}>
                             @for($m = 1; $m <= 12; $m++)
                                 <option value="{{ $m }}" {{ $bulan == $m ? 'selected' : '' }}>
                                     {{ \Carbon\Carbon::create(now()->year, $m, 1)->locale('id')->isoFormat('MMMM') }}
@@ -124,7 +95,7 @@
                     </div>
                     <div class="col-md-2 mb-3 mb-md-0">
                         <label class="small fw-bold">TAHUN</label>
-                        <select name="tahun" class="form-select" onchange="this.form.submit()" {{ ($semester ?? '') ? 'disabled' : '' }}>
+                        <select name="tahun" class="form-select" data-auto-submit {{ ($semester ?? '') ? 'disabled' : '' }}>
                             @for($y = now()->year - 2; $y <= now()->year + 1; $y++)
                                 <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
@@ -283,36 +254,13 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Tidak
                 </button>
-                <button type="button" class="btn btn-primary" onclick="submitPresensi()">
+                <button type="button" class="btn btn-primary" id="btnSubmitPresensi">
                     <i class="fas fa-check me-1"></i> Ya, Simpan
                 </button>
             </div>
         </div>
     </div>
 </div>
-@endsection
-
-@section('scripts')
-<script>
-    function submitPresensi() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('konfirmasiSimpanModal'));
-        modal.hide();
-        document.getElementById('formPresensi').submit();
-    }
-
-    // Sync tanggal filter → import modal tanggal field
-    document.addEventListener('DOMContentLoaded', function () {
-        const filterTanggal = document.querySelector('input[name="tanggal"]');
-        const importTanggal = document.getElementById('importTanggal');
-        if (filterTanggal && importTanggal) {
-            importTanggal.value = filterTanggal.value;
-            filterTanggal.addEventListener('change', function () {
-                importTanggal.value = this.value;
-            });
-        }
-    });
-</script>
-@endsection
 
 {{-- MODAL IMPORT EXCEL --}}
 <div class="modal fade" id="importPresensiModal" tabindex="-1" aria-labelledby="importPresensiModalLabel" aria-hidden="true">
@@ -385,3 +333,4 @@
         </div>
     </div>
 </div>
+@endsection

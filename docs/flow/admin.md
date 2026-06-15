@@ -573,9 +573,9 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ### Akademik → Pengumuman
 
-**Index view**: `admin/akademik/pengumuman/index.blade.php` → `@include('shared.akademik.pengumuman-index')` · **Controller**: `Admin/Akademik/AkademikController.php`
+**Index view**: `admin/akademik/pengumuman/index.blade.php` (standalone per-role, tanpa shared partial) - **Controller**: `Admin/Akademik/AkademikController.php`
 
-**Tampilan index**: Identik Sekretaris (partial shared) — toolbar header dengan judul + tombol **+ Tambah Pengumuman**. 3 **stat card**: Total Pengumuman, Sumber Otomatis (generated dari kalender), Prioritas Tinggi. Tabel: Detail | Tanggal | Prioritas | Sumber | Status | Aksi (Edit, Hapus).
+**Tampilan index**: Selaras dengan Sekretaris, tetapi markup berada langsung di view admin - toolbar header dengan judul + tombol **+ Tambah Pengumuman**. 3 **stat card**: Total Pengumuman, Sumber Otomatis (generated dari kalender), Prioritas Tinggi. Tabel: Detail | Tanggal | Prioritas | Sumber | Status | Aksi (Edit, Hapus).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -591,9 +591,9 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ### Akademik → Berita
 
-**Index view**: `admin/akademik/berita/index.blade.php` → `@include('shared.akademik.berita-index')` · **Controller**: `Admin/Akademik/AkademikController.php`
+**Index view**: `admin/akademik/berita/index.blade.php` (standalone per-role, tanpa shared partial) - **Controller**: `Admin/Akademik/AkademikController.php`
 
-**Tampilan index**: Identik Sekretaris (partial shared) — toolbar dengan tombol **+ Tambah Berita**. 4 **stat card**: Total, Published, Featured, Kategori. Form filter: search judul + dropdown Kategori + Status (Aktif/Draft/Arsip) + tombol Filter/Reset. Tabel: judul + thumbnail, kategori badge, status, featured icon, aksi (Edit, Hapus, Toggle Featured ⭐).
+**Tampilan index**: Selaras dengan Sekretaris, tetapi markup berada langsung di view admin - toolbar dengan tombol **+ Tambah Berita**. 4 **stat card**: Total, Published, Featured, Kategori. Form filter: search judul + dropdown Kategori + Status (Aktif/Draft/Arsip) + tombol Filter/Reset. Tabel: judul + thumbnail, kategori badge, status, featured icon, aksi (Edit, Hapus, Toggle Featured ⭐).
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|
@@ -610,9 +610,9 @@ Submenu CRUD rutin (index/create/store/edit/update/destroy) + import/template/pr
 
 ### Akademik → Flyer
 
-**Index view**: `admin/akademik/flyer/index.blade.php` → `@include('shared.akademik.flyer-index')` · **Controller**: `Admin/Akademik/AkademikController.php`
+**Index view**: `admin/akademik/flyer/index.blade.php` (standalone per-role, tanpa shared partial) - **Controller**: `Admin/Akademik/AkademikController.php`
 
-**Tampilan index**: Identik Sekretaris (partial shared) — toolbar dengan tombol **+ Tambah Flyer**. 3 **stat card**: Total Flyer, Aktif, Nonaktif. **Grid card flyer** (bukan tabel) — tiap card: gambar, badge status, judul + nomor urut, deskripsi, target audience, periode tampil, tombol Kunjungi Tautan + Edit + Hapus.
+**Tampilan index**: Selaras dengan Sekretaris, tetapi markup berada langsung di view admin - toolbar dengan tombol **+ Tambah Flyer**. 3 **stat card**: Total Flyer, Aktif, Nonaktif. **Grid card flyer** (bukan tabel) — tiap card: gambar, badge status, judul + nomor urut, deskripsi, target audience, periode tampil, tombol Kunjungi Tautan + Edit + Hapus.
 
 | Tombol/Aksi | Route name | HTTP | Controller@method | View | Logika ringkas |
 |---|---|---|---|---|---|

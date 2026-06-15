@@ -5,103 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekap Nilai - {{ $siswa->nama_lengkap }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 9pt;
-            background: #f0f2f5;
-            color: #000;
-        }
-
-        /* ── Controls bar (screen only) ── */
-        @media screen {
-            .ctrl-bar {
-                position: fixed; top: 0; left: 0; right: 0; height: 46px;
-                background: #2c3340; color: #fff;
-                display: flex; align-items: center; justify-content: space-between;
-                padding: 0 14px; z-index: 9999; gap: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,.4);
-            }
-            .btn-c {
-                background: rgba(255,255,255,.08); color: #fff;
-                border: 1px solid rgba(255,255,255,.28);
-                padding: 7px 14px; border-radius: 5px; cursor: pointer;
-                font-size: 14px; font-weight: 700; line-height: 1;
-                display: inline-flex; align-items: center; gap: 5px;
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation; user-select: none;
-            }
-            .btn-c:active { background: rgba(255,255,255,.25); }
-            .btn-print { background: #dc3545 !important; border-color: #dc3545 !important; }
-            .btn-print:active { background: #bb2d3b !important; }
-            .zoom-group { display: flex; align-items: center; gap: 6px; }
-            .zoom-label {
-                min-width: 46px; text-align: center;
-                font-size: 12px; font-weight: 700; color: #d0d0d0;
-            }
-
-            body { padding-top: 54px; }
-
-            /* ── Wrapper: scrollable saat zoom in ── */
-            #scaleWrapper {
-                display: flex;
-                justify-content: center;
-                overflow-x: auto;
-                padding: 20px 10px 50px;
-                min-height: calc(100vh - 54px);
-            }
-
-            /* ── Page container: lebar LANDSCAPE A4 ── */
-            .page-container {
-                background: white;
-                box-shadow: 0 4px 20px rgba(0,0,0,.15);
-                width: 1058px;       /* A4 landscape usable width */
-                min-height: 750px;
-                padding: 18px 22px;
-                flex-shrink: 0;      /* jangan menyusut dalam flex */
-            }
-        }
-
-        /* ── Print: sembunyikan ctrl-bar ── */
-        @media print {
-            @page { size: A4 landscape; margin: 6mm; }
-            .ctrl-bar { display: none !important; }
-            body { background: white; padding: 0; font-size: 8.5pt; }
-            #scaleWrapper { display: block; padding: 0; }
-            .page-container { box-shadow: none; padding: 0; width: 100%; min-height: auto; zoom: 1 !important; }
-            table { page-break-inside: avoid; }
-        }
-
-        /* ── Semester badge ── */
-        .semester-badge {
-            display: inline-block;
-            background: #e3f2fd; border: 1px solid #90caf9;
-            color: #1565c0; border-radius: 4px;
-            padding: 2px 10px; font-size: 8pt; font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        /* ── Info table ── */
-        .info-table { margin-bottom: 8px; font-size: 8.5pt; width: 100%; }
-        .info-table td { padding: 2px 6px; }
-        .info-table .label { font-weight: bold; width: 110px; white-space: nowrap; }
-
-        /* ── Data table ── */
-        table.data { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
-        table.data th, table.data td { border: 1px solid #444; padding: 4px 3px; }
-        table.data th { background: #e9ecef; text-align: center; font-weight: bold; }
-        .rata        { background: #d4edda; }
-        .nilai-akhir { background: #c3e6cb; font-weight: bold; }
-
-        /* ── Footer ── */
-        .footer { margin-top: 14px; }
-        .print-date { font-size: 7.5pt; color: #555; font-style: italic; margin-bottom: 8px; }
-        .ttd { display: flex; justify-content: space-between; }
-        .ttd-item { text-align: center; width: 30%; font-size: 8.5pt; }
-        .ttd-line { border-bottom: 1px solid #333; height: 38px; }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/wali-kelas/nilai/print.css') }}">
 </head>
 <body>
     @php
@@ -115,12 +19,12 @@
     {{-- ── Controls bar ── --}}
     <div class="ctrl-bar">
         <div class="zoom-group">
-            <button class="btn-c" onclick="zoomOut()" title="Perkecil">−</button>
+            <button class="btn-c" data-zoom-action="out" title="Perkecil">−</button>
             <span class="zoom-label" id="zoomLabel">100%</span>
-            <button class="btn-c" onclick="zoomIn()" title="Perbesar">+</button>
-            <button class="btn-c" onclick="fitScreen()" title="Sesuaikan layar" style="font-size:11px; padding:7px 10px;">Fit</button>
+            <button class="btn-c" data-zoom-action="in" title="Perbesar">+</button>
+            <button class="btn-c" data-zoom-action="fit" title="Sesuaikan layar" style="font-size:11px; padding:7px 10px;">Fit</button>
         </div>
-        <button class="btn-c btn-print" onclick="window.print()">
+        <button class="btn-c btn-print" data-print-page>
             <i class="bi bi-printer-fill"></i> Cetak / PDF
         </button>
     </div>
@@ -253,36 +157,6 @@
             </div>
         </div>{{-- end .page-container --}}
     </div>{{-- end #scaleWrapper --}}
-
-    <script>
-        const NATIVE_W = 1058;
-        let zoomLevel  = 1; // multiplier di atas baseScale
-
-        function baseScale() {
-            // Hitung skala agar container fit ke lebar layar
-            const avail = window.innerWidth - 20; // 10px sisi kiri + kanan
-            return avail < NATIVE_W ? avail / NATIVE_W : 1;
-        }
-
-        function applyScale() {
-            const el  = document.getElementById('pageContainer');
-            const lbl = document.getElementById('zoomLabel');
-            if (!el) return;
-
-            // CSS zoom mempengaruhi layout (berbeda dari transform scale)
-            // → overflow/scrollbar wrapper muncul otomatis saat zoom in
-            const scale = Math.round(baseScale() * zoomLevel * 1000) / 1000;
-            el.style.zoom = scale;
-
-            if (lbl) lbl.textContent = Math.round(scale * 100) + '%';
-        }
-
-        function zoomIn()    { zoomLevel = Math.min(+(zoomLevel + 0.15).toFixed(2), 4);   applyScale(); }
-        function zoomOut()   { zoomLevel = Math.max(+(zoomLevel - 0.15).toFixed(2), 0.1); applyScale(); }
-        function fitScreen() { zoomLevel = 1; applyScale(); }
-
-        window.addEventListener('load',   applyScale);
-        window.addEventListener('resize', () => { zoomLevel = 1; applyScale(); });
-    </script>
+    <script src="{{ asset('js/wali-kelas/nilai/print.js') }}"></script>
 </body>
 </html>

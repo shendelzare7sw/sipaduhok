@@ -11,6 +11,10 @@
     @endif
 @endsection
 
+@section('styles')
+    @vite(['resources/css/admin/akademik/promotion/settings.css'])
+@endsection
+
 @section('content')
 @php
     $routePrefix = request()->routeIs('waka.*') ? 'waka.promotion' : 'admin.akademik.promotion';
@@ -144,136 +148,4 @@
     </div>
 </div>
 
-<style>
-.promotion-page {
-    --primary: #4361ee;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --info: #06b6d4;
-    --ink: #1f2937;
-    --muted: #64748b;
-    --line: #e2e8f0;
-    --soft: #f8fafc;
-}
-
-.page-panel,
-.content-card {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
-}
-
-.page-panel {
-    padding: 20px;
-}
-
-.panel-kicker {
-    color: var(--primary);
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-}
-
-.panel-title {
-    color: var(--ink);
-    font-weight: 800;
-    margin-bottom: 4px;
-}
-
-.panel-subtitle {
-    color: var(--muted);
-}
-
-.info-icon {
-    align-items: center;
-    border-radius: 10px;
-    display: inline-flex;
-    height: 36px;
-    justify-content: center;
-    width: 36px;
-}
-
-.info-icon.primary { background: rgba(67, 97, 238, .12); color: var(--primary); }
-.info-icon.success { background: rgba(16, 185, 129, .12); color: var(--success); }
-.info-icon.warning { background: rgba(245, 158, 11, .14); color: var(--warning); }
-
-.content-card {
-    overflow: hidden;
-}
-
-.content-card-header {
-    border-bottom: 1px solid var(--line);
-    padding: 18px 20px;
-}
-
-.content-card-header h5,
-.info-item h6 {
-    color: var(--ink);
-    font-weight: 800;
-}
-
-.content-card-body {
-    padding: 20px;
-}
-
-.form-block {
-    background: var(--soft);
-    border: 1px solid #eef2f7;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    padding: 16px;
-}
-
-.form-label {
-    color: #334155;
-    font-weight: 800;
-}
-
-.action-footer {
-    background: #fff;
-    border-top: 1px solid var(--line);
-    margin: 20px -20px -20px;
-    padding: 16px 20px;
-    text-align: right;
-}
-
-.info-list {
-    display: grid;
-    gap: 14px;
-}
-
-.info-item {
-    align-items: flex-start;
-    background: var(--soft);
-    border: 1px solid #eef2f7;
-    border-radius: 12px;
-    display: flex;
-    gap: 12px;
-    padding: 14px;
-}
-
-.info-item p {
-    color: var(--muted);
-    margin-bottom: 0;
-}
-
-@media (max-width: 767.98px) {
-    .page-panel,
-    .content-card-body {
-        padding: 16px;
-    }
-
-    .action-footer {
-        margin: 16px -16px -16px;
-    }
-
-    .action-footer .btn {
-        width: 100%;
-    }
-}
-</style>
 @endsection

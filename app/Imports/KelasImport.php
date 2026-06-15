@@ -17,17 +17,23 @@ class KelasImport implements ToCollection, WithHeadingRow
     private $cabangs;
     private $tahunAjarans;
     private $waliKelas;
+    private $forcedCabangId;
 
     // Tracking missing entities
     private $missingCabang = [];
     private $missingWaliKelas = [];
     private $warnings = [];
 
-    public function __construct()
+    public function __construct(?int $forcedCabangId = null)
     {
-        $this->cabangs = Cabang::pluck('id', 'nama_cabang')->toArray();
+        $this->forcedCabangId = $forcedCabangId;
+        $this->cabangs = Cabang::when($forcedCabangId, fn($query) => $query->where('id', $forcedCabangId))
+            ->pluck('id', 'nama_cabang')
+            ->toArray();
         $this->tahunAjarans = TahunAjaran::pluck('id', 'nama_tahun_ajaran')->toArray();
-        $this->waliKelas = TenagaPendidik::pluck('id', 'nama_lengkap')->toArray();
+        $this->waliKelas = TenagaPendidik::when($forcedCabangId, function ($query) use ($forcedCabangId) {
+            $query->whereHas('user', fn($userQuery) => $userQuery->where('cabang_id', $forcedCabangId));
+        })->pluck('id', 'nama_lengkap')->toArray();
     }
 
     public function collection(Collection $rows)
@@ -52,8 +58,8 @@ class KelasImport implements ToCollection, WithHeadingRow
             }
 
             // Lookup cabang (optional - kelas tetap dibuat)
-            $cabangId = null;
-            if (!empty($row['nama_cabang'])) {
+            $cabangId = $this->forcedCabangId;
+            if (!$cabangId && !empty($row['nama_cabang'])) {
                 $cabangId = $this->findCabang($row['nama_cabang']);
                 if (!$cabangId) {
                     $cabangName = trim($row['nama_cabang']);

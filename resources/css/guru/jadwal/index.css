@@ -1,0 +1,262 @@
+:root {
+    --g-primary: #4361ee;
+    --g-success: #10b981;
+    --g-warning: #f59e0b;
+    --g-info: #06b6d4;
+    --g-text: #1e293b;
+    --g-muted: #64748b;
+    --g-line: #e2e8f0;
+    --g-soft: #f8fafc;
+}
+
+.guru-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.guru-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.guru-stat {
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--g-line);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    display: flex;
+    gap: 12px;
+    min-height: 92px;
+    padding: 16px;
+}
+
+.guru-stat-icon {
+    align-items: center;
+    border-radius: 10px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.guru-stat-icon-primary {
+    background: rgba(67, 97, 238, 0.12);
+    color: var(--g-primary);
+}
+
+.guru-stat-icon-success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+}
+
+.guru-stat-icon-info {
+    background: rgba(6, 182, 212, 0.12);
+    color: #0e7490;
+}
+
+.guru-stat-icon-warning {
+    background: rgba(245, 158, 11, 0.14);
+    color: #b45309;
+}
+
+.guru-stat-value {
+    color: var(--g-text);
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 4px;
+}
+
+.guru-stat-label {
+    color: var(--g-muted);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.guru-card {
+    background: #fff;
+    border: 1px solid var(--g-line);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+}
+
+.guru-day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+    gap: 16px;
+}
+
+.guru-day-card {
+    background: #fff;
+    border: 1px solid var(--g-line);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+}
+
+.guru-day-header {
+    align-items: center;
+    background: var(--g-soft);
+    border-bottom: 1px solid var(--g-line);
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 14px 16px;
+}
+
+.guru-day-title {
+    align-items: center;
+    color: var(--g-text);
+    display: flex;
+    font-size: 15px;
+    font-weight: 900;
+    gap: 8px;
+    margin: 0;
+}
+
+.guru-day-count {
+    align-items: center;
+    background: rgba(67, 97, 238, 0.1);
+    border-radius: 999px;
+    color: var(--g-primary);
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 900;
+    min-height: 26px;
+    padding: 4px 9px;
+}
+
+.guru-lesson-list {
+    display: grid;
+    gap: 0;
+}
+
+.guru-lesson {
+    border-bottom: 1px solid #eef2f7;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(118px, max-content) minmax(0, 1fr);
+    padding: 14px 16px;
+}
+
+.guru-lesson:last-child {
+    border-bottom: 0;
+}
+
+.guru-time {
+    align-items: baseline;
+    color: var(--g-primary);
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 900;
+    gap: 4px;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.guru-time span {
+    color: var(--g-muted);
+    display: inline;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 0;
+}
+
+.guru-mapel {
+    color: var(--g-text);
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.guru-meta {
+    color: var(--g-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 5px;
+}
+
+.guru-class-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.guru-class-chip {
+    align-items: center;
+    background: rgba(6, 182, 212, 0.12);
+    border-radius: 999px;
+    color: #0e7490;
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1.25;
+    min-height: 26px;
+    padding: 4px 9px;
+}
+
+.guru-empty {
+    color: var(--g-muted);
+    padding: 48px 18px;
+    text-align: center;
+}
+
+.guru-empty-icon {
+    align-items: center;
+    background: #f1f5f9;
+    border-radius: 50%;
+    color: #94a3b8;
+    display: inline-flex;
+    font-size: 22px;
+    height: 56px;
+    justify-content: center;
+    margin: 0 auto 14px;
+    width: 56px;
+}
+
+.guru-empty h5 {
+    color: var(--g-text);
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+@media (max-width: 991.98px) {
+    .guru-day-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .guru-stat-grid,
+    .guru-day-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .guru-stat {
+        min-height: 84px;
+        padding: 14px;
+    }
+
+    .guru-day-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .guru-lesson {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}

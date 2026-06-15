@@ -3,6 +3,7 @@
     File: resources/views/bendahara/partials/sneat-sidebar-menu.blade.php
 
     Compatible dengan Sneat Bootstrap 5 Template
+    Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 --}}
 
 @php
@@ -17,49 +18,52 @@
     </a>
 </li>
 
-<!-- Menu Header - Keuangan -->
+<!-- ============================================ -->
+<!-- UC11: Kelola Tagihan & Pembayaran            -->
+<!-- (Tagihan, Tunggakan, Pembayaran, Config)     -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Keuangan</span>
 </li>
 
-<!-- Kelola Tagihan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') && !Str::contains($currentRoute, 'carryover') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.tagihan.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') || Str::startsWith($currentRoute, 'bendahara.pembayaran') || Str::startsWith($currentRoute, 'bendahara.info-pembayaran') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-file-invoice-dollar"></i>
-        <div>Kelola Tagihan</div>
+        <div>Tagihan & Pembayaran</div>
     </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.tagihan') && !Str::contains($currentRoute, 'carryover') ? 'active' : '' }}">
+            <a href="{{ route('bendahara.tagihan.index') }}" class="menu-link">
+                <div>Kelola Tagihan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::contains($currentRoute, 'bendahara.tagihan.carryover') ? 'active' : '' }}">
+            <a href="{{ route('bendahara.tagihan.carryover') }}" class="menu-link">
+                <div>Tarik Tunggakan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.pembayaran') ? 'active' : '' }}">
+            <a href="{{ route('bendahara.pembayaran.index') }}" class="menu-link">
+                <div>Kelola Pembayaran</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.info-pembayaran') ? 'active' : '' }}">
+            <a href="{{ route('bendahara.info-pembayaran.index') }}" class="menu-link">
+                <div>Config Pembayaran</div>
+            </a>
+        </li>
+    </ul>
 </li>
 
-<!-- Tarik Tunggakan TA Lama -->
-<li class="menu-item {{ Str::contains($currentRoute, 'bendahara.tagihan.carryover') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.tagihan.carryover') }}" class="menu-link">
-        <i class="menu-icon fas fa-arrow-circle-right"></i>
-        <div>Tarik Tunggakan</div>
-    </a>
-</li>
-
-<!-- Kelola Pembayaran -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.pembayaran') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.pembayaran.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-money-bill-wave"></i>
-        <div>Kelola Pembayaran</div>
-    </a>
-</li>
-
-<!-- Info Pembayaran -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.info-pembayaran') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.info-pembayaran.index') }}" class="menu-link">
-        <i class="menu-icon fas fa-cog"></i>
-        <div>Config Pembayaran</div>
-    </a>
-</li>
-
-<!-- Menu Header - Validasi Akses -->
+<!-- ============================================ -->
+<!-- UC14: Validasi Akses Ujian dan Rapor         -->
+<!-- UC16: Memproses Dispensasi Kenaikan Kelas    -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Validasi Akses</span>
+    <span class="menu-header-text">Validasi & Dispensasi</span>
 </li>
 
-<!-- Validasi Ujian & Rapor -->
+<!-- UC14: Validasi Akses Ujian dan Rapor -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.validasi-akses') ? 'active' : '' }}">
     <a href="{{ route('bendahara.validasi-akses.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-circle"></i>
@@ -67,12 +71,7 @@
     </a>
 </li>
 
-<!-- Menu Header - Kenaikan Kelas -->
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Kenaikan Kelas</span>
-</li>
-
-<!-- Validasi Dispensasi -->
+<!-- UC16: Memproses Dispensasi Kenaikan Kelas -->
 <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.promotion.validation') ? 'active' : '' }}">
     <a href="{{ route('bendahara.promotion.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
@@ -80,31 +79,34 @@
     </a>
 </li>
 
-<!-- Menu Header - Laporan -->
+<!-- ============================================ -->
+<!-- UC12: Lihat Laporan Keuangan                 -->
+<!-- (Laporan Pembayaran, Rekap, Belum Lunas)     -->
+<!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Laporan</span>
 </li>
 
-<!-- Laporan Pembayaran -->
-<li class="menu-item {{ $currentRoute == 'bendahara.laporan.index' || $currentRoute == 'bendahara.laporan.cetak' ? 'active' : '' }}">
-    <a href="{{ route('bendahara.laporan.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan') ? 'active open' : '' }}">
+    <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-chart-bar"></i>
-        <div>Laporan Pembayaran</div>
+        <div>Laporan Keuangan</div>
     </a>
-</li>
-
-<!-- Rekap Tagihan -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan.rekap-tagihan') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.laporan.rekap-tagihan') }}" class="menu-link">
-        <i class="menu-icon fas fa-file-alt"></i>
-        <div>Rekap Tagihan</div>
-    </a>
-</li>
-
-<!-- Siswa Belum Lunas -->
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan.belum-lunas') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.laporan.belum-lunas') }}" class="menu-link">
-        <i class="menu-icon fas fa-exclamation-triangle"></i>
-        <div>Siswa Belum Lunas</div>
-    </a>
+    <ul class="menu-sub">
+        <li class="menu-item {{ $currentRoute == 'bendahara.laporan.index' || $currentRoute == 'bendahara.laporan.cetak' ? 'active' : '' }}">
+            <a href="{{ route('bendahara.laporan.index') }}" class="menu-link">
+                <div>Laporan Pembayaran</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan.rekap-tagihan') ? 'active' : '' }}">
+            <a href="{{ route('bendahara.laporan.rekap-tagihan') }}" class="menu-link">
+                <div>Rekap Tagihan</div>
+            </a>
+        </li>
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.laporan.belum-lunas') ? 'active' : '' }}">
+            <a href="{{ route('bendahara.laporan.belum-lunas') }}" class="menu-link">
+                <div>Siswa Belum Lunas</div>
+            </a>
+        </li>
+    </ul>
 </li>

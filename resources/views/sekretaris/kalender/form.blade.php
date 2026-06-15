@@ -9,8 +9,12 @@
     @include('sekretaris.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/sekretaris/kalender/form.css'])
+@endsection
+
 @section('content')
-<div style="max-width: 1400px; margin: 0 auto; padding: 0 1rem;">
+<div class="sekretaris-calendar-form-page">
 <div class="row">
     <div class="col-lg-8">
         <div class="content-card">
@@ -66,7 +70,7 @@
                 </div>
 
                 <!-- Custom Jenis Kegiatan (shown when Lainnya selected) -->
-                <div class="form-group" id="customJenisKegiatanGroup" style="display: none; margin-top: -8px;">
+                <div class="form-group custom-event-group" id="customJenisKegiatanGroup">
                     <label for="custom_jenis_kegiatan" class="form-label">
                         Jenis Kegiatan Kustom <span class="text-danger">*</span>
                     </label>
@@ -212,7 +216,7 @@
                 </div>
 
                 <!-- Buttons -->
-                <div class="d-flex justify-content-between" style="margin-top: 24px;">
+                <div class="d-flex justify-content-between calendar-form-actions">
                     <a href="{{ route('sekretaris.kalender.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Kembali
                     </a>
@@ -227,22 +231,22 @@
     <!-- Info Panel -->
     <div class="col-lg-4">
         <div class="content-card">
-            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">
-                <i class="fas fa-info-circle me-2" style="color: #165fac;"></i>Informasi
+            <h3 class="calendar-info-title">
+                <i class="fas fa-info-circle me-2 calendar-info-icon"></i>Informasi
             </h3>
             
-            <div style="font-size: 14px; color: #666; line-height: 1.6;">
+            <div class="calendar-info-content">
                 <p><strong>Cara Kerja:</strong></p>
-                <ul style="padding-left: 20px; margin-bottom: 12px;">
+                <ul>
                     <li>Kegiatan akan muncul di kalender dashboard</li>
                     <li>Pengumuman otomatis dibuat <strong>H-3</strong></li>
                     <li>Lampiran bisa PDF atau link URL</li>
                 </ul>
                 
-                <hr style="margin: 16px 0;">
+                <hr>
                 
                 <p><strong>Jenis Kegiatan:</strong></p>
-                <ul style="padding-left: 20px; margin-bottom: 12px;">
+                <ul>
                     <li><strong>Field Trip:</strong> Kunjungan edukatif</li>
                     <li><strong>Outing:</strong> Kegiatan di luar sekolah</li>
                     <li><strong>Live In:</strong> Menginap bersama</li>
@@ -250,45 +254,19 @@
                     <li><strong>PTS/PAS:</strong> Ujian</li>
                 </ul>
                 
-                <hr style="margin: 16px 0;">
+                <hr>
                 
-                <p style="margin-bottom: 0;">
-                    <i class="fas fa-lightbulb" style="color: #ffc107;"></i>
+                <p class="calendar-info-tip">
+                    <i class="fas fa-lightbulb calendar-info-tip-icon"></i>
                     <strong> Tips:</strong> Isi waktu untuk kegiatan yang punya jam spesifik. Kosongkan untuk kegiatan seharian.
                 </p>
             </div>
         </div>
     </div>
-    </div>
 </div>
+</div>
+@endsection
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const jenisKegiatanSelect = document.getElementById('jenis_kegiatan');
-    const customGroup = document.getElementById('customJenisKegiatanGroup');
-    const customInput = document.getElementById('custom_jenis_kegiatan');
-    
-    function toggleCustomInput() {
-        if (jenisKegiatanSelect.value === 'lainnya') {
-            customGroup.style.display = 'block';
-            customInput.required = true;
-        } else {
-            customGroup.style.display = 'none';
-            customInput.required = false;
-            customInput.value = '';
-        }
-    }
-    
-    // On page load - check if editing with custom type
-    const currentCustomValue = customInput.value.trim();
-    if (currentCustomValue) {
-        jenisKegiatanSelect.value = 'lainnya';
-        toggleCustomInput();
-    }
-    
-    jenisKegiatanSelect.addEventListener('change', toggleCustomInput);
-});
-</script>
-@endpush
+@section('scripts')
+    @vite(['resources/js/sekretaris/kalender/form.js'])
 @endsection

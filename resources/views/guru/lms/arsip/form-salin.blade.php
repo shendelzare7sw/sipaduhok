@@ -18,78 +18,11 @@
 @endsection
 
 @section('styles')
-<style>
-    .salin-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 26px;
-        max-width: 720px;
-        margin: 0 auto;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-    }
-    .konten-info {
-        background: #f8fafc;
-        border-left: 4px solid #4361ee;
-        padding: 14px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-    }
-    .konten-info .label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: .5px; }
-    .konten-info .value { font-size: 16px; font-weight: 700; color: #1e293b; line-height: 1.4; }
-    .konten-info .meta { font-size: 12px; color: #64748b; margin-top: 4px; }
-
-    .form-section { margin-bottom: 18px; }
-    .form-section label.main-label {
-        display: block;
-        font-size: 13px;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 6px;
-    }
-    .form-section .helper { font-size: 11px; color: #64748b; margin-top: 4px; }
-
-    .target-list { display: grid; gap: 8px; }
-    .target-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all .15s ease;
-    }
-    .target-item:hover { border-color: #4361ee; background: rgba(67,97,238,0.03); }
-    .target-item input[type=radio] { margin: 0; }
-    .target-item.selected { border-color: #4361ee; background: rgba(67,97,238,0.06); }
-    .target-item .info { flex: 1; }
-    .target-item .info .kelas { font-weight: 700; color: #1e293b; }
-    .target-item .info .mapel { font-size: 12px; color: #64748b; }
-
-    .switch-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: #f8fafc;
-        padding: 10px 14px;
-        border-radius: 8px;
-    }
-
-    .action-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-top: 22px;
-        padding-top: 18px;
-        border-top: 1px solid #e5e7eb;
-    }
-</style>
+    @vite(['resources/css/guru/lms/arsip/form-salin.css'])
 @endsection
 
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="guru-lms-arsip-salin-page">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-2">
             <li class="breadcrumb-item"><a href="{{ route('guru.lms.arsip.index') }}">Arsip LMS</a></li>
@@ -113,8 +46,8 @@
             <div class="value">{{ $previewTitle }}</div>
             <div class="meta">
                 {{ $konten->kelas?->nama_kelas ?? '-' }}
-                · {{ $konten->mataPelajaran?->nama_mapel ?? '-' }}
-                · TA {{ $konten->kelas?->tahunAjaran?->nama_tahun_ajaran ?? '-' }}
+                - {{ $konten->mataPelajaran?->nama_mapel ?? '-' }}
+                - TA {{ $konten->kelas?->tahunAjaran?->nama_tahun_ajaran ?? '-' }}
             </div>
         </div>
 
@@ -131,6 +64,8 @@
                 @csrf
                 <input type="hidden" name="type" value="{{ $kontenType }}">
                 <input type="hidden" name="sumber_id" value="{{ $kontenId }}">
+                <input type="hidden" name="kelas_id" value="" data-kelas-input>
+                <input type="hidden" name="mata_pelajaran_id" value="" data-mapel-input>
 
                 <div class="form-section">
                     <label class="main-label">Pilih Kelas + Mata Pelajaran Tujuan</label>
@@ -142,8 +77,6 @@
                                     value="{{ $tujuan['kelas_id'] }}|{{ $tujuan['mata_pelajaran_id'] }}"
                                     @checked($idx === 0)
                                     required>
-                                <input type="hidden" name="kelas_id" value="">
-                                <input type="hidden" name="mata_pelajaran_id" value="">
                                 <div class="info">
                                     <div class="kelas">
                                         <i class="fas fa-school me-1 text-primary"></i>{{ $tujuan['kelas']?->nama_kelas ?? '-' }}
@@ -164,12 +97,12 @@
                         <label class="main-label">Opsi Salin</label>
                         <label class="switch-row">
                             <input type="checkbox" name="sertakan_soal" value="1" checked>
-                            <span><strong>Sertakan semua soal</strong> — duplikat seluruh soal beserta kunci jawaban (jawaban siswa lama TIDAK ikut tersalin).</span>
+                            <span><strong>Sertakan semua soal</strong> - duplikat seluruh soal beserta kunci jawaban (jawaban siswa lama TIDAK ikut tersalin).</span>
                         </label>
                     </div>
                 @endif
 
-                <div class="alert alert-info" style="font-size: 13px;">
+                <div class="alert alert-info copy-note-alert">
                     <i class="fas fa-info-circle me-1"></i>
                     <strong>Catatan:</strong> Setelah disalin, konten akan muncul di kelas tujuan dengan tanggal mulai = hari ini.
                     @if($kontenType === 'tugas')
@@ -195,29 +128,5 @@
 @endsection
 
 @push('scripts')
-<script>
-(function () {
-    const targets = document.querySelectorAll('[data-target]');
-    targets.forEach(label => {
-        label.addEventListener('click', () => {
-            targets.forEach(l => l.classList.remove('selected'));
-            label.classList.add('selected');
-            const radio = label.querySelector('input[type=radio]');
-            if (radio) {
-                radio.checked = true;
-                const [kelasId, mapelId] = (radio.value || '|').split('|');
-                document.querySelector('input[name=kelas_id]').value = kelasId;
-                document.querySelector('input[name=mata_pelajaran_id]').value = mapelId;
-            }
-        });
-    });
-    // Set initial values
-    const initial = document.querySelector('[data-target] input[type=radio]:checked');
-    if (initial) {
-        const [kelasId, mapelId] = (initial.value || '|').split('|');
-        document.querySelector('input[name=kelas_id]').value = kelasId;
-        document.querySelector('input[name=mata_pelajaran_id]').value = mapelId;
-    }
-})();
-</script>
+    @vite(['resources/js/guru/lms/arsip/form-salin.js'])
 @endpush

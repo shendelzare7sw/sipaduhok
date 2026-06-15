@@ -4,35 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekap Presensi - {{ $kelas->nama_kelas }}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .header { margin-bottom: 20px; border-bottom: 3px solid #165fac; padding-bottom: 15px; }
-        .header-inner { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
-        .header-text h1 { color: #165fac; font-size: 18px; margin-bottom: 3px; }
-        .header-text h2 { font-size: 13px; font-weight: normal; color: #555; margin-bottom: 2px; }
-        .header-text p { font-size: 11px; color: #777; }
-        .doc-title { text-align: center; font-size: 16px; font-weight: bold; color: #165fac; margin-top: 8px; }
-        .btn-actions { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 999; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
-        .btn-print { background: #165fac; color: white; }
-        .btn-close { background: #6b7280; color: white; text-decoration: none; display: flex; align-items: center; }
-        .info-box { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; }
-        .info-box div { margin-bottom: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        table th { padding: 10px; background: #165fac; color: white; border: 1px solid #ccc; text-align: center; }
-        table td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-        .summary { margin-top: 30px; padding: 15px; background: #f0f9ff; border-radius: 8px; }
-        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
-        .summary-item { text-align: center; }
-        .summary-item strong { display: block; font-size: 24px; color: #165fac; margin-bottom: 5px; }
-        @media print { body { padding: 10px; } @page { margin: 15mm; } .no-print { display: none !important; } }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/wali-kelas/presensi/print-rekap.css') }}">
+    <script src="{{ asset('js/wali-kelas/presensi/print-rekap.js') }}" defer></script>
 </head>
 <body>
     <div class="btn-actions no-print">
-        <button onclick="window.print()" class="btn btn-print">&#128438; Cetak</button>
-        <button onclick="window.close()" class="btn btn-close">Tutup</button>
+        <button type="button" class="btn btn-print" data-print-page>&#128438; Cetak</button>
+        <button type="button" class="btn btn-close" data-close-window>Tutup</button>
     </div>
 
     @include('partials.print-header', ['cabang' => $cabang ?? null])

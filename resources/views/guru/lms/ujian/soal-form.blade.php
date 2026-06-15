@@ -8,9 +8,17 @@
     @include('guru.partials.sidebar-lms')
 @endsection
 
+@php
+    $selectedTipe = $soal->tipe_soal ?? old('tipe_soal', 'pilihan_ganda');
+@endphp
+
+@push('styles')
+    @vite(['resources/css/guru/lms/ujian/soal-form.css'])
+@endpush
+
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-lg-10">
+<div class="row guru-lms-soal-form-page">
+    <div class="col-12">
         <div class="card-custom">
             <div class="card-header-custom d-flex justify-content-between align-items-center">
                 <span>{{ $soal ? 'Form Edit Soal' : 'Form Soal Baru' }}</span>
@@ -28,11 +36,11 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Tipe Soal <span class="text-danger">*</span></label>
                             <select name="tipe_soal" id="tipeSoal" class="form-select" required {{ $soal ? '' : '' }}>
-                                <option value="pilihan_ganda" {{ ($soal->tipe_soal ?? old('tipe_soal')) == 'pilihan_ganda' ? 'selected' : '' }}>Pilihan Ganda (Satu Jawaban)</option>
-                                <option value="pilihan_ganda_kompleks" {{ ($soal->tipe_soal ?? old('tipe_soal')) == 'pilihan_ganda_kompleks' ? 'selected' : '' }}>Pilihan Ganda Kompleks (Banyak Jawaban)</option>
-                                <option value="benar_salah" {{ ($soal->tipe_soal ?? old('tipe_soal')) == 'benar_salah' ? 'selected' : '' }}>Benar - Salah</option>
-                                <option value="isian_singkat" {{ ($soal->tipe_soal ?? old('tipe_soal')) == 'isian_singkat' ? 'selected' : '' }}>Isian Singkat</option>
-                                <option value="uraian" {{ ($soal->tipe_soal ?? old('tipe_soal')) == 'uraian' ? 'selected' : '' }}>Uraian / Essay</option>
+                                <option value="pilihan_ganda" {{ $selectedTipe == 'pilihan_ganda' ? 'selected' : '' }}>Pilihan Ganda (Satu Jawaban)</option>
+                                <option value="pilihan_ganda_kompleks" {{ $selectedTipe == 'pilihan_ganda_kompleks' ? 'selected' : '' }}>Pilihan Ganda Kompleks (Banyak Jawaban)</option>
+                                <option value="benar_salah" {{ $selectedTipe == 'benar_salah' ? 'selected' : '' }}>Benar - Salah</option>
+                                <option value="isian_singkat" {{ $selectedTipe == 'isian_singkat' ? 'selected' : '' }}>Isian Singkat</option>
+                                <option value="uraian" {{ $selectedTipe == 'uraian' ? 'selected' : '' }}>Uraian / Essay</option>
                             </select>
                         </div>
                         <div class="col-md-4">
@@ -57,7 +65,7 @@
                         <h6 class="fw-bold border-bottom pb-2 mb-3">Opsi Jawaban & Kunci</h6>
                         
                         {{-- 1. Pilihan Ganda (Single) --}}
-                        <div id="sectionPilgan" class="tipe-section" style="display:none;">
+                        <div id="sectionPilgan" class="tipe-section {{ $selectedTipe === 'pilihan_ganda' ? 'is-active' : '' }}">
                             @php 
                                 $pilganOpts = ['A','B','C','D','E']; 
                                 $existingPilgan = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '{}', true);
@@ -76,7 +84,7 @@
                         </div>
 
                         {{-- 2. Pilihan Ganda Kompleks (Multiple) --}}
-                        <div id="sectionPilganKompleks" class="tipe-section" style="display:none;">
+                        <div id="sectionPilganKompleks" class="tipe-section {{ $selectedTipe === 'pilihan_ganda_kompleks' ? 'is-active' : '' }}">
                             @php 
                                 $existingKompleks = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '{}', true);
                                 $kunciKompleks = is_array($soal->kunci_jawaban ?? null) ? $soal->kunci_jawaban : (json_decode($soal->kunci_jawaban ?? '[]', true) ?? []);
@@ -94,7 +102,7 @@
                         </div>
 
                         {{-- 3. Benar Salah --}}
-                        <div id="sectionBenarSalah" class="tipe-section" style="display:none;">
+                        <div id="sectionBenarSalah" class="tipe-section {{ $selectedTipe === 'benar_salah' ? 'is-active' : '' }}">
                             <table class="table table-bordered bg-white">
                                 <thead>
                                     <tr>
@@ -102,7 +110,7 @@
                                         <th width="150" class="text-center">Kunci Jawaban</th>
                                     </tr>
                                 </thead>
-                                <tbody id="bsTbody">
+                                <tbody id="bsTbody" data-next-index="{{ count($existingBS ?? []) }}">
                                     {{-- JS generated rows or loops --}}
                                     @php
                                         $rawBS = is_array($soal->pilihan_jawaban ?? null) ? $soal->pilihan_jawaban : json_decode($soal->pilihan_jawaban ?? '[]', true);
@@ -129,7 +137,7 @@
                         </div>
 
                         {{-- 4. Isian Singkat --}}
-                        <div id="sectionIsian" class="tipe-section" style="display:none;">
+                        <div id="sectionIsian" class="tipe-section {{ $selectedTipe === 'isian_singkat' ? 'is-active' : '' }}">
                             <label class="form-label text-muted">Kunci Jawaban Singkat</label>
                             <input type="text" name="kunci_jawaban_isian" class="form-control" value="{{ $soal->kunci_jawaban ?? '' }}" placeholder="Contoh: Soekarno">
                             <small class="text-info">
@@ -138,7 +146,7 @@
                         </div>
 
                         {{-- 5. Uraian --}}
-                        <div id="sectionUraian" class="tipe-section" style="display:none;">
+                        <div id="sectionUraian" class="tipe-section {{ $selectedTipe === 'uraian' ? 'is-active' : '' }}">
                             <div class="alert alert-info border-0">
                                 <i class="fas fa-info-circle me-1"></i>
                                 Untuk soal uraian, guru harus melakukan koreksi manual.
@@ -158,56 +166,6 @@
 </div>
 
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tipeSelect = document.getElementById('tipeSoal');
-    const sections = {
-        'pilihan_ganda': document.getElementById('sectionPilgan'),
-        'pilihan_ganda_kompleks': document.getElementById('sectionPilganKompleks'),
-        'benar_salah': document.getElementById('sectionBenarSalah'),
-        'isian_singkat': document.getElementById('sectionIsian'),
-        'uraian': document.getElementById('sectionUraian'),
-    };
-
-    function showSection(type) {
-        // Hide all
-        Object.values(sections).forEach(el => el.style.display = 'none');
-        // Show selected
-        if(sections[type]) sections[type].style.display = 'block';
-    }
-
-    tipeSelect.addEventListener('change', function() {
-        showSection(this.value);
-    });
-
-    // Init
-    showSection(tipeSelect.value);
-
-    // Benar Salah Row Adder
-    let bsIdx = {{ count($existingBS ?? []) }};
-    const addBsBtn = document.getElementById('addBsRow');
-    const bsTbody = document.getElementById('bsTbody');
-    
-    if (addBsBtn && bsTbody) {
-        addBsBtn.addEventListener('click', function() {
-            const row = `
-                <tr>
-                    <td>
-                        <input type="text" name="pilihan_jawaban_bs[${bsIdx}][pernyataan]" class="form-control" placeholder="Tulis pernyataan...">
-                    </td>
-                    <td class="text-center align-middle">
-                        <select name="pilihan_jawaban_bs[${bsIdx}][kunci]" class="form-select form-select-sm">
-                            <option value="B">Benar</option>
-                            <option value="S">Salah</option>
-                        </select>
-                    </td>
-                </tr>
-            `;
-            bsTbody.insertAdjacentHTML('beforeend', row);
-            bsIdx++;
-        });
-    }
-});
-</script>
+    @vite(['resources/js/guru/lms/ujian/soal-form.js'])
 @endpush
 @endsection

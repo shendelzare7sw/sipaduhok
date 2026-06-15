@@ -7,8 +7,12 @@
     @include('orang-tua.partials.sneat-sidebar-menu')
 @endsection
 
+@section('styles')
+    @vite(['resources/css/orang-tua/presensi/edit-izin.css'])
+@endsection
+
 @section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y orang-tua-edit-izin-page">
 
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -117,8 +121,7 @@
                                             <div class="text-center mb-2">
                                                 <img src="{{ asset('storage/' . $buktiPath) }}"
                                                      alt="Bukti"
-                                                     class="img-fluid rounded"
-                                                     style="max-height: 150px;">
+                                                     class="img-fluid rounded proof-preview">
                                             </div>
                                         @elseif($isPdf)
                                             <div class="text-center mb-2">

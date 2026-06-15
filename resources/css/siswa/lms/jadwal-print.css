@@ -1,0 +1,206 @@
+.siswa-lms-jadwal-print-page,
+.siswa-lms-jadwal-print-page * {
+    box-sizing: border-box;
+}
+
+.siswa-lms-jadwal-print-page * {
+    margin: 0;
+    padding: 0;
+}
+
+.siswa-lms-jadwal-print-page {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: white;
+}
+
+.siswa-lms-jadwal-print-page .header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #000;
+    padding-bottom: 15px;
+}
+
+.siswa-lms-jadwal-print-page .header h1 {
+    color: #000;
+    font-size: 18px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.siswa-lms-jadwal-print-page .header h2 {
+    color: #333;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.siswa-lms-jadwal-print-page .info-box {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    font-size: 12px;
+}
+
+.siswa-lms-jadwal-print-page .info-box div {
+    flex: 1;
+}
+
+.siswa-lms-jadwal-print-page .info-box strong {
+    color: #000;
+    font-weight: 600;
+}
+
+.siswa-lms-jadwal-print-page .day-section {
+    margin-bottom: 30px;
+    page-break-inside: avoid;
+}
+
+.siswa-lms-jadwal-print-page .day-header {
+    background: #165fac;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px 5px 0 0;
+}
+
+.siswa-lms-jadwal-print-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.siswa-lms-jadwal-print-page table thead {
+    background: #e5e7eb;
+}
+
+.siswa-lms-jadwal-print-page table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.siswa-lms-jadwal-print-page table td {
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    background: white;
+}
+
+.siswa-lms-jadwal-print-page table tbody tr:nth-child(even) {
+    background: #f9fafb;
+}
+
+.siswa-lms-jadwal-print-page table tbody tr.break-row {
+    background: #fff9c4;
+}
+
+.siswa-lms-jadwal-print-page table tbody tr.break-row td {
+    font-weight: bold;
+    color: #f57f17;
+}
+
+.siswa-lms-jadwal-print-page .col-number {
+    width: 80px;
+}
+
+.siswa-lms-jadwal-print-page .col-time {
+    width: 150px;
+}
+
+.siswa-lms-jadwal-print-page .text-center {
+    text-align: center;
+}
+
+.siswa-lms-jadwal-print-page .no-schedule {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    font-style: italic;
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+}
+
+.siswa-lms-jadwal-print-page .footer {
+    margin-top: 30px;
+    text-align: right;
+    padding-top: 15px;
+    border-top: 2px solid #e5e7eb;
+    font-size: 11px;
+}
+
+.siswa-lms-jadwal-print-page .signature-box {
+    display: inline-block;
+    text-align: center;
+    min-width: 200px;
+}
+
+.siswa-lms-jadwal-print-page .signature-role {
+    margin-top: 5px;
+}
+
+.siswa-lms-jadwal-print-page .signature-line {
+    margin-top: 50px;
+    border-top: 1px solid #333;
+    padding-top: 5px;
+    font-weight: 600;
+}
+
+.siswa-lms-jadwal-print-page .print-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 24px;
+    background: #1565c0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    transition: all 0.3s;
+}
+
+.siswa-lms-jadwal-print-page .print-button:hover {
+    background: #0d47a1;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 15mm;
+    }
+
+    .siswa-lms-jadwal-print-page {
+        padding: 10px;
+    }
+
+    .siswa-lms-jadwal-print-page .no-print,
+    .siswa-lms-jadwal-print-page .print-button {
+        display: none !important;
+    }
+
+    nav,
+    header,
+    aside,
+    .navbar,
+    .sidebar,
+    .topbar,
+    .footer-app,
+    .app-menu,
+    .layout-wrapper,
+    .layout-container,
+    .content-wrapper {
+        display: none !important;
+    }
+}

@@ -6,18 +6,77 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
-use App\Models\Cabang;
 use App\Models\WaliKelasAssignment;
 use Illuminate\Http\Request;
 
 class WaliKelasController extends Controller
 {
+    private function getUserCabangId(): int
+    {
+        $cabangId = auth()->user()->cabang_id;
+
+        if (!$cabangId) {
+            abort(403, 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
+        }
+
+        return (int) $cabangId;
+    }
+
+    private function ensureKelasInUserCabang(Kelas $kelas): void
+    {
+        if ((int) $kelas->cabang_id !== $this->getUserCabangId()) {
+            abort(403, 'Anda tidak berhak mengakses kelas dari cabang lain.');
+        }
+    }
+
+    private function scopeActiveWaliKelasUser($query, int $userCabangId): void
+    {
+        $query->where('cabang_id', $userCabangId)
+            ->where('is_active', true)
+            ->where(function ($roleQuery) {
+                $roleQuery->where('role', 'wali_kelas')
+                    ->orWhereHas('roleRelation', fn($relationQuery) => $relationQuery->where('name', 'wali_kelas'));
+            });
+    }
+
+    private function ensureWaliKelasInUserCabang(?int $waliKelasId): void
+    {
+        if (!$waliKelasId) {
+            return;
+        }
+
+        $userCabangId = $this->getUserCabangId();
+
+        $exists = TenagaPendidik::where('id', $waliKelasId)
+            ->whereHas('user', function ($query) use ($userCabangId) {
+                $this->scopeActiveWaliKelasUser($query, $userCabangId);
+            })
+            ->exists();
+
+        if (!$exists) {
+            abort(403, 'Wali kelas harus berasal dari cabang Anda.');
+        }
+    }
+
+    private function getWaliKelasOptions(int $userCabangId)
+    {
+        return TenagaPendidik::with([
+            'user.cabang',
+            'waliKelasAssignments' => function ($query) use ($userCabangId) {
+                $query->whereHas('kelas', fn($kelasQuery) => $kelasQuery->where('cabang_id', $userCabangId))
+                    ->with(['kelas.cabang']);
+            },
+        ])
+            ->whereHas('user', function ($query) use ($userCabangId) {
+                $this->scopeActiveWaliKelasUser($query, $userCabangId);
+            })
+            ->orderBy('nama_lengkap')
+            ->get();
+    }
+
     public function index(Request $request)
     {
-        $userCabangId = auth()->user()->cabang_id;
-        if (!$userCabangId) {
-            return redirect()->back()->with('error', 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
-        }
+        $userCabangId = $this->getUserCabangId();
 
         $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelasAssignments.tenagaPendidik.user'])->withCount('siswa');
 
@@ -72,16 +131,8 @@ class WaliKelasController extends Controller
             $currentTahunAjaran = TahunAjaran::where('is_active', true)->first();
         }
 
-        // Available wali kelas options
-        $waliKelasOptions = TenagaPendidik::with(['user', 'waliKelasAssignments.kelas.cabang'])
-            ->whereHas('user', function ($q) {
-                $q->where(function ($sq) {
-                    $sq->where('role', 'wali_kelas')
-                        ->orWhereHas('roleRelation', fn($rq) => $rq->where('name', 'wali_kelas'));
-                })->where('is_active', true);
-            })
-            ->orderBy('nama_lengkap')
-            ->get();
+        // Available wali kelas options, scoped to this Waka cabang.
+        $waliKelasOptions = $this->getWaliKelasOptions($userCabangId);
 
         // Statistics (filtered by user's cabang)
         $stats = [
@@ -93,8 +144,14 @@ class WaliKelasController extends Controller
             'kelasWithoutWali' => Kelas::where('cabang_id', $userCabangId)
                 ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereDoesntHave('waliKelasAssignments')->count(),
-            'totalWaliKelas' => TenagaPendidik::whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
-                ->where('cabang_id', $userCabangId))->count(),
+            'totalWaliKelas' => TenagaPendidik::whereHas('user', function ($query) use ($userCabangId) {
+                $query->where('cabang_id', $userCabangId)
+                    ->where('is_active', true)
+                    ->where(function ($roleQuery) {
+                        $roleQuery->whereIn('role', ['wali_kelas', 'guru_pengajar'])
+                            ->orWhereHas('roleRelation', fn($relationQuery) => $relationQuery->whereIn('name', ['wali_kelas', 'guru_pengajar']));
+                    });
+            })->count(),
         ];
 
         return view('waka.wali-kelas.index', compact(
@@ -109,32 +166,36 @@ class WaliKelasController extends Controller
 
     public function assign(Request $request, $kelasId)
     {
-        $request->validate([
+        $validated = $request->validate([
             'wali_kelas_id' => 'nullable|exists:tenaga_pendidik,id'
         ]);
 
         $kelas = Kelas::findOrFail($kelasId);
+        $this->ensureKelasInUserCabang($kelas);
 
-        if ($request->filled('wali_kelas_id')) {
+        $waliKelasId = $validated['wali_kelas_id'] ?? null;
+        $this->ensureWaliKelasInUserCabang($waliKelasId ? (int) $waliKelasId : null);
+
+        if ($waliKelasId) {
             // Check if assignment already exists
             $exists = WaliKelasAssignment::where('kelas_id', $kelas->id)
-                ->where('tenaga_pendidik_id', $request->wali_kelas_id)
+                ->where('tenaga_pendidik_id', $waliKelasId)
                 ->exists();
 
             if ($exists) {
-                return redirect()->route('waka.wali-kelas.index')
+                return back()
                     ->with('info', 'Wali kelas ini sudah ditugaskan ke kelas ' . $kelas->nama_kelas);
             }
 
             // Create new assignment (keeping existing assignments - multi-class support)
             WaliKelasAssignment::create([
-                'tenaga_pendidik_id' => $request->wali_kelas_id,
+                'tenaga_pendidik_id' => $waliKelasId,
                 'kelas_id' => $kelas->id,
                 'assigned_at' => now(),
             ]);
 
             // Update legacy field for backward compatibility
-            $kelas->wali_kelas_id = $request->wali_kelas_id;
+            $kelas->wali_kelas_id = $waliKelasId;
             $message = 'Wali kelas berhasil ditugaskan';
         } else {
             // Remove all wali kelas assignments
@@ -145,19 +206,19 @@ class WaliKelasController extends Controller
 
         $kelas->save();
 
-        return redirect()->route('waka.wali-kelas.index')
-            ->with('success', $message);
+        return back()->with('success', $message);
     }
 
     public function show(Kelas $kelas)
     {
-        $kelas->load(['waliKelasAssignments.tenagaPendidik.user', 'siswa', 'tahunAjaran', 'cabang']);
+        $this->ensureKelasInUserCabang($kelas);
 
-        // Available wali kelas options
-        $waliKelasOptions = TenagaPendidik::with(['user', 'waliKelasAssignments.kelas.cabang'])
-            ->whereHas('user', fn($q) => $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])->where('is_active', true))
-            ->orderBy('nama_lengkap')
-            ->get();
+        $userCabangId = $this->getUserCabangId();
+
+        $kelas->load(['waliKelas.user', 'waliKelasAssignments.tenagaPendidik.user.cabang', 'siswa', 'tahunAjaran', 'cabang']);
+
+        // Available wali kelas options, scoped to this Waka cabang.
+        $waliKelasOptions = $this->getWaliKelasOptions($userCabangId);
 
         // Statistics for this class
         $stats = [
@@ -171,6 +232,7 @@ class WaliKelasController extends Controller
 
     public function print(Request $request)
     {
+        $userCabangId = $this->getUserCabangId();
         $query = Kelas::with(['tahunAjaran', 'cabang', 'waliKelasAssignments.tenagaPendidik'])->withCount('siswa');
 
         // Apply same filters
@@ -188,7 +250,7 @@ class WaliKelasController extends Controller
         }
 
         // Mandatory filter by user's assigned cabang
-        $query->where('cabang_id', auth()->user()->cabang_id);
+        $query->where('cabang_id', $userCabangId);
 
         if ($request->filled('status')) {
             if ($request->status == 'assigned') {

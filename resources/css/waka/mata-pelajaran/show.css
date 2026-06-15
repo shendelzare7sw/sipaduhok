@@ -1,0 +1,47 @@
+.table-card-title {
+    color: #fff;
+}
+
+.progress-thin {
+    height: 5px;
+}
+
+.progress-fill-full {
+    width: 100%;
+}
+
+.progress-fill-empty {
+    width: 0;
+}
+
+@media (max-width: 767.98px) {
+    .table-card-mobile thead {
+        display: none;
+    }
+
+    .table-card-mobile tbody tr {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        display: block;
+        margin-bottom: 10px;
+        padding: 14px;
+    }
+
+    .table-card-mobile tbody td {
+        align-items: center;
+        border: none;
+        display: flex;
+        font-size: 13px;
+        justify-content: space-between;
+        padding: 6px 0;
+    }
+
+    .table-card-mobile tbody td::before {
+        color: #6b7280;
+        content: attr(data-label);
+        font-weight: 600;
+        margin-right: 12px;
+        white-space: nowrap;
+    }
+}

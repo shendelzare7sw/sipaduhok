@@ -1,0 +1,12 @@
+.guru-lms-ujian-soal-page .question-preview {
+    max-width: 400px;
+}
+
+.guru-lms-ujian-soal-page .empty-icon {
+    font-size: 64px;
+    opacity: 0.2;
+}
+
+.guru-lms-ujian-soal-page .delete-form {
+    display: inline;
+}

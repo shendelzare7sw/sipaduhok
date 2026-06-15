@@ -164,7 +164,7 @@
             </tr>
             <tr>
                 <td>Metode Pembayaran</td>
-                <td>: {{ strtoupper($pembayaran->metode_pembayaran) }}</td>
+                <td>: {{ $pembayaran->metode_pembayaran === 'transfer' ? 'DIRECT TRANSFER' : strtoupper($pembayaran->metode_pembayaran) }}</td>
             </tr>
             <tr>
                 <td>Status</td>
