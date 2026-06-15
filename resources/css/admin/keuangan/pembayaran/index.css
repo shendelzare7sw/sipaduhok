@@ -272,8 +272,8 @@
         width: 100%;
     }
 
-    .dropdown,
-    .dropdown-toggle {
+    .filter-area .dropdown,
+    .filter-area .dropdown-toggle {
         width: 100%;
     }
 
