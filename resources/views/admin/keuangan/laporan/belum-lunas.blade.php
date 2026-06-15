@@ -14,9 +14,9 @@
 
 @section('content')
     <div class="report-page">
-        <div class="card mb-4">
-            <div class="card-body">
-                <form action="{{ route('admin.keuangan.laporan.belum-lunas') }}" method="GET" class="row align-items-end">
+        <div class="dashboard-card mb-4">
+            <div class="filter-area">
+                <form action="{{ route('admin.keuangan.laporan.belum-lunas') }}" method="GET" class="row align-items-end w-100 m-0">
                     <div class="col-md-4 mb-2 mb-md-0">
                         <label class="form-label fw-bold small text-muted">KELAS</label>
                         <select name="kelas_id" class="form-select">
@@ -41,69 +41,91 @@
             </div>
         </div>
 
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="stat-card bg-gradient-red">
-                    <div class="stat-content">
-                        <div class="stat-title">Siswa Belum Lunas</div>
-                        <div class="stat-number stat-number-lg">{{ $siswaList->count() }}</div>
-                        <div class="stat-desc">Siswa yang menunggak</div>
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="dashboard-card h-100">
+                    <div class="stat-widget">
+                        <div class="stat-details">
+                            <div class="stat-value">{{ $siswaList->count() }}</div>
+                            <div class="stat-label">Siswa Belum Lunas</div>
+                        </div>
+                        <div class="stat-icon-wrapper stat-icon-danger">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
                     </div>
-                    <div class="stat-icon-bg stat-icon-bg-lg">
-                        <i class="fas fa-user-clock"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 mb-3">
-                <div class="stat-card bg-gradient-orange">
-                    <div class="stat-content">
-                        <div class="stat-title">Total Sisa Tagihan</div>
-                        <div class="stat-number stat-number-lg">Rp {{ number_format($siswaList->sum('sisa_tagihan'), 0, ',', '.') }}</div>
-                        <div class="stat-desc">Piutang berjalan</div>
-                    </div>
-                    <div class="stat-icon-bg stat-icon-bg-lg">
-                        <i class="fas fa-hand-holding-usd"></i>
+                    <div class="stat-footer">
+                        <span>Siswa yang menunggak</span>
+                        <i class="fas fa-users opacity-50"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 mb-3">
-                <div class="stat-card bg-gradient-blue">
-                    <div class="stat-content">
-                        <div class="stat-title">Total Tagihan</div>
-                        <div class="stat-number stat-number-lg">Rp {{ number_format($siswaList->sum('total_tagihan'), 0, ',', '.') }}</div>
-                        <div class="stat-desc">Target keseluruhan</div>
+            <div class="col-md-3">
+                <div class="dashboard-card h-100">
+                    <div class="stat-widget">
+                        <div class="stat-details">
+                            <div class="stat-value">Rp {{ number_format($siswaList->sum('sisa_tagihan'), 0, ',', '.') }}</div>
+                            <div class="stat-label">Total Sisa Tagihan</div>
+                        </div>
+                        <div class="stat-icon-wrapper stat-icon-warning">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
                     </div>
-                    <div class="stat-icon-bg stat-icon-bg-lg">
-                        <i class="fas fa-file-invoice-dollar"></i>
+                    <div class="stat-footer">
+                        <span>Piutang berjalan</span>
+                        <i class="fas fa-chart-line opacity-50"></i>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 mb-3">
-                <div class="stat-card bg-gradient-green">
-                    <div class="stat-content">
-                        <div class="stat-title">Total Terbayar</div>
-                        <div class="stat-number stat-number-lg">Rp {{ number_format($siswaList->sum('total_bayar'), 0, ',', '.') }}</div>
-                        <div class="stat-desc">Sudah divalidasi</div>
+            <div class="col-md-3">
+                <div class="dashboard-card h-100">
+                    <div class="stat-widget">
+                        <div class="stat-details">
+                            <div class="stat-value">Rp {{ number_format($siswaList->sum('total_tagihan'), 0, ',', '.') }}</div>
+                            <div class="stat-label">Total Tagihan</div>
+                        </div>
+                        <div class="stat-icon-wrapper stat-icon-primary">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
                     </div>
-                    <div class="stat-icon-bg stat-icon-bg-lg">
-                        <i class="fas fa-check-circle"></i>
+                    <div class="stat-footer">
+                        <span>Target keseluruhan</span>
+                        <i class="fas fa-bullseye opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="dashboard-card h-100">
+                    <div class="stat-widget">
+                        <div class="stat-details">
+                            <div class="stat-value">Rp {{ number_format($siswaList->sum('total_bayar'), 0, ',', '.') }}</div>
+                            <div class="stat-label">Total Terbayar</div>
+                        </div>
+                        <div class="stat-icon-wrapper stat-icon-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                    <div class="stat-footer">
+                        <span>Sudah divalidasi</span>
+                        <i class="fas fa-shield-alt opacity-50"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-list-ul me-2 text-primary"></i>Daftar Rincian Tunggakan</h5>
+        <div class="dashboard-card mb-4">
+            <div class="card-header-clean">
+                <h5 class="card-title-clean">
+                    <i class="fas fa-list-ul card-title-icon"></i> Daftar Rincian Tunggakan
+                </h5>
                 <span class="badge bg-danger">{{ $siswaList->count() }} Data Ditemukan</span>
             </div>
             <div class="card-body p-0">
                 @if($siswaList->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-belum-lunas mb-0">
+                        <table class="table table-clean mb-0">
                             <thead>
                                 <tr>
                                     <th class="text-center" width="50">No</th>
