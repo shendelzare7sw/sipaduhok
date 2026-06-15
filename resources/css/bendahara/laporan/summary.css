@@ -1,162 +1,167 @@
-.report-page {
-    margin: 0 auto;
-    max-width: 1400px;
-    padding: 0 1rem;
-}
-
-.stat-card {
-    border: none;
+/* Clean Summary CSS */
+.dashboard-card {
+    background: var(--surface-color, #fff);
+    border: 1px solid var(--border-color, #e2e8f0);
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    color: #fff;
-    height: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
-    padding: 24px;
-    position: relative;
-    transition: transform 0.2s;
 }
 
-.stat-card:hover {
-    transform: translateY(-5px);
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
 }
 
-.stat-content {
-    position: relative;
-    z-index: 2;
+.card-header-clean {
+    background: transparent;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    padding: 1.1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
 }
 
-.stat-title {
-    font-size: 13px;
+.card-title-clean {
+    font-size: 1rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    opacity: 0.9;
-    text-transform: uppercase;
+    color: var(--text-main, #1e293b);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.stat-number {
-    font-size: 22px;
+.card-title-icon {
+    color: var(--primary-color, #4361ee);
+}
+
+.stat-widget {
+    padding: 1.4rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.stat-icon-primary {
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.stat-icon-warning {
+    color: #f59e0b;
+    background: #fffbeb;
+}
+
+.stat-icon-success {
+    color: #10b981;
+    background: #ecfdf5;
+}
+
+.stat-icon-danger {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.stat-icon-purple {
+    color: #8b5cf6;
+    background: #f5f3ff;
+}
+
+.stat-details {
+    flex-grow: 1;
+}
+
+.stat-value {
+    font-size: 1.75rem;
     font-weight: 700;
+    color: var(--text-main, #1e293b);
     line-height: 1.2;
-    margin-bottom: 4px;
+    margin-bottom: 0.2rem;
 }
 
-.stat-number-lg {
-    font-size: 24px;
-}
-
-.stat-desc,
-.stat-label-sub {
-    font-size: 13px;
-    opacity: 0.8;
-}
-
-.stat-icon-bg {
-    font-size: 60px;
-    opacity: 0.15;
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 1;
-}
-
-.stat-icon-bg-lg {
-    font-size: 70px;
-}
-
-.bg-gradient-blue {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-}
-
-.bg-gradient-green {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.bg-gradient-orange {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-}
-
-.bg-gradient-red {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-}
-
-.bg-gradient-purple {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-}
-
-.btn-gradient-blue {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border: none;
-}
-
-.btn-gradient-green {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border: none;
-}
-
-.btn-blue-text {
-    color: #2563eb;
-}
-
-.table thead th {
-    background: #f8f9fc;
-    border-bottom: 2px solid #e3e6f0;
-    color: #4e73df;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.table-belum-lunas thead th {
-    background: #f9fafb;
-    border-bottom-color: #e5e7eb;
-    color: #4b5563;
-    font-size: 13px;
+.stat-label {
+    font-size: 0.8rem;
     font-weight: 600;
+    color: var(--text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.progress-bar-container,
-.progress-bar-custom {
+.stat-footer {
+    padding: 0.75rem 1.5rem 1rem;
+    border-top: 1px dashed var(--border-color, #e2e8f0);
+    font-size: 0.8rem;
+    color: var(--text-muted, #64748b);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-clean {
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.table-clean th {
+    background: var(--background-color, #f8fafc);
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    color: var(--text-muted, #64748b);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 1.2rem;
+    white-space: nowrap;
+}
+
+.table-clean td {
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    padding: 1rem 1.2rem;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+.table-clean tbody tr:hover {
+    background-color: var(--background-color, #f8fafc);
+}
+
+.progress-bar-container {
     background: #eaecf4;
     border-radius: 10px;
     height: 8px;
     overflow: hidden;
 }
 
-.progress-bar-custom {
-    background: #e5e7eb;
-    border-radius: 4px;
-}
-
 .progress-fill {
     height: 100%;
     width: 0;
+    transition: width 0.5s ease;
 }
 
 .progress-fill.progress-good {
     background: #10b981;
 }
 
-.progress-text.progress-good {
-    color: #10b981;
-}
-
 .progress-fill.progress-warning {
     background: #f59e0b;
 }
 
-.progress-text.progress-warning {
-    color: #f59e0b;
-}
-
 .progress-fill.progress-danger {
     background: #ef4444;
-}
-
-.progress-text.progress-danger {
-    color: #ef4444;
 }
 
 .currency-font {
@@ -165,48 +170,25 @@
 }
 
 @media (max-width: 768px) {
-    .stat-card {
-        padding: 16px;
+    .stat-widget {
+        padding: 1rem;
     }
 
-    .stat-number {
-        font-size: 16px;
+    .stat-value {
+        font-size: 1.5rem;
     }
 
-    .stat-title {
-        font-size: 11px;
+    .stat-label {
+        font-size: 0.75rem;
     }
 
-    .stat-icon-bg,
-    .stat-icon-bg-lg {
-        font-size: 40px;
-        right: 12px;
-    }
-
-    .table thead th {
-        font-size: 10px;
-        padding: 8px 6px;
-    }
-
-    .table td {
-        font-size: 12px;
-        padding: 8px 6px;
-    }
-
-    .currency-font {
-        font-size: 12px;
-    }
-
-    .card-body.py-3 .row {
+    .card-header-clean {
         flex-direction: column;
-        gap: 12px;
+        align-items: flex-start;
     }
 
-    .card-body.py-3 .col-auto {
-        text-align: left;
-    }
-
-    .card-body.py-3 .btn {
-        width: 100%;
+    .table-clean th,
+    .table-clean td {
+        padding: 0.75rem;
     }
 }

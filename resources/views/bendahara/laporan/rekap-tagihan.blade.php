@@ -15,82 +15,108 @@
 @section('content')
     <div class="report-page">
         <div class="container-fluid px-0">
-            <div class="card shadow mb-4 bg-gradient-blue border-0">
-                <div class="card-body py-3">
-                    <div class="row align-items-center">
-                        <div class="col text-white">
-                            <h5 class="m-0 fw-bold">Tahun Ajaran: {{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</h5>
-                            <p class="small mb-0 opacity-75">
-                                Periode:
-                                {{ $tahunAjaran ? $tahunAjaran->tanggal_mulai->format('d/m/Y') . ' - ' . $tahunAjaran->tanggal_selesai->format('d/m/Y') : '-' }}
-                            </p>
-                        </div>
-                        <div class="col-auto">
-                            <a href="{{ route('bendahara.laporan.cetak-rekap-tagihan') }}" class="btn btn-light fw-bold px-4 shadow-sm btn-blue-text" target="_blank">
-                                <i class="fas fa-print me-1"></i> Cetak Rekap
-                            </a>
-                        </div>
+            <div class="dashboard-card mb-4">
+                <div class="card-header-clean">
+                    <div>
+                        <h5 class="card-title-clean">
+                            <i class="fas fa-calendar-alt card-title-icon"></i>
+                            Tahun Ajaran: {{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}
+                        </h5>
+                        <small class="text-muted">
+                            Periode: {{ $tahunAjaran ? $tahunAjaran->tanggal_mulai->format('d/m/Y') . ' - ' . $tahunAjaran->tanggal_selesai->format('d/m/Y') : '-' }}
+                        </small>
+                    </div>
+                    <div>
+                        <a href="{{ route('bendahara.laporan.cetak-rekap-tagihan') }}" class="btn btn-primary btn-sm shadow-sm" target="_blank">
+                            <i class="fas fa-print me-1"></i> Cetak Rekap
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <div class="row mb-4">
-                <div class="col-xl-3 col-md-6 mb-3">
-                    <div class="stat-card bg-gradient-blue">
-                        <div class="stat-content">
-                            <div class="stat-title">Total Tagihan</div>
-                            <div class="stat-number">Rp {{ number_format($grandTotal['tagihan'], 0, ',', '.') }}</div>
-                            <div class="stat-label-sub">Seluruh Kelas</div>
-                        </div>
-                        <div class="stat-icon-bg"><i class="fas fa-file-invoice"></i></div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-3">
-                    <div class="stat-card bg-gradient-green">
-                        <div class="stat-content">
-                            <div class="stat-title">Total Terbayar</div>
-                            <div class="stat-number">Rp {{ number_format($grandTotal['bayar'], 0, ',', '.') }}</div>
-                            <div class="stat-label-sub">Dana Masuk</div>
-                        </div>
-                        <div class="stat-icon-bg"><i class="fas fa-check-circle"></i></div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-3">
-                    <div class="stat-card bg-gradient-red">
-                        <div class="stat-content">
-                            <div class="stat-title">Total Sisa</div>
-                            <div class="stat-number">Rp {{ number_format($grandTotal['sisa'], 0, ',', '.') }}</div>
-                            <div class="stat-label-sub">Belum Dibayar</div>
-                        </div>
-                        <div class="stat-icon-bg"><i class="fas fa-wallet"></i></div>
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-md-6 mb-3">
-                    <div class="stat-card bg-gradient-purple">
-                        <div class="stat-content">
-                            <div class="stat-title">Persentase Lunas</div>
-                            <div class="stat-number">
-                                {{ $grandTotal['tagihan'] > 0 ? round(($grandTotal['bayar'] / $grandTotal['tagihan']) * 100, 1) : 0 }}%
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="dashboard-card h-100">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($grandTotal['tagihan'], 0, ',', '.') }}</div>
+                                <div class="stat-label">Total Tagihan</div>
                             </div>
-                            <div class="stat-label-sub">Rata-rata Kelas</div>
+                            <div class="stat-icon-wrapper stat-icon-primary">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
                         </div>
-                        <div class="stat-icon-bg"><i class="fas fa-chart-pie"></i></div>
+                        <div class="stat-footer">
+                            <span>Seluruh Kelas</span>
+                            <i class="fas fa-globe opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="dashboard-card h-100">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($grandTotal['bayar'], 0, ',', '.') }}</div>
+                                <div class="stat-label">Total Terbayar</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Dana Masuk</span>
+                            <i class="fas fa-arrow-down opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="dashboard-card h-100">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($grandTotal['sisa'], 0, ',', '.') }}</div>
+                                <div class="stat-label">Total Sisa</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-danger">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Belum Dibayar</span>
+                            <i class="fas fa-exclamation-circle opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="dashboard-card h-100">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">{{ $grandTotal['tagihan'] > 0 ? round(($grandTotal['bayar'] / $grandTotal['tagihan']) * 100, 1) : 0 }}%</div>
+                                <div class="stat-label">Persentase Lunas</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-purple">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Rata-rata Kelas</span>
+                            <i class="fas fa-percentage opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-primary">
-                        <i class="fas fa-list-alt me-2"></i>Rincian Pembayaran Per Kelas
-                    </h6>
+            <div class="dashboard-card mb-4">
+                <div class="card-header-clean">
+                    <h5 class="card-title-clean">
+                        <i class="fas fa-list-alt card-title-icon"></i> Rincian Pembayaran Per Kelas
+                    </h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-clean mb-0">
                             <thead>
                                 <tr>
                                     <th class="text-center" width="50">No</th>
@@ -165,13 +191,13 @@
                 </div>
             </div>
 
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-white">
-                    <h6 class="m-0 fw-bold text-primary">
-                        <i class="fas fa-chart-bar me-2"></i>Statistik Pembayaran Per Jenjang
-                    </h6>
+            <div class="dashboard-card mb-4">
+                <div class="card-header-clean">
+                    <h5 class="card-title-clean">
+                        <i class="fas fa-chart-bar card-title-icon"></i> Statistik Pembayaran Per Jenjang
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     @php
                         $perJenjang = $kelasList->groupBy('jenjang')->map(function ($items) {
                             return [
