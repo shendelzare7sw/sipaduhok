@@ -63,3 +63,17 @@
 #logoutModal .modal-header {
     position: relative !important;
 }
+
+/* Fix global badge text color contrast for solid background badges */
+.badge.bg-primary,
+.badge.bg-success,
+.badge.bg-danger,
+.badge.bg-info,
+.badge.bg-secondary,
+.badge.bg-dark {
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    color: #212529 !important;
+}

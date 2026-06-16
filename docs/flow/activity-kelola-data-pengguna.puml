@@ -1,0 +1,53 @@
+@startuml activity-kelola-data-pengguna
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu\nKelola Data Pengguna;
+
+|Sistem|
+:Menampilkan Daftar\nData Pengguna;
+
+|Pengguna (Admin)|
+:Memilih Aksi Manajemen\n(Tambah / Edit / Hapus);
+
+if (Aksi yang dipilih?) then (Tambah / Edit)
+    |Pengguna (Admin)|
+    :Mengisi Form Data Pengguna;
+    :Klik Tombol Simpan;
+    
+    |Sistem|
+    if (Proses Simpan Berhasil?) then (Ya)
+        :Menyimpan Data ke Database;
+        :Menampilkan Pesan Sukses;
+    else (Tidak)
+        :Menampilkan Pesan Error;
+        |Pengguna (Admin)|
+        :Memperbaiki Input Data;
+        note right: Kembali Mengubah Data
+    endif
+
+else (Hapus Data)
+    |Pengguna (Admin)|
+    :Klik Tombol Hapus Data;
+    
+    |Sistem|
+    :Menampilkan Pop-up\nKonfirmasi Hapus;
+    
+    |Pengguna (Admin)|
+    :Menyetujui Konfirmasi\n(Klik "Ya, Hapus");
+    
+    |Sistem|
+    :Menghapus Data dari Database;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Sistem|
+:Memperbarui Tampilan\nDaftar Pengguna;
+
+|Pengguna (Admin)|
+:Melihat Hasil Perubahan;
+stop
+@enduml
