@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -71,14 +71,14 @@
 
             <h1 class="text-4xl md:text-5xl font-bold">{{ $heroContent['title'] ?? 'Pendidikan Anak Usia Dini' }}</h1>
             <p class="mt-4 text-lg text-white/90">
-                {{ $heroContent['subtitle'] ?? 'Program PAUD, KB, dan TK (Usia 2–6 Tahun)' }}
+                {{ $heroContent['subtitle'] ?? 'Program PAUD, KB, dan TK (Usia 2â€“6 Tahun)' }}
             </p>
         </div>
     </section>
 
 
 
-    <!-- PAUD – TK Section -->
+    <!-- PAUD â€“ TK Section -->
     <section class="py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -86,15 +86,15 @@
                 <!-- FOTO-FOTO (3 GAMBAR) -->
                 <div class="relative w-full h-[420px] md:h-[460px]">
                     <!-- Gambar utama -->
-                    <img src="{{ asset($aboutContent['image_1'] ?? 'img/tk-main.jpg') }}" class="absolute top-0 left-0 w-2/3 h-[280px] md:h-[300px] object-cover rounded-2xl shadow-xl
+                    <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image_1'] ?? 'img/tk-main.jpg') }}" class="absolute top-0 left-0 w-2/3 h-[280px] md:h-[300px] object-cover rounded-2xl shadow-xl
                         transform rotate-[-4deg] hover:rotate-0 transition duration-700 ease-out z-[30]">
 
                     <!-- Gambar kedua -->
-                    <img src="{{ asset($aboutContent['image_2'] ?? 'img/tk-aktif.jpg') }}" class="absolute bottom-4 left-6 w-1/2 h-[220px] md:h-[240px] object-cover rounded-2xl shadow-lg
+                    <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image_2'] ?? 'img/tk-aktif.jpg') }}" class="absolute bottom-4 left-6 w-1/2 h-[220px] md:h-[240px] object-cover rounded-2xl shadow-lg
                         transform rotate-[3deg] hover:rotate-0 transition duration-700 ease-out z-[20]">
 
                     <!-- Gambar ketiga -->
-                    <img src="{{ asset($aboutContent['image_3'] ?? 'img/tk-belajar.jpg') }}" class="absolute top-10 right-0 w-1/2 h-[240px] md:h-[260px] object-cover rounded-2xl shadow-lg
+                    <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image_3'] ?? 'img/tk-belajar.jpg') }}" class="absolute top-10 right-0 w-1/2 h-[240px] md:h-[260px] object-cover rounded-2xl shadow-lg
                         transform rotate-[6deg] hover:rotate-0 transition duration-700 ease-out z-[10]">
 
                     <!-- Kotak teks -->
@@ -106,23 +106,23 @@
                 </div>
 
 
-                <!-- KONTEN PAUD – TK -->
+                <!-- KONTEN PAUD â€“ TK -->
                 <div>
                     <span
                         class="inline-block bg-[#287f3b]/20 text-[#287f3b] px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                        {{ $aboutContent['badge'] ?? 'Program PAUD – TK' }}
+                        {{ $aboutContent['badge'] ?? 'Program PAUD â€“ TK' }}
                     </span>
 
                     <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
-                        {{ $aboutContent['title'] ?? 'Belajar Menyenangkan untuk Usia 2–6 Tahun' }}
+                        {{ $aboutContent['title'] ?? 'Belajar Menyenangkan untuk Usia 2â€“6 Tahun' }}
                     </h2>
 
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        {{ $aboutContent['description_1'] ?? 'Kami percaya bahwa masa usia dini adalah waktu terbaik bagi anak untuk mulai mengenal dunia dengan cara yang paling natural: bermain. Di program PAUD–TK kami, setiap hari dirancang agar anak merasa aman, senang, dan bebas bereksplorasi sesuai ritme mereka.' }}
+                        {{ $aboutContent['description_1'] ?? 'Kami percaya bahwa masa usia dini adalah waktu terbaik bagi anak untuk mulai mengenal dunia dengan cara yang paling natural: bermain. Di program PAUDâ€“TK kami, setiap hari dirancang agar anak merasa aman, senang, dan bebas bereksplorasi sesuai ritme mereka.' }}
                     </p>
 
                     <p class="text-gray-600 mb-6 leading-relaxed">
-                        {{ $aboutContent['description_2'] ?? 'Guru-guru kami mendampingi anak dengan penuh perhatian dan kehangatan, membantu mereka berkembang dalam aspek sosial, motorik, bahasa, serta membangun rasa percaya diri sejak dini. Belajar tanpa tekanan — hanya keceriaan dan pengalaman baru setiap hari.' }}
+                        {{ $aboutContent['description_2'] ?? 'Guru-guru kami mendampingi anak dengan penuh perhatian dan kehangatan, membantu mereka berkembang dalam aspek sosial, motorik, bahasa, serta membangun rasa percaya diri sejak dini. Belajar tanpa tekanan â€” hanya keceriaan dan pengalaman baru setiap hari.' }}
                     </p>
 
                     <a href="{{ url($aboutContent['button_link'] ?? '/kontak') }}"
@@ -169,7 +169,7 @@
                         <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto"
                             style="background-color: {{ $color['bg'] }}20">
                             @if(!empty($program['icon']) && str_contains($program['icon'], '/'))
-                                <img src="{{ asset($program['icon']) }}" alt="{{ $program['name'] }}" class="w-10 h-10 object-contain">
+                                <img loading="lazy" decoding="async" src="{{ asset($program['icon']) }}" alt="{{ $program['name'] }}" class="w-10 h-10 object-contain">
                             @else
                                 <svg class="w-8 h-8" style="color: {{ $color['text'] }}" fill="currentColor"
                                     viewBox="0 0 20 20">
@@ -226,7 +226,7 @@
                         <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
                             style="background-color: {{ $color['bg'] }}20">
                             @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                                <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-9 h-9 object-contain">
+                                <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-9 h-9 object-contain">
                             @else
                                 <svg class="w-7 h-7" style="color: {{ $color['text'] }}" fill="currentColor"
                                     viewBox="0 0 20 20">
@@ -297,7 +297,7 @@
                         <div class="w-14 h-14 rounded-full flex items-center justify-center mb-4 mx-auto"
                             style="background-color: {{ $color['bg'] }}20">
                             @if(!empty($facility['icon']) && str_contains($facility['icon'], '/'))
-                                <img src="{{ asset($facility['icon']) }}" alt="{{ $facility['title'] }}" class="w-9 h-9 object-contain">
+                                <img loading="lazy" decoding="async" src="{{ asset($facility['icon']) }}" alt="{{ $facility['title'] }}" class="w-9 h-9 object-contain">
                             @else
                                 <svg class="w-7 h-7" style="color: {{ $color['text'] }}" fill="currentColor"
                                     viewBox="0 0 20 20">
@@ -336,3 +336,4 @@
 </body>
 
 </html>
+

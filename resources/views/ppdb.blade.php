@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -373,7 +373,7 @@
                                 class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center overflow-hidden {{ $bgClass }}"
                                 @if($useInlineStyle) style="background-color: {{ $hexColor }}15" @endif>
                                 @if($image)
-                                    <img src="{{ asset($image) }}" alt="{{ $header['title'] ?? 'Icon' }}" class="w-full h-full object-cover">
+                                    <img loading="lazy" decoding="async" src="{{ asset($image) }}" alt="{{ $header['title'] ?? 'Icon' }}" class="w-full h-full object-cover">
                                 @else
                                     <span class="text-3xl" @if($useInlineStyle) style="color: {{ $hexColor }}" @endif><i class="{{ $icon }}"></i></span>
                                 @endif
@@ -629,7 +629,7 @@
                     <span
                         class="w-10 h-10 bg-accent-yellow rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
                         @if(isset($biayaPaudContent['header']['image']) && $biayaPaudContent['header']['image'])
-                            <img src="{{ asset($biayaPaudContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                            <img loading="lazy" decoding="async" src="{{ asset($biayaPaudContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
                         @else
                             <i class="fas fa-money-bill-wave"></i>
                         @endif
@@ -727,10 +727,10 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
@@ -765,7 +765,7 @@
                     <span
                         class="w-10 h-10 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
                         @if(isset($biayaSmaContent['header']['image']) && $biayaSmaContent['header']['image'])
-                            <img src="{{ asset($biayaSmaContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                            <img loading="lazy" decoding="async" src="{{ asset($biayaSmaContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
                         @else
                             <i class="fas fa-money-bill-wave"></i>
                         @endif
@@ -855,10 +855,10 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
@@ -892,7 +892,7 @@
                 <h3 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
                         @if(isset($biayaSdContent['header']['image']) && $biayaSdContent['header']['image'])
-                            <img src="{{ asset($biayaSdContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                            <img loading="lazy" decoding="async" src="{{ asset($biayaSdContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
                         @else
                             <i class="fas fa-money-bill-wave"></i>
                         @endif
@@ -981,10 +981,10 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 
@@ -1019,7 +1019,7 @@
                     <span
                         class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white mr-3 overflow-hidden">
                         @if(isset($biayaSmpContent['header']['image']) && $biayaSmpContent['header']['image'])
-                            <img src="{{ asset($biayaSmpContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
+                            <img loading="lazy" decoding="async" src="{{ asset($biayaSmpContent['header']['image']) }}" alt="Icon" class="w-full h-full object-cover">
                         @else
                             <i class="fas fa-money-bill-wave"></i>
                         @endif
@@ -1108,10 +1108,10 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h5 class="font-bold text-gray-800 mb-2"><i class="fas fa-lightbulb"></i> Informasi Penting:</h5>
                     <ul class="text-sm text-gray-600 space-y-1">
-                        <li>• Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
-                        <li>• Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
-                        <li>• Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
-                        <li>• Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
+                        <li>â€¢ Biaya tambahan bersifat opsional dan dapat disesuaikan dengan kebutuhan siswa</li>
+                        <li>â€¢ Tersedia program cicilan bulanan untuk memudahkan pembayaran</li>
+                        <li>â€¢ Beasiswa tersedia untuk siswa berprestasi dan kurang mampu</li>
+                        <li>â€¢ Biaya dapat berubah sewaktu-waktu dengan pemberitahuan sebelumnya</li>
                     </ul>
                 </div>
 

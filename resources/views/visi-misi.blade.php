@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -59,7 +59,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <img src="{{ asset($visiContent['image'] ?? 'img/visi-misi.jpg') }}" alt="Visi"
+                    <img loading="lazy" decoding="async" src="{{ asset($visiContent['image'] ?? 'img/visi-misi.jpg') }}" alt="Visi"
                         class="rounded-2xl shadow-xl w-full h-[350px] object-cover">
                     <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-[#fac030] rounded-2xl -z-10"></div>
                 </div>
@@ -147,7 +147,7 @@
                     <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-center">
                         <div class="text-4xl mb-3 flex justify-center">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                                <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-12 h-12 object-contain">
+                                <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-12 h-12 object-contain">
                              @else
                                 <i class="{{ $item['icon'] ?? 'fas fa-star' }} {{ $iconClass }}" style="{{ $iconStyle }}"></i>
                              @endif
@@ -165,3 +165,4 @@
 </body>
 
 </html>
+

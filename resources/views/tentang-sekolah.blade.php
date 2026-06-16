@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -61,7 +61,7 @@
 
                 <!-- Image -->
                 <div class="relative">
-                    <img src="{{ asset($aboutContent['image'] ?? 'img/about-school.jpg') }}" alt="Tentang Sekolah"
+                    <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/about-school.jpg') }}" alt="Tentang Sekolah"
                         class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                     <div
                         class="absolute -bottom-6 -right-6 bg-[#165fac] text-white p-6 rounded-2xl shadow-lg hidden md:block">
@@ -174,7 +174,7 @@
                         </div>
 
                         <div class="md:w-1/2 {{ $index % 2 == 0 ? 'md:pl-12' : 'md:pr-12' }}">
-                            <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}"
+                            <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}"
                                 class="rounded-2xl shadow-lg w-full h-48 object-cover">
                         </div>
                     </div>
@@ -202,7 +202,7 @@
                 <div class="card-hover bg-gray-50 rounded-2xl p-8 text-center">
                     <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style="background-color: {{ $item['icon_color'] ?? '#165fac' }}1A;">
                          @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
+                             <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
                          @else
                              <svg class="w-8 h-8" style="color: {{ $item['icon_color'] ?? '#165fac' }};" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
@@ -239,3 +239,4 @@
 </body>
 
 </html>
+

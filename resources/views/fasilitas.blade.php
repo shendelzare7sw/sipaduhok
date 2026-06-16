@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -167,7 +167,7 @@
                             @if(isset($ruangBelajarContent['items']) && is_array($ruangBelajarContent['items']))
                                 @foreach($ruangBelajarContent['items'] as $item)
                                 <div class="carousel-slide">
-                                    <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
+                                    <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">{{ $item['title'] ?? '' }}</p>
                                         @if(!empty($item['description']))
@@ -178,25 +178,25 @@
                                 @endforeach
                             @else
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-belajar-1.jpg') }}" alt="Ruang Belajar 1">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-belajar-1.jpg') }}" alt="Ruang Belajar 1">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Ruang Kelas Modern</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-belajar-2.jpg') }}" alt="Ruang Belajar 2">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-belajar-2.jpg') }}" alt="Ruang Belajar 2">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Suasana Belajar Kondusif</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-belajar-3.jpg') }}" alt="Ruang Belajar 3">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-belajar-3.jpg') }}" alt="Ruang Belajar 3">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Ruang Kelas Dilengkapi Ac</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-belajar-4.jpg') }}" alt="Ruang Belajar 4">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-belajar-4.jpg') }}" alt="Ruang Belajar 4">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Furniture Ergonomis dan Nyaman</p>
                                     </div>
@@ -339,7 +339,7 @@
                             @if(isset($ruangTerapiContent['items']) && is_array($ruangTerapiContent['items']))
                                 @foreach($ruangTerapiContent['items'] as $item)
                                 <div class="carousel-slide">
-                                    <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
+                                    <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">{{ $item['title'] ?? '' }}</p>
                                         @if(!empty($item['description']))
@@ -350,25 +350,25 @@
                                 @endforeach
                             @else
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-terapi-1.jpg') }}" alt="Ruang Terapi 1">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-terapi-1.jpg') }}" alt="Ruang Terapi 1">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Ruang Terapi Lengkap</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-terapi-2.jpg') }}" alt="Ruang Terapi 2">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-terapi-2.jpg') }}" alt="Ruang Terapi 2">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Alat Terapi Sensorik</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-terapi-3.jpg') }}" alt="Ruang Terapi 3">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-terapi-3.jpg') }}" alt="Ruang Terapi 3">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Ruang Terapi Anak Berkebutuhan Khusus</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-ruang-terapi-4.jpg') }}" alt="Ruang Terapi 4">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-ruang-terapi-4.jpg') }}" alt="Ruang Terapi 4">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Fasilitas Ruang Terapi</p>
                                     </div>
@@ -410,7 +410,7 @@
                             @if(isset($areaBermainContent['items']) && is_array($areaBermainContent['items']))
                                 @foreach($areaBermainContent['items'] as $item)
                                 <div class="carousel-slide">
-                                    <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
+                                    <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">{{ $item['title'] ?? '' }}</p>
                                         @if(!empty($item['description']))
@@ -421,25 +421,25 @@
                                 @endforeach
                             @else
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-area-bermain-1.jpg') }}" alt="Area Bermain 1">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-area-bermain-1.jpg') }}" alt="Area Bermain 1">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Playground Outdoor</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-area-bermain-2.jpg') }}" alt="Area Bermain 2">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-area-bermain-2.jpg') }}" alt="Area Bermain 2">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Area Bermain Indoor</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-area-bermain-3.jpg') }}" alt="Area Bermain 3">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-area-bermain-3.jpg') }}" alt="Area Bermain 3">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Zona Bermain Aman</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-area-bermain-4.jpg') }}" alt="Area Bermain 4">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-area-bermain-4.jpg') }}" alt="Area Bermain 4">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Permainan Edukatif</p>
                                     </div>
@@ -593,7 +593,7 @@
                             @if(isset($perpustakaanContent['items']) && is_array($perpustakaanContent['items']))
                                 @foreach($perpustakaanContent['items'] as $item)
                                 <div class="carousel-slide">
-                                    <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
+                                    <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">{{ $item['title'] ?? '' }}</p>
                                         @if(!empty($item['description']))
@@ -604,25 +604,25 @@
                                 @endforeach
                             @else
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-perpustakaan-1.jpg') }}" alt="Perpustakaan 1">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-perpustakaan-1.jpg') }}" alt="Perpustakaan 1">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Koleksi Buku Lengkap</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-perpustakaan-2.jpg') }}" alt="Perpustakaan 2">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-perpustakaan-2.jpg') }}" alt="Perpustakaan 2">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Ruang Baca yang Nyaman</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-perpustakaan-3.jpg') }}" alt="Perpustakaan 3">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-perpustakaan-3.jpg') }}" alt="Perpustakaan 3">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Area Literasi Interaktif</p>
                                     </div>
                                 </div>
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('img/fasilitas-perpustakaan-4.jpg') }}" alt="Perpustakaan 4">
+                                    <img loading="lazy" decoding="async" src="{{ asset('img/fasilitas-perpustakaan-4.jpg') }}" alt="Perpustakaan 4">
                                     <div class="carousel-caption">
                                         <p class="font-semibold text-lg">Pojok Baca Anak</p>
                                     </div>
@@ -675,7 +675,7 @@
                 @if(isset($galleryContent['items']) && is_array($galleryContent['items']))
                     @foreach($galleryContent['items'] as $item)
                     <div class="gallery-image h-64">
-                        <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}"
+                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="{{ $item['title'] ?? 'Fasilitas' }}"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">{{ $item['title'] ?? '' }}</p>
@@ -684,7 +684,7 @@
                     @endforeach
                 @else
                     <div class="gallery-image h-64">
-                        <img src="{{ asset('img/gallery-fasilitas-1.jpg') }}" alt="Fasilitas 1"
+                        <img loading="lazy" decoding="async" src="{{ asset('img/gallery-fasilitas-1.jpg') }}" alt="Fasilitas 1"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">Aula</p>
@@ -692,7 +692,7 @@
                     </div>
 
                     <div class="gallery-image h-64">
-                        <img src="{{ asset('img/gallery-fasilitas-2.jpg') }}" alt="Fasilitas 2"
+                        <img loading="lazy" decoding="async" src="{{ asset('img/gallery-fasilitas-2.jpg') }}" alt="Fasilitas 2"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">Area Bermain Anak</p>
@@ -700,7 +700,7 @@
                     </div>
 
                     <div class="gallery-image h-64">
-                        <img src="{{ asset('img/gallery-fasilitas-3.jpg') }}" alt="Fasilitas 3"
+                        <img loading="lazy" decoding="async" src="{{ asset('img/gallery-fasilitas-3.jpg') }}" alt="Fasilitas 3"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">Alat Terapi</p>
@@ -708,7 +708,7 @@
                     </div>
 
                     <div class="gallery-image h-64">
-                        <img src="{{ asset('img/gallery-fasilitas-4.jpg') }}" alt="Fasilitas 4"
+                        <img loading="lazy" decoding="async" src="{{ asset('img/gallery-fasilitas-4.jpg') }}" alt="Fasilitas 4"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">Perpustakaan</p>
@@ -716,7 +716,7 @@
                     </div>
 
                     <div class="gallery-image h-64">
-                        <img src="{{ asset('img/gallery-fasilitas-5.jpg') }}" alt="Fasilitas 5"
+                        <img loading="lazy" decoding="async" src="{{ asset('img/gallery-fasilitas-5.jpg') }}" alt="Fasilitas 5"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">Ruang Serbaguna</p>
@@ -724,7 +724,7 @@
                     </div>
 
                     <div class="gallery-image h-64">
-                        <img src="{{ asset('img/gallery-fasilitas-6.jpg') }}" alt="Fasilitas 6"
+                        <img loading="lazy" decoding="async" src="{{ asset('img/gallery-fasilitas-6.jpg') }}" alt="Fasilitas 6"
                             class="w-full h-full object-cover">
                         <div class="gallery-overlay">
                             <p class="text-white font-semibold">Lapangan Upacara</p>
@@ -854,3 +854,4 @@
 </body>
 
 </html>
+

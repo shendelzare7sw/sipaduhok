@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <img src="{{ asset('img/hero-img.jpg') }}" alt="Homeschooling" class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
+                    <img loading="lazy" decoding="async" src="{{ asset('img/hero-img.jpg') }}" alt="Homeschooling" class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                 </div>
             </div>
         </div>
@@ -175,3 +175,4 @@
     @vite(['resources/js/navbar.js'])
 </body>
 </html>
+

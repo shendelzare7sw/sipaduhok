@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -111,7 +111,7 @@
                     @endphp
                     <div class="masonry-item scroll-reveal gallery-item rounded-2xl overflow-hidden shadow-lg bg-white"
                         data-category="{{ $item['category'] ?? '' }}">
-                        <img src="{{ asset($item['image'] ?? 'img/gallery-1.jpg') }}" alt="{{ $item['title'] ?? '' }}"
+                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/gallery-1.jpg') }}" alt="{{ $item['title'] ?? '' }}"
                             class="w-full h-auto object-cover">
                         <div class="gallery-overlay"></div>
                         <div class="gallery-info">

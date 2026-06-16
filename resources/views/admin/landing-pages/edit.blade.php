@@ -260,7 +260,7 @@
                         {{-- Section Header --}}
                         <div class="card-header bg-light border-bottom">
                             <div class="d-flex align-items-center gap-3">
-                                <span class="badge bg-primary rounded-pill fs-6">{{ $index + 1 }}</span>
+                                <span class="badge bg-primary rounded-circle fs-6 section-number-badge">{{ $index + 1 }}</span>
                                 <div class="flex-grow-1 min-w-0">
                                     <h5 class="mb-0 fw-bold">
                                         {{ $label }}

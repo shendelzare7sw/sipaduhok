@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -60,7 +60,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="relative">
-                    <img src="{{ asset($aboutContent['image'] ?? 'img/inklusi-main.jpg') }}" alt="Program Inklusi"
+                    <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/inklusi-main.jpg') }}" alt="Program Inklusi"
                         class="rounded-2xl shadow-xl w-full h-[400px] object-cover">
                     <div
                         class="absolute -bottom-6 -right-6 bg-[#d45930] text-white p-6 rounded-2xl shadow-lg hidden md:block">
@@ -119,7 +119,7 @@
                         <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
                              style="background-color: {{ $styles['bg'] }}1A;">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                                <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
+                                <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
                              @else
                                 <i class="{{ $item['icon'] ?? 'fas fa-info-circle' }} text-2xl" style="color: {{ $styles['text'] }}"></i>
                              @endif
@@ -160,7 +160,7 @@
                         <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                              style="background-color: {{ $styles['bg'] }}1A;">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                                <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
+                                <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] }}" class="w-8 h-8 object-contain">
                              @else
                                 <i class="{{ $item['icon'] ?? 'fas fa-user' }} text-3xl" style="color: {{ $styles['text'] }}"></i>
                              @endif
@@ -200,3 +200,4 @@
 </body>
 
 </html>
+

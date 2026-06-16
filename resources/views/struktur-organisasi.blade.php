@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -81,7 +81,7 @@
                     <!-- Leader Card -->
                     <div class="org-card text-white rounded-2xl p-6 text-center shadow-xl mb-8"
                         style="background-color: {{ $leaderColor }}">
-                        <img src="{{ asset($leader['image'] ?? 'img/guru-1.png') }}" alt="{{ $leader['name'] }}"
+                        <img loading="lazy" decoding="async" src="{{ asset($leader['image'] ?? 'img/guru-1.png') }}" alt="{{ $leader['name'] }}"
                             class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white">
                         <h3 class="font-bold text-lg">{{ $leader['name'] }}</h3>
                         <p class="text-white/80 text-sm">{{ $leader['position'] }}</p>
@@ -105,7 +105,7 @@
                         @endphp
                         <div class="org-card bg-white rounded-2xl p-6 text-center shadow-lg border-t-4"
                             style="border-color: {{ $staffColor }}">
-                            <img src="{{ asset($staff['image'] ?? 'img/guru-1.png') }}" alt="{{ $staff['name'] }}"
+                            <img loading="lazy" decoding="async" src="{{ asset($staff['image'] ?? 'img/guru-1.png') }}" alt="{{ $staff['name'] }}"
                                 class="w-20 h-20 rounded-full mx-auto mb-4 object-cover">
                             <h3 class="font-bold text-gray-800">{{ $staff['name'] }}</h3>
                             <p class="text-gray-600 text-sm">{{ $staff['position'] }}</p>
@@ -120,7 +120,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         @foreach($coordinators as $coord)
                             <div class="org-card bg-gray-50 rounded-xl p-4 text-center shadow hover:bg-white">
-                                <img src="{{ asset($coord['image'] ?? 'img/guru-1.png') }}"
+                                <img loading="lazy" decoding="async" src="{{ asset($coord['image'] ?? 'img/guru-1.png') }}"
                                     alt="{{ $coord['name'] }}" class="w-16 h-16 rounded-full mx-auto mb-3 object-cover">
                                 <h4 class="font-semibold text-gray-800 text-sm">{{ $coord['name'] }}</h4>
                                 <p class="text-gray-500 text-xs">{{ $coord['department'] }}</p>
@@ -138,3 +138,4 @@
 </body>
 
 </html>
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -95,7 +95,7 @@
                 <!-- Right Content - Decorative Image -->
                 <div class="hidden lg:block">
                     <div class="decorative-frame-tilt relative">
-                        <img src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
+                        <img loading="lazy" decoding="async" src="{{ asset($heroContent['image'] ?? 'img/hero-img.jpg') }}" alt="PKBM House of Knowledge" class="rounded-2xl shadow-2xl w-full h-[400px] object-cover transform rotate-6 hover:rotate-3 transition-transform duration-500">
 
                         <!-- Floating Badge 1 -->
                         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl transform -rotate-6 hover:rotate-0 transition-transform duration-300">
@@ -158,7 +158,7 @@
                     <div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center {{ $bgClass }}" style="{{ $bgStyle }}">
                         {{-- Dynamic Icon or Fallback --}}
                         @if(!empty($stat['icon']) && str_contains($stat['icon'], '/'))
-                             <img src="{{ asset($stat['icon']) }}" alt="{{ $stat['label'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
+                             <img loading="lazy" decoding="async" src="{{ asset($stat['icon']) }}" alt="{{ $stat['label'] ?? 'Icon' }}" class="w-8 h-8 object-contain">
                         @else
                             {{-- Fallback SVGs with color --}}
                             @if($index == 0)
@@ -239,7 +239,7 @@
                          style="{{ $iconBgStyle }} {{ $isHex ? 'border: 1px solid '.$themeColor.'20;' : '' }}">
                         {{-- Custom image icon or relevant program fallback icon. --}}
                         @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                             <img src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Program' }}" class="w-10 h-10 object-contain">
+                             <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="{{ $item['title'] ?? 'Program' }}" class="w-10 h-10 object-contain">
                         @else
                             @switch($programIconKey)
                                 @case('inklusi')
@@ -304,7 +304,7 @@
                 <!-- Left - Image -->
                 <div class="relative">
                     <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                        <img src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">
+                        <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/about-img.jpg') }}" alt="Tentang PKBM" class="w-full h-[450px] object-cover">
                     </div>
 
                     <!-- Experience Badge -->
@@ -381,7 +381,7 @@
                     @foreach($beritaList as $index => $berita)
                     <div class="carousel-item" data-index="{{ $index }}">
                         <a href="{{ $berita->url_berita }}" target="_blank" class="block w-full h-full">
-                            <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
+                            <img loading="lazy" decoding="async" src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="w-full h-full object-cover">
                             <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
                                 <span class="inline-block px-2.5 py-0.5 {{ $berita->kategori_badge_class }} text-[11px] sm:text-xs rounded-full mb-2">{{ $berita->kategori_label }}</span>
                                 <h3 class="text-white font-bold text-sm sm:text-base leading-snug line-clamp-2">{{ $berita->judul }}</h3>
@@ -435,7 +435,7 @@
                 @if(!empty($galleryItems))
                     @foreach($galleryItems as $item)
                     <div class="gallery-item rounded-2xl shadow-lg">
-                        <img src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="Gallery Item" class="w-full h-64 object-cover rounded-2xl">
+                        <img loading="lazy" decoding="async" src="{{ asset($item['image'] ?? 'img/placeholder.jpg') }}" alt="Gallery Item" class="w-full h-64 object-cover rounded-2xl">
                     </div>
                     @endforeach
                 @else
@@ -524,7 +524,7 @@
                         <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 {{ $iconBgClass }} {{ $textColorClass }} {{ $iconHoverBgClass }} group-hover:text-white"
                              style="{{ $iconBgStyle }}">
                              @if(!empty($item['icon']) && str_contains($item['icon'], '/'))
-                                 <img src="{{ asset($item['icon']) }}" alt="Icon" class="w-8 h-8 object-contain">
+                                 <img loading="lazy" decoding="async" src="{{ asset($item['icon']) }}" alt="Icon" class="w-8 h-8 object-contain">
                             @else
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
@@ -592,3 +592,4 @@
     @vite(['resources/js/navbar.js', 'resources/js/pages/home.js'])
 </body>
 </html>
+

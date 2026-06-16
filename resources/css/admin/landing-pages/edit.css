@@ -37,8 +37,23 @@ html {
 }
 
 .list-group-item.active .badge {
-    background-color: rgba(255, 255, 255, 0.25) !important;
-    color: #fff !important;
+    background-color: #fff !important;
+    color: #696cff !important;
+}
+
+.list-group-item:not(.active) .badge {
+    background-color: #e7e7ff !important;
+    color: #696cff !important;
+}
+
+.section-nav-link .badge {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
 }
 
 .list-group-item.active .text-truncate {
@@ -109,4 +124,14 @@ html {
 
 .landing-reset-icon {
     font-size: 4rem;
+}
+
+.section-number-badge {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -105,7 +105,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <img src="{{ asset($aboutContent['image'] ?? 'img/terapi-img.jpg') }}" alt="Program Terapi"
+                    <img loading="lazy" decoding="async" src="{{ asset($aboutContent['image'] ?? 'img/terapi-img.jpg') }}" alt="Program Terapi"
                         class="rounded-2xl shadow-xl w-full">
                 </div>
             </div>
@@ -271,3 +271,4 @@
 </body>
 
 </html>
+

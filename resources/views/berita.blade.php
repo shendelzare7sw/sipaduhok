@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -122,7 +122,7 @@
 
                 <div class="news-card bg-white rounded-3xl shadow-xl overflow-hidden grid md:grid-cols-2 gap-0">
                     <div class="news-image-wrapper h-80 md:h-auto">
-                        <img src="{{ $beritaUtama->gambar_url }}" alt="{{ $beritaUtama->judul }}" class="w-full h-full object-cover">
+                        <img loading="lazy" decoding="async" src="{{ $beritaUtama->gambar_url }}" alt="{{ $beritaUtama->judul }}" class="w-full h-full object-cover">
                     </div>
                     <div class="p-8 md:p-12 flex flex-col justify-center">
                         <div class="flex items-center gap-3 mb-4">
@@ -160,7 +160,7 @@
                         @foreach($beritaList as $index => $item)
                             <div class="news-card bg-white rounded-2xl shadow-lg overflow-hidden fade-in-up" style="animation-delay: {{ $index * 0.1 }}s;">
                                 <div class="news-image-wrapper h-56">
-                                    <img src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="w-full h-full object-cover">
+                                    <img loading="lazy" decoding="async" src="{{ $item->gambar_url }}" alt="{{ $item->judul }}" class="w-full h-full object-cover">
                                 </div>
                                 <div class="p-6">
                                     <div class="flex items-center gap-3 mb-3">
@@ -234,3 +234,4 @@
     @vite(['resources/js/navbar.js'])
 </body>
 </html>
+
