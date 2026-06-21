@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AI Chatbot General Assistant - Frontend Logic with Conversation History
  * SIPADUHOK - Claude/ChatGPT Style Interface
  */
@@ -28,7 +28,7 @@ const chatbotState = {
 const USER_ROLE = chatbotConfig.userRole;
 
 // ==================== Initialize Chatbot ====================
-const CHATBOT_DATA_VERSION = '2';
+const CHATBOT_DATA_VERSION = '3';
 
 function initChatbot() {
     migrateLegacyChatbotData();
@@ -54,9 +54,9 @@ function migrateLegacyChatbotData() {
                         if (msg.isHtml || /<\w+[\s>]/.test(msg.content)) {
                             const tmp = document.createElement('div');
                             tmp.innerHTML = msg.content;
-                            return { role: msg.role, content: (tmp.textContent || '').trim() };
+                            return { role: msg.role, content: (tmp.textContent || '').trim(), structured: msg.structured || null };
                         }
-                        return { role: msg.role, content: msg.content };
+                        return { role: msg.role, content: msg.content, structured: msg.structured || null };
                     });
                     return conv;
                 });
@@ -144,7 +144,7 @@ function loadConversation(conversationId) {
     chatbotState.conversationHistory = [...conv.messages];
     clearChatMessages();
     conv.messages.forEach(msg => {
-        addMessage(msg.role, msg.content, null, false, msg.isHtml || false);
+        addMessage(msg.role, msg.content, null, false, msg.isHtml || false, msg.structured || null);
     });
     updateConversationTitle(conv.title);
     renderConversationsList();
@@ -739,7 +739,7 @@ function addMessage(role, content, attachments = null, saveToHistory = true, isH
     `;
     messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
     if (saveToHistory) {
-        chatbotState.conversationHistory.push({ role, content });
+        chatbotState.conversationHistory.push({ role, content, isHtml, structured });
     }
     scrollToBottom();
 }

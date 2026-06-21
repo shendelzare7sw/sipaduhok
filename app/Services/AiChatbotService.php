@@ -309,7 +309,7 @@ ATURAN OUTPUT JSON (WAJIB):
 ═══════════════════════════════════════════════════════════
 Selalu balas dengan JSON valid (tanpa code fence ```, tanpa teks pembungkus), schema:
 {
-  "text": "jawaban natural Bahasa Indonesia, max 3 paragraf pendek. Pakai \\n untuk newline. Hindari markdown heading (#).",
+  "text": "jawaban natural Bahasa Indonesia, max 3 paragraf pendek. JANGAN SEBUTKAN kata 'route', 'URL', atau nama path (seperti admin/kelas.index) di dalam teks. Bicaralah selayaknya manusia. Pakai \\n untuk newline. Hindari markdown heading (#).",
   "callout": "info penting singkat (max 200 char) atau null",
   "button": { "label": "Buka [Nama Menu]", "route": "nama.route.dari.map" } atau null,
   "related": [ { "label": "topik", "route": "nama.route" } ] atau null (max 3)
@@ -453,11 +453,30 @@ PROMPT;
         if ($route === '') return null;
 
         if (str_starts_with($route, '/')) {
-            return $this->kb->isLandingPageUrl($route) ? $route : null;
+            if ($this->kb->isLandingPageUrl($route)) {
+                return $route;
+            }
+            // Strip leading slash to match against our map values below
+            $route = ltrim($route, '/');
         }
 
-        if (!$this->kb->isRouteAllowedForRole($route, $role)) return null;
-        return $this->kb->resolveRouteUrl($route);
+        $map = $this->kb->getRouteMapForRole($role);
+
+        // 1. If it's exactly a valid route name
+        if (array_key_exists($route, $map)) {
+            return $this->kb->resolveRouteUrl($route);
+        }
+
+        // 2. If it's a route path (value in the map)
+        $routePath = '/' . ltrim($route, '/');
+        foreach ($map as $name => $path) {
+            if ($path === $routePath) {
+                return url($path);
+            }
+        }
+
+        // 3. Fallback: Check if it's a valid route name even if not allowed? No, keep it secure.
+        return null;
     }
 
     /**
