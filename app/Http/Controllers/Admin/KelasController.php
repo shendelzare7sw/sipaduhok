@@ -296,12 +296,9 @@ class KelasController extends Controller
             ->orderBy('nama_lengkap')
             ->get();
 
-        // Siswa yang belum memiliki kelas atau di kelas lain (untuk ditambahkan)
+        // Siswa yang belum memiliki kelas (untuk ditambahkan)
         $siswaAvailable = Siswa::where('status', 'aktif')
-            ->where(function ($q) use ($kelas) {
-                $q->whereNull('kelas_id')
-                    ->orWhere('kelas_id', '!=', $kelas->id);
-            })
+            ->whereNull('kelas_id')
             ->where('cabang_id', $kelas->cabang_id) // Filter by same cabang
             ->orderBy('nama_lengkap')
             ->get();

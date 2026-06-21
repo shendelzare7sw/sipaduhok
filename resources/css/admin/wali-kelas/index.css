@@ -360,13 +360,17 @@
 .rounded-action-btn { border-radius: 8px; }
 .location-text { font-size: 0.8rem; }
 .assigned-wali-name { font-size: 0.85rem; }
-.assign-action-btn { background-color: #8b5cf6; }
+.assign-action-btn { background-color: #8b5cf6; transition: all 0.2s; }
+.assign-action-btn:hover { background-color: #7c3aed !important; color: #ffffff !important; }
 .empty-wali-icon { color: #e2e8f0; }
 .assign-modal-content { border-radius: 16px; }
 .dashed-input { border: 1px dashed #cbd5e1; border-radius: 8px; }
 .modal-search-icon { left: 12px; top: 50%; transform: translateY(-50%); }
 .modal-search-input { padding-left: 36px; border-radius: 8px; }
-.modal-filter-select { max-width: 140px; border-radius: 8px; }
+.modal-filter-select { min-width: 170px; max-width: 250px; border-radius: 8px; }
+@media (max-width: 576px) {
+    .modal-filter-select { max-width: 100%; min-width: 100%; }
+}
 .wali-list { max-height: 280px; overflow-y: auto; border: 1px solid var(--wk-border); border-radius: 10px; padding: 6px; background: #fafafa; }
 .wali-option { padding: 12px 14px; border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: all 0.2s; }
 .wali-option.is-hidden { display: none !important; }

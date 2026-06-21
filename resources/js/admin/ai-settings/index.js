@@ -123,6 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const alertTitle = page.querySelector('#connectionTitle');
     const alertIcon = page.querySelector('#connectionIcon');
 
+    let alertTimeoutId = null;
+
     const hideAlertSmooth = (element) => {
         if (!element) {
             return;
@@ -152,6 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (alertTimeoutId) {
+            clearTimeout(alertTimeoutId);
+            alertTimeoutId = null;
+        }
+
         alertEl.classList.add('d-none');
         alertEl.classList.remove('alert-success', 'alert-danger', 'alert-info', 'alert-warning', 'fading-out', 'showing');
         void alertEl.offsetWidth;
@@ -160,6 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const setConnectionAlert = ({ type, title, message, icon }) => {
         if (!alertEl || !alertTitle || !alertMsg || !alertIcon) {
             return;
+        }
+
+        if (alertTimeoutId) {
+            clearTimeout(alertTimeoutId);
+            alertTimeoutId = null;
         }
 
         alertEl.classList.add(type);
@@ -187,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 icon: 'fas fa-exclamation-triangle me-2 fs-4',
             });
 
-            setTimeout(() => hideAlertSmooth(alertEl), 5000);
+            alertTimeoutId = setTimeout(() => hideAlertSmooth(alertEl), 5000);
             return;
         }
 
@@ -234,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         icon: 'fas fa-check-circle me-2 fs-4',
                     });
 
-                    setTimeout(() => hideAlertSmooth(alertEl), 5000);
+                    alertTimeoutId = setTimeout(() => hideAlertSmooth(alertEl), 5000);
                     return;
                 }
 
@@ -245,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon: 'fas fa-times-circle me-2 fs-4',
                 });
 
-                setTimeout(() => hideAlertSmooth(alertEl), 6000);
+                alertTimeoutId = setTimeout(() => hideAlertSmooth(alertEl), 6000);
             })
             .catch((error) => {
                 clearTimeout(timeoutId);
@@ -259,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon: 'fas fa-exclamation-triangle me-2 fs-4',
                 });
 
-                setTimeout(() => hideAlertSmooth(alertEl), 6000);
+                alertTimeoutId = setTimeout(() => hideAlertSmooth(alertEl), 6000);
             })
             .finally(() => {
                 testBtn.innerHTML = originalText;

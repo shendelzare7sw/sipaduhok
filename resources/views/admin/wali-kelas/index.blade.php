@@ -244,7 +244,7 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
 
                     <div class="mb-3">
                         <label class="form-label fw-bold text-secondary small">Pencarian & Filter Pendidik</label>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex flex-column flex-sm-row gap-2">
                             <div class="position-relative flex-grow-1">
                                 <i class="fas fa-search position-absolute text-muted modal-search-icon"></i>
                                 <input type="text" id="searchWali" class="form-control modal-search-input" placeholder="Ketik nama wali kelas...">

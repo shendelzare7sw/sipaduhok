@@ -140,8 +140,14 @@
                     <form action="{{ route('admin.kelas.add-siswa', $kelas) }}" method="POST" id="formAddSiswa">
                         @csrf
                         <div class="action-bar">
-                            <div class="selected-count">
-                                <span id="selectedCount">0</span> siswa dipilih
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check d-flex align-items-center mb-0 d-md-none">
+                                    <input class="form-check-input checkbox-custom selectAll-checkbox me-2" style="margin-top:0;" type="checkbox" id="selectAllMobile">
+                                    <label class="form-check-label mb-0 fw-medium text-dark" style="font-size: 13px;" for="selectAllMobile">Pilih Semua</label>
+                                </div>
+                                <div class="selected-count">
+                                    <span id="selectedCount">0</span> siswa dipilih
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-success" id="btnAddSiswa" disabled>
                                 <i class="fas fa-plus"></i> Tambahkan ke Kelas
@@ -153,7 +159,7 @@
                                 <thead>
                                     <tr class="select-all-row">
                                         <th width="40">
-                                            <input type="checkbox" class="checkbox-custom" id="selectAll">
+                                            <input type="checkbox" class="checkbox-custom selectAll-checkbox" id="selectAll">
                                         </th>
                                         <th>Siswa</th>
                                         <th>JK</th>
