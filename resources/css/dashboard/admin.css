@@ -144,6 +144,20 @@
 
 .admin-dashboard-tabs .nav-link {
     font-weight: 600;
+    color: var(--text-muted, #94a3b8);
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.admin-dashboard-tabs .nav-link:hover {
+    color: var(--primary-color, #4361ee);
+    background: rgba(67, 97, 238, 0.05);
+}
+
+.admin-dashboard-tabs .nav-link.active {
+    background-color: var(--primary-color, #4361ee) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
 }
 
 .quick-link-item {

@@ -131,7 +131,7 @@
 }
 
 .custom-nav-pills .nav-link.active {
-    background-color: var(--primary-light, #4895ef) !important;
+    background-color: var(--primary-color, #4361ee) !important;
     color: #fff !important;
     box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
 }
