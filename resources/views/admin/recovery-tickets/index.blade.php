@@ -144,7 +144,49 @@
                                 @endif
                             </td>
                             <td class="mobile-card-actions">
+                                @php
+                                    $waPhoneRaw = $ticket->user->phone;
+                                    if (empty($waPhoneRaw) && $ticket->user->siswa && !empty($ticket->user->siswa->telepon_orangtua)) {
+                                        $waPhoneRaw = $ticket->user->siswa->telepon_orangtua;
+                                    }
+
+                                    $waPhone = '';
+                                    if ($waPhoneRaw) {
+                                        $waPhone = preg_replace('/[^0-9]/', '', $waPhoneRaw);
+                                        if (str_starts_with($waPhone, '0')) {
+                                            $waPhone = '62' . substr($waPhone, 1);
+                                        } elseif (!str_starts_with($waPhone, '62')) {
+                                            $waPhone = '62' . $waPhone;
+                                        }
+                                    }
+
+                                    $rawRole = $ticket->user->roleRelation->name ?? $ticket->user->role ?? 'User';
+                                    $roleName = ucwords(str_replace('_', ' ', $rawRole));
+                                    
+                                    $waMessage = "";
+                                    if ($ticket->tipe_recovery === 'lupa_username') {
+                                        $waMessage = "LAYANAN IT OTOMATIS PKBM HOUSE OF KNOWLEDGE\n\nHalo,\nKami menerima permintaan pemulihan Username Anda.\n\nNama: {$ticket->user->name}\nTipe Akun (Role): {$roleName}\nUsername Anda: {$ticket->user->username}\n\nSilakan kembali ke aplikasi dan login menggunakan username tersebut.";
+                                    } elseif (in_array($ticket->tipe_recovery, ['lupa_password', 'lupa_keduanya'])) {
+                                        $resetUrl = $ticket->token_reset ? route('password.reset.ticket', ['token' => $ticket->token_reset]) : 'Token belum tersedia';
+                                        
+                                        $waMessage = "LAYANAN IT OTOMATIS PKBM HOUSE OF KNOWLEDGE\n\nHalo,\nKami menerima permintaan reset Password Anda.\n\nNama: {$ticket->user->name}\nTipe Akun (Role): {$roleName}\n";
+                                        
+                                        if ($ticket->tipe_recovery === 'lupa_keduanya') {
+                                            $waMessage .= "Username Anda: {$ticket->user->username}\nEmail Login Anda: {$ticket->user->email}\n";
+                                        }
+                                        
+                                        $waMessage .= "\nKlik link aman di bawah ini untuk membuat Password Baru:\n{$resetUrl}\n\n(Link ini berlaku maksimal 24 jam sejak dikirim)";
+                                    }
+                                    
+                                    $waLink = $waPhone ? "https://wa.me/{$waPhone}?text=" . urlencode($waMessage) : '#';
+                                @endphp
                                 <div class="d-flex flex-wrap gap-2">
+                                    @if($waPhone)
+                                        <a href="{{ $waLink }}" target="_blank" class="btn btn-sm btn-icon btn-outline-success" title="Kirim Pesan via WhatsApp">
+                                            <i class="bx bxl-whatsapp fs-5"></i>
+                                        </a>
+                                    @endif
+
                                     @if($ticket->user->personal_email)
                                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resendModal{{ $ticket->id }}">
                                             <i class="bx bx-refresh"></i> Kirim Ulang

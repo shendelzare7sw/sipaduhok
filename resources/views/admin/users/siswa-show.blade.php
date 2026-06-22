@@ -121,6 +121,10 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                             <td class="show-value">{{ $siswa->user->personal_email ?? '-' }}</td>
                         </tr>
                         <tr>
+                            <td class="show-label">No. Telepon (Akun)</td>
+                            <td class="show-value">{{ $siswa->user->phone ?? '-' }}</td>
+                        </tr>
+                        <tr>
                             <td class="show-label">Status Akun</td>
                             <td>
                                 <span class="show-status {{ $siswa->user->is_active ? 'show-status--active' : 'show-status--inactive' }}">

@@ -5,7 +5,7 @@
                 <i class="fas fa-chalkboard-teacher section-icon-green"></i>
                 Tenaga Pendidik Terbaru
             </h5>
-            <div class="usr-card-subtitle">5 data tenaga pendidik yang baru ditambahkan</div>
+            <div class="usr-card-subtitle">{{ $tenagaPendidik->count() }} data tenaga pendidik yang baru ditambahkan</div>
         </div>
         <div>
             @if($tenagaPendidik->count() > 0)

@@ -5,7 +5,7 @@
                 <i class="fas fa-user-graduate section-icon-blue"></i>
                 Siswa Terbaru
             </h5>
-            <div class="usr-card-subtitle">5 data siswa yang baru ditambahkan</div>
+            <div class="usr-card-subtitle">{{ $siswa->count() }} data siswa yang baru ditambahkan</div>
         </div>
         <div>
             @if($siswa->count() > 0)

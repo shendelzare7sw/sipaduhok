@@ -5,7 +5,7 @@
                 <i class="fas fa-user-friends section-icon-yellow"></i>
                 Orang Tua Terbaru
             </h5>
-            <div class="usr-card-subtitle">5 data orang tua yang baru ditambahkan</div>
+            <div class="usr-card-subtitle">{{ $orangTua->count() }} data orang tua yang baru ditambahkan</div>
         </div>
         <div>
             @if($orangTua->count() > 0)
