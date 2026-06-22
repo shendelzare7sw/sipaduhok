@@ -3,7 +3,7 @@
 @section('title', 'Manajemen User')
 
 @section('page-title', 'Manajemen User')
-@section('page-subtitle', 'Overview data Tenaga Pendidik dan Siswa')
+@section('page-subtitle', 'Overview data Tenaga Pendidik, Siswa, dan Orang Tua')
 
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
@@ -14,17 +14,14 @@
 @endsection
 
 @section('content')
-    <div class="admin-users-shell"
-        data-admin-users-index
+    <div data-admin-users-index
         data-delete-tenaga-pendidik-url-template="{{ route('admin.users.delete-tenaga-pendidik', ['id' => '__ID__']) }}"
         data-delete-siswa-url-template="{{ route('admin.users.delete-siswa', ['id' => '__ID__']) }}">
         @include('admin.users.partials.index-stats')
 
-        <div class="row">
-            @include('admin.users.partials.recent-tenaga-pendidik')
-            @include('admin.users.partials.recent-siswa')
-            @include('admin.users.partials.recent-orang-tua')
-        </div>
+        @include('admin.users.partials.recent-tenaga-pendidik')
+        @include('admin.users.partials.recent-siswa')
+        @include('admin.users.partials.recent-orang-tua')
     </div>
 
     @include('admin.users.partials.delete-modals')
