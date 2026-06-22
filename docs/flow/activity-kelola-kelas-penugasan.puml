@@ -1,0 +1,62 @@
+@startuml activity-kelola-kelas-penugasan
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu\nData Kelas & Penugasan;
+
+|Sistem|
+:Menampilkan *Dropdown* Menu\nKelas & Penugasan;
+
+|Pengguna (Admin)|
+:Memilih Sub-Menu\n(Decision);
+
+if (Pilih Kategori?) then (Data Kelas)
+    |Sistem|
+    :Menampilkan Halaman\nKelola Kelas;
+    |Pengguna (Admin)|
+    :Membuat / Mengedit\nData Kelas Dasar;
+
+elseif (Pilih Kategori?) then (Wali Kelas)
+    |Sistem|
+    :Menampilkan Halaman\nPenugasan Wali;
+    |Pengguna (Admin)|
+    :Memilih Kelas &\nAssign Wali Kelas;
+
+elseif (Pilih Kategori?) then (Guru Pengajar)
+    |Sistem|
+    :Menampilkan Halaman\nPenugasan Guru;
+    |Pengguna (Admin)|
+    :Memilih Kelas &\nAssign Guru Pengajar;
+
+else (Manajemen Siswa)
+    |Sistem|
+    :Menampilkan Halaman\nManajemen Siswa;
+    |Pengguna (Admin)|
+    :Membuka Detail Siswa &\nMemilih Penempatan Kelas;
+endif
+
+|Pengguna (Admin)|
+:Klik Tombol "Simpan Perubahan";
+
+|Sistem|
+if (Validasi Data Penugasan?) then (Valid)
+    :Menyimpan Relasi/Mapping\nke Database;
+    :Menampilkan Pesan Sukses;
+else (Tidak Valid / Bentrok)
+    :Menampilkan Pesan Error\n(Contoh: "Siswa sudah\nada di kelas lain");
+    
+    |Pengguna (Admin)|
+    :Membatalkan Pilihan\natau Memilih Ulang;
+    note right: Kembali ke Form Penugasan
+endif
+
+|Sistem|
+:Memperbarui Tampilan\nAnggota Kelas;
+
+|Pengguna (Admin)|
+:Melihat Hasil Penugasan;
+stop
+@enduml

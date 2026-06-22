@@ -46,23 +46,27 @@ const filterTable = (input, tableId) => {
 const bindCheckboxes = () => {
     const { sisaKuota } = getManageConfig();
     const checkboxes = document.querySelectorAll('.siswa-checkbox');
-    const selectAll = document.getElementById('selectAll');
+    const selectAlls = document.querySelectorAll('.selectAll-checkbox');
 
     checkboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
             updateSelectedCount();
-            if (selectAll) {
-                selectAll.checked = document.querySelectorAll('.siswa-checkbox:checked').length === checkboxes.length;
+            if (selectAlls.length) {
+                const isAllChecked = document.querySelectorAll('.siswa-checkbox:checked').length === checkboxes.length;
+                selectAlls.forEach(sa => sa.checked = isAllChecked);
             }
         });
     });
 
-    selectAll?.addEventListener('change', () => {
-        const maxSelect = Math.min(checkboxes.length, sisaKuota);
-        checkboxes.forEach((checkbox, index) => {
-            checkbox.checked = selectAll.checked && index < maxSelect;
+    selectAlls.forEach((selectAll) => {
+        selectAll.addEventListener('change', () => {
+            const maxSelect = Math.min(checkboxes.length, sisaKuota);
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = selectAll.checked && index < maxSelect;
+            });
+            selectAlls.forEach(sa => sa.checked = selectAll.checked);
+            updateSelectedCount();
         });
-        updateSelectedCount();
     });
 };
 

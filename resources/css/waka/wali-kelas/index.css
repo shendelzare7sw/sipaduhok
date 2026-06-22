@@ -360,7 +360,8 @@
 .rounded-action-btn { border-radius: 8px; }
 .location-text { font-size: 0.8rem; }
 .assigned-wali-name { font-size: 0.85rem; }
-.assign-action-btn { background-color: #8b5cf6; }
+.assign-action-btn { background-color: #8b5cf6; transition: all 0.2s; }
+.assign-action-btn:hover { background-color: #7c3aed !important; color: #ffffff !important; }
 .empty-wali-icon { color: #e2e8f0; }
 .assign-modal-content { border-radius: 16px; }
 .dashed-input { border: 1px dashed #cbd5e1; border-radius: 8px; }

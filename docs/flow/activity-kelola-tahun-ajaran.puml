@@ -1,0 +1,53 @@
+@startuml activity-kelola-tahun-ajaran
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin)|
+start
+:Mengakses Menu\nTahun Ajaran;
+
+|Sistem|
+:Menampilkan Daftar\nData Tahun Ajaran;
+
+|Pengguna (Admin)|
+:Memilih Aksi Data Master\n(Decision);
+
+if (Pilih Aksi?) then (Tambah / Edit)
+    |Pengguna (Admin)|
+    :Mengisi / Mengubah\nForm Tahun Ajaran;
+    :Klik Tombol "Simpan";
+    
+    |Sistem|
+    if (Validasi Input?) then (Valid)
+        :Menyimpan Data\nke Database;
+        :Menampilkan Pesan Sukses;
+    else (Tidak Valid)
+        :Menampilkan Pesan Error\n(Input Kosong / Duplikat);
+        |Pengguna (Admin)|
+        :Memperbaiki Input Data;
+        note right: Kembali ke Form
+    endif
+
+else (Hapus Data)
+    |Pengguna (Admin)|
+    :Klik Tombol "Hapus";
+    
+    |Sistem|
+    :Menampilkan Pop-up\nKonfirmasi Hapus;
+    
+    |Pengguna (Admin)|
+    :Mengeklik "Ya, Hapus";
+    
+    |Sistem|
+    :Menghapus Data\ndari Database;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Sistem|
+:Memperbarui Tampilan\nDaftar Tahun Ajaran;
+
+|Pengguna (Admin)|
+:Melihat Hasil Perubahan;
+stop
+@enduml

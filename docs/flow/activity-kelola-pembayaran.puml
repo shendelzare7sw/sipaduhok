@@ -1,0 +1,46 @@
+@startuml activity-kelola-pembayaran
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Bendahara / Admin|
+start
+:Mengakses Menu\nPembayaran Tagihan;
+
+|Sistem|
+:Menampilkan Data Tagihan\ndan Daftar Siswa;
+
+|Bendahara / Admin|
+:Memilih Siswa\nyang Akan Membayar;
+
+|Sistem|
+:Menampilkan Detail Tagihan\n(Tunggakan, SPP, dll);
+
+|Bendahara / Admin|
+:Menginput Nominal\nPembayaran;
+:Klik Tombol "Proses Pembayaran";
+
+|Sistem|
+if (Nominal Valid?) then (Ya)
+    :Memproses Transaksi\ndan Mengurangi Tagihan;
+    :Memperbarui Status\n(Lunas / Belum Lunas);
+    :Menyimpan ke Database;
+    :Menampilkan Pesan Sukses;
+    
+    |Bendahara / Admin|
+    :Klik Tombol "Cetak Kwitansi";
+    
+    |Sistem|
+    :Men-generate PDF Kwitansi;
+else (Tidak Valid)
+    |Sistem|
+    :Menampilkan Pesan Error\n(Input Nominal Salah);
+    |Bendahara / Admin|
+    :Memperbaiki Input Nominal;
+    note right: Kembali Menginput Nominal
+endif
+
+|Bendahara / Admin|
+:Menerima/Menyimpan Kwitansi;
+stop
+@enduml

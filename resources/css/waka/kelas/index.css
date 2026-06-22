@@ -234,6 +234,7 @@
     border-radius: 8px;
     font-size: 0.85rem;
     min-width: 150px;
+    width: auto;
     padding: 0.45rem 2rem 0.45rem 0.75rem;
 }
 
