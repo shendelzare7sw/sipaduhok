@@ -11,43 +11,58 @@ start
 :Menampilkan Daftar\nData Tahun Ajaran;
 
 |Pengguna (Admin)|
-:Memilih Aksi Data Master\n(Decision);
-
-if (Pilih Aksi?) then (Tambah / Edit)
-    |Pengguna (Admin)|
-    :Mengisi / Mengubah\nForm Tahun Ajaran;
-    :Klik Tombol "Simpan";
-    
+if (Pilih Aksi?) then (Tambah)
     |Sistem|
-    if (Validasi Input?) then (Valid)
-        :Menyimpan Data\nke Database;
-        :Menampilkan Pesan Sukses;
-    else (Tidak Valid)
-        :Menampilkan Pesan Error\n(Input Kosong / Duplikat);
-        |Pengguna (Admin)|
-        :Memperbaiki Input Data;
-        note right: Kembali ke Form
+    :Menampilkan Form\nTambah Tahun Ajaran;
+    |Pengguna (Admin)|
+    :Isi Form Tahun Ajaran;
+    :Klik Tombol Simpan;
+    |Sistem|
+    if (Proses?) then (Berhasil)
+        :Memperbarui Data Tahun Ajaran;
+    else (Gagal)
+        :Menampilkan Pesan Error;
+        stop
     endif
 
-else (Hapus Data)
+elseif (Pilih Aksi?) then (Edit)
     |Pengguna (Admin)|
-    :Klik Tombol "Hapus";
-    
+    :Klik ikon Edit pada\nData Tahun Ajaran;
     |Sistem|
-    :Menampilkan Pop-up\nKonfirmasi Hapus;
-    
+    :Menampilkan Form\nEdit Tahun Ajaran;
     |Pengguna (Admin)|
-    :Mengeklik "Ya, Hapus";
-    
+    :Mengubah Data Tahun Ajaran;
+    :Klik Tombol Simpan;
     |Sistem|
-    :Menghapus Data\ndari Database;
-    :Menampilkan Pesan Sukses;
+    if (Proses?) then (Berhasil)
+        :Memperbarui Data Tahun Ajaran;
+    else (Gagal)
+        :Menampilkan Pesan Error;
+        stop
+    endif
+
+else (Hapus)
+    |Pengguna (Admin)|
+    :Klik ikon Hapus pada\nData Tahun Ajaran;
+    |Sistem|
+    :Menampilkan\nKonfirmasi Hapus;
+    |Pengguna (Admin)|
+    if (Hapus atau Batal?) then (Hapus)
+        |Sistem|
+        :Menghapus Data;
+        if (Proses?) then (Berhasil)
+            :Memperbarui Data Tahun Ajaran;
+        else (Gagal)
+            :Menampilkan Pesan Error;
+            stop
+        endif
+    else (Batal)
+        :Kembali ke Daftar\nTahun Ajaran;
+        stop
+    endif
 endif
 
-|Sistem|
-:Memperbarui Tampilan\nDaftar Tahun Ajaran;
-
 |Pengguna (Admin)|
-:Melihat Hasil Perubahan;
+:Selesai;
 stop
 @enduml

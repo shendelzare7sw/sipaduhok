@@ -11,52 +11,56 @@ start
 :Menampilkan *Dropdown* Menu\nKelas & Penugasan;
 
 |Pengguna (Admin)|
-:Memilih Sub-Menu\n(Decision);
+:Memilih Kategori Pengelolaan;
 
-if (Pilih Kategori?) then (Data Kelas)
+if (Kategori Pengelolaan?) then (Data Kelas)
     |Sistem|
-    :Menampilkan Halaman\nKelola Kelas;
+    :Menampilkan Halaman\nData Kelas;
     |Pengguna (Admin)|
-    :Membuat / Mengedit\nData Kelas Dasar;
+    :Melakukan Aksi CRUD\n(Tambah / Edit / Hapus);
+    :Klik "Simpan" / "Konfirmasi";
+    |Sistem|
+    :Memproses Perubahan\nData ke Database;
+    :Menampilkan Pesan Sukses;
 
-elseif (Pilih Kategori?) then (Wali Kelas)
+elseif (Kategori Pengelolaan?) then (Wali Kelas)
     |Sistem|
     :Menampilkan Halaman\nPenugasan Wali;
     |Pengguna (Admin)|
     :Memilih Kelas &\nAssign Wali Kelas;
-
-elseif (Pilih Kategori?) then (Guru Pengajar)
+    :Klik Tombol "Simpan Penugasan";
     |Sistem|
-    :Menampilkan Halaman\nPenugasan Guru;
+    if (Validasi Penugasan?) then (Valid)
+        :Menyimpan Relasi Wali Kelas\nke Database;
+        :Menampilkan Pesan Sukses;
+    else (Tidak Valid / Bentrok)
+        :Menampilkan Pesan Error\n(Contoh: "Wali kelas sudah\nditugaskan");
+        |Pengguna (Admin)|
+        :Memperbaiki Pilihan;
+        note right: Kembali ke Form Penugasan
+    endif
+
+elseif (Kategori Pengelolaan?) then (Guru Pengajar)
+    |Sistem|
+    :Menampilkan Halaman\nData Guru Pengajar;
     |Pengguna (Admin)|
-    :Memilih Kelas &\nAssign Guru Pengajar;
+    :Melihat Daftar Penugasan Guru\n*(Read-Only)*;
+    :Klik "Sinkronisasi dari Jadwal";
+    |Sistem|
+    :Menarik Data Relasi dari\nModul Jadwal Pelajaran;
+    :Memperbarui Tampilan\nData Guru Pengajar;
 
 else (Manajemen Siswa)
     |Sistem|
     :Menampilkan Halaman\nManajemen Siswa;
     |Pengguna (Admin)|
-    :Membuka Detail Siswa &\nMemilih Penempatan Kelas;
+    :Melihat Detail Informasi Siswa;
+    :Klik Tombol "Cetak Kartu";
+    |Sistem|
+    :Men-generate PDF\nKartu Pelajar Siswa;
 endif
 
 |Pengguna (Admin)|
-:Klik Tombol "Simpan Perubahan";
-
-|Sistem|
-if (Validasi Data Penugasan?) then (Valid)
-    :Menyimpan Relasi/Mapping\nke Database;
-    :Menampilkan Pesan Sukses;
-else (Tidak Valid / Bentrok)
-    :Menampilkan Pesan Error\n(Contoh: "Siswa sudah\nada di kelas lain");
-    
-    |Pengguna (Admin)|
-    :Membatalkan Pilihan\natau Memilih Ulang;
-    note right: Kembali ke Form Penugasan
-endif
-
-|Sistem|
-:Memperbarui Tampilan\nAnggota Kelas;
-
-|Pengguna (Admin)|
-:Melihat Hasil Penugasan;
+:Selesai Melakukan\nPengelolaan;
 stop
 @enduml
