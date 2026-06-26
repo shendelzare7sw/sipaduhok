@@ -226,7 +226,7 @@ class PresensiController extends Controller
                 $query->where('status_validasi', 'pending')
                     ->orWhere(function ($legacyQuery) {
                         $legacyQuery->whereNull('status_validasi')
-                            ->where('keterangan', 'LIKE', '%Diajukan oleh orang tua%');
+                            ->where('keterangan', 'LIKE', '%Diajukan oleh wali siswa%');
                     });
             })
             ->with(['siswa', 'inputBy'])
@@ -270,7 +270,7 @@ class PresensiController extends Controller
                 'status_validasi' => 'disetujui',
             ]);
 
-            // Notify orang tua about izin approval
+            // Notify wali siswa about izin approval
             $presensi->load('siswa.orangTua');
             app(\App\Services\NotificationService::class)->notifyIzinStatus($presensi);
 
@@ -287,7 +287,7 @@ class PresensiController extends Controller
                 'status_validasi' => 'ditolak',
             ]);
 
-            // Notify orang tua about izin rejection
+            // Notify wali siswa about izin rejection
             $presensi->load('siswa.orangTua');
             app(\App\Services\NotificationService::class)->notifyIzinStatus($presensi);
 

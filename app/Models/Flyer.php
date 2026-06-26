@@ -98,7 +98,7 @@ class Flyer extends Model
             'siswa' => 'Siswa',
             'guru' => 'Guru',
             'wali_kelas' => 'Wali Kelas',
-            'orang_tua' => 'Orang Tua'
+            'orang_tua' => 'Wali Siswa'
         ];
 
         return $labels[$this->target_audience] ?? 'Semua';

@@ -231,7 +231,7 @@
                     Tanda Tangan
                 </th>
                 <td class="text-center font-bold" style="padding: 8px;">
-                    Orang Tua
+                    Wali Siswa
                 </td>
                 <td class="text-center font-bold" style="padding: 8px;">
                     Wali Kelas

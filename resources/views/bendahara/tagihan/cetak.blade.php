@@ -203,7 +203,7 @@
 
     <div class="footer">
         <div class="sign">
-            <p>Orang Tua/Wali Siswa</p>
+            <p>Wali Siswa/Wali Siswa</p>
             <div class="sign-line">
                 ( ................................ )
             </div>

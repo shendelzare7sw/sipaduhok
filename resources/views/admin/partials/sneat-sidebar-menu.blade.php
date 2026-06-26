@@ -89,8 +89,8 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
                 <div>Siswa</div>
             </a>
         </li>
-        <li class="menu-item {{ $currentRoute == 'admin.users.orang-tua' ? 'active' : '' }}">
-            <a href="{{ route('admin.users.orang-tua') }}" class="menu-link">
+        <li class="menu-item {{ $currentRoute == 'admin.users.wali-siswa' ? 'active' : '' }}">
+            <a href="{{ route('admin.users.wali-siswa') }}" class="menu-link">
                 <div>Wali Murid</div>
             </a>
         </li>

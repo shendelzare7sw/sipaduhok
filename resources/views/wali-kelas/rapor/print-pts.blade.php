@@ -144,7 +144,7 @@
         <table>
             <tr>
                 <td width="33%">
-                    <div>Orang Tua/Wali</div>
+                    <div>Wali Siswa/Wali</div>
                     <div class="sign-line">(...........................)</div>
                 </td>
                 <td width="34%" style="text-align: center;">

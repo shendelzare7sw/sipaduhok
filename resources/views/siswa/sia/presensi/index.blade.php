@@ -67,8 +67,8 @@
                 Bulan {{ now()->translatedFormat('F Y') }}
             </p>
         </div>
-        {{-- Note: Fitur Ajukan Izin dipindahkan ke akses Orang Tua --}}
-        {{-- Siswa fokus pada pembelajaran, pengajuan izin dilakukan oleh orang tua sebagai bentuk pendampingan --}}
+        {{-- Note: Fitur Ajukan Izin dipindahkan ke akses Wali Siswa --}}
+        {{-- Siswa fokus pada pembelajaran, pengajuan izin dilakukan oleh wali siswa sebagai bentuk pendampingan --}}
     </div>
 </div>
 

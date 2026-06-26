@@ -88,7 +88,7 @@
                                     $isCustom = !in_array($key, $standardJenisTagihan);
                                     // Cek apakah sudah ada pembayaran
                                     $hasPembayaran = $tagihanRecord && $tagihanRecord->pembayaran()->where('status_validasi', 'disetujui')->exists();
-                                    // PROTEKSI: Hanya lock jika ada pembayaran dari orang tua
+                                    // PROTEKSI: Hanya lock jika ada pembayaran dari wali siswa
                                     // Rp 0 (setting admin) tetap bisa diedit
                                     $isReadOnly = $hasPembayaran;
                                     $canDelete = $tagihanRecord && !$hasPembayaran && ($isCustom || $tagihanRecord->status === 'belum_bayar');
@@ -98,7 +98,7 @@
                                     <td class="align-middle" data-label="Jenis Tagihan">
                                         <strong>{{ $label }}</strong>
                                         @if($isReadOnly)
-                                            <br><small class="badge bg-success">Sudah Dibayar Orang Tua</small>
+                                            <br><small class="badge bg-success">Sudah Dibayar Wali Siswa</small>
                                         @elseif($isCustom && $tagihanRecord)
                                             <br><small class="badge bg-success">Custom</small>
                                         @endif
@@ -184,7 +184,7 @@
             <div>
                 <strong>Catatan:</strong>
                 <ul class="mb-0 mt-2">
-                    <li>Tagihan yang sudah dibayar oleh orang tua tidak dapat diedit atau dihapus untuk menjaga integritas data transaksi.</li>
+                    <li>Tagihan yang sudah dibayar oleh wali siswa tidak dapat diedit atau dihapus untuk menjaga integritas data transaksi.</li>
                     <li>Tagihan dengan nominal Rp 0 (setting admin) tetap dapat diedit kapan saja untuk fleksibilitas perubahan.</li>
                     <li>Perubahan tagihan akan mempengaruhi status pembayaran siswa.</li>
                     <li>Tahun ajaran: <strong>{{ $tahunAjaran->nama_tahun_ajaran ?? '-' }}</strong></li>

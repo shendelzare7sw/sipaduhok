@@ -212,7 +212,7 @@
         <table style="width: 100%;">
             <tr>
                 <td style="width: 33%; text-align: center; vertical-align: top;">
-                    <p style="margin-bottom: 80px;">Orang Tua</p>
+                    <p style="margin-bottom: 80px;">Wali Siswa</p>
                     <div style="border-top: 1px solid #333; display: inline-block; width: 150px; margin-bottom: 5px;"></div>
                     <p>(.......................)</p>
                 </td>

@@ -1,0 +1,20 @@
+.wali-siswa-rapor-index-page .rapor-student-avatar {
+  height: 60px;
+  width: 60px;
+}
+
+.wali-siswa-rapor-index-page .rapor-student-avatar-image {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.wali-siswa-rapor-index-page .rapor-student-avatar-initial {
+  font-size: 1.8rem;
+  height: 100%;
+  width: 100%;
+}
+
+.wali-siswa-rapor-index-page .rapor-score-progress {
+  height: 8px;
+}

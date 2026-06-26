@@ -68,7 +68,7 @@ class SiaPresensiController extends Controller
     /**
      * Note: Method ajukanIzin(), createIzin(), dan storeIzin() telah dihapus.
      * Fitur pengajuan izin dipindahkan ke OrangTuaController.
-     * Siswa fokus pada pembelajaran, pengajuan izin dilakukan oleh orang tua sebagai bentuk pendampingan.
+     * Siswa fokus pada pembelajaran, pengajuan izin dilakukan oleh wali siswa sebagai bentuk pendampingan.
      */
 
     /**

@@ -116,7 +116,7 @@ class TunggakanCarryoverService
 
     /**
      * Eksekusi: buat tagihan baru di TA tujuan + tandai tagihan asal sebagai dialihkan.
-     * Notifikasi orang tua dikirim per tagihan baru.
+     * Notifikasi wali siswa dikirim per tagihan baru.
      *
      * @param int[] $siswaIds
      */

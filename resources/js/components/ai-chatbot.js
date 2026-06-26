@@ -427,7 +427,7 @@ function loadQuickActions() {
             {i:'fa-file-alt',t:'Rapor saya'},{i:'fa-credit-card',t:'Pembayaran saya'},{i:'fa-key',t:'Lupa password'},
         ],
         orang_tua: [
-            {i:'fa-home',t:'Dashboard orang tua'},{i:'fa-calendar-check',t:'Presensi anak'},{i:'fa-edit',t:'Ajukan izin anak'},
+            {i:'fa-home',t:'Dashboard wali siswa'},{i:'fa-calendar-check',t:'Presensi anak'},{i:'fa-edit',t:'Ajukan izin anak'},
             {i:'fa-history',t:'Riwayat izin'},{i:'fa-credit-card',t:'Tagihan anak'},{i:'fa-money-bill-wave',t:'Bayar spp'},
             {i:'fa-receipt',t:'Cetak invoice'},{i:'fa-file-alt',t:'Rapor anak'},{i:'fa-chart-bar',t:'Nilai anak'},
             {i:'fa-graduation-cap',t:'LMS anak'},{i:'fa-key',t:'Lupa password'},{i:'fa-bell',t:'Notifikasi'},

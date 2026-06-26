@@ -173,7 +173,7 @@
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-semibold">Alasan Pengajuan</label>
-                                                                <textarea name="alasan" class="form-control" rows="3" required placeholder="Contoh: Orang tua berjanji melunasi bulan depan, kondisi ekonomi kurang mampu, dll."></textarea>
+                                                                <textarea name="alasan" class="form-control" rows="3" required placeholder="Contoh: Wali siswa berjanji melunasi bulan depan, kondisi ekonomi kurang mampu, dll."></textarea>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer border-0">
@@ -227,7 +227,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Alasan Pengajuan <span class="text-muted fw-normal">(berlaku untuk semua)</span></label>
-                        <textarea name="alasan" class="form-control" rows="4" required placeholder="Contoh: Orang tua berjanji melunasi bulan depan, kondisi ekonomi kurang mampu, dll."></textarea>
+                        <textarea name="alasan" class="form-control" rows="4" required placeholder="Contoh: Wali siswa berjanji melunasi bulan depan, kondisi ekonomi kurang mampu, dll."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-0">

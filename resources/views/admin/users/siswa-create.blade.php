@@ -228,11 +228,11 @@
         <div class="card">
             <h5 class="form-title">
                 <i class="fas fa-users section-icon--guardian"></i>
-                4. Data Orang Tua / Wali (Biodata)
+                4. Data Wali Siswa / Wali (Biodata)
             </h5>
             <p class="section-note">
                 <i class="fas fa-info-circle"></i>
-                Informasi dasar orang tua/wali siswa untuk keperluan administrasi sekolah.
+                Informasi dasar wali siswa/wali siswa untuk keperluan administrasi sekolah.
             </p>
 
             <div class="row">
@@ -253,7 +253,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">No. Telepon Orang Tua (WA Aktif)</label>
+                <label class="form-label">No. Telepon Wali Siswa (WA Aktif)</label>
                 <input type="text" name="telepon_orangtua" class="form-control" value="{{ old('telepon_orangtua') }}"
                     placeholder="Contoh: 08123456789">
                 <small class="text-muted">
@@ -266,19 +266,19 @@
         <div class="card">
             <h5 class="form-title">
                 <i class="fas fa-user-friends section-icon--parent"></i>
-                5. Akun Orang Tua (Login Sistem)
+                5. Akun Wali Siswa (Login Sistem)
             </h5>
             <p class="section-note">
                 <i class="fas fa-info-circle"></i>
-                Pilih orang tua yang sudah ada atau buat akun baru untuk memberikan akses login ke sistem.
+                Pilih wali siswa yang sudah ada atau buat akun baru untuk memberikan akses login ke sistem.
             </p>
 
             <div class="form-group">
-                <label class="form-label">Opsi Akun Orang Tua</label>
+                <label class="form-label">Opsi Akun Wali Siswa</label>
                 <select name="parent_option" id="parentOption" class="form-control">
                     <option value="">-- Pilih Opsi --</option>
-                    <option value="existing">Pilih Orang Tua yang Sudah Ada</option>
-                    <option value="new">Buat Akun Orang Tua Baru</option>
+                    <option value="existing">Pilih Wali Siswa yang Sudah Ada</option>
+                    <option value="new">Buat Akun Wali Siswa Baru</option>
                     <option value="none">Tidak Perlu Akun (Bisa Ditambahkan Nanti)</option>
                 </select>
             </div>
@@ -290,10 +290,10 @@
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-search muted-label-icon"></i>
-                                Cari Orang Tua
+                                Cari Wali Siswa
                             </label>
                             <input type="text" id="searchParent" class="form-control"
-                                placeholder="Ketik nama atau username orang tua...">
+                                placeholder="Ketik nama atau username wali siswa...">
                         </div>
                     </div>
                     <div class="col">
@@ -303,7 +303,7 @@
                                 Filter Status
                             </label>
                             <select id="filterParentStatus" class="form-control">
-                                <option value="">Semua Orang Tua</option>
+                                <option value="">Semua Wali Siswa</option>
                                 <option value="available">Belum Terhubung (Baru)</option>
                                 <option value="has_children">Sudah Punya Anak Terdaftar</option>
                             </select>
@@ -313,7 +313,7 @@
 
                 <div class="form-group parent-form-block">
                     <label class="form-label">
-                        Pilih Orang Tua <span class="required-mark">*</span>
+                        Pilih Wali Siswa <span class="required-mark">*</span>
                         <small class="text-muted parent-count-hint">
                             (<span id="parentCount">{{ $orangTuaList->count() }}</span> tersedia)
                         </small>
@@ -349,7 +349,7 @@
                         @endforeach
                         <div id="noParentFound" class="empty-list-message d-none">
                             <i class="fas fa-search"></i>
-                            <p>Tidak ada orang tua yang ditemukan</p>
+                            <p>Tidak ada wali siswa yang ditemukan</p>
                             <small>Coba ubah kata kunci atau filter pencarian</small>
                         </div>
                     </div>
@@ -381,14 +381,14 @@
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
-                            <label class="form-label">Nama Lengkap Orang Tua <span class="required-mark">*</span></label>
+                            <label class="form-label">Nama Lengkap Wali Siswa <span class="required-mark">*</span></label>
                             <input type="text" name="parent_name" class="form-control" value="{{ old('parent_name') }}"
-                                placeholder="Nama lengkap orang tua">
+                                placeholder="Nama lengkap wali siswa">
                         </div>
                     </div>
                     <div class="col">
                         <div class="form-group">
-                            <label class="form-label">Username Orang Tua <span class="required-mark">*</span></label>
+                            <label class="form-label">Username Wali Siswa <span class="required-mark">*</span></label>
                             <input type="text" name="parent_username" class="form-control"
                                 value="{{ old('parent_username') }}" placeholder="Username untuk login">
                             <small class="text-muted">Untuk login ke sistem</small>
@@ -398,7 +398,7 @@
                 <div class="row">
                     <div class="col">
                         <div class="form-group">
-                            <label class="form-label">Email Orang Tua <span class="required-mark">*</span></label>
+                            <label class="form-label">Email Wali Siswa <span class="required-mark">*</span></label>
                             <input type="email" name="parent_email" class="form-control" value="{{ old('parent_email') }}"
                                 placeholder="contoh@email.com">
                         </div>

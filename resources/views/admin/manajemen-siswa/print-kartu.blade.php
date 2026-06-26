@@ -110,7 +110,7 @@
                         <p>{{ Str::limit($siswa->alamat, 65) }}</p>
                     </div>
                     <div class="info-section">
-                        <h4>Nama Orang Tua/Wali</h4>
+                        <h4>Nama Wali Siswa/Wali</h4>
                         <p>{{ $namaOrtu ?? '-' }}</p>
                     </div>
                     <div class="info-section">

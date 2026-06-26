@@ -3,7 +3,7 @@
 @section('title', 'Manajemen User')
 
 @section('page-title', 'Manajemen User')
-@section('page-subtitle', 'Overview data Tenaga Pendidik, Siswa, dan Orang Tua')
+@section('page-subtitle', 'Overview data Tenaga Pendidik, Siswa, dan Wali Siswa')
 
 @section('sidebar-menu')
     @include('admin.partials.sneat-sidebar-menu')
@@ -21,7 +21,7 @@
 
         @include('admin.users.partials.recent-tenaga-pendidik')
         @include('admin.users.partials.recent-siswa')
-        @include('admin.users.partials.recent-orang-tua')
+        @include('admin.users.partials.recent-wali-siswa')
     </div>
 
     @include('admin.users.partials.delete-modals')

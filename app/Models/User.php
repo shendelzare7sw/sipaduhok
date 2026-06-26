@@ -189,7 +189,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi untuk orang tua - mendapatkan anak-anak (siswa)
+     * Relasi untuk wali siswa - mendapatkan anak-anak (siswa)
      * Menggunakan tabel pivot student_parents
      */
     public function children()

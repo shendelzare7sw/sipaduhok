@@ -1,0 +1,166 @@
+.wali-siswa-tagihan-index-page .paid-bill-row {
+  --bs-table-bg: #ecfdf5;
+  --bs-table-hover-bg: #d1fae5;
+  --bs-table-striped-bg: #ecfdf5;
+  background-color: #ecfdf5 !important;
+  color: #14532d !important;
+}
+
+.wali-siswa-tagihan-index-page .paid-bill-row td {
+  background-color: transparent !important;
+  color: #14532d !important;
+}
+
+.wali-siswa-tagihan-index-page .paid-bill-row .fw-bold {
+  color: #064e3b !important;
+}
+
+.wali-siswa-tagihan-index-page .arrears-unavailable-row {
+  --bs-table-bg: #fef2f2;
+  --bs-table-hover-bg: #fee2e2;
+  background-color: #fef2f2;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-col-select {
+  width: 50px;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-col-date,
+.wali-siswa-tagihan-index-page .tagihan-col-amount {
+  width: 150px;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-col-original-amount {
+  width: 160px;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-col-status-xs {
+  width: 100px;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-col-status-sm {
+  width: 130px;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-col-status-lg {
+  width: 180px;
+}
+
+.wali-siswa-tagihan-index-page .tagihan-badge-sm {
+  font-size: 0.7rem;
+}
+
+.wali-siswa-tagihan-index-page .bulk-payment-footer {
+  box-shadow: 0 -0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  z-index: 1030;
+}
+
+.wali-siswa-tagihan-index-page .payment-summary-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.wali-siswa-tagihan-index-page .cash-method-disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.wali-siswa-tagihan-index-page .payment-history-actions,
+.wali-siswa-tagihan-index-page .payment-history-actions form,
+.wali-siswa-tagihan-index-page .payment-history-action {
+  width: 100%;
+}
+
+.wali-siswa-tagihan-index-page .rekening-copy-helper {
+  left: -9999px;
+  opacity: 0;
+  position: absolute;
+  top: -9999px;
+}
+
+.wali-siswa-tagihan-index-page .modal {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wali-siswa-tagihan-index-page .modal.fade {
+  transition: opacity 0.15s linear;
+}
+
+.wali-siswa-tagihan-index-page .modal.fade:not(.show) {
+  opacity: 0;
+}
+
+.wali-siswa-tagihan-index-page .payment-input:disabled {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #adb5bd;
+}
+
+@media (max-width: 768px) {
+  .wali-siswa-tagihan-index-page .table-responsive {
+    border: none;
+  }
+
+  .wali-siswa-tagihan-index-page .table thead {
+    display: none;
+  }
+
+  .wali-siswa-tagihan-index-page .table tbody tr {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: block;
+    margin-bottom: 1rem;
+    padding: 10px;
+  }
+
+  .wali-siswa-tagihan-index-page .table tbody td {
+    align-items: center;
+    border: none;
+    border-bottom: 1px dashed #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    text-align: right;
+  }
+
+  .wali-siswa-tagihan-index-page .table tbody td > div {
+    text-align: right;
+  }
+
+  .wali-siswa-tagihan-index-page .table tbody td:last-child {
+    border-bottom: none;
+    gap: 10px;
+    justify-content: center;
+    padding-top: 15px;
+  }
+
+  .wali-siswa-tagihan-index-page .table tbody td::before {
+    color: #64748b;
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 15px;
+    text-align: left;
+    text-transform: uppercase;
+    width: 40%;
+  }
+
+  .wali-siswa-tagihan-index-page .bulk-payment-footer h4 {
+    font-size: 1.25rem;
+  }
+
+  .wali-siswa-tagihan-index-page .bulk-payment-footer .btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .wali-siswa-tagihan-index-page .bulk-payment-footer {
+    margin-left: 260px;
+  }
+}

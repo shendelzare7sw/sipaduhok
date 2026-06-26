@@ -247,7 +247,7 @@ class NotificationService
     }
 
     /**
-     * Notify wali kelas about new izin request from orang tua
+     * Notify wali kelas about new izin request from wali siswa
      */
     public function notifyIzinBaru($presensi)
     {
@@ -273,7 +273,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about izin status update
+     * Notify wali siswa about izin status update
      */
     public function notifyIzinStatus($presensi)
     {
@@ -291,7 +291,7 @@ class NotificationService
                     Notification::TIPE_IZIN,
                     'Status Izin: ' . $statusText,
                     'Pengajuan izin ' . $siswa->nama_lengkap . ' telah ' . strtolower($statusText),
-                    route('orang-tua.presensi.riwayat-izin', $siswa->id),
+                    route('wali-siswa.presensi.riwayat-izin', $siswa->id),
                     ['presensi_id' => $presensi->id, 'status' => $presensi->status_validasi]
                 );
             }
@@ -377,7 +377,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about payment validation
+     * Notify wali siswa about payment validation
      */
     public function notifyPembayaranValidasi($pembayaran)
     {
@@ -394,7 +394,7 @@ class NotificationService
                     Notification::TIPE_PEMBAYARAN,
                     'Pembayaran Berhasil Divalidasi',
                     'Pembayaran Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' telah divalidasi',
-                    route('orang-tua.tagihan.anak', $siswa->id),
+                    route('wali-siswa.tagihan.anak', $siswa->id),
                     ['pembayaran_id' => $pembayaran->id]
                 );
             }
@@ -402,7 +402,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua bahwa tunggakan TA lama dialihkan menjadi tagihan di TA aktif.
+     * Notify wali siswa bahwa tunggakan TA lama dialihkan menjadi tagihan di TA aktif.
      * Tagihan parameter di sini adalah tagihan BARU (carryover) dengan tagihan_asal_id.
      */
     public function notifyTunggakanDialihkan($tagihanBaru)
@@ -423,7 +423,7 @@ class NotificationService
                     Notification::TIPE_PEMBAYARAN,
                     'Tunggakan Dialihkan ke TA Aktif',
                     "Tunggakan {$siswa->nama_lengkap} dari {$namaTaAsal} sebesar {$jumlahFmt} telah dialihkan dan harus dilunasi di TA aktif.",
-                    route('orang-tua.tagihan.anak', $siswa->id),
+                    route('wali-siswa.tagihan.anak', $siswa->id),
                     [
                         'tagihan_id' => $tagihanBaru->id,
                         'tagihan_asal_id' => $tagihanBaru->tagihan_asal_id,
@@ -435,7 +435,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about new tagihan
+     * Notify wali siswa about new tagihan
      */
     public function notifyTagihanBaru($tagihan)
     {
@@ -452,7 +452,7 @@ class NotificationService
                     Notification::TIPE_PEMBAYARAN,
                     'Tagihan Baru: ' . $tagihan->jenis_tagihan,
                     'Rp ' . number_format($tagihan->jumlah, 0, ',', '.') . ' - ' . $siswa->nama_lengkap,
-                    route('orang-tua.tagihan.anak', $siswa->id),
+                    route('wali-siswa.tagihan.anak', $siswa->id),
                     ['tagihan_id' => $tagihan->id, 'siswa_id' => $siswa->id]
                 );
             }
@@ -460,7 +460,7 @@ class NotificationService
     }
 
     /**
-     * Notify siswa and orang tua about rapor terbit
+     * Notify siswa and wali siswa about rapor terbit
      */
     public function notifyRaporTerbit($rapor)
     {
@@ -482,7 +482,7 @@ class NotificationService
         //     );
         // }
 
-        // Notify orang tua
+        // Notify wali siswa
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
             if ($parent->user_id) {
@@ -491,7 +491,7 @@ class NotificationService
                     Notification::TIPE_RAPOR,
                     'Rapor ' . $siswa->nama_lengkap . ' Tersedia',
                     'Rapor ' . $semesterText . ' sudah bisa dilihat',
-                    route('orang-tua.rapor.anak', $siswa->id),
+                    route('wali-siswa.rapor.anak', $siswa->id),
                     ['rapor_id' => $rapor->id, 'siswa_id' => $siswa->id]
                 );
             }
@@ -584,7 +584,7 @@ class NotificationService
             $route = match ($user->role) {
                 'siswa' => route('siswa.lms.kalender'),
                 'guru_pengajar' => route('guru.dashboard'),
-                'orang_tua' => route('orang-tua.dashboard'),
+                'orang_tua' => route('wali-siswa.dashboard'),
                 default => route('notifications.index'),
             };
 
@@ -662,7 +662,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about payment rejection
+     * Notify wali siswa about payment rejection
      */
     public function notifyPembayaranDitolak($pembayaran, $alasan = null)
     {
@@ -684,7 +684,7 @@ class NotificationService
                     Notification::TIPE_PEMBAYARAN,
                     'Pembayaran Ditolak',
                     $pesan,
-                    route('orang-tua.tagihan.anak', $siswa->id),
+                    route('wali-siswa.tagihan.anak', $siswa->id),
                     ['pembayaran_id' => $pembayaran->id, 'alasan' => $alasan]
                 );
             }
@@ -692,7 +692,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about ujian access validation
+     * Notify wali siswa about ujian access validation
      */
     public function notifyValidasiAksesUjian($siswa, $status = 'disetujui')
     {
@@ -713,7 +713,7 @@ class NotificationService
                     Notification::TIPE_PEMBAYARAN,
                     'Akses Ujian ' . $statusText,
                     $pesan,
-                    route('orang-tua.tagihan.anak', $siswa->id),
+                    route('wali-siswa.tagihan.anak', $siswa->id),
                     ['siswa_id' => $siswa->id, 'status' => $status, 'tipe' => 'ujian']
                 );
             }
@@ -733,7 +733,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about rapor access validation
+     * Notify wali siswa about rapor access validation
      */
     public function notifyValidasiAksesRapor($siswa, $status = 'disetujui')
     {
@@ -754,7 +754,7 @@ class NotificationService
                     Notification::TIPE_RAPOR,
                     'Akses Rapor ' . $statusText,
                     $pesan,
-                    route('orang-tua.rapor.anak', $siswa->id),
+                    route('wali-siswa.rapor.anak', $siswa->id),
                     ['siswa_id' => $siswa->id, 'status' => $status, 'tipe' => 'rapor']
                 );
             }
@@ -762,7 +762,7 @@ class NotificationService
     }
 
     /**
-     * Notify orang tua about bulk tagihan created
+     * Notify wali siswa about bulk tagihan created
      */
     public function notifyTagihanBulk($siswaIds, $jenisTagihan, $jumlah)
     {
@@ -777,7 +777,7 @@ class NotificationService
                         Notification::TIPE_PEMBAYARAN,
                         'Tagihan Baru: ' . $jenisTagihan,
                         'Rp ' . number_format($jumlah, 0, ',', '.') . ' - ' . $siswa->nama_lengkap,
-                        route('orang-tua.tagihan.anak', $siswa->id),
+                        route('wali-siswa.tagihan.anak', $siswa->id),
                         ['siswa_id' => $siswa->id, 'jenis' => $jenisTagihan, 'jumlah' => $jumlah]
                     );
                 }
@@ -807,7 +807,7 @@ class NotificationService
     }
 
     /**
-     * Notify siswa and orang tua when assigned to a class
+     * Notify siswa and wali siswa when assigned to a class
      */
     public function notifyPlottingSiswa($siswa)
     {
@@ -828,7 +828,7 @@ class NotificationService
             );
         }
 
-        // Notify orang tua
+        // Notify wali siswa
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
             if ($parent->user_id) {
@@ -837,7 +837,7 @@ class NotificationService
                     Notification::TIPE_KELAS,
                     'Penempatan Kelas: ' . $siswa->nama_lengkap,
                     $siswa->nama_lengkap . ' telah ditempatkan di kelas ' . $kelas->nama_kelas,
-                    route('orang-tua.dashboard'),
+                    route('wali-siswa.dashboard'),
                     ['siswa_id' => $siswa->id, 'kelas_id' => $kelas->id]
                 );
             }
@@ -859,7 +859,7 @@ class NotificationService
             $route = match($user->role) {
                 'siswa' => route('siswa.lms.kalender'),
                 'guru_pengajar' => route('guru.dashboard'),
-                'orang_tua' => route('orang-tua.dashboard'),
+                'orang_tua' => route('wali-siswa.dashboard'),
                 default => route('notifications.index'),
             };
 
@@ -891,7 +891,7 @@ class NotificationService
             $route = match($user->role) {
                 'siswa' => route('siswa.sia.dashboard'),
                 'guru_pengajar' => route('guru.dashboard'),
-                'orang_tua' => route('orang-tua.dashboard'),
+                'orang_tua' => route('wali-siswa.dashboard'),
                 default => route('notifications.index'),
             };
 
@@ -922,7 +922,7 @@ class NotificationService
             'sekretaris' => 'Sekretaris',
             'wali_kelas' => 'Wali Kelas',
             'guru_pengajar' => 'Guru Pengajar',
-            'orang_tua' => 'Orang Tua',
+            'orang_tua' => 'Wali Siswa',
             'siswa' => 'Siswa',
             default => 'Pengguna',
         };
@@ -936,7 +936,7 @@ class NotificationService
             'sekretaris' => route('sekretaris.dashboard'),
             'wali_kelas' => route('wali.dashboard'),
             'guru_pengajar' => route('guru.dashboard'),
-            'orang_tua' => route('orang-tua.dashboard'),
+            'orang_tua' => route('wali-siswa.dashboard'),
             'siswa' => route('siswa.sia.dashboard'),
             default => route('notifications.index'),
         };
@@ -1164,14 +1164,14 @@ class NotificationService
     }
 
     /**
-     * Notify Wali Kelas when Orang Tua requests rapor download.
+     * Notify Wali Kelas when Wali Siswa requests rapor download.
      */
     public function notifyRequestDownloadRapor($downloadRequest)
     {
         if (!$downloadRequest) return;
 
         $siswa = $downloadRequest->siswa;
-        $parentName = $downloadRequest->user->name ?? 'Orang Tua';
+        $parentName = $downloadRequest->user->name ?? 'Wali Siswa';
 
         if (!$siswa) return;
 
@@ -1192,7 +1192,7 @@ class NotificationService
     }
 
     /**
-     * Notify Orang Tua when Wali Kelas approves/rejects download request.
+     * Notify Wali Siswa when Wali Kelas approves/rejects download request.
      */
     public function notifyKeputusanDownloadRapor($downloadRequest)
     {
@@ -1207,7 +1207,7 @@ class NotificationService
             ? 'Permintaan unduh rapor ' . $siswaName . ' telah disetujui. Tautan berlaku 24 jam.'
             : 'Permintaan unduh rapor ' . $siswaName . ' telah ditolak.';
 
-        $link = $siswa ? route('orang-tua.rapor.anak', $siswa->id) : route('orang-tua.dashboard');
+        $link = $siswa ? route('wali-siswa.rapor.anak', $siswa->id) : route('wali-siswa.dashboard');
 
         $this->create(
             $downloadRequest->user_id,

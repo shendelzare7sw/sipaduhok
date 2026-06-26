@@ -243,7 +243,7 @@
             ? ($cabang->alamat ?? 'Jl. Ruko Reni Jaya, Pamulang')
             : 'Jl. Ruko Reni Jaya, Pamulang';
 
-        // Resolve orang tua: prioritas primary, fallback ke first, lalu legacy fields
+        // Resolve wali siswa: prioritas primary, fallback ke first, lalu legacy fields
         $primaryParent = $siswa->studentParents->firstWhere('is_primary', true)
             ?? $siswa->studentParents->first();
         $namaOrtu = null;
@@ -336,7 +336,7 @@
                         <p>{{ Str::limit($siswa->alamat, 65) }}</p>
                     </div>
                     <div class="info-section">
-                        <h4>Nama Orang Tua/Wali</h4>
+                        <h4>Nama Wali Siswa/Wali</h4>
                         <p>{{ $namaOrtu ?? '-' }}</p>
                     </div>
                     <div class="info-section">

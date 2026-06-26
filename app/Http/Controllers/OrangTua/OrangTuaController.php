@@ -70,17 +70,17 @@ class OrangTuaController extends Controller
         });
     }
     /**
-     * Dashboard Orang Tua - Menampilkan ringkasan semua anak
+     * Dashboard Wali Siswa - Menampilkan ringkasan semua anak
      */
     public function dashboard()
     {
         $user = Auth::user();
 
-        // Ambil semua siswa yang orang tuanya adalah user ini
+        // Ambil semua siswa yang wali siswanya adalah user ini
         $children = $user->children()->with(['kelas', 'cabang'])->get();
 
         if ($children->isEmpty()) {
-            return view('orang-tua.dashboard', [
+            return view('wali-siswa.dashboard', [
                 'children' => collect(),
                 'message' => 'Belum ada data anak yang terhubung dengan akun Anda.'
             ]);
@@ -151,22 +151,22 @@ class OrangTuaController extends Controller
             ];
         }
 
-        return view('orang-tua.dashboard', compact('children', 'summary'));
+        return view('wali-siswa.dashboard', compact('children', 'summary'));
     }
 
     /**
      * Detail Tagihan dan Pembayaran Anak
-     * Orang tua bisa melihat dan melakukan pembayaran
+     * wali siswa bisa melihat dan melakukan pembayaran
      */
     public function tagihanAnak($siswaId)
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
@@ -282,7 +282,7 @@ class OrangTuaController extends Controller
         // Info pembayaran
         $infoPembayaran = \App\Models\InfoPembayaran::getInstance();
 
-        return view('orang-tua.tagihan.index', [
+        return view('wali-siswa.tagihan.index', [
             'siswa' => $siswa,
             'tagihan' => $tagihanAll,
             'tagihanGroup' => $tagihanGroup,
@@ -301,17 +301,17 @@ class OrangTuaController extends Controller
 
     /**
      * Proses Pembayaran untuk Anak
-     * Hanya orang tua yang bisa melakukan pembayaran
+     * Hanya wali siswa yang bisa melakukan pembayaran
      */
     public function prosesBayar(Request $request, $siswaId)
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
@@ -323,7 +323,7 @@ class OrangTuaController extends Controller
         }
 
         // Validation rules dengan conditional untuk bukti_bayar
-        // Note: Orang tua hanya bisa pilih 'transfer' atau 'midtrans'
+        // Note: wali siswa hanya bisa pilih 'transfer' atau 'midtrans'
         // 'tunai' hanya bisa diinput oleh admin/bendahara
         $rules = [
             'tagihan_id' => 'required|exists:tagihan,id',
@@ -341,7 +341,7 @@ class OrangTuaController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Guard: tagihan original TA lama yang belum dialihkan TIDAK boleh dibayar via orang tua
+        // Guard: tagihan original TA lama yang belum dialihkan TIDAK boleh dibayar via wali siswa
         // Harus di-carryover dulu oleh admin/bendahara
         $tagihanCheck = Tagihan::find($validated['tagihan_id']);
         $taAktifId = TahunAjaran::where('is_active', true)->value('id');
@@ -371,7 +371,7 @@ class OrangTuaController extends Controller
 
                 // Check if Midtrans is configured
                 if (!$midtransService->isConfigured()) {
-                    return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+                    return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
                         ->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan gunakan metode pembayaran lainnya.');
                 }
 
@@ -423,7 +423,7 @@ class OrangTuaController extends Controller
                     $snapToken = $midtransService->createSnapToken($transactionParams);
 
                     // Redirect to existing payment
-                    return redirect()->route('orang-tua.pembayaran.snap', [
+                    return redirect()->route('wali-siswa.pembayaran.snap', [
                         'pembayaran' => $existingPendingPayment->id,
                         'token' => encrypt($snapToken)
                     ]);
@@ -468,7 +468,7 @@ class OrangTuaController extends Controller
                 $pembayaran = Pembayaran::create($validated);
 
                 // Redirect to Snap payment page with token as query parameter (encrypted)
-                return redirect()->route('orang-tua.pembayaran.snap', [
+                return redirect()->route('wali-siswa.pembayaran.snap', [
                     'pembayaran' => $pembayaran->id,
                     'token' => encrypt($snapToken)
                 ]);
@@ -476,7 +476,7 @@ class OrangTuaController extends Controller
             } catch (\Exception $e) {
                 \Log::error('Midtrans Payment Error: ' . $e->getMessage());
 
-                return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+                return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
                     ->with('error', 'Layanan pembayaran sedang offline atau terjadi gangguan sistem. Silakan coba beberapa saat lagi.');
             }
         }
@@ -484,7 +484,7 @@ class OrangTuaController extends Controller
         // Untuk metode manual (tunai & transfer)
         Pembayaran::create($validated);
 
-        return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+        return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
             ->with('success', 'Pembayaran berhasil diajukan. Menunggu validasi dari bendahara.');
     }
 
@@ -495,11 +495,11 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
@@ -602,7 +602,7 @@ class OrangTuaController extends Controller
                 DB::commit();
 
                 // Redirect to snap (using the first pembayaran ID for the route placeholder, but token covers all)
-                return redirect()->route('orang-tua.pembayaran.snap', [
+                return redirect()->route('wali-siswa.pembayaran.snap', [
                     'pembayaran' => $pembayaranIds[0],
                     'token' => encrypt($snapToken)
                 ]);
@@ -623,7 +623,7 @@ class OrangTuaController extends Controller
                 ? "Pembayaran massal ($count tagihan) berhasil diajukan. Menunggu validasi."
                 : "Pembayaran berhasil diajukan. Menunggu validasi.";
 
-            return redirect()->route('orang-tua.tagihan.anak', $siswa->id)
+            return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
                 ->with('success', $message);
 
         } catch (\Exception $e) {
@@ -640,11 +640,11 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
@@ -658,7 +658,7 @@ class OrangTuaController extends Controller
 
         // Cek Validasi Akses Rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
         if (!$siswa->hasFullRaporAccess()) {
-             return view('orang-tua.rapor.index', [
+             return view('wali-siswa.rapor.index', [
                 'siswa' => $siswa,
                 'rapor' => collect(),
                 'locked' => true, // Pass locked status to view
@@ -666,7 +666,7 @@ class OrangTuaController extends Controller
              ]);
         }
 
-        return view('orang-tua.rapor.index', compact('siswa', 'rapor'));
+        return view('wali-siswa.rapor.index', compact('siswa', 'rapor'));
     }
 
     /**
@@ -676,26 +676,26 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil rapor dan pastikan itu milik anak dari orang tua yang login
+        // Ambil rapor dan pastikan itu milik anak dari wali siswa yang login
         $rapor = Rapor::with(['siswa.kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])
             ->findOrFail($raporId);
 
-        // Cek apakah siswa ini adalah anak dari orang tua yang login
+        // Cek apakah siswa ini adalah anak dari wali siswa yang login
         $isMyChild = $user->children()->where('siswa.id', $rapor->siswa_id)->exists();
 
         if (!$isMyChild) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke rapor ini.');
         }
 
         // Cek Validasi Akses Rapor (3-level: Bendahara, Wali Kelas, Ketua PKBM)
         $siswa = $rapor->siswa;
         if (!$siswa->hasFullRaporAccess()) {
-            return redirect()->route('orang-tua.rapor.anak', $siswa->id)
+            return redirect()->route('wali-siswa.rapor.anak', $siswa->id)
                 ->with('error', 'Akses rapor untuk siswa ini belum dibuka. Rapor harus divalidasi oleh Bendahara, Wali Kelas, dan Ketua PKBM.');
         }
 
-        return view('orang-tua.rapor.detail', compact('rapor'));
+        return view('wali-siswa.rapor.detail', compact('rapor'));
     }
 
     /**
@@ -705,11 +705,11 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
@@ -750,52 +750,52 @@ class OrangTuaController extends Controller
                 ->count(),
         ];
 
-        return view('orang-tua.presensi.index', compact('siswa', 'presensi', 'rekap'));
+        return view('wali-siswa.presensi.index', compact('siswa', 'presensi', 'rekap'));
     }
 
     /**
      * Tampilkan form pengajuan izin untuk anak
-     * Orang tua yang mengajukan izin untuk anak mereka
+     * wali siswa yang mengajukan izin untuk anak mereka
      */
     public function ajukanIzin($siswaId)
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        return view('orang-tua.presensi.ajukan-izin', compact('siswa'));
+        return view('wali-siswa.presensi.ajukan-izin', compact('siswa'));
     }
 
     /**
      * Proses pengajuan izin untuk anak
-     * Pengajuan dilakukan oleh orang tua sebagai bentuk pendampingan
+     * Pengajuan dilakukan oleh wali siswa sebagai bentuk pendampingan
      */
     public function storeIzin(Request $request, $siswaId)
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
         // Block izin for Alumni
         if ($siswa->status === 'lulus') {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Siswa yang sudah lulus tidak dapat mengajukan izin.');
         }
 
         if (!$siswa->kelas_id) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Siswa belum memiliki kelas aktif, pengajuan izin belum dapat dibuat.');
         }
 
@@ -821,7 +821,7 @@ class OrangTuaController extends Controller
             $buktiFoto = $request->file('bukti')->store('presensi/bukti', 'public');
         }
 
-        // Simpan atau update presensi sebagai pengajuan orang tua.
+        // Simpan atau update presensi sebagai pengajuan wali siswa.
         // Riwayat dan validasi wali kelas membaca status_validasi, bukan teks keterangan.
         $presensi = null;
         if ($existingPresensi) {
@@ -858,7 +858,7 @@ class OrangTuaController extends Controller
             app(\App\Services\NotificationService::class)->notifyIzinBaru($presensi);
         }
 
-        return redirect()->route('orang-tua.presensi.anak', $siswa->id)
+        return redirect()->route('wali-siswa.presensi.anak', $siswa->id)
             ->with('success', "Pengajuan izin untuk {$siswa->nama_lengkap} berhasil diajukan. Menunggu validasi wali kelas.");
     }
 
@@ -869,27 +869,27 @@ class OrangTuaController extends Controller
     {
         $user = Auth::user();
 
-        // Pastikan siswa ini adalah anak dari orang tua yang login
+        // Pastikan siswa ini adalah anak dari wali siswa yang login
         $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
-        // Ambil pengajuan izin yang diajukan oleh orang tua ini.
+        // Ambil pengajuan izin yang diajukan oleh wali siswa ini.
         // Gunakan field terstruktur agar pengajuan baru tetap tampil walau keterangan tidak berisi teks khusus.
         $pengajuanIzin = Presensi::where('siswa_id', $siswa->id)
             ->whereIn('status', ['sakit', 'izin', 'alpha'])
             ->where('diinput_oleh', $user->id)
             ->where(function ($query) {
                 $query->whereIn('status_validasi', ['pending', 'disetujui', 'ditolak'])
-                    ->orWhere('keterangan', 'LIKE', '%Diajukan oleh orang tua%');
+                    ->orWhere('keterangan', 'LIKE', '%Diajukan oleh wali siswa%');
             })
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        return view('orang-tua.presensi.riwayat-izin', compact('siswa', 'pengajuanIzin'));
+        return view('wali-siswa.presensi.riwayat-izin', compact('siswa', 'pengajuanIzin'));
     }
 
     /**
@@ -902,7 +902,7 @@ class OrangTuaController extends Controller
         $siswa = $user->children()->with(['kelas', 'cabang'])->find($siswaId);
 
         if (!$siswa) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data siswa ini.');
         }
 
@@ -929,7 +929,7 @@ class OrangTuaController extends Controller
             'alpha' => (clone $baseQuery)->where('status', 'alpha')->count(),
         ];
 
-        return view('orang-tua.presensi.riwayat-presensi', compact('siswa', 'riwayat', 'rekap'));
+        return view('wali-siswa.presensi.riwayat-presensi', compact('siswa', 'riwayat', 'rekap'));
     }
 
     /**
@@ -941,21 +941,21 @@ class OrangTuaController extends Controller
 
         $presensi = Presensi::with('siswa.kelas')->findOrFail($presensiId);
 
-        // Pastikan siswa adalah anak dari orang tua yang login
+        // Pastikan siswa adalah anak dari wali siswa yang login
         $isMyChild = $user->children()->where('siswa.id', $presensi->siswa_id)->exists();
 
         if (!$isMyChild) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }
 
         // Cek apakah sudah divalidasi
         if ($presensi->status_validasi && $presensi->status_validasi !== 'pending') {
-            return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+            return redirect()->route('wali-siswa.presensi.riwayat-izin', $presensi->siswa_id)
                 ->with('error', 'Pengajuan yang sudah divalidasi tidak dapat diedit.');
         }
 
-        return view('orang-tua.presensi.edit-izin', compact('presensi'));
+        return view('wali-siswa.presensi.edit-izin', compact('presensi'));
     }
 
     /**
@@ -967,22 +967,22 @@ class OrangTuaController extends Controller
 
         $presensi = Presensi::with('siswa')->findOrFail($presensiId);
 
-        // Pastikan siswa adalah anak dari orang tua yang login
+        // Pastikan siswa adalah anak dari wali siswa yang login
         $isMyChild = $user->children()->where('siswa.id', $presensi->siswa_id)->exists();
 
         if (!$isMyChild) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }
 
         // Cek apakah sudah divalidasi
         if ($presensi->status_validasi && $presensi->status_validasi !== 'pending') {
-            return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+            return redirect()->route('wali-siswa.presensi.riwayat-izin', $presensi->siswa_id)
                 ->with('error', 'Pengajuan yang sudah divalidasi tidak dapat diedit.');
         }
 
         if (!$presensi->siswa->kelas_id) {
-            return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+            return redirect()->route('wali-siswa.presensi.riwayat-izin', $presensi->siswa_id)
                 ->with('error', 'Siswa belum memiliki kelas aktif, pengajuan izin belum dapat diperbarui.');
         }
 
@@ -1024,7 +1024,7 @@ class OrangTuaController extends Controller
             'diinput_oleh' => $user->id,
         ]);
 
-        return redirect()->route('orang-tua.presensi.riwayat-izin', $presensi->siswa_id)
+        return redirect()->route('wali-siswa.presensi.riwayat-izin', $presensi->siswa_id)
             ->with('success', 'Pengajuan izin berhasil diperbarui.');
     }
 
@@ -1055,12 +1055,12 @@ class OrangTuaController extends Controller
 
         // Check if payment is already rejected/expired or approved
         if ($pembayaran->status_validasi === 'ditolak') {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                 ->with('error', 'Sesi pembayaran telah kadaluarsa. Silakan ajukan pembayaran baru.');
         }
 
         if ($pembayaran->status_validasi === 'disetujui') {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                 ->with('success', 'Pembayaran ini sudah berhasil diproses.');
         }
 
@@ -1114,7 +1114,7 @@ class OrangTuaController extends Controller
                 ]);
 
                 // If token generation fails (possibly due to expiration), redirect with clear message
-                return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                     ->with('error', 'Sesi pembayaran telah kadaluarsa atau tidak valid. Silakan ajukan pembayaran baru.');
             }
         }
@@ -1124,7 +1124,7 @@ class OrangTuaController extends Controller
             ? \App\Models\InfoPembayaran::getInstance()->midtrans_client_key
             : null;
 
-        return view('orang-tua.pembayaran.snap', [
+        return view('wali-siswa.pembayaran.snap', [
             'pembayaran' => $pembayaran,
             'allPayments' => $allPayments,
             'totalBayar' => $totalBayar,
@@ -1154,7 +1154,7 @@ class OrangTuaController extends Controller
         if ($payments->isEmpty()) {
             \Log::error('Pembayaran (Bulk) not found in snapFinish', ['order_id' => $orderId]);
 
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Data pembayaran tidak ditemukan. Order ID: ' . $orderId);
         }
 
@@ -1229,13 +1229,13 @@ class OrangTuaController extends Controller
 
         // Redirect to tagihan page with appropriate message
         if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
-            return redirect()->route('orang-tua.tagihan.anak', $firstPayment->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
                 ->with('success', 'Pembayaran berhasil! Transaksi telah dikonfirmasi.');
         } elseif ($transactionStatus === 'pending') {
-            return redirect()->route('orang-tua.tagihan.anak', $firstPayment->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
                 ->with('info', 'Pembayaran Anda sedang diproses. Mohon tunggu konfirmasi dari bank.');
         } else {
-            return redirect()->route('orang-tua.tagihan.anak', $firstPayment->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
                 ->with('warning', 'Pembayaran dibatalkan atau gagal. Status: ' . $transactionStatus);
         }
     }
@@ -1255,24 +1255,24 @@ class OrangTuaController extends Controller
         $isMyChild = $user->children()->where('siswa.id', $pembayaran->siswa_id)->exists();
 
         if (!$isMyChild) {
-            return redirect()->route('orang-tua.dashboard')
+            return redirect()->route('wali-siswa.dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke pembayaran ini.');
         }
 
         // Validasi: harus metode midtrans dan status pending
         if ($pembayaran->metode_pembayaran !== 'midtrans') {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                 ->with('error', 'Pembayaran ini bukan menggunakan metode Midtrans.');
         }
 
         if ($pembayaran->status_validasi !== 'pending') {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                 ->with('error', 'Pembayaran ini sudah tidak dalam status pending.');
         }
 
         // Cek apakah masih dalam waktu 24 jam
         if ($pembayaran->created_at < now()->subHours(24)) {
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                 ->with('error', 'Sesi pembayaran telah kadaluarsa. Silakan buat pembayaran baru.');
         }
 
@@ -1280,7 +1280,7 @@ class OrangTuaController extends Controller
             $midtransService = new MidtransService();
 
             if (!$midtransService->isConfigured()) {
-                return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+                return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                     ->with('error', 'Pembayaran digital belum dikonfigurasi. Silakan hubungi admin.');
             }
 
@@ -1320,7 +1320,7 @@ class OrangTuaController extends Controller
             $snapToken = $midtransService->createSnapToken($transactionParams);
 
             // Redirect to Snap payment page
-            return redirect()->route('orang-tua.pembayaran.snap', [
+            return redirect()->route('wali-siswa.pembayaran.snap', [
                 'pembayaran' => $pembayaran->id,
                 'token' => encrypt($snapToken)
             ]);
@@ -1331,7 +1331,7 @@ class OrangTuaController extends Controller
                 'order_id' => $pembayaran->order_id,
             ]);
 
-            return redirect()->route('orang-tua.tagihan.anak', $pembayaran->siswa_id)
+            return redirect()->route('wali-siswa.tagihan.anak', $pembayaran->siswa_id)
                 ->with('error', 'Gagal melanjutkan pembayaran: ' . $e->getMessage());
         }
     }
@@ -1403,7 +1403,7 @@ class OrangTuaController extends Controller
             'email' => 'info@sipaduhok.sch.id',
         ];
 
-        return view('orang-tua.tagihan.invoice', [
+        return view('wali-siswa.tagihan.invoice', [
             'pembayaran' => $mainPayment, // Menggunakan payment pertama sebagai header info
             'items' => $items,            // Mengirim collection items untuk tabel
             'siswa' => $siswa,
@@ -1412,7 +1412,7 @@ class OrangTuaController extends Controller
     }
 
     /**
-     * Request download rapor (orang tua).
+     * Request download rapor (wali siswa).
      */
     public function requestDownloadRapor(Request $request, $raporId)
     {
@@ -1479,11 +1479,11 @@ class OrangTuaController extends Controller
             ->first();
 
         if (!$request) {
-            return redirect()->route('orang-tua.dashboard')->with('error', 'Link download tidak valid.');
+            return redirect()->route('wali-siswa.dashboard')->with('error', 'Link download tidak valid.');
         }
 
         if ($request->isExpired()) {
-            return redirect()->route('orang-tua.dashboard')->with('error', 'Link download sudah kadaluarsa.');
+            return redirect()->route('wali-siswa.dashboard')->with('error', 'Link download sudah kadaluarsa.');
         }
 
         $rapor = $request->rapor;

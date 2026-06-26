@@ -1,0 +1,70 @@
+@startuml
+title Sequence Diagram - UC09: Kelola Landing Page (Laravel MVC)
+autonumber
+
+actor "Admin" as Admin
+participant "Routes\n(web.php)" as Route
+participant "View\n(Blade)" as View
+participant "LandingPageController\n(Controller)" as Controller
+participant "LandingPage\n(Model)" as Model
+database "Database\n(MySQL)" as DB
+
+== Skenario: Menampilkan Form Kelola Landing Page ==
+
+Admin -> Route : GET /admin/landing-page
+activate Route
+Route -> Controller : index()
+deactivate Route
+activate Controller
+
+Controller -> Model : first() / get()
+activate Model
+Model -> DB : SELECT data landing page
+activate DB
+DB --> Model : return data
+deactivate DB
+Model --> Controller : return data object
+deactivate Model
+
+Controller -> View : view('admin.landing.index', compact('data'))
+activate View
+View --> Admin : Tampilkan form konfigurasi Landing Page
+deactivate View
+deactivate Controller
+
+== Skenario: Update Data Landing Page ==
+
+Admin -> View : Mengisi form dan klik "Simpan"
+activate View
+View -> Route : PUT /admin/landing-page/update
+deactivate View
+activate Route
+Route -> Controller : update(Request)
+deactivate Route
+activate Controller
+
+Controller -> Controller : validate(Request)
+alt Validasi Gagal
+    Controller --> View : redirect()->back()->withErrors()
+    activate View
+    View --> Admin : Tampilkan form dengan pesan error validasi
+    deactivate View
+else Validasi Berhasil
+    Controller -> Model : update($validatedData)
+    activate Model
+    Model -> DB : UPDATE data landing page
+    activate DB
+    DB --> Model : success
+    deactivate DB
+    Model --> Controller : return success
+    deactivate Model
+    
+    Controller --> View : redirect()->back()->with('success', 'Data berhasil diperbarui')
+    activate View
+    View --> Admin : Tampilkan notifikasi sukses
+    deactivate View
+end
+
+deactivate Controller
+
+@enduml

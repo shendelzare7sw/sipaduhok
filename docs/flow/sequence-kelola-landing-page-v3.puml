@@ -1,0 +1,52 @@
+@startuml
+title Sequence Diagram - UC09: Kelola Landing Page (Logical/Awam + Real Flow)
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_LandingPage" as UI
+control "Control_KelolaLandingPage" as Control
+entity "T_LandingPage" as Entity
+
+== Skenario: Menampilkan Form Kelola Landing Page ==
+
+Admin -> UI : 1. BukaMenuLandingPage()
+activate UI
+UI -> Control : 2. RequestData()
+activate Control
+
+Control -> Entity : 3. AmbilDataLandingPage()
+activate Entity
+Entity --> Control : 4. DataDitemukan()
+deactivate Entity
+
+Control --> UI : 5. TampilkanForm(Data)
+deactivate Control
+UI --> Admin : 6. HalamanFormTerbuka()
+deactivate UI
+
+== Skenario: Update Data Landing Page ==
+
+Admin -> UI : 7. InputData()
+activate UI
+Admin -> UI : 8. KlikSimpan()
+UI -> Control : 9. SimpanPerubahan(Data)
+activate Control
+
+Control -> Control : 10. ValidasiData()
+alt Validasi Gagal
+    Control --> UI : 11. ErrorValidasi()
+    UI --> Admin : 12. TampilkanPesanError()
+else Validasi Berhasil
+    Control -> Entity : 13. UpdateData(Data)
+    activate Entity
+    Entity --> Control : 14. BerhasilDiubah()
+    deactivate Entity
+    
+    Control --> UI : 15. NotifikasiSukses()
+    UI --> Admin : 16. TampilkanPesanSukses()
+end
+
+deactivate Control
+deactivate UI
+
+@enduml

@@ -281,7 +281,7 @@
     font-size: 0.85rem;
 }
 
-/* ---- Children list (orang tua) ---- */
+/* ---- Children list (wali siswa) ---- */
 .children-list {
     display: flex;
     flex-direction: column;

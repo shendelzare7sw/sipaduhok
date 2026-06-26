@@ -134,7 +134,7 @@ class ManajemenSiswaController extends Controller
             'cabang',
             'kelas.tahunAjaran',
             'kelas.waliKelas',
-            'orangTua' // Load relasi orang tua
+            'orangTua' // Load relasi wali siswa
         ]);
 
         // Get available kelas for reassignment
@@ -176,7 +176,7 @@ class ManajemenSiswaController extends Controller
         $siswa->update(['kelas_id' => $validated['kelas_id']]);
 
         if ($validated['kelas_id']) {
-            // Notify siswa and orang tua about class assignment
+            // Notify siswa and wali siswa about class assignment
             $siswa->refresh()->load('kelas');
             $notificationService = app(NotificationService::class);
             $notificationService->notifyPlottingSiswa($siswa);
@@ -211,7 +211,7 @@ class ManajemenSiswaController extends Controller
 
         Siswa::whereIn('id', $validated['siswa_ids'])->update(['kelas_id' => $validated['kelas_id']]);
 
-        // Notify each siswa and orang tua about class assignment
+        // Notify each siswa and wali siswa about class assignment
         $notificationService = app(NotificationService::class);
         $siswaList = Siswa::whereIn('id', $validated['siswa_ids'])->with('kelas')->get();
         foreach ($siswaList as $siswa) {
@@ -222,7 +222,7 @@ class ManajemenSiswaController extends Controller
     }
 
     /**
-     * Attach parent (orang tua) to siswa.
+     * Attach parent (wali siswa) to siswa.
      * Supports both selecting existing parent and creating new parent.
      */
     public function attachParent(Request $request, Siswa $siswa)
@@ -243,7 +243,7 @@ class ManajemenSiswaController extends Controller
 
         // Check if already attached
         if ($siswa->parents()->where('parent_id', $validated['parent_id'])->exists()) {
-            return back()->with('error', 'Orang tua ini sudah terhubung dengan siswa!');
+            return back()->with('error', 'Wali siswa ini sudah terhubung dengan siswa!');
         }
 
         // Check for duplicate ayah_kandung or ibu_kandung
@@ -335,7 +335,7 @@ class ManajemenSiswaController extends Controller
     }
 
     /**
-     * Detach parent (orang tua) from siswa.
+     * Detach parent (wali siswa) from siswa.
      */
     public function detachParent(Siswa $siswa, \App\Models\User $parent)
     {

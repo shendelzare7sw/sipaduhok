@@ -101,7 +101,7 @@
                         <div class="pay-empty">
                             <i class="fas fa-exclamation-triangle"></i>
                             <h6 class="mb-1">Belum ada rekening bank</h6>
-                            <p class="small mb-0">Lengkapi data rekening agar orang tua mendapat instruksi Direct Transfer.</p>
+                            <p class="small mb-0">Lengkapi data rekening agar wali siswa mendapat instruksi Direct Transfer.</p>
                         </div>
                     @endif
                 </div>
@@ -299,7 +299,7 @@
             <div class="pay-card-header">
                 <div>
                     <h5 class="pay-card-title"><i class="fas fa-satellite-dish pay-card-title-icon-info"></i> Integrasi Kanal Pembayaran</h5>
-                    <div class="pay-card-subtitle">Status kanal yang tersedia untuk siswa dan orang tua.</div>
+                    <div class="pay-card-subtitle">Status kanal yang tersedia untuk siswa dan wali siswa.</div>
                 </div>
             </div>
             <div class="pay-card-body">

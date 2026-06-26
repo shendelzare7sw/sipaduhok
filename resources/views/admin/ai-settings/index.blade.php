@@ -319,7 +319,7 @@
                                     <input class="form-check-input" type="checkbox" name="chatbot_orang_tua" id="chatbot_orang_tua"
                                         {{ ($chatbotEnabledRoles['orang_tua'] ?? false) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="chatbot_orang_tua">
-                                        <strong>Orang Tua</strong>
+                                        <strong>Wali Siswa</strong>
                                         <span class="text-muted d-block small">Bantuan untuk cek nilai dan pembayaran</span>
                                     </label>
                                 </div>

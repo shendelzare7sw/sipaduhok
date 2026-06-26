@@ -576,7 +576,7 @@ class KetuaController extends Controller
             'wali_kelas' => 'Wali Kelas',
             'guru_pengajar' => 'Guru Pengajar',
             'siswa' => 'Siswa',
-            'orang_tua' => 'Orang Tua',
+            'orang_tua' => 'Wali Siswa',
         ];
 
         // Remove sender's own role (cannot send to self)

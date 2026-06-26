@@ -281,7 +281,7 @@
             <tr>
                 <td style="width: 50%; vertical-align: top;">
                     <p style="margin-bottom: 5px;">Mengetahui,</p>
-                    <p style="margin-bottom: 80px;">Orang Tua Siswa</p>
+                    <p style="margin-bottom: 80px;">Wali Siswa Siswa</p>
                     <div style="border-top: 1px solid #333; display: inline-block; width: 200px; margin-bottom: 5px;"></div>
                     <p>(.......................)</p>
                 </td>

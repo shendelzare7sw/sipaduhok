@@ -60,7 +60,7 @@
                 <strong>Catatan Penting:</strong>
                 <ul class="mb-0 mt-2">
                     <li>Form ini khusus untuk <strong>pembayaran tunai di loket sekolah</strong></li>
-                    <li>Pembayaran via <strong>Midtrans</strong> dan <strong>Direct Transfer</strong> akan otomatis tercatat dari sistem orang tua</li>
+                    <li>Pembayaran via <strong>Midtrans</strong> dan <strong>Direct Transfer</strong> akan otomatis tercatat dari sistem wali siswa</li>
                     <li>Centang "Langsung validasi" jika uang tunai sudah diterima</li>
                 </ul>
             </div>

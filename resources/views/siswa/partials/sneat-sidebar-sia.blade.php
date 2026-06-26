@@ -58,5 +58,5 @@ Compatible dengan Sneat Bootstrap 5 Template
     </a>
 </li>
 
-<!-- Note: Menu Rapor & Pembayaran dipindahkan ke akses Orang Tua -->
-<!-- Siswa fokus pada pembelajaran, orang tua yang mengelola keuangan dan monitoring rapor -->
+<!-- Note: Menu Rapor & Pembayaran dipindahkan ke akses Wali Siswa -->
+<!-- Siswa fokus pada pembelajaran, wali siswa yang mengelola keuangan dan monitoring rapor -->

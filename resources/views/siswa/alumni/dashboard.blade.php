@@ -115,7 +115,7 @@
             </div>
             <div class="text-muted small mt-2">
                 <i class="fas fa-info-circle me-1"></i>
-                Untuk akses rapor lengkap (download/cetak), silakan hubungi orang tua atau wali Anda. Akun orang tua tetap memiliki akses penuh.
+                Untuk akses rapor lengkap (download/cetak), silakan hubungi wali siswa atau wali Anda. Akun wali siswa tetap memiliki akses penuh.
             </div>
         @else
             <div class="alert alert-warning mt-3 mb-0">

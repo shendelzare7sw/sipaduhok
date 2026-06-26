@@ -775,7 +775,7 @@ class UserController extends Controller
         return redirect()->route('admin.users.siswa')->with('success', 'Siswa berhasil dihapus!');
     }
 
-    // --- ORANG TUA ---
+    // --- WALI SISWA ---
 
     public function orangTua(Request $request)
     {
@@ -814,7 +814,7 @@ class UserController extends Controller
         $cabangList = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
-        return view('admin.users.orang-tua', compact('orangTua', 'cabangList', 'jenjangs'));
+        return view('admin.users.wali-siswa', compact('orangTua', 'cabangList', 'jenjangs'));
     }
 
     public function printOrangTua(Request $request)
@@ -861,7 +861,7 @@ class UserController extends Controller
         }
         if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
 
-        return view('admin.users.print.orang-tua', compact('orangTua', 'filterInfo'));
+        return view('admin.users.print.wali-siswa', compact('orangTua', 'filterInfo'));
     }
 
     public function createOrangTua()
@@ -885,7 +885,7 @@ class UserController extends Controller
         // Jenjang list
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
 
-        return view('admin.users.orang-tua-create', compact('siswaList', 'cabangList', 'kelasList', 'jenjangs'));
+        return view('admin.users.wali-siswa-create', compact('siswaList', 'cabangList', 'kelasList', 'jenjangs'));
     }
 
     public function storeOrangTua(Request $request)
@@ -937,8 +937,8 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.orang-tua')
-            ->with('success', 'Akun orang tua berhasil dibuat!');
+        return redirect()->route('admin.users.wali-siswa')
+            ->with('success', 'Akun wali siswa berhasil dibuat!');
     }
 
     public function toggleOrangTuaStatus($id)
@@ -948,7 +948,7 @@ class UserController extends Controller
         $user->save();
 
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        return redirect()->route('admin.users.orang-tua')->with('success', "Akun orang tua berhasil {$status}!");
+        return redirect()->route('admin.users.wali-siswa')->with('success', "Akun wali siswa berhasil {$status}!");
     }
 
     public function showOrangTua($id)
@@ -957,7 +957,7 @@ class UserController extends Controller
             ->with(['studentParents.siswa.kelas.cabang', 'studentParents.siswa.cabang'])
             ->findOrFail($id);
 
-        return view('admin.users.orang-tua-show', compact('orangTua'));
+        return view('admin.users.wali-siswa-show', compact('orangTua'));
     }
 
     public function editOrangTua($id)
@@ -966,7 +966,7 @@ class UserController extends Controller
             ->with(['studentParents.siswa.kelas'])
             ->findOrFail($id);
 
-        return view('admin.users.orang-tua-edit', compact('orangTua'));
+        return view('admin.users.wali-siswa-edit', compact('orangTua'));
     }
 
     public function updateOrangTua(Request $request, $id)
@@ -1028,8 +1028,8 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.show-orang-tua', $orangTua->id)
-            ->with('success', 'Data orang tua berhasil diperbarui!');
+        return redirect()->route('admin.users.show-wali-siswa', $orangTua->id)
+            ->with('success', 'Data wali siswa berhasil diperbarui!');
     }
 
     public function deleteOrangTua($id)
@@ -1037,7 +1037,7 @@ class UserController extends Controller
         $user = User::where('role', 'orang_tua')->findOrFail($id);
         $user->delete();
 
-        return redirect()->route('admin.users.orang-tua')->with('success', 'Akun orang tua berhasil dihapus!');
+        return redirect()->route('admin.users.wali-siswa')->with('success', 'Akun wali siswa berhasil dihapus!');
     }
 
     // --- IMPORT SISWA ---
@@ -1116,11 +1116,11 @@ class UserController extends Controller
         return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\TenagaPendidikTemplate(), 'template_tenaga_pendidik.xlsx');
     }
 
-    // --- IMPORT ORANG TUA ---
+    // --- IMPORT WALI SISWA ---
 
     public function importOrangTuaForm()
     {
-        return view('admin.users.orang-tua-import');
+        return view('admin.users.wali-siswa-import');
     }
 
     public function importOrangTua(Request $request)
@@ -1137,12 +1137,12 @@ class UserController extends Controller
             $skipped = $import->getSkippedCount();
             $warnings = $import->getWarnings();
 
-            $message = "Berhasil mengimport {$imported} orang tua.";
+            $message = "Berhasil mengimport {$imported} wali siswa.";
             if ($skipped > 0) {
                 $message .= " {$skipped} data dilewati.";
             }
 
-            return redirect()->route('admin.users.orang-tua')->with('success', $message)->with('import_warnings', $warnings);
+            return redirect()->route('admin.users.wali-siswa')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
         }
@@ -1195,6 +1195,6 @@ class UserController extends Controller
 
         User::whereIn('id', $ids)->where('role', 'orang_tua')->delete();
 
-        return redirect()->back()->with('success', count($ids) . ' data orang tua berhasil dihapus');
+        return redirect()->back()->with('success', count($ids) . ' Data wali siswa berhasil dihapus');
     }
 }

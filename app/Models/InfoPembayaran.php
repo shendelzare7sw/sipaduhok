@@ -77,7 +77,7 @@ class InfoPembayaran extends Model
 
     /**
      * Check apakah Midtrans aktif (dikonfigurasi DAN di-enable)
-     * Digunakan untuk menentukan apakah opsi Midtrans ditampilkan ke orang tua
+     * Digunakan untuk menentukan apakah opsi Midtrans ditampilkan ke wali siswa
      */
     public function isMidtransEnabled()
     {

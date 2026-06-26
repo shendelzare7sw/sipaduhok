@@ -363,7 +363,7 @@ Output JSON array (PENTING: strict JSON, no markdown):
     "struggling_subjects": ["Mapel 1", "Mapel 2"],
     "analysis": "Analisis singkat 2-3 kalimat",
     "recommendations": ["Rec 1", "Rec 2", "Rec 3"],
-    "parent_notification_draft": "Draft surat untuk orang tua (atau null jika LOW risk)"
+    "parent_notification_draft": "Draft surat untuk wali siswa (atau null jika LOW risk)"
   }
 ]
 

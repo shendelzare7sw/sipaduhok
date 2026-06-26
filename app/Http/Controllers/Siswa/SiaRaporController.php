@@ -26,7 +26,7 @@ class SiaRaporController extends Controller
         }
 
         // BLOCK ACCESS FOR STUDENT ROLE
-        // User request: "orang tua yang nantinya akan diberi akses melihat rapor bukan siswa"
+        // User request: "wali siswa yang nantinya akan diberi akses melihat rapor bukan siswa"
         // We redirect them back with a message.
         if (!Auth::user()->hasRole('orang_tua')) { 
              // Double check if this controller is shared. The route middleware is 'role:siswa'.
@@ -34,7 +34,7 @@ class SiaRaporController extends Controller
              // But wait, parents use OrangTuaController.
              // So this controller is ONLY for students.
              return redirect()->route('siswa.sia.dashboard')
-                ->with('error', 'Akses Rapor hanya diperuntukkan bagi Orang Tua/Wali.');
+                ->with('error', 'Akses Rapor hanya diperuntukkan bagi Wali Siswa.');
         }
 
         // Ambil rapor yang sudah diterbitkan

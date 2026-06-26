@@ -60,7 +60,7 @@ class ManajemenSiswaController extends Controller
             ->exists();
 
         if (!$exists) {
-            abort(403, 'Orang tua/wali harus berasal dari cabang Anda.');
+            abort(403, 'Wali siswa/wali harus berasal dari cabang Anda.');
         }
     }
 
@@ -245,7 +245,7 @@ class ManajemenSiswaController extends Controller
         // Check if parent already attached
         if ($siswa->parents()->where('parent_id', $validated['parent_id'])->exists()) {
             return redirect()->route('waka.manajemen-siswa.show', $siswa)
-                ->with('error', 'Orang tua sudah terhubung dengan siswa ini');
+                ->with('error', 'Wali siswa sudah terhubung dengan siswa ini');
         }
 
         if (in_array($validated['relationship'], ['ayah_kandung', 'ibu_kandung'])) {
@@ -268,7 +268,7 @@ class ManajemenSiswaController extends Controller
         ]);
 
         return redirect()->route('waka.manajemen-siswa.show', $siswa)
-            ->with('success', 'Orang tua berhasil ditambahkan');
+            ->with('success', 'Wali siswa berhasil ditambahkan');
     }
 
     protected function createAndAttachParent(Request $request, Siswa $siswa)
@@ -323,7 +323,7 @@ class ManajemenSiswaController extends Controller
             'can_access_academic' => $request->boolean('can_access_academic'),
         ]);
 
-        return back()->with('success', 'Akun orang tua berhasil dibuat dan dihubungkan');
+        return back()->with('success', 'Akun wali siswa berhasil dibuat dan dihubungkan');
     }
 
     public function detachParent(Siswa $siswa, $parentId)
@@ -335,7 +335,7 @@ class ManajemenSiswaController extends Controller
         $siswa->parents()->detach($parentId);
 
         return redirect()->route('waka.manajemen-siswa.show', $siswa)
-            ->with('success', 'Hubungan dengan orang tua berhasil dihapus');
+            ->with('success', 'Hubungan dengan wali siswa berhasil dihapus');
     }
 
     public function print(Request $request)

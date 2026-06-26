@@ -179,7 +179,7 @@ class ValidasiAksesController extends Controller
                 'validasi_ujian_oleh' => auth()->id(),
             ]);
 
-            // Notify orang tua and siswa
+            // Notify wali siswa and siswa
             $notificationService = app(NotificationService::class);
             $notificationService->notifyValidasiAksesUjian($siswa, 'disetujui');
 
@@ -209,7 +209,7 @@ class ValidasiAksesController extends Controller
                 'tanggal_validasi_ujian_wali' => null,
             ]);
 
-            // Notify orang tua and siswa
+            // Notify wali siswa and siswa
             $notificationService = app(NotificationService::class);
             $notificationService->notifyValidasiAksesUjian($siswa, 'dibatalkan');
 
@@ -240,7 +240,7 @@ class ValidasiAksesController extends Controller
                 'validasi_rapor_oleh' => auth()->id(),
             ]);
 
-            // Notify orang tua
+            // Notify wali siswa
             $notificationService = app(NotificationService::class);
             $notificationService->notifyValidasiAksesRapor($siswa, 'disetujui');
 
@@ -268,7 +268,7 @@ class ValidasiAksesController extends Controller
                 'validasi_rapor_oleh' => null,
             ]);
 
-            // Notify orang tua
+            // Notify wali siswa
             $notificationService = app(NotificationService::class);
             $notificationService->notifyValidasiAksesRapor($siswa, 'dibatalkan');
 

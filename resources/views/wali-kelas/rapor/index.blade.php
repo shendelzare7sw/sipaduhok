@@ -89,7 +89,7 @@
                 <i class="fas fa-arrow-right text-muted small"></i>
                 <span class="badge bg-secondary"><i class="fas fa-money-bill me-1"></i>5. Cek Keuangan</span>
                 <i class="fas fa-arrow-right text-muted small"></i>
-                <span class="badge bg-success"><i class="fas fa-unlock me-1"></i>6. Akses Orang Tua</span>
+                <span class="badge bg-success"><i class="fas fa-unlock me-1"></i>6. Akses Wali Siswa</span>
             </div>
         </div>
 
@@ -154,7 +154,7 @@
                                     </td>
                                     <td class="text-center align-middle">
                                         @if($validasiStage === 'bendahara')
-                                            <span class="badge bg-success" title="Disetujui Bendahara - Akses orang tua terbuka">
+                                            <span class="badge bg-success" title="Disetujui Bendahara - Akses wali siswa terbuka">
                                                 <i class="fas fa-unlock me-1"></i> Akses Terbuka
                                             </span>
                                         @elseif($validasiStage === 'ketua')
@@ -326,12 +326,12 @@
                                                                             <input type="date" name="tanggal_rilis" class="form-control"
                                                                                    value="{{ $rapor->tanggal_rilis ? $rapor->tanggal_rilis->format('Y-m-d') : '' }}"
                                                                                    min="{{ now()->format('Y-m-d') }}" required>
-                                                                            <small class="text-muted">Rapor akan otomatis terlihat oleh orang tua pada tanggal ini</small>
+                                                                            <small class="text-muted">Rapor akan otomatis terlihat oleh wali siswa pada tanggal ini</small>
                                                                         </div>
                                                                         <div class="alert alert-info bg-light border-info mb-0 small">
                                                                             <ul class="mb-0">
                                                                                 <li>Status rapor berubah ke <strong>Diterbitkan</strong></li>
-                                                                                <li>Orang tua dapat melihat rapor mulai tanggal rilis</li>
+                                                                                <li>Wali siswa dapat melihat rapor mulai tanggal rilis</li>
                                                                                 <li>Anda bisa <strong>tarik kembali</strong> kapan saja</li>
                                                                             </ul>
                                                                         </div>
@@ -363,7 +363,7 @@
                                                                     <div class="alert alert-success bg-light border-success mb-0 small">
                                                                         <ul class="mb-0 text-start">
                                                                             <li>Tanggal rilis diset ke <strong>hari ini</strong></li>
-                                                                            <li>Orang tua <strong>langsung bisa melihat</strong> rapor</li>
+                                                                            <li>Wali siswa <strong>langsung bisa melihat</strong> rapor</li>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -450,7 +450,7 @@
                                                                 <div class="alert alert-warning bg-light border-warning mb-0">
                                                                     <ul class="mb-0 small">
                                                                         <li>Status rapor berubah dari <strong>Diterbitkan</strong> ke <strong>Draft</strong></li>
-                                                                        <li>Rapor <strong>tidak akan terlihat</strong> oleh orang tua/siswa</li>
+                                                                        <li>Rapor <strong>tidak akan terlihat</strong> oleh wali siswa/siswa</li>
                                                                         <li>Data rapor <strong>tetap tersimpan</strong>, Anda bisa edit dan terbitkan ulang</li>
                                                                     </ul>
                                                                 </div>
@@ -585,8 +585,8 @@
                     <li><strong>Edit:</strong> Mengisi catatan wali kelas, data kehadiran, dan kegiatan ekstrakurikuler.</li>
                     <li><strong>Preview:</strong> Melihat tampilan akhir rapor sebelum dikirmkan.</li>
                     <li><strong>Kirim ke Ketua:</strong> Mengirim rapor untuk divalidasi Ketua PKBM.</li>
-                    <li><strong>Set Tanggal Rilis:</strong> Muncul setelah Bendahara menyetujui. Pilih tanggal kapan rapor bisa dilihat orang tua.</li>
-                    <li><strong>Rilis Sekarang:</strong> Terbitkan rapor dan langsung bisa dilihat orang tua hari ini.</li>
+                    <li><strong>Set Tanggal Rilis:</strong> Muncul setelah Bendahara menyetujui. Pilih tanggal kapan rapor bisa dilihat wali siswa.</li>
+                    <li><strong>Rilis Sekarang:</strong> Terbitkan rapor dan langsung bisa dilihat wali siswa hari ini.</li>
                     <li><strong>Upload PDF:</strong> Upload rapor PDF manual untuk siswa yang belum ada rapornya.</li>
                     <li><strong>Tarik Kembali:</strong> Menarik rapor yang sudah diterbitkan kembali ke draft jika ada perbaikan.</li>
                 </ul>

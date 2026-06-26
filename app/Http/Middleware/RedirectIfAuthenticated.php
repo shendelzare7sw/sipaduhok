@@ -38,7 +38,7 @@ class RedirectIfAuthenticated
                 } elseif ($user->isSiswa()) {
                     return redirect()->route('siswa.dashboard');
                 } elseif ($user->isOrangTua()) {
-                    return redirect()->route('orang-tua.dashboard');
+                    return redirect()->route('wali-siswa.dashboard');
                 }
 
                 // Default fallback - redirect to general dashboard

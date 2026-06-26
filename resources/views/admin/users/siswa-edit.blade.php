@@ -257,11 +257,11 @@
         <div class="card">
             <h5 class="form-title">
                 <i class="fas fa-users section-icon--guardian"></i>
-                Data Orang Tua / Wali (Biodata)
+                Data Wali Siswa / Wali (Biodata)
             </h5>
             <p class="section-note">
                 <i class="fas fa-info-circle"></i>
-                Informasi dasar orang tua/wali siswa untuk keperluan administrasi sekolah.
+                Informasi dasar wali siswa/wali siswa untuk keperluan administrasi sekolah.
             </p>
 
             <div class="row">
@@ -282,7 +282,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">No. Telepon Orang Tua (WA Aktif)</label>
+                <label class="form-label">No. Telepon Wali Siswa (WA Aktif)</label>
                 <input type="text" name="telepon_orangtua" class="form-control"
                     value="{{ old('telepon_orangtua', $siswa->telepon_orangtua) }}" placeholder="Contoh: 08123456789">
                 <small class="text-muted">
@@ -295,17 +295,17 @@
         <div class="card">
             <h5 class="form-title">
                 <i class="fas fa-user-friends section-icon--parent"></i>
-                Manajemen Akun Orang Tua (Login Sistem)
+                Manajemen Akun Wali Siswa (Login Sistem)
             </h5>
             <p class="section-note">
                 <i class="fas fa-info-circle"></i>
-                Kelola akun orang tua yang terhubung dengan siswa ini untuk akses ke sistem. Satu siswa bisa memiliki
-                beberapa akun orang tua/wali.
+                Kelola akun wali siswa yang terhubung dengan siswa ini untuk akses ke sistem. Satu siswa bisa memiliki
+                beberapa akun wali siswa/wali.
             </p>
 
             {{-- Current Parents List --}}
             <div class="form-group">
-                <label class="form-label">Orang Tua Terdaftar</label>
+                <label class="form-label">Wali Siswa Terdaftar</label>
                 @if($siswa->studentParents && $siswa->studentParents->count() > 0)
                     <div class="parents-stack">
                         @foreach($siswa->studentParents as $sp)
@@ -333,19 +333,19 @@
                 @else
                     <div class="empty-parent-state">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <p>Siswa ini belum memiliki akun orang tua terdaftar.</p>
-                        <small>Tambahkan orang tua di bawah untuk memberikan akses ke sistem.</small>
+                        <p>Siswa ini belum memiliki akun wali siswa terdaftar.</p>
+                        <small>Tambahkan wali siswa di bawah untuk memberikan akses ke sistem.</small>
                     </div>
                 @endif
             </div>
 
             {{-- Add New Parent --}}
             <div class="form-group parent-form-group">
-                <label class="form-label">Tambah Orang Tua</label>
+                <label class="form-label">Tambah Wali Siswa</label>
                 <select name="add_parent_option" id="addParentOption" class="form-control">
                     <option value="">-- Pilih Aksi --</option>
-                    <option value="existing">Hubungkan dengan Orang Tua yang Sudah Ada</option>
-                    <option value="new">Buat Akun Orang Tua Baru</option>
+                    <option value="existing">Hubungkan dengan Wali Siswa yang Sudah Ada</option>
+                    <option value="new">Buat Akun Wali Siswa Baru</option>
                 </select>
             </div>
 
@@ -356,10 +356,10 @@
                         <div class="form-group">
                             <label class="form-label">
                                 <i class="fas fa-search muted-label-icon"></i>
-                                Cari Orang Tua
+                                Cari Wali Siswa
                             </label>
                             <input type="text" id="searchParent" class="form-control"
-                                placeholder="Ketik nama atau username orang tua...">
+                                placeholder="Ketik nama atau username wali siswa...">
                         </div>
                     </div>
                     <div class="col">
@@ -369,7 +369,7 @@
                                 Filter Status
                             </label>
                             <select id="filterParentStatus" class="form-control">
-                                <option value="">Semua Orang Tua</option>
+                                <option value="">Semua Wali Siswa</option>
                                 <option value="available">Belum Terhubung (Baru)</option>
                                 <option value="has_children">Sudah Punya Anak Terdaftar</option>
                             </select>
@@ -379,7 +379,7 @@
 
                 <div class="form-group parent-form-block">
                     <label class="form-label">
-                        Pilih Orang Tua
+                        Pilih Wali Siswa
                         <small class="text-muted parent-count-hint">
                             (<span id="parentCount">{{ $orangTuaList->count() }}</span> tersedia)
                         </small>
@@ -418,7 +418,7 @@
                         @endforeach
                         <div id="noParentFound" class="empty-list-message d-none">
                             <i class="fas fa-search"></i>
-                            <p>Tidak ada orang tua yang ditemukan</p>
+                            <p>Tidak ada wali siswa yang ditemukan</p>
                             <small>Coba ubah kata kunci atau filter pencarian</small>
                         </div>
                     </div>
@@ -526,7 +526,7 @@
                     <button type="button" class="modal-close-btn" data-close-confirmation>&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>Apakah Anda yakin ingin menghapus hubungan dengan orang tua ini?</p>
+                    <p>Apakah Anda yakin ingin menghapus hubungan dengan wali siswa ini?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-close-confirmation>Batal</button>

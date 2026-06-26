@@ -15,7 +15,7 @@
             'guru_pengajar' => 'guru.partials.sneat-sidebar-menu',
             'wali_kelas' => 'wali-kelas.partials.sneat-sidebar-menu',
             'siswa' => 'siswa.partials.sneat-sidebar-sia',
-            'orang_tua' => 'orang-tua.partials.sneat-sidebar-menu',
+            'orang_tua' => 'wali-siswa.partials.sneat-sidebar-menu',
         ];
         $sidebarView = $sidebarMap[$roleName] ?? 'admin.partials.sneat-sidebar-menu';
     @endphp

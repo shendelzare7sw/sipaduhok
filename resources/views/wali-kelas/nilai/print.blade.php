@@ -149,7 +149,7 @@
                         <p>( _________________________ )</p>
                     </div>
                     <div class="ttd-item">
-                        <p>Orang Tua / Wali Siswa</p>
+                        <p>Wali Siswa / Wali Siswa</p>
                         <div class="ttd-line"></div>
                         <p>( _________________________ )</p>
                     </div>

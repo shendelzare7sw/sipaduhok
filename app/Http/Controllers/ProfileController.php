@@ -42,7 +42,7 @@ class ProfileController extends Controller
                 break;
 
             case 'orang_tua':
-                // Orang tua tidak punya profil khusus, hanya data user
+                // Wali siswa tidak punya profil khusus, hanya data user
                 $profileData = null;
                 break;
 

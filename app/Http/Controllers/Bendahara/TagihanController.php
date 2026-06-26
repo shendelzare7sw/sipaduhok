@@ -340,14 +340,14 @@ class TagihanController extends Controller
                     ->first();
 
                 if ($tagihan) {
-                    // PROTEKSI: Hanya lock editing jika sudah ada pembayaran dari orang tua
+                    // PROTEKSI: Hanya lock editing jika sudah ada pembayaran dari wali siswa
                     // Rp 0 (setting admin) tetap bisa diedit untuk fleksibilitas
                     $hasPembayaran = $tagihan->pembayaran()
                         ->where('status_validasi', 'disetujui')
                         ->exists();
 
                     if ($hasPembayaran) {
-                        continue; // Skip editing - sudah dibayar orang tua, jaga integritas data
+                        continue; // Skip editing - sudah dibayar wali siswa, jaga integritas data
                     }
 
                     // Update jika ada (bisa pindah tahun)
@@ -708,7 +708,7 @@ class TagihanController extends Controller
 
             DB::commit();
 
-            // Notify orang tua about new tagihan
+            // Notify wali siswa about new tagihan
             foreach ($createdTagihan as $tagihan) {
                 $tagihan->load('siswa.orangTua');
                 app(\App\Services\NotificationService::class)->notifyTagihanBaru($tagihan);
@@ -739,14 +739,14 @@ class TagihanController extends Controller
             // but we fetch it manually to avoid "Attempt to read property status on string" error
             $tagihan = Tagihan::findOrFail($tagihanId);
 
-            // PROTEKSI: Hanya lock deletion jika sudah ada pembayaran dari orang tua
+            // PROTEKSI: Hanya lock deletion jika sudah ada pembayaran dari wali siswa
             // Rp 0 (setting admin) tetap bisa dihapus
             $hasPembayaran = $tagihan->pembayaran()
                 ->where('status_validasi', 'disetujui')
                 ->exists();
 
             if ($hasPembayaran) {
-                $message = 'Tagihan yang sudah dibayar oleh orang tua tidak dapat dihapus untuk menjaga integritas data transaksi.';
+                $message = 'Tagihan yang sudah dibayar oleh wali siswa tidak dapat dihapus untuk menjaga integritas data transaksi.';
 
                 // Return JSON for AJAX requests
                 if (request()->expectsJson()) {

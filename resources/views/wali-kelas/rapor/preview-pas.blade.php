@@ -245,10 +245,10 @@
             <tr>
                 <td style="text-align: center; vertical-align: top;">
                     <p style="margin: 0;">Mengetahui,</p>
-                    <p style="margin: 0;">Orang Tua Siswa</p>
+                    <p style="margin: 0;">Wali Siswa Siswa</p>
                 </td>
                 <td style="text-align: center; vertical-align: top;">
-                    <br> <!-- Spacer to align simply with 'Orang Tua Siswa' below 'Mengetahui' -->
+                    <br> <!-- Spacer to align simply with 'Wali Siswa Siswa' below 'Mengetahui' -->
                     <p style="margin: 0;">Wali Kelas</p>
                 </td>
             </tr>

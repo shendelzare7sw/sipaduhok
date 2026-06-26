@@ -1,0 +1,425 @@
+body.wali-siswa-invoice-page {
+  --dark: #233446;
+  --danger: #ff3e1d;
+  --light: #f5f5f9;
+  --primary: #696cff;
+  --secondary: #8592a3;
+  --success: #71dd37;
+  --warning: #ffab00;
+  background-color: var(--light);
+  color: #566a7f;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+  margin: 0;
+  padding: 40px 20px;
+}
+
+.wali-siswa-invoice-page .action-buttons {
+  margin: 0 auto 20px;
+  max-width: 800px;
+  text-align: right;
+}
+
+.wali-siswa-invoice-page .invoice-action-button {
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 10px 20px;
+}
+
+.wali-siswa-invoice-page .invoice-action-button-primary {
+  background: var(--primary);
+}
+
+.wali-siswa-invoice-page .invoice-action-button-secondary {
+  background: var(--secondary);
+  margin-left: 10px;
+}
+
+.wali-siswa-invoice-page .invoice-print-icon {
+  height: 16px;
+  margin-right: 5px;
+  vertical-align: middle;
+  width: 16px;
+}
+
+.wali-siswa-invoice-page .invoice-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 40px;
+  position: relative;
+}
+
+.wali-siswa-invoice-page .watermark {
+  border: 10px solid rgba(113, 221, 55, 0.1);
+  border-radius: 20px;
+  color: rgba(113, 221, 55, 0.1);
+  font-size: 8rem;
+  font-weight: 900;
+  left: 50%;
+  padding: 20px 40px;
+  pointer-events: none;
+  position: absolute;
+  text-transform: uppercase;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  z-index: 0;
+}
+
+.wali-siswa-invoice-page .watermark.pending {
+  border-color: rgba(255, 171, 0, 0.1);
+  color: rgba(255, 171, 0, 0.1);
+}
+
+.wali-siswa-invoice-page .watermark.rejected {
+  border-color: rgba(255, 62, 29, 0.1);
+  color: rgba(255, 62, 29, 0.1);
+}
+
+.wali-siswa-invoice-page .header {
+  align-items: flex-end;
+  border-bottom: 2px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+}
+
+.wali-siswa-invoice-page .company-info {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.wali-siswa-invoice-page .company-logo {
+  flex-shrink: 0;
+  height: 70px;
+  width: auto;
+}
+
+.wali-siswa-invoice-page .company-info h1 {
+  color: var(--primary);
+  font-size: 18px;
+  margin: 0 0 5px;
+}
+
+.wali-siswa-invoice-page .company-info p {
+  color: var(--secondary);
+  font-size: 14px;
+  margin: 0;
+}
+
+.wali-siswa-invoice-page .invoice-details {
+  text-align: right;
+}
+
+.wali-siswa-invoice-page .invoice-title {
+  color: var(--dark);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.wali-siswa-invoice-page .invoice-meta {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.wali-siswa-invoice-page .meta-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.wali-siswa-invoice-page .meta-label {
+  color: var(--secondary);
+  font-weight: 600;
+  text-align: right;
+  width: 100px;
+}
+
+.wali-siswa-invoice-page .meta-value {
+  color: var(--dark);
+  font-weight: 500;
+  text-align: right;
+  width: 180px;
+}
+
+.wali-siswa-invoice-page .info-grid {
+  display: grid;
+  gap: 40px;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 40px;
+}
+
+.wali-siswa-invoice-page .info-box h3 {
+  border-bottom: 1px solid #eee;
+  color: var(--secondary);
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin: 0 0 10px;
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.wali-siswa-invoice-page .info-box p {
+  color: var(--dark);
+  font-weight: 500;
+  margin: 0 0 5px;
+}
+
+.wali-siswa-invoice-page .info-box .sub-text {
+  color: var(--secondary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.wali-siswa-invoice-page .student-name {
+  font-size: 18px;
+}
+
+.wali-siswa-invoice-page .payment-status-box {
+  text-align: right;
+}
+
+.wali-siswa-invoice-page .payment-status-wrapper {
+  margin-top: 5px;
+}
+
+.wali-siswa-invoice-page .transfer-proof-note {
+  margin-top: 10px;
+}
+
+.wali-siswa-invoice-page .table-container {
+  margin-bottom: 30px;
+}
+
+.wali-siswa-invoice-page table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.wali-siswa-invoice-page th {
+  background-color: #f9f9fc;
+  color: var(--secondary);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 12px 15px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.wali-siswa-invoice-page td {
+  border-bottom: 1px solid #f0f0f0;
+  color: var(--dark);
+  padding: 15px;
+}
+
+.wali-siswa-invoice-page .invoice-col-no {
+  width: 5%;
+}
+
+.wali-siswa-invoice-page .invoice-col-description {
+  width: 55%;
+}
+
+.wali-siswa-invoice-page .invoice-col-year,
+.wali-siswa-invoice-page .invoice-col-amount {
+  width: 20%;
+}
+
+.wali-siswa-invoice-page .invoice-col-amount {
+  text-align: right;
+}
+
+.wali-siswa-invoice-page .amount-col {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 600;
+  text-align: right;
+}
+
+.wali-siswa-invoice-page .text-muted {
+  color: var(--secondary);
+}
+
+.wali-siswa-invoice-page .total-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.wali-siswa-invoice-page .total-box {
+  width: 300px;
+}
+
+.wali-siswa-invoice-page .total-row {
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.wali-siswa-invoice-page .total-row.grand-total {
+  border-bottom: none;
+  border-top: 2px solid var(--dark);
+  color: var(--primary);
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 10px;
+  padding-top: 15px;
+}
+
+.wali-siswa-invoice-page .footer {
+  border-top: 1px solid #f0f0f0;
+  color: var(--secondary);
+  font-size: 12px;
+  margin-top: 60px;
+  padding-top: 30px;
+  text-align: center;
+}
+
+.wali-siswa-invoice-page .invoice-legal-note {
+  color: #b0b0b0;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.wali-siswa-invoice-page .status-badge {
+  border-radius: 20px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  text-transform: uppercase;
+}
+
+.wali-siswa-invoice-page .status-paid {
+  background: rgba(113, 221, 55, 0.15);
+  color: var(--success);
+}
+
+.wali-siswa-invoice-page .status-pending {
+  background: rgba(255, 171, 0, 0.15);
+  color: var(--warning);
+}
+
+.wali-siswa-invoice-page .status-failed {
+  background: rgba(255, 62, 29, 0.15);
+  color: var(--danger);
+}
+
+@page {
+  margin: 10mm 15mm;
+  size: A4;
+}
+
+@media (max-width: 768px) {
+  body.wali-siswa-invoice-page {
+    padding: 15px 10px;
+  }
+
+  .wali-siswa-invoice-page .invoice-container {
+    padding: 20px;
+  }
+
+  .wali-siswa-invoice-page .header {
+    align-items: flex-start;
+    border-bottom: 2px solid #f0f0f0;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+
+  .wali-siswa-invoice-page .invoice-details {
+    text-align: left;
+    width: 100%;
+  }
+
+  .wali-siswa-invoice-page .meta-row {
+    justify-content: flex-start;
+  }
+
+  .wali-siswa-invoice-page .meta-label {
+    text-align: left;
+    width: 90px;
+  }
+
+  .wali-siswa-invoice-page .meta-value {
+    flex: 1;
+    text-align: left;
+    width: auto;
+  }
+
+  .wali-siswa-invoice-page .info-grid {
+    gap: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .wali-siswa-invoice-page .info-box {
+    text-align: left !important;
+  }
+
+  .wali-siswa-invoice-page .table-container {
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+
+  .wali-siswa-invoice-page .total-section {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .wali-siswa-invoice-page .total-box {
+    width: 100%;
+  }
+
+  .wali-siswa-invoice-page .watermark {
+    border-width: 5px;
+    font-size: 4rem;
+    padding: 10px 20px;
+  }
+
+  .wali-siswa-invoice-page .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .wali-siswa-invoice-page .action-buttons button {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media print {
+  body.wali-siswa-invoice-page {
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+
+  .wali-siswa-invoice-page .invoice-container {
+    box-shadow: none;
+    margin: 0;
+    max-width: 100%;
+    padding: 0;
+    width: 100%;
+  }
+
+  .wali-siswa-invoice-page .no-print {
+    display: none !important;
+  }
+
+  .wali-siswa-invoice-page .watermark {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

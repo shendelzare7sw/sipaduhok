@@ -507,7 +507,7 @@ PROMPT;
             'wali kelas',
             'guru',
             'siswa',
-            'orang tua',
+            'wali siswa',
             'wali murid',
             'kelas',
             'cabang',

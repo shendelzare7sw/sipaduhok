@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!parentSelected) {
             event.preventDefault();
-            alert('Silakan pilih orang tua terlebih dahulu!');
+            alert('Silakan pilih wali siswa terlebih dahulu!');
             return;
         }
 

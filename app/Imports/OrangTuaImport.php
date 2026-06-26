@@ -32,7 +32,7 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
 
             // Skip instruction/header rows
             $namaLower = strtolower(trim($row['nama']));
-            if (in_array($namaLower, ['contoh', 'petunjuk', 'instruksi', 'nama lengkap', 'nama orang tua'])) {
+            if (in_array($namaLower, ['contoh', 'petunjuk', 'instruksi', 'nama lengkap', 'nama wali siswa'])) {
                 continue;
             }
             if (str_contains($namaLower, 'contoh') || str_contains($namaLower, 'petunjuk')) {
@@ -48,7 +48,7 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
 
             if ($exists) {
                 $this->skippedCount++;
-                $this->warnings[] = "Baris {$rowNumber}: Orang tua dilewati karena Email '{$email}' atau Username '{$username}' sudah ada.";
+                $this->warnings[] = "Baris {$rowNumber}: Wali siswa dilewati karena Email '{$email}' atau Username '{$username}' sudah ada.";
                 continue;
             }
 
@@ -87,7 +87,7 @@ class OrangTuaImport implements ToCollection, WithHeadingRow
                             StudentParent::create([
                                 'siswa_id' => $siswa->id,
                                 'parent_id' => $user->id,
-                                'relationship' => $row['hubungan'] ?? 'Orang Tua',
+                                'relationship' => $row['hubungan'] ?? 'Wali Siswa',
                                 'is_primary' => true,
                                 'is_financial_responsible' => true,
                                 'can_access_academic' => true,

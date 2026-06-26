@@ -23,7 +23,7 @@ class KnowledgeBaseLoader
         'admin' => 'admin.',
         'guru_pengajar' => 'guru.',
         'siswa' => 'siswa.',
-        'orang_tua' => 'orang-tua.',
+        'orang_tua' => 'wali-siswa.',
         'wali_kelas' => ['wali.', 'wali-kelas.'],
         'bendahara' => 'bendahara.',
         'sekretaris' => 'sekretaris.',
@@ -67,19 +67,19 @@ class KnowledgeBaseLoader
             'SIA: HOK-LMS muncul jika jenjang siswa termasuk setting lms_allowed_jenjang',
             'SIA: Presensi => siswa.sia.presensi.index',
             'SIA: Data Penilaian => siswa.sia.penilaian',
-            'Rapor dan pembayaran siswa tidak ada di menu siswa; diarahkan ke Orang Tua/Wali Murid',
+            'Rapor dan pembayaran siswa tidak ada di menu siswa; diarahkan ke Wali Siswa/Wali Murid',
             'LMS: Beranda => siswa.lms.dashboard',
             'LMS: Mata Pelajaran dinamis dari jadwal kelas; tiap mapel berisi materi, tugas, ujian/latihan, forum, dan aktivitas pembelajaran',
             'LMS: Kalender Akademik, Jadwal Pelajaran, Daftar Guru',
         ],
         'orang_tua' => [
-            'Dashboard => orang-tua.dashboard',
-            'Monitoring Anak menampilkan submenu per anak yang terhubung ke akun orang tua',
+            'Dashboard => wali-siswa.dashboard',
+            'Monitoring Anak menampilkan submenu per anak yang terhubung ke akun wali siswa',
             'Per anak: Presensi, Tagihan, Rapor',
             'Presensi anak mencakup riwayat presensi dan pengajuan/edit izin',
             'Tagihan mencakup daftar tagihan, invoice, pembayaran online/transfer, dan status validasi',
             'Rapor anak hanya bisa diakses/download sesuai status validasi akses rapor',
-            'Route orang tua banyak memakai parameter siswa/anak; arahkan memilih anak dulu bila tombol langsung tidak tersedia',
+            'Route wali siswa banyak memakai parameter siswa/anak; arahkan memilih anak dulu bila tombol langsung tidak tersedia',
         ],
         'wali_kelas' => [
             'Dashboard => wali.dashboard',
@@ -87,7 +87,7 @@ class KnowledgeBaseLoader
             'Akademik: Jadwal Pelajaran, Presensi Siswa, Nilai Siswa, Kelola Rapor',
             'Presensi Siswa: Input Harian, Validasi Izin, Rekap Harian, Riwayat & Edit',
             'Arsip Kelas Saya lintas tahun ajaran (read-only untuk kelas yang pernah diwalikan) => wali.arsip.index',
-            'Permintaan Unduh Rapor dari orang tua/siswa => wali.rapor.request-download.index',
+            'Permintaan Unduh Rapor dari wali siswa/siswa => wali.rapor.request-download.index',
             'Kenaikan Kelas: Prediksi Kenaikan => wali.promotion.prediction',
             'Validasi Akses ujian/rapor untuk siswa kelasnya => wali.validasi-akses.index',
         ],
@@ -135,7 +135,7 @@ class KnowledgeBaseLoader
         'cek nilai|lihat nilai|data penilaian|nilai saya|nilai anak' => [
             'owner' => ['siswa', 'orang_tua', 'wali_kelas', 'guru_pengajar'],
             'admin_view_route' => 'admin.monitoring.siswa',
-            'description' => 'Siswa melihat Data Penilaian di SIA; Orang Tua melihat hasil akhir melalui Rapor anak; Wali/Guru mengelola nilai',
+            'description' => 'Siswa melihat Data Penilaian di SIA; Wali Siswa melihat hasil akhir melalui Rapor anak; Wali/Guru mengelola nilai',
         ],
         'input presensi|catat absen|rekap presensi|validasi izin' => [
             'owner' => ['wali_kelas'],
@@ -145,12 +145,12 @@ class KnowledgeBaseLoader
         'cek presensi|lihat presensi|presensi anak|riwayat kehadiran' => [
             'owner' => ['siswa', 'orang_tua', 'wali_kelas'],
             'admin_view_route' => 'admin.monitoring.siswa',
-            'description' => 'Siswa dan Orang Tua melihat riwayat presensi sesuai akunnya; Wali Kelas menginput dan merekap presensi',
+            'description' => 'Siswa dan Wali Siswa melihat riwayat presensi sesuai akunnya; Wali Kelas menginput dan merekap presensi',
         ],
         'ajukan izin|izin sakit|izin siswa' => [
             'owner' => ['orang_tua'],
             'admin_view_route' => 'admin.monitoring.pengguna',
-            'description' => 'Pengajuan izin siswa dilakukan oleh Orang Tua melalui Dashboard Orang Tua, kemudian divalidasi Wali Kelas',
+            'description' => 'Pengajuan izin siswa dilakukan oleh Wali Siswa melalui Dashboard Wali Siswa, kemudian divalidasi Wali Kelas',
         ],
         'cetak rapor|generate rapor|isi rapor|kelola rapor' => [
             'owner' => ['wali_kelas'],
@@ -160,7 +160,7 @@ class KnowledgeBaseLoader
         'lihat rapor|rapor anak|download rapor|unduh rapor|permintaan unduh' => [
             'owner' => ['orang_tua', 'wali_kelas', 'ketua_pkbm'],
             'admin_view_route' => 'admin.monitoring.pengguna',
-            'description' => 'Orang Tua melihat rapor anak setelah akses tervalidasi; Wali Kelas mengelola permintaan unduh; Ketua PKBM melakukan validasi akhir rapor',
+            'description' => 'Wali Siswa melihat rapor anak setelah akses tervalidasi; Wali Kelas mengelola permintaan unduh; Ketua PKBM melakukan validasi akhir rapor',
         ],
         'validasi rapor|setujui rapor|approve rapor' => [
             'owner' => ['ketua_pkbm'],
@@ -317,10 +317,10 @@ class KnowledgeBaseLoader
             'admin_view_route' => 'admin.mata-pelajaran.index',
             'description' => 'Siswa dan Guru melihat mata pelajaran sesuai jadwal/kelasnya; Admin/Wakasek mengelola data master mata pelajaran',
         ],
-        'manajemen siswa|data siswa|assign siswa|kartu siswa|orang tua siswa' => [
+        'manajemen siswa|data siswa|assign siswa|kartu siswa|wali siswa siswa' => [
             'owner' => ['wakil_kepala_sekolah', 'admin'],
             'admin_view_route' => 'admin.manajemen-siswa.index',
-            'description' => 'Data siswa, assign kelas, kartu siswa, dan relasi orang tua dikelola Admin atau Wakasek',
+            'description' => 'Data siswa, assign kelas, kartu siswa, dan relasi wali siswa dikelola Admin atau Wakasek',
         ],
         'cabang|manajemen cabang|data cabang' => [
             'owner' => ['admin'],
@@ -347,7 +347,7 @@ class KnowledgeBaseLoader
             'admin_view_route' => 'admin.catatan.index',
             'description' => 'Catatan internal dikirim oleh Admin, Wakasek, atau Ketua PKBM kepada role/user terkait',
         ],
-        'kelola user|manajemen user|buat akun|akun siswa|akun guru|akun orang tua|wali murid|tenaga pendidik' => [
+        'kelola user|manajemen user|buat akun|akun siswa|akun guru|akun wali siswa|wali murid|tenaga pendidik' => [
             'owner' => ['admin'],
             'admin_view_route' => 'admin.users.index',
             'description' => 'Pembuatan dan pengelolaan akun pengguna dilakukan Admin',
@@ -375,7 +375,7 @@ class KnowledgeBaseLoader
         'bayar spp|bayar tagihan|transfer pembayaran' => [
             'owner' => ['orang_tua'],
             'admin_view_route' => 'admin.keuangan.pembayaran.index',
-            'description' => 'Pembayaran SPP dilakukan oleh Orang Tua via Dashboard Orang Tua (online Midtrans atau Direct Transfer) atau langsung ke Bendahara',
+            'description' => 'Pembayaran SPP dilakukan oleh Wali Siswa via Dashboard Wali Siswa (online Midtrans atau Direct Transfer) atau langsung ke Bendahara',
         ],
     ];
 
@@ -417,7 +417,7 @@ class KnowledgeBaseLoader
             'admin' => 'Admin',
             'guru_pengajar' => 'Guru Pengajar',
             'siswa' => 'Siswa',
-            'orang_tua' => 'Orang Tua / Wali Murid',
+            'orang_tua' => 'Wali Siswa',
             'wali_kelas' => 'Wali Kelas',
             'bendahara' => 'Bendahara',
             'sekretaris' => 'Sekretaris',

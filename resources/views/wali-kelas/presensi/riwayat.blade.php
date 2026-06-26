@@ -176,7 +176,7 @@
                                                 <option value="disetujui" {{ $selectedValidasi == 'disetujui' ? 'selected' : '' }}>Setujui (Sakit/Izin)</option>
                                                 <option value="ditolak" {{ $selectedValidasi == 'ditolak' ? 'selected' : '' }}>Tolak (Jadi Alpha)</option>
                                             </select>
-                                            <small class="text-muted mt-1 d-block">Pilih 'Setujui' agar status muncul sebagai Sakit/Izin di orang tua.</small>
+                                            <small class="text-muted mt-1 d-block">Pilih 'Setujui' agar status muncul sebagai Sakit/Izin di wali siswa.</small>
                                         </div>
                                         @if($item->bukti_file)
                                         <div class="mb-3">

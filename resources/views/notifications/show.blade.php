@@ -21,7 +21,7 @@
         $userRole === 'ketua_pkbm'                           => 'ketua.partials.sneat-sidebar-menu',
         $userRole === 'wakil_kepala_sekolah'                 => 'waka.partials.sneat-sidebar-menu',
         $userRole === 'sekretaris'                           => 'sekretaris.partials.sneat-sidebar-menu',
-        $userRole === 'orang_tua'                            => 'orang-tua.partials.sneat-sidebar-menu',
+        $userRole === 'orang_tua'                            => 'wali-siswa.partials.sneat-sidebar-menu',
         default                                              => 'partials.sneat-sidebar',
     };
 

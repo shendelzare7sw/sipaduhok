@@ -260,7 +260,7 @@ class PembayaranController extends Controller
                 }
             }
 
-            // Notify orang tua about payment validation
+            // Notify wali siswa about payment validation
             $notificationService = app(NotificationService::class);
             if ($request->status_validasi === 'disetujui') {
                 foreach ($relatedPayments as $pembayaran) {

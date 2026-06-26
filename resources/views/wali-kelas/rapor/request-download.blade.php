@@ -2,7 +2,7 @@
 
 @section('title', 'Request Download Rapor')
 @section('page-title', 'Request Download Rapor')
-@section('page-subtitle', 'Kelola permintaan download rapor dari orang tua')
+@section('page-subtitle', 'Kelola permintaan download rapor dari wali siswa')
 
 @section('sidebar-menu')
     @include('wali-kelas.partials.sneat-sidebar-menu')
@@ -18,9 +18,9 @@
     <div class="alert alert-light border border-primary border-opacity-25 shadow-sm mb-4">
         <div class="small text-muted">
             <i class="fas fa-info-circle text-primary me-1"></i>
-            Orang tua dapat mengajukan permintaan download rapor dari halaman detail rapor anak.
+            Wali siswa dapat mengajukan permintaan download rapor dari halaman detail rapor anak.
             Setelah Anda <strong>setujui</strong>, link download akan aktif selama <strong>24 jam</strong>.
-            Setelah expired, orang tua perlu mengajukan ulang.
+            Setelah expired, wali siswa perlu mengajukan ulang.
             @if($kelas)
                 | Kelas: <strong>{{ $kelas->nama_kelas }}</strong>
             @endif
@@ -37,7 +37,7 @@
                     <thead class="table-light">
                         <tr>
                             <th class="text-center" width="50">No</th>
-                            <th>Orang Tua</th>
+                            <th>Wali Siswa</th>
                             <th>Siswa</th>
                             <th>Rapor</th>
                             <th>Alasan</th>

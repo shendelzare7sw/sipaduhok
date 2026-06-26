@@ -1,0 +1,16 @@
+.wali-siswa-rapor-detail-page .rapor-detail-avatar {
+  height: 40px;
+  width: 40px;
+}
+
+.wali-siswa-rapor-detail-page .rapor-detail-avatar-image {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.wali-siswa-rapor-detail-page .rapor-detail-avatar-initial {
+  font-size: 1.2rem;
+  height: 100%;
+  width: 100%;
+}

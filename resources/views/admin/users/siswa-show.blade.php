@@ -90,7 +90,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                 </div>
 
                 <div>
-                    <h5 class="show-section-title">Data Orang Tua (Biodata)</h5>
+                    <h5 class="show-section-title">Data Wali Siswa (Biodata)</h5>
                     <table class="show-table">
                         <tr>
                             <td class="show-label">Nama Ayah</td>
@@ -141,7 +141,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                         </tr>
                     </table>
 
-                    <h5 class="show-section-title show-section-title--warning">Akun Orang Tua Terdaftar</h5>
+                    <h5 class="show-section-title show-section-title--warning">Akun Wali Siswa Terdaftar</h5>
                     @if($siswa->studentParents && $siswa->studentParents->count() > 0)
                         <div class="show-card-list">
                             @foreach($siswa->studentParents as $sp)
@@ -187,7 +187,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                     @else
                         <div class="show-empty-state">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <div class="show-empty-title">Belum ada akun orang tua terdaftar</div>
+                            <div class="show-empty-title">Belum ada akun wali siswa terdaftar</div>
                             <small class="show-empty-hint">Tambahkan melalui halaman edit siswa</small>
                         </div>
                     @endif

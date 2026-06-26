@@ -140,7 +140,7 @@ class Siswa extends Model
                     ->withTimestamps();
     }
 
-    // Alias untuk orang tua (sama dengan parents)
+    // Alias untuk wali siswa (sama dengan parents)
     public function orangTua()
     {
         return $this->parents();

@@ -564,7 +564,7 @@ class RaporController extends Controller
 
         $rapor->terbitkan();
 
-        // Notify siswa and orang tua about published rapor
+        // Notify siswa and wali siswa about published rapor
         $rapor->load('siswa.orangTua');
         app(\App\Services\NotificationService::class)->notifyRaporTerbit($rapor);
 
@@ -672,7 +672,7 @@ class RaporController extends Controller
         
         $rapor->tarikKembali();
         
-        return back()->with('success', 'Rapor berhasil ditarik kembali. Status kembali ke draft dan tidak terlihat oleh orang tua.');
+        return back()->with('success', 'Rapor berhasil ditarik kembali. Status kembali ke draft dan tidak terlihat oleh wali siswa.');
     }
 
     /**
@@ -1083,7 +1083,7 @@ class RaporController extends Controller
     }
 
     /**
-     * Daftar request download rapor dari orang tua.
+     * Daftar request download rapor dari wali siswa.
      */
     public function requestDownloadIndex(): View
     {
@@ -1119,7 +1119,7 @@ class RaporController extends Controller
 
         $downloadRequest->generateDownloadToken(24);
 
-        // Notify Orang Tua
+        // Notify Wali Siswa
         $downloadRequest->load('siswa');
         app(\App\Services\NotificationService::class)->notifyKeputusanDownloadRapor($downloadRequest);
 
@@ -1140,7 +1140,7 @@ class RaporController extends Controller
             'tanggal_keputusan' => now(),
         ]);
 
-        // Notify Orang Tua
+        // Notify Wali Siswa
         $downloadRequest->load('siswa');
         app(\App\Services\NotificationService::class)->notifyKeputusanDownloadRapor($downloadRequest);
 

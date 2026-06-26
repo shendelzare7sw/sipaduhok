@@ -1,0 +1,111 @@
+@startuml activity-kelola-jadwal-pelajaran
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin / Waka)|
+start
+:Mengakses Menu\nJadwal Pelajaran;
+
+|Sistem|
+:Menampilkan Halaman\nJadwal Pelajaran\n(Sesuai Tahun Ajaran Aktif);
+
+|Pengguna (Admin / Waka)|
+:Memilih Aksi Pengelolaan\n(Decision);
+
+if (Aksi yang Dipilih?) then (Tambah Jadwal)
+    |Sistem|
+    :Menampilkan Form\nTambah Jadwal;
+    repeat
+        |Pengguna (Admin / Waka)|
+        :Mengisi Form (Kelas, Mapel,\nGuru, Hari, Jam);
+        :Klik "Simpan";
+        |Sistem|
+        :Validasi Kesesuaian Jenjang;
+        if (Sesuai?) then (Tidak Sesuai)
+            :Menampilkan Pesan Error\n(Mapel tidak sesuai jenjang);
+            |Pengguna (Admin / Waka)|
+            :Memperbaiki Pilihan\nKelas/Mapel;
+        else (Ya)
+            :Validasi Bentrok Waktu\n(Cek Guru & Kelas);
+            if (Ada Bentrok?) then (Ya, Bentrok)
+                :Menampilkan Pesan Error\n(Guru/Kelas sudah terisi);
+                |Pengguna (Admin / Waka)|
+                :Memperbaiki Input\nWaktu/Guru;
+            else (Tidak, Aman)
+                :Menyimpan Jadwal ke Database;
+                :Sinkronisasi Otomatis\nRelasi Guru Pengajar;
+                :Menampilkan Pesan Sukses;
+                break
+            endif
+        endif
+    repeat while (Kembali Cek Data)
+
+elseif (Aksi yang Dipilih?) then (Ganti Guru Khusus)
+    |Pengguna (Admin / Waka)|
+    :Klik "Ganti Guru" pada\nsalah satu slot jadwal;
+    |Sistem|
+    :Menampilkan Form\nPenggantian Guru;
+    repeat
+        |Pengguna (Admin / Waka)|
+        :Memilih Guru Pengganti\n& Mengisi Alasan;
+        :Klik "Simpan Perubahan";
+        |Sistem|
+        :Validasi Bentrok Guru Baru;
+        if (Ada Bentrok?) then (Ya)
+            :Menampilkan Pesan Error\n(Bentrok Waktu);
+            |Pengguna (Admin / Waka)|
+            :Memilih Guru Lain;
+        else (Tidak)
+            :Memperbarui Jadwal;
+            :Mencatat Log Riwayat\n(History) Perubahan;
+            :Sinkronisasi Ulang\nRelasi Guru Pengajar;
+            :Menampilkan Pesan Sukses;
+            break
+        endif
+    repeat while (Kembali Cek Data)
+
+elseif (Aksi yang Dipilih?) then (Ganti Guru Massal)
+    |Pengguna (Admin / Waka)|
+    :Klik "Bulk Replace Guru";
+    |Sistem|
+    :Menampilkan Form\nPergantian Massal;
+    repeat
+        |Pengguna (Admin / Waka)|
+        :Memilih Guru Lama & Guru Baru;
+        :Klik "Proses Ganti Massal";
+        |Sistem|
+        :Memeriksa Bentrok di\nSemua Jadwal Terkait;
+        if (Ada Bentrok?) then (Ya)
+            :Menampilkan Pesan Error\n(Detail Jadwal Bentrok);
+            |Pengguna (Admin / Waka)|
+            :Memperbaiki Pilihan Guru;
+        else (Tidak)
+            :Memperbarui Semua Jadwal\ndari Guru Lama ke Guru Baru;
+            :Mencatat Log Riwayat Massal;
+            :Menampilkan Pesan Sukses;
+            break
+        endif
+    repeat while (Kembali Cek Data)
+
+else (Hapus Jadwal)
+    |Pengguna (Admin / Waka)|
+    :Klik "Hapus" pada jadwal;
+    |Sistem|
+    :Menampilkan Pop-up\nKonfirmasi Hapus;
+    |Pengguna (Admin / Waka)|
+    if (Hapus atau Batal?) then (Hapus)
+        |Sistem|
+        :Menghapus Data Jadwal;
+        :Membersihkan Relasi Guru\n(Bila tidak ada jadwal lain);
+        :Menampilkan Pesan Sukses;
+    else (Batal)
+        |Sistem|
+        :Kembali ke Halaman\nJadwal Pelajaran;
+    endif
+endif
+
+|Pengguna (Admin / Waka)|
+:Selesai Melakukan\nPengelolaan Jadwal;
+stop
+@enduml

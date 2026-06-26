@@ -72,7 +72,7 @@ class LoginController extends Controller
             'bendahara' => redirect()->route('bendahara.dashboard'),
             'wali_kelas' => redirect()->route('wali.dashboard'),
             'guru_pengajar' => redirect()->route('guru.dashboard'),
-            'orang_tua' => redirect()->route('orang-tua.dashboard'),
+            'orang_tua' => redirect()->route('wali-siswa.dashboard'),
             'siswa' => redirect()->route('siswa.dashboard'),
             default => redirect()->route('dashboard'),
         };

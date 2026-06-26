@@ -72,7 +72,7 @@ use App\Http\Controllers\Siswa\SiaPembayaranController;
 // use App\Http\Controllers\Siswa\SiaRaporController; // Disabled - Siswa tidak berhak akses rapor
 use App\Http\Controllers\Siswa\LmsDashboardController;
 
-// Orang Tua Controllers
+// Wali Siswa Controllers
 use App\Http\Controllers\OrangTua\OrangTuaController;
 use App\Http\Controllers\Siswa\LmsMateriController;
 use App\Http\Controllers\Siswa\LmsTugasController;
@@ -253,20 +253,20 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/siswa/{id}', [UserController::class, 'showSiswa'])->name('show-siswa');
             Route::post('/siswa/bulk-delete', [UserController::class, 'bulkDeleteSiswa'])->name('bulk-delete-siswa');
 
-            // Orang Tua
-            Route::get('/orang-tua/import', [UserController::class, 'importOrangTuaForm'])->name('import-orang-tua');
-            Route::post('/orang-tua/import', [UserController::class, 'importOrangTua'])->name('import-orang-tua.store');
-            Route::get('/orang-tua/template', [UserController::class, 'downloadOrangTuaTemplate'])->name('orang-tua-template');
-            Route::get('/orang-tua/print', [UserController::class, 'printOrangTua'])->name('orang-tua.print');
-            Route::get('/orang-tua', [UserController::class, 'orangTua'])->name('orang-tua');
-            Route::get('/orang-tua/create', [UserController::class, 'createOrangTua'])->name('orang-tua.create');
-            Route::post('/orang-tua', [UserController::class, 'storeOrangTua'])->name('orang-tua.store');
-            Route::get('/orang-tua/{id}', [UserController::class, 'showOrangTua'])->name('show-orang-tua');
-            Route::get('/orang-tua/{id}/edit', [UserController::class, 'editOrangTua'])->name('edit-orang-tua');
-            Route::put('/orang-tua/{id}', [UserController::class, 'updateOrangTua'])->name('update-orang-tua');
-            Route::post('/orang-tua/{id}/toggle-status', [UserController::class, 'toggleOrangTuaStatus'])->name('toggle-orang-tua-status');
-            Route::delete('/orang-tua/{id}', [UserController::class, 'deleteOrangTua'])->name('delete-orang-tua');
-            Route::post('/orang-tua/bulk-delete', [UserController::class, 'bulkDeleteOrangTua'])->name('bulk-delete-orang-tua');
+            // Wali Siswa
+            Route::get('/wali-siswa/import', [UserController::class, 'importOrangTuaForm'])->name('import-wali-siswa');
+            Route::post('/wali-siswa/import', [UserController::class, 'importOrangTua'])->name('import-wali-siswa.store');
+            Route::get('/wali-siswa/template', [UserController::class, 'downloadOrangTuaTemplate'])->name('wali-siswa-template');
+            Route::get('/wali-siswa/print', [UserController::class, 'printOrangTua'])->name('wali-siswa.print');
+            Route::get('/wali-siswa', [UserController::class, 'orangTua'])->name('wali-siswa');
+            Route::get('/wali-siswa/create', [UserController::class, 'createOrangTua'])->name('wali-siswa.create');
+            Route::post('/wali-siswa', [UserController::class, 'storeOrangTua'])->name('wali-siswa.store');
+            Route::get('/wali-siswa/{id}', [UserController::class, 'showOrangTua'])->name('show-wali-siswa');
+            Route::get('/wali-siswa/{id}/edit', [UserController::class, 'editOrangTua'])->name('edit-wali-siswa');
+            Route::put('/wali-siswa/{id}', [UserController::class, 'updateOrangTua'])->name('update-wali-siswa');
+            Route::post('/wali-siswa/{id}/toggle-status', [UserController::class, 'toggleOrangTuaStatus'])->name('toggle-wali-siswa-status');
+            Route::delete('/wali-siswa/{id}', [UserController::class, 'deleteOrangTua'])->name('delete-wali-siswa');
+            Route::post('/wali-siswa/bulk-delete', [UserController::class, 'bulkDeleteOrangTua'])->name('bulk-delete-wali-siswa');
         });
 
         // Pengaturan AI Assistant
@@ -1431,8 +1431,8 @@ Route::middleware(['auth'])->group(function () {
             Route::prefix('presensi')->name('presensi.')->group(function () {
                 Route::get('/', [SiaPresensiController::class, 'index'])->name('index');
 
-                // Note: Routes ajukan izin di-disable - Fitur dipindahkan ke Orang Tua
-                // Siswa tidak bisa mengajukan izin sendiri, harus melalui orang tua sebagai bentuk pendampingan
+                // Note: Routes ajukan izin di-disable - Fitur dipindahkan ke Wali Siswa
+                // Siswa tidak bisa mengajukan izin sendiri, harus melalui wali siswa sebagai bentuk pendampingan
                 // Route::get('/ajukan-izin', [SiaPresensiController::class, 'ajukanIzin'])->name('ajukan-izin');
                 // Route::post('/ajukan-izin', [SiaPresensiController::class, 'storeIzin'])->name('store-izin');
             });
@@ -1452,7 +1452,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/midtrans/finish', [SiaPembayaranController::class, 'midtransFinish'])->name('midtrans-finish');
             });
 
-            // Rapor - DISABLED: Siswa tidak berhak mengelola rapor, hanya orang tua
+            // Rapor - DISABLED: Siswa tidak berhak mengelola rapor, hanya wali siswa
             // Route::prefix('rapor')->name('rapor.')->group(function () {
             //     Route::get('/', [SiaRaporController::class, 'index'])->name('index');
             //     Route::get('/tengah-semester/{rapor}', [SiaRaporController::class, 'tengahSemester'])->name('tengah-semester');
@@ -1545,14 +1545,14 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ORANG TUA DASHBOARD & ROUTES
-    | Note: Orang tua yang bertanggung jawab untuk pembayaran & monitoring anak
+    | WALI SISWA DASHBOARD & ROUTES
+    | Note: Wali siswa yang bertanggung jawab untuk pembayaran & monitoring anak
     | Siswa hanya fokus belajar, tidak ada akses pembayaran (mencegah penyembunyian info)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:orang_tua'])->prefix('orang-tua')->name('orang-tua.')->group(function () {
+    Route::middleware(['role:orang_tua'])->prefix('wali-siswa')->name('wali-siswa.')->group(function () {
 
-        // Dashboard Orang Tua
+        // Dashboard Wali Siswa
         Route::get('/dashboard', [OrangTuaController::class, 'dashboard'])->name('dashboard');
 
         // Tagihan & Pembayaran Anak

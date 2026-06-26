@@ -103,7 +103,7 @@
     <div class="signature-section">
         <div class="signature-box">
             <div style="margin-bottom: 10px;">Mengetahui,</div>
-            <div>Orang Tua / Wali</div>
+            <div>Wali Siswa / Wali</div>
             <div class="signature-line">( .................................................. )</div>
         </div>
         <div class="signature-box">

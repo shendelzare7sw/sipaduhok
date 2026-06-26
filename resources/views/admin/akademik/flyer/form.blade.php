@@ -153,7 +153,7 @@
                                 <option value="siswa" {{ old('target_audience', $flyer->target_audience ?? 'siswa') == 'siswa' ? 'selected' : '' }}>Siswa</option>
                                 <option value="guru" {{ old('target_audience', $flyer->target_audience ?? '') == 'guru' ? 'selected' : '' }}>Guru</option>
                                 <option value="wali_kelas" {{ old('target_audience', $flyer->target_audience ?? '') == 'wali_kelas' ? 'selected' : '' }}>Wali Kelas</option>
-                                <option value="orang_tua" {{ old('target_audience', $flyer->target_audience ?? '') == 'orang_tua' ? 'selected' : '' }}>Orang Tua</option>
+                                <option value="orang_tua" {{ old('target_audience', $flyer->target_audience ?? '') == 'orang_tua' ? 'selected' : '' }}>Wali Siswa</option>
                                 <option value="semua" {{ old('target_audience', $flyer->target_audience ?? '') == 'semua' ? 'selected' : '' }}>Semua</option>
                             </select>
                             @error('target_audience')

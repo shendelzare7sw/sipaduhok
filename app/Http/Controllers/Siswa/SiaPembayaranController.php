@@ -54,15 +54,15 @@ class SiaPembayaranController extends Controller
 
     /**
      * Proses pembayaran - DISABLED
-     * Pembayaran hanya bisa dilakukan oleh orang tua untuk mencegah
+     * Pembayaran hanya bisa dilakukan oleh wali siswa untuk mencegah
      * siswa menyembunyikan informasi tagihan
      */
     public function prosesBayar(Request $request)
     {
         return redirect()->route('siswa.sia.pembayaran.index')
-            ->with('error', 'Pembayaran hanya dapat dilakukan oleh Orang Tua. Silakan hubungi orang tua Anda untuk melakukan pembayaran.');
+            ->with('error', 'Pembayaran hanya dapat dilakukan oleh Wali Siswa. Silakan hubungi wali siswa Anda untuk melakukan pembayaran.');
 
-        /* DISABLED - Pembayaran hanya oleh orang tua
+        /* DISABLED - Pembayaran hanya oleh wali siswa
         $request->validate([
             'tagihan_id' => 'required|exists:tagihan,id',
             'jumlah_bayar' => 'required|numeric|min:1',

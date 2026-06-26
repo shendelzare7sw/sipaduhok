@@ -98,7 +98,7 @@
                             <span class="info-value">{{ $siswa->nama_ibu ?? '-' }}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Telepon Orang Tua</span>
+                            <span class="info-label">Telepon Wali Siswa</span>
                             <span class="info-value">{{ $siswa->telepon_orangtua ?? '-' }}</span>
                         </div>
                         <div class="info-item">
@@ -173,9 +173,9 @@
 
             <div class="card">
                 <div class="card-header card-header-flex">
-                    <h5><i class="fas fa-users"></i> Data Orang Tua / Wali</h5>
+                    <h5><i class="fas fa-users"></i> Data Wali Siswa / Wali</h5>
                     <button type="button" class="btn btn-sm btn-primary add-parent-button" id="btnTambahOrangTua">
-                        <i class="fas fa-plus"></i> Tambah Orang Tua
+                        <i class="fas fa-plus"></i> Tambah Wali Siswa
                     </button>
                 </div>
                 <div class="card-body">
@@ -249,14 +249,14 @@
                     @else
                         <div class="alert alert-parent-empty">
                             <i class="fas fa-exclamation-triangle"></i>
-                            Belum ada data orang tua/wali yang terhubung dengan siswa ini.
+                            Belum ada data wali siswa/wali yang terhubung dengan siswa ini.
                         </div>
                     @endif
 
                     <div id="addParentFormContainer" class="add-parent-form">
                         <div class="add-parent-header">
                             <h6 class="add-parent-title">
-                                <i class="fas fa-user-plus title-icon-primary"></i> Tambah Orang Tua / Wali
+                                <i class="fas fa-user-plus title-icon-primary"></i> Tambah Wali Siswa / Wali
                             </h6>
                             <button type="button" class="btn btn-sm btn-subtle-icon" data-hide-parent-form>
                                 <i class="fas fa-times"></i>
@@ -266,7 +266,7 @@
                         @if($hasAyahKandung && $hasIbuKandung)
                             <div class="alert alert-info-parent">
                                 <i class="fas fa-info-circle"></i>
-                                Siswa ini sudah memiliki Ayah Kandung dan Ibu Kandung. Anda masih dapat menambahkan wali/orang tua dengan hubungan lain.
+                                Siswa ini sudah memiliki Ayah Kandung dan Ibu Kandung. Anda masih dapat menambahkan wali/wali siswa dengan hubungan lain.
                             </div>
                         @elseif($hasAyahKandung)
                             <div class="alert alert-info-parent">
@@ -281,11 +281,11 @@
                         @endif
 
                         <div class="form-group">
-                            <label class="form-label">Opsi Tambah Orang Tua</label>
+                            <label class="form-label">Opsi Tambah Wali Siswa</label>
                             <select id="parentOptionSelect" class="form-control">
                                 <option value="">-- Pilih Opsi --</option>
-                                <option value="existing">Pilih Orang Tua yang Sudah Ada</option>
-                                <option value="new">Buat Akun Orang Tua Baru</option>
+                                <option value="existing">Pilih Wali Siswa yang Sudah Ada</option>
+                                <option value="new">Buat Akun Wali Siswa Baru</option>
                             </select>
                         </div>
 
@@ -296,7 +296,7 @@
                                 <div class="form-grid-2">
                                     <div class="form-group form-group-compact">
                                         <label class="form-label">
-                                            <i class="fas fa-search form-icon-muted"></i> Cari Orang Tua
+                                            <i class="fas fa-search form-icon-muted"></i> Cari Wali Siswa
                                         </label>
                                         <input type="text" id="searchParentInput" class="form-control" placeholder="Ketik nama atau email...">
                                     </div>
@@ -305,7 +305,7 @@
                                             <i class="fas fa-filter form-icon-muted"></i> Filter Status
                                         </label>
                                         <select id="filterParentStatus" class="form-control">
-                                            <option value="">Semua Orang Tua</option>
+                                            <option value="">Semua Wali Siswa</option>
                                             <option value="available">Belum Punya Anak Terdaftar (Baru)</option>
                                             <option value="has_children">Sudah Punya Anak Terdaftar</option>
                                         </select>
@@ -314,7 +314,7 @@
 
                                 <div class="form-group">
                                     <label class="form-label">
-                                        Pilih Orang Tua <span class="required-mark">*</span>
+                                        Pilih Wali Siswa <span class="required-mark">*</span>
                                         <small class="label-note">(<span id="parentCount">{{ $availableParents->count() }}</span> tersedia)</small>
                                     </label>
                                     <div id="parentListContainer" class="parent-list-container">
@@ -353,13 +353,13 @@
                                         @empty
                                             <div class="empty-parent-state">
                                                 <i class="fas fa-users-slash empty-state-icon"></i>
-                                                <p>Tidak ada akun orang tua tersedia.</p>
+                                                <p>Tidak ada akun wali siswa tersedia.</p>
                                                 <small>Silakan buat akun baru terlebih dahulu.</small>
                                             </div>
                                         @endforelse
                                         <div id="noParentFound" class="empty-parent-state no-parent-found">
                                             <i class="fas fa-search empty-state-icon"></i>
-                                            <p><strong>Tidak ada orang tua yang ditemukan</strong></p>
+                                            <p><strong>Tidak ada wali siswa yang ditemukan</strong></p>
                                             <small>Coba ubah kata kunci pencarian</small>
                                         </div>
                                     </div>
@@ -405,7 +405,7 @@
 
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary form-action-submit">
-                                        <i class="fas fa-link"></i> Hubungkan Orang Tua
+                                        <i class="fas fa-link"></i> Hubungkan Wali Siswa
                                     </button>
                                     <button type="button" class="btn btn-secondary-action" data-hide-parent-form>
                                         <i class="fas fa-times"></i> Batal
@@ -422,7 +422,7 @@
                                 <div class="form-grid-2">
                                     <div class="form-group">
                                         <label class="form-label">Nama Lengkap <span class="required-mark">*</span></label>
-                                        <input type="text" name="new_parent_name" class="form-control" placeholder="Nama lengkap orang tua" required>
+                                        <input type="text" name="new_parent_name" class="form-control" placeholder="Nama lengkap wali siswa" required>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Username <span class="required-mark">*</span></label>
@@ -492,7 +492,7 @@
 
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-primary form-action-submit">
-                                        <i class="fas fa-user-plus"></i> Buat & Hubungkan Orang Tua
+                                        <i class="fas fa-user-plus"></i> Buat & Hubungkan Wali Siswa
                                     </button>
                                     <button type="button" class="btn btn-secondary-action" data-hide-parent-form>
                                         <i class="fas fa-times"></i> Batal
@@ -518,13 +518,13 @@
                         </button>
                     </div>
                     <div class="modal-body detach-modal-body">
-                        <p class="detach-modal-message">Apakah Anda yakin ingin menghapus hubungan dengan orang tua berikut?</p>
+                        <p class="detach-modal-message">Apakah Anda yakin ingin menghapus hubungan dengan wali siswa berikut?</p>
                         <div class="detach-parent-summary">
                             <div class="detach-parent-name" id="detachParentName"></div>
                             <div class="detach-parent-relationship">Hubungan: <span id="detachParentRelationship"></span></div>
                         </div>
                         <p class="detach-modal-note">
-                            <i class="fas fa-info-circle"></i> Hubungan akan dihapus. Orang tua masih bisa dihubungkan kembali nanti.
+                            <i class="fas fa-info-circle"></i> Hubungan akan dihapus. Wali siswa masih bisa dihubungkan kembali nanti.
                         </p>
                     </div>
                     <div class="modal-footer detach-modal-footer">
