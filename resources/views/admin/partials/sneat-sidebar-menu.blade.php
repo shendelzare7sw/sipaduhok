@@ -67,7 +67,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 
 <!-- ============================================ -->
 <!-- UC01: Kelola Data Pengguna                   -->
-<!-- (Tenaga Pendidik, Siswa, Wali Murid)         -->
+<!-- (Tenaga Pendidik, Siswa, Wali Siswa)         -->
 <!-- ============================================ -->
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Pengguna</span>
@@ -91,7 +91,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
         </li>
         <li class="menu-item {{ $currentRoute == 'admin.users.wali-siswa' ? 'active' : '' }}">
             <a href="{{ route('admin.users.wali-siswa') }}" class="menu-link">
-                <div>Wali Murid</div>
+                <div>Wali Siswa</div>
             </a>
         </li>
     </ul>

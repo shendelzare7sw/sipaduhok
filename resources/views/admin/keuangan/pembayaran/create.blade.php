@@ -172,7 +172,7 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Catatan / Keterangan</label>
-                            <textarea name="catatan" class="form-control shadow-sm" rows="3" placeholder="Contoh: Dibayar oleh {{ $siswa->waliMurid->name ?? 'wali murid' }}">{{ old('catatan') }}</textarea>
+                            <textarea name="catatan" class="form-control shadow-sm" rows="3" placeholder="Contoh: Dibayar oleh {{ $siswa->waliMurid->name ?? 'wali siswa' }}">{{ old('catatan') }}</textarea>
                             <small class="text-muted">Opsional. Tambahkan catatan jika diperlukan.</small>
                         </div>
 
