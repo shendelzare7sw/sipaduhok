@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -515,11 +515,11 @@
                     </div>
                 </div> -->
 
-    <!-- Data Wali Siswa
+    <!-- Data Orang Tua
                 <div class="mb-10">
                     <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
                         <span class="w-8 h-8 bg-accent-orange rounded-full flex items-center justify-center text-white mr-3 text-sm">3</span>
-                        Data Wali Siswa/Wali
+                        Data Orang Tua/Wali
                     </h3>
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
@@ -539,11 +539,11 @@
                             <input type="text" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="Pekerjaan ibu">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">No. HP Wali Siswa *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">No. HP Orang Tua *</label>
                             <input type="tel" required class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none" placeholder="08xx-xxxx-xxxx">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Penghasilan Wali Siswa/Bulan</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Penghasilan Orang Tua/Bulan</label>
                             <select class="form-input w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-primary focus:outline-none">
                                 <option value="">Pilih range penghasilan</option>
                                 <option value="< 1jt">< Rp 1.000.000</option>

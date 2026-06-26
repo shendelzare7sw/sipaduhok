@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -32,10 +32,10 @@
         // Fallback defaults when DB items are empty
         if (empty($alurItems)) {
             $alurItems = [
-                ['title' => 'Konsultasi Awal', 'description' => 'Diskusi dengan wali siswa mengenai kondisi dan kebutuhan anak'],
+                ['title' => 'Konsultasi Awal', 'description' => 'Diskusi dengan orang tua mengenai kondisi dan kebutuhan anak'],
                 ['title' => 'Asesmen', 'description' => 'Evaluasi menyeluruh untuk menentukan jenis terapi yang tepat'],
                 ['title' => 'Sesi Terapi', 'description' => 'Pelaksanaan terapi sesuai program yang telah dirancang'],
-                ['title' => 'Evaluasi & Laporan', 'description' => 'Monitoring berkala dan laporan perkembangan untuk wali siswa'],
+                ['title' => 'Evaluasi & Laporan', 'description' => 'Monitoring berkala dan laporan perkembangan untuk orang tua'],
             ];
         }
 
