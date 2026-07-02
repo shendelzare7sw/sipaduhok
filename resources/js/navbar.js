@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Add page-loaded class on window load to start animations (prevents Tailwind CDN double-blink)
+    window.addEventListener('load', function() {
+        document.body.classList.add('page-loaded');
+    });
+
     // Sticky navbar on scroll
     window.addEventListener('scroll', function() {
         const navbar = document.getElementById('navbar');

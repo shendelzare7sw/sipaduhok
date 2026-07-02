@@ -23,7 +23,7 @@
                         </h5>
                         <p class="text-muted mb-0 modal-catatan-subtitle" id="catatanKontenLabel">Konten</p>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close modal-catatan-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body modal-catatan-body">

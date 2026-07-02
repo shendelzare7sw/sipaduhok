@@ -15,6 +15,14 @@ section {
     scroll-margin-top: 100px;
 }
 
+/* Prevent double-blink animation from Tailwind CDN */
+body:not(.page-loaded) .fade-in-up,
+body:not(.page-loaded) .animate-fade-up,
+body:not(.page-loaded) .animate__animated {
+    animation-play-state: paused !important;
+    opacity: 0 !important;
+}
+
 /* Standard hero gradient overlay */
 .hero-overlay {
     background: linear-gradient(135deg, rgba(22, 95, 172, 0.9) 0%, rgba(40, 127, 59, 0.8) 100%);

@@ -21,6 +21,12 @@
     font-size: 0.8rem;
 }
 
+/* Custom positioning for close button to move it slightly up, adjust top value as needed */
+.modal-catatan-close-btn {
+    position: relative;
+    top: -5px; 
+}
+
 .modal-catatan-body {
     padding: 22px;
 }
