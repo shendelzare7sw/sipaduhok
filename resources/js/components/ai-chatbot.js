@@ -302,30 +302,20 @@ async function loadAvailableModels() {
     }
 }
 
-// ==================== Populate Model Selector ====================
+// ==================== Populate Model Selector (Logic Only) ====================
 function populateModelSelector(models) {
-    const selector = document.getElementById('modelSelector');
-    if (!selector) return;
-    
     // Prioritize backend default, fallback to Llama
     const backendDefault = models.find(m => m.default === true);
     const fallbackDefault = models.find(m => m.id === 'llama-3.3-70b-versatile');
     const forcedDefaultId = backendDefault ? backendDefault.id : (fallbackDefault ? fallbackDefault.id : models[0]?.id);
     
-    selector.innerHTML = models.map(m => {
-        let icons = '';
-        if (m.supports_vision) icons += ' [Vision]';
-        if (m.supports_pdf) icons += ' [PDF]';
-        const isDefault = m.id === forcedDefaultId;
-        return `<option value="${m.id}" ${isDefault ? 'selected' : ''}>${m.name} ${icons}</option>`;
-    }).join('');
     chatbotState.selectedModel = forcedDefaultId;
+    
     const savedModel = localStorage.getItem('selectedChatModel');
     if (savedModel && models.some(m => m.id === savedModel)) {
         const savedModelInfo = models.find(m => m.id === savedModel);
         if (savedModelInfo && savedModelInfo.provider === 'groq') {
             chatbotState.selectedModel = savedModel;
-            selector.value = savedModel;
         } else {
             localStorage.removeItem('selectedChatModel');
         }

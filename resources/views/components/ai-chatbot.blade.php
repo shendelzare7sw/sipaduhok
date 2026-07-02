@@ -55,10 +55,6 @@
                 <span class="header-title">Asisten SIPADUHOK</span>
             </div>
             <div class="header-right">
-                {{-- Model Switcher --}}
-                <select id="modelSelector" class="model-selector form-select form-select-sm">
-                    <option value="llama-3.3-70b-versatile">Memuat...</option>
-                </select>
                 <button class="btn btn-sm btn-icon-header ms-2" data-chatbot-action="close" title="Close">
                     <i class="fas fa-times"></i>
                 </button>
