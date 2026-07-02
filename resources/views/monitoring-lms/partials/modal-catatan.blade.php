@@ -16,7 +16,7 @@
                 <input type="hidden" name="konten_type" id="catatanKontenType" value="">
                 <input type="hidden" name="konten_id" id="catatanKontenId" value="">
 
-                <div class="modal-header modal-catatan-header">
+                <div class="modal-header modal-catatan-header align-items-start">
                     <div>
                         <h5 class="modal-title fw-bold mb-1 modal-catatan-title" id="modalKirimCatatanLabel">
                             <i class="fas fa-comment-dots me-2 modal-catatan-title-icon"></i>Kirim Catatan untuk Guru
