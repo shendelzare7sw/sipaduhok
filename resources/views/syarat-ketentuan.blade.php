@@ -11,7 +11,7 @@
     @vite(['resources/css/landing.css', 'resources/css/navbar.css', 'resources/css/pages/syarat-ketentuan.css'])
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 overflow-x-hidden">
 
     <x-navbar></x-navbar>
 
@@ -322,5 +322,6 @@
 
     <x-footer></x-footer>
 
+    @vite(['resources/js/navbar.js'])
 </body>
 </html>
