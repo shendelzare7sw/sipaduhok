@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -76,7 +76,7 @@
     @endphp
     <x-navbar></x-navbar>
 
-    <section class="relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat"
+    <section class="relative min-h-screen flex items-center bg-cover bg-center bg-no-repeat overflow-hidden"
         style="background-image: linear-gradient(135deg, rgba(22,95,172,0.75) 45%, rgba(40,127,59,0.75) 20%), url('{{ asset($heroContent['background_image'] ?? 'img/bg-ppdb.jpg') }}');">
 
         <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,<svg width=" 60"

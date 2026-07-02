@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -41,7 +41,7 @@
     <x-navbar></x-navbar>
 
     <!-- ==================== HERO SECTION ==================== -->
-    <section class="relative min-h-screen flex items-center" style="
+    <section class="relative min-h-screen flex items-center overflow-hidden" style="
             background-image: url('{{ asset($heroContent['background_image'] ?? 'img/bg-fasilitas.jpg') }}');
             background-size: cover;
             background-position: center;

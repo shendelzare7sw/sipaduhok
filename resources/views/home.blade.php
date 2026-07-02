@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -53,7 +53,7 @@
         $ctaSection = $page->getSection('cta_section');
         $ctaContent = $ctaSection->content ?? [];
     @endphp
-    <section class="relative min-h-screen flex items-center" style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
+    <section class="relative min-h-screen flex items-center overflow-hidden" style="background-image: url('{{ asset($heroContent['background_image'] ?? 'img/hero-bg.jpg') }}'); background-size: cover; background-position: center;">
         <div class="hero-overlay absolute inset-0"></div>
 
         <!-- Decorative Elements -->
