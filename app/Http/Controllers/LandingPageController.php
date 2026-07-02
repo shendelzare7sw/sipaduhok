@@ -110,5 +110,13 @@ class LandingPageController extends Controller
         return view('kontak', compact('page'));
     }
 
-    // Add other methods as we implement them
+    public function kebijakanPrivasi()
+    {
+        return view('kebijakan-privasi');
+    }
+
+    public function syaratKetentuan()
+    {
+        return view('syarat-ketentuan');
+    }
 }

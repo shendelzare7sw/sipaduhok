@@ -184,4 +184,19 @@ class PromotionValidationController extends Controller
             'filters' => $request->all()
         ]);
     }
+
+    public function bulkDeleteHistory(Request $request): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'Tidak ada riwayat pengajuan yang dipilih.');
+        }
+
+        $count = DB::table('izin_naik_kelas_khusus')
+            ->whereIn('id', $ids)
+            ->where('status', '!=', 'MENUNGGU')
+            ->delete();
+
+        return back()->with('success', $count . ' riwayat pengajuan berhasil dihapus permanen.');
+    }
 }

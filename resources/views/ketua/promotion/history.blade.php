@@ -60,13 +60,22 @@
                         </div>
                     </form>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tanggal Pengajuan</th>
-                                    <th>Siswa</th>
-                                    <th>Kelas</th>
+                    <form id="bulkDeleteForm" method="POST" action="{{ route('ketua.promotion.approval.history.bulk-delete') }}">
+                        @csrf
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>
+                                <i class="bx bx-trash me-1"></i> Hapus Terpilih
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;"><input class="form-check-input" type="checkbox" id="checkAll"></th>
+                                        <th>Tanggal Pengajuan</th>
+                                        <th>Siswa</th>
+                                        <th>Kelas</th>
                                     <th>Status</th>
                                     <th>Diajukan Oleh</th>
                                     <th>Disetujui/Ditolak Oleh</th>
@@ -77,6 +86,9 @@
                             <tbody>
                                 @forelse($history as $item)
                                 <tr>
+                                    <td class="text-center">
+                                        <input class="form-check-input history-checkbox" type="checkbox" name="ids[]" value="{{ $item->id }}">
+                                    </td>
                                     <td>{{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->locale('id')->translatedFormat('d F Y') }}</td>
                                     <td class="fw-bold">{{ $item->nama_siswa }}</td>
                                     <td>{{ $item->nama_kelas }}</td>
@@ -102,7 +114,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center py-4 text-muted">
+                                    <td colspan="9" class="text-center py-4 text-muted">
                                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                         Belum ada riwayat persetujuan.
                                     </td>
@@ -111,9 +123,57 @@
                             </tbody>
                         </table>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkAll = document.getElementById('checkAll');
+        const checkboxes = document.querySelectorAll('.history-checkbox');
+        const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+        function updateButtonState() {
+            const checkedCount = document.querySelectorAll('.history-checkbox:checked').length;
+            if(btnBulkDelete) {
+                btnBulkDelete.disabled = checkedCount === 0;
+            }
+            if (checkAll) {
+                checkAll.checked = checkedCount === checkboxes.length && checkboxes.length > 0;
+            }
+        }
+
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateButtonState();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateButtonState);
+        });
+    });
+
+    function confirmBulkDelete() {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Riwayat yang dipilih akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#8592a3',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('bulkDeleteForm').submit();
+            }
+        });
+    }
+</script>
 @endsection

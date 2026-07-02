@@ -67,11 +67,27 @@
                         </div>
                     </form>
 
-                    <div class="table-responsive text-nowrap">
-                        <table class="table table-hover table-card-mobile align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Siswa</th>
+                    <form id="bulkDeleteForm" method="POST" action="{{ route('bendahara.promotion.validation.history.bulk-delete') }}">
+                        @csrf
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>
+                                <i class="bx bx-trash me-1"></i> Hapus Terpilih
+                            </button>
+                            
+                            <div class="form-check d-md-none">
+                                <input class="form-check-input" type="checkbox" id="checkAllMobile">
+                                <label class="form-check-label" for="checkAllMobile">
+                                    Pilih Semua
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive text-nowrap">
+                            <table class="table table-hover table-card-mobile align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 40px;" class="mobile-hide"><input class="form-check-input" type="checkbox" id="checkAll"></th>
+                                        <th>Siswa</th>
                                     <th>Tanggal Pengajuan</th>
                                     <th>Kelas</th>
                                     <th>Status</th>
@@ -84,9 +100,17 @@
                             <tbody>
                                 @forelse($history as $item)
                                 <tr>
+                                    <td class="mobile-hide text-center">
+                                        <input class="form-check-input history-checkbox" type="checkbox" name="ids[]" value="{{ $item->id }}">
+                                    </td>
                                     <td class="mobile-card-head">
                                         <div class="d-flex justify-content-between align-items-center gap-2 history-head-row">
-                                            <span class="text-wrap text-break lh-sm fw-semibold history-student-name">{{ $item->nama_siswa }}</span>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="form-check form-check-inline m-0 mobile-only-cell">
+                                                    <input class="form-check-input history-checkbox" type="checkbox" name="ids[]" value="{{ $item->id }}" style="transform: scale(1.2);">
+                                                </div>
+                                                <span class="text-wrap text-break lh-sm fw-semibold history-student-name">{{ $item->nama_siswa }}</span>
+                                            </div>
                                             <span class="mobile-only-cell flex-shrink-0 ms-auto">
                                                 @if($item->status == 'DISETUJUI')
                                                     <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
@@ -136,7 +160,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center py-4 text-muted">
+                                    <td colspan="9" class="text-center py-4 text-muted">
                                         <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                         Belum ada riwayat pengajuan.
                                     </td>
@@ -145,9 +169,72 @@
                             </tbody>
                         </table>
                     </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkAll = document.getElementById('checkAll');
+        const checkAllMobile = document.getElementById('checkAllMobile');
+        const checkboxes = document.querySelectorAll('.history-checkbox');
+        const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+        function updateButtonState() {
+            const checkedCount = document.querySelectorAll('.history-checkbox:checked').length;
+            if(btnBulkDelete) {
+                btnBulkDelete.disabled = checkedCount === 0;
+            }
+            const allChecked = checkedCount === checkboxes.length && checkboxes.length > 0;
+            if (checkAll) {
+                checkAll.checked = allChecked;
+            }
+            if (checkAllMobile) {
+                checkAllMobile.checked = allChecked;
+            }
+        }
+
+        function toggleAll(checked) {
+            checkboxes.forEach(cb => cb.checked = checked);
+            updateButtonState();
+        }
+
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                toggleAll(this.checked);
+            });
+        }
+        
+        if (checkAllMobile) {
+            checkAllMobile.addEventListener('change', function() {
+                toggleAll(this.checked);
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', updateButtonState);
+        });
+    });
+
+    function confirmBulkDelete() {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Riwayat yang dipilih akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#8592a3',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('bulkDeleteForm').submit();
+            }
+        });
+    }
+</script>
 @endsection

@@ -1,0 +1,14 @@
+/* Syarat & Ketentuan Page Styles */
+
+.hero-overlay {
+    background: linear-gradient(135deg, rgba(22, 95, 172, 0.85), rgba(40, 127, 59, 0.75));
+}
+
+.legal-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.legal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}

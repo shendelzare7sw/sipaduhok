@@ -96,4 +96,4 @@ Disallow: /admin-recovery
 Allow: /
 
 # Sitemap Link
-Sitemap: https://sipaduhok.my.id/sitemap.xml
+Sitemap: https://app.sipaduhok.id/sitemap.xml

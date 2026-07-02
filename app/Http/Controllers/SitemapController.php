@@ -28,7 +28,10 @@ class SitemapController extends Controller
             'ppdb',
             'galeri',
             'kontak',
-            'berita'
+            'berita',
+            'legalitas',
+            'kebijakan-privasi',
+            'syarat-ketentuan',
         ];
 
         // Use app's last deployment/modification date instead of now()
@@ -46,17 +49,16 @@ class SitemapController extends Controller
             ];
         }
 
-        // 2. Dynamic News Pages (if any public single news view exists, else just the index which is added above)
-        // If there's a route like /berita/{slug}, we would add them here:
-        // $beritas = Berita::where('status', 'published')->get();
-        // foreach ($beritas as $berita) {
-        //     $urls[] = [
-        //         'loc' => url('/berita/' . $berita->slug),
-        //         'lastmod' => $berita->updated_at->toAtomString(),
-        //         'changefreq' => 'monthly',
-        //         'priority' => '0.6',
-        //     ];
-        // }
+        // 2. Dynamic News Pages
+        $beritas = Berita::where('status', 'published')->get();
+        foreach ($beritas as $berita) {
+            $urls[] = [
+                'loc' => url('/berita/' . $berita->slug),
+                'lastmod' => $berita->updated_at->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ];
+        }
 
         $content = view('sitemap', compact('urls'))->render();
 

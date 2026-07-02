@@ -122,9 +122,9 @@
                     &copy; {{ date('Y') }} {{ $bottom['copyright'] ?? 'PKBM House Of Knowledge. All rights reserved.' }}
                 </p>
                 <div class="flex space-x-6">
-                    <a href="{{ $bottom['privacy_url'] ?? '#' }}" class="text-gray-400 hover:text-blue-400 text-sm transition duration-300">{{ $bottom['privacy_label'] ?? 'Kebijakan Privasi' }}</a>
-                    <a href="{{ $bottom['terms_url'] ?? '#' }}" class="text-gray-400 hover:text-blue-400 text-sm transition duration-300">{{ $bottom['terms_label'] ?? 'Syarat & Ketentuan' }}</a>
-                    <a href="{{ $bottom['sitemap_url'] ?? '#' }}" class="text-gray-400 hover:text-blue-400 text-sm transition duration-300">{{ $bottom['sitemap_label'] ?? 'Sitemap' }}</a>
+                    <a href="{{ (!empty($bottom['privacy_url']) && $bottom['privacy_url'] !== '#') ? $bottom['privacy_url'] : route('kebijakan-privasi') }}" class="text-gray-400 hover:text-blue-400 text-sm transition duration-300">{{ $bottom['privacy_label'] ?? 'Kebijakan Privasi' }}</a>
+                    <a href="{{ (!empty($bottom['terms_url']) && $bottom['terms_url'] !== '#') ? $bottom['terms_url'] : route('syarat-ketentuan') }}" class="text-gray-400 hover:text-blue-400 text-sm transition duration-300">{{ $bottom['terms_label'] ?? 'Syarat & Ketentuan' }}</a>
+                    <a href="{{ (!empty($bottom['sitemap_url']) && $bottom['sitemap_url'] !== '#') ? $bottom['sitemap_url'] : route('sitemap') }}" class="text-gray-400 hover:text-blue-400 text-sm transition duration-300">{{ $bottom['sitemap_label'] ?? 'Sitemap' }}</a>
                 </div>
             </div>
         </div>

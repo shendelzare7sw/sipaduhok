@@ -520,6 +520,8 @@ export default defineConfig({
                 'resources/css/pages/legalitas.css',
                 'resources/css/pages/struktur-organisasi.css',
                 'resources/css/pages/profil-guru.css',
+                'resources/css/pages/kebijakan-privasi.css',
+                'resources/css/pages/syarat-ketentuan.css',
 
                 // Page-specific JS
                 'resources/js/pages/home.js',

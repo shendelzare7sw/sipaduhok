@@ -120,6 +120,10 @@ Route::get('/kontak', [\App\Http\Controllers\LandingPageController::class, 'kont
 // Berita Public Page
 Route::get('/berita', [BeritaController::class, 'index'])->name('berita');
 
+// Legal Pages
+Route::get('/kebijakan-privasi', [\App\Http\Controllers\LandingPageController::class, 'kebijakanPrivasi'])->name('kebijakan-privasi');
+Route::get('/syarat-ketentuan', [\App\Http\Controllers\LandingPageController::class, 'syaratKetentuan'])->name('syarat-ketentuan');
+
 /*
 |--------------------------------------------------------------------------
 | AUTHENTICATION ROUTES
@@ -546,6 +550,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'store'])->name('validation.store');
                 Route::post('/validation/bulk', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'bulkStore'])->name('validation.bulk-store');
                 Route::get('/validation/history', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'history'])->name('validation.history');
+                Route::post('/validation/history/bulk-delete', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'bulkDeleteHistory'])->name('validation.history.bulk-delete');
             });
         });
 
@@ -739,6 +744,7 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/approval/bulk', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'bulkUpdate'])->name('approval.bulk-update');
             Route::put('/approval/{id}', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'update'])->name('approval.update');
             Route::get('/approval/history', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'history'])->name('approval.history');
+            Route::post('/approval/history/bulk-delete', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'bulkDeleteHistory'])->name('approval.history.bulk-delete');
         });
 
         // Validasi Rapor (NEW - 3rd level validation)
@@ -1089,6 +1095,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'store'])->name('validation.store');
             Route::post('/validation/bulk', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'bulkStore'])->name('validation.bulk-store');
             Route::get('/validation/history', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'history'])->name('validation.history');
+            Route::post('/validation/history/bulk-delete', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'bulkDeleteHistory'])->name('validation.history.bulk-delete');
         });
     });
 
