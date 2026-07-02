@@ -35,4 +35,3 @@
 .fade-in-up { animation: fadeInUp 0.6s ease-out; }
 
 .search-box { transition: all 0.3s ease; }
-.search-box:focus-within { box-shadow: 0 0 0 3px rgba(22, 95, 172, 0.2); }
