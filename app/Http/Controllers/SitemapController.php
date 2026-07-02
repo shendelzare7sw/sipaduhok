@@ -54,7 +54,7 @@ class SitemapController extends Controller
         foreach ($beritas as $berita) {
             $urls[] = [
                 'loc' => url('/berita/' . $berita->slug),
-                'lastmod' => $berita->updated_at->toAtomString(),
+                'lastmod' => $berita->updated_at ? $berita->updated_at->toAtomString() : ($berita->created_at ? $berita->created_at->toAtomString() : now()->toAtomString()),
                 'changefreq' => 'monthly',
                 'priority' => '0.6',
             ];
