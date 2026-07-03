@@ -274,11 +274,11 @@
     position: relative;
 }
 
-.disp-modal-header .btn-close {
+.modal .modal-content .disp-modal-header .btn-close {
     margin: 0 !important;
     position: absolute !important;
-    right: 0px !important;
-    top: 0px !important;
+    right: 15px !important;
+    top: 15px !important;
     z-index: 10 !important;
 }
 
