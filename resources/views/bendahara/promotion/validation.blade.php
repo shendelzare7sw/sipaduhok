@@ -163,7 +163,7 @@
                                                         @csrf
                                                         <div class="modal-header border-0 disp-modal-header">
                                                             <h5 class="modal-title text-white"><i class="bx bx-send me-2"></i>Ajukan Izin Khusus</h5>
-                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            <button type="button" class="btn-close btn-close-white disp-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <input type="hidden" name="siswa_id" value="{{ $candidate['siswa']->id }}">
@@ -214,7 +214,7 @@
                 @csrf
                 <div class="modal-header border-0 disp-modal-header">
                     <h5 class="modal-title text-white"><i class="bx bx-send me-2"></i>Ajukan Dispensasi Terpilih</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white disp-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">

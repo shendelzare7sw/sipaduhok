@@ -274,12 +274,14 @@
     position: relative;
 }
 
-.modal .modal-content .disp-modal-header .btn-close.btn-close-white {
-    margin: 0 !important;
+.modal .modal-content .disp-modal-header .btn-close.disp-close-btn {
     position: absolute !important;
-    right: 12px !important;
-    top: 6px !important;
-    z-index: 10 !important;
+    top: -15px !important;
+    right: -15px !important;
+    margin: 0 !important;
+    z-index: 1055 !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
+    background-color: #fff !important;
 }
 
 
@@ -305,7 +307,7 @@
         align-items: stretch;
     }
 
-    .disp-card-header > div,
+    .disp-card-header>div,
     .disp-card-header .btn {
         width: 100%;
     }
@@ -314,7 +316,7 @@
         align-items: stretch;
     }
 
-    .disp-toolbar > div {
+    .disp-toolbar>div {
         width: 100%;
     }
 
