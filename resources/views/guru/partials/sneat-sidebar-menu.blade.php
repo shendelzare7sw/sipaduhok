@@ -10,7 +10,7 @@
     $currentRoute = Route::currentRouteName();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'guru.dashboard' ? 'active' : '' }}">
     <a href="{{ route('guru.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -18,9 +18,9 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC38: Melihat Informasi Akademik             -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC38: Melihat Informasi Akademik             --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Akademik</span>
 </li>
@@ -44,14 +44,14 @@
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC27: Kelola Materi Pembelajaran (Arsip)     -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC27: Kelola Materi Pembelajaran (Arsip)     --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Pembelajaran</span>
 </li>
 
-<!-- Arsip LMS (lintas TA) -->
+{{-- Arsip LMS (lintas TA) --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'guru.lms.arsip') ? 'active' : '' }}">
     <a href="{{ route('guru.lms.arsip.index') }}" class="menu-link">
         <i class="menu-icon fas fa-archive"></i>
@@ -59,10 +59,10 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC37: Membaca Catatan Monitoring             -->
-<!-- ============================================ -->
-<!-- Catatan Monitoring -->
+{{-- ============================================ --}}
+{{-- UC37: Membaca Catatan Monitoring             --}}
+{{-- ============================================ --}}
+{{-- Catatan Monitoring --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'guru.lms.catatan-monitoring') ? 'active' : '' }}">
     <a href="{{ route('guru.lms.catatan-monitoring.index') }}" class="menu-link">
         <i class="menu-icon fas fa-comment-dots"></i>
@@ -82,9 +82,9 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- Kelas Saya (Akses Cepat ke LMS)              -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- Kelas Saya (Akses Cepat ke LMS)              --}}
+{{-- ============================================ --}}
 @if(isset($sidebarKelas) && count($sidebarKelas) > 0)
     <li class="menu-header small text-uppercase">
         <span class="menu-header-text">Kelas Saya (Akses Cepat)</span>
@@ -120,3 +120,4 @@
         </li>
     @endforeach
 @endif
+

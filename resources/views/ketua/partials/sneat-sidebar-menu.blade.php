@@ -10,7 +10,7 @@
     $currentRoute = Route::currentRouteName();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'ketua.dashboard' ? 'active' : '' }}">
     <a href="{{ route('ketua.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -18,16 +18,16 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC15: Memproses Dispensasi Keuangan          -->
-<!-- UC16: Memproses Dispensasi Kenaikan Kelas    -->
-<!-- UC20: Validasi Rapor Tingkat Akhir           -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC15: Memproses Dispensasi Keuangan          --}}
+{{-- UC16: Memproses Dispensasi Kenaikan Kelas    --}}
+{{-- UC20: Validasi Rapor Tingkat Akhir           --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Persetujuan & Validasi</span>
 </li>
 
-<!-- UC16: Memproses Dispensasi Kenaikan Kelas -->
+{{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.promotion.approval') ? 'active' : '' }}">
     <a href="{{ route('ketua.promotion.approval.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-double"></i>
@@ -35,7 +35,7 @@
     </a>
 </li>
 
-<!-- UC21: Validasi Rapor Tingkat Akhir -->
+{{-- UC21: Validasi Rapor Tingkat Akhir --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.validasi-rapor') ? 'active' : '' }}">
     <a href="{{ route('ketua.validasi-rapor.index') }}" class="menu-link">
         <i class="menu-icon fas fa-certificate"></i>
@@ -43,7 +43,7 @@
     </a>
 </li>
 
-<!-- UC15: Memproses Dispensasi Keuangan -->
+{{-- UC15: Memproses Dispensasi Keuangan --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.dispensasi') ? 'active' : '' }}">
     <a href="{{ route('ketua.dispensasi.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-heart"></i>
@@ -55,14 +55,14 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC35: Monitoring Sistem Terpadu              -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC35: Monitoring Sistem Terpadu              --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring</span>
 </li>
 
-<!-- UC35: Monitoring Sistem Terpadu -->
+{{-- UC35: Monitoring Sistem Terpadu --}}
 <li class="menu-item {{ $currentRoute == 'ketua.monitoring.pengguna' || $currentRoute == 'ketua.monitoring.wali-kelas' || $currentRoute == 'ketua.monitoring.guru-pengajar' || $currentRoute == 'ketua.monitoring.siswa' || Str::startsWith($currentRoute, 'ketua.monitoring.lms') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-chart-bar"></i>
@@ -97,9 +97,9 @@
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC36: Kelola Laporan & Catatan               -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC36: Kelola Laporan & Catatan               --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Laporan & Komunikasi</span>
 </li>
@@ -122,3 +122,4 @@
         </li>
     </ul>
 </li>
+

@@ -1,0 +1,50 @@
+@startuml activity-eksekusi-kenaikan-kelas
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin / Waka)|
+start
+:Mengakses Menu\nEksekusi Kenaikan Kelas;
+
+|Sistem|
+:Memeriksa Kesiapan Data Dasar\n(Tahun Ajaran Berikutnya & Kelas Baru);
+
+if (Sistem Siap?) then (Belum Siap)
+    :Menampilkan Pesan Peringatan:\n"Tahun Ajaran / Kelas Baru Belum Dibuat!";
+    |Pengguna (Admin / Waka)|
+    :Tombol Eksekusi Dikunci (Disabled);
+    :Harus Membuat Data Master\nTerlebih Dahulu;
+    stop
+else (Sudah Siap)
+    |Sistem|
+    :Melakukan Simulasi Kenaikan Kelas;
+    :Mengevaluasi Syarat Kelulusan per Siswa:\n1. Akademik Tuntas\n2. Lunas Keuangan / Punya Dispensasi Ketua;
+    :Menampilkan Daftar Siswa beserta\nStatus Simulasi Kelayakan (Eligible);
+endif
+
+|Pengguna (Admin / Waka)|
+:Me-review Daftar Simulasi;
+:Memilih Mode Eksekusi\n(Decision);
+
+if (Mode Eksekusi?) then (Pilih Siswa Manual)
+    :Menandai Checkbox\npada Siswa tertentu;
+    :Klik "Naikkan Kelas\nSiswa Terpilih";
+    |Sistem|
+    :Memindahkan Kelas\nhanya untuk Siswa yang ditandai;
+else (Eksekusi Massal / Bulk)
+    |Pengguna (Admin / Waka)|
+    :Klik "Eksekusi Massal\nSiswa yang Memenuhi Syarat";
+    |Sistem|
+    :Otomatis Memindahkan Semua Siswa\nyang Berstatus Eligible;
+endif
+
+|Sistem|
+:Mencatat Riwayat (History) Kenaikan;
+:Mengupdate Data Kelas Siswa\n(Berpindah ke Kelas Baru TA Berikutnya);
+:Menampilkan Pesan Sukses;
+
+|Pengguna (Admin / Waka)|
+:Selesai Melakukan\nEksekusi Kenaikan Kelas;
+stop
+@enduml

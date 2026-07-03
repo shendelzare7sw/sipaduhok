@@ -11,7 +11,7 @@
     $children = $user->children()->with(['kelas', 'cabang'])->get();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'wali-siswa.dashboard' ? 'active' : '' }}">
     <a href="{{ route('wali-siswa.dashboard') }}" class="menu-link">
         <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -19,12 +19,12 @@
     </a>
 </li>
 
-<!-- Menu Header - Monitoring Anak -->
+{{-- Menu Header - Monitoring Anak --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring Anak</span>
 </li>
 
-<!-- Daftar Anak dengan Submenu -->
+{{-- Daftar Anak dengan Submenu --}}
 @if($children->isNotEmpty())
     @foreach($children as $child)
         @php
@@ -69,3 +69,4 @@
         </a>
     </li>
 @endif
+

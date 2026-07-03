@@ -10,7 +10,7 @@
     $currentRoute = Route::currentRouteName();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'waka.dashboard' ? 'active' : '' }}">
     <a href="{{ route('waka.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -18,9 +18,9 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC04: Kelola Tahun Ajaran                    -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC04: Kelola Tahun Ajaran                    --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Akademik</span>
 </li>
@@ -32,10 +32,10 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC06: Kelola Data Kelas & Penugasan          -->
-<!-- (Kelas, Wali Kelas, Guru Pengajar, Siswa)    -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC06: Kelola Data Kelas & Penugasan          --}}
+{{-- (Kelas, Wali Kelas, Guru Pengajar, Siswa)    --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Data Akademik</span>
 </li>
@@ -69,7 +69,7 @@
     </ul>
 </li>
 
-<!-- UC07: Kelola Mata Pelajaran -->
+{{-- UC07: Kelola Mata Pelajaran --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.mata-pelajaran') ? 'active' : '' }}">
     <a href="{{ route('waka.mata-pelajaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-book"></i>
@@ -77,7 +77,7 @@
     </a>
 </li>
 
-<!-- UC08: Kelola Jadwal Pelajaran -->
+{{-- UC08: Kelola Jadwal Pelajaran --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.jadwal-pelajaran') ? 'active' : '' }}">
     <a href="{{ route('waka.jadwal-pelajaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-calendar-week"></i>
@@ -85,11 +85,11 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC17: Kelola Pengaturan Kenaikan             -->
-<!-- (KKM + Pengaturan Kenaikan)                  -->
-<!-- UC18: Proses Eksekusi Kenaikan Kelas         -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC17: Kelola Pengaturan Kenaikan             --}}
+{{-- (KKM + Pengaturan Kenaikan)                  --}}
+{{-- UC18: Proses Eksekusi Kenaikan Kelas         --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
@@ -113,7 +113,7 @@
     </ul>
 </li>
 
-<!-- UC18: Proses Eksekusi Kenaikan Kelas -->
+{{-- UC18: Proses Eksekusi Kenaikan Kelas --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.report') ? 'active' : '' }}">
     <a href="{{ route('waka.promotion.report') }}" class="menu-link">
         <i class="menu-icon fas fa-tasks"></i>
@@ -121,15 +121,15 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC35: Monitoring Sistem Terpadu              -->
-<!-- UC36: Kelola Laporan & Catatan               -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC35: Monitoring Sistem Terpadu              --}}
+{{-- UC36: Kelola Laporan & Catatan               --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring & Analitik</span>
 </li>
 
-<!-- UC35: Monitoring Sistem Terpadu -->
+{{-- UC35: Monitoring Sistem Terpadu --}}
 <li class="menu-item {{ $currentRoute == 'waka.monitoring.wali-kelas' || $currentRoute == 'waka.monitoring.guru-pengajar' || $currentRoute == 'waka.monitoring.siswa' || Str::startsWith($currentRoute, 'waka.monitoring.lms') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-chart-bar"></i>
@@ -159,7 +159,7 @@
     </ul>
 </li>
 
-<!-- UC36: Kelola Laporan & Catatan (Waka hanya punya Catatan) -->
+{{-- UC36: Kelola Laporan & Catatan (Waka hanya punya Catatan) --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Komunikasi</span>
 </li>
@@ -170,3 +170,4 @@
         <div>Catatan</div>
     </a>
 </li>
+

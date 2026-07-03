@@ -26,7 +26,7 @@
 @endphp
 
 @if($selectedKelas && $hasMultipleKelas)
-<!-- Current Class Indicator -->
+{{-- Current Class Indicator --}}
 <li class="menu-item">
     <div class="wali-active-class-card">
         <div class="wali-active-class-label">
@@ -46,7 +46,7 @@
 </li>
 @endif
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'wali.dashboard' ? 'active' : '' }}">
     <a href="{{ route('wali.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -55,7 +55,7 @@
 </li>
 
 @if($hasMultipleKelas)
-<!-- Pilih Kelas -->
+{{-- Pilih Kelas --}}
 <li class="menu-item {{ $currentRoute == 'wali.pilih-kelas' ? 'active' : '' }}">
     <a href="{{ route('wali.pilih-kelas') }}" class="menu-link">
         <i class="menu-icon fas fa-exchange-alt"></i>
@@ -64,9 +64,9 @@
 </li>
 @endif
 
-<!-- ============================================ -->
-<!-- UC38: Melihat Informasi Akademik             -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC38: Melihat Informasi Akademik             --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Akademik</span>
 </li>
@@ -78,10 +78,10 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC19: Kelola Presensi Siswa                  -->
-<!-- (Input Harian, Validasi Izin, Rekap, Edit)   -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC19: Kelola Presensi Siswa                  --}}
+{{-- (Input Harian, Validasi Izin, Rekap, Edit)   --}}
+{{-- ============================================ --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.presensi') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-clipboard-check"></i>
@@ -115,11 +115,11 @@
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC20: Kelola Rapor Siswa                     -->
-<!-- (Nilai, Rapor, Arsip dalam satu dropdown)    -->
-<!-- UC22: Mengelola Permintaan Unduh Rapor       -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC20: Kelola Rapor Siswa                     --}}
+{{-- (Nilai, Rapor, Arsip dalam satu dropdown)    --}}
+{{-- UC22: Mengelola Permintaan Unduh Rapor       --}}
+{{-- ============================================ --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'wali.nilai') || Str::startsWith($currentRoute, 'wali.rapor') || Str::startsWith($currentRoute, 'wali.arsip') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-file-alt"></i>
@@ -157,9 +157,9 @@
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC24: Melihat Prediksi Kenaikan Kelas        -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC24: Melihat Prediksi Kenaikan Kelas        --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
@@ -171,9 +171,9 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC14: Validasi Akses Ujian dan Rapor          -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC14: Validasi Akses Ujian dan Rapor          --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Validasi</span>
 </li>
@@ -184,3 +184,4 @@
         <div>Validasi Akses</div>
     </a>
 </li>
+

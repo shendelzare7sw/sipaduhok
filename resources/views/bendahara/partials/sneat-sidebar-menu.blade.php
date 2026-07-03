@@ -10,7 +10,7 @@
     $currentRoute = Route::currentRouteName();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'bendahara.dashboard' ? 'active' : '' }}">
     <a href="{{ route('bendahara.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -18,10 +18,10 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC11: Kelola Tagihan & Pembayaran            -->
-<!-- (Tagihan, Tunggakan, Pembayaran, Config)     -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC11: Kelola Tagihan & Pembayaran            --}}
+{{-- (Tagihan, Tunggakan, Pembayaran, Config)     --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Keuangan</span>
 </li>
@@ -55,15 +55,15 @@
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC14: Validasi Akses Ujian dan Rapor         -->
-<!-- UC16: Memproses Dispensasi Kenaikan Kelas    -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC14: Validasi Akses Ujian dan Rapor         --}}
+{{-- UC16: Memproses Dispensasi Kenaikan Kelas    --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Validasi & Dispensasi</span>
 </li>
 
-<!-- UC14: Validasi Akses Ujian dan Rapor -->
+{{-- UC14: Validasi Akses Ujian dan Rapor --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.validasi-akses') ? 'active' : '' }}">
     <a href="{{ route('bendahara.validasi-akses.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-circle"></i>
@@ -71,7 +71,7 @@
     </a>
 </li>
 
-<!-- UC16: Memproses Dispensasi Kenaikan Kelas -->
+{{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.promotion.validation') ? 'active' : '' }}">
     <a href="{{ route('bendahara.promotion.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
@@ -79,10 +79,10 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC12: Lihat Laporan Keuangan                 -->
-<!-- (Laporan Pembayaran, Rekap, Belum Lunas)     -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC12: Lihat Laporan Keuangan                 --}}
+{{-- (Laporan Pembayaran, Rekap, Belum Lunas)     --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Laporan</span>
 </li>
@@ -110,3 +110,4 @@
         </li>
     </ul>
 </li>
+

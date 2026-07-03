@@ -10,7 +10,7 @@
     $currentRoute = Route::currentRouteName();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'sekretaris.dashboard' ? 'active' : '' }}">
     <a href="{{ route('sekretaris.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -18,10 +18,10 @@
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC10: Kelola Konten Publikasi                -->
-<!-- (Kalender, Pengumuman, Flyer, Berita)        -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC10: Kelola Konten Publikasi                --}}
+{{-- (Kalender, Pengumuman, Flyer, Berita)        --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Konten</span>
 </li>
@@ -54,3 +54,4 @@
         </li>
     </ul>
 </li>
+

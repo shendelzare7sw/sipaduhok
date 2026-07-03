@@ -10,7 +10,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     $currentRoute = Route::currentRouteName();
 @endphp
 
-<!-- Dashboard -->
+{{-- Dashboard --}}
 <li class="menu-item {{ $currentRoute == 'admin.dashboard' ? 'active' : '' }}">
     <a href="{{ route('admin.dashboard') }}" class="menu-link">
         <i class="menu-icon fas fa-home"></i>
@@ -18,9 +18,9 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC09: Kelola Landing Page                    -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC09: Kelola Landing Page                    --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Konten</span>
 </li>
@@ -32,10 +32,10 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC10: Kelola Konten Publikasi                -->
-<!-- (Kalender, Pengumuman, Flyer, Berita)        -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC10: Kelola Konten Publikasi                --}}
+{{-- (Kalender, Pengumuman, Flyer, Berita)        --}}
+{{-- ============================================ --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.akademik.kalender') || Str::startsWith($currentRoute, 'admin.akademik.pengumuman') || Str::startsWith($currentRoute, 'admin.akademik.flyer') || Str::startsWith($currentRoute, 'admin.akademik.berita') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-bullhorn"></i>
@@ -65,10 +65,10 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC01: Kelola Data Pengguna                   -->
-<!-- (Tenaga Pendidik, Siswa, Wali Siswa)         -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC01: Kelola Data Pengguna                   --}}
+{{-- (Tenaga Pendidik, Siswa, Wali Siswa)         --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Manajemen Pengguna</span>
 </li>
@@ -97,7 +97,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- UC02: Kelola Tiket Pemulihan Akun -->
+{{-- UC02: Kelola Tiket Pemulihan Akun --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.recovery-tickets') ? 'active' : '' }}">
     <a href="{{ route('admin.recovery-tickets.index') }}" class="menu-link">
         <i class="menu-icon fas fa-life-ring"></i>
@@ -111,10 +111,10 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC03: Kelola Pengaturan Sistem               -->
-<!-- (Pengaturan LMS + Pengaturan AI)             -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC03: Kelola Pengaturan Sistem               --}}
+{{-- (Pengaturan LMS + Pengaturan AI)             --}}
+{{-- ============================================ --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.lms-settings') || Str::startsWith($currentRoute, 'admin.ai-settings') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-cogs"></i>
@@ -134,15 +134,15 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- ============================================ -->
-<!-- UC04: Kelola Tahun Ajaran                    -->
-<!-- UC05: Kelola Data Cabang                     -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC04: Kelola Tahun Ajaran                    --}}
+{{-- UC05: Kelola Data Cabang                     --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Data Master</span>
 </li>
 
-<!-- UC04: Kelola Tahun Ajaran -->
+{{-- UC04: Kelola Tahun Ajaran --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.tahun-ajaran') ? 'active' : '' }}">
     <a href="{{ route('admin.tahun-ajaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-calendar-alt"></i>
@@ -150,7 +150,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- UC05: Kelola Data Cabang -->
+{{-- UC05: Kelola Data Cabang --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.cabang') ? 'active' : '' }}">
     <a href="{{ route('admin.cabang.index') }}" class="menu-link">
         <i class="menu-icon fas fa-building"></i>
@@ -158,10 +158,10 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC06: Kelola Data Kelas & Penugasan          -->
-<!-- (Kelas, Wali Kelas, Guru Pengajar, Siswa)    -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC06: Kelola Data Kelas & Penugasan          --}}
+{{-- (Kelas, Wali Kelas, Guru Pengajar, Siswa)    --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Data Akademik</span>
 </li>
@@ -195,7 +195,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- UC07: Kelola Mata Pelajaran -->
+{{-- UC07: Kelola Mata Pelajaran --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.mata-pelajaran') ? 'active' : '' }}">
     <a href="{{ route('admin.mata-pelajaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-book"></i>
@@ -203,7 +203,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- UC08: Kelola Jadwal Pelajaran -->
+{{-- UC08: Kelola Jadwal Pelajaran --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.jadwal-pelajaran') || Str::startsWith($currentRoute, 'admin.pengaturan-istirahat') ? 'active' : '' }}">
     <a href="{{ route('admin.jadwal-pelajaran.index') }}" class="menu-link">
         <i class="menu-icon fas fa-calendar-week"></i>
@@ -211,11 +211,11 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC11: Kelola Tagihan & Pembayaran            -->
-<!-- (Tagihan, Tunggakan, Pembayaran, Config)     -->
-<!-- UC12: Lihat Laporan Keuangan                 -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC11: Kelola Tagihan & Pembayaran            --}}
+{{-- (Tagihan, Tunggakan, Pembayaran, Config)     --}}
+{{-- UC12: Lihat Laporan Keuangan                 --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Keuangan</span>
 </li>
@@ -249,7 +249,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- UC12: Lihat Laporan Keuangan -->
+{{-- UC12: Lihat Laporan Keuangan --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.laporan') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.laporan.index') }}" class="menu-link">
         <i class="menu-icon fas fa-chart-line"></i>
@@ -257,15 +257,15 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC14: Validasi Akses Ujian dan Rapor         -->
-<!-- UC15: Memproses Dispensasi Keuangan          -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC14: Validasi Akses Ujian dan Rapor         --}}
+{{-- UC15: Memproses Dispensasi Keuangan          --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Validasi & Dispensasi</span>
 </li>
 
-<!-- UC14: Validasi Akses Ujian dan Rapor -->
+{{-- UC14: Validasi Akses Ujian dan Rapor --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.validasi-akses') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.validasi-akses.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-circle"></i>
@@ -273,7 +273,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- UC16: Memproses Dispensasi Kenaikan Kelas -->
+{{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.promotion.validation') ? 'active' : '' }}">
     <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
@@ -281,11 +281,11 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC17: Kelola Pengaturan Kenaikan             -->
-<!-- (KKM + Pengaturan Kenaikan)                  -->
-<!-- UC18: Proses Eksekusi Kenaikan Kelas         -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC17: Kelola Pengaturan Kenaikan             --}}
+{{-- (KKM + Pengaturan Kenaikan)                  --}}
+{{-- UC18: Proses Eksekusi Kenaikan Kelas         --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
@@ -309,7 +309,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- UC18: Proses Eksekusi Kenaikan Kelas -->
+{{-- UC18: Proses Eksekusi Kenaikan Kelas --}}
 <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.report' ? 'active' : '' }}">
     <a href="{{ route('admin.akademik.promotion.report') }}" class="menu-link">
         <i class="menu-icon fas fa-tasks"></i>
@@ -317,15 +317,15 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </a>
 </li>
 
-<!-- ============================================ -->
-<!-- UC35: Monitoring Sistem Terpadu              -->
-<!-- UC36: Kelola Laporan & Catatan               -->
-<!-- ============================================ -->
+{{-- ============================================ --}}
+{{-- UC35: Monitoring Sistem Terpadu              --}}
+{{-- UC36: Kelola Laporan & Catatan               --}}
+{{-- ============================================ --}}
 <li class="menu-header small text-uppercase">
     <span class="menu-header-text">Monitoring & Analitik</span>
 </li>
 
-<!-- UC35: Monitoring Sistem Terpadu -->
+{{-- UC35: Monitoring Sistem Terpadu --}}
 <li class="menu-item {{ Str::startsWith($currentRoute, 'admin.monitoring') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-chart-bar"></i>
@@ -360,7 +360,7 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     </ul>
 </li>
 
-<!-- UC36: Kelola Laporan & Catatan -->
+{{-- UC36: Kelola Laporan & Catatan --}}
 <li class="menu-item {{ (Str::startsWith($currentRoute, 'admin.laporan') && !Str::startsWith($currentRoute, 'admin.keuangan.laporan')) || Str::startsWith($currentRoute, 'admin.catatan') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-file-alt"></i>
@@ -379,3 +379,4 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
         </li>
     </ul>
 </li>
+
