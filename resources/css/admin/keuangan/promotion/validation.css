@@ -274,6 +274,14 @@
     position: relative;
 }
 
+.modal .modal-content .disp-modal-header .btn-close {
+    margin: 0 !important;
+    position: absolute !important;
+    right: 12px !important;
+    top: 6px !important;
+    z-index: 10 !important;
+}
+
 
 
 .mobile-select-all,
