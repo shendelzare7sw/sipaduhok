@@ -267,11 +267,14 @@
 
 .disp-modal-content {
     border-radius: 12px;
+    overflow: visible !important; /* Allow the button to break out */
 }
 
 .disp-modal-header {
     background: #4361ee;
     position: relative;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 .modal .modal-content .disp-modal-header .btn-close.disp-close-btn {
