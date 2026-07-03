@@ -274,7 +274,7 @@
     position: relative;
 }
 
-.modal .modal-content .disp-modal-header .btn-close {
+.modal .modal-content .disp-modal-header .btn-close.btn-close-white {
     margin: 0 !important;
     position: absolute !important;
     right: 12px !important;
