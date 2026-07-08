@@ -128,7 +128,7 @@
                                 $ext = strtolower(pathinfo($item->bukti_file, PATHINFO_EXTENSION));
                                 $isPdf = $ext === 'pdf';
                                 $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                $previewUrl = route('storage.preview', ['path' => $item->bukti_file]);
+                                $previewUrl = preview_url($item->bukti_file);
                                 $downloadUrl = asset('storage/' . $item->bukti_file);
                             @endphp
 

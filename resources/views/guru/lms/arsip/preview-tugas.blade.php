@@ -8,13 +8,8 @@
     $isPdf = $extension === 'pdf';
     $isVideo = in_array($extension, ['mp4', 'webm', 'ogg']);
 
-    if ($tugas->file_tugas) {
-        $hashKey = crc32($tugas->file_tugas . now()->timestamp);
-        \Illuminate\Support\Facades\Cache::put('docview_' . $hashKey, $tugas->file_tugas, 3600);
-        $filePreviewUrl = route('document.preview', $hashKey);
-    } else {
-        $filePreviewUrl = null;
-    }
+    // Preview URL: token acak terikat pemilik (lihat helper preview_url()).
+    $filePreviewUrl = preview_url($tugas->file_tugas);
 @endphp
 
 @extends('guru.lms.arsip.preview-wrapper', [

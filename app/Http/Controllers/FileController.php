@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
@@ -22,40 +20,28 @@ class FileController extends Controller
     ];
 
     /**
-     * Preview file inline (legacy route, kept for backward compatibility)
-     */
-    public function preview(Request $request)
-    {
-        $path = $request->query('path');
-
-        if (!$path && $request->query('b64path')) {
-            $path = base64_decode($request->query('b64path'));
-        }
-
-        if (!$path) {
-            abort(404, 'No file path provided');
-        }
-
-        return $this->serveFileInline($path);
-    }
-
-    /**
-     * Preview file using cache-based integer ID.
-     * URL looks like /view-document/54321 — identical structure to validasi-izin's /preview-bukti/1
-     * IDM cannot detect this as a file download because:
-     *   - No file extension in URL
-     *   - No query parameters with file paths
-     *   - URL looks like a normal page
+     * Preview file lewat token cache yang diikat ke pemilik.
+     * URL: /view-document/{token} — token acak 48 char (via helper preview_url()).
+     *
+     * Keamanan:
+     *  - Token acak & panjang => tidak bisa dienumerasi.
+     *  - Entri cache menyimpan user_id pembuat => hanya user itu yang boleh membuka,
+     *    mencegah pengguna lain memanen file yang sedang dipratinjau orang lain.
      */
     public function previewHash($id)
     {
-        $path = Cache::get('docview_' . $id);
+        $entry = Cache::get('docview_' . $id);
 
-        if (!$path) {
+        // Format lama (string) tidak lagi didukung; wajib array ber-user_id.
+        if (!is_array($entry) || !isset($entry['path'])) {
             abort(404, 'Preview link expired or invalid.');
         }
 
-        return $this->serveFileInline($path);
+        if (($entry['user_id'] ?? null) !== auth()->id()) {
+            abort(403, 'Anda tidak memiliki akses ke file ini.');
+        }
+
+        return $this->serveFileInline($entry['path']);
     }
 
     /**

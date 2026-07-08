@@ -14,11 +14,8 @@
 
     $downloadUrl = asset('storage/' . $path);
 
-    // Preview URL: use an integer-based cache ID so the URL stays extensionless.
-    $previewId = crc32($path . session()->getId()) % 100000;
-    if ($previewId < 0) $previewId = abs($previewId);
-    \Illuminate\Support\Facades\Cache::put('docview_' . $previewId, $path, now()->addHours(4));
-    $previewUrl = url('/view-document/' . $previewId);
+    // Preview URL: token acak terikat pemilik (extensionless), lihat helper preview_url().
+    $previewUrl = preview_url($path);
 
     $modalId = 'filemodal' . md5($path . uniqid());
 @endphp

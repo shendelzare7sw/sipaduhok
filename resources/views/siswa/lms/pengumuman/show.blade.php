@@ -61,7 +61,7 @@
                         $extension = strtolower(pathinfo($pengumuman->lampiran_surat, PATHINFO_EXTENSION));
                         $isPdf = $extension === 'pdf';
                         $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                        $previewUrl = route('storage.preview', ['path' => $pengumuman->lampiran_surat]);
+                        $previewUrl = preview_url($pengumuman->lampiran_surat);
                         $downloadUrl = asset('storage/' . $pengumuman->lampiran_surat);
                     @endphp
 

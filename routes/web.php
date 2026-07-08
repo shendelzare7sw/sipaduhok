@@ -213,8 +213,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // File preview (auth-protected to prevent unauthorized file access)
-    Route::get('/storage-preview', [\App\Http\Controllers\FileController::class, 'preview'])->name('storage.preview');
+    // File preview (auth-protected + token diikat ke pemilik; lihat helper preview_url()).
+    // Route raw-path lama (/storage-preview?path=) dihapus karena tidak melakukan cek kepemilikan.
     Route::get('/view-document/{id}', [\App\Http\Controllers\FileController::class, 'previewHash'])->name('document.preview');
 
     /*

@@ -8,14 +8,8 @@
     $isPdf = $extension === 'pdf';
     $isVideo = in_array($extension, ['mp4', 'webm', 'ogg']);
 
-    // Generate hashed preview URL to bypass IDM interception
-    if ($materi->file_materi) {
-        $hashKey = crc32($materi->file_materi . now()->timestamp);
-        \Illuminate\Support\Facades\Cache::put('docview_' . $hashKey, $materi->file_materi, 3600);
-        $filePreviewUrl = route('document.preview', $hashKey);
-    } else {
-        $filePreviewUrl = null;
-    }
+    // Preview URL: token acak terikat pemilik (lihat helper preview_url()).
+    $filePreviewUrl = preview_url($materi->file_materi);
 @endphp
 
 @extends('monitoring-lms.preview.wrapper', [

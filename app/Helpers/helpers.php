@@ -40,6 +40,33 @@ if (!function_exists('terbilang')) {
 }
 
 /**
+ * Buat URL preview file yang aman: token acak yang diikat ke user yang sedang login.
+ * Menggantikan skema lama (id crc32 kecil / raw ?path=) yang bisa dienumerasi &
+ * tidak terikat pemilik. File hanya bisa dibuka oleh user yang membuat token ini.
+ *
+ * @param  string|null  $path       Path relatif di disk 'public' (storage/app/public)
+ * @param  int          $ttlHours   Masa berlaku token (jam)
+ * @return string|null
+ */
+if (!function_exists('preview_url')) {
+    function preview_url(?string $path, int $ttlHours = 4)
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        $token = \Illuminate\Support\Str::random(48);
+
+        \Illuminate\Support\Facades\Cache::put('docview_' . $token, [
+            'path' => $path,
+            'user_id' => auth()->id(),
+        ], now()->addHours($ttlHours));
+
+        return url('/view-document/' . $token);
+    }
+}
+
+/**
  * Format jenis kegiatan untuk display
  * Menangani custom event types dengan benar
  */
