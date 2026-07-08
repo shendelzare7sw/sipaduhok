@@ -401,6 +401,7 @@
         </tr>
     </template>
 
-    <template id="soalDataTemplate">@json($soalList)</template>
+    {{-- Guru berhak melihat kunci jawaban; makeVisible membuka field yang di-$hidden pada model untuk form edit ini. --}}
+    <template id="soalDataTemplate">@json($soalList->makeVisible(['kunci_jawaban', 'jawaban_benar']))</template>
 
 @endsection

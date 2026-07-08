@@ -313,9 +313,7 @@
                                     <div>
                                         @if($soal->tipe_soal === 'pilihan_ganda')
                                             @php
-                                                $pilihan = is_array($soal->pilihan_jawaban)
-                                                    ? $soal->pilihan_jawaban
-                                                    : json_decode($soal->pilihan_jawaban, true);
+                                                $pilihan = $soal->pilihanJawabanForSiswa();
                                             @endphp
                                             @if(is_array($pilihan))
                                                 @foreach($pilihan as $key => $value)
@@ -330,9 +328,7 @@
 
                                         @elseif($soal->tipe_soal === 'pilihan_ganda_kompleks')
                                             @php
-                                                $pilihan = is_array($soal->pilihan_jawaban)
-                                                    ? $soal->pilihan_jawaban
-                                                    : json_decode($soal->pilihan_jawaban, true);
+                                                $pilihan = $soal->pilihanJawabanForSiswa();
                                             @endphp
                                             <small class="text-muted mb-2 d-block"><i class="fas fa-info-circle me-1"></i>Pilih semua jawaban yang benar</small>
                                             <input type="hidden" name="jawaban[{{ $soal->id }}]" id="kompleks-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">
@@ -357,9 +353,7 @@
 
                                         @elseif($soal->tipe_soal === 'benar_salah')
                                             @php
-                                                $pilihanData = is_array($soal->pilihan_jawaban)
-                                                    ? $soal->pilihan_jawaban
-                                                    : json_decode($soal->pilihan_jawaban, true);
+                                                $pilihanData = $soal->pilihanJawabanForSiswa();
                                                 $pernyataanList = $pilihanData['pernyataan'] ?? [];
                                             @endphp
                                             <input type="hidden" name="jawaban[{{ $soal->id }}]" id="bs-hidden-{{ $soal->id }}" value="{{ $existingAnswers[$soal->id] ?? '' }}">

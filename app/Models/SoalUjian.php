@@ -30,6 +30,16 @@ class SoalUjian extends Model
         'bobot_nilai' => 'integer',
     ];
 
+    /**
+     * Sembunyikan kunci jawaban dari serialisasi array/JSON (mis. @json, toArray, response()->json).
+     * Tidak memengaruhi akses properti PHP, jadi grading & UI guru (property access) tetap jalan.
+     * Untuk audiens yang berhak (guru), pakai ->makeVisible([...]) secara eksplisit.
+     */
+    protected $hidden = [
+        'kunci_jawaban',
+        'jawaban_benar',
+    ];
+
     // Tipe Soal Constants
     const TIPE_PILGAN = 'pilihan_ganda';
     const TIPE_PILGAN_KOMPLEKS = 'pilihan_ganda_kompleks';
@@ -47,6 +57,36 @@ class SoalUjian extends Model
     public function jawabanSiswa()
     {
         return $this->hasMany(JawabanSiswa::class);
+    }
+
+    /**
+     * Versi pilihan_jawaban yang AMAN dikirim ke siswa.
+     * Membuang semua info kunci jawaban yang secara struktur ikut tersimpan di pilihan_jawaban:
+     *  - key 'jawaban_benar' (pilihan ganda kompleks & isian singkat)
+     *  - flag 'benar' pada tiap item 'pernyataan' (benar/salah)
+     * Sumber tunggal opsi aman-siswa: view/JS jangan pakai pilihan_jawaban mentah.
+     */
+    public function pilihanJawabanForSiswa(): array
+    {
+        $data = $this->pilihan_jawaban;
+        if (!is_array($data)) {
+            $data = json_decode($data ?? '[]', true) ?: [];
+        }
+
+        // Pilihan ganda kompleks & isian singkat menyimpan jawaban di key ini.
+        unset($data['jawaban_benar']);
+
+        // Benar/salah: sisakan hanya teks pernyataan, buang flag 'benar'.
+        if (isset($data['pernyataan']) && is_array($data['pernyataan'])) {
+            $data['pernyataan'] = array_map(function ($item) {
+                if (is_array($item)) {
+                    unset($item['benar']);
+                }
+                return $item;
+            }, $data['pernyataan']);
+        }
+
+        return $data;
     }
 
     /**
