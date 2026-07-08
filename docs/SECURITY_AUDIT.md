@@ -19,6 +19,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-05 | 🟡 Low | Headers | Tidak ada Content-Security-Policy; HSTS dikomentari | ⏳ Open |
 | F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | ⏳ Open |
 | F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ⏳ Open |
+| F-08 | 🔴 High | Nilai guru | `GuruNilaiController@update/updateBatch` ubah `nilai_id` tanpa scope kelas+mapel → tampering nilai lintas-kelas | ✅ Fixed |
 
 ---
 
@@ -37,6 +38,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - `FileController@previewHash` menolak jika entri bukan array atau `user_id` ≠ `auth()->id()` (403), token tak dikenal → 404.
 - Semua produser token diseragamkan (component `file-preview`, `monitoring-lms/preview/*`, `guru/lms/arsip/preview-*`).
 **Test:** `tests/Feature/FilePreviewAccessTest.php` (pemilik boleh, user lain 403, token asal 404, route lama 404).
+
+### ✅ F-08 — Tampering nilai lintas-kelas (High)
+**Lokasi:** `app/Http/Controllers/Guru/GuruNilaiController.php` (`update`, `updateBatch`)
+**Isu:** Kedua method memanggil `verifyAccess()` untuk kelas+mapel di route, tetapi lalu memuat `Nilai` dari `nilai_id` yang dikirim user **tanpa memverifikasi nilai itu milik kelas+mapel tsb**. Guru yang mengajar kelas A bisa mengubah nilai siswa di kelas/mapel lain (milik guru lain) dengan mengirim `nilai_id` sembarang. `index/exportExcel/downloadTemplate/importExcel/recalculate` sudah aman (verifyAccess + query ter-scope).
+**Fix:** Muat `Nilai` dengan scope `where('kelas_id',$kelasId)->where('mata_pelajaran_id',$mapelId)` (firstOrFail di `update`, skip di `updateBatch`).
+**Test:** `tests/Feature/GuruNilaiIdorTest.php`.
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.

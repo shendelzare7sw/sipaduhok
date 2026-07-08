@@ -108,9 +108,14 @@ class GuruNilaiController extends Controller
         }
 
         $validated = $request->validate($rules);
-        
-        $nilai = Nilai::findOrFail($validated['nilai_id']);
-        
+
+        // IDOR guard: nilai wajib milik kelas+mapel yang aksesnya sudah diverifikasi,
+        // mencegah guru mengubah nilai kelas/mapel lain lewat nilai_id sembarang.
+        $nilai = Nilai::where('id', $validated['nilai_id'])
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
+
         // Remove nilai_id from validated array before update
         $dataToUpdate = collect($validated)->except(['nilai_id'])->toArray();
         
@@ -145,7 +150,11 @@ class GuruNilaiController extends Controller
         }
 
         foreach ($nilaiData as $nilaiId => $data) {
-            $nilai = Nilai::find($nilaiId);
+            // IDOR guard: hanya nilai di kelas+mapel yang diverifikasi yang boleh diubah.
+            $nilai = Nilai::where('id', $nilaiId)
+                ->where('kelas_id', $kelasId)
+                ->where('mata_pelajaran_id', $mapelId)
+                ->first();
             if (!$nilai) continue;
 
             $newValues = [];
