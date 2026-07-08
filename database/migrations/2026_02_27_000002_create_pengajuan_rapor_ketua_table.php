@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('siswa_id')->constrained('siswa')->onDelete('cascade');
             $table->foreignId('diajukan_oleh')->constrained('users')->comment('Bendahara yang mengajukan');
             $table->text('alasan')->comment('Alasan penolakan / keterangan pengajuan');
+            $table->enum('tipe', ['rapor', 'ujian'])->default('rapor');
+            $table->enum('periode', ['pts_ganjil', 'pas_ganjil', 'pts_genap', 'pas_genap', 'ujian_akhir'])->nullable();
             $table->enum('status', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
             $table->foreignId('diputuskan_oleh')->nullable()->constrained('users')->comment('Ketua PKBM yang memutuskan');
             $table->text('catatan_ketua')->nullable()->comment('Catatan/keputusan dari Ketua PKBM');

@@ -14,8 +14,10 @@ return new class extends Migration
             $table->foreignId('mata_pelajaran_id')->constrained('mata_pelajaran')->onDelete('cascade');
             $table->foreignId('guru_id')->constrained('tenaga_pendidik')->onDelete('cascade');
             $table->string('judul_materi');
+            $table->enum('kategori', ['materi', 'modul_ajar'])->default('materi');
             $table->text('deskripsi')->nullable();
             $table->string('file_materi')->nullable();
+            $table->string('url_materi')->nullable();
             $table->enum('tipe_file', ['pdf', 'video', 'ppt', 'doc', 'link'])->nullable();
             $table->date('tanggal_upload');
             $table->timestamps();

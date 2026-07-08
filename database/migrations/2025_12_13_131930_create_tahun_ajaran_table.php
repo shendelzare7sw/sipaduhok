@@ -13,6 +13,9 @@ return new class extends Migration
             $table->string('nama_tahun_ajaran'); // 2024/2025
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
+            $table->date('tanggal_mulai_genap')->nullable();
+            $table->date('tanggal_akhir_pts_ganjil')->nullable();
+            $table->date('tanggal_akhir_pts_genap')->nullable();
             $table->boolean('is_active')->default(false);
             $table->timestamps();
         });

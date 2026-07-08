@@ -7,22 +7,22 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Foreign key untuk users dipasang di sini karena tabel roles & cabang
+     * baru tersedia setelah tabel users dibuat.
      */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('foto_profil')->nullable()->after('email');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('restrict');
+            $table->foreign('cabang_id')->references('id')->on('cabang')->onDelete('set null');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('foto_profil');
+            $table->dropForeign(['role_id']);
+            $table->dropForeign(['cabang_id']);
         });
     }
 };

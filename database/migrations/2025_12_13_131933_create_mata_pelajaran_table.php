@@ -12,8 +12,11 @@ return new class extends Migration
             $table->id();
             $table->string('kode_mapel')->unique();
             $table->string('nama_mapel');
-            $table->enum('jenjang', ['PAUD', 'SD', 'SMP', 'SMA']);
+            $table->enum('jenjang', ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA']);
+            $table->enum('kelompok', ['A', 'B'])->nullable()
+                ->comment('Subject category: A (Core subjects) or B (Elective/Local content)');
             $table->text('deskripsi')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

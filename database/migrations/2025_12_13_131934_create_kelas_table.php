@@ -13,9 +13,9 @@ return new class extends Migration
             $table->foreignId('cabang_id')->constrained('cabang')->onDelete('cascade');
             $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran')->onDelete('cascade');
             $table->foreignId('wali_kelas_id')->nullable()->constrained('tenaga_pendidik')->onDelete('set null');
-            $table->string('nama_kelas'); // KB, TKA, TKB, SD, SMP Paket A, SMP Paket B, dll
-            $table->enum('jenjang', ['PAUD', 'SD', 'SMP', 'SMA']);
-            $table->string('kode_kelas')->unique(); // RUKO-SMP-A-2024
+            $table->string('nama_kelas');
+            $table->enum('jenjang', ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA']);
+            $table->string('kode_kelas')->unique();
             $table->integer('kuota_siswa')->default(30);
             $table->timestamps();
         });

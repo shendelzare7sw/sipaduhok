@@ -20,12 +20,32 @@ return new class extends Migration
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir');
             $table->text('alamat');
+            $table->string('agama')->nullable();
+            $table->string('pelajaran_agama')->nullable();
             $table->string('nama_ayah')->nullable();
             $table->string('nama_ibu')->nullable();
             $table->string('telepon_orangtua')->nullable();
             $table->string('foto')->nullable();
             $table->date('tanggal_masuk');
             $table->enum('status', ['aktif', 'lulus', 'pindah', 'keluar'])->default('aktif');
+
+            // Validasi akses ujian
+            $table->boolean('validasi_ujian_bendahara')->default(false);
+            $table->boolean('validasi_ujian_wali')->default(false);
+            $table->timestamp('tanggal_validasi_ujian_bendahara')->nullable();
+            $table->timestamp('tanggal_validasi_ujian_wali')->nullable();
+            $table->foreignId('validasi_ujian_oleh')->nullable()->constrained('users')->onDelete('set null');
+
+            // Validasi akses rapor
+            $table->boolean('validasi_rapor_bendahara')->default(false);
+            $table->boolean('validasi_rapor_wali')->default(false);
+            $table->boolean('validasi_rapor_ketua')->default(false);
+            $table->timestamp('tanggal_validasi_rapor_bendahara')->nullable();
+            $table->timestamp('tanggal_validasi_rapor_wali')->nullable();
+            $table->timestamp('tanggal_validasi_rapor_ketua')->nullable();
+            $table->foreignId('validasi_rapor_oleh')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('validasi_rapor_ketua_oleh')->nullable()->constrained('users')->onDelete('set null');
+
             $table->timestamps();
         });
     }

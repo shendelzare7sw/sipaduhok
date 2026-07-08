@@ -15,7 +15,9 @@ return new class extends Migration
             $table->foreignId('mata_pelajaran_id')->nullable()->constrained('mata_pelajaran')->onDelete('cascade');
             $table->date('tanggal');
             $table->enum('status', ['hadir', 'sakit', 'izin', 'alpha']);
+            $table->enum('status_validasi', ['pending', 'disetujui', 'ditolak'])->nullable();
             $table->text('keterangan')->nullable();
+            $table->string('bukti_file')->nullable();
             $table->foreignId('diinput_oleh')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

@@ -13,9 +13,16 @@ return new class extends Migration
             $table->foreignId('kelas_id')->constrained('kelas')->onDelete('cascade');
             $table->foreignId('mata_pelajaran_id')->constrained('mata_pelajaran')->onDelete('cascade');
             $table->foreignId('guru_id')->constrained('tenaga_pendidik')->onDelete('cascade');
+            $table->enum('jenis_tugas', ['tugas', 'latihan'])->default('tugas');
+            $table->integer('urutan')->nullable();
             $table->string('judul_tugas');
+            $table->string('judul_bab')->nullable();
+            $table->string('nama_materi')->nullable();
             $table->text('deskripsi');
             $table->string('file_tugas')->nullable();
+            $table->boolean('tampilkan_nilai')->default(true);
+            $table->boolean('bisa_diulang')->default(false);
+            $table->integer('batas_pengulangan')->nullable();
             $table->date('tanggal_mulai');
             $table->date('tanggal_deadline');
             $table->timestamps();
@@ -31,6 +38,7 @@ return new class extends Migration
             $table->timestamp('tanggal_submit')->nullable();
             $table->decimal('nilai', 5, 2)->nullable();
             $table->enum('status', ['belum_dikerjakan', 'dikerjakan', 'terlambat', 'dinilai'])->default('belum_dikerjakan');
+            $table->integer('pengulangan_ke')->default(1);
             $table->text('feedback_guru')->nullable();
             $table->timestamps();
         });
