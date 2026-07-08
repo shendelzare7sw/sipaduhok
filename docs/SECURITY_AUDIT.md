@@ -20,7 +20,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | ⏳ Open |
 | F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ⏳ Open |
 | F-08 | 🔴 High | Nilai guru | `GuruNilaiController@update/updateBatch` ubah `nilai_id` tanpa scope kelas+mapel → tampering nilai lintas-kelas | ✅ Fixed |
-| F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` tanpa scope `guru_id` → baca kunci jawaban / ubah / hapus / nilai ujian guru lain | ✅ Fixed |
+| F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` yang tak dibatasi ke kelas+mapel yang diajar → baca kunci jawaban / ubah / hapus / nilai ujian di kelas/mapel lain | ✅ Fixed |
 
 ---
 
@@ -49,7 +49,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 ### ✅ F-09 — IDOR kelola/koreksi soal & ujian lintas-guru (High)
 **Lokasi:** `app/Http/Controllers/Guru/GuruUjianController.php` (banyak method)
 **Isu:** `verifyAccess()` hanya memastikan guru mengajar kelas+mapel **di route**, tetapi banyak method memuat `Ujian`/`SoalUjian`/`UjianSiswa` dari `ujianId/soalId/ujianSiswaId` yang dikirim user **tanpa scope `guru_id`**. Guru mana pun bisa: melihat **kunci jawaban** ujian guru lain (`soal`, `manageSoal`, `editSoal`, `getAiSuggestion`), menambah/ubah/hapus soal (`storeSoal/updateSoal/destroySoal/storeAllSoal/importSoal/bulkStoreSoal`), toggle status/visibilitas (`toggleStatus/toggleResultVisibility`), melihat hasil & menilai (`hasil/koreksiShow/koreksiStore`). (`edit/update/destroy/pengawasan/pengawasanData` sudah aman.)
-**Fix:** Helper `authorizedUjian($guruId,$kelasId,$mapelId,$ujianId)` (scope `guru_id`+kelas+mapel, firstOrFail) & `authorizedSoal(...)` (scope soal ke ujian tsb); semua method di atas memuat resource lewat helper ini; `koreksiStore` juga men-scope `UjianSiswa` ke ujian yang terotorisasi.
+**Fix:** Helper `authorizedUjian(...)` membatasi ujian ke **kelas+mapel yang diajar guru** (dijamin `verifyAccess`), `firstOrFail`; `authorizedSoal(...)` men-scope soal ke ujian tsb. Semua method memuat resource lewat helper ini; `koreksiStore` men-scope `UjianSiswa` ke ujian terotorisasi. Sengaja **tidak** mengunci ke `guru_id` (pembuat) agar team-teaching di kelas+mapel yang sama tetap berjalan (flow-preserving).
 **Test:** `tests/Feature/GuruUjianSoalIdorTest.php`.
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)

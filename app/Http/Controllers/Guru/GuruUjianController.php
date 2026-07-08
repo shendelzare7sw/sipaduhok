@@ -1632,15 +1632,17 @@ class GuruUjianController extends Controller
     }
 
     /**
-     * Muat ujian & pastikan milik guru ini pada kelas+mapel yang sudah diverifikasi.
-     * Cegah IDOR: guru mengelola/melihat ujian milik guru/kelas/mapel lain lewat id sembarang.
+     * Muat ujian & pastikan berada di kelas+mapel yang sudah diverifikasi untuk guru ini
+     * (verifyAccess menjamin guru mengajar kelas+mapel route). Cegah IDOR: guru tidak bisa
+     * menyentuh ujian di kelas/mapel yang tidak ia ajar lewat ujianId sembarang.
+     * Catatan: sengaja TIDAK mengunci ke guru_id (pembuat) agar team-teaching di kelas+mapel
+     * yang sama tetap berjalan seperti perilaku semula.
      */
     private function authorizedUjian($guruId, $kelasId, $mapelId, $ujianId): Ujian
     {
         return Ujian::where('id', $ujianId)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $guruId)
             ->firstOrFail();
     }
 
