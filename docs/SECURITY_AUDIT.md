@@ -20,6 +20,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | ⏳ Open |
 | F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ⏳ Open |
 | F-08 | 🔴 High | Nilai guru | `GuruNilaiController@update/updateBatch` ubah `nilai_id` tanpa scope kelas+mapel → tampering nilai lintas-kelas | ✅ Fixed |
+| F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` tanpa scope `guru_id` → baca kunci jawaban / ubah / hapus / nilai ujian guru lain | ✅ Fixed |
 
 ---
 
@@ -45,6 +46,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Fix:** Muat `Nilai` dengan scope `where('kelas_id',$kelasId)->where('mata_pelajaran_id',$mapelId)` (firstOrFail di `update`, skip di `updateBatch`).
 **Test:** `tests/Feature/GuruNilaiIdorTest.php`.
 
+### ✅ F-09 — IDOR kelola/koreksi soal & ujian lintas-guru (High)
+**Lokasi:** `app/Http/Controllers/Guru/GuruUjianController.php` (banyak method)
+**Isu:** `verifyAccess()` hanya memastikan guru mengajar kelas+mapel **di route**, tetapi banyak method memuat `Ujian`/`SoalUjian`/`UjianSiswa` dari `ujianId/soalId/ujianSiswaId` yang dikirim user **tanpa scope `guru_id`**. Guru mana pun bisa: melihat **kunci jawaban** ujian guru lain (`soal`, `manageSoal`, `editSoal`, `getAiSuggestion`), menambah/ubah/hapus soal (`storeSoal/updateSoal/destroySoal/storeAllSoal/importSoal/bulkStoreSoal`), toggle status/visibilitas (`toggleStatus/toggleResultVisibility`), melihat hasil & menilai (`hasil/koreksiShow/koreksiStore`). (`edit/update/destroy/pengawasan/pengawasanData` sudah aman.)
+**Fix:** Helper `authorizedUjian($guruId,$kelasId,$mapelId,$ujianId)` (scope `guru_id`+kelas+mapel, firstOrFail) & `authorizedSoal(...)` (scope soal ke ujian tsb); semua method di atas memuat resource lewat helper ini; `koreksiStore` juga men-scope `UjianSiswa` ke ujian yang terotorisasi.
+**Test:** `tests/Feature/GuruUjianSoalIdorTest.php`.
+
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
 
@@ -68,6 +75,9 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - **Materi siswa** (`LmsMateriController`): scope kelas+mapel.
 - **Forum siswa** (`LmsForumController`): scope kelas, edit/hapus hanya milik sendiri.
 - **Rapor siswa** (`SiaRaporController`): tidak ada IDOR lintas-siswa (scope `siswa_id` + gerbang validasi 3-level).
+- **Tugas/Materi guru** (`GuruTugasController`, `GuruMateriController`): `edit/update/destroy` dobel-scope (`verifyAccess` + `where('guru_id')->firstOrFail()`).
+- **Ujian guru** (`GuruUjianController`): `edit/update/destroy/pengawasan/pengawasanData` ter-scope `guru_id`; sisanya diperbaiki di F-09.
+- **Nilai wali kelas** (`WaliKelas\NilaiController` + trait `WaliKelasHelper`): `update/clearNilai/syncFromGuru/import` di-scope ke kelas wali; `getSelectedKelas()` memvalidasi session terhadap `wali_kelas_assignments` (tak bisa pilih kelas sembarang).
 
 ---
 

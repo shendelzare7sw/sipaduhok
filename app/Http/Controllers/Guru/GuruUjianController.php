@@ -380,7 +380,7 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $ujian = Ujian::findOrFail($id);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $id);
 
         // Ambil semua siswa aktif di kelas ini
         $siswaList = Siswa::where('kelas_id', $kelasId)
@@ -537,7 +537,7 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
 
         $soalList = SoalUjian::where('ujian_id', $ujianId)
             ->orderBy('urutan', 'asc')
@@ -562,7 +562,7 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
 
         return view('guru.lms.ujian.soal-form', [
             'kelas' => $kelas,
@@ -617,6 +617,9 @@ class GuruUjianController extends Controller
                 break;
         }
 
+        // IDOR guard: pastikan ujian ini milik guru pada kelas+mapel yang diverifikasi.
+        $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
+
         SoalUjian::create([
             'ujian_id' => $ujianId,
             'tipe_soal' => $validated['tipe_soal'],
@@ -642,8 +645,8 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $ujian = Ujian::findOrFail($ujianId);
-        $soal = SoalUjian::findOrFail($soalId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
+        $soal = $this->authorizedSoal($tenagaPendidik->id, $kelasId, $mapelId, $ujianId, $soalId);
 
         return view('guru.lms.ujian.soal-form', [
             'kelas' => $kelas,
@@ -662,7 +665,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $soal = SoalUjian::findOrFail($soalId);
+        $soal = $this->authorizedSoal($tenagaPendidik->id, $kelasId, $mapelId, $ujianId, $soalId);
 
         $validated = $request->validate([
             'tipe_soal' => 'required|in:pilihan_ganda,pilihan_ganda_kompleks,benar_salah,isian_singkat,uraian',
@@ -724,7 +727,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $soal = SoalUjian::findOrFail($soalId);
+        $soal = $this->authorizedSoal($tenagaPendidik->id, $kelasId, $mapelId, $ujianId, $soalId);
         $soal->delete();
 
         return redirect()
@@ -742,7 +745,7 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $ujian = Ujian::where('id', $ujianId)->firstOrFail();
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
 
         $soalList = SoalUjian::where('ujian_id', $ujianId)->orderBy('urutan', 'asc')->get();
 
@@ -777,7 +780,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
 
         // Validasi dasar
         $request->validate([
@@ -972,7 +975,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
         // Toggle is_active
         $ujian->is_active = !$ujian->is_active;
         $ujian->save();
@@ -1011,7 +1014,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
         $ujian->tampilkan_nilai = !$ujian->tampilkan_nilai;
         $ujian->save();
 
@@ -1051,7 +1054,7 @@ class GuruUjianController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
         
         $ujianSiswa = UjianSiswa::with(['siswa', 'jawabanSiswa.soalUjian'])
             ->where('id', $ujianSiswaId)
@@ -1089,7 +1092,11 @@ class GuruUjianController extends Controller
             'feedback.*' => 'nullable|string',
         ]);
 
-        $ujianSiswa = UjianSiswa::findOrFail($ujianSiswaId);
+        // IDOR guard: ujian harus milik guru ini; sesi ujian siswa harus milik ujian tsb.
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
+        $ujianSiswa = UjianSiswa::where('id', $ujianSiswaId)
+            ->where('ujian_id', $ujian->id)
+            ->firstOrFail();
         $totalNilai = 0;
 
         // Loop semua soal untuk update nilai & feedback
@@ -1156,7 +1163,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $ujian = Ujian::findOrFail($ujianId);
+        $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
         $filename = ($ujian->tipe_ujian === 'latihan') ? 'template_soal_latihan.xlsx' : 'template_soal_ujian.xlsx';
 
         return \Maatwebsite\Excel\Facades\Excel::download(
@@ -1178,7 +1185,7 @@ class GuruUjianController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $soal = SoalUjian::findOrFail($soalId);
+        $soal = $this->authorizedSoal($tenagaPendidik->id, $kelasId, $mapelId, $ujianId, $soalId);
         
         // Determine correct answer/key context
         // Priority: kunci_jawaban > jawaban_benar > narasi (for context)
@@ -1221,6 +1228,9 @@ class GuruUjianController extends Controller
         $request->validate([
             'file_soal' => 'required|file|mimes:xlsx,xls|max:5120',
         ]);
+
+        // IDOR guard: pastikan ujian milik guru pada kelas+mapel yang diverifikasi.
+        $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
 
         try {
             \Maatwebsite\Excel\Facades\Excel::import(
@@ -1266,7 +1276,7 @@ class GuruUjianController extends Controller
         ]);
 
         try {
-            $ujian = Ujian::findOrFail($ujianId);
+            $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
             $mataPelajaran = MataPelajaran::findOrFail($mapelId);
             $kelas = Kelas::findOrFail($kelasId);
 
@@ -1336,7 +1346,7 @@ class GuruUjianController extends Controller
 
         \DB::beginTransaction();
         try {
-            $ujian = Ujian::findOrFail($ujianId);
+            $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
             $currentMaxUrutan = Soal::where('ujian_id', $ujianId)->max('urutan') ?? 0;
             $createdCount = 0;
 
@@ -1619,6 +1629,31 @@ class GuruUjianController extends Controller
     private function relativeTimeId($date): string
     {
         return $date ? $date->copy()->locale('id')->diffForHumans() : '-';
+    }
+
+    /**
+     * Muat ujian & pastikan milik guru ini pada kelas+mapel yang sudah diverifikasi.
+     * Cegah IDOR: guru mengelola/melihat ujian milik guru/kelas/mapel lain lewat id sembarang.
+     */
+    private function authorizedUjian($guruId, $kelasId, $mapelId, $ujianId): Ujian
+    {
+        return Ujian::where('id', $ujianId)
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->where('guru_id', $guruId)
+            ->firstOrFail();
+    }
+
+    /**
+     * Muat soal & pastikan berada di ujian yang sudah diotorisasi untuk guru ini.
+     */
+    private function authorizedSoal($guruId, $kelasId, $mapelId, $ujianId, $soalId): SoalUjian
+    {
+        $this->authorizedUjian($guruId, $kelasId, $mapelId, $ujianId);
+
+        return SoalUjian::where('id', $soalId)
+            ->where('ujian_id', $ujianId)
+            ->firstOrFail();
     }
 
     private function verifyAccess($guruId, $kelasId, $mapelId)
