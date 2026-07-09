@@ -29,6 +29,8 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-15 | 🔴 High | Bukti izin wali | `PresensiController@previewBukti` sajikan file bukti izin via `id` tanpa otorisasi → wali lihat dokumen izin/sakit (pribadi) siswa kelas mana pun | ✅ Fixed |
 | F-16 | 🟠 Medium | Forum guru | `GuruForumController` `show/reply/destroyReply/togglePin/toggleClose` muat forum/reply via id tanpa scope kelas+mapel → baca/tulis/hapus/pin diskusi kelas/mapel yang tak diajar | ✅ Fixed |
 | F-17 | 🟡 Low | Template capaian | `TemplateCapaianController@update/destroy` tak cek `created_by` → wali mana pun bisa ubah/hapus template milik wali lain (pustaka bersama, sesama-role) | ⏳ Open (kebijakan) |
+| F-18 | 🟠 Medium | Bayar tagihan ortu | `OrangTuaController@prosesBayar` validasi `tagihan_id` hanya `exists:` tanpa cek tagihan milik anak → wali siswa bisa melampirkan/menyetel pembayaran ke tagihan siswa lain (mismatch integritas) | ✅ Fixed |
+| F-19 | 🔴 High | Pembayaran Midtrans | `OrangTuaController@snapFinish` percaya `transaction_status` dari query redirect (tak bertanda-tangan) → tandai pembayaran `disetujui`/tagihan lunas tanpa benar-benar membayar; juga tak cek `isMyChild` | ⏳ Open (Fase 8) |
 
 ---
 
@@ -96,6 +98,16 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Fix:** Helper `authorizedForum(kelas,mapel,forum)` (firstOrFail ter-scope kelas+mapel) dipakai `show/reply/togglePin/toggleClose`; `destroyReply` memuat reply dengan `whereHas('forumDiskusi', kelas+mapel)`. Bagian sinkronisasi ke "kelas lain" tetap aman karena sudah memfilter `hasAccess`.
 **Test:** `tests/Feature/GuruForumIdorTest.php`.
 
+### ✅ F-18 — Bayar tagihan siswa lain via `prosesBayar` (Medium)
+**Lokasi:** `app/Http/Controllers/OrangTua/OrangTuaController.php` (`prosesBayar`)
+**Isu:** Setelah memverifikasi `$siswa = $user->children()->find($siswaId)` (anak sendiri), `tagihan_id` hanya divalidasi `exists:tagihan,id` — tak dicek milik `$siswa`. Wali siswa bisa mengirim `tagihan_id` milik siswa lain; record `Pembayaran` tercatat `siswa_id=anak-sendiri` tapi `tagihan_id=siswa-lain` → mismatch, dan saat divalidasi `tagihan->updateStatusBayar()` bisa mengubah status tagihan siswa lain. `processBulkPay` sudah aman (`if ($tagihan->siswa_id != $siswa->id) continue;`).
+**Fix:** Tambah guard `if (!$tagihanCheck || $tagihanCheck->siswa_id != $siswa->id) return back(error)` di `prosesBayar` (menyamakan dengan bulk).
+**Test:** `tests/Feature/OrangTuaBayarTagihanIdorTest.php`.
+
+### ⏳ F-19 — `snapFinish` percaya status transaksi dari client (High, Fase 8)
+**Lokasi:** `app/Http/Controllers/OrangTua/OrangTuaController.php` (`snapFinish`)
+**Isu:** Callback redirect Midtrans (`/pembayaran/snap-finish`) membaca `transaction_status` dari **query string** lalu, sebagai "fallback bila webhook belum jalan", mengubah `Pembayaran.status_validasi` (mis. `settlement`→`disetujui`) dan memanggil `tagihan->updateStatusBayar()`. URL finish Midtrans **tidak bertanda tangan** → wali siswa bisa memanggil `snap-finish?order_id=<X>&transaction_status=settlement` untuk menandai pembayaran lunas **tanpa membayar**; endpoint juga tak memverifikasi `isMyChild`. **Perbaikan yang direncanakan (Fase 8):** jangan percaya query; ambil status **otoritatif** via `MidtransService::getTransactionStatus($orderId)` (pola yang sudah dipakai `dashboard()`/`tagihanAnak()`), dan tambah cek kepemilikan. Perlu telaah gabungan dengan handler webhook (harus validasi `signature_key`) — dikerjakan hati-hati di Fase 8 (logika pembayaran) karena menyangkut uang.
+
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
 
@@ -135,6 +147,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - **Jadwal wali** (`WaliKelas\JadwalPelajaranController`): read-only, scope kelas terpilih (dari `getKelasWali`).
 - **Prediksi kenaikan wali** (`WaliKelas\PromotionController`): read-only, scope `getSelectedKelas`; eksekusi kenaikan/kelulusan ada di peran admin/ketua/bendahara (di luar segitiga pembelajaran).
 - **Arsip wali** (`WaliKelasArsipController`): tiap method `guardAccess($kelas)` memverifikasi wali pernah di-assign ke kelas via `wali_kelas_assignments` (akses historis read-only).
+- **Orang tua / wali siswa** (`OrangTua\OrangTuaController`): semua akses per-anak dijaga `children()->find()` (belongsToMany via `student_parents`) atau `isMyChild = children()->where('siswa.id', …)->exists()` yang **ditegakkan** (redirect/abort 403) — `tagihanAnak/prosesBayar/processBulkPay/raporAnak/detailRapor/presensiAnak/ajukanIzin/storeIzin/riwayat*/editIzin/updateIzin/snapPayment/continuePayment/cetakInvoice/requestDownloadRapor`. `downloadRapor($token)` mengikat token ke `user_id` + status disetujui + kadaluarsa. `detailRapor` juga cek gerbang 3-level `hasFullRaporAccess()`. **Pengecualian:** `prosesBayar` (F-18, diperbaiki) & `snapFinish` (F-19, Fase 8).
 
 ---
 

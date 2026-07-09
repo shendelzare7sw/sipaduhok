@@ -341,9 +341,17 @@ class OrangTuaController extends Controller
 
         $validated = $request->validate($rules);
 
+        // IDOR guard: tagihan HARUS milik anak ini (processBulkPay sudah cek serupa;
+        // samakan di jalur pembayaran tunggal agar tak bisa membayar tagihan siswa lain).
+        $tagihanCheck = Tagihan::find($validated['tagihan_id']);
+        if (!$tagihanCheck || $tagihanCheck->siswa_id != $siswa->id) {
+            return redirect()->back()
+                ->with('error', 'Tagihan tidak valid untuk siswa ini.')
+                ->withInput();
+        }
+
         // Guard: tagihan original TA lama yang belum dialihkan TIDAK boleh dibayar via wali siswa
         // Harus di-carryover dulu oleh admin/bendahara
-        $tagihanCheck = Tagihan::find($validated['tagihan_id']);
         $taAktifId = TahunAjaran::where('is_active', true)->value('id');
         if ($tagihanCheck && $taAktifId && $tagihanCheck->tahun_ajaran_id != $taAktifId
             && empty($tagihanCheck->dialihkan_ke_id) && empty($tagihanCheck->tagihan_asal_id)) {
