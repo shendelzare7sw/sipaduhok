@@ -1450,13 +1450,12 @@ Route::middleware(['auth'])->group(function () {
             // Pembayaran
             Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
                 Route::get('/', [SiaPembayaranController::class, 'index'])->name('index');
-                Route::post('/bayar', [SiaPembayaranController::class, 'bayar'])->name('bayar');
+                Route::post('/bayar', [SiaPembayaranController::class, 'prosesBayar'])->name('bayar');
                 Route::get('/riwayat', [SiaPembayaranController::class, 'riwayat'])->name('riwayat');
-                Route::get('/cetak/{pembayaran}', [SiaPembayaranController::class, 'cetak'])->name('cetak');
-
-                // Midtrans callbacks
-                Route::post('/midtrans/notification', [SiaPembayaranController::class, 'midtransNotification'])->name('midtrans-notification');
-                Route::get('/midtrans/finish', [SiaPembayaranController::class, 'midtransFinish'])->name('midtrans-finish');
+                Route::get('/cetak/{pembayaran}', [SiaPembayaranController::class, 'cetakBukti'])->name('cetak');
+                // Catatan: callback Midtrans siswa dihapus (metode controller tak ada & tak
+                // dipakai). Callback resmi: MidtransWebhookController (webhook bertanda tangan)
+                // & OrangTua\OrangTuaController@snapFinish.
             });
 
             // Rapor - DISABLED: Siswa tidak berhak mengelola rapor, hanya wali siswa

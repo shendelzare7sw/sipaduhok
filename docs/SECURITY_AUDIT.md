@@ -31,6 +31,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-17 | 🟡 Low | Template capaian | `TemplateCapaianController@update/destroy` tak cek `created_by` → wali mana pun bisa ubah/hapus template milik wali lain (pustaka bersama, sesama-role) | ⏳ Open (kebijakan) |
 | F-18 | 🟠 Medium | Bayar tagihan ortu | `OrangTuaController@prosesBayar` validasi `tagihan_id` hanya `exists:` tanpa cek tagihan milik anak → wali siswa bisa melampirkan/menyetel pembayaran ke tagihan siswa lain (mismatch integritas) | ✅ Fixed |
 | F-19 | 🔴 High | Pembayaran Midtrans | `OrangTuaController@snapFinish` percaya `transaction_status` dari query redirect (tak bertanda-tangan) → tandai pembayaran `disetujui`/tagihan lunas tanpa benar-benar membayar; juga tak cek `isMyChild` | ✅ Fixed |
+| F-20 | 🟡 Low | Rute rusak (QA) | Rute pembayaran siswa menunjuk metode controller yang tak ada (`bayar`/`cetak`/`midtrans-*`) → tombol "cetak bukti" & submit bayar **500**; callback midtrans siswa dead | ✅ Fixed |
 
 ---
 
@@ -109,6 +110,11 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** Callback redirect Midtrans (`/pembayaran/snap-finish`) membaca `transaction_status` dari **query string** lalu, sebagai "fallback bila webhook belum jalan", mengubah `Pembayaran.status_validasi` (mis. `settlement`→`disetujui`) dan memanggil `tagihan->updateStatusBayar()`. URL finish Midtrans **tidak bertanda tangan** → wali siswa bisa memanggil `snap-finish?order_id=<X>&transaction_status=settlement` untuk menandai pembayaran lunas **tanpa membayar**; endpoint juga tak memverifikasi `isMyChild`.
 **Fix:** (1) Tambah otorisasi `isMyChild` pada `firstPayment->siswa_id` (abort 403). (2) **Tidak lagi** memakai `transaction_status` dari query untuk mengubah data — ambil status **otoritatif** via `MidtransService::getTransactionStatus($orderId)` (hanya bila `isConfigured()`, dibungkus try/catch; pola yang sama dipakai `dashboard()`/`tagihanAnak()`). Bila status otoritatif tak tersedia → **tidak** menyentuh DB. Pesan redirect kini berdasar status otoritatif/terkini, bukan query. Jalur utama tetap webhook bertanda tangan.
 **Test:** `tests/Feature/OrangTuaSnapFinishForgeryTest.php` (forgery `settlement` → tetap `pending`; order milik anak lain → 403).
+
+### ✅ F-20 — Rute pembayaran siswa menunjuk metode tak ada (Low, QA)
+**Lokasi:** `routes/web.php` (grup `siswa.sia.pembayaran`), `Siswa\SiaPembayaranController`
+**Isu:** Rute `bayar`→`bayar()`, `cetak`→`cetak()`, plus `midtrans-notification`/`midtrans-finish` menunjuk metode yang **tidak ada** di controller (yang ada: `prosesBayar`, `cetakBukti`; tak ada metode midtrans). View aktif memakainya: `pembayaran/riwayat.blade.php` (tombol cetak bukti) & `pembayaran/index.blade.php` (form bayar) → menekan/submit menghasilkan **HTTP 500**. Bukan celah keamanan (semua ter-scope `siswa_id`), tapi bug nyata. Callback midtrans siswa juga dead (di-`role:siswa`, Midtrans tak bisa memanggilnya).
+**Fix:** Arahkan `bayar`→`prosesBayar` (menampilkan pesan "pembayaran lewat wali siswa" sesuai desain) & `cetak`→`cetakBukti` (mengembalikan cetak bukti milik sendiri, ter-scope `siswa_id`). Hapus dua rute callback midtrans siswa yang mati (callback resmi: `MidtransWebhookController` + `OrangTuaController@snapFinish`).
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
