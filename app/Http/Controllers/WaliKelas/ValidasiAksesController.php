@@ -126,12 +126,39 @@ class ValidasiAksesController extends Controller
         ]);
     }
 
+    /** Kumpulan id kelas yang diampu wali (dimemo per-request). */
+    private ?\Illuminate\Support\Collection $kelasIdsWaliCache = null;
+
+    private function kelasIdsWali(): \Illuminate\Support\Collection
+    {
+        if ($this->kelasIdsWaliCache === null) {
+            $tenagaPendidik = $this->getTenagaPendidik();
+            $this->kelasIdsWaliCache = $tenagaPendidik
+                ? $this->getKelasWali($tenagaPendidik)->pluck('id')
+                : collect();
+        }
+
+        return $this->kelasIdsWaliCache;
+    }
+
+    /**
+     * Pastikan siswa berada di kelas yang diampu wali. Cegah IDOR validasi akses
+     * ujian/rapor untuk siswa kelas lain.
+     */
+    private function assertSiswaMilikWali(Siswa $siswa): void
+    {
+        if (!$this->kelasIdsWali()->contains($siswa->kelas_id)) {
+            abort(404);
+        }
+    }
+
     /**
      * Validasi akses ujian untuk satu siswa
      */
     public function validasiUjian($siswaId): RedirectResponse
     {
         $siswa = Siswa::findOrFail($siswaId);
+        $this->assertSiswaMilikWali($siswa);
 
         if (!$siswa->validasi_ujian_bendahara) {
             return back()->with('error', 'Akses ujian belum divalidasi oleh Bendahara!');
@@ -152,6 +179,7 @@ class ValidasiAksesController extends Controller
     public function batalkanUjian($siswaId): RedirectResponse
     {
         $siswa = Siswa::findOrFail($siswaId);
+        $this->assertSiswaMilikWali($siswa);
 
         $siswa->update([
             'validasi_ujian_wali' => false,
@@ -168,6 +196,7 @@ class ValidasiAksesController extends Controller
     public function validasiRapor($siswaId): RedirectResponse
     {
         $siswa = Siswa::findOrFail($siswaId);
+        $this->assertSiswaMilikWali($siswa);
 
         $siswa->update([
             'validasi_rapor_wali' => true,
@@ -185,6 +214,7 @@ class ValidasiAksesController extends Controller
     public function batalkanRapor($siswaId): RedirectResponse
     {
         $siswa = Siswa::findOrFail($siswaId);
+        $this->assertSiswaMilikWali($siswa);
 
         $siswa->update([
             'validasi_rapor_wali' => false,
@@ -213,7 +243,7 @@ class ValidasiAksesController extends Controller
         foreach ($request->siswa_ids as $siswaId) {
             $siswa = Siswa::find($siswaId);
             
-            if ($siswa && $siswa->validasi_ujian_bendahara && !$siswa->validasi_ujian_wali) {
+            if ($siswa && $this->kelasIdsWali()->contains($siswa->kelas_id) && $siswa->validasi_ujian_bendahara && !$siswa->validasi_ujian_wali) {
                 $siswa->update([
                     'validasi_ujian_wali' => true,
                     'tanggal_validasi_ujian_wali' => now(),
@@ -240,7 +270,7 @@ class ValidasiAksesController extends Controller
         foreach ($request->siswa_ids as $siswaId) {
             $siswa = Siswa::find($siswaId);
             
-            if ($siswa && !$siswa->validasi_rapor_wali) {
+            if ($siswa && $this->kelasIdsWali()->contains($siswa->kelas_id) && !$siswa->validasi_rapor_wali) {
                 $siswa->update([
                     'validasi_rapor_wali' => true,
                     'tanggal_validasi_rapor_wali' => now(),

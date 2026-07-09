@@ -23,6 +23,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` yang tak dibatasi ke kelas+mapel yang diajar → baca kunci jawaban / ubah / hapus / nilai ujian di kelas/mapel lain | ✅ Fixed |
 | F-10 | 🔴 High | Koreksi tugas | `GuruKoreksiController` `show/store/bulkGrade/ai-suggest` memuat `TugasSiswa/Tugas` tanpa scope kelas+mapel → nilai/baca pengumpulan tugas kelas lain | ✅ Fixed |
 | F-11 | 🔴 High | Rapor wali | `WaliKelas\RaporController` `update/terbitkan/resetNilai/reorderNilai/tarikKembali/preview/print/autoFillKehadiran/exportExcel` + `approve/rejectDownload` tanpa cek kelas wali → kelola/lihat/cetak rapor & setujui unduh kelas lain | ✅ Fixed |
+| F-12 | 🔴 High | Validasi akses wali | `ValidasiAksesController` validasi/batal ujian&rapor + bulk via `siswaId` tanpa cek kelas → wali buka akses ujian/rapor siswa kelas lain (bobol gerbang keuangan) | ✅ Fixed |
 
 ---
 
@@ -65,6 +66,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** `edit/destroy/importExcel/kirimValidasi/batalkanKirimValidasi/applyFormat` sudah cek kepemilikan, tetapi `update/terbitkan/resetNilai/reorderNilai(inti)/tarikKembali/preview/print/autoFillKehadiran/exportExcel` memuat `Rapor::findOrFail($raporId)` **tanpa** verifikasi rapor milik kelas wali → wali bisa ubah/terbitkan/hapus/reset/cetak/ekspor rapor kelas lain. Juga `approveDownload/rejectDownload` memutuskan (dan menerbitkan token unduh) request kelas lain; `requestDownloadIndex` tak ter-scope saat belum ada kelas terpilih.
 **Fix:** Helper `assertRaporMilikWali()` (rapor->kelas_id harus di antara kelas ampuan wali via `wali_kelas_assignments`) dipasang di semua method yang bolong; `assertDownloadRequestMilikWali()` untuk approve/reject; `requestDownloadIndex` di-scope ke kelas ampuan saat tak ada kelas terpilih. Scope ke **seluruh kelas ampuan** (bukan hanya "kelas terpilih") agar tak memutus flow multi-kelas.
 **Test:** `tests/Feature/WaliRaporIdorTest.php`.
+
+### ✅ F-12 — IDOR validasi akses ujian/rapor lintas-kelas (wali) (High)
+**Lokasi:** `app/Http/Controllers/WaliKelas/ValidasiAksesController.php`
+**Isu:** `validasiUjian/batalkanUjian/validasiRapor/batalkanRapor` + `bulkValidasiUjian/bulkValidasiRapor` memuat `Siswa::find($siswaId)` tanpa verifikasi siswa berada di kelas wali → wali bisa membuka/membatalkan akses ujian & rapor siswa kelas mana pun (membobol gerbang validasi Bendahara/keuangan). `index/validasiSemua*` sudah aman (scope kelas).
+**Fix:** Helper `assertSiswaMilikWali()` + `kelasIdsWali()` (memoized) di 4 method per-siswa; kondisi bulk menambahkan `kelasIdsWali()->contains($siswa->kelas_id)`.
+**Test:** _pending_ (mirip `WaliRaporIdorTest`, akan ditambah).
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
