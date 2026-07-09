@@ -21,6 +21,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ⏳ Open |
 | F-08 | 🔴 High | Nilai guru | `GuruNilaiController@update/updateBatch` ubah `nilai_id` tanpa scope kelas+mapel → tampering nilai lintas-kelas | ✅ Fixed |
 | F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` yang tak dibatasi ke kelas+mapel yang diajar → baca kunci jawaban / ubah / hapus / nilai ujian di kelas/mapel lain | ✅ Fixed |
+| F-10 | 🔴 High | Koreksi tugas | `GuruKoreksiController` `show/store/bulkGrade/ai-suggest` memuat `TugasSiswa/Tugas` tanpa scope kelas+mapel → nilai/baca pengumpulan tugas kelas lain | ✅ Fixed |
 
 ---
 
@@ -51,6 +52,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** `verifyAccess()` hanya memastikan guru mengajar kelas+mapel **di route**, tetapi banyak method memuat `Ujian`/`SoalUjian`/`UjianSiswa` dari `ujianId/soalId/ujianSiswaId` yang dikirim user **tanpa scope `guru_id`**. Guru mana pun bisa: melihat **kunci jawaban** ujian guru lain (`soal`, `manageSoal`, `editSoal`, `getAiSuggestion`), menambah/ubah/hapus soal (`storeSoal/updateSoal/destroySoal/storeAllSoal/importSoal/bulkStoreSoal`), toggle status/visibilitas (`toggleStatus/toggleResultVisibility`), melihat hasil & menilai (`hasil/koreksiShow/koreksiStore`). (`edit/update/destroy/pengawasan/pengawasanData` sudah aman.)
 **Fix:** Helper `authorizedUjian(...)` membatasi ujian ke **kelas+mapel yang diajar guru** (dijamin `verifyAccess`), `firstOrFail`; `authorizedSoal(...)` men-scope soal ke ujian tsb. Semua method memuat resource lewat helper ini; `koreksiStore` men-scope `UjianSiswa` ke ujian terotorisasi. Sengaja **tidak** mengunci ke `guru_id` (pembuat) agar team-teaching di kelas+mapel yang sama tetap berjalan (flow-preserving).
 **Test:** `tests/Feature/GuruUjianSoalIdorTest.php`.
+
+### ✅ F-10 — IDOR koreksi tugas lintas-kelas (High)
+**Lokasi:** `app/Http/Controllers/Guru/GuruKoreksiController.php`
+**Isu:** `index/show/store/bulkGrade/getAiAssignmentSuggestion` memanggil `verifyAccess()` untuk kelas+mapel route, tetapi memuat `Tugas`/`TugasSiswa` dari `tugasId/submissionId` yang dikirim user **tanpa scope** → guru bisa membaca & menilai pengumpulan tugas di kelas/mapel lain.
+**Fix:** Helper `authorizedTugas(kelas,mapel,tugas)` & `authorizedSubmission(submission,tugas)` (firstOrFail ter-scope, tidak mengunci `guru_id` agar team-teaching jalan); `bulkGrade` membatasi `siswa_ids` ke `tugas_id` terverifikasi. Bonus robustness: `feedback_guru` di `store/bulkGrade` dibuat `?? null` (cegah 500 bila field opsional tidak dikirim).
+**Test:** `tests/Feature/GuruKoreksiIdorTest.php`.
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.

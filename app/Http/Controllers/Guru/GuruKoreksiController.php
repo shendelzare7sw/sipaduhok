@@ -29,7 +29,7 @@ class GuruKoreksiController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $tugas = Tugas::findOrFail($tugasId);
+        $tugas = $this->authorizedTugas($kelasId, $mapelId, $tugasId);
 
         $submissions = TugasSiswa::with('siswa')
             ->where('tugas_id', $tugasId)
@@ -72,8 +72,8 @@ class GuruKoreksiController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
-        $tugas = Tugas::findOrFail($tugasId);
-        $submission = TugasSiswa::with('siswa')->findOrFail($submissionId);
+        $tugas = $this->authorizedTugas($kelasId, $mapelId, $tugasId);
+        $submission = $this->authorizedSubmission($submissionId, $tugas);
 
         return view('guru.lms.tugas.koreksi-show', [
             'kelas' => $kelas,
@@ -100,10 +100,11 @@ class GuruKoreksiController extends Controller
             'feedback_guru' => 'nullable|string',
         ]);
 
-        $submission = TugasSiswa::findOrFail($submissionId);
+        $tugas = $this->authorizedTugas($kelasId, $mapelId, $tugasId);
+        $submission = $this->authorizedSubmission($submissionId, $tugas);
         $submission->update([
             'nilai' => $validated['nilai'],
-            'feedback_guru' => $validated['feedback_guru'],
+            'feedback_guru' => $validated['feedback_guru'] ?? null,
             'status' => 'dinilai',
         ]);
 
@@ -131,16 +132,22 @@ class GuruKoreksiController extends Controller
             'feedback_guru' => 'nullable|string',
         ]);
 
+        // IDOR guard: batasi ke pengumpulan milik tugas di kelas+mapel yang diverifikasi.
+        $tugas = $this->authorizedTugas($kelasId, $mapelId, $tugasId);
+
         TugasSiswa::whereIn('id', $validated['siswa_ids'])
+            ->where('tugas_id', $tugas->id)
             ->update([
                 'nilai' => $validated['nilai'],
-                'feedback_guru' => $validated['feedback_guru'],
+                'feedback_guru' => $validated['feedback_guru'] ?? null,
                 'status' => 'dinilai',
             ]);
 
         // Notify each siswa about nilai
         $notificationService = app(NotificationService::class);
-        $submissions = TugasSiswa::whereIn('id', $validated['siswa_ids'])->get();
+        $submissions = TugasSiswa::whereIn('id', $validated['siswa_ids'])
+            ->where('tugas_id', $tugas->id)
+            ->get();
         foreach ($submissions as $submission) {
             $notificationService->notifyNilaiUpdate($submission);
         }
@@ -158,8 +165,8 @@ class GuruKoreksiController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $submission = TugasSiswa::findOrFail($submissionId);
-        $tugas = Tugas::findOrFail($tugasId);
+        $tugas = $this->authorizedTugas($kelasId, $mapelId, $tugasId);
+        $submission = $this->authorizedSubmission($submissionId, $tugas);
 
         $aiService = new \App\Services\AiGradingService();
 
@@ -251,6 +258,29 @@ class GuruKoreksiController extends Controller
             'error' => true,
             'feedback' => 'Tidak ada jawaban teks atau gambar yang valid untuk dianalisis AI.'
         ]);
+    }
+
+    /**
+     * Muat tugas & pastikan berada di kelas+mapel yang diajar guru (verifyAccess sudah
+     * menjamin akses kelas+mapel route). Cegah IDOR koreksi tugas kelas/mapel lain.
+     */
+    private function authorizedTugas($kelasId, $mapelId, $tugasId): Tugas
+    {
+        return Tugas::where('id', $tugasId)
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
+    }
+
+    /**
+     * Muat pengumpulan (TugasSiswa) & pastikan milik tugas yang sudah diotorisasi.
+     */
+    private function authorizedSubmission($submissionId, Tugas $tugas): TugasSiswa
+    {
+        return TugasSiswa::with('siswa')
+            ->where('id', $submissionId)
+            ->where('tugas_id', $tugas->id)
+            ->firstOrFail();
     }
 
     /**
