@@ -24,6 +24,9 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-10 | 🔴 High | Koreksi tugas | `GuruKoreksiController` `show/store/bulkGrade/ai-suggest` memuat `TugasSiswa/Tugas` tanpa scope kelas+mapel → nilai/baca pengumpulan tugas kelas lain | ✅ Fixed |
 | F-11 | 🔴 High | Rapor wali | `WaliKelas\RaporController` `update/terbitkan/resetNilai/reorderNilai/tarikKembali/preview/print/autoFillKehadiran/exportExcel` + `approve/rejectDownload` tanpa cek kelas wali → kelola/lihat/cetak rapor & setujui unduh kelas lain | ✅ Fixed |
 | F-12 | 🔴 High | Validasi akses wali | `ValidasiAksesController` validasi/batal ujian&rapor + bulk via `siswaId` tanpa cek kelas → wali buka akses ujian/rapor siswa kelas lain (bobol gerbang keuangan) | ✅ Fixed |
+| F-13 | 🔴 High | Presensi wali | `PresensiController@updatePresensi` tulis presensi via `siswa_id`+`kelas_id` sembarang (hanya `exists:`) tanpa cek kelas ampuan → tampering absensi siswa kelas lain | ✅ Fixed |
+| F-14 | 🔴 High | Presensi wali | `PresensiController@inputHarian` (bulk) sama seperti F-13; `kelas_id`/`siswa_id` tak diverifikasi milik wali | ✅ Fixed |
+| F-15 | 🔴 High | Bukti izin wali | `PresensiController@previewBukti` sajikan file bukti izin via `id` tanpa otorisasi → wali lihat dokumen izin/sakit (pribadi) siswa kelas mana pun | ✅ Fixed |
 
 ---
 
@@ -72,6 +75,18 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** `validasiUjian/batalkanUjian/validasiRapor/batalkanRapor` + `bulkValidasiUjian/bulkValidasiRapor` memuat `Siswa::find($siswaId)` tanpa verifikasi siswa berada di kelas wali → wali bisa membuka/membatalkan akses ujian & rapor siswa kelas mana pun (membobol gerbang validasi Bendahara/keuangan). `index/validasiSemua*` sudah aman (scope kelas).
 **Fix:** Helper `assertSiswaMilikWali()` + `kelasIdsWali()` (memoized) di 4 method per-siswa; kondisi bulk menambahkan `kelasIdsWali()->contains($siswa->kelas_id)`.
 **Test:** `tests/Feature/WaliValidasiAksesIdorTest.php`.
+
+### ✅ F-13 / F-14 — Tampering presensi lintas-kelas (wali) (High)
+**Lokasi:** `app/Http/Controllers/WaliKelas/PresensiController.php` (`updatePresensi`, `inputHarian`)
+**Isu:** Kedua method memvalidasi `kelas_id`/`siswa_id` hanya dengan `exists:` (ada di tabel), **tanpa** memastikan kelas itu diampu wali dan siswa memang anggota kelas tsb. Wali mana pun bisa membuat/menimpa presensi (mis. menandai "alpha"/"hadir") untuk siswa di kelas lain — data yang ikut menghitung kehadiran rapor. `updateRiwayat/prosesValidasiIzin/importExcel` sudah punya gerbang kelas.
+**Fix:** Helper `assertKelasMilikWali($kelasId)` (kelas harus ada di `kelasIdsWali()` = seluruh kelas ampuan wali) + `assertSiswaDiKelas($siswaId,$kelasId)` di `updatePresensi`; `inputHarian` memuat daftar `siswa_id` sah untuk kelas lalu **melewati** baris siswa di luar kelas. Juga `updateRiwayat` dipindah ke `assertPresensiMilikWali()` (menghapus potensi null-deref saat belum ada kelas terpilih).
+**Test:** `tests/Feature/WaliPresensiIdorTest.php`.
+
+### ✅ F-15 — Kebocoran bukti izin lewat `previewBukti` (wali) (High)
+**Lokasi:** `app/Http/Controllers/WaliKelas/PresensiController.php` (`previewBukti`)
+**Isu:** `Presensi::findOrFail($id)` lalu `response()->file(...)` **tanpa otorisasi apa pun** → wali bisa mengunduh/melihat bukti izin/sakit (dokumen pribadi, kadang surat medis) milik siswa kelas mana pun dengan menebak/menghitung `id`. Sekelas dengan F-01/F-02.
+**Fix:** Tambah `assertPresensiMilikWali($presensi)` (cek `kelas_id` presensi maupun `kelas_id` siswa berada di antara kelas ampuan wali) sebelum menyajikan file.
+**Test:** `tests/Feature/WaliPresensiIdorTest.php`.
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.

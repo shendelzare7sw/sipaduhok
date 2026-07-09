@@ -23,6 +23,59 @@ class PresensiController extends Controller
         return in_array($status, ['sakit', 'izin'], true) ? 'disetujui' : null;
     }
 
+    /** Kumpulan id kelas yang diampu wali (dimemo per-request). */
+    private ?\Illuminate\Support\Collection $kelasIdsWaliCache = null;
+
+    private function kelasIdsWali(): \Illuminate\Support\Collection
+    {
+        if ($this->kelasIdsWaliCache === null) {
+            $tenagaPendidik = $this->getTenagaPendidik();
+            $this->kelasIdsWaliCache = $tenagaPendidik
+                ? $this->getKelasWali($tenagaPendidik)->pluck('id')
+                : collect();
+        }
+
+        return $this->kelasIdsWaliCache;
+    }
+
+    /**
+     * Pastikan kelas yang dituju benar-benar diampu wali. Cegah wali mengubah presensi
+     * kelas lain lewat kelas_id sembarang (IDOR lintas-kelas).
+     */
+    private function assertKelasMilikWali($kelasId): void
+    {
+        if (!$this->kelasIdsWali()->contains((int) $kelasId)) {
+            abort(403, 'Anda tidak memiliki akses ke kelas ini.');
+        }
+    }
+
+    /**
+     * Pastikan siswa memang berada di kelas tujuan. Cegah penyisipan siswa kelas lain.
+     */
+    private function assertSiswaDiKelas($siswaId, $kelasId): void
+    {
+        $milik = Siswa::where('id', $siswaId)
+            ->where('kelas_id', $kelasId)
+            ->exists();
+
+        if (!$milik) {
+            abort(403, 'Siswa tidak berada di kelas ini.');
+        }
+    }
+
+    /**
+     * Pastikan record presensi berada di salah satu kelas yang diampu wali (cek via
+     * kelas_id presensi maupun kelas siswa untuk data lama yang tidak sinkron).
+     */
+    private function assertPresensiMilikWali(Presensi $presensi): void
+    {
+        $kelasIds = $this->kelasIdsWali();
+        if (!$kelasIds->contains($presensi->kelas_id)
+            && !$kelasIds->contains(optional($presensi->siswa)->kelas_id)) {
+            abort(403, 'Anda tidak memiliki akses ke data presensi ini.');
+        }
+    }
+
     /**
      * Display presensi siswa
      */
@@ -156,6 +209,10 @@ class PresensiController extends Controller
             'status' => 'required|in:hadir,sakit,izin,alpha',
             'keterangan' => 'nullable|string|max:500',
         ]);
+
+        // IDOR guard: kelas harus diampu wali & siswa harus benar berada di kelas itu.
+        $this->assertKelasMilikWali($request->kelas_id);
+        $this->assertSiswaDiKelas($request->siswa_id, $request->kelas_id);
 
         Presensi::updateOrCreate(
             [
@@ -308,7 +365,15 @@ class PresensiController extends Controller
             'presensi.*.status' => 'required|in:hadir,sakit,izin,alpha',
         ]);
 
+        // IDOR guard: kelas harus diampu wali; siswa di luar kelas ini dilewati.
+        $this->assertKelasMilikWali($request->kelas_id);
+        $validSiswaIds = Siswa::where('kelas_id', $request->kelas_id)->pluck('id')->all();
+
         foreach ($request->presensi as $data) {
+            if (!in_array((int) $data['siswa_id'], $validSiswaIds, true)) {
+                continue; // lewati siswa yang bukan anggota kelas (cegah tampering lintas-kelas)
+            }
+
             Presensi::updateOrCreate(
                 [
                     'siswa_id' => $data['siswa_id'],
@@ -390,15 +455,11 @@ class PresensiController extends Controller
      */
     public function updateRiwayat(Request $request, $id): RedirectResponse
     {
-        $presensi = Presensi::findOrFail($id);
-        
-        // Security check: ensure presensi belongs to wali kelas's current class
-        $tenagaPendidik = $this->getTenagaPendidik();
-        $kelas = $this->getSelectedKelas($tenagaPendidik);
-        
-        if ($presensi->kelas_id != $kelas->id) {
-            abort(403, 'Anda tidak memiliki akses ke data ini.');
-        }
+        $presensi = Presensi::with('siswa')->findOrFail($id);
+
+        // Security check: presensi harus berada di salah satu kelas yang diampu wali.
+        // (Pakai kelasIdsWali agar tidak null-deref saat belum ada kelas terpilih.)
+        $this->assertPresensiMilikWali($presensi);
 
         $validated = $request->validate([
             'status' => 'required|in:hadir,sakit,izin,alpha',
@@ -617,8 +678,12 @@ class PresensiController extends Controller
      */
     public function previewBukti($id)
     {
-        $presensi = Presensi::findOrFail($id);
-        
+        $presensi = Presensi::with('siswa')->findOrFail($id);
+
+        // Otorisasi: hanya wali yang mengampu kelas siswa boleh melihat bukti izin
+        // (dokumen pribadi/medis). Cegah wali membuka bukti siswa kelas lain via id.
+        $this->assertPresensiMilikWali($presensi);
+
         if (!$presensi->bukti_file) {
             abort(404);
         }
