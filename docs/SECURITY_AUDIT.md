@@ -71,7 +71,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Lokasi:** `app/Http/Controllers/WaliKelas/ValidasiAksesController.php`
 **Isu:** `validasiUjian/batalkanUjian/validasiRapor/batalkanRapor` + `bulkValidasiUjian/bulkValidasiRapor` memuat `Siswa::find($siswaId)` tanpa verifikasi siswa berada di kelas wali → wali bisa membuka/membatalkan akses ujian & rapor siswa kelas mana pun (membobol gerbang validasi Bendahara/keuangan). `index/validasiSemua*` sudah aman (scope kelas).
 **Fix:** Helper `assertSiswaMilikWali()` + `kelasIdsWali()` (memoized) di 4 method per-siswa; kondisi bulk menambahkan `kelasIdsWali()->contains($siswa->kelas_id)`.
-**Test:** _pending_ (mirip `WaliRaporIdorTest`, akan ditambah).
+**Test:** `tests/Feature/WaliValidasiAksesIdorTest.php`.
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
