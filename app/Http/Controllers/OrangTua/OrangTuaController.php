@@ -1169,83 +1169,111 @@ class OrangTuaController extends Controller
         // Use the first record to identify student and generic details
         $firstPayment = $payments->first();
 
-        // Update status for ALL payments in this order if webhook hasn't been called yet (fallback)
+        // OTORISASI: order ini harus milik anak dari wali siswa yang login.
+        // (Redirect finish tidak boleh dipakai menyentuh transaksi orang lain.)
+        $user = Auth::user();
+        $isMyChild = $user && $user->children()->where('siswa.id', $firstPayment->siswa_id)->exists();
+        if (!$isMyChild) {
+            abort(403, 'Anda tidak memiliki akses ke transaksi ini.');
+        }
+
+        // F-19: URL "finish" Midtrans TIDAK bertanda tangan, jadi `transaction_status` dari
+        // query TIDAK boleh dipercaya untuk mengubah status. Jalur otoritatif adalah webhook
+        // (bertanda tangan). Sebagai fallback UX, ambil status SEBENARNYA via API Midtrans
+        // (pola sama seperti dashboard()/tagihanAnak()); kalau tak tersedia, jangan ubah data.
+        $newStatus = null; // null = tidak diketahui/otoritatif tak tersedia → jangan sentuh DB
         $midtransService = new MidtransService();
-        $newStatus = $midtransService->mapTransactionStatus($transactionStatus);
-
-        foreach ($payments as $pembayaran) {
-            $oldStatus = $pembayaran->status_validasi;
-
-            // Only update if webhook hasn't updated it yet
-            if ($oldStatus === 'pending' && $newStatus !== 'pending') {
-                $pembayaran->update([
-                    'status_validasi' => $newStatus,
-                    'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
+        if ($midtransService->isConfigured()) {
+            try {
+                $status = $midtransService->getTransactionStatus($orderId);
+                $newStatus = $midtransService->mapTransactionStatus(
+                    $status->transaction_status ?? null,
+                    $status->fraud_status ?? 'accept'
+                );
+            } catch (\Exception $e) {
+                \Log::error('snapFinish get authoritative status failed: ' . $e->getMessage(), [
+                    'order_id' => $orderId,
                 ]);
+            }
+        }
 
-                // Create audit log for bendahara tracking
-                \App\Models\FinancialAuditLog::create([
-                    'user_id' => Auth::id(),
-                    'action' => 'update_status',
-                    'model_type' => 'Pembayaran',
-                    'model_id' => $pembayaran->id,
-                    'old_values' => json_encode(['status_validasi' => $oldStatus]),
-                    'new_values' => json_encode(['status_validasi' => $newStatus]),
-                    'description' => "Pembayaran digital {$orderId} status updated from redirect (fallback): {$transactionStatus} → {$newStatus}",
-                    'ip_address' => request()->ip(),
-                    'user_agent' => request()->userAgent(),
-                ]);
+        // Update status untuk SEMUA pembayaran di order ini bila webhook belum menyentuhnya.
+        if ($newStatus !== null) {
+            foreach ($payments as $pembayaran) {
+                $oldStatus = $pembayaran->status_validasi;
 
-                // Auto-update status tagihan if payment approved
-                if ($newStatus === 'disetujui') {
-                    $pembayaran->tagihan->updateStatusBayar();
-
-                    \Log::info('Tagihan status auto-updated from snapFinish', [
-                        'tagihan_id' => $pembayaran->tagihan_id,
-                        'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
+                // Only update if webhook hasn't updated it yet
+                if ($oldStatus === 'pending' && $newStatus !== 'pending') {
+                    $pembayaran->update([
+                        'status_validasi' => $newStatus,
+                        'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
                     ]);
 
-                    // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
-                    $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
-                        ->where('siswa_id', $pembayaran->siswa_id)
-                        ->where('id', '!=', $pembayaran->id)
-                        ->where('status_validasi', 'pending')
-                        ->update([
-                            'status_validasi' => 'ditolak',
-                            'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
+                    // Create audit log for bendahara tracking
+                    \App\Models\FinancialAuditLog::create([
+                        'user_id' => Auth::id(),
+                        'action' => 'update_status',
+                        'model_type' => 'Pembayaran',
+                        'model_id' => $pembayaran->id,
+                        'old_values' => json_encode(['status_validasi' => $oldStatus]),
+                        'new_values' => json_encode(['status_validasi' => $newStatus]),
+                        'description' => "Pembayaran digital {$orderId} status updated from finish (verified via Midtrans API): {$newStatus}",
+                        'ip_address' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ]);
+
+                    // Auto-update status tagihan if payment approved
+                    if ($newStatus === 'disetujui') {
+                        $pembayaran->tagihan->updateStatusBayar();
+
+                        \Log::info('Tagihan status auto-updated from snapFinish', [
+                            'tagihan_id' => $pembayaran->tagihan_id,
+                            'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
                         ]);
 
-                    if ($cancelledCount > 0) {
-                        \App\Models\FinancialAuditLog::create([
-                            'user_id' => Auth::id(),
-                            'action' => 'auto_cancel_duplicates',
-                            'model_type' => 'Pembayaran',
-                            'model_id' => $pembayaran->id,
-                            'old_values' => null,
-                            'new_values' => json_encode([
-                                'cancelled_count' => $cancelledCount,
-                                'reason' => 'duplicate_payment_prevention',
-                            ]),
-                            'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama",
-                            'ip_address' => request()->ip(),
-                            'user_agent' => request()->userAgent(),
-                        ]);
+                        // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
+                        $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
+                            ->where('siswa_id', $pembayaran->siswa_id)
+                            ->where('id', '!=', $pembayaran->id)
+                            ->where('status_validasi', 'pending')
+                            ->update([
+                                'status_validasi' => 'ditolak',
+                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
+                            ]);
+
+                        if ($cancelledCount > 0) {
+                            \App\Models\FinancialAuditLog::create([
+                                'user_id' => Auth::id(),
+                                'action' => 'auto_cancel_duplicates',
+                                'model_type' => 'Pembayaran',
+                                'model_id' => $pembayaran->id,
+                                'old_values' => null,
+                                'new_values' => json_encode([
+                                    'cancelled_count' => $cancelledCount,
+                                    'reason' => 'duplicate_payment_prevention',
+                                ]),
+                                'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama",
+                                'ip_address' => request()->ip(),
+                                'user_agent' => request()->userAgent(),
+                            ]);
+                        }
                     }
                 }
             }
         }
 
-        // Redirect to tagihan page with appropriate message
-        if ($transactionStatus === 'settlement' || $transactionStatus === 'capture') {
+        // Pesan berdasarkan status OTORITATIF (bukan query). Bila tak tersedia → status terkini record.
+        $effectiveStatus = $newStatus ?? $firstPayment->fresh()->status_validasi;
+        if ($effectiveStatus === 'disetujui') {
             return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
                 ->with('success', 'Pembayaran berhasil! Transaksi telah dikonfirmasi.');
-        } elseif ($transactionStatus === 'pending') {
+        } elseif ($effectiveStatus === 'ditolak') {
             return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
-                ->with('info', 'Pembayaran Anda sedang diproses. Mohon tunggu konfirmasi dari bank.');
-        } else {
-            return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
-                ->with('warning', 'Pembayaran dibatalkan atau gagal. Status: ' . $transactionStatus);
+                ->with('warning', 'Pembayaran dibatalkan atau gagal.');
         }
+
+        return redirect()->route('wali-siswa.tagihan.anak', $firstPayment->siswa_id)
+            ->with('info', 'Pembayaran Anda sedang diproses. Mohon tunggu konfirmasi dari bank.');
     }
 
     /**
