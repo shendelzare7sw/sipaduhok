@@ -28,6 +28,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-14 | 🔴 High | Presensi wali | `PresensiController@inputHarian` (bulk) sama seperti F-13; `kelas_id`/`siswa_id` tak diverifikasi milik wali | ✅ Fixed |
 | F-15 | 🔴 High | Bukti izin wali | `PresensiController@previewBukti` sajikan file bukti izin via `id` tanpa otorisasi → wali lihat dokumen izin/sakit (pribadi) siswa kelas mana pun | ✅ Fixed |
 | F-16 | 🟠 Medium | Forum guru | `GuruForumController` `show/reply/destroyReply/togglePin/toggleClose` muat forum/reply via id tanpa scope kelas+mapel → baca/tulis/hapus/pin diskusi kelas/mapel yang tak diajar | ✅ Fixed |
+| F-17 | 🟡 Low | Template capaian | `TemplateCapaianController@update/destroy` tak cek `created_by` → wali mana pun bisa ubah/hapus template milik wali lain (pustaka bersama, sesama-role) | ⏳ Open (kebijakan) |
 
 ---
 
@@ -110,6 +111,10 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 ### ⏳ F-07 — `parent_id` reply forum tak ter-scope (Low)
 `LmsForumController@reply` memvalidasi `parent_id` hanya `exists:forum_replies,id` tanpa memastikan parent berada di diskusi yang sama.
 
+### ⏳ F-17 — Template capaian: edit/hapus tanpa cek pemilik (Low, butuh kebijakan)
+`TemplateCapaianController@update/destroy` memuat `TemplateCapaianKompetensi::findOrFail($id)` lalu mengubah/menghapus **tanpa** memeriksa `created_by`. `index` menampilkan semua template lintas-pembuat, dan `created_by` dicatat tapi tak pernah dipakai men-scope → ini tampak sebagai **pustaka template bersama** antar-wali (bukan per-pemilik). Risiko: wali lain bisa mengubah/menghapus template yang dibuat rekannya (integritas data sesama-role, bukan eskalasi lintas-role / kebocoran data).
+**Keputusan yang diperlukan:** (a) jika memang pustaka bersama → biarkan, atau batasi **hapus** saja ke `created_by`+admin; (b) jika seharusnya per-pemilik → scope `update/destroy` ke `where('created_by', auth()->id())`. Sengaja **tidak** diubah sekarang agar tidak memutus flow "template dipakai bersama" tanpa konfirmasi.
+
 ---
 
 ## Area yang sudah diverifikasi AMAN
@@ -121,12 +126,21 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - **Tugas/Materi guru** (`GuruTugasController`, `GuruMateriController`): `edit/update/destroy` dobel-scope (`verifyAccess` + `where('guru_id')->firstOrFail()`).
 - **Ujian guru** (`GuruUjianController`): `edit/update/destroy/pengawasan/pengawasanData` ter-scope `guru_id`; sisanya diperbaiki di F-09.
 - **Nilai wali kelas** (`WaliKelas\NilaiController` + trait `WaliKelasHelper`): `update/clearNilai/syncFromGuru/import` di-scope ke kelas wali; `getSelectedKelas()` memvalidasi session terhadap `wali_kelas_assignments` (tak bisa pilih kelas sembarang).
+- **Meeting/kelas virtual guru** (`GuruLmsMeetingController`): `index` filter `guru_id`; `edit/update/destroy` muat `where('guru_id')->firstOrFail()`; duplikasi ke kelas lain difilter `hasAccess`.
+- **Catatan monitoring guru** (`GuruCatatanMonitoringController`): `index/show` di-scope `forGuru($tp->id)` = `where('guru_id',...)` → hanya catatan yang ditujukan ke guru ybs.
+- **Dashboard/Jadwal/Kelas guru** (`GuruLmsController@dashboard`, `GuruJadwalController`, `GuruKelasController`): read-only, statistik & data di-scope `guru_id` + `verifyAccess`/`GuruPengajarKelas`.
+- **Arsip LMS guru** (`GuruLmsArsipController` + `GuruLmsArsipService`): `resolveKonten` scope sumber `where('guru_id')->findOrFail`; `salin*` verifikasi sumber (milik guru) **dan** tujuan (`validateKelasMapelTujuan` = diampu di TA aktif).
+- **Dashboard/Rapor-pending/Jadwal wali** (`WaliKelasController`): read-only, di-scope `getKelasWali`/`wali_kelas_assignments`/kelas terpilih.
+- **Pilih kelas wali** (`PilihKelasController`): `select()` memverifikasi kelas ∈ `getKelasWali` sebelum simpan session.
+- **Jadwal wali** (`WaliKelas\JadwalPelajaranController`): read-only, scope kelas terpilih (dari `getKelasWali`).
+- **Prediksi kenaikan wali** (`WaliKelas\PromotionController`): read-only, scope `getSelectedKelas`; eksekusi kenaikan/kelulusan ada di peran admin/ketua/bendahara (di luar segitiga pembelajaran).
+- **Arsip wali** (`WaliKelasArsipController`): tiap method `guardAccess($kelas)` memverifikasi wali pernah di-assign ke kelas via `wali_kelas_assignments` (akses historis read-only).
 
 ---
 
 ## Progres Fase
 - [x] Fase 1 — Pemetaan permukaan (middleware, role, route, controller)
-- [~] Fase 2 — Kontrol akses/IDOR: **siswa selesai**; guru & wali berikutnya
+- [x] Fase 2 — Kontrol akses/IDOR segitiga pembelajaran (**siswa, guru, wali kelas selesai**); F-08..F-16 ditambal + F-17 dicatat (kebijakan)
 - [ ] Fase 3 — Autentikasi (login, PIN, recovery, session, password)
 - [ ] Fase 4 — Validasi input / SQLi / XSS / mass assignment
 - [ ] Fase 5 — Upload file
