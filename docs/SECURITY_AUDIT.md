@@ -167,16 +167,19 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - **Pemulihan admin** (`AdminRecoveryController`): `unlock` hanya toggle UI (tak ada cek kredensial); `reset` `throttle:5,1` + multi-faktor (pertanyaan keamanan + jawaban `Hash::check` + PIN 6-digit `Hash::check`) + cek peran admin/ketua + pesan generik (anti-enumerasi) + logging. Brute-force PIN ter-hash @5/menit infeasible.
 - **Pemulihan pengguna** (`UserRecoveryController` + reset via link): `POST /recovery` & reset `throttle:5,1`; link reset pakai token + `expires_at` + status non-final + `lockForUpdate` (anti-race).
 - **AI chatbot** (`ai-chatbot/send-message`): `throttle:10,1`.
+- **Validasi input (Fase 4)**: tak ada mass-assignment `update/create($request->all())`; semua controller pakai `$request->validate()` + array field eksplisit. Tak ada SQL injection — semua `selectRaw/orderByRaw/whereRaw` memakai string hardcoded atau binding `?` (mis. `SyncModuleToSheet` `whereRaw("... = ?", [$bulan])`). XSS: keluaran data pengguna konsisten `{!! nl2br(e($x)) !!}` (di-escape dulu); `{!! $var !!}` mentah hanya untuk atribut server (`rowspan/colspan`) & teks instruksi hardcoded.
+- **Upload (Fase 5)**: divalidasi `image|mimes:...`/`mimes:pdf` + `max`; nama file di-generate server (`hashName()`/`time().uniqid().ext`) → tak ada path traversal; penyajian file ter-otorisasi (F-01/F-02/F-15).
+- **CSRF (Fase 6)**: aktif global; pengecualian **hanya** webhook Midtrans (`midtrans/*`, `midtrans/notification`) yang memang eksternal & diverifikasi tanda tangan. Penanganan 419 ramah. `SecurityHeaders` + `RejectEmailHeaderInjection` dipasang global.
 
 ---
 
 ## Progres Fase
 - [x] Fase 1 — Pemetaan permukaan (middleware, role, route, controller)
-- [x] Fase 2 — Kontrol akses/IDOR segitiga pembelajaran (**siswa, guru, wali kelas selesai**); F-08..F-16 ditambal + F-17 dicatat (kebijakan)
-- [ ] Fase 3 — Autentikasi (login, PIN, recovery, session, password)
-- [ ] Fase 4 — Validasi input / SQLi / XSS / mass assignment
-- [ ] Fase 5 — Upload file
-- [ ] Fase 6 — CSRF & endpoint state-changing
-- [ ] Fase 7 — Rate-limit / DoS
-- [ ] Fase 8 — Logika bisnis (ujian, nilai, pembayaran/Midtrans)
-- [ ] Fase 9 — Kompilasi laporan akhir
+- [x] Fase 2 — Kontrol akses/IDOR segitiga pembelajaran (**siswa, guru, wali kelas**) + orang tua/wali siswa; F-08..F-16, F-18 ditambal + F-17 dicatat (kebijakan)
+- [x] Fase 3 — Autentikasi: login (captcha+ratelimit), recovery admin/user (throttle+MFA) — terverifikasi aman
+- [x] Fase 4 — Validasi input / SQLi / XSS / mass assignment — terverifikasi bersih
+- [x] Fase 5 — Upload file — divalidasi mimes + nama server-generated
+- [x] Fase 6 — CSRF — aktif, pengecualian minimal (webhook Midtrans)
+- [x] Fase 7 — Rate-limit / DoS: endpoint AI di-throttle (F-21); login/recovery ter-throttle
+- [x] Fase 8 — Pembayaran/Midtrans: F-19 ditambal, webhook signature terverifikasi, F-20 rute dibersihkan
+- [ ] Fase 9 — Kompilasi laporan akhir (in progress) + tindak lanjut temuan kebijakan (F-03..F-07, F-17)
