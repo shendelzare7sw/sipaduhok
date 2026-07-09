@@ -1292,7 +1292,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'show'])->name('koreksi.show');
                 Route::post('/{tugas}/koreksi/{tugasSiswa}', [GuruKoreksiController::class, 'store'])->name('koreksi.store');
                 Route::post('/{tugas}/koreksi/bulk', [GuruKoreksiController::class, 'bulkGrade'])->name('koreksi.bulk');
-                Route::post('/{tugas}/koreksi/{submission}/ai-suggest', [GuruKoreksiController::class, 'getAiAssignmentSuggestion'])->name('koreksi.ai-suggest');
+                Route::post('/{tugas}/koreksi/{submission}/ai-suggest', [GuruKoreksiController::class, 'getAiAssignmentSuggestion'])->name('koreksi.ai-suggest')->middleware('throttle:30,1');
             });
 
             // Ujian
@@ -1310,7 +1310,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/pengawasan/data', [GuruUjianController::class, 'pengawasanData'])->name('pengawasan.data');
                 Route::get('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiShow'])->name('koreksi.show');
                 Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiStore'])->name('koreksi.store');
-                Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest'); // Added
+                Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest')->middleware('throttle:30,1'); // Added
 
                 // Manajemen Soal
                 Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
@@ -1321,7 +1321,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
 
                 // AI Question Bank Generator
-                Route::post('/{ujian}/ai-generate-questions', [GuruUjianController::class, 'aiGenerateQuestions'])->name('soal.ai-generate');
+                Route::post('/{ujian}/ai-generate-questions', [GuruUjianController::class, 'aiGenerateQuestions'])->name('soal.ai-generate')->middleware('throttle:15,1');
                 Route::post('/{ujian}/bulk-store-soal', [GuruUjianController::class, 'bulkStoreSoal'])->name('soal.bulk-store');
 
                 // Manajemen Soal (Bulk / Multi-Soal)
@@ -1348,7 +1348,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::get('/{ujian}/hasil', [GuruUjianController::class, 'hasil'])->name('hasil');
                 Route::get('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiShow'])->name('koreksi.show');
                 Route::post('/{ujian}/koreksi/{ujianSiswa}', [GuruUjianController::class, 'koreksiStore'])->name('koreksi.store');
-                Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest'); // Added
+                Route::post('/{ujian}/koreksi/{soal}/ai-suggest', [GuruUjianController::class, 'getAiSuggestion'])->name('koreksi.ai-suggest')->middleware('throttle:30,1'); // Added
 
                 // Manajemen Soal Latihan
                 Route::get('/{ujian}/soal', [GuruUjianController::class, 'soal'])->name('soal.index');
@@ -1359,7 +1359,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::delete('/{ujian}/soal/{soal}', [GuruUjianController::class, 'destroySoal'])->name('soal.destroy');
 
                 // AI Question Bank Generator
-                Route::post('/{ujian}/ai-generate-questions', [GuruUjianController::class, 'aiGenerateQuestions'])->name('soal.ai-generate');
+                Route::post('/{ujian}/ai-generate-questions', [GuruUjianController::class, 'aiGenerateQuestions'])->name('soal.ai-generate')->middleware('throttle:15,1');
                 Route::post('/{ujian}/bulk-store-soal', [GuruUjianController::class, 'bulkStoreSoal'])->name('soal.bulk-store');
 
                 // Manajemen Soal Latihan (Bulk)

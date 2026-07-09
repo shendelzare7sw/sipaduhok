@@ -32,6 +32,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-18 | 🟠 Medium | Bayar tagihan ortu | `OrangTuaController@prosesBayar` validasi `tagihan_id` hanya `exists:` tanpa cek tagihan milik anak → wali siswa bisa melampirkan/menyetel pembayaran ke tagihan siswa lain (mismatch integritas) | ✅ Fixed |
 | F-19 | 🔴 High | Pembayaran Midtrans | `OrangTuaController@snapFinish` percaya `transaction_status` dari query redirect (tak bertanda-tangan) → tandai pembayaran `disetujui`/tagihan lunas tanpa benar-benar membayar; juga tak cek `isMyChild` | ✅ Fixed |
 | F-20 | 🟡 Low | Rute rusak (QA) | Rute pembayaran siswa menunjuk metode controller yang tak ada (`bayar`/`cetak`/`midtrans-*`) → tombol "cetak bukti" & submit bayar **500**; callback midtrans siswa dead | ✅ Fixed |
+| F-21 | 🟠 Medium | Rate-limit AI | Endpoint AI guru (`ai-suggest` × koreksi tugas/ujian/latihan, `ai-generate-questions`) tanpa throttle → panggil API AI eksternal (berbiaya) bisa disalahgunakan (abuse biaya/kuota, DoS) | ✅ Fixed |
 
 ---
 
@@ -116,6 +117,11 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** Rute `bayar`→`bayar()`, `cetak`→`cetak()`, plus `midtrans-notification`/`midtrans-finish` menunjuk metode yang **tidak ada** di controller (yang ada: `prosesBayar`, `cetakBukti`; tak ada metode midtrans). View aktif memakainya: `pembayaran/riwayat.blade.php` (tombol cetak bukti) & `pembayaran/index.blade.php` (form bayar) → menekan/submit menghasilkan **HTTP 500**. Bukan celah keamanan (semua ter-scope `siswa_id`), tapi bug nyata. Callback midtrans siswa juga dead (di-`role:siswa`, Midtrans tak bisa memanggilnya).
 **Fix:** Arahkan `bayar`→`prosesBayar` (menampilkan pesan "pembayaran lewat wali siswa" sesuai desain) & `cetak`→`cetakBukti` (mengembalikan cetak bukti milik sendiri, ter-scope `siswa_id`). Hapus dua rute callback midtrans siswa yang mati (callback resmi: `MidtransWebhookController` + `OrangTuaController@snapFinish`).
 
+### ✅ F-21 — Endpoint AI guru tanpa rate-limit (Medium)
+**Lokasi:** `routes/web.php` (grup `guru.lms.*`): `koreksi.ai-suggest` (tugas), `ujian/latihan koreksi.ai-suggest`, `ujian/latihan soal.ai-generate`.
+**Isu:** Kelima endpoint memanggil layanan AI eksternal berbiaya (`AiGradingService`/`GuruUjianController@getAiSuggestion`/`aiGenerateQuestions`) tanpa throttle. Sesi guru yang bocor/berniat jahat bisa membanjiri endpoint → tagihan/kuota API meledak & potensi DoS pihak ketiga. `ai-chatbot/send-message` sudah `throttle:10,1` (preseden).
+**Fix:** Tambah `throttle:30,1` untuk `ai-suggest` (grading, wajar sering) dan `throttle:15,1` untuk `ai-generate-questions` (lebih berat). Batas dibuat longgar agar tak memutus pemakaian normal.
+
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
 
@@ -157,6 +163,10 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - **Arsip wali** (`WaliKelasArsipController`): tiap method `guardAccess($kelas)` memverifikasi wali pernah di-assign ke kelas via `wali_kelas_assignments` (akses historis read-only).
 - **Orang tua / wali siswa** (`OrangTua\OrangTuaController`): semua akses per-anak dijaga `children()->find()` (belongsToMany via `student_parents`) atau `isMyChild = children()->where('siswa.id', …)->exists()` yang **ditegakkan** (redirect/abort 403) — `tagihanAnak/prosesBayar/processBulkPay/raporAnak/detailRapor/presensiAnak/ajukanIzin/storeIzin/riwayat*/editIzin/updateIzin/snapPayment/continuePayment/cetakInvoice/requestDownloadRapor`. `downloadRapor($token)` mengikat token ke `user_id` + status disetujui + kadaluarsa. `detailRapor` juga cek gerbang 3-level `hasFullRaporAccess()`. `prosesBayar` (F-18) & `snapFinish` (F-19) sudah diperbaiki.
 - **Webhook Midtrans** (`MidtransWebhookController@notification`): jalur otoritatif memperbarui status; memverifikasi `signature_key` = `sha512(order_id + status_code + gross_amount + serverKey)` sebelum menyentuh data (invalid → 403). `mapTransactionStatus` menandai `disetujui` hanya untuk `settlement`/`capture(accept)`. **Catatan minor (Low):** `verifySignature` memakai `===`; boleh diganti `hash_equals()` untuk timing-safety (bukan celah eksploitatif — SHA512 tak bisa dipalsukan tanpa serverKey).
+- **Login** (`LoginRequest`): **captcha wajib** tiap percobaan + `RateLimiter` 5 percobaan per (login+IP) dengan lockout + cek `is_active`. Kunci throttle pakai login+IP; captcha jadi backstop bila IP dipalsukan (lihat F-04). Brute-force tak praktis.
+- **Pemulihan admin** (`AdminRecoveryController`): `unlock` hanya toggle UI (tak ada cek kredensial); `reset` `throttle:5,1` + multi-faktor (pertanyaan keamanan + jawaban `Hash::check` + PIN 6-digit `Hash::check`) + cek peran admin/ketua + pesan generik (anti-enumerasi) + logging. Brute-force PIN ter-hash @5/menit infeasible.
+- **Pemulihan pengguna** (`UserRecoveryController` + reset via link): `POST /recovery` & reset `throttle:5,1`; link reset pakai token + `expires_at` + status non-final + `lockForUpdate` (anti-race).
+- **AI chatbot** (`ai-chatbot/send-message`): `throttle:10,1`.
 
 ---
 
