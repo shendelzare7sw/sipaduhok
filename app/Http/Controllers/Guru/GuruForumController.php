@@ -147,6 +147,8 @@ class GuruForumController extends Controller
 
         $forum = ForumDiskusi::with(['user', 'replies.user', 'replies.children.user'])
             ->where('id', $forumId)
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
             ->firstOrFail();
 
         return view('guru.lms.forum.show', [
@@ -172,7 +174,7 @@ class GuruForumController extends Controller
             'attachment.*' => 'file|mimes:jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,mp4,avi,mov|max:10240',
         ]);
 
-        $forum = ForumDiskusi::findOrFail($forumId);
+        $forum = $this->authorizedForum($kelasId, $mapelId, $forumId);
 
         if ($forum->is_closed) {
             return back()->with('error', 'Diskusi ini sudah ditutup.');
@@ -249,9 +251,15 @@ class GuruForumController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $reply = ForumReply::findOrFail($replyId);
+        // Guru boleh menghapus balasan mana pun, TAPI hanya pada diskusi di kelas+mapel
+        // yang ia ajar. Batasi lewat relasi forum (cegah hapus balasan kelas/mapel lain).
+        $reply = ForumReply::where('id', $replyId)
+            ->whereHas('forumDiskusi', function ($q) use ($kelasId, $mapelId) {
+                $q->where('kelas_id', $kelasId)
+                    ->where('mata_pelajaran_id', $mapelId);
+            })
+            ->firstOrFail();
 
-        // Allow teacher to delete any reply in their class
         $reply->delete();
 
         return back()->with('success', 'Balasan berhasil dihapus');
@@ -265,7 +273,7 @@ class GuruForumController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $forum = ForumDiskusi::findOrFail($forumId);
+        $forum = $this->authorizedForum($kelasId, $mapelId, $forumId);
         $newState = !$forum->is_pinned;
         $forum->update(['is_pinned' => $newState]);
 
@@ -302,7 +310,7 @@ class GuruForumController extends Controller
         $tenagaPendidik = TenagaPendidik::where('user_id', auth()->id())->firstOrFail();
         $this->verifyAccess($tenagaPendidik->id, $kelasId, $mapelId);
 
-        $forum = ForumDiskusi::findOrFail($forumId);
+        $forum = $this->authorizedForum($kelasId, $mapelId, $forumId);
         $newState = !$forum->is_closed;
         $forum->update(['is_closed' => $newState]);
 
@@ -392,6 +400,18 @@ class GuruForumController extends Controller
         return redirect()
             ->route('guru.lms.forum.index', [$kelasId, $mapelId])
             ->with('success', $msg);
+    }
+
+    /**
+     * Muat forum & pastikan berada di kelas+mapel yang diajar guru (route sudah dijamin
+     * oleh verifyAccess). Cegah IDOR baca/kelola diskusi kelas/mapel lain lewat forumId.
+     */
+    private function authorizedForum($kelasId, $mapelId, $forumId): ForumDiskusi
+    {
+        return ForumDiskusi::where('id', $forumId)
+            ->where('kelas_id', $kelasId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->firstOrFail();
     }
 
     /**

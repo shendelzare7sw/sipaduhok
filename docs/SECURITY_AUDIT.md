@@ -27,6 +27,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-13 | 🔴 High | Presensi wali | `PresensiController@updatePresensi` tulis presensi via `siswa_id`+`kelas_id` sembarang (hanya `exists:`) tanpa cek kelas ampuan → tampering absensi siswa kelas lain | ✅ Fixed |
 | F-14 | 🔴 High | Presensi wali | `PresensiController@inputHarian` (bulk) sama seperti F-13; `kelas_id`/`siswa_id` tak diverifikasi milik wali | ✅ Fixed |
 | F-15 | 🔴 High | Bukti izin wali | `PresensiController@previewBukti` sajikan file bukti izin via `id` tanpa otorisasi → wali lihat dokumen izin/sakit (pribadi) siswa kelas mana pun | ✅ Fixed |
+| F-16 | 🟠 Medium | Forum guru | `GuruForumController` `show/reply/destroyReply/togglePin/toggleClose` muat forum/reply via id tanpa scope kelas+mapel → baca/tulis/hapus/pin diskusi kelas/mapel yang tak diajar | ✅ Fixed |
 
 ---
 
@@ -87,6 +88,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** `Presensi::findOrFail($id)` lalu `response()->file(...)` **tanpa otorisasi apa pun** → wali bisa mengunduh/melihat bukti izin/sakit (dokumen pribadi, kadang surat medis) milik siswa kelas mana pun dengan menebak/menghitung `id`. Sekelas dengan F-01/F-02.
 **Fix:** Tambah `assertPresensiMilikWali($presensi)` (cek `kelas_id` presensi maupun `kelas_id` siswa berada di antara kelas ampuan wali) sebelum menyajikan file.
 **Test:** `tests/Feature/WaliPresensiIdorTest.php`.
+
+### ✅ F-16 — IDOR forum diskusi lintas-kelas/mapel (guru) (Medium)
+**Lokasi:** `app/Http/Controllers/Guru/GuruForumController.php` (`show`, `reply`, `destroyReply`, `togglePin`, `toggleClose`)
+**Isu:** `verifyAccess()` hanya memastikan guru mengajar kelas+mapel **di route**, tetapi resource dimuat dari `forumId`/`replyId` tanpa scope → dengan menaruh kelas+mapel miliknya sendiri di URL (lolos `verifyAccess`) tapi `forumId` milik kelas/mapel lain, guru bisa: membaca diskusi & balasan siswa kelas lain (`show`), menulis balasan ke diskusi lain (`reply`), menghapus balasan mana pun di sistem (`destroyReply` — komentar lama klaim "in their class" tapi tak ada cek), serta pin/tutup diskusi lain (`togglePin/toggleClose`). `store/updateReply/destroy` sudah aman (owner-scoped / hasAccess).
+**Fix:** Helper `authorizedForum(kelas,mapel,forum)` (firstOrFail ter-scope kelas+mapel) dipakai `show/reply/togglePin/toggleClose`; `destroyReply` memuat reply dengan `whereHas('forumDiskusi', kelas+mapel)`. Bagian sinkronisasi ke "kelas lain" tetap aman karena sudah memfilter `hasAccess`.
+**Test:** `tests/Feature/GuruForumIdorTest.php`.
 
 ### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
 `SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
