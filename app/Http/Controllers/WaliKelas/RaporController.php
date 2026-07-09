@@ -329,6 +329,7 @@ class RaporController extends Controller
         ]);
 
         $rapor = Rapor::findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
 
         // Update rapor
         $rapor->update([
@@ -553,9 +554,24 @@ class RaporController extends Controller
     /**
      * Terbitkan rapor (dengan optional tanggal_rilis)
      */
+    /**
+     * Pastikan rapor berada di salah satu kelas yang menjadi tanggung jawab wali.
+     * Cegah IDOR: wali mengubah/melihat/menerbitkan rapor kelas lain lewat raporId sembarang.
+     */
+    private function assertRaporMilikWali(Rapor $rapor): void
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
+
+        if (!$kelasIds->contains($rapor->kelas_id)) {
+            abort(404);
+        }
+    }
+
     public function terbitkan(Request $request, $raporId): RedirectResponse
     {
         $rapor = Rapor::findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
 
         // Set tanggal_rilis: dari input atau default hari ini
         $tanggalRilis = $request->input('tanggal_rilis') ? $request->input('tanggal_rilis') : now()->toDateString();
@@ -577,6 +593,7 @@ class RaporController extends Controller
     public function resetNilai($raporId): RedirectResponse
     {
         $rapor = Rapor::findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
 
         if ($rapor->status === 'diterbitkan') {
             return back()->with('error', 'Tidak bisa reset nilai rapor yang sudah diterbitkan. Tarik kembali dulu.');
@@ -599,6 +616,7 @@ class RaporController extends Controller
         ]);
 
         $rapor = Rapor::with('siswa')->findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
 
         foreach ($request->order as $index => $raporNilaiId) {
             RaporNilai::where('id', $raporNilaiId)
@@ -664,6 +682,7 @@ class RaporController extends Controller
     public function tarikKembali($raporId): RedirectResponse
     {
         $rapor = Rapor::findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
         
         // Only allow retract if currently published
         if ($rapor->status !== 'diterbitkan') {
@@ -726,6 +745,8 @@ class RaporController extends Controller
             'kegiatanEkstra', // For ekstrakurikuler activities
         ])->findOrFail($raporId);
 
+        $this->assertRaporMilikWali($rapor);
+
         // Auto-fill kehadiran dari presensi agar selalu data terbaru
         $rapor->hitungKehadiranOtomatis();
 
@@ -743,6 +764,7 @@ class RaporController extends Controller
     public function print($raporId)
     {
         $rapor = Rapor::with(['siswa', 'kelas.tahunAjaran', 'raporNilai.mataPelajaran', 'kegiatanEkstra'])->findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
 
         // If upload mode, serve the uploaded PDF
         if ($rapor->input_mode === 'upload_pdf' && $rapor->uploaded_pdf_path) {
@@ -827,6 +849,7 @@ class RaporController extends Controller
     public function autoFillKehadiran(Request $request, $raporId)
     {
         $rapor = Rapor::findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
         $rapor->hitungKehadiranOtomatis();
 
         if ($request->wantsJson()) {
@@ -1034,6 +1057,7 @@ class RaporController extends Controller
     {
         $rapor = Rapor::with(['siswa', 'kelas', 'tahunAjaran', 'raporNilai.mataPelajaran', 'raporNilai.nilai', 'kegiatanEkstra'])
             ->findOrFail($raporId);
+        $this->assertRaporMilikWali($rapor);
 
         $filename = "Rapor_" . Str::slug($rapor->siswa->nama_lengkap) . "_{$rapor->getPeriodeLabel()}.xlsx";
 
@@ -1096,6 +1120,10 @@ class RaporController extends Controller
 
         if ($kelas) {
             $query->whereHas('siswa', fn($q) => $q->where('kelas_id', $kelas->id));
+        } else {
+            // Tanpa kelas terpilih: batasi ke seluruh kelas yang diampu wali (cegah bocornya request kelas lain).
+            $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
+            $query->whereHas('siswa', fn($q) => $q->whereIn('kelas_id', $kelasIds));
         }
 
         $requests = $query->paginate(25);
@@ -1104,11 +1132,26 @@ class RaporController extends Controller
     }
 
     /**
+     * Pastikan request download rapor berada di kelas yang menjadi tanggung jawab wali.
+     */
+    private function assertDownloadRequestMilikWali(RequestDownloadRapor $downloadRequest): void
+    {
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
+        $kelasId = optional($downloadRequest->rapor)->kelas_id ?? optional($downloadRequest->siswa)->kelas_id;
+
+        if (!$kelasId || !$kelasIds->contains($kelasId)) {
+            abort(404);
+        }
+    }
+
+    /**
      * Approve request download rapor.
      */
     public function approveDownload(Request $request, $id): RedirectResponse
     {
-        $downloadRequest = RequestDownloadRapor::findOrFail($id);
+        $downloadRequest = RequestDownloadRapor::with('rapor', 'siswa')->findOrFail($id);
+        $this->assertDownloadRequestMilikWali($downloadRequest);
 
         $downloadRequest->update([
             'status' => 'disetujui',
@@ -1131,7 +1174,8 @@ class RaporController extends Controller
      */
     public function rejectDownload(Request $request, $id): RedirectResponse
     {
-        $downloadRequest = RequestDownloadRapor::findOrFail($id);
+        $downloadRequest = RequestDownloadRapor::with('rapor', 'siswa')->findOrFail($id);
+        $this->assertDownloadRequestMilikWali($downloadRequest);
 
         $downloadRequest->update([
             'status' => 'ditolak',
