@@ -17,7 +17,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-03 | 🟠 Medium | Rapor siswa | Otorisasi `SiaRaporController` tidak konsisten | ✅ Resolved (by design — rute siswa rapor dinonaktifkan; siswa memang tak berhak) |
 | F-04 | 🟠 Medium | Infra | `trustProxies(at:'*')` → IP klien bisa dipalsukan (log & rate-limit) | ✅ Fixed (VPS: percaya loopback saja) |
 | F-05 | 🟡 Low | Headers | Tidak ada Content-Security-Policy; HSTS dikomentari | ✅ Fixed (HSTS saat HTTPS + CSP minimal aman) |
-| F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | 🔧 Pesan digenerik-kan; auto-logout menunggu keputusan |
+| F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | ✅ Fixed (Opsi 1: 403 tanpa logout + pesan generik) |
 | F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ✅ Fixed (siswa & guru) |
 | F-08 | 🔴 High | Nilai guru | `GuruNilaiController@update/updateBatch` ubah `nilai_id` tanpa scope kelas+mapel → tampering nilai lintas-kelas | ✅ Fixed |
 | F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` yang tak dibatasi ke kelas+mapel yang diajar → baca kunci jawaban / ubah / hapus / nilai ujian di kelas/mapel lain | ✅ Fixed |
@@ -142,11 +142,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Lokasi:** `app/Http/Middleware/SecurityHeaders.php`
 **Fix:** (1) **HSTS** diaktifkan tetapi hanya pada koneksi HTTPS (`$request->isSecure()`), `max-age=31536000` tanpa `includeSubDomains` (agar tak mengunci subdomain yang mungkin belum HTTPS). (2) **CSP minimal & aman**: `frame-ancestors 'self'; object-src 'none'; base-uri 'self'` — sengaja TIDAK membatasi `script/style/img/font` agar UI (Sneat/Vite/Bootstrap/FontAwesome/inline script) tetap jalan. **Catatan:** policy penuh (`script-src`/`default-src`) perlu inventarisasi aset lebih dulu (pekerjaan lanjutan bila diinginkan).
 
-### 🔧 F-06 — Kebocoran info & auto-logout `CheckRole` (Low)
+### ✅ F-06 — Kebocoran info & auto-logout `CheckRole` (Low) — Opsi 1
 **Lokasi:** `app/Http/Middleware/CheckRole.php`
 **Isu:** Saat gagal otorisasi, pesan error menyebut **nama role user & role yang dibutuhkan** (kebocoran info) dan melakukan `logout()`+invalidate session (komentar: "untuk kemudahan testing").
-**Sudah diperbaiki:** pesan dijadikan generik (`'Anda tidak memiliki akses ke halaman ini.'`) — tak lagi membocorkan role apa pun.
-**Menunggu keputusan pemilik:** apakah **auto-logout** saat salah-role dipertahankan (kadang dipakai sebagai UX) atau diganti menjadi tolak-tanpa-logout (`abort(403)` / redirect ke dashboard sendiri). Belum diubah agar tak menyentuh perilaku yang ditandai pemilik.
+**Fix (Opsi 1, disetujui pemilik):** kegagalan otorisasi ≠ autentikasi → `abort(403, 'Anda tidak memiliki akses ke halaman ini.')` **tanpa** logout. User tetap login (hanya halaman itu ditolak), pesan generik (tak bocorkan role). Alasan mengganti auto-logout: (a) membuang sesi + kerja user yang belum tersimpan, (b) menjadi "jebakan logout" (link salah-role = tombol logout), (c) tak menambah keamanan (penyerang tinggal login lagi). Semantik HTTP yang benar untuk authz gagal = 403.
+**Test:** `tests/Feature/CheckRoleForbidsWithoutLogoutTest.php` (403 + tetap login + pesan tanpa nama role).
+**Catatan:** belum ada view `errors/403.blade.php` → memakai halaman 403 bawaan Laravel (fungsional; bisa dipercantik nanti bila mau).
 
 ### ✅ F-07 — `parent_id` reply forum tak ter-scope (Low)
 **Lokasi:** `Siswa\LmsForumController@reply`, `Guru\GuruForumController@reply`

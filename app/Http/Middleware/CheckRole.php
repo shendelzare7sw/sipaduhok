@@ -43,15 +43,11 @@ class CheckRole
 
         // Check if user role matches any of the allowed roles
         if (!$userRole || !in_array($userRole, $roles)) {
-            // Auto-logout untuk kemudahan testing
-            auth()->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            // F-06: pesan generik — jangan bocorkan role user maupun role yang dibutuhkan.
-            return redirect()->route('login')->with('error',
-                'Anda tidak memiliki akses ke halaman ini.'
-            );
+            // F-06 (Opsi 1): ini kegagalan OTORISASI, bukan autentikasi. User tetap dikenal
+            // & tetap login — hanya halaman ini yang ditolak. JANGAN akhiri sesi (auto-logout
+            // lama hanya "untuk testing": buang kerja user + jadi jebakan logout via link).
+            // Pesan generik (tanpa nama role) mencegah kebocoran info.
+            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 
         return $next($request);
