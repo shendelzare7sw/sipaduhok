@@ -875,6 +875,10 @@ class RaporController extends Controller
             'template_id' => 'required|exists:template_capaian_kompetensi,id',
         ]);
 
+        // IDOR guard (F-22): rapor tujuan harus milik kelas yang diampu wali.
+        $rapor = Rapor::findOrFail($request->rapor_id);
+        $this->assertRaporMilikWali($rapor);
+
         $template = TemplateCapaianKompetensi::findOrFail($request->template_id);
 
         // Find rapor_nilai
@@ -909,6 +913,13 @@ class RaporController extends Controller
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
             'template_id' => 'required|exists:template_capaian_kompetensi,id',
         ]);
+
+        // IDOR guard (F-22): kelas tujuan harus diampu wali (cegah terapkan massal lintas-kelas).
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
+        if (!$kelasIds->contains((int) $request->kelas_id)) {
+            abort(404);
+        }
 
         $template = TemplateCapaianKompetensi::findOrFail($request->template_id);
 

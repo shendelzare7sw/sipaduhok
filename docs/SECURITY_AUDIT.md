@@ -33,6 +33,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-19 | 🔴 High | Pembayaran Midtrans | `OrangTuaController@snapFinish` percaya `transaction_status` dari query redirect (tak bertanda-tangan) → tandai pembayaran `disetujui`/tagihan lunas tanpa benar-benar membayar; juga tak cek `isMyChild` | ✅ Fixed |
 | F-20 | 🟡 Low | Rute rusak (QA) | Rute pembayaran siswa menunjuk metode controller yang tak ada (`bayar`/`cetak`/`midtrans-*`) → tombol "cetak bukti" & submit bayar **500**; callback midtrans siswa dead | ✅ Fixed |
 | F-21 | 🟠 Medium | Rate-limit AI | Endpoint AI guru (`ai-suggest` × koreksi tugas/ujian/latihan, `ai-generate-questions`) tanpa throttle → panggil API AI eksternal (berbiaya) bisa disalahgunakan (abuse biaya/kuota, DoS) | ✅ Fixed |
+| F-22 | 🟠 Medium | Terapkan template rapor | `RaporController@applyTemplate`/`applyTemplateToAll` tulis deskripsi capaian ke rapor/kelas via id tanpa cek kepemilikan wali (terlewat di F-11) → wali isi deskripsi rapor kelas lain | ✅ Fixed |
 
 ---
 
@@ -116,6 +117,12 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Lokasi:** `routes/web.php` (grup `siswa.sia.pembayaran`), `Siswa\SiaPembayaranController`
 **Isu:** Rute `bayar`→`bayar()`, `cetak`→`cetak()`, plus `midtrans-notification`/`midtrans-finish` menunjuk metode yang **tidak ada** di controller (yang ada: `prosesBayar`, `cetakBukti`; tak ada metode midtrans). View aktif memakainya: `pembayaran/riwayat.blade.php` (tombol cetak bukti) & `pembayaran/index.blade.php` (form bayar) → menekan/submit menghasilkan **HTTP 500**. Bukan celah keamanan (semua ter-scope `siswa_id`), tapi bug nyata. Callback midtrans siswa juga dead (di-`role:siswa`, Midtrans tak bisa memanggilnya).
 **Fix:** Arahkan `bayar`→`prosesBayar` (menampilkan pesan "pembayaran lewat wali siswa" sesuai desain) & `cetak`→`cetakBukti` (mengembalikan cetak bukti milik sendiri, ter-scope `siswa_id`). Hapus dua rute callback midtrans siswa yang mati (callback resmi: `MidtransWebhookController` + `OrangTuaController@snapFinish`).
+
+### ✅ F-22 — IDOR "Terapkan Template" capaian rapor lintas-kelas (Medium)
+**Lokasi:** `app/Http/Controllers/WaliKelas/RaporController.php` (`applyTemplate`, `applyTemplateToAll`)
+**Isu:** Dua method "NEW" (dipakai tombol **Terapkan Template** di edit rapor) memvalidasi `rapor_id`/`kelas_id` hanya `exists:` lalu menulis `RaporNilai.deskripsi` (jika kosong) — **tanpa** cek kepemilikan wali. `applyTemplate` → isi deskripsi rapor mana pun; `applyTemplateToAll` → isi massal seluruh rapor kelas mana pun. **Terlewat saat F-11** (kedua method baru ditambahkan terpisah); ditemukan saat menelusuri alur pemakaian pustaka Template Capaian (F-17). Catatan konteks: halaman kelola template (`/wali/template-capaian`) **orphan** (tak ada link sidebar; hanya via URL), tetapi template-nya dikonsumsi lewat alur ini.
+**Fix:** `applyTemplate` → `assertRaporMilikWali(Rapor::findOrFail($rapor_id))`; `applyTemplateToAll` → cek `kelas_id ∈ getKelasWali()->pluck('id')`, abort 404 bila bukan.
+**Test:** `tests/Feature/WaliApplyTemplateIdorTest.php`.
 
 ### ✅ F-21 — Endpoint AI guru tanpa rate-limit (Medium)
 **Lokasi:** `routes/web.php` (grup `guru.lms.*`): `koreksi.ai-suggest` (tugas), `ujian/latihan koreksi.ai-suggest`, `ujian/latihan soal.ai-generate`.
