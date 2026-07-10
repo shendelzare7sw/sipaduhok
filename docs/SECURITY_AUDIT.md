@@ -34,6 +34,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-20 | 🟡 Low | Rute rusak (QA) | Rute pembayaran siswa menunjuk metode controller yang tak ada (`bayar`/`cetak`/`midtrans-*`) → tombol "cetak bukti" & submit bayar **500**; callback midtrans siswa dead | ✅ Fixed |
 | F-21 | 🟠 Medium | Rate-limit AI | Endpoint AI guru (`ai-suggest` × koreksi tugas/ujian/latihan, `ai-generate-questions`) tanpa throttle → panggil API AI eksternal (berbiaya) bisa disalahgunakan (abuse biaya/kuota, DoS) | ✅ Fixed |
 | F-22 | 🟠 Medium | Terapkan template rapor | `RaporController@applyTemplate`/`applyTemplateToAll` tulis deskripsi capaian ke rapor/kelas via id tanpa cek kepemilikan wali (terlewat di F-11) → wali isi deskripsi rapor kelas lain | ✅ Fixed |
+| F-23 | 🟠 Medium | Dependency (CVE) | `laravel/framework` 11.54 kena CVE-2026-48019 (CRLF injection di rule `email`). Fix ada di 12.60+ (upgrade mayor) | 🟡 Mitigated (middleware `RejectEmailHeaderInjection` memblokir CRLF di field email; rekomendasi: rencanakan upgrade Laravel) |
 
 ---
 
@@ -118,6 +119,15 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** Rute `bayar`→`bayar()`, `cetak`→`cetak()`, plus `midtrans-notification`/`midtrans-finish` menunjuk metode yang **tidak ada** di controller (yang ada: `prosesBayar`, `cetakBukti`; tak ada metode midtrans). View aktif memakainya: `pembayaran/riwayat.blade.php` (tombol cetak bukti) & `pembayaran/index.blade.php` (form bayar) → menekan/submit menghasilkan **HTTP 500**. Bukan celah keamanan (semua ter-scope `siswa_id`), tapi bug nyata. Callback midtrans siswa juga dead (di-`role:siswa`, Midtrans tak bisa memanggilnya).
 **Fix:** Arahkan `bayar`→`prosesBayar` (menampilkan pesan "pembayaran lewat wali siswa" sesuai desain) & `cetak`→`cetakBukti` (mengembalikan cetak bukti milik sendiri, ter-scope `siswa_id`). Hapus dua rute callback midtrans siswa yang mati (callback resmi: `MidtransWebhookController` + `OrangTuaController@snapFinish`).
 
+### 🟡 F-23 — CVE dependency Laravel (email CRLF) — dimitigasi
+**Temuan:** `composer audit` → `laravel/framework` 11.54.0 terkena **CVE-2026-48019 / GHSA-5vg9-5847-vvmq** (High): CRLF injection pada rule validasi `email` bawaan. Semua Laravel 11.x terdampak; perbaikan resmi di 12.60+ (upgrade mayor).
+**Mitigasi yang sudah ada:** middleware global `app/Http/Middleware/RejectEmailHeaderInjection.php` (dipasang di `bootstrap/app.php` grup web) memindai **semua** field yang namanya mengandung "email" dan **menolak** bila berisi `\r`/`\n` — persis vektor CRLF yang dieksploitasi CVE ini. Risiko praktis tertutup.
+**Rekomendasi:** rencanakan upgrade `laravel/framework` ke rilis ter-patch (mis. 12.60+) sebagai perawatan; bukan blocker pra-deploy karena sudah ada kompensasi. Jalankan `composer audit` berkala.
+
+### ✅ Verifikasi keunikan username & email (tuntutan pemilik)
+**Kebutuhan:** satu orang boleh punya beberapa akun (role beda), tetapi **username & email harus unik** lintas semua akun; input duplikat harus "sudah dipakai", bukan error mentah.
+**Status: sudah terpenuhi.** DB: `users.username` & `users.email` ber-constraint `unique`. Validasi controller (`Admin\UserController` untuk tenaga pendidik/siswa/orang tua, create & edit): `unique:users,email` + `unique:users,username`; pada edit memakai `Rule::unique(...)->ignore($id)` (abaikan diri sendiri). `personal_email` (Email Pemulihan) sengaja **tidak** unik (boleh kosong/berbagi). Label "Email Pribadi" diseragamkan menjadi **"Email Pemulihan"** di seluruh form/tampilan/pesan; `/recovery` opsi "lupa password" kini menerima **Email** (backend `findUserByIdentifier` memang sudah mencocokkan `email`/`personal_email`).
+
 ### ✅ F-22 — IDOR "Terapkan Template" capaian rapor lintas-kelas (Medium)
 **Lokasi:** `app/Http/Controllers/WaliKelas/RaporController.php` (`applyTemplate`, `applyTemplateToAll`)
 **Isu:** Dua method "NEW" (dipakai tombol **Terapkan Template** di edit rapor) memvalidasi `rapor_id`/`kelas_id` hanya `exists:` lalu menulis `RaporNilai.deskripsi` (jika kosong) — **tanpa** cek kepemilikan wali. `applyTemplate` → isi deskripsi rapor mana pun; `applyTemplateToAll` → isi massal seluruh rapor kelas mana pun. **Terlewat saat F-11** (kedua method baru ditambahkan terpisah); ditemukan saat menelusuri alur pemakaian pustaka Template Capaian (F-17). Catatan konteks: halaman kelola template (`/wali/template-capaian`) **orphan** (tak ada link sidebar; hanya via URL), tetapi template-nya dikonsumsi lewat alur ini.
@@ -198,6 +208,25 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 - **Validasi input (Fase 4)**: tak ada mass-assignment `update/create($request->all())`; semua controller pakai `$request->validate()` + array field eksplisit. Tak ada SQL injection — semua `selectRaw/orderByRaw/whereRaw` memakai string hardcoded atau binding `?` (mis. `SyncModuleToSheet` `whereRaw("... = ?", [$bulan])`). XSS: keluaran data pengguna konsisten `{!! nl2br(e($x)) !!}` (di-escape dulu); `{!! $var !!}` mentah hanya untuk atribut server (`rowspan/colspan`) & teks instruksi hardcoded.
 - **Upload (Fase 5)**: divalidasi `image|mimes:...`/`mimes:pdf` + `max`; nama file di-generate server (`hashName()`/`time().uniqid().ext`) → tak ada path traversal; penyajian file ter-otorisasi (F-01/F-02/F-15).
 - **CSRF (Fase 6)**: aktif global; pengecualian **hanya** webhook Midtrans (`midtrans/*`, `midtrans/notification`) yang memang eksternal & diverifikasi tanda tangan. Penanganan 419 ramah. `SecurityHeaders` + `RejectEmailHeaderInjection` dipasang global.
+
+---
+
+## Postur keamanan & catatan infrastruktur (penting)
+
+**Aman untuk pemakaian standar dari serangan aplikasi umum (OWASP):**
+- **Brute-force login** → captcha + rate-limit 5/menit (login+IP) + lockout; recovery `throttle:5,1`; admin-recovery MFA (PIN+pertanyaan, ter-hash). ✅
+- **SQL injection** → Eloquent/parameterized; tak ada raw SQL dengan input mentah. ✅
+- **XSS** → Blade auto-escape + `nl2br(e())`. ✅
+- **CSRF** → aktif, pengecualian minimal. ✅
+- **Broken access control / IDOR** → F-08…F-22 ditambal + 23 test regresi. ✅
+- **Integritas pembayaran** → F-19 + webhook bertanda tangan. ✅
+- **Mass assignment / upload / header keamanan / IP spoofing** → bersih/diperbaiki (F-04, F-05).
+
+**⚠️ DDoS bukan sepenuhnya masalah aplikasi — dan infra berubah.** Rate-limit aplikasi menahan *abuse* (brute-force, spam endpoint AI), TAPI **tidak** bisa menahan **DDoS volumetrik** (banjir trafik jaringan). Dulu origin di balik **Cloudflare Tunnel** (tak punya IP publik → terlindung). Sekarang **VPS langsung terekspos** → lapisan proteksi itu hilang. **Rekomendasi kuat (pilih salah satu/keduanya):**
+1. Pasang **Cloudflare (gratis, DNS proxied/awan oranye)** di depan VPS → dapat proteksi DDoS + WAF + cache. *(Jika ini dilakukan, ubah `trustProxies` F-04 menjadi rentang IP Cloudflare, bukan loopback.)*
+2. Di server: **Nginx `limit_req`** (rate-limit per-IP) + **fail2ban** (blokir IP abusive) + firewall.
+
+**Dependency (F-23):** jalankan `composer audit` berkala; rencanakan upgrade Laravel ke rilis ter-patch. Saat ini dimitigasi middleware.
 
 ---
 
