@@ -20,8 +20,13 @@ return new class extends Migration
             return; // instalasi baru: kolom memang sudah tidak ada
         }
 
+        // Index komposit lama (mata_pelajaran_id, nama_template) dipakai FK mata_pelajaran_id.
+        // Tambah index tunggal pengganti dulu agar FK tetap ter-cover saat komposit dilepas.
         Schema::table('template_capaian_kompetensi', function (Blueprint $table) {
-            // Index lama memuat nama_template → harus dilepas sebelum drop kolom.
+            $table->index('mata_pelajaran_id', 'idx_template_mapel');
+        });
+
+        Schema::table('template_capaian_kompetensi', function (Blueprint $table) {
             $table->dropIndex('idx_template_mapel_nama');
         });
 
