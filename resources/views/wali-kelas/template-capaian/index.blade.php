@@ -14,8 +14,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Template Capaian Kompetensi</h1>
+    <div class="d-flex justify-content-end align-items-center mb-4">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
             <i class="fas fa-plus"></i> Tambah Template
         </button>
