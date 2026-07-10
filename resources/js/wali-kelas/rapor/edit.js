@@ -235,4 +235,17 @@ document.addEventListener('DOMContentLoaded', function () {
         select.addEventListener('change', applyAlignment);
         applyAlignment();
     });
+
+    // Auto-grow textarea "Deskripsi Capaian" agar teks panjang (mis. hasil terapan
+    // template) langsung terlihat tanpa perlu di-resize manual.
+    (function initDeskripsiAutoGrow() {
+        const grow = function (el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight + 2) + 'px';
+        };
+        document.querySelectorAll('#nilaiTable .deskripsi-input').forEach(function (ta) {
+            grow(ta);
+            ta.addEventListener('input', function () { grow(ta); });
+        });
+    })();
 });

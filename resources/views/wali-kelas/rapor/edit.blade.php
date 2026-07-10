@@ -471,11 +471,10 @@
                                         </div>
                                     </td>
                                     <td class="align-middle" data-label="Deskripsi Capaian">
-                                        <input type="text"
-                                               name="deskripsi[{{ $raporNilai->id }}]"
+                                        <textarea name="deskripsi[{{ $raporNilai->id }}]"
+                                               rows="2"
                                                class="form-control form-control-sm deskripsi-input alignment-{{ $deskripsiAlignment }}"
-                                               value="{{ old('deskripsi.' . $raporNilai->id, $raporNilai->deskripsi) }}"
-                                               placeholder="Deskripsi capaian kompetensi...">
+                                               placeholder="Deskripsi capaian kompetensi...">{{ old('deskripsi.' . $raporNilai->id, $raporNilai->deskripsi) }}</textarea>
                                     </td>
                                 </tr>
                             @endforeach
