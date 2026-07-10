@@ -35,7 +35,7 @@ class AdminRecoveryTicketController extends Controller
         $user = $ticket->user;
 
         if (empty($user->personal_email)) {
-            return back()->with('error', 'Gagal mengirim. User tidak memiliki Email Pribadi. Harap tambahkan Email Pribadi terlebih dahulu melalui halaman edit user.');
+            return back()->with('error', 'Gagal mengirim. User tidak memiliki Email Pemulihan. Harap tambahkan Email Pemulihan terlebih dahulu melalui halaman edit user.');
         }
 
         // Refresh token and expiration for password reset tickets

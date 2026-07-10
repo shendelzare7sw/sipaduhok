@@ -80,7 +80,7 @@
                             @endif
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Email Pribadi <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
+                            <label class="form-label">Email Pemulihan <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
                             <input type="email" class="form-control @error('personal_email') is-invalid @enderror" name="personal_email" value="{{ old('personal_email', $user->personal_email) }}">
                             @error('personal_email') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
                         </div>

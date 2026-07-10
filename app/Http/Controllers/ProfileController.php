@@ -70,7 +70,7 @@ class ProfileController extends Controller
             'alamat' => 'nullable|string|max:500',
         ]);
 
-        // Simpan email pribadi langsung ke model User
+        // Simpan email pemulihan langsung ke model User
         $user->update([
             'personal_email' => $validated['personal_email']
         ]);

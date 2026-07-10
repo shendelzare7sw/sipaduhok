@@ -102,8 +102,8 @@
                         <label for="identifier" class="block text-sm font-semibold text-gray-700 mb-2">Masukkan Identitas Anda</label>
                         <input type="text" id="identifier" name="identifier" value="{{ old('identifier') }}"
                             class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none @error('identifier') border-red-500 @enderror"
-                            placeholder="Username / NISN / NIP" required autofocus>
-                        <p class="text-xs text-gray-500 mt-1" id="identifierHelp">Masukkan Username, NISN (Siswa), atau NIP (Guru/Pegawai) Anda.</p>
+                            placeholder="Username / Email / NISN / NIP" required autofocus>
+                        <p class="text-xs text-gray-500 mt-1" id="identifierHelp">Masukkan Username, Email, NISN (Siswa), atau NIP (Guru/Pegawai) Anda.</p>
                         @error('identifier')
                             <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                         @enderror

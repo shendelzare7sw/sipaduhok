@@ -56,7 +56,7 @@ Detail Wali Siswa - {{ $orangTua->name ?? 'N/A' }}
                             <td class="show-value">{{ $orangTua->email ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td class="show-label">Email Pribadi</td>
+                            <td class="show-label">Email Pemulihan</td>
                             <td class="show-value">{{ $orangTua->personal_email ?? '-' }}</td>
                         </tr>
                         <tr>

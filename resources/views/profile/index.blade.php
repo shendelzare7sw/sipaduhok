@@ -174,7 +174,7 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="personal_email" class="form-label">Email Pribadi</label>
+                                        <label for="personal_email" class="form-label">Email Pemulihan</label>
                                         <div class="input-group input-group-merge">
                                             <span class="input-group-text"><i class="bx bx-envelope"></i></span>
                                             <input type="email" name="personal_email" id="personal_email"

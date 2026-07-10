@@ -92,7 +92,7 @@
                     placeholder="contoh@email.com">
             </div>
             <div class="form-group">
-                <label class="form-label">Email Pribadi <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
+                <label class="form-label">Email Pemulihan <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
                 <input type="email" name="personal_email" class="form-control" value="{{ old('personal_email') }}"
                     placeholder="contoh: nama@gmail.com">
                 @error('personal_email') <div class="text-danger field-error">{{ $message }}</div> @enderror

@@ -151,7 +151,7 @@ class AccountController extends Controller
             'security_pin'      => Hash::make($validated['security_pin']),
         ]);
 
-        // Kirim Notifikasi ke Email Pribadi Admin (jika ada)
+        // Kirim Notifikasi ke Email Pemulihan Admin (jika ada)
         if ($user->personal_email) {
             $emailService = new EmailRecoveryService();
             $emailService->sendSecurityUpdateNotification($user, $validated['security_question']);

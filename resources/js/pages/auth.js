@@ -27,16 +27,16 @@ window.updatePlaceholder = function () {
 
     switch (tipe.value) {
         case 'lupa_username':
-            input.placeholder = "NISN / NIP / No. HP / Email Pribadi";
-            helpText.innerText = "Masukkan Nomor Induk, No. HP, atau Email Pribadi yang terdaftar.";
+            input.placeholder = "NISN / NIP / No. HP / Email Pemulihan";
+            helpText.innerText = "Masukkan Nomor Induk, No. HP, atau Email Pemulihan yang terdaftar.";
             break;
         case 'lupa_password':
-            input.placeholder = "Username / NISN / NIP";
-            helpText.innerText = "Masukkan Username, NISN (Siswa), atau NIP (Guru/Pegawai) Anda.";
+            input.placeholder = "Username / Email / NISN / NIP";
+            helpText.innerText = "Masukkan Username, Email, NISN (Siswa), atau NIP (Guru/Pegawai) Anda.";
             break;
         case 'lupa_keduanya':
-            input.placeholder = "NISN / NIP / No. HP / Email Pribadi";
-            helpText.innerText = "Masukkan identitas selain Username/Email Login, seperti NISN, NIP, No. HP, atau Email Pribadi.";
+            input.placeholder = "NISN / NIP / No. HP / Email Pemulihan";
+            helpText.innerText = "Masukkan identitas selain Username/Email Login, seperti NISN, NIP, No. HP, atau Email Pemulihan.";
             break;
         default:
             input.placeholder = "NISN (Siswa) / NIP (Guru)";

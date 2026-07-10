@@ -38,7 +38,7 @@ class UserRecoveryController extends Controller
         $user = $this->findUserByIdentifier($identifier);
 
         if (!$user) {
-            return back()->with('error', 'Identitas tidak ditemukan dalam sistem. Coba periksa kembali NISN, NIP, No. HP, Email Pribadi, atau Username Anda.');
+            return back()->with('error', 'Identitas tidak ditemukan dalam sistem. Coba periksa kembali NISN, NIP, No. HP, Email, Email Pemulihan, atau Username Anda.');
         }
 
         if ($user->isAdmin() || $user->isKetuaPKBM()) {
@@ -76,7 +76,7 @@ class UserRecoveryController extends Controller
 
         if (empty($targetEmail)) {
             app(\App\Services\NotificationService::class)->notifyAdminTicketPemulihan($ticket);
-            return redirect()->route('login')->with('info', "Email pribadi Anda tidak terdaftar. Permintaan Anda (#{$ticket->id}) telah ditangguhkan dan akan dibantu secara manual oleh Administrator sekolah.");
+            return redirect()->route('login')->with('info', "Email pemulihan Anda tidak terdaftar. Permintaan Anda (#{$ticket->id}) telah ditangguhkan dan akan dibantu secara manual oleh Administrator sekolah.");
         }
 
         $isSent = $this->emailService->sendTicketRecovery($ticket, $user);

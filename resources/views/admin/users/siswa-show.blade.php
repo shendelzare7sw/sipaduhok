@@ -117,7 +117,7 @@ Detail Siswa - {{ $siswa->nama_lengkap ?? 'N/A' }}
                             <td class="show-value">{{ $siswa->user->email }}</td>
                         </tr>
                         <tr>
-                            <td class="show-label">Email Pribadi</td>
+                            <td class="show-label">Email Pemulihan</td>
                             <td class="show-value">{{ $siswa->user->personal_email ?? '-' }}</td>
                         </tr>
                         <tr>

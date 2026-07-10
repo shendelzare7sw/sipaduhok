@@ -72,7 +72,7 @@ Detail Tenaga Pendidik - {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
                     <td class="show-value">{{ $tenagaPendidik->user->email }}</td>
                 </tr>
                 <tr>
-                    <td class="show-label">Email Pribadi</td>
+                    <td class="show-label">Email Pemulihan</td>
                     <td class="show-value">{{ $tenagaPendidik->user->personal_email ?? '-' }}</td>
                 </tr>
                 <tr>

@@ -137,7 +137,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Email Pribadi <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
+                    <label class="form-label">Email Pemulihan <small class="text-muted">(Penting – untuk pemulihan akun)</small></label>
                     <input type="email" class="form-control" name="personal_email" value="{{ old('personal_email') }}"
                         placeholder="contoh: nama@gmail.com">
                     @error('personal_email')
