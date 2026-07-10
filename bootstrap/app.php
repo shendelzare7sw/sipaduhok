@@ -11,9 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Trust Cloudflare Tunnel proxy headers (X-Forwarded-Proto, X-Forwarded-For, etc.)
-        // Without this, Laravel sees HTTP instead of HTTPS, causing CSRF mismatch (419)
-        $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+        // Proxy tepercaya HANYA loopback (Nginx + PHP-FPM di VPS yang sama).
+        // Dulu 'at: *' diperlukan untuk Cloudflare Tunnel; setelah pindah ke VPS yang
+        // langsung terekspos, '*' berbahaya: siapa pun bisa memalsukan X-Forwarded-For
+        // → IP palsu (menembus rate-limit login, mengotori log audit/keuangan).
+        // Dengan hanya memercayai 127.0.0.1/::1, request internet (REMOTE_ADDR = IP asli,
+        // bukan loopback) tidak dipercaya headernya → Laravel pakai IP asli. Header
+        // X-Forwarded-Proto dari Nginx lokal tetap dipercaya (deteksi HTTPS/CSRF aman).
+        $middleware->trustProxies(at: ['127.0.0.1', '::1'], headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
             \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
             \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
             \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO |

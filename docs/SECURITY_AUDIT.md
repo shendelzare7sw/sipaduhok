@@ -14,8 +14,8 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 |----|----------|------|-----|--------|
 | F-01 | 🔴 High | File preview | `/storage-preview?path=` menyajikan file publik apa pun tanpa cek pemilik | ✅ Fixed |
 | F-02 | 🔴 High | File preview | `/view-document/{id}` id enumerable (crc32 % 100000) tanpa ikatan pemilik | ✅ Fixed |
-| F-03 | 🟠 Medium | Rapor siswa | Otorisasi `SiaRaporController@index` tidak konsisten dgn detail/download | ⏳ Open |
-| F-04 | 🟠 Medium | Infra | `trustProxies(at:'*')` → IP klien bisa dipalsukan (log & rate-limit) | ⏳ Open |
+| F-03 | 🟠 Medium | Rapor siswa | Otorisasi `SiaRaporController` tidak konsisten | ✅ Resolved (by design — rute siswa rapor dinonaktifkan; siswa memang tak berhak) |
+| F-04 | 🟠 Medium | Infra | `trustProxies(at:'*')` → IP klien bisa dipalsukan (log & rate-limit) | ✅ Fixed (VPS: percaya loopback saja) |
 | F-05 | 🟡 Low | Headers | Tidak ada Content-Security-Policy; HSTS dikomentari | ⏳ Open |
 | F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | ⏳ Open |
 | F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ⏳ Open |
@@ -122,11 +122,14 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Isu:** Kelima endpoint memanggil layanan AI eksternal berbiaya (`AiGradingService`/`GuruUjianController@getAiSuggestion`/`aiGenerateQuestions`) tanpa throttle. Sesi guru yang bocor/berniat jahat bisa membanjiri endpoint → tagihan/kuota API meledak & potensi DoS pihak ketiga. `ai-chatbot/send-message` sudah `throttle:10,1` (preseden).
 **Fix:** Tambah `throttle:30,1` untuk `ai-suggest` (grading, wajar sering) dan `throttle:15,1` untuk `ai-generate-questions` (lebih berat). Batas dibuat longgar agar tak memutus pemakaian normal.
 
-### ⏳ F-03 — Inkonsistensi otorisasi rapor siswa (Medium)
-`SiaRaporController@index:31` memblokir non-`orang_tua` (route `role:siswa` → daftar rapor selalu ditolak untuk siswa), sedangkan `tengahSemester/akhirSemester/download` tidak → siswa tetap bisa buka/unduh rapor sendiri via URL. Perlu keputusan kebijakan: siswa boleh lihat rapor sendiri atau tidak, lalu samakan di semua method.
+### ✅ F-03 — Otorisasi rapor siswa (Medium) — Resolved by design
+**Keputusan pemilik:** siswa **tidak berhak** melihat/mengunduh rapor; yang meminta unduh rapor adalah orang tua/wali siswa. **Status kode saat ini sudah sesuai:** seluruh rute `Siswa\SiaRaporController` dinonaktifkan (`routes/web.php:1461-1466` dikomentari; `use SiaRaporController` di baris 72 dikomentari), dan sidebar siswa menegaskan "Menu Rapor & Pembayaran dipindahkan ke akses Wali Siswa". Siswa tak punya rute/menu ke rapor → tidak ada IDOR maupun link patah. **Tidak perlu perubahan kode.** (Opsional/kerapian: view `resources/views/siswa/sia/rapor/*` & controller `SiaRaporController` kini orphan/dead-code, boleh dihapus kemudian.)
 
-### ⏳ F-04 — IP klien bisa dipalsukan (Medium)
-`bootstrap/app.php:16` `trustProxies(at:'*')`. Jika origin tak dikunci hanya ke Cloudflare, `X-Forwarded-For` bisa dipalsukan → merusak `recovery_tickets.requested_ip` & rate-limit IP. Rekomendasi: batasi ke rentang IP Cloudflare / proxy tepercaya.
+### ✅ F-04 — IP klien bisa dipalsukan (Medium)
+**Lokasi:** `bootstrap/app.php`
+**Isu:** `trustProxies(at:'*')` mempercayai `X-Forwarded-For` dari siapa pun. Perlu saat memakai Cloudflare Tunnel (origin tak punya IP publik), tetapi setelah pindah ke **VPS yang langsung terekspos** (Nginx + PHP-FPM di mesin sama, tanpa reverse-proxy berlapis), `*` berbahaya: klien bisa memalsukan `X-Forwarded-For` → IP palsu → menembus rate-limit login per-IP & mengotori `recovery_tickets.requested_ip`/`FinancialAuditLog.ip_address`.
+**Fix:** `trustProxies(at: ['127.0.0.1', '::1'])` — hanya percaya loopback. Request internet (`REMOTE_ADDR` = IP asli, bukan loopback) tak dipercaya headernya → Laravel pakai IP asli (anti-spoof); header `X-Forwarded-Proto` dari Nginx lokal tetap dihormati (deteksi HTTPS/CSRF aman).
+**⚠️ Verifikasi pasca-deploy (wajib di VPS):** setelah deploy, uji **login/POST** sekali. Jika muncul **419 (CSRF/"sesi berakhir")** di semua form, berarti Nginx belum meneruskan info HTTPS ke PHP → tambahkan `fastcgi_param HTTPS on;` pada blok SSL Nginx (atau di server-block: pastikan `fastcgi_params` menyertakan `fastcgi_param HTTPS $https if_not_empty;`). Rollback cepat bila mendesak: kembalikan sementara `at: '*'`.
 
 ### ⏳ F-05 — Header keamanan kurang (Low)
 `SecurityHeaders.php` belum memasang Content-Security-Policy; HSTS dikomentari. Tambah CSP (minimal) & aktifkan HSTS saat HTTPS.
