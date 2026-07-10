@@ -14,7 +14,6 @@ class TemplateCapaianKompetensi extends Model
 
     protected $fillable = [
         'mata_pelajaran_id',
-        'nama_template',
         'template_text',
         'created_by',
     ];

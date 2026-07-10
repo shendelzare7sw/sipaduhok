@@ -152,7 +152,6 @@ class WaliApplyTemplateBatchTest extends TestCase
     {
         $t = new TemplateCapaianKompetensi();
         $t->mata_pelajaran_id = $mapelId;
-        $t->nama_template = 'Template ' . $suffix;
         $t->template_text = $text;
         $t->created_by = $createdBy;
         $t->save();

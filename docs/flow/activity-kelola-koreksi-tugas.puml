@@ -1,0 +1,78 @@
+@startuml activity-kelola-koreksi-tugas
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Guru Pengajar)|
+start
+:Mengakses Dashboard LMS Kelas;
+
+|Sistem|
+:Menampilkan Tab "Tugas Pembelajaran";
+
+|Pengguna (Guru Pengajar)|
+:Memilih Aksi Utama\n(Decision);
+
+if (Aksi?) then (Buat Tugas Baru)
+    :Klik "Tambah Tugas";
+    
+    |Sistem|
+    :Menampilkan Form Pembuatan Tugas;
+    
+    |Pengguna (Guru Pengajar)|
+    :Mengisi Judul, Deskripsi, dan File Lampiran;
+    :Menentukan Tanggal Mulai &\nTenggat Waktu (Deadline);
+    :Mengatur Opsi Lanjutan\n(Izinkan Pengulangan, Tampilkan Nilai);
+    :Memilih Opsi "Duplikasi ke Kelas Lain";
+    :Klik "Publikasikan Tugas";
+    
+    |Sistem|
+    :Menyimpan Tugas ke Database\n(Termasuk hasil duplikasinya);
+    :Meng-generate Slot Lembar Tugas (TugasSiswa)\nuntuk Seluruh Siswa di Kelas Tersebut;
+    :Mengirim Notifikasi "Tugas Baru"\nkepada Siswa;
+    
+else (Koreksi Tugas Masuk)
+    :Memilih Salah Satu Tugas\nyang Sedang Berjalan;
+    :Klik "Lihat Daftar Pengumpulan";
+    
+    |Sistem|
+    :Menampilkan Statistik Tugas\n(Dikerjakan, Terlambat, Belum, Dinilai);
+    :Menampilkan Daftar Status Siswa;
+    
+    |Pengguna (Guru Pengajar)|
+    :Memilih Metode Penilaian\n(Decision);
+    
+    if (Metode Penilaian?) then (Penilaian Individual)
+        :Membuka Hasil Pekerjaan Satu Siswa;
+        
+        |Sistem|
+        :Menampilkan File / Jawaban Siswa;
+        
+        |Pengguna (Guru Pengajar)|
+        :Membaca dan Menganalisis Jawaban;
+        :Memberikan Nilai (0-100)\ndan Catatan Evaluasi (Feedback);
+        :Klik "Simpan Nilai";
+        
+    else (Penilaian Massal / Bulk Grade)
+        :Mencentang Beberapa Nama Siswa;
+        :Klik Tombol "Nilai Sekaligus";
+        
+        |Sistem|
+        :Menampilkan Pop-up Bulk Grade;
+        
+        |Pengguna (Guru Pengajar)|
+        :Memasukkan Satu Angka Nilai & Feedback\nuntuk Diterapkan ke Semua Siswa Terpilih;
+        :Klik "Terapkan Nilai";
+    endif
+    
+    |Sistem|
+    :Menyimpan Nilai & Feedback ke Database;
+    :Mengubah Status Tugas Siswa\nmenjadi "Dinilai";
+    :Mengirim Notifikasi Update Nilai\nkepada Siswa Terkait;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Pengguna (Guru Pengajar)|
+:Selesai Melakukan Kelola\ndan Koreksi Tugas;
+stop
+@enduml

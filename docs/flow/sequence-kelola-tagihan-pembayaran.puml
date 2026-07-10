@@ -1,0 +1,139 @@
+@startuml
+title Sequence Diagram - UC11: Kelola Tagihan & Pembayaran
+autonumber
+
+actor "Admin / Bendahara" as Admin
+boundary "UI_KelolaKeuangan" as UI
+control "Control_KelolaKeuangan" as Control
+entity "T_Tagihan" as E_Tagihan
+entity "T_Pembayaran" as E_Pembayaran
+entity "T_Config" as E_Config
+
+== Skenario: Data Tagihan (Generate SPP / Tagihan) ==
+
+Admin -> UI : 1. Pilih Sub-Menu "Data Tagihan"
+activate UI
+UI -> Control : 2. RequestDataTagihan()
+activate Control
+Control -> E_Tagihan : 3. AmbilDataTagihan()
+activate E_Tagihan
+E_Tagihan --> Control : 4. DataDitemukan(Data)
+deactivate E_Tagihan
+Control --> UI : 5. TampilkanHalaman(Data)
+deactivate Control
+
+Admin -> UI : 6. Pilih Aksi "Generate Tagihan"
+UI --> Admin : 7. Tampilkan Form Pembuatan Tagihan
+Admin -> UI : 8. Mengisi Data Tagihan (Nominal, Bulan, Siswa)
+Admin -> UI : 9. Klik "Generate / Simpan"
+UI -> Control : 10. GenerateTagihan(Data)
+activate Control
+
+Control -> Control : 11. Validasi Input & Cek Duplikasi
+alt Validasi Gagal / Duplikat
+    Control --> UI : 12. ErrorValidasi(Pesan)
+    UI --> Admin : 13. Tampilkan Pesan Error
+else Validasi Berhasil
+    Control -> E_Tagihan : 14. InsertData(Data)
+    activate E_Tagihan
+    E_Tagihan --> Control : 15. BerhasilDisimpan()
+    deactivate E_Tagihan
+    Control --> UI : 16. NotifikasiSukses()
+    UI --> Admin : 17. Tampilkan Pesan Sukses & Refresh Tabel
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Pembayaran Masuk (Validasi Transfer) ==
+
+Admin -> UI : 18. Pilih Sub-Menu "Pembayaran Masuk"
+activate UI
+UI -> Control : 19. RequestDaftarMenungguValidasi()
+activate Control
+Control -> E_Pembayaran : 20. AmbilDataStatusMenunggu()
+activate E_Pembayaran
+E_Pembayaran --> Control : 21. DataDitemukan(Data)
+deactivate E_Pembayaran
+Control --> UI : 22. TampilkanHalaman(Data)
+deactivate Control
+
+Admin -> UI : 23. Klik "Validasi" pada salah satu pembayaran
+UI --> Admin : 24. Tampilkan Detail Bukti Transfer
+Admin -> UI : 25. Klik Keputusan (Setujui / Tolak)
+UI -> Control : 26. ValidasiPembayaran(ID, Keputusan)
+activate Control
+
+alt Keputusan = Setujui (Lunas)
+    Control -> E_Pembayaran : 27. UpdateStatus(Lunas)
+    activate E_Pembayaran
+    E_Pembayaran --> Control : 28. StatusDiperbarui()
+    deactivate E_Pembayaran
+    Control -> E_Tagihan : 29. UpdateSaldoSisaTagihan()
+    activate E_Tagihan
+    E_Tagihan --> Control : 30. SaldoDiperbarui()
+    deactivate E_Tagihan
+    Control --> UI : 31. NotifikasiSukses()
+    UI --> Admin : 32. Tampilkan Pesan Lunas
+else Keputusan = Tolak
+    Control -> E_Pembayaran : 33. UpdateStatus(Ditolak)
+    activate E_Pembayaran
+    E_Pembayaran --> Control : 34. StatusDiperbarui()
+    deactivate E_Pembayaran
+    Control --> UI : 35. NotifikasiPenolakan()
+    UI --> Admin : 36. Tampilkan Pesan Ditolak
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Tarik Tunggakan (Carryover) ==
+
+Admin -> UI : 37. Pilih Sub-Menu "Tarik Tunggakan"
+activate UI
+Admin -> UI : 38. Klik "Preview Tunggakan" (Tahun Sebelumnya)
+UI -> Control : 39. RequestDaftarTunggakan(TahunLalu)
+activate Control
+Control -> E_Tagihan : 40. AmbilDataTunggakan()
+activate E_Tagihan
+E_Tagihan --> Control : 41. DataDitemukan(Data)
+deactivate E_Tagihan
+Control --> UI : 42. Tampilkan Daftar Siswa Penunggak
+deactivate Control
+
+Admin -> UI : 43. Klik "Eksekusi Tarik Tunggakan"
+UI -> Control : 44. EksekusiCarryover()
+activate Control
+Control -> E_Tagihan : 45. PindahkanTunggakanKeTahunSekarang()
+activate E_Tagihan
+E_Tagihan --> Control : 46. BerhasilDipindahkan()
+deactivate E_Tagihan
+Control --> UI : 47. NotifikasiSukses()
+deactivate Control
+UI --> Admin : 48. Tampilkan Pesan Sukses
+deactivate UI
+
+== Skenario: Config Pembayaran ==
+
+Admin -> UI : 49. Pilih Sub-Menu "Config Pembayaran"
+activate UI
+UI --> Admin : 50. Tampilkan Form Konfigurasi (Bank / API Midtrans)
+Admin -> UI : 51. Memperbarui Data Konfigurasi
+Admin -> UI : 52. Klik "Simpan Konfigurasi"
+UI -> Control : 53. SimpanConfig(Data)
+activate Control
+
+Control -> Control : 54. ValidasiData()
+alt Validasi Gagal
+    Control --> UI : 55. ErrorValidasi(Pesan)
+    UI --> Admin : 56. Tampilkan Pesan Error
+else Validasi Berhasil
+    Control -> E_Config : 57. UpdateConfig(Data)
+    activate E_Config
+    E_Config --> Control : 58. BerhasilDiubah()
+    deactivate E_Config
+    Control --> UI : 59. NotifikasiSukses()
+    UI --> Admin : 60. Tampilkan Pesan Sukses
+end
+deactivate Control
+deactivate UI
+
+@enduml

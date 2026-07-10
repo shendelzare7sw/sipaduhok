@@ -114,7 +114,7 @@ class RaporController extends Controller
                 ->orderBy('nama_mapel')->get();
             $templatesByMapel = TemplateCapaianKompetensi::where('created_by', auth()->id())
                 ->whereIn('mata_pelajaran_id', $mapelIds)
-                ->orderBy('nama_template')
+                ->orderByDesc('id')
                 ->get()
                 ->groupBy('mata_pelajaran_id');
         }

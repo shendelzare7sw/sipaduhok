@@ -1,0 +1,79 @@
+@startuml activity-kelola-kelas-virtual
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Guru Pengajar)|
+start
+:Mengakses Menu Kelas (LMS);
+
+|Sistem|
+:Menampilkan Daftar Kelas & Mata Pelajaran\nyang Diajar oleh Guru;
+
+|Pengguna (Guru Pengajar)|
+:Memilih Kelas Tertentu;
+
+|Sistem|
+:Menampilkan Dashboard LMS Kelas\n(Materi, Tugas, Ujian, Pertemuan Virtual);
+
+|Pengguna (Guru Pengajar)|
+:Memilih Tab "Pertemuan Virtual";
+
+|Sistem|
+:Menampilkan Daftar Jadwal\nPertemuan Video Conference;
+
+|Pengguna (Guru Pengajar)|
+:Memilih Aksi (Decision);
+
+if (Aksi?) then (Buat Jadwal Baru)
+    :Klik Tombol "Jadwalkan Pertemuan";
+    
+    |Sistem|
+    :Menampilkan Form Jadwal Meeting;
+    
+    |Pengguna (Guru Pengajar)|
+    :Mengisi Judul, Platform (Zoom/GMeet/Lainnya),\ndan Link Tautan Meeting;
+    :Menentukan Waktu Mulai & Waktu Selesai;
+    :Memilih Opsi "Duplikasi ke Kelas Lain"\n(Pilihan kelas yang mengampu Mapel sama);
+    :Klik "Simpan";
+    
+    |Sistem|
+    :Memvalidasi Input;
+    :Menyimpan Data ke Database\n(Otomatis membuat banyak jadwal jika diduplikasi);
+    :Menampilkan Pesan Sukses;
+
+elseif (Aksi?) then (Edit Jadwal)
+    |Pengguna (Guru Pengajar)|
+    :Klik "Edit" pada Jadwal;
+    
+    |Sistem|
+    :Menampilkan Form Edit;
+    
+    |Pengguna (Guru Pengajar)|
+    :Mengubah Data (Waktu / Link / Judul);
+    :Memilih Opsi "Update Semua Kelas Terkait"\n(Jika jadwal sebelumnya adalah hasil duplikasi);
+    :Klik "Simpan Perubahan";
+    
+    |Sistem|
+    :Memperbarui Data di Database;
+    :Menampilkan Pesan Sukses;
+    
+elseif (Aksi?) then (Hapus Jadwal)
+    |Pengguna (Guru Pengajar)|
+    :Klik "Hapus" pada Jadwal;
+    
+    |Sistem|
+    :Menampilkan Konfirmasi Hapus;
+    
+    |Pengguna (Guru Pengajar)|
+    :Mengonfirmasi Penghapusan\n(Satu kelas atau beserta duplikatnya);
+    
+    |Sistem|
+    :Menghapus Data dari Database;
+    :Menampilkan Pesan Sukses;
+endif
+
+|Pengguna (Guru Pengajar)|
+:Selesai Melakukan Kelola\nPertemuan Virtual;
+stop
+@enduml

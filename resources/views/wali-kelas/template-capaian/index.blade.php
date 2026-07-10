@@ -67,9 +67,8 @@
                     <thead class="thead-light">
                         <tr>
                             <th width="50">No</th>
-                            <th>Mata Pelajaran</th>
-                            <th>Nama Template</th>
-                            <th>Template Text</th>
+                            <th width="220">Mata Pelajaran</th>
+                            <th>Deskripsi Capaian</th>
                             <th width="150" class="text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -78,28 +77,26 @@
                         <tr>
                             <td>{{ $loop->iteration + ($templates->currentPage() - 1) * $templates->perPage() }}</td>
                             <td>{{ $template->mataPelajaran->nama_mapel ?? '-' }}</td>
-                            <td>{{ $template->nama_template }}</td>
-                            <td>{{ Str::limit($template->template_text, 100) }}</td>
+                            <td>{{ Str::limit($template->template_text, 140) }}</td>
                             <td class="text-center">
                                 <button type="button"
                                         class="btn btn-info btn-sm js-template-edit"
                                         data-update-url="{{ route('wali.template-capaian.update', $template->id) }}"
                                         data-mata-pelajaran-id="{{ $template->mata_pelajaran_id }}"
-                                        data-nama-template="{{ $template->nama_template }}"
                                         data-template-text="{{ $template->template_text }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button type="button" class="btn btn-danger btn-sm"
                                     data-bs-toggle="modal" data-bs-target="#hapusTemplateModal"
                                     data-action="{{ route('wali.template-capaian.destroy', $template->id) }}"
-                                    data-nama="{{ $template->nama_template }}">
+                                    data-nama="{{ $template->mataPelajaran->nama_mapel ?? 'template ini' }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted">
+                            <td colspan="4" class="text-center text-muted">
                                 <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
                                 Tidak ada template
                             </td>
@@ -137,14 +134,9 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Nama Template <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_template" class="form-control" placeholder="Contoh: Sangat Baik, Baik, Cukup" required>
-                        <small class="text-muted">Nama untuk mengidentifikasi template (max 100 karakter)</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Template Text <span class="text-danger">*</span></label>
-                        <textarea name="template_text" class="form-control" rows="5" placeholder="Tulis deskripsi capaian kompetensi..." required></textarea>
-                        <small class="text-muted">Deskripsi yang akan digunakan untuk rapor siswa</small>
+                        <label>Deskripsi Capaian <span class="text-danger">*</span></label>
+                        <textarea name="template_text" class="form-control" rows="5" placeholder="Contoh: Sangat baik, ananda menguasai ..." required></textarea>
+                        <small class="text-muted">Kalimat ini yang akan mengisi deskripsi capaian di rapor siswa. Sertakan predikat (mis. "Sangat Baik") di awal bila perlu.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -178,11 +170,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Nama Template <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_template" id="edit_nama_template" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Template Text <span class="text-danger">*</span></label>
+                        <label>Deskripsi Capaian <span class="text-danger">*</span></label>
                         <textarea name="template_text" id="edit_template_text" class="form-control" rows="5" required></textarea>
                     </div>
                 </div>
@@ -208,7 +196,7 @@
             <div class="modal-body text-center py-4">
                 <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
                 <h6 class="fw-bold mb-2">Hapus template ini?</h6>
-                <p class="text-muted small mb-1">Template: <strong id="namaTemplateDihapus"></strong></p>
+                <p class="text-muted small mb-1">Mata Pelajaran: <strong id="namaTemplateDihapus"></strong></p>
                 <p class="text-muted small mb-0">Tindakan ini tidak dapat dibatalkan.</p>
             </div>
             <div class="modal-footer bg-light">

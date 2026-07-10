@@ -1,0 +1,129 @@
+@startuml
+title Sequence Diagram - UC06: Kelola Data Kelas & Penugasan
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_KelasPenugasan" as UI
+control "Control_KelasPenugasan" as Control
+entity "T_Kelas" as E_Kelas
+entity "T_WaliKelas" as E_Wali
+entity "T_GuruPengajar" as E_Guru
+entity "T_Siswa" as E_Siswa
+
+== Skenario: Mengelola Data Kelas ==
+
+Admin -> UI : 1. Memilih Kategori "Data Kelas"
+activate UI
+UI -> Control : 2. RequestDataKelas()
+activate Control
+Control -> E_Kelas : 3. AmbilDataKelas()
+activate E_Kelas
+E_Kelas --> Control : 4. DataDitemukan(Data)
+deactivate E_Kelas
+Control --> UI : 5. TampilkanHalamanDataKelas(Data)
+deactivate Control
+
+Admin -> UI : 6. Melakukan Aksi CRUD (Input Form)
+Admin -> UI : 7. Klik "Simpan" / "Konfirmasi"
+UI -> Control : 8. SimpanDataKelas(Data)
+activate Control
+
+Control -> Control : 9. Validasi Input
+alt Validasi Gagal
+    Control --> UI : 10. ErrorValidasi(Pesan)
+    UI --> Admin : 11. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> E_Kelas : 12. Proses Perubahan Data
+    activate E_Kelas
+    deactivate E_Kelas
+    
+    Control --> UI : 13. NotifikasiSukses()
+    UI --> Admin : 14. Menampilkan Pesan Sukses & Refresh Tabel
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Penugasan Wali Kelas ==
+
+Admin -> UI : 15. Memilih Kategori "Wali Kelas"
+activate UI
+UI -> Control : 16. RequestDataWaliKelas()
+activate Control
+Control -> E_Wali : 17. AmbilDataPenugasanWali()
+activate E_Wali
+E_Wali --> Control : 18. DataDitemukan(Data)
+deactivate E_Wali
+Control --> UI : 19. TampilkanHalamanPenugasan(Data)
+deactivate Control
+
+Admin -> UI : 20. Memilih Kelas & Assign Wali Kelas
+Admin -> UI : 21. Klik Tombol "Simpan Penugasan"
+UI -> Control : 22. AssignWaliKelas(Data)
+activate Control
+
+Control -> Control : 23. Validasi Penugasan (Cek Bentrok)
+alt Tidak Valid / Bentrok
+    Control --> UI : 24. ErrorValidasi("Wali kelas sudah ditugaskan")
+    UI --> Admin : 25. Menampilkan Pesan Error (Perbaiki Pilihan)
+else Validasi Berhasil
+    Control -> E_Wali : 26. Insert Relasi Wali Kelas
+    activate E_Wali
+    deactivate E_Wali
+    
+    Control --> UI : 27. NotifikasiSukses()
+    UI --> Admin : 28. Menampilkan Pesan Sukses & Refresh Tabel
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Sinkronisasi Guru Pengajar ==
+
+Admin -> UI : 29. Memilih Kategori "Guru Pengajar"
+activate UI
+UI -> Control : 30. RequestDataGuruPengajar()
+activate Control
+Control -> E_Guru : 31. AmbilDataGuruPengajar()
+activate E_Guru
+E_Guru --> Control : 32. DataDitemukan(Data)
+deactivate E_Guru
+Control --> UI : 33. TampilkanDaftarPenugasan(Data)
+deactivate Control
+
+Admin -> UI : 34. Klik "Sinkronisasi dari Jadwal"
+UI -> Control : 35. ProsesSinkronisasiGuru()
+activate Control
+
+Control -> E_Guru : 36. Tarik Data Relasi dari Jadwal Pelajaran
+activate E_Guru
+E_Guru --> Control : 37. Kembalikan Data Sinkronisasi Baru
+deactivate E_Guru
+
+Control --> UI : 38. Kirim Data Guru Terbaru
+deactivate Control
+UI --> Admin : 39. Memperbarui Tampilan Data Guru Pengajar
+deactivate UI
+
+== Skenario: Manajemen Siswa (Cetak Kartu) ==
+
+Admin -> UI : 40. Memilih Kategori "Manajemen Siswa"
+activate UI
+UI -> Control : 41. RequestDataSiswa()
+activate Control
+Control -> E_Siswa : 42. AmbilDataSiswa()
+activate E_Siswa
+E_Siswa --> Control : 43. DataDitemukan(Data)
+deactivate E_Siswa
+Control --> UI : 44. TampilkanHalamanSiswa(Data)
+deactivate Control
+
+Admin -> UI : 45. Klik Tombol "Cetak Kartu" pada Detail Siswa
+UI -> Control : 46. GenerateKartuPelajar(ID)
+activate Control
+
+Control -> Control : 47. Generate PDF Kartu Pelajar
+Control --> UI : 48. Return URL / Stream PDF
+deactivate Control
+UI --> Admin : 49. Download Dokumen Kartu Pelajar
+deactivate UI
+
+@enduml

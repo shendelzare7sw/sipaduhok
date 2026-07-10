@@ -1,0 +1,64 @@
+@startuml activity-kelola-rapor-siswa
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Wali Kelas)|
+start
+:Mengakses Menu\nKelola Rapor Siswa;
+
+|Sistem|
+:Menampilkan Daftar Siswa\ndi Kelas Wali Tersebut;
+:Menampilkan Status Rapor Terkini\n(Belum Dibuat / Draft / Menunggu Validasi /\nDisetujui Ketua / Diterbitkan);
+
+|Pengguna (Wali Kelas)|
+:Memilih Aksi Pengelolaan\n(Decision);
+
+if (Aksi?) then (Generate Rapor)
+    :Klik "Generate Rapor"\n(Single / Semua Siswa);
+    |Sistem|
+    :Membuat Draft Rapor Kosong\nberdasarkan Template & Mapel Aktif;
+    :Menampilkan Pesan Sukses;
+    
+elseif (Aksi?) then (Input Data & Nilai)
+    |Pengguna (Wali Kelas)|
+    :Klik "Edit Rapor";
+    |Sistem|
+    :Menampilkan Form Pengisian Nilai,\nKehadiran & Catatan Wali Kelas;
+    |Pengguna (Wali Kelas)|
+    :Mengisi Nilai secara Manual\natau klik "Tarik Kehadiran Otomatis";
+    :Klik "Simpan Perubahan";
+    |Sistem|
+    :Menyimpan Data ke Draft Rapor;
+    
+elseif (Aksi?) then (Import / Export Excel)
+    |Pengguna (Wali Kelas)|
+    :Klik "Export / Import Excel";
+    |Sistem|
+    :Menyediakan File Template (Export)\natau Memproses File Excel (Import);
+    :Mengisi Nilai Siswa Secara Massal;
+    
+elseif (Aksi?) then (Kirim Validasi)
+    |Pengguna (Wali Kelas)|
+    :Klik "Kirim Validasi ke Ketua";
+    |Sistem|
+    :Mengubah Status Rapor\nmenjadi "Menunggu Validasi Ketua";
+    :Mengunci Edit Nilai & Mengirim Notifikasi;
+    
+elseif (Aksi?) then (Terbitkan Rapor)
+    |Pengguna (Wali Kelas)|
+    :Klik "Terbitkan Rapor";
+    |Sistem|
+    :Mengecek Status Persetujuan;
+    if (Disetujui Ketua & Divalidasi Bendahara?) then (Belum Lengkap)
+        :Menampilkan Pesan Error\n(Persyaratan Validasi Belum Terpenuhi);
+    else (Sudah Lengkap)
+        :Mengubah Status menjadi "DITERBITKAN";
+        :Rapor kini dapat diakses\natau diunduh oleh Orang Tua;
+    endif
+endif
+
+|Pengguna (Wali Kelas)|
+:Selesai Melakukan Pengelolaan Rapor;
+stop
+@enduml

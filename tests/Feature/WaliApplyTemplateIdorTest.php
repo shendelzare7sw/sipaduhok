@@ -143,7 +143,6 @@ class WaliApplyTemplateIdorTest extends TestCase
     {
         $t = new TemplateCapaianKompetensi();
         $t->mata_pelajaran_id = $mapelId;
-        $t->nama_template = 'Template ' . $suffix;
         $t->template_text = 'CAPAIAN TEMPLATE TEST';
         $t->created_by = $createdBy;
         $t->save();

@@ -41,7 +41,6 @@ class WaliTemplateCapaianDeleteTest extends TestCase
 
             $template = new TemplateCapaianKompetensi();
             $template->mata_pelajaran_id = $mapel->id;
-            $template->nama_template = 'Template ' . $suffix;
             $template->template_text = 'ISI ASLI';
             $template->created_by = $waliPembuat->id;
             $template->save();
@@ -56,7 +55,6 @@ class WaliTemplateCapaianDeleteTest extends TestCase
             // Edit oleh wali lain → ditolak, isi TIDAK berubah.
             $this->put(route('wali.template-capaian.update', $template->id), [
                 'mata_pelajaran_id' => $mapel->id,
-                'nama_template' => 'Template Diedit',
                 'template_text' => 'ISI DIEDIT ORANG LAIN',
             ])->assertRedirect();
             $this->assertSame('ISI ASLI', $template->fresh()->template_text);
@@ -66,7 +64,6 @@ class WaliTemplateCapaianDeleteTest extends TestCase
 
             $this->put(route('wali.template-capaian.update', $template->id), [
                 'mata_pelajaran_id' => $mapel->id,
-                'nama_template' => 'Template Sendiri',
                 'template_text' => 'ISI DIPERBARUI PEMBUAT',
             ])->assertRedirect();
             $this->assertSame('ISI DIPERBARUI PEMBUAT', $template->fresh()->template_text);

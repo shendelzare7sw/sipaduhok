@@ -48,9 +48,8 @@ class TemplateCapaianSeeder extends Seeder
             foreach ($templates as $template) {
                 TemplateCapaianKompetensi::create([
                     'mata_pelajaran_id' => $mapel->id,
-                    'nama_template' => $template['nama'],
                     'template_text' => $template['template'],
-                    'created_by' => null, // System generated
+                    'created_by' => null, // System generated (catatan: pustaka kini private per wali)
                 ]);
             }
             $this->command->info("✓ Created 4 templates for: {$mapel->nama_mapel}");

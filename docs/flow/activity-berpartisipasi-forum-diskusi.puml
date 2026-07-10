@@ -1,0 +1,75 @@
+@startuml activity-berpartisipasi-forum-diskusi
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Guru Pengajar|
+|Sistem|
+|Siswa|
+
+|Guru Pengajar|
+start
+:Mengakses Dashboard LMS Kelas\n(Tab Forum Diskusi);
+
+|Sistem|
+:Menampilkan Daftar Topik\nDiskusi yang Tersedia;
+
+|Guru Pengajar|
+:Memilih Aksi Utama\n(Decision);
+
+if (Aksi?) then (Buat Topik Baru)
+    :Membuat Topik Diskusi Baru\n(Isi, Lampiran, Pin, Duplikasi);
+    
+    |Sistem|
+    :Menyimpan Topik Utama ke Database;
+    :Mengirim Notifikasi ke Seluruh Siswa;
+    
+elseif (Aksi?) then (Kelola Topik)
+    |Guru Pengajar|
+    :Mengedit atau Menghapus\nTopik Utama;
+    :Menutup (Close) Topik Diskusi\nagar tidak ada balasan baru;
+    
+    |Sistem|
+    :Mengeksekusi Perubahan\ndan Memperbarui Status Topik;
+    
+else (Berpartisipasi)
+    |Guru Pengajar|
+    :Membaca Komentar Siswa;
+    :Menulis Balasan (Reply);
+    
+    |Sistem|
+    :Menyimpan Balasan Guru;
+endif
+|Guru Pengajar|
+stop
+
+|Siswa|
+start
+:Mengakses Dashboard LMS Kelas\n(Tab Forum Diskusi);
+
+|Sistem|
+:Menampilkan Daftar Topik\nDiskusi yang Tersedia;
+
+|Siswa|
+:Memilih Aksi Utama\n(Decision);
+
+if (Aksi?) then (Berpartisipasi)
+    :Membaca Topik & Komentar;
+    :Menulis Balasan (Reply) untuk Topik\natau membalas komentar orang lain;
+    
+    |Sistem|
+    :Menyimpan Balasan Siswa ke Database;
+    :Mengirim Notifikasi kepada\npemilik komentar yang dibalas;
+    
+else (Kelola Balasan Sendiri)
+    |Siswa|
+    :Memilih Balasan (Reply)\nmiliknya sendiri;
+    :Mengedit Isi Balasan\natau Menghapus Balasan;
+    
+    |Sistem|
+    :Mengeksekusi Perubahan di Database;
+endif
+
+|Siswa|
+stop
+@enduml

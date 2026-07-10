@@ -1,0 +1,33 @@
+@startuml activity-membaca-catatan-monitoring
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Guru / Wali Kelas)|
+start
+:Mengakses Menu\n"Catatan Monitoring";
+
+|Sistem|
+:Menarik Data Catatan Monitoring\ndari Database (Berdasarkan ID Pengguna);
+:Menampilkan Daftar Catatan Evaluasi/Teguran\n(Pengirim, Tanggal, Status Baca);
+
+|Pengguna (Guru / Wali Kelas)|
+:Memilih Salah Satu Catatan\nuntuk Dibaca Detailnya;
+
+|Sistem|
+:Mengecek Status Catatan;
+
+if (Apakah Statusnya 'Belum Dibaca'?) then (Ya)
+    :Memperbarui Status di Database\nmenjadi "Sudah Dibaca" (markAsRead);
+else (Tidak, Sudah Pernah Dibaca)
+endif
+
+:Menampilkan Halaman Detail\nCatatan Monitoring Beserta Isi Pesan;
+
+|Pengguna (Guru / Wali Kelas)|
+:Membaca Isi Evaluasi/Catatan\ndari Admin, Waka, atau Ketua PKBM;
+:Kembali ke Daftar Catatan\natau Menutup Halaman;
+
+:Selesai Membaca Catatan Monitoring;
+stop
+@enduml

@@ -1,0 +1,52 @@
+@startuml activity-dispensasi-keuangan
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Admin / Bendahara)|
+start
+:Mengakses Menu\nValidasi Akses Ujian & Rapor;
+
+|Sistem|
+:Menampilkan Daftar Siswa\nBeserta Status Keuangannya;
+
+|Pengguna (Admin / Bendahara)|
+:Memilih Siswa yang Menunggak\n(Status Akses Ujian/Rapor Terkunci);
+:Klik Tombol "Ajukan Dispensasi";
+
+|Sistem|
+:Menampilkan Form Pengajuan Dispensasi;
+
+|Pengguna (Admin / Bendahara)|
+:Memilih Tipe Akses (Ujian / Rapor);
+:Memilih Periode (Misal: PAS Ganjil);
+:Mengisi Alasan Pengajuan;
+:Klik "Kirim ke Ketua PKBM";
+
+|Sistem|
+:Menyimpan Data Pengajuan\n(Status: Menunggu);
+:Mengirim Notifikasi\nkepada Ketua PKBM;
+
+|Ketua PKBM|
+:Menerima Notifikasi & Mengakses\nDashboard Dispensasi Keuangan;
+:Melihat Detail Pengajuan & Tunggakan;
+:Memilih Keputusan\n(Decision);
+
+if (Keputusan?) then (Setujui)
+    |Sistem|
+    :Mengubah Status Pengajuan\nmenjadi "Disetujui";
+    :Secara Otomatis Membuka Akses\nUjian/Rapor untuk Siswa Tersebut;
+    :Mengirim Notifikasi Persetujuan\nke Admin & Bendahara;
+else (Tolak)
+    |Ketua PKBM|
+    :Mengisi Alasan Penolakan;
+    |Sistem|
+    :Mengubah Status Pengajuan\nmenjadi "Ditolak";
+    :Tetap Memblokir Akses Siswa;
+    :Mengirim Notifikasi Penolakan\nke Admin & Bendahara;
+endif
+
+|Pengguna (Admin / Bendahara)|
+:Melihat Status Akhir di Halaman\nValidasi Akses;
+stop
+@enduml

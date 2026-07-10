@@ -1,0 +1,161 @@
+@startuml
+title Sequence Diagram - UC08: Kelola Jadwal Pelajaran
+autonumber
+
+actor "Admin / Waka" as Admin
+boundary "UI_KelolaJadwal" as UI
+control "Control_KelolaJadwal" as Control
+entity "T_JadwalPelajaran" as E_Jadwal
+entity "T_GuruPengajar" as E_Guru
+entity "T_LogRiwayat" as E_Log
+
+note over Admin, UI : Catatan UI: Diakses melalui menu tunggal "Jadwal Pelajaran" (bukan dropdown).
+
+== Skenario: Menampilkan Halaman Jadwal ==
+
+Admin -> UI : 1. Mengakses Menu Jadwal Pelajaran
+activate UI
+UI -> Control : 2. RequestJadwal(TahunAjaranAktif)
+activate Control
+Control -> E_Jadwal : 3. AmbilDataJadwal()
+activate E_Jadwal
+E_Jadwal --> Control : 4. DataDitemukan(Data)
+deactivate E_Jadwal
+Control --> UI : 5. TampilkanHalamanJadwal(Data)
+deactivate Control
+UI --> Admin : 6. Halaman Jadwal Terbuka
+deactivate UI
+
+== Skenario: Tambah / Edit Jadwal ==
+
+alt Tambah Data
+    Admin -> UI : 7. Klik "Tambah Jadwal"
+else Edit Data
+    Admin -> UI : 8. Memilih Jadwal yang Akan Diedit
+end
+
+activate UI
+UI --> Admin : 9. Menampilkan Form Jadwal (Kosong/Terisi)
+
+Admin -> UI : 10. Mengisi/Mengubah Form (Kelas, Mapel, Guru, Hari, Jam)
+Admin -> UI : 11. Klik "Simpan"
+UI -> Control : 12. SimpanJadwal(Data)
+activate Control
+
+Control -> Control : 13. Validasi Kesesuaian Jenjang Mapel
+alt Tidak Sesuai
+    Control --> UI : 14. ErrorValidasi("Mapel tidak sesuai jenjang")
+    UI --> Admin : 15. Menampilkan Pesan Error
+else Sesuai
+    Control -> Control : 16. Validasi Bentrok Waktu (Guru/Kelas)
+    alt Bentrok
+        Control --> UI : 17. ErrorValidasi("Guru/Kelas sudah terisi pada jam tersebut")
+        UI --> Admin : 18. Menampilkan Pesan Error
+    else Aman
+        Control -> E_Jadwal : 19. Insert / Update Data Jadwal
+        activate E_Jadwal
+        deactivate E_Jadwal
+        
+        Control -> E_Guru : 20. Sinkronisasi Otomatis Relasi Guru Pengajar
+        activate E_Guru
+        deactivate E_Guru
+        
+        Control --> UI : 21. NotifikasiSukses()
+        UI --> Admin : 22. Menampilkan Pesan Sukses & Refresh Jadwal
+    end
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Ganti Guru (Tunggal) ==
+
+Admin -> UI : 23. Klik "Ganti Guru" pada salah satu slot jadwal
+activate UI
+UI --> Admin : 24. Menampilkan Form Penggantian Guru
+
+Admin -> UI : 25. Memilih Guru Pengganti & Mengisi Alasan
+Admin -> UI : 26. Klik "Simpan Perubahan"
+UI -> Control : 27. ProsesGantiGuru(Data)
+activate Control
+
+Control -> Control : 28. Validasi Bentrok Guru Baru
+alt Bentrok
+    Control --> UI : 29. ErrorValidasi("Guru pengganti memiliki jadwal bentrok")
+    UI --> Admin : 30. Menampilkan Pesan Error
+else Aman
+    Control -> E_Jadwal : 31. Update Data Guru pada Jadwal
+    activate E_Jadwal
+    deactivate E_Jadwal
+    
+    Control -> E_Log : 32. Mencatat Log Riwayat Pindah Jadwal
+    activate E_Log
+    deactivate E_Log
+    
+    Control -> E_Guru : 33. Sinkronisasi Ulang Relasi Guru Pengajar
+    activate E_Guru
+    deactivate E_Guru
+    
+    Control --> UI : 34. NotifikasiSukses()
+    UI --> Admin : 35. Menampilkan Pesan Sukses & Refresh Jadwal
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Ganti Guru (Massal / Quick Replace) ==
+
+Admin -> UI : 36. Klik "Quick Replace Guru"
+activate UI
+UI --> Admin : 37. Menampilkan Form Penggantian Massal
+
+Admin -> UI : 38. Memilih Guru Lama & Guru Baru
+Admin -> UI : 39. Klik "Proses Ganti Massal"
+UI -> Control : 40. ProsesGantiMassal(Data)
+activate Control
+
+Control -> Control : 41. Validasi Bentrok di Semua Jadwal Terkait
+alt Bentrok (Sebagian/Semua)
+    Control --> UI : 42. ErrorValidasi("Daftar Jadwal Bentrok")
+    UI --> Admin : 43. Menampilkan Pesan Error / Peringatan
+else Aman
+    Control -> E_Jadwal : 44. Update Semua Jadwal (Guru Lama -> Guru Baru)
+    activate E_Jadwal
+    deactivate E_Jadwal
+    
+    Control -> E_Log : 45. Mencatat Log Riwayat Massal
+    activate E_Log
+    deactivate E_Log
+    
+    Control -> E_Guru : 46. Sinkronisasi Ulang Relasi Guru Pengajar
+    activate E_Guru
+    deactivate E_Guru
+    
+    Control --> UI : 47. NotifikasiSukses()
+    UI --> Admin : 48. Menampilkan Pesan Sukses & Refresh Jadwal
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Hapus Jadwal ==
+
+Admin -> UI : 49. Klik "Hapus" pada Jadwal
+activate UI
+UI --> Admin : 50. Menampilkan Pop-up Konfirmasi Hapus
+
+Admin -> UI : 51. Konfirmasi Hapus (Setuju)
+UI -> Control : 52. HapusJadwal(ID)
+activate Control
+
+Control -> E_Jadwal : 53. DeleteData(ID)
+activate E_Jadwal
+deactivate E_Jadwal
+
+Control -> E_Guru : 54. Membersihkan Relasi Guru (Jika tidak ada jadwal lain)
+activate E_Guru
+deactivate E_Guru
+
+Control --> UI : 55. NotifikasiSukses()
+deactivate Control
+UI --> Admin : 56. Menampilkan Pesan Sukses & Refresh Jadwal
+deactivate UI
+
+@enduml

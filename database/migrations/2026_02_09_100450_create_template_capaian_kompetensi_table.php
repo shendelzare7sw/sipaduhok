@@ -16,17 +16,12 @@ return new class extends Migration
             $table->foreignId('mata_pelajaran_id')
                   ->constrained('mata_pelajaran')->onDelete('cascade')
                   ->comment('FK to mata_pelajaran table');
-            $table->string('nama_template', 100)
-                  ->comment('Template name: Sangat Baik, Baik, Cukup, Kurang');
             $table->text('template_text')
                   ->comment('Reusable competency achievement description text');
             $table->foreignId('created_by')->nullable()
                   ->constrained('users')->onDelete('set null')
-                  ->comment('User who created this template');
+                  ->comment('User who created this template (pustaka private per wali)');
             $table->timestamps();
-
-            // Index for faster lookups by subject (custom name to avoid MySQL 64 char limit)
-            $table->index(['mata_pelajaran_id', 'nama_template'], 'idx_template_mapel_nama');
         });
     }
 

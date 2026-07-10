@@ -1,0 +1,102 @@
+@startuml
+title Sequence Diagram - UC07: Kelola Mata Pelajaran
+autonumber
+
+actor "Admin / Waka" as Admin
+boundary "UI_KelolaMapel" as UI
+control "Control_Mapel" as Control
+entity "T_MataPelajaran" as Entity
+
+== Skenario: Menampilkan Daftar Data Mata Pelajaran ==
+
+Admin -> UI : 1. Mengakses Menu Mata Pelajaran
+activate UI
+UI -> Control : 2. RequestDaftarMapel()
+activate Control
+Control -> Entity : 3. AmbilDataMapel()
+activate Entity
+Entity --> Control : 4. DataDitemukan(Data)
+deactivate Entity
+Control --> UI : 5. TampilkanDaftarData(Data)
+deactivate Control
+UI --> Admin : 6. Daftar Data Mata Pelajaran Terbuka
+deactivate UI
+
+== Skenario: Tambah Data ==
+
+Admin -> UI : 7. Pilih Aksi "Tambah"
+activate UI
+UI --> Admin : 8. Menampilkan Form Tambah Mata Pelajaran
+
+Admin -> UI : 9. Isi Form Mata Pelajaran
+Admin -> UI : 10. Klik Tombol Simpan
+UI -> Control : 11. SimpanDataMapel(Data)
+activate Control
+
+Control -> Control : 12. Proses Validasi
+alt Validasi Gagal
+    Control --> UI : 13. ErrorValidasi(Pesan)
+    UI --> Admin : 14. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> Entity : 15. InsertData(Data)
+    activate Entity
+    deactivate Entity
+    
+    Control --> UI : 16. Notifikasi Berhasil()
+    UI --> Admin : 17. Memperbarui Data Mata Pelajaran (Tabel Refresh)
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Edit Data ==
+
+Admin -> UI : 18. Klik ikon Edit pada Data Mata Pelajaran
+activate UI
+UI --> Admin : 19. Menampilkan Form Edit Mata Pelajaran
+
+Admin -> UI : 20. Mengubah Data Mata Pelajaran
+Admin -> UI : 21. Klik Tombol Simpan
+UI -> Control : 22. UpdateDataMapel(Data)
+activate Control
+
+Control -> Control : 23. Proses Validasi
+alt Validasi Gagal
+    Control --> UI : 24. ErrorValidasi(Pesan)
+    UI --> Admin : 25. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> Entity : 26. UpdateData(Data)
+    activate Entity
+    deactivate Entity
+    
+    Control --> UI : 27. Notifikasi Berhasil()
+    UI --> Admin : 28. Memperbarui Data Mata Pelajaran (Tabel Refresh)
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Hapus Data ==
+
+Admin -> UI : 29. Klik ikon Hapus pada Data Mata Pelajaran
+activate UI
+UI --> Admin : 30. Menampilkan Konfirmasi Hapus
+
+Admin -> UI : 31. Setuju Hapus Data
+UI -> Control : 32. HapusDataMapel(ID)
+activate Control
+
+Control -> Entity : 33. DeleteData(ID)
+activate Entity
+
+alt Proses Gagal (Constraint/Data Terikat)
+    Entity --> Control : 34. Proses Gagal(Pesan)
+    Control --> UI : 35. ErrorHapus(Pesan)
+    UI --> Admin : 36. Menampilkan Pesan Error
+else Proses Berhasil
+    deactivate Entity
+    Control --> UI : 37. Notifikasi Berhasil()
+    UI --> Admin : 38. Memperbarui Data Mata Pelajaran (Tabel Refresh)
+end
+deactivate Control
+deactivate UI
+
+@enduml

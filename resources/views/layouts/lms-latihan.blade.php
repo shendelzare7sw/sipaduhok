@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Latihan') - HOK Learning</title>
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">

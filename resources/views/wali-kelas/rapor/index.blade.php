@@ -719,7 +719,7 @@
                                             <select name="templates[{{ $mapel->id }}]" class="form-select form-select-sm">
                                                 <option value="">— Lewati —</option>
                                                 @foreach($opts as $t)
-                                                    <option value="{{ $t->id }}">{{ $t->nama_template }}</option>
+                                                    <option value="{{ $t->id }}">{{ \Illuminate\Support\Str::limit($t->template_text, 70) }}</option>
                                                 @endforeach
                                             </select>
                                         @endif

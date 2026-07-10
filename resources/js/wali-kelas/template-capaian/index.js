@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function () {
             document.getElementById('editForm').action = this.dataset.updateUrl || '';
             document.getElementById('edit_mata_pelajaran_id').value = this.dataset.mataPelajaranId || '';
-            document.getElementById('edit_nama_template').value = this.dataset.namaTemplate || '';
             document.getElementById('edit_template_text').value = this.dataset.templateText || '';
 
             bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();

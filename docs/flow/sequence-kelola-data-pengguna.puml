@@ -1,0 +1,105 @@
+@startuml
+title Sequence Diagram - UC01: Kelola Data Pengguna
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_KelolaPengguna" as UI
+control "Control_KelolaPengguna" as Control
+entity "T_User" as Entity
+
+== Skenario: Menampilkan Daftar Data Pengguna ==
+
+Admin -> UI : 1. Mengakses Menu Kelola Data Pengguna
+activate UI
+UI -> Control : 2. RequestDaftarPengguna()
+activate Control
+Control -> Entity : 3. AmbilDataPengguna()
+activate Entity
+Entity --> Control : 4. DataDitemukan(Data)
+deactivate Entity
+Control --> UI : 5. TampilkanDaftarData(Data)
+deactivate Control
+UI --> Admin : 6. Daftar Data Pengguna Terbuka
+deactivate UI
+
+== Skenario: Tambah Data ==
+
+Admin -> UI : 7. Pilih Aksi "Tambah"
+activate UI
+UI --> Admin : 8. Menampilkan Form Tambah Data Pengguna
+
+Admin -> UI : 9. Isi Form Data Pengguna
+Admin -> UI : 10. Klik Tombol Simpan
+UI -> Control : 11. SimpanDataPengguna(Data)
+activate Control
+
+Control -> Control : 12. Proses Validasi
+alt Validasi Gagal
+    Control --> UI : 13. ErrorValidasi(Pesan)
+    UI --> Admin : 14. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> Entity : 15. InsertData(Data)
+    activate Entity
+    Entity --> Control : 16. Proses Berhasil()
+    deactivate Entity
+    
+    Control --> UI : 17. Notifikasi Berhasil()
+    UI --> Admin : 18. Memperbarui Data Pengguna (Tabel Refresh)
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Edit Data ==
+
+Admin -> UI : 19. Klik ikon Edit pada Data Pengguna
+activate UI
+UI --> Admin : 20. Menampilkan Form Edit Data Pengguna
+
+Admin -> UI : 21. Mengubah Data Pengguna
+Admin -> UI : 22. Klik Tombol Simpan
+UI -> Control : 23. UpdateDataPengguna(Data)
+activate Control
+
+Control -> Control : 24. Proses Validasi
+alt Validasi Gagal
+    Control --> UI : 25. ErrorValidasi(Pesan)
+    UI --> Admin : 26. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> Entity : 27. UpdateData(Data)
+    activate Entity
+    Entity --> Control : 28. Proses Berhasil()
+    deactivate Entity
+    
+    Control --> UI : 29. Notifikasi Berhasil()
+    UI --> Admin : 30. Memperbarui Data Pengguna (Tabel Refresh)
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Hapus Data ==
+
+Admin -> UI : 31. Klik ikon Hapus pada Data Pengguna
+activate UI
+UI --> Admin : 32. Menampilkan Konfirmasi Hapus
+
+Admin -> UI : 33. Setuju Hapus Data
+UI -> Control : 34. HapusDataPengguna(ID)
+activate Control
+
+Control -> Entity : 35. DeleteData(ID)
+activate Entity
+
+alt Proses Gagal (Constraint/Data Terikat)
+    Entity --> Control : 36. Proses Gagal(Pesan)
+    Control --> UI : 37. ErrorHapus(Pesan)
+    UI --> Admin : 38. Menampilkan Pesan Error
+else Proses Berhasil
+    Entity --> Control : 39. Proses Berhasil()
+    deactivate Entity
+    Control --> UI : 40. Notifikasi Berhasil()
+    UI --> Admin : 41. Memperbarui Data Pengguna (Tabel Refresh)
+end
+deactivate Control
+deactivate UI
+
+@enduml

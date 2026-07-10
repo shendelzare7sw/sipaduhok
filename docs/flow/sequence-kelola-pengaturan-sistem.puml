@@ -1,0 +1,84 @@
+@startuml
+title Sequence Diagram - UC03: Kelola Pengaturan Sistem
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_PengaturanSistem" as UI
+control "Control_Pengaturan" as Control
+entity "T_Pengaturan" as Entity
+
+== Skenario: Menampilkan Menu Utama ==
+
+Admin -> UI : 1. Mengakses Menu Pengaturan Sistem
+activate UI
+UI --> Admin : 2. Menampilkan Dropdown Kategori (LMS / AI)
+deactivate UI
+
+== Skenario: Mengubah Pengaturan LMS ==
+
+Admin -> UI : 3. Memilih Kategori "Pengaturan LMS"
+activate UI
+UI -> Control : 4. RequestDataPengaturan("LMS")
+activate Control
+Control -> Entity : 5. AmbilDataPengaturan("LMS")
+activate Entity
+Entity --> Control : 6. DataDitemukan(Data)
+deactivate Entity
+Control --> UI : 7. TampilkanFormLMS(Data)
+deactivate Control
+
+Admin -> UI : 8. Mengubah Konfigurasi LMS (Integrasi Google Workspace, dll)
+Admin -> UI : 9. Klik Tombol "Simpan Pengaturan LMS"
+UI -> Control : 10. SimpanPengaturan(DataLMS)
+activate Control
+
+Control -> Control : 11. Validasi Input Format
+alt Validasi Gagal
+    Control --> UI : 12. ErrorValidasi(Pesan)
+    UI --> Admin : 13. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> Entity : 14. UpdatePengaturan(DataLMS)
+    activate Entity
+    deactivate Entity
+    
+    Control --> UI : 15. NotifikasiSukses()
+    UI --> Admin : 16. Menampilkan Pesan Sukses & Data Form Terbarui
+end
+deactivate Control
+deactivate UI
+
+
+== Skenario: Mengubah Pengaturan AI ==
+
+Admin -> UI : 17. Memilih Kategori "Pengaturan AI"
+activate UI
+UI -> Control : 18. RequestDataPengaturan("AI")
+activate Control
+Control -> Entity : 19. AmbilDataPengaturan("AI")
+activate Entity
+Entity --> Control : 20. DataDitemukan(Data)
+deactivate Entity
+Control --> UI : 21. TampilkanFormAI(Data)
+deactivate Control
+
+Admin -> UI : 22. Mengubah Konfigurasi AI (Input API Key Groq/Gemini)
+Admin -> UI : 23. Klik Tombol "Simpan Pengaturan AI"
+UI -> Control : 24. SimpanPengaturan(DataAI)
+activate Control
+
+Control -> Control : 25. Validasi Input Format
+alt Validasi Gagal
+    Control --> UI : 26. ErrorValidasi(Pesan)
+    UI --> Admin : 27. Menampilkan Pesan Error
+else Validasi Berhasil
+    Control -> Entity : 28. UpdatePengaturan(DataAI)
+    activate Entity
+    deactivate Entity
+    
+    Control --> UI : 29. NotifikasiSukses()
+    UI --> Admin : 30. Menampilkan Pesan Sukses & Data Form Terbarui
+end
+deactivate Control
+deactivate UI
+
+@enduml

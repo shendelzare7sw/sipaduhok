@@ -25,13 +25,13 @@ class TemplateCapaianController extends Controller
             $query->where('mata_pelajaran_id', $request->mata_pelajaran_id);
         }
 
-        // Search by template name
+        // Search by isi deskripsi (template_text)
         if ($request->has('search') && $request->search != '') {
-            $query->where('nama_template', 'like', '%' . $request->search . '%');
+            $query->where('template_text', 'like', '%' . $request->search . '%');
         }
 
         $templates = $query->orderBy('mata_pelajaran_id')
-                           ->orderBy('nama_template')
+                           ->orderByDesc('id')
                            ->paginate(20);
 
         $mataPelajaranList = MataPelajaran::orderBy('nama_mapel')->get();
@@ -49,13 +49,11 @@ class TemplateCapaianController extends Controller
     {
         $request->validate([
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
-            'nama_template' => 'required|string|max:100',
             'template_text' => 'required|string',
         ]);
 
         TemplateCapaianKompetensi::create([
             'mata_pelajaran_id' => $request->mata_pelajaran_id,
-            'nama_template' => $request->nama_template,
             'template_text' => $request->template_text,
             'created_by' => auth()->id(),
         ]);
@@ -71,7 +69,6 @@ class TemplateCapaianController extends Controller
     {
         $request->validate([
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
-            'nama_template' => 'required|string|max:100',
             'template_text' => 'required|string',
         ]);
 
@@ -85,7 +82,6 @@ class TemplateCapaianController extends Controller
 
         $template->update([
             'mata_pelajaran_id' => $request->mata_pelajaran_id,
-            'nama_template' => $request->nama_template,
             'template_text' => $request->template_text,
         ]);
 

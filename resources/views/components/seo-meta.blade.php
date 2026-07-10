@@ -12,6 +12,10 @@
 <meta name="keywords" content="{{ $keywords }}">
 <meta name="author" content="PKBM House Of Knowledge">
 
+<!-- Favicons -->
+<link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
+
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ url()->current() }}">

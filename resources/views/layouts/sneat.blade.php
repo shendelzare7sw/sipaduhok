@@ -13,8 +13,9 @@
 
     <meta name="description" content="Sistem Informasi PKBM Duta House of Knowledge">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('img/logo.png') }}">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

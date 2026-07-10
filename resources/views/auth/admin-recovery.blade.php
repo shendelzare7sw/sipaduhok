@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pemulihan Akses Khusus - PKBM House Of Knowledge</title>
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" href="{{ asset('img/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/logo.png') }}">
     
     <!-- CDN Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
