@@ -9,13 +9,12 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Regresi-guard F-17 (Opsi A): Template Capaian = pustaka bersama antar-wali.
- * Tambah/edit tetap terbuka, tetapi HAPUS hanya boleh oleh pembuatnya
- * (cegah wali menghapus permanen template rekannya).
+ * Regresi-guard F-17 (final: pustaka PRIVATE per wali). Template hanya boleh
+ * dikelola (edit & hapus) oleh pembuatnya; wali lain tak boleh mengubah/menghapus.
  */
 class WaliTemplateCapaianDeleteTest extends TestCase
 {
-    public function test_hapus_template_hanya_oleh_pembuat_tapi_edit_tetap_bersama(): void
+    public function test_template_hanya_bisa_dikelola_pembuatnya(): void
     {
         config([
             'database.default' => 'mysql',
@@ -47,24 +46,31 @@ class WaliTemplateCapaianDeleteTest extends TestCase
             $template->created_by = $waliPembuat->id;
             $template->save();
 
-            // ===== HAPUS =====
-            // Negatif (F-17): wali lain TIDAK boleh menghapus → template tetap ada.
+            // ===== Wali LAIN: edit & hapus DITOLAK (pustaka private) =====
             $this->actingAs($waliLain)->withoutMiddleware();
+
+            // Hapus oleh wali lain → ditolak, template tetap ada.
             $this->delete(route('wali.template-capaian.destroy', $template->id))->assertRedirect();
             $this->assertDatabaseHas('template_capaian_kompetensi', ['id' => $template->id]);
 
-            // ===== EDIT (tetap bersama) =====
-            // Wali lain MASIH boleh mengedit (Opsi A: edit terbuka, hanya hapus dikunci).
+            // Edit oleh wali lain → ditolak, isi TIDAK berubah.
             $this->put(route('wali.template-capaian.update', $template->id), [
                 'mata_pelajaran_id' => $mapel->id,
                 'nama_template' => 'Template Diedit',
-                'template_text' => 'ISI DIEDIT BERSAMA',
+                'template_text' => 'ISI DIEDIT ORANG LAIN',
             ])->assertRedirect();
-            $this->assertSame('ISI DIEDIT BERSAMA', $template->fresh()->template_text);
+            $this->assertSame('ISI ASLI', $template->fresh()->template_text);
 
-            // ===== HAPUS oleh pembuat =====
-            // Positif: pembuat boleh menghapus → template terhapus.
+            // ===== Pembuat: edit & hapus BOLEH =====
             $this->actingAs($waliPembuat)->withoutMiddleware();
+
+            $this->put(route('wali.template-capaian.update', $template->id), [
+                'mata_pelajaran_id' => $mapel->id,
+                'nama_template' => 'Template Sendiri',
+                'template_text' => 'ISI DIPERBARUI PEMBUAT',
+            ])->assertRedirect();
+            $this->assertSame('ISI DIPERBARUI PEMBUAT', $template->fresh()->template_text);
+
             $this->delete(route('wali.template-capaian.destroy', $template->id))->assertRedirect();
             $this->assertDatabaseMissing('template_capaian_kompetensi', ['id' => $template->id]);
         } finally {

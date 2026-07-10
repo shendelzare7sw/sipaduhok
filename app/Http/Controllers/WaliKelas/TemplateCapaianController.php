@@ -16,7 +16,9 @@ class TemplateCapaianController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = TemplateCapaianKompetensi::with('mataPelajaran');
+        // Pustaka private per wali: hanya tampilkan template milik wali yang login.
+        $query = TemplateCapaianKompetensi::with('mataPelajaran')
+            ->where('created_by', auth()->id());
 
         // Filter by mata pelajaran
         if ($request->has('mata_pelajaran_id') && $request->mata_pelajaran_id != '') {
@@ -75,6 +77,12 @@ class TemplateCapaianController extends Controller
 
         $template = TemplateCapaianKompetensi::findOrFail($id);
 
+        // Pustaka private per wali: hanya pemilik yang boleh mengubah.
+        if ($template->created_by != auth()->id()) {
+            return redirect()->route('wali.template-capaian.index')
+                ->with('error', 'Anda hanya dapat mengubah template yang Anda buat sendiri.');
+        }
+
         $template->update([
             'mata_pelajaran_id' => $request->mata_pelajaran_id,
             'nama_template' => $request->nama_template,
@@ -92,8 +100,7 @@ class TemplateCapaianController extends Controller
     {
         $template = TemplateCapaianKompetensi::findOrFail($id);
 
-        // F-17 (Opsi A): pustaka bersama — tambah/edit terbuka untuk semua wali, tetapi
-        // HAPUS hanya oleh pembuatnya (cegah wali menghapus permanen template rekannya).
+        // Pustaka private per wali: hanya pemilik yang boleh menghapus.
         if ($template->created_by != auth()->id()) {
             return redirect()->route('wali.template-capaian.index')
                 ->with('error', 'Anda hanya dapat menghapus template yang Anda buat sendiri.');

@@ -879,7 +879,10 @@ class RaporController extends Controller
         $rapor = Rapor::findOrFail($request->rapor_id);
         $this->assertRaporMilikWali($rapor);
 
-        $template = TemplateCapaianKompetensi::findOrFail($request->template_id);
+        // Pustaka private per wali: hanya boleh menerapkan template milik sendiri.
+        $template = TemplateCapaianKompetensi::where('id', $request->template_id)
+            ->where('created_by', auth()->id())
+            ->firstOrFail();
 
         // Find rapor_nilai
         $raporNilai = RaporNilai::where('rapor_id', $request->rapor_id)
@@ -921,7 +924,10 @@ class RaporController extends Controller
             abort(404);
         }
 
-        $template = TemplateCapaianKompetensi::findOrFail($request->template_id);
+        // Pustaka private per wali: hanya boleh menerapkan template milik sendiri.
+        $template = TemplateCapaianKompetensi::where('id', $request->template_id)
+            ->where('created_by', auth()->id())
+            ->firstOrFail();
 
         // Get all rapor for this class, semester, jenis
         $raporList = Rapor::where('kelas_id', $request->kelas_id)
