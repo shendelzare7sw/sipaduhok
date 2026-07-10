@@ -14,7 +14,7 @@
                     <div class="activity-title">{{ $login->name }}</div>
                     <div class="activity-meta">
                         <span class="badge bg-label-primary me-1">
-                            {{ $login->roleRelation->role_name ?? 'User' }}
+                            {{ $login->role_label }}
                         </span>
                         <i class="far fa-clock ms-1 me-1"></i>
                         {{ \Carbon\Carbon::parse($login->last_login_at)->locale('id')->diffForHumans() }}

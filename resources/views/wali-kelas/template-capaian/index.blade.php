@@ -14,7 +14,10 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="d-flex justify-content-end align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
+        <a href="{{ route('wali.rapor.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Kembali
+        </a>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
             <i class="fas fa-plus"></i> Tambah Template
         </button>

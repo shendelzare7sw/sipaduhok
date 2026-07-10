@@ -65,6 +65,33 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id');
     }
 
+    /**
+     * Label peran yang mudah dibaca. Utamakan sistem role baru (roleRelation),
+     * lalu peta enum `role`, terakhir fallback rapi. Dipakai mis. widget dashboard.
+     */
+    public function getRoleLabelAttribute(): string
+    {
+        if ($this->roleRelation && !empty($this->roleRelation->role_name)) {
+            return $this->roleRelation->role_name;
+        }
+
+        $labels = [
+            'admin' => 'Admin',
+            'ketua_pkbm' => 'Ketua PKBM',
+            'wakil_kepala_sekolah' => 'Wakil Kepala Sekolah',
+            'sekretaris' => 'Sekretaris',
+            'bendahara' => 'Bendahara',
+            'wali_kelas' => 'Wali Kelas',
+            'guru_pengajar' => 'Guru Pengajar',
+            'siswa' => 'Siswa',
+            'orang_tua' => 'Wali Siswa',
+        ];
+
+        $role = $this->attributes['role'] ?? null;
+
+        return $labels[$role] ?? ($role ? ucwords(str_replace('_', ' ', $role)) : 'Pengguna');
+    }
+
     // For parent users - students they are responsible for
     public function students()
     {
