@@ -48,8 +48,9 @@ class CheckRole
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
+            // F-06: pesan generik — jangan bocorkan role user maupun role yang dibutuhkan.
             return redirect()->route('login')->with('error',
-                'Anda tidak memiliki akses ke halaman ini. Role Anda: ' . ($userRole ?? 'N/A') . '. Role yang dibutuhkan: ' . implode(', ', $roles)
+                'Anda tidak memiliki akses ke halaman ini.'
             );
         }
 

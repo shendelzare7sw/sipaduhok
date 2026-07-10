@@ -180,6 +180,16 @@ class GuruForumController extends Controller
             return back()->with('error', 'Diskusi ini sudah ditutup.');
         }
 
+        // F-07: balasan-induk (jika ada) harus berada di diskusi yang sama.
+        if ($request->parent_id) {
+            $parentValid = ForumReply::where('id', $request->parent_id)
+                ->where('forum_diskusi_id', $forum->id)
+                ->exists();
+            if (!$parentValid) {
+                abort(404);
+            }
+        }
+
         // Process multiple attachments
         $attachmentPaths = [];
         if ($request->hasFile('attachment')) {

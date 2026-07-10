@@ -36,8 +36,25 @@ class SecurityHeaders
         // Restrict browser features/permissions
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
-        // HSTS - enforce HTTPS (uncomment when using HTTPS in production)
-        // $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        // CSP minimal & aman (F-05): TIDAK membatasi script/style/img/font agar UI
+        // (Sneat, Vite, Bootstrap, FontAwesome, inline script Blade) tetap berjalan.
+        // Hanya menutup vektor yang jarang dipakai app normal:
+        // - frame-ancestors 'self' : anti-clickjacking (pelengkap X-Frame-Options)
+        // - object-src 'none'      : blokir <object>/<embed>/plugin lawas
+        // - base-uri 'self'        : cegah pembajakan <base>
+        // Catatan: policy penuh (script-src/default-src) perlu inventarisasi aset dulu.
+        if (!$response->headers->has('Content-Security-Policy')) {
+            $response->headers->set(
+                'Content-Security-Policy',
+                "frame-ancestors 'self'; object-src 'none'; base-uri 'self'"
+            );
+        }
+
+        // HSTS - paksa HTTPS. Hanya dikirim pada koneksi HTTPS (spec: diabaikan di HTTP).
+        // Tanpa includeSubDomains agar tak mengunci subdomain yang mungkin belum HTTPS.
+        if ($request->isSecure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000');
+        }
 
         return $response;
     }

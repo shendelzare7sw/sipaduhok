@@ -130,6 +130,16 @@ class LmsForumController extends Controller
             return back()->with('error', 'Diskusi ini sudah ditutup.');
         }
 
+        // F-07: balasan-induk (jika ada) harus berada di diskusi yang sama.
+        if (!empty($validated['parent_id'])) {
+            $parentValid = ForumReply::where('id', $validated['parent_id'])
+                ->where('forum_diskusi_id', $diskusi->id)
+                ->exists();
+            if (!$parentValid) {
+                abort(404);
+            }
+        }
+
         // Process multiple attachments
         $attachmentPaths = [];
         if ($request->hasFile('attachment')) {

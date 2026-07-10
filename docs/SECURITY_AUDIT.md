@@ -16,9 +16,9 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-02 | 🔴 High | File preview | `/view-document/{id}` id enumerable (crc32 % 100000) tanpa ikatan pemilik | ✅ Fixed |
 | F-03 | 🟠 Medium | Rapor siswa | Otorisasi `SiaRaporController` tidak konsisten | ✅ Resolved (by design — rute siswa rapor dinonaktifkan; siswa memang tak berhak) |
 | F-04 | 🟠 Medium | Infra | `trustProxies(at:'*')` → IP klien bisa dipalsukan (log & rate-limit) | ✅ Fixed (VPS: percaya loopback saja) |
-| F-05 | 🟡 Low | Headers | Tidak ada Content-Security-Policy; HSTS dikomentari | ⏳ Open |
-| F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | ⏳ Open |
-| F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ⏳ Open |
+| F-05 | 🟡 Low | Headers | Tidak ada Content-Security-Policy; HSTS dikomentari | ✅ Fixed (HSTS saat HTTPS + CSP minimal aman) |
+| F-06 | 🟡 Low | Auth | `CheckRole` membocorkan nama role di pesan error + auto-logout | 🔧 Pesan digenerik-kan; auto-logout menunggu keputusan |
+| F-07 | 🟡 Low | Forum | `parent_id` reply hanya `exists:` tanpa scope ke diskusi | ✅ Fixed (siswa & guru) |
 | F-08 | 🔴 High | Nilai guru | `GuruNilaiController@update/updateBatch` ubah `nilai_id` tanpa scope kelas+mapel → tampering nilai lintas-kelas | ✅ Fixed |
 | F-09 | 🔴 High | Ujian guru | `GuruUjianController` kelola/koreksi soal & ujian via `ujianId/soalId` yang tak dibatasi ke kelas+mapel yang diajar → baca kunci jawaban / ubah / hapus / nilai ujian di kelas/mapel lain | ✅ Fixed |
 | F-10 | 🔴 High | Koreksi tugas | `GuruKoreksiController` `show/store/bulkGrade/ai-suggest` memuat `TugasSiswa/Tugas` tanpa scope kelas+mapel → nilai/baca pengumpulan tugas kelas lain | ✅ Fixed |
@@ -138,14 +138,21 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 **Fix:** `trustProxies(at: ['127.0.0.1', '::1'])` — hanya percaya loopback. Request internet (`REMOTE_ADDR` = IP asli, bukan loopback) tak dipercaya headernya → Laravel pakai IP asli (anti-spoof); header `X-Forwarded-Proto` dari Nginx lokal tetap dihormati (deteksi HTTPS/CSRF aman).
 **⚠️ Verifikasi pasca-deploy (wajib di VPS):** setelah deploy, uji **login/POST** sekali. Jika muncul **419 (CSRF/"sesi berakhir")** di semua form, berarti Nginx belum meneruskan info HTTPS ke PHP → tambahkan `fastcgi_param HTTPS on;` pada blok SSL Nginx (atau di server-block: pastikan `fastcgi_params` menyertakan `fastcgi_param HTTPS $https if_not_empty;`). Rollback cepat bila mendesak: kembalikan sementara `at: '*'`.
 
-### ⏳ F-05 — Header keamanan kurang (Low)
-`SecurityHeaders.php` belum memasang Content-Security-Policy; HSTS dikomentari. Tambah CSP (minimal) & aktifkan HSTS saat HTTPS.
+### ✅ F-05 — Header keamanan kurang (Low)
+**Lokasi:** `app/Http/Middleware/SecurityHeaders.php`
+**Fix:** (1) **HSTS** diaktifkan tetapi hanya pada koneksi HTTPS (`$request->isSecure()`), `max-age=31536000` tanpa `includeSubDomains` (agar tak mengunci subdomain yang mungkin belum HTTPS). (2) **CSP minimal & aman**: `frame-ancestors 'self'; object-src 'none'; base-uri 'self'` — sengaja TIDAK membatasi `script/style/img/font` agar UI (Sneat/Vite/Bootstrap/FontAwesome/inline script) tetap jalan. **Catatan:** policy penuh (`script-src`/`default-src`) perlu inventarisasi aset lebih dulu (pekerjaan lanjutan bila diinginkan).
 
-### ⏳ F-06 — Kebocoran info & auto-logout `CheckRole` (Low)
-`CheckRole` menampilkan nama role di pesan error dan melakukan `logout()` saat gagal otorisasi. Ganti pesan generik; jangan logout hanya karena beda role.
+### 🔧 F-06 — Kebocoran info & auto-logout `CheckRole` (Low)
+**Lokasi:** `app/Http/Middleware/CheckRole.php`
+**Isu:** Saat gagal otorisasi, pesan error menyebut **nama role user & role yang dibutuhkan** (kebocoran info) dan melakukan `logout()`+invalidate session (komentar: "untuk kemudahan testing").
+**Sudah diperbaiki:** pesan dijadikan generik (`'Anda tidak memiliki akses ke halaman ini.'`) — tak lagi membocorkan role apa pun.
+**Menunggu keputusan pemilik:** apakah **auto-logout** saat salah-role dipertahankan (kadang dipakai sebagai UX) atau diganti menjadi tolak-tanpa-logout (`abort(403)` / redirect ke dashboard sendiri). Belum diubah agar tak menyentuh perilaku yang ditandai pemilik.
 
-### ⏳ F-07 — `parent_id` reply forum tak ter-scope (Low)
-`LmsForumController@reply` memvalidasi `parent_id` hanya `exists:forum_replies,id` tanpa memastikan parent berada di diskusi yang sama.
+### ✅ F-07 — `parent_id` reply forum tak ter-scope (Low)
+**Lokasi:** `Siswa\LmsForumController@reply`, `Guru\GuruForumController@reply`
+**Isu:** `parent_id` (balasan-induk pada thread — **bukan** orang tua) hanya divalidasi `exists:forum_replies,id`, tak dipastikan berada di diskusi yang sama → balasan bisa "menempel" ke induk dari diskusi lain (kerapian threading; bukan kebocoran/eskalasi). Forum hanya diikuti **siswa & guru** — orang tua tak punya akses forum.
+**Fix:** sebelum membuat balasan, bila `parent_id` diisi → cek `ForumReply where id=parent AND forum_diskusi_id=diskusi ini`; bila tidak cocok → 404. Dipasang di sisi siswa & guru.
+**Test:** `tests/Feature/ForumReplyParentScopeTest.php`.
 
 ### ✅ F-17 — Template capaian: hapus tanpa cek pemilik (Low) — Opsi A
 **Lokasi:** `app/Http/Controllers/WaliKelas/TemplateCapaianController.php` (`destroy`)
