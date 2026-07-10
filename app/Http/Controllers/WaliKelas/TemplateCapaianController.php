@@ -91,6 +91,14 @@ class TemplateCapaianController extends Controller
     public function destroy(int $id): RedirectResponse
     {
         $template = TemplateCapaianKompetensi::findOrFail($id);
+
+        // F-17 (Opsi A): pustaka bersama — tambah/edit terbuka untuk semua wali, tetapi
+        // HAPUS hanya oleh pembuatnya (cegah wali menghapus permanen template rekannya).
+        if ($template->created_by != auth()->id()) {
+            return redirect()->route('wali.template-capaian.index')
+                ->with('error', 'Anda hanya dapat menghapus template yang Anda buat sendiri.');
+        }
+
         $template->delete();
 
         return redirect()->route('wali.template-capaian.index')

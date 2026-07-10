@@ -28,7 +28,7 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 | F-14 | 🔴 High | Presensi wali | `PresensiController@inputHarian` (bulk) sama seperti F-13; `kelas_id`/`siswa_id` tak diverifikasi milik wali | ✅ Fixed |
 | F-15 | 🔴 High | Bukti izin wali | `PresensiController@previewBukti` sajikan file bukti izin via `id` tanpa otorisasi → wali lihat dokumen izin/sakit (pribadi) siswa kelas mana pun | ✅ Fixed |
 | F-16 | 🟠 Medium | Forum guru | `GuruForumController` `show/reply/destroyReply/togglePin/toggleClose` muat forum/reply via id tanpa scope kelas+mapel → baca/tulis/hapus/pin diskusi kelas/mapel yang tak diajar | ✅ Fixed |
-| F-17 | 🟡 Low | Template capaian | `TemplateCapaianController@update/destroy` tak cek `created_by` → wali mana pun bisa ubah/hapus template milik wali lain (pustaka bersama, sesama-role) | ⏳ Open (kebijakan) |
+| F-17 | 🟡 Low | Template capaian | `TemplateCapaianController@destroy` tak cek `created_by` → wali mana pun bisa hapus template milik wali lain | ✅ Fixed (Opsi A: hapus dikunci ke pembuat; edit tetap bersama) |
 | F-18 | 🟠 Medium | Bayar tagihan ortu | `OrangTuaController@prosesBayar` validasi `tagihan_id` hanya `exists:` tanpa cek tagihan milik anak → wali siswa bisa melampirkan/menyetel pembayaran ke tagihan siswa lain (mismatch integritas) | ✅ Fixed |
 | F-19 | 🔴 High | Pembayaran Midtrans | `OrangTuaController@snapFinish` percaya `transaction_status` dari query redirect (tak bertanda-tangan) → tandai pembayaran `disetujui`/tagihan lunas tanpa benar-benar membayar; juga tak cek `isMyChild` | ✅ Fixed |
 | F-20 | 🟡 Low | Rute rusak (QA) | Rute pembayaran siswa menunjuk metode controller yang tak ada (`bayar`/`cetak`/`midtrans-*`) → tombol "cetak bukti" & submit bayar **500**; callback midtrans siswa dead | ✅ Fixed |
@@ -147,9 +147,13 @@ Dikerjakan di branch `finalizing`. Prioritas: fitur pembelajaran (siswa ↔ guru
 ### ⏳ F-07 — `parent_id` reply forum tak ter-scope (Low)
 `LmsForumController@reply` memvalidasi `parent_id` hanya `exists:forum_replies,id` tanpa memastikan parent berada di diskusi yang sama.
 
-### ⏳ F-17 — Template capaian: edit/hapus tanpa cek pemilik (Low, butuh kebijakan)
-`TemplateCapaianController@update/destroy` memuat `TemplateCapaianKompetensi::findOrFail($id)` lalu mengubah/menghapus **tanpa** memeriksa `created_by`. `index` menampilkan semua template lintas-pembuat, dan `created_by` dicatat tapi tak pernah dipakai men-scope → ini tampak sebagai **pustaka template bersama** antar-wali (bukan per-pemilik). Risiko: wali lain bisa mengubah/menghapus template yang dibuat rekannya (integritas data sesama-role, bukan eskalasi lintas-role / kebocoran data).
-**Keputusan yang diperlukan:** (a) jika memang pustaka bersama → biarkan, atau batasi **hapus** saja ke `created_by`+admin; (b) jika seharusnya per-pemilik → scope `update/destroy` ke `where('created_by', auth()->id())`. Sengaja **tidak** diubah sekarang agar tidak memutus flow "template dipakai bersama" tanpa konfirmasi.
+### ✅ F-17 — Template capaian: hapus tanpa cek pemilik (Low) — Opsi A
+**Lokasi:** `app/Http/Controllers/WaliKelas/TemplateCapaianController.php` (`destroy`)
+**Isu:** `destroy` memuat `findOrFail($id)` lalu menghapus **tanpa** cek `created_by` → wali mana pun bisa menghapus permanen template buatan rekannya. `index` menampilkan semua template lintas-pembuat → memang **pustaka bersama** antar-wali (integritas sesama-role, bukan eskalasi/kebocoran lintas-role).
+**Keputusan pemilik (Opsi A):** pertahankan pustaka bersama — **tambah & edit tetap terbuka** untuk semua wali, tetapi **HAPUS dikunci ke pembuat** (`created_by`). ("+admin" tak relevan: halaman `role:wali_kelas`, admin tak punya rute ke sini.)
+**Fix:** `destroy` → `if ($template->created_by != auth()->id()) return back(error)`.
+**Test:** `tests/Feature/WaliTemplateCapaianDeleteTest.php`.
+**Catatan penting (temuan navigasi):** seluruh subsistem Template Capaian ternyata **orphan/tak tersambung UI** — halaman `/wali/template-capaian` tak punya link menu/tombol, dan endpoint yang memakainya (`RaporController@applyTemplate`/`applyTemplateToAll`, lihat F-22) juga **tak dipanggil view mana pun**. Tombol "Terapkan Template" di edit rapor sebenarnya memakai fitur lain `applyFormat` (`wali.rapor.apply-format`) yang **sudah aman** (sumber & target di-scope ke kelas wali via `accessibleClassIds`) dan **tidak** menyentuh pustaka ini. Fix F-17/F-22 = pengaman lapis-tambahan untuk rute terdaftar-tapi-tanpa-UI (masih bisa dipanggil via POST langsung). Opsi kerapian ke depan: hapus subsistem template capaian bila memang tak dipakai.
 
 ---
 
