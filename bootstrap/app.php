@@ -11,13 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Proxy tepercaya HANYA loopback (Nginx + PHP-FPM di VPS yang sama).
-        // Dulu 'at: *' diperlukan untuk Cloudflare Tunnel; setelah pindah ke VPS yang
-        // langsung terekspos, '*' berbahaya: siapa pun bisa memalsukan X-Forwarded-For
-        // → IP palsu (menembus rate-limit login, mengotori log audit/keuangan).
-        // Dengan hanya memercayai 127.0.0.1/::1, request internet (REMOTE_ADDR = IP asli,
-        // bukan loopback) tidak dipercaya headernya → Laravel pakai IP asli. Header
-        // X-Forwarded-Proto dari Nginx lokal tetap dipercaya (deteksi HTTPS/CSRF aman).
+        // Proxy tepercaya HANYA loopback (127.0.0.1/::1).
+        // Arsitektur: Cloudflare (proxied) → Nginx → PHP-FPM di VPS yang sama.
+        // IP asli pengunjung disediakan oleh Nginx real_ip (set_real_ip_from <rentang
+        // Cloudflare> + real_ip_header CF-Connecting-IP) → REMOTE_ADDR sudah = IP asli.
+        // Karena itu Laravel cukup memercayai loopback: request memakai REMOTE_ADDR (IP asli,
+        // tak bisa dipalsukan via X-Forwarded-For dari luar). Deteksi HTTPS dari
+        // `fastcgi_param HTTPS on` di blok SSL Nginx (Cloudflare SSL mode = Full/Strict).
+        // JANGAN pakai 'at: *' (berbahaya: siapa pun bisa memalsukan header IP).
+        // Penting: firewall origin agar 80/443 HANYA menerima IP Cloudflare (cegah bypass).
         $middleware->trustProxies(at: ['127.0.0.1', '::1'], headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
             \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
             \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
