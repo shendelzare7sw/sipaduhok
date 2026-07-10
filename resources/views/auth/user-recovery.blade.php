@@ -68,6 +68,12 @@
                 <!-- Recovery Form -->
                 <form method="POST" action="{{ route('user.recovery.store') }}" class="space-y-5">
                     @csrf
+                    @php
+                        // Kelas border dihitung di sini agar hanya SATU warna yang aktif
+                        // (hindari bentrok border-gray-200 vs border-red-500 di class attribute).
+                        $borderTipe  = $errors->has('tipe_recovery') ? 'border-red-500' : 'border-gray-200';
+                        $borderIdent = $errors->has('identifier') ? 'border-red-500' : 'border-gray-200';
+                    @endphp
 
                     <!-- Error Messages -->
                     @if(session('error'))
@@ -87,7 +93,7 @@
                     <!-- Problem Type -->
                     <div>
                         <label for="tipe_recovery" class="block text-sm font-semibold text-gray-700 mb-2">Apa kendala yang Anda alami?</label>
-                        <select id="tipe_recovery" name="tipe_recovery" class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none bg-white @error('tipe_recovery') border-red-500 @enderror" required onchange="updatePlaceholder()">
+                        <select id="tipe_recovery" name="tipe_recovery" class="input-field w-full px-4 py-3 border-2 {{ $borderTipe }} rounded-xl focus:border-[#165fac] focus:outline-none bg-white" required onchange="updatePlaceholder()">
                             <option value="lupa_password" selected>Saya lupa Password</option>
                             <option value="lupa_username">Saya lupa Username/Email</option>
                             <option value="lupa_keduanya">Saya lupa Keduanya (Username & Password)</option>
@@ -101,7 +107,7 @@
                     <div>
                         <label for="identifier" class="block text-sm font-semibold text-gray-700 mb-2">Masukkan Identitas Anda</label>
                         <input type="text" id="identifier" name="identifier" value="{{ old('identifier') }}"
-                            class="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#165fac] focus:outline-none @error('identifier') border-red-500 @enderror"
+                            class="input-field w-full px-4 py-3 border-2 {{ $borderIdent }} rounded-xl focus:border-[#165fac] focus:outline-none"
                             placeholder="Username / Email / NISN / NIP" required autofocus>
                         <p class="text-xs text-gray-500 mt-1" id="identifierHelp">Masukkan Username, Email, NISN (Siswa), atau NIP (Guru/Pegawai) Anda.</p>
                         @error('identifier')
