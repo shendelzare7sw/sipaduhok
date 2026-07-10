@@ -203,6 +203,37 @@ location = /login {
 
 ---
 
+## 💾 Backup database otomatis (PRIORITAS TINGGI)
+
+Kehilangan data jauh lebih fatal daripada downtime. Script siap-pakai: `scripts/backup-db.sh`
+(baca kredensial dari `.env`, dump konsisten `--single-transaction`, gzip, retensi 14 hari,
+password tak bocor ke `ps`).
+
+**Pasang:**
+```bash
+cd /www/wwwroot/app.sipaduhok.id
+sudo cp scripts/backup-db.sh /usr/local/bin/backup-db-sipaduhok.sh
+sudo chmod 700 /usr/local/bin/backup-db-sipaduhok.sh
+sudo /usr/local/bin/backup-db-sipaduhok.sh        # uji manual — harus muncul "OK: ...sql.gz"
+```
+
+**Jadwalkan harian 02:00:**
+```bash
+echo '0 2 * * * root /usr/local/bin/backup-db-sipaduhok.sh >> /var/log/backup-db-sipaduhok.log 2>&1' \
+  | sudo tee /etc/cron.d/backup-db-sipaduhok
+```
+
+**Uji RESTORE (backup tak berguna bila tak bisa dipulihkan — wajib dites sekali!):**
+```bash
+# ke database uji, JANGAN ke produksi
+gunzip -c /var/backups/sipaduhok/db/db_sipaduhok_YYYY-MM-DD_HHMMSS.sql.gz | mysql -u root -p db_uji
+```
+
+**Penting:**
+- `BACKUP_DIR` (`/var/backups/sipaduhok/db`) harus **di luar web root** — jangan sampai dump DB bisa diunduh publik.
+- **Salin off-site** (rclone/S3 — lihat komentar di akhir script). Backup di server yang sama tak melindungi
+  dari server hilang/ransomware. Ini yang membedakan backup "beneran" vs sekadar formalitas.
+
 ## ✅ Verifikasi akhir
 1. `curl -sI https://app.sipaduhok.id` → status 200, header keamanan muncul sekali, ada `cf-ray` (lewat Cloudflare).
 2. Coba akses langsung IP VPS di port 80/443 dari luar → harus **timeout/refused** (firewall bekerja).
