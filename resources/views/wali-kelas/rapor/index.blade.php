@@ -43,6 +43,12 @@
                                 <i class="fas fa-paper-plane me-1"></i> Kirim Semua ke Ketua
                             </button>
                         @endif
+                        <button type="button" class="btn btn-info shadow-sm fw-bold text-white" data-bs-toggle="modal" data-bs-target="#terapkanTemplateModal">
+                            <i class="fas fa-magic me-1"></i> Terapkan Template
+                        </button>
+                        <a href="{{ route('wali.template-capaian.index') }}" class="btn btn-outline-secondary shadow-sm fw-bold">
+                            <i class="fas fa-book me-1"></i> Kelola Template
+                        </a>
                     </div>
                 </div>
             </div>
@@ -666,6 +672,80 @@
                     </button>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL: Terapkan Template Deskripsi Capaian ke seluruh kelas --}}
+<div class="modal fade" id="terapkanTemplateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <form action="{{ route('wali.rapor.apply-template-batch') }}" method="POST">
+                @csrf
+                <input type="hidden" name="semester" value="{{ $semester }}">
+                <input type="hidden" name="jenis_rapor" value="{{ $jenisRapor }}">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title fw-bold text-white">
+                        <i class="fas fa-magic me-2"></i>Terapkan Template Deskripsi Capaian
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body py-4">
+                    @if($templateMapelList->isEmpty())
+                        <div class="alert alert-warning border-warning bg-light mb-0 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Belum ada rapor untuk <strong>{{ ucwords(str_replace('_', ' ', $jenisRapor)) }} {{ ucfirst($semester) }}</strong>.
+                            <strong>Generate rapor</strong> terlebih dahulu, baru template bisa diterapkan.
+                        </div>
+                    @else
+                        <p class="text-muted small mb-3">
+                            Pilih template deskripsi per mata pelajaran. Saat diterapkan, deskripsi capaian
+                            <strong>semua siswa kelas {{ $kelas->nama_kelas }}</strong> ({{ ucwords(str_replace('_', ' ', $jenisRapor)) }} {{ ucfirst($semester) }})
+                            akan terisi otomatis, lalu tetap bisa diedit per siswa. Mapel yang dibiarkan "— Lewati —" tidak diubah.
+                        </p>
+                        <div class="border rounded">
+                            @foreach($templateMapelList as $mapel)
+                                @php $opts = $templatesByMapel[$mapel->id] ?? collect(); @endphp
+                                <div class="row align-items-center g-2 px-3 py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                    <div class="col-5 col-md-4">
+                                        <span class="fw-semibold small">{{ $mapel->nama_mapel }}</span>
+                                    </div>
+                                    <div class="col-7 col-md-8">
+                                        @if($opts->isEmpty())
+                                            <span class="small text-muted fst-italic">
+                                                <i class="fas fa-info-circle me-1"></i>Belum ada template — buat lewat tombol "Kelola Template"
+                                            </span>
+                                        @else
+                                            <select name="templates[{{ $mapel->id }}]" class="form-select form-select-sm">
+                                                <option value="">— Lewati —</option>
+                                                @foreach($opts as $t)
+                                                    <option value="{{ $t->id }}">{{ $t->nama_template }}</option>
+                                                @endforeach
+                                            </select>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="form-check mt-3">
+                            <input type="checkbox" class="form-check-input" id="tplOverwrite" name="overwrite" value="1">
+                            <label class="form-check-label small" for="tplOverwrite">
+                                Timpa deskripsi yang sudah terisi <span class="text-muted">(default: hanya mengisi yang masih kosong)</span>
+                            </label>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    @if($templateMapelList->isNotEmpty())
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="fas fa-magic me-1"></i> Terapkan ke Kelas
+                        </button>
+                    @endif
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -1190,6 +1190,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{rapor}/apply-format', [RaporController::class, 'applyFormat'])->name('apply-format');
             Route::post('/apply-template', [RaporController::class, 'applyTemplate'])->name('apply-template'); // NEW
             Route::post('/apply-template-all', [RaporController::class, 'applyTemplateToAll'])->name('apply-template-all'); // NEW
+            Route::post('/apply-template-batch', [RaporController::class, 'applyTemplateBatch'])->name('apply-template-batch'); // Terapkan template per-mapel ke seluruh kelas
             Route::post('/{rapor}/reset-nilai', [RaporController::class, 'resetNilai'])->name('reset-nilai');
             Route::post('/{rapor}/reorder-nilai', [RaporController::class, 'reorderNilai'])->name('reorder-nilai');
             // Kirim validasi ke Ketua PKBM

@@ -102,6 +102,23 @@ class RaporController extends Controller
             'belum_dibuat' => $raporList->whereNull('rapor')->count(),
         ];
 
+        // Data modal "Terapkan Template Deskripsi": mapel yang ada di rapor kelas ini +
+        // template milik wali (login) yang cocok per mapel (pustaka private).
+        $raporIdsKelas = $raporList->pluck('rapor')->filter()->map->id;
+        $templateMapelList = collect();
+        $templatesByMapel = collect();
+        if ($raporIdsKelas->isNotEmpty()) {
+            $mapelIds = RaporNilai::whereIn('rapor_id', $raporIdsKelas)
+                ->distinct()->pluck('mata_pelajaran_id');
+            $templateMapelList = MataPelajaran::whereIn('id', $mapelIds)
+                ->orderBy('nama_mapel')->get();
+            $templatesByMapel = TemplateCapaianKompetensi::where('created_by', auth()->id())
+                ->whereIn('mata_pelajaran_id', $mapelIds)
+                ->orderBy('nama_template')
+                ->get()
+                ->groupBy('mata_pelajaran_id');
+        }
+
         return view('wali-kelas.rapor.index', [
             'kelas' => $kelas,
             'kelasList' => $kelasList,
@@ -109,6 +126,8 @@ class RaporController extends Controller
             'semester' => $semester,
             'jenisRapor' => $jenisRapor,
             'statusCount' => $statusCount,
+            'templateMapelList' => $templateMapelList,
+            'templatesByMapel' => $templatesByMapel,
         ]);
     }
 
@@ -947,6 +966,81 @@ class RaporController extends Controller
             ]);
 
         return back()->with('success', "Template berhasil diterapkan ke {$updated} siswa (yang deskripsinya masih kosong)!");
+    }
+
+    /**
+     * Terapkan template deskripsi capaian PER MATA PELAJARAN ke SELURUH siswa di kelas
+     * yang sedang dikelola wali (sekali klik). Default hanya mengisi deskripsi yang kosong;
+     * centang "timpa" untuk mengganti yang sudah terisi. Semua ter-scope: kelas ampuan
+     * (getSelectedKelas) + template milik sendiri (created_by) + template untuk mapel itu.
+     */
+    public function applyTemplateBatch(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'semester' => 'required|in:ganjil,genap',
+            'jenis_rapor' => 'required|in:tengah_semester,akhir_semester',
+            'templates' => 'required|array',
+            'templates.*' => 'nullable|integer',
+            'overwrite' => 'nullable|boolean',
+        ]);
+
+        $tenagaPendidik = $this->getTenagaPendidik();
+        $kelas = $tenagaPendidik ? $this->getSelectedKelas($tenagaPendidik) : null;
+        if (!$kelas) {
+            return back()->with('error', 'Kelas yang dikelola tidak ditemukan.');
+        }
+
+        // Rapor pada kelas yang dikelola untuk semester + jenis terpilih.
+        $raporIds = Rapor::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
+            ->where('semester', $request->semester)
+            ->where('jenis_rapor', $request->jenis_rapor)
+            ->pluck('id');
+
+        if ($raporIds->isEmpty()) {
+            return back()->with('info', 'Belum ada rapor untuk semester/jenis ini. Generate rapor terlebih dahulu.');
+        }
+
+        $overwrite = $request->boolean('overwrite');
+        $totalBaris = 0;
+        $mapelDiterapkan = 0;
+
+        foreach ($request->templates as $mapelId => $templateId) {
+            if (empty($templateId)) {
+                continue; // mapel yang tak dipilih template-nya dilewati
+            }
+
+            // Template harus milik wali ini DAN memang untuk mapel tersebut.
+            $template = TemplateCapaianKompetensi::where('id', $templateId)
+                ->where('created_by', auth()->id())
+                ->where('mata_pelajaran_id', $mapelId)
+                ->first();
+
+            if (!$template) {
+                continue;
+            }
+
+            $query = RaporNilai::whereIn('rapor_id', $raporIds)
+                ->where('mata_pelajaran_id', $mapelId);
+
+            if (!$overwrite) {
+                $query->where(function ($q) {
+                    $q->whereNull('deskripsi')->orWhere('deskripsi', '');
+                });
+            }
+
+            $affected = $query->update(['deskripsi' => $template->template_text]);
+            if ($affected > 0) {
+                $totalBaris += $affected;
+                $mapelDiterapkan++;
+            }
+        }
+
+        if ($mapelDiterapkan === 0) {
+            return back()->with('info', 'Tidak ada deskripsi yang diisi. Pilih template per mapel, atau centang "Timpa" bila ingin mengganti yang sudah terisi.');
+        }
+
+        return back()->with('success', "Template diterapkan: {$totalBaris} deskripsi terisi dari {$mapelDiterapkan} mata pelajaran.");
     }
 
     /**
