@@ -69,16 +69,27 @@ class TagihanController extends Controller
             ->orderBy('nama_kelas')
             ->get() ?? collect();
 
+        // Mode khusus "Alumni Menunggak": tampilkan alumni (status 'lulus') yang MASIH
+        // punya tunggakan, dihitung LINTAS semua tahun ajaran (abaikan selektor TA).
+        // Berguna untuk penebusan ijazah — satu tempat, satu angka total yang akurat.
+        $isAlumniMode = $request->boolean('tunggakan_alumni');
+
         // Query siswa dengan filter
         // IMPORTANT: Include alumni (status='lulus') so their outstanding bills remain accessible
-        $query = Siswa::whereIn('status', ['aktif', 'lulus']);
+        if ($isAlumniMode) {
+            $alumniIds = $this->getAlumniMenunggakIds();
+            $query = Siswa::whereIn('siswa.id', $alumniIds->isNotEmpty() ? $alumniIds->all() : [0])
+                ->where('status', 'lulus');
+        } else {
+            $query = Siswa::whereIn('status', ['aktif', 'lulus']);
 
-        // Filter berdasarkan kelas
-        if ($request->filled('kelas_id')) {
-            $query->where('kelas_id', $request->kelas_id);
+            // Filter berdasarkan kelas
+            if ($request->filled('kelas_id')) {
+                $query->where('kelas_id', $request->kelas_id);
+            }
         }
 
-        // Filter berdasarkan pencarian nama
+        // Filter berdasarkan pencarian nama (berlaku di kedua mode)
         if ($request->filled('search')) {
             $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
         }
@@ -104,10 +115,14 @@ class TagihanController extends Controller
 
         // Hitung total tagihan per siswa berdasarkan tahun yang dipilih
         if ($siswaList && $siswaList->isNotEmpty()) {
-            $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear) {
+            $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear, $isAlumniMode) {
                 try {
                     $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                        ->when($selectedYear, function ($q) use ($selectedYear) {
+                        ->when($isAlumniMode, function ($q) {
+                            // Alumni: hanya tagihan yang MASIH menunggak, lintas semua tahun ajaran.
+                            return $q->belumLunasOriginal();
+                        })
+                        ->when(!$isAlumniMode && $selectedYear, function ($q) use ($selectedYear) {
                             return $q->where('tahun_ajaran_id', $selectedYear->id);
                         })
                         ->get();
@@ -142,9 +157,10 @@ class TagihanController extends Controller
             });
         }
 
-        // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif)
+        // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif;
+        // di mode alumni tidak relevan karena sudah lintas-tahun).
         $tunggakanSummary = null;
-        if ($tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
+        if (!$isAlumniMode && $tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
             $tunggakanData = Tagihan::where('tahun_ajaran_id', '!=', $tahunAjaranAktif->id)
                 ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
                 ->select('tahun_ajaran_id', DB::raw('COUNT(DISTINCT siswa_id) as jumlah_siswa'), DB::raw('SUM(jumlah) as total_tunggakan'))
@@ -177,7 +193,39 @@ class TagihanController extends Controller
             'tunggakanSummary' => $tunggakanSummary,
             'jenisTagihan' => $this->jenisTagihan ?? [],
             'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id']) ?? [],
+            'isAlumniMode' => $isAlumniMode,
         ]);
+    }
+
+    /**
+     * ID alumni (status 'lulus') yang MASIH memiliki tunggakan (sisa > 0),
+     * dihitung lintas SEMUA tahun ajaran. Dipakai mode "Alumni Menunggak" agar
+     * bendahara bisa melihat total tebusan ijazah dalam satu tempat.
+     */
+    protected function getAlumniMenunggakIds()
+    {
+        $bills = Tagihan::belumLunasOriginal()
+            ->whereHas('siswa', fn ($q) => $q->where('status', 'lulus'))
+            ->get(['id', 'siswa_id', 'jumlah']);
+
+        if ($bills->isEmpty()) {
+            return collect();
+        }
+
+        // Total pembayaran DISETUJUI per tagihan → untuk hitung sisa akurat (termasuk cicilan).
+        $paidByTagihan = Pembayaran::whereIn('tagihan_id', $bills->pluck('id'))
+            ->where('status_validasi', 'disetujui')
+            ->select('tagihan_id', DB::raw('SUM(jumlah_bayar) as total'))
+            ->groupBy('tagihan_id')
+            ->pluck('total', 'tagihan_id');
+
+        return $bills->groupBy('siswa_id')
+            ->filter(function ($grup) use ($paidByTagihan) {
+                $sisa = $grup->sum(fn ($t) => max(0, (float) $t->jumlah - (float) ($paidByTagihan[$t->id] ?? 0)));
+                return $sisa > 0;
+            })
+            ->keys()
+            ->values();
     }
 
     /**
