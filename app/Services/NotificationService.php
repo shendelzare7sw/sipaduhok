@@ -284,10 +284,10 @@ class NotificationService
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $statusText = $presensi->status_validasi === 'disetujui' ? 'Disetujui' : 'Ditolak';
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_IZIN,
                     'Status Izin: ' . $statusText,
                     'Pengajuan izin ' . $siswa->nama_lengkap . ' telah ' . strtolower($statusText),
@@ -388,9 +388,9 @@ class NotificationService
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_PEMBAYARAN,
                     'Pembayaran Berhasil Divalidasi',
                     'Pembayaran Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' telah divalidasi',
@@ -417,9 +417,9 @@ class NotificationService
 
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_PEMBAYARAN,
                     'Tunggakan Dialihkan ke TA Aktif',
                     "Tunggakan {$siswa->nama_lengkap} dari {$namaTaAsal} sebesar {$jumlahFmt} telah dialihkan dan harus dilunasi di TA aktif.",
@@ -446,9 +446,9 @@ class NotificationService
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_PEMBAYARAN,
                     'Tagihan Baru: ' . $tagihan->jenis_tagihan,
                     'Rp ' . number_format($tagihan->jumlah, 0, ',', '.') . ' - ' . $siswa->nama_lengkap,
@@ -485,9 +485,9 @@ class NotificationService
         // Notify wali siswa
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_RAPOR,
                     'Rapor ' . $siswa->nama_lengkap . ' Tersedia',
                     'Rapor ' . $semesterText . ' sudah bisa dilihat',
@@ -673,14 +673,14 @@ class NotificationService
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $pesan = 'Pembayaran Rp ' . number_format($pembayaran->jumlah_bayar, 0, ',', '.') . ' ditolak';
                 if ($alasan) {
                     $pesan .= '. Alasan: ' . $alasan;
                 }
 
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_PEMBAYARAN,
                     'Pembayaran Ditolak',
                     $pesan,
@@ -707,9 +707,9 @@ class NotificationService
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_PEMBAYARAN,
                     'Akses Ujian ' . $statusText,
                     $pesan,
@@ -748,9 +748,9 @@ class NotificationService
         // Notify all parents of this student
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_RAPOR,
                     'Akses Rapor ' . $statusText,
                     $pesan,
@@ -762,23 +762,28 @@ class NotificationService
     }
 
     /**
-     * Notify wali siswa about bulk tagihan created
+     * Notify wali siswa tentang tagihan baru yang dibuat MASSAL (bulk / generate SPP).
+     * Satu notifikasi RINGKAS per siswa (bukan per-tagihan) agar tidak spam ketika
+     * banyak tagihan dibuat sekaligus. $ringkasan menjelaskan tagihan yang dibuat.
      */
-    public function notifyTagihanBulk($siswaIds, $jenisTagihan, $jumlah)
+    public function notifyTagihanMassal(array $siswaIds, string $ringkasan)
     {
+        if (empty($siswaIds)) {
+            return;
+        }
+
         $siswaList = Siswa::whereIn('id', $siswaIds)->with('orangTua')->get();
 
         foreach ($siswaList as $siswa) {
-            $parents = $siswa->orangTua;
-            foreach ($parents as $parent) {
-                if ($parent->user_id) {
+            foreach ($siswa->orangTua as $parent) {
+                if ($parent->id) {
                     $this->create(
-                        $parent->user_id,
+                        $parent->id,
                         Notification::TIPE_PEMBAYARAN,
-                        'Tagihan Baru: ' . $jenisTagihan,
-                        'Rp ' . number_format($jumlah, 0, ',', '.') . ' - ' . $siswa->nama_lengkap,
+                        'Tagihan Baru: ' . $siswa->nama_lengkap,
+                        $ringkasan,
                         route('wali-siswa.tagihan.anak', $siswa->id),
-                        ['siswa_id' => $siswa->id, 'jenis' => $jenisTagihan, 'jumlah' => $jumlah]
+                        ['siswa_id' => $siswa->id]
                     );
                 }
             }
@@ -831,9 +836,9 @@ class NotificationService
         // Notify wali siswa
         $parents = $siswa->orangTua;
         foreach ($parents as $parent) {
-            if ($parent->user_id) {
+            if ($parent->id) {
                 $this->create(
-                    $parent->user_id,
+                    $parent->id,
                     Notification::TIPE_KELAS,
                     'Penempatan Kelas: ' . $siswa->nama_lengkap,
                     $siswa->nama_lengkap . ' telah ditempatkan di kelas ' . $kelas->nama_kelas,
@@ -951,26 +956,56 @@ class NotificationService
     }
 
     /**
-     * Notify about promotion/kenaikan kelas pengajuan
+     * Notify siswa & wali siswa tentang HASIL eksekusi kenaikan kelas.
+     * Hanya untuk hasil positif (NAIK / LULUS). Hasil TIDAK_NAIK_KELAS sengaja
+     * TIDAK dikirim via notifikasi (sensitif; sebaiknya disampaikan langsung sekolah).
      */
-    public function notifyPromotionPengajuan($promotion)
+    public function notifyHasilKenaikanKelas($siswa, string $statusKelulusan, ?string $kelasTujuanNama = null)
     {
-        // Notify bendahara & admin about new promotion submission
-        $targets = User::whereIn('role', ['admin', 'bendahara'])->get();
+        if (!$siswa) {
+            return;
+        }
 
-        foreach ($targets as $target) {
-            $route = $target->role === 'admin'
-                ? route('admin.keuangan.kenaikan-kelas.validation.index')
-                : route('bendahara.kenaikan-kelas.validation.index');
+        $map = [
+            'NAIK_KELAS'           => ['Selamat! Naik Kelas', 'dinyatakan NAIK KELAS'],
+            'NAIK_KELAS_TUNGGAKAN' => ['Naik Kelas (dispensasi tunggakan)', 'dinyatakan naik kelas dengan dispensasi tunggakan'],
+            'LULUS'                => ['Selamat! Dinyatakan LULUS', 'dinyatakan LULUS'],
+            'LULUS_TUNGGAKAN'      => ['Dinyatakan LULUS (dispensasi tunggakan)', 'dinyatakan lulus dengan dispensasi tunggakan'],
+        ];
 
+        if (!isset($map[$statusKelulusan])) {
+            return; // TIDAK_NAIK_KELAS atau status lain → tidak dinotifikasi
+        }
+
+        [$judul, $frasa] = $map[$statusKelulusan];
+        $tujuan = ($kelasTujuanNama && !in_array($kelasTujuanNama, ['ALUMNI', 'BELUM DITENTUKAN'], true))
+            ? ' ke kelas ' . $kelasTujuanNama
+            : '';
+
+        // Notif siswa (akun tetap aktif walau alumni → tetap bisa menerima)
+        if ($siswa->user_id) {
             $this->create(
-                $target->id,
+                $siswa->user_id,
                 Notification::TIPE_KENAIKAN,
-                'Pengajuan Kenaikan Kelas',
-                'Pengajuan kenaikan kelas untuk ' . ($promotion->kelas->nama_kelas ?? 'kelas'),
-                $route,
-                ['promotion_id' => $promotion->id, 'kelas_id' => $promotion->kelas_id]
+                $judul,
+                'Anda ' . $frasa . $tujuan . '.',
+                route('siswa.sia.dashboard'),
+                ['siswa_id' => $siswa->id, 'status_kelulusan' => $statusKelulusan]
             );
+        }
+
+        // Notif orang tua
+        foreach ($siswa->orangTua as $parent) {
+            if ($parent->id) {
+                $this->create(
+                    $parent->id,
+                    Notification::TIPE_KENAIKAN,
+                    $judul . ': ' . $siswa->nama_lengkap,
+                    $siswa->nama_lengkap . ' ' . $frasa . $tujuan . '.',
+                    route('wali-siswa.dashboard'),
+                    ['siswa_id' => $siswa->id, 'status_kelulusan' => $statusKelulusan]
+                );
+            }
         }
     }
 

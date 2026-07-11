@@ -565,6 +565,7 @@ class TagihanController extends Controller
             try {
                 $totalCreated = 0;
                 $totalSkipped = 0;
+                $notifSiswaIds = []; // siswa yang dapat >=1 tagihan baru → dinotif ke ortu
 
                 foreach ($siswaList as $siswa) {
                     // Process default tagihan
@@ -596,6 +597,7 @@ class TagihanController extends Controller
                             ]);
                             $tagihanItem->updateStatusBayar();
                             $totalCreated++;
+                            $notifSiswaIds[$siswa->id] = true;
                         }
                     }
 
@@ -636,11 +638,20 @@ class TagihanController extends Controller
                             ]);
                             $tagihanCustom->updateStatusBayar();
                             $totalCreated++;
+                            $notifSiswaIds[$siswa->id] = true;
                         }
                     }
                 }
 
                 DB::commit();
+
+                // Notif ortu (setelah commit agar tak terkirim bila transaksi gagal).
+                if (!empty($notifSiswaIds)) {
+                    app(\App\Services\NotificationService::class)->notifyTagihanMassal(
+                        array_keys($notifSiswaIds),
+                        'Beberapa tagihan baru telah ditambahkan. Silakan cek rincian tagihan Anda.'
+                    );
+                }
 
                 $message = "Tagihan berhasil dibuat untuk {$totalCreated} data";
                 if ($totalSkipped > 0) {
@@ -927,6 +938,7 @@ class TagihanController extends Controller
         try {
             $totalCreated = 0;
             $totalSkipped = 0;
+            $notifSiswaIds = []; // siswa yang dapat/diperbarui SPP → dinotif ke ortu
             $bulanMulai = $request->bulan_mulai;
 
             // Tentukan jumlah bulan yang akan digenerate
@@ -990,10 +1002,20 @@ class TagihanController extends Controller
                     }
 
                     $totalCreated++;
+                    $notifSiswaIds[$siswa->id] = true;
                 }
             }
 
             DB::commit();
+
+            // Notif ortu (setelah commit agar tak terkirim bila transaksi gagal).
+            if (!empty($notifSiswaIds)) {
+                app(\App\Services\NotificationService::class)->notifyTagihanMassal(
+                    array_keys($notifSiswaIds),
+                    'Tagihan SPP telah ditambahkan/diperbarui. Silakan cek rincian tagihan Anda.'
+                );
+            }
+
             $tipeSppText = $request->tipe_spp === 'setahun' ? '(SPP Setahun)' : "(SPP {$jumlahBulanGenerate} Bulan)";
 
             // Pesan disesuaikan berdasarkan ada tidaknya skipped

@@ -263,6 +263,12 @@ class PromotionService
             ]
         );
 
+        // Notifikasi HASIL kenaikan kelas ke siswa & orang tua.
+        // Choke point tunggal: mencakup eksekusi manual, terjadwal, & promote-selected.
+        // Hanya hasil positif (NAIK/LULUS) yang dikirim (lihat method).
+        app(\App\Services\NotificationService::class)
+            ->notifyHasilKenaikanKelas($siswa, $statusKelulusan, $kelasTujuanNama);
+
         return $statusKelulusan;
     }
 

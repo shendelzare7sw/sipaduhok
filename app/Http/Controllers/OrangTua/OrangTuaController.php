@@ -490,7 +490,11 @@ class OrangTuaController extends Controller
         }
 
         // Untuk metode manual (tunai & transfer)
-        Pembayaran::create($validated);
+        $pembayaran = Pembayaran::create($validated);
+
+        // Beritahu bendahara & admin bahwa ada pembayaran menunggu validasi
+        // (sebelumnya jalur tunggal ini senyap; hanya jalur bulk yang mengirim notif).
+        app(\App\Services\NotificationService::class)->notifyPembayaranBaru($pembayaran);
 
         return redirect()->route('wali-siswa.tagihan.anak', $siswa->id)
             ->with('success', 'Pembayaran berhasil diajukan. Menunggu validasi dari bendahara.');
