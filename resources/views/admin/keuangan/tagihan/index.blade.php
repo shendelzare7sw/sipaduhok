@@ -42,15 +42,28 @@
             @endif
 
             {{-- INFORMASI TAMBAHAN --}}
-            <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-4">
-                <div class="d-flex">
-                    <i class="fas fa-info-circle fa-lg me-2 mt-1"></i>
-                    <small class="fw-bold text-gray-800">
-                        Catatan: Total Tagihan mencakup seluruh kewajiban siswa di periode berjalan. Gunakan fitur "Buat
-                        Tagihan Massal" untuk efisiensi waktu jika tagihan per jenjang bersifat seragam.
-                    </small>
+            @if($isAlumniMode ?? false)
+                <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-user-graduate fa-lg me-2 mt-1"></i>
+                        <small class="fw-bold text-gray-800">
+                            Mode <strong>Alumni Menunggak</strong>: menampilkan siswa berstatus <strong>lulus</strong> yang masih memiliki
+                            tunggakan, dihitung <strong>lintas semua tahun ajaran</strong>. Kolom <strong>SISA</strong> = total tebusan
+                            yang harus dilunasi (mis. untuk pengambilan ijazah). Cari cepat lewat kotak pencarian nama.
+                        </small>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="alert alert-warning border-start border-warning border-4 shadow-sm mb-4">
+                    <div class="d-flex">
+                        <i class="fas fa-info-circle fa-lg me-2 mt-1"></i>
+                        <small class="fw-bold text-gray-800">
+                            Catatan: Total Tagihan mencakup seluruh kewajiban siswa di periode berjalan. Gunakan fitur "Buat
+                            Tagihan Massal" untuk efisiensi waktu jika tagihan per jenjang bersifat seragam.
+                        </small>
+                    </div>
+                </div>
+            @endif
 
             {{-- TABEL UTAMA --}}
             <div class="card shadow mb-4">
@@ -121,6 +134,18 @@
                                 </button>
                             </div>
                         </form>
+
+                        {{-- Toggle: Alumni yang masih menunggak (lintas tahun ajaran) --}}
+                        @if($isAlumniMode ?? false)
+                            <a href="{{ route('admin.keuangan.tagihan.index') }}" class="btn btn-warning btn-sm fw-bold shadow-sm w-100-mobile" title="Kembali ke daftar semua siswa">
+                                <i class="fas fa-user-graduate me-1"></i> Alumni Menunggak
+                                <span class="badge bg-dark ms-1">aktif</span> <i class="fas fa-times ms-1"></i>
+                            </a>
+                        @else
+                            <a href="{{ route('admin.keuangan.tagihan.index', ['tunggakan_alumni' => 1]) }}" class="btn btn-outline-warning btn-sm fw-bold w-100-mobile" title="Tampilkan alumni yang masih punya tunggakan (lintas tahun ajaran)">
+                                <i class="fas fa-user-graduate me-1"></i> Alumni Menunggak
+                            </a>
+                        @endif
                     </div>
 
                     {{-- Right Group: Action Buttons --}}
@@ -197,7 +222,7 @@
                                             <td class="align-middle" data-label="IDENTITAS SISWA">
                                                 <div class="student-identity">
                                                     <span class="student-name">{{ $siswa->nama_lengkap }}</span>
-                                                    <span class="student-nisn">Siswa Aktif</span>
+                                                    <span class="student-nisn">{{ ($siswa->status ?? '') === 'lulus' ? 'Alumni' : 'Siswa Aktif' }}</span>
                                                 </div>
                                             </td>
                                             <td class="text-center align-middle fw-bold text-gray-800" data-label="NISN">{{ $siswa->nisn }}</td>

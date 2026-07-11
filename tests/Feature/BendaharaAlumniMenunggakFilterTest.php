@@ -75,6 +75,14 @@ class BendaharaAlumniMenunggakFilterTest extends TestCase
             $resNormal = $this->get(route('bendahara.tagihan.index', ['search' => $suffix]));
             $resNormal->assertOk();
             $resNormal->assertSee("SiswaAktif$suffix");
+
+            // Surface Admin Keuangan (extends controller Bendahara + view sendiri) harus
+            // punya mode & tombol yang sama.
+            $resAdmin = $this->get(route('admin.keuangan.tagihan.index', ['tunggakan_alumni' => 1, 'search' => $suffix]));
+            $resAdmin->assertOk();
+            $resAdmin->assertSee("AlumniNunggak$suffix");
+            $resAdmin->assertDontSee("SiswaAktif$suffix");
+            $resAdmin->assertSee('Alumni Menunggak'); // tombol/banner ada di view admin
         } finally {
             DB::connection('mysql')->rollBack();
         }
