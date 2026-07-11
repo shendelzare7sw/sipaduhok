@@ -45,14 +45,6 @@ window.updatePlaceholder = function () {
     }
 };
 
-// --- 3. Login Page Logic (login.blade.php) ---
-window.refreshCaptcha = function () {
-    const captchaImage = document.getElementById('captchaImage');
-    if (captchaImage) {
-        captchaImage.src = '/captcha?' + Math.random();
-    }
-};
-
 document.addEventListener('DOMContentLoaded', function () {
     // Hidden trigger logic for admin recovery
     let logoClickCount = 0;

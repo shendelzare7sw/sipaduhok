@@ -133,10 +133,6 @@ Route::get('/syarat-ketentuan', [\App\Http\Controllers\LandingPageController::cl
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
-    
-    // Captcha Routes
-    Route::get('/captcha', [\App\Http\Controllers\CaptchaController::class, 'generate'])->name('captcha');
-    Route::get('/captcha/refresh', [\App\Http\Controllers\CaptchaController::class, 'refresh'])->name('captcha.refresh');
 
     // Admin Recovery Routes
     Route::post('/admin-recovery/unlock', [\App\Http\Controllers\Auth\AdminRecoveryController::class, 'unlock'])->name('admin.recovery.unlock');
