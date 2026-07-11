@@ -45,11 +45,16 @@ class PromotionService
 
     private function checkFinancial($siswa, $tahunAjaranId)
     {
-        // Check unpaid bills
+        // Semua tagihan yang BELUM lunas dihitung — termasuk 'cicilan' (bayar sebagian) —
+        // demi keadilan & konsisten dengan gate ujian/rapor (cekSiswaLunas: != 'sudah_bayar').
+        // Sebelumnya 'cicilan' terlewat, sehingga siswa yang baru bayar sebagian salah dianggap LUNAS.
+        // Nilai tunggakan memakai SISA sebenarnya (jumlah - pembayaran disetujui), bukan tagihan penuh,
+        // agar akurat untuk yang sudah menyicil.
         $unpaid = Tagihan::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunAjaranId)
-            ->whereIn('status', ['belum_bayar', 'terlambat'])
-            ->sum('jumlah');
+            ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
+            ->get()
+            ->sum(fn ($t) => $t->sisa_pembayaran);
 
         $isLunas = $unpaid <= 0;
         $dispensasi = false;

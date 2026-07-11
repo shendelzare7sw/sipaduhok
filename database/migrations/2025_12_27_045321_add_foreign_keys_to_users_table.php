@@ -44,6 +44,14 @@ return new class extends Migration
      */
     private function foreignKeyExists(string $table, string $constraint): bool
     {
+        // information_schema hanya tersedia di MySQL/MariaDB. Pada driver lain
+        // (mis. SQLite untuk test), kembalikan false agar alurnya menyamai migrasi
+        // asli (tambah FK langsung); SQLite memperlakukan penambahan FK via ALTER
+        // sebagai no-op sehingga tetap aman.
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            return false;
+        }
+
         return DB::table('information_schema.TABLE_CONSTRAINTS')
             ->where('CONSTRAINT_SCHEMA', DB::connection()->getDatabaseName())
             ->where('TABLE_NAME', $table)
