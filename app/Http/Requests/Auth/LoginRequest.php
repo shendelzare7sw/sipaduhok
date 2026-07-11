@@ -5,6 +5,7 @@ namespace App\Http\Requests\Auth;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -31,11 +32,50 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Verifikasi Cloudflare Turnstile.
+     *
+     * Dicek eksplisit (bukan sebagai aturan closure) agar SELALU dijalankan —
+     * aturan closure bersifat non-implisit, sehingga bila field turnstile tidak
+     * dikirim sama sekali (POST manual) aturannya akan dilewati → celah bypass.
+     *
+     * Bila TURNSTILE_SECRET_KEY belum diisi (mis. lokal/dev), verifikasi dilewati
+     * agar tidak memblokir login sebelum kunci dikonfigurasi.
+     */
+    public function ensureTurnstileVerified(): void
+    {
+        $secret = config('services.turnstile.secret_key');
+
+        if (empty($secret)) {
+            return;
+        }
+
+        $token = $this->input('cf-turnstile-response');
+        $verified = false;
+
+        if (! empty($token)) {
+            $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                'secret' => $secret,
+                'response' => $token,
+                'remoteip' => $this->ip(),
+            ]);
+
+            $verified = (bool) ($response->json('success') ?? false);
+        }
+
+        if (! $verified) {
+            throw ValidationException::withMessages([
+                'cf-turnstile-response' => 'Verifikasi keamanan gagal. Silakan coba lagi.',
+            ]);
+        }
+    }
+
+    /**
      * Attempt to authenticate the request's credentials.
      */
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+        $this->ensureTurnstileVerified();
 
         $login = $this->input('login');
         

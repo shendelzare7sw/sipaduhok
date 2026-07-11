@@ -12,6 +12,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('js/tailwind.config.js') }}"></script>
 
+    <!-- Cloudflare Turnstile -->
+    @if(config('services.turnstile.site_key'))
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    @endif
+
     @vite(['resources/css/pages/login.css', 'resources/js/pages/login.js', 'resources/js/pages/auth.js'])
     
     <!-- Google Fonts -->
@@ -169,9 +174,19 @@
                                 </div>
                             </div>
 
+                            <!-- Cloudflare Turnstile -->
+                            @if(config('services.turnstile.site_key'))
+                                <div class="mt-6 flex justify-center">
+                                    <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+                                </div>
+                                @error('cf-turnstile-response')
+                                    <p class="text-red-500 text-sm mt-1.5 font-medium text-center">{{ $message }}</p>
+                                @enderror
+                            @endif
+
                             <!-- Submit Button -->
                             <div class="mt-6">
-                                <button type="submit" 
+                                <button type="submit"
                                     class="w-full bg-gradient-to-r from-[#165fac] via-[#287f3b] to-[#d45930] hover:from-[#d45930] hover:via-[#287f3b] hover:to-[#165fac] bg-[length:200%_auto] text-white font-bold py-4 rounded-xl shadow-[0_10px_20px_-10px_rgba(22,95,172,0.5)] hover:shadow-[0_10px_20px_-10px_rgba(212,89,48,0.5)] transition-all duration-500 transform hover:-translate-y-1 flex items-center justify-center gap-2 group hover:bg-right">
                                     <span>Masuk ke Dashboard</span>
                                     <svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
