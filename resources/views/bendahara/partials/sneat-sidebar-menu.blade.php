@@ -72,8 +72,8 @@
 </li>
 
 {{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.promotion.validation') ? 'active' : '' }}">
-    <a href="{{ route('bendahara.promotion.validation.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'bendahara.kenaikan-kelas.validation') ? 'active' : '' }}">
+    <a href="{{ route('bendahara.kenaikan-kelas.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
         <div>Validasi Dispensasi</div>
     </a>

@@ -28,8 +28,8 @@
 </li>
 
 {{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.promotion.approval') ? 'active' : '' }}">
-    <a href="{{ route('ketua.promotion.approval.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'ketua.kenaikan-kelas.approval') ? 'active' : '' }}">
+    <a href="{{ route('ketua.kenaikan-kelas.approval.index') }}" class="menu-link">
         <i class="menu-icon fas fa-check-double"></i>
         <div>Approval Dispensasi</div>
     </a>

@@ -327,7 +327,7 @@ class PromotionReportController extends Controller
             }
             DB::commit();
             
-            $route = str_contains($request->route()->getName(), 'waka') ? 'waka.promotion.report' : 'admin.akademik.promotion.report';
+            $route = str_contains($request->route()->getName(), 'waka') ? 'waka.kenaikan-kelas.report' : 'admin.akademik.kenaikan-kelas.report';
             
             return redirect()->route($route, ['tahun_ajaran_id' => $contextYear->id]) // Redirect back to same context
                 ->with('success', "Proses kenaikan kelas berhasil dijalankan untuk {$count} siswa (Tahun: {$contextYear->nama_tahun_ajaran}).");

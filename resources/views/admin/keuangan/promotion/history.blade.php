@@ -20,12 +20,12 @@
                     <h5 class="mb-0 text-primary fw-bold">
                         <i class="bi bi-clock-history me-2"></i>Riwayat Pengajuan Dispensasi
                     </h5>
-                    <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{{ route('admin.keuangan.kenaikan-kelas.validation.index') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left me-1"></i>Kembali
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.keuangan.promotion.validation.history') }}" method="GET" class="mb-4">
+                    <form action="{{ route('admin.keuangan.kenaikan-kelas.validation.history') }}" method="GET" class="mb-4">
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label">Cari Siswa</label>
@@ -67,7 +67,7 @@
                         </div>
                     </form>
 
-                    <form id="bulkDeleteForm" method="POST" action="{{ route('admin.keuangan.promotion.validation.history.bulk-delete') }}">
+                    <form id="bulkDeleteForm" method="POST" action="{{ route('admin.keuangan.kenaikan-kelas.validation.history.bulk-delete') }}">
                         @csrf
                         <div class="mb-3 d-flex justify-content-between align-items-center">
                             <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>

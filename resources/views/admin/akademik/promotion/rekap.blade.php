@@ -97,7 +97,7 @@
 
                         {{-- Print Button --}}
                         @php
-                            $printRouteName = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.report.print' : 'waka.promotion.report.print';
+                            $printRouteName = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.kenaikan-kelas.report.print' : 'waka.kenaikan-kelas.report.print';
                         @endphp
                         <a href="{{ route($printRouteName, array_merge(request()->only(['tahun_ajaran_id', 'status', 'cabang_id', 'jenjang', 'kelas_id']))) }}"
                            target="_blank"
@@ -572,7 +572,7 @@
                     @php
                         $routePrefix = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik' : 'waka';
                     @endphp
-                    <form id="promoteSelectedForm" action="{{ route($routePrefix . '.promotion.promote-selected') }}" method="POST" class="d-none">
+                    <form id="promoteSelectedForm" action="{{ route($routePrefix . '.kenaikan-kelas.promote-selected') }}" method="POST" class="d-none">
                         @csrf
                         <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
                         <input type="hidden" name="select_all" id="selectAllFlag" value="0">
@@ -606,7 +606,7 @@
                     <div class="alert alert-info mb-3">
                         <i class="fas fa-info-circle me-1"></i> 
                         Jadwal eksekusi otomatis diatur melalui menu 
-                        <a href="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.settings.index' : 'waka.promotion.settings.index') }}" class="fw-bold">Pengaturan Kenaikan Kelas</a>.
+                        <a href="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.kenaikan-kelas.settings.index' : 'waka.kenaikan-kelas.settings.index') }}" class="fw-bold">Pengaturan Kenaikan Kelas</a>.
                     </div>
                     
                     <div class="table-responsive">
@@ -687,7 +687,7 @@
                                             <button type="button" class="btn btn-sm btn-danger"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#cancelScheduleModal"
-                                                data-url="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.promotion.cancel-schedule' : 'waka.promotion.cancel-schedule', $schedule->id) }}"
+                                                data-url="{{ route(str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.kenaikan-kelas.cancel-schedule' : 'waka.kenaikan-kelas.cancel-schedule', $schedule->id) }}"
                                                 data-date="{{ $schedule->scheduled_at->format('d/m/y H:i') }}">
                                                 Batal
                                             </button>

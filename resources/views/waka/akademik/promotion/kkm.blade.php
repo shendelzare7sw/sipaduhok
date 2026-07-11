@@ -13,7 +13,7 @@
 
 @section('content')
 @php
-    $routePrefix = 'waka.promotion';
+    $routePrefix = 'waka.kenaikan-kelas';
     $tahunLabel = $tahun->nama_tahun_ajaran ?? $tahun->nama ?? $tahun->tahun_ajaran ?? '-';
     $totalMapel = $mapelList->count();
     $configuredCount = collect($existingKKM ?? [])->filter(function ($value) {

@@ -960,8 +960,8 @@ class NotificationService
 
         foreach ($targets as $target) {
             $route = $target->role === 'admin'
-                ? route('admin.keuangan.promotion.validation.index')
-                : route('bendahara.promotion.validation.index');
+                ? route('admin.keuangan.kenaikan-kelas.validation.index')
+                : route('bendahara.kenaikan-kelas.validation.index');
 
             $this->create(
                 $target->id,
@@ -987,7 +987,7 @@ class NotificationService
                 Notification::TIPE_KENAIKAN,
                 'Dispensasi Naik Kelas Baru',
                 $pengaju->name . ' mengajukan dispensasi naik kelas untuk ' . $count . ' siswa. Menunggu keputusan Anda.',
-                route('ketua.promotion.approval.index'),
+                route('ketua.kenaikan-kelas.approval.index'),
                 ['count' => $count, 'pengaju_id' => $pengaju->id]
             );
         }
@@ -1011,8 +1011,8 @@ class NotificationService
             if (!$pengaju) continue;
 
             $route = match($pengaju->role) {
-                'admin' => route('admin.keuangan.promotion.validation.history'),
-                'bendahara' => route('bendahara.promotion.validation.history'),
+                'admin' => route('admin.keuangan.kenaikan-kelas.validation.history'),
+                'bendahara' => route('bendahara.kenaikan-kelas.validation.history'),
                 default => route('notifications.index'),
             };
 

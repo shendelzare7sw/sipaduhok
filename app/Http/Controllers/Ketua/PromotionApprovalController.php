@@ -54,7 +54,7 @@ class PromotionApprovalController extends Controller
         app(NotificationService::class)->notifyPromotionDispensasiKeputusan([$id], $status, auth()->user()->name);
 
         return redirect()
-            ->route('ketua.promotion.approval.index')
+            ->route('ketua.kenaikan-kelas.approval.index')
             ->with('success', 'Status pengajuan berhasil diperbarui: ' . $status);
     }
 
@@ -86,7 +86,7 @@ class PromotionApprovalController extends Controller
         $label = $status === 'DISETUJUI' ? 'disetujui' : 'ditolak';
 
         return redirect()
-            ->route('ketua.promotion.approval.index')
+            ->route('ketua.kenaikan-kelas.approval.index')
             ->with('success', "{$count} pengajuan dispensasi berhasil {$label}");
     }
 

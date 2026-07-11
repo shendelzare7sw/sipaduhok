@@ -349,7 +349,7 @@
                             <i class="fas fa-calendar-week text-warning"></i>
                             <span class="quick-link-text">Jadwal<br>Pelajaran</span>
                         </a>
-                        <a href="{{ route('wali.promotion.prediction') }}" class="quick-link-item">
+                        <a href="{{ route('wali.kenaikan-kelas.prediction') }}" class="quick-link-item">
                             <i class="fas fa-chart-bar text-danger"></i>
                             <span class="quick-link-text">Prediksi<br>Kenaikan</span>
                         </a>

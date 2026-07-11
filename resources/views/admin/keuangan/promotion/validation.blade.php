@@ -75,7 +75,7 @@
                 <h5 class="disp-card-title"><i class="fas fa-clipboard-check disp-title-icon"></i> Kandidat Dispensasi</h5>
                 <div class="disp-card-subtitle">Daftar siswa yang akademiknya tuntas namun masih memiliki sisa tagihan.</div>
             </div>
-            <a href="{{ route('admin.keuangan.promotion.validation.history') }}" class="btn btn-primary btn-sm btn-soft">
+            <a href="{{ route('admin.keuangan.kenaikan-kelas.validation.history') }}" class="btn btn-primary btn-sm btn-soft">
                 <i class="bx bx-history"></i> <span>Riwayat</span>
             </a>
         </div>
@@ -159,7 +159,7 @@
                                         <div class="modal fade" id="modalDispensasi{{ $candidate['siswa']->id }}" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                                 <div class="modal-content border-0 shadow disp-modal-content">
-                                                    <form action="{{ route('admin.keuangan.promotion.validation.store') }}" method="POST">
+                                                    <form action="{{ route('admin.keuangan.kenaikan-kelas.validation.store') }}" method="POST">
                                                         @csrf
                                                         <div class="modal-header border-0 disp-modal-header">
                                                             <h5 class="modal-title text-white"><i class="bx bx-send me-2"></i>Ajukan Izin Khusus</h5>
@@ -210,7 +210,7 @@
 <div class="modal fade" id="modalBulkDispensasi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow disp-modal-content">
-            <form action="{{ route('admin.keuangan.promotion.validation.bulk-store') }}" method="POST" id="bulkDispensasiForm">
+            <form action="{{ route('admin.keuangan.kenaikan-kelas.validation.bulk-store') }}" method="POST" id="bulkDispensasiForm">
                 @csrf
                 <div class="modal-header border-0 disp-modal-header">
                     <h5 class="modal-title text-white"><i class="bx bx-send me-2"></i>Ajukan Dispensasi Terpilih</h5>

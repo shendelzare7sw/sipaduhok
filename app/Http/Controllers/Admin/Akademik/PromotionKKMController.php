@@ -59,7 +59,7 @@ class PromotionKKMController extends Controller
             );
         }
 
-        $routePrefix = $request->routeIs('waka.*') ? 'waka.promotion' : 'admin.akademik.promotion';
+        $routePrefix = $request->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
 
         return redirect()
             ->route($routePrefix . '.kkm.index', ['jenjang' => $validated['jenjang']])

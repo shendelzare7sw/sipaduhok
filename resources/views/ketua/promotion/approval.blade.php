@@ -25,7 +25,7 @@
                 <button type="button" class="btn btn-danger btn-sm approval-bulk-action is-hidden" id="btnBulkReject" data-bs-toggle="modal" data-bs-target="#modalBulkReject">
                     <i class='bx bx-x'></i> <span class="d-none d-sm-inline">Tolak</span> Terpilih (<span id="rejectCount">0</span>)
                 </button>
-                <a href="{{ route('ketua.promotion.approval.history') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('ketua.kenaikan-kelas.approval.history') }}" class="btn btn-primary btn-sm">
                     <i class='bx bx-history'></i> <span class="d-none d-sm-inline">Riwayat</span>
                 </a>
             </div>
@@ -76,7 +76,7 @@
                             <div class="modal fade" id="modalApprove{{ $req->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
-                                        <form action="{{ route('ketua.promotion.approval.update', $req->id) }}" method="POST">
+                                        <form action="{{ route('ketua.kenaikan-kelas.approval.update', $req->id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="action" value="approve">
@@ -109,7 +109,7 @@
                             <div class="modal fade" id="modalReject{{ $req->id }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
-                                        <form action="{{ route('ketua.promotion.approval.update', $req->id) }}" method="POST">
+                                        <form action="{{ route('ketua.kenaikan-kelas.approval.update', $req->id) }}" method="POST">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="action" value="reject">
@@ -146,7 +146,7 @@
 <div class="modal fade" id="modalBulkApprove" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form action="{{ route('ketua.promotion.approval.bulk-update') }}" method="POST" id="bulkApproveForm">
+            <form action="{{ route('ketua.kenaikan-kelas.approval.bulk-update') }}" method="POST" id="bulkApproveForm">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="action" value="approve">
@@ -179,7 +179,7 @@
 <div class="modal fade" id="modalBulkReject" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <form action="{{ route('ketua.promotion.approval.bulk-update') }}" method="POST" id="bulkRejectForm">
+            <form action="{{ route('ketua.kenaikan-kelas.approval.bulk-update') }}" method="POST" id="bulkRejectForm">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="action" value="reject">

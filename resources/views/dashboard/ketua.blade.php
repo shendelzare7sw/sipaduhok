@@ -159,7 +159,7 @@
                     <!-- Approval & Dispensasi Tab -->
                     <div class="tab-pane fade show active h-100" id="tab-approval" role="tabpanel">
                         <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('ketua.promotion.approval.index') }}" class="quick-link-item position-relative">
+                            <a href="{{ route('ketua.kenaikan-kelas.approval.index') }}" class="quick-link-item position-relative">
                                 <i class="fas fa-check-double text-success"></i>
                                 <span class="quick-link-text">Dispensasi Kenaikan</span>
                             </a>

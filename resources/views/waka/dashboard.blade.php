@@ -271,15 +271,15 @@
                     <!-- Kenaikan & Nilai Tab -->
                     <div class="tab-pane fade h-100" id="tab-nilai" role="tabpanel">
                         <div class="quick-links-grid align-content-start pb-4">
-                            <a href="{{ route('waka.promotion.kkm.index') }}" class="quick-link-item">
+                            <a href="{{ route('waka.kenaikan-kelas.kkm.index') }}" class="quick-link-item">
                                 <i class="fas fa-chart-line text-success"></i>
                                 <span class="quick-link-text">Pengaturan KKM</span>
                             </a>
-                            <a href="{{ route('waka.promotion.settings.index') }}" class="quick-link-item">
+                            <a href="{{ route('waka.kenaikan-kelas.settings.index') }}" class="quick-link-item">
                                 <i class="fas fa-cogs text-secondary"></i>
                                 <span class="quick-link-text">Setting Naik Kelas</span>
                             </a>
-                            <a href="{{ route('waka.promotion.report') }}" class="quick-link-item quick-link-wide">
+                            <a href="{{ route('waka.kenaikan-kelas.report') }}" class="quick-link-item quick-link-wide">
                                 <i class="fas fa-file-signature text-primary"></i>
                                 <span class="quick-link-text">Proses & Rekap Kenaikan</span>
                             </a>

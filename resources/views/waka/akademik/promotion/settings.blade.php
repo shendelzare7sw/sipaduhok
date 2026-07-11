@@ -16,7 +16,7 @@
             <div class="card mb-4">
                 <h5 class="card-header">Konfigurasi Umum</h5>
                 <div class="card-body">
-                    <form action="{{ route('waka.promotion.settings.store') }}" method="POST">
+                    <form action="{{ route('waka.kenaikan-kelas.settings.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
 

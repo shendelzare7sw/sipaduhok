@@ -238,7 +238,7 @@
                             @endforeach
                         </ul>
                         <div class="tab-panel-footer">
-                            <a href="{{ route('bendahara.promotion.validation.index') }}">
+                            <a href="{{ route('bendahara.kenaikan-kelas.validation.index') }}">
                                 Kelola Dispensasi <i class="fas fa-arrow-right ms-1"></i>
                             </a>
                         </div>
@@ -321,7 +321,7 @@
                         <i class="fas fa-id-card text-warning"></i>
                         <span class="quick-link-text">Validasi<br>Akses</span>
                     </a>
-                    <a href="{{ route('bendahara.promotion.validation.index') }}" class="quick-link-item">
+                    <a href="{{ route('bendahara.kenaikan-kelas.validation.index') }}" class="quick-link-item">
                         <i class="fas fa-handshake text-secondary"></i>
                         <span class="quick-link-text">Validasi<br>Dispensasi</span>
                     </a>

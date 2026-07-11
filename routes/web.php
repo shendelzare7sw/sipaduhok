@@ -541,7 +541,7 @@ Route::middleware(['auth'])->group(function () {
             });
 
             // Promotion Validation (New Admin Access)
-            Route::prefix('promotion')->name('promotion.')->group(function () {
+            Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
                 Route::get('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'index'])->name('validation.index');
                 Route::post('/validation', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'store'])->name('validation.store');
                 Route::post('/validation/bulk', [\App\Http\Controllers\Admin\Keuangan\PromotionValidationController::class, 'bulkStore'])->name('validation.bulk-store');
@@ -604,7 +604,7 @@ Route::middleware(['auth'])->group(function () {
             });
             
             // Promotion System (Report, KKM, Settings)
-            Route::prefix('promotion')->name('promotion.')->group(function () {
+            Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
                 Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
                 Route::get('/report/print', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'print'])->name('report.print');
                 Route::post('/execute', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'execute'])->name('execute');
@@ -735,7 +735,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion Approval
-        Route::prefix('promotion')->name('promotion.')->group(function() {
+        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function() {
             Route::get('/approval', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'index'])->name('approval.index');
             Route::put('/approval/bulk', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'bulkUpdate'])->name('approval.bulk-update');
             Route::put('/approval/{id}', [\App\Http\Controllers\Ketua\PromotionApprovalController::class, 'update'])->name('approval.update');
@@ -897,7 +897,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion System Settings
-        Route::prefix('promotion')->name('promotion.')->group(function() {
+        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function() {
             // Note: We use Admin controllers for shared functionality to ensure consistency
             // Settings and KKM are defined at the end of this group
 
@@ -1086,7 +1086,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion Validation (Overrides)
-        Route::prefix('promotion')->name('promotion.')->group(function() {
+        Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function() {
             Route::get('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'index'])->name('validation.index');
             Route::post('/validation', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'store'])->name('validation.store');
             Route::post('/validation/bulk', [\App\Http\Controllers\Bendahara\PromotionValidationController::class, 'bulkStore'])->name('validation.bulk-store');
@@ -1139,7 +1139,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Promotion Prediction
-        Route::get('/promotion/prediction', [\App\Http\Controllers\WaliKelas\PromotionController::class, 'index'])->name('promotion.prediction');
+        Route::get('/kenaikan-kelas/prediction', [\App\Http\Controllers\WaliKelas\PromotionController::class, 'index'])->name('kenaikan-kelas.prediction');
 
         // Nilai Siswa
         Route::prefix('nilai')->name('nilai.')->group(function () {

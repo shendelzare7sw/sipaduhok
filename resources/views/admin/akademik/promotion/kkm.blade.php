@@ -17,7 +17,7 @@
 
 @section('content')
 @php
-    $routePrefix = request()->routeIs('waka.*') ? 'waka.promotion' : 'admin.akademik.promotion';
+    $routePrefix = request()->routeIs('waka.*') ? 'waka.kenaikan-kelas' : 'admin.akademik.kenaikan-kelas';
     $tahunLabel = $tahun->nama_tahun_ajaran ?? $tahun->nama ?? $tahun->tahun_ajaran ?? '-';
     $totalMapel = $mapelList->count();
     $configuredCount = collect($existingKKM ?? [])->filter(function ($value) {

@@ -88,14 +88,14 @@ class KnowledgeBaseLoader
             'Presensi Siswa: Input Harian, Validasi Izin, Rekap Harian, Riwayat & Edit',
             'Arsip Kelas Saya lintas tahun ajaran (read-only untuk kelas yang pernah diwalikan) => wali.arsip.index',
             'Permintaan Unduh Rapor dari wali siswa/siswa => wali.rapor.request-download.index',
-            'Kenaikan Kelas: Prediksi Kenaikan => wali.promotion.prediction',
+            'Kenaikan Kelas: Prediksi Kenaikan => wali.kenaikan-kelas.prediction',
             'Validasi Akses ujian/rapor untuk siswa kelasnya => wali.validasi-akses.index',
         ],
         'bendahara' => [
             'Dashboard => bendahara.dashboard',
             'Keuangan: Kelola Tagihan, Tarik Tunggakan, Kelola Pembayaran, Config Pembayaran',
             'Validasi Akses: Validasi Ujian & Rapor berdasarkan status pembayaran => bendahara.validasi-akses.index',
-            'Kenaikan Kelas: Validasi Dispensasi => bendahara.promotion.validation.index',
+            'Kenaikan Kelas: Validasi Dispensasi => bendahara.kenaikan-kelas.validation.index',
             'Laporan: Laporan Pembayaran, Rekap Tagihan, Siswa Belum Lunas',
         ],
         'sekretaris' => [
@@ -259,22 +259,22 @@ class KnowledgeBaseLoader
         ],
         'kkm|kriteria ketuntasan' => [
             'owner' => ['wakil_kepala_sekolah', 'admin'],
-            'admin_view_route' => 'admin.akademik.promotion.kkm.index',
+            'admin_view_route' => 'admin.akademik.kenaikan-kelas.kkm.index',
             'description' => 'Pengaturan KKM (Kriteria Ketuntasan Minimal) per mapel dikelola oleh Wakasek atau Admin',
         ],
         'kenaikan kelas|promosi siswa|naik kelas' => [
             'owner' => ['wakil_kepala_sekolah', 'admin', 'ketua_pkbm'],
-            'admin_view_route' => 'admin.akademik.promotion.report',
+            'admin_view_route' => 'admin.akademik.kenaikan-kelas.report',
             'description' => 'Proses kenaikan kelas: Wakasek/Admin eksekusi, Ketua PKBM persetujuan akhir',
         ],
         'dispensasi|keringanan biaya' => [
             'owner' => ['ketua_pkbm', 'bendahara'],
-            'admin_view_route' => 'admin.keuangan.promotion.validation.index',
+            'admin_view_route' => 'admin.keuangan.kenaikan-kelas.validation.index',
             'description' => 'Validasi dispensasi pembayaran dikelola oleh Ketua PKBM atau Bendahara',
         ],
         'approval dispensasi|validasi dispensasi|dispensasi naik kelas' => [
             'owner' => ['ketua_pkbm', 'bendahara', 'admin'],
-            'admin_view_route' => 'admin.keuangan.promotion.validation.index',
+            'admin_view_route' => 'admin.keuangan.kenaikan-kelas.validation.index',
             'description' => 'Dispensasi kenaikan/keuangan divalidasi oleh Ketua PKBM, Bendahara, atau Admin sesuai alur',
         ],
         'atur jadwal|buat jadwal|kelola jadwal|jadwal kelas' => [

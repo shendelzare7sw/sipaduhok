@@ -44,7 +44,7 @@
                     Halaman ini adalah <strong>simulasi</strong> berdasarkan data saat ini. Status akhir tetap ditentukan saat tanggal eksekusi sistem.
                 </div>
 
-                <form method="GET" action="{{ route('wali.promotion.prediction') }}" class="row g-3 align-items-end">
+                <form method="GET" action="{{ route('wali.kenaikan-kelas.prediction') }}" class="row g-3 align-items-end">
                     <div class="col-md-6 col-lg-8">
                         <label class="form-label">Cari Siswa</label>
                         <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..." value="{{ request('search') }}">

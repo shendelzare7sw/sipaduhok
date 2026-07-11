@@ -274,8 +274,8 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 </li>
 
 {{-- UC16: Memproses Dispensasi Kenaikan Kelas --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.promotion.validation') ? 'active' : '' }}">
-    <a href="{{ route('admin.keuangan.promotion.validation.index') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'admin.keuangan.kenaikan-kelas.validation') ? 'active' : '' }}">
+    <a href="{{ route('admin.keuangan.kenaikan-kelas.validation.index') }}" class="menu-link">
         <i class="menu-icon fas fa-hand-holding-usd"></i>
         <div>Validasi Dispensasi</div>
     </a>
@@ -290,19 +290,19 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
 
-<li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.kkm.index' || $currentRoute == 'admin.akademik.promotion.settings.index' ? 'active open' : '' }}">
+<li class="menu-item {{ $currentRoute == 'admin.akademik.kenaikan-kelas.kkm.index' || $currentRoute == 'admin.akademik.kenaikan-kelas.settings.index' ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-cogs"></i>
         <div>Pengaturan Kenaikan</div>
     </a>
     <ul class="menu-sub">
-        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.kkm.index' ? 'active' : '' }}">
-            <a href="{{ route('admin.akademik.promotion.kkm.index') }}" class="menu-link">
+        <li class="menu-item {{ $currentRoute == 'admin.akademik.kenaikan-kelas.kkm.index' ? 'active' : '' }}">
+            <a href="{{ route('admin.akademik.kenaikan-kelas.kkm.index') }}" class="menu-link">
                 <div>Pengaturan KKM</div>
             </a>
         </li>
-        <li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.settings.index' ? 'active' : '' }}">
-            <a href="{{ route('admin.akademik.promotion.settings.index') }}" class="menu-link">
+        <li class="menu-item {{ $currentRoute == 'admin.akademik.kenaikan-kelas.settings.index' ? 'active' : '' }}">
+            <a href="{{ route('admin.akademik.kenaikan-kelas.settings.index') }}" class="menu-link">
                 <div>Pengaturan Kenaikan</div>
             </a>
         </li>
@@ -310,8 +310,8 @@ Diselaraskan dengan 39 Use Case Diagram SIPADUHOK
 </li>
 
 {{-- UC18: Proses Eksekusi Kenaikan Kelas --}}
-<li class="menu-item {{ $currentRoute == 'admin.akademik.promotion.report' ? 'active' : '' }}">
-    <a href="{{ route('admin.akademik.promotion.report') }}" class="menu-link">
+<li class="menu-item {{ $currentRoute == 'admin.akademik.kenaikan-kelas.report' ? 'active' : '' }}">
+    <a href="{{ route('admin.akademik.kenaikan-kelas.report') }}" class="menu-link">
         <i class="menu-icon fas fa-tasks"></i>
         <div>Proses & Rekap</div>
     </a>

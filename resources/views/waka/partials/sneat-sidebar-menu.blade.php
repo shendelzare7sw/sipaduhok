@@ -94,19 +94,19 @@
     <span class="menu-header-text">Kenaikan Kelas</span>
 </li>
 
-<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.kkm') || Str::startsWith($currentRoute, 'waka.promotion.settings') ? 'active open' : '' }}">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.kenaikan-kelas.kkm') || Str::startsWith($currentRoute, 'waka.kenaikan-kelas.settings') ? 'active open' : '' }}">
     <a href="#" class="menu-link menu-toggle">
         <i class="menu-icon fas fa-cogs"></i>
         <div>Pengaturan Kenaikan</div>
     </a>
     <ul class="menu-sub">
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.kkm') ? 'active' : '' }}">
-            <a href="{{ route('waka.promotion.kkm.index') }}" class="menu-link">
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.kenaikan-kelas.kkm') ? 'active' : '' }}">
+            <a href="{{ route('waka.kenaikan-kelas.kkm.index') }}" class="menu-link">
                 <div>Pengaturan KKM</div>
             </a>
         </li>
-        <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.settings') ? 'active' : '' }}">
-            <a href="{{ route('waka.promotion.settings.index') }}" class="menu-link">
+        <li class="menu-item {{ Str::startsWith($currentRoute, 'waka.kenaikan-kelas.settings') ? 'active' : '' }}">
+            <a href="{{ route('waka.kenaikan-kelas.settings.index') }}" class="menu-link">
                 <div>Pengaturan Kenaikan</div>
             </a>
         </li>
@@ -114,8 +114,8 @@
 </li>
 
 {{-- UC18: Proses Eksekusi Kenaikan Kelas --}}
-<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.promotion.report') ? 'active' : '' }}">
-    <a href="{{ route('waka.promotion.report') }}" class="menu-link">
+<li class="menu-item {{ Str::startsWith($currentRoute, 'waka.kenaikan-kelas.report') ? 'active' : '' }}">
+    <a href="{{ route('waka.kenaikan-kelas.report') }}" class="menu-link">
         <i class="menu-icon fas fa-tasks"></i>
         <div>Proses & Rekap</div>
     </a>

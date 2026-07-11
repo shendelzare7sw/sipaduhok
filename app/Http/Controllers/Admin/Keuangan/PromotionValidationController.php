@@ -81,7 +81,7 @@ class PromotionValidationController extends Controller
         app(NotificationService::class)->notifyPromotionDispensasiDiajukan(1, auth()->user());
 
         return redirect()
-            ->route('admin.keuangan.promotion.validation.index')
+            ->route('admin.keuangan.kenaikan-kelas.validation.index')
             ->with('success', 'Pengajuan izin khusus berhasil dikirim ke Ketua PKBM');
     }
 
@@ -123,7 +123,7 @@ class PromotionValidationController extends Controller
         }
 
         return redirect()
-            ->route('admin.keuangan.promotion.validation.index')
+            ->route('admin.keuangan.kenaikan-kelas.validation.index')
             ->with('success', "Berhasil mengajukan dispensasi untuk {$created} siswa ke Ketua PKBM");
     }
 

@@ -13,12 +13,12 @@
                     <h5 class="mb-0 text-primary fw-bold">
                         <i class="bi bi-clock-history me-2"></i>Riwayat Persetujuan Dispensasi
                     </h5>
-                    <a href="{{ route('ketua.promotion.approval.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{{ route('ketua.kenaikan-kelas.approval.index') }}" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left me-1"></i>Kembali
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('ketua.promotion.approval.history') }}" method="GET" class="mb-4">
+                    <form action="{{ route('ketua.kenaikan-kelas.approval.history') }}" method="GET" class="mb-4">
                         <div class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label">Cari Siswa</label>
@@ -60,7 +60,7 @@
                         </div>
                     </form>
 
-                    <form id="bulkDeleteForm" method="POST" action="{{ route('ketua.promotion.approval.history.bulk-delete') }}">
+                    <form id="bulkDeleteForm" method="POST" action="{{ route('ketua.kenaikan-kelas.approval.history.bulk-delete') }}">
                         @csrf
                         <div class="mb-3">
                             <button type="button" class="btn btn-danger btn-sm" onclick="confirmBulkDelete()" id="btnBulkDelete" disabled>

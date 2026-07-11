@@ -81,7 +81,7 @@ class PengaturanNaikKelasController extends Controller
         });
 
         return redirect()
-            ->route('waka.promotion.settings.index')
+            ->route('waka.kenaikan-kelas.settings.index')
             ->with('success', 'Pengaturan Naik Kelas berhasil disimpan & Jadwal Otomatis diperbarui.');
     }
 }

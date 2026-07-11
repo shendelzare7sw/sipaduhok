@@ -60,7 +60,7 @@ class PengaturanKKMController extends Controller
         }
 
         return redirect()
-            ->route('waka.promotion.kkm.index', ['jenjang' => $validated['jenjang']])
+            ->route('waka.kenaikan-kelas.kkm.index', ['jenjang' => $validated['jenjang']])
             ->with('success', 'Pengaturan KKM berhasil disimpan');
     }
 }
