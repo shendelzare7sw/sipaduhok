@@ -142,6 +142,11 @@
                         <span class="section-icon section-icon--{{ $sectionKey }}"><i class="fas {{ $cfg[0] }}"></i></span>
                         {{ $cfg[1] }}
                         <span class="badge-count">{{ $arsip[$sectionKey]->count() }}</span>
+                        @if($kelasMapelTujuan->isNotEmpty())
+                            <label class="section-select-all">
+                                <input type="checkbox" class="arsip-select-all"> Pilih semua
+                            </label>
+                        @endif
                     </div>
                     <div class="arsip-grid">
                         @foreach($arsip[$sectionKey] as $item)

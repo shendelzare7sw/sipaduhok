@@ -161,6 +161,33 @@
     font-weight: 700;
 }
 
+/* "Pilih semua" per tipe pembelajaran (kanan header) */
+.guru-lms-arsip-index-page .arsip-section-title .section-select-all {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.guru-lms-arsip-index-page .arsip-section-title .arsip-select-all {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #4361ee;
+}
+
+@media (max-width: 767.98px) {
+    .guru-lms-arsip-index-page .arsip-section-title .arsip-select-all {
+        width: 20px;
+        height: 20px;
+    }
+}
+
 .guru-lms-arsip-index-page .arsip-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

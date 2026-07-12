@@ -21,8 +21,36 @@ document.addEventListener('DOMContentLoaded', function () {
         if (bar) bar.hidden = n === 0;
     }
 
+    // Sinkronkan checkbox "Pilih semua" per tipe (checked / indeterminate).
+    function syncSectionSelectAll(section) {
+        if (!section) return;
+        const sa = section.querySelector('.arsip-select-all');
+        if (!sa) return;
+        const boxes = Array.from(section.querySelectorAll('.arsip-check'));
+        const checked = boxes.filter((c) => c.checked).length;
+        sa.checked = checked > 0 && checked === boxes.length;
+        sa.indeterminate = checked > 0 && checked < boxes.length;
+    }
+
+    function syncAllSections() {
+        form.querySelectorAll('.arsip-section').forEach(syncSectionSelectAll);
+    }
+
     form.addEventListener('change', function (e) {
-        if (e.target.classList && e.target.classList.contains('arsip-check')) {
+        const t = e.target;
+        if (!t.classList) return;
+
+        if (t.classList.contains('arsip-select-all')) {
+            // Toggle semua item di tipe (section) ini.
+            const section = t.closest('.arsip-section');
+            if (section) {
+                section.querySelectorAll('.arsip-check').forEach((c) => {
+                    c.checked = t.checked;
+                });
+            }
+            refresh();
+        } else if (t.classList.contains('arsip-check')) {
+            syncSectionSelectAll(t.closest('.arsip-section'));
             refresh();
         }
     });
@@ -32,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
             allChecks().forEach((c) => {
                 c.checked = false;
             });
+            syncAllSections();
             refresh();
         });
     }
