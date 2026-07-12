@@ -236,7 +236,8 @@ class GuruLmsArsipService
                 'tanggal_selesai' => now()->addDays(7),
                 'durasi_menit' => $sumber->durasi_menit,
                 'is_active' => false, // default off — guru aktivasi manual setelah cek
-                'acak_soal' => $sumber->acak_soal,
+                // Catatan: kolom 'acak_soal' tidak ada di tabel `ujian` (fitur di-drop);
+                // jangan disisipkan agar insert tidak gagal (SQLSTATE 42S22).
                 'tampilkan_nilai' => $sumber->tampilkan_nilai,
                 'bisa_diulang' => $sumber->bisa_diulang,
                 'batas_pengulangan' => $sumber->batas_pengulangan,
