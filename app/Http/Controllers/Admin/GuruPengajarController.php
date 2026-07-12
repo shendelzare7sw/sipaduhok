@@ -195,6 +195,13 @@ class GuruPengajarController extends Controller
         try {
             // Delete all existing entries for classes in this tahun ajaran
             $kelasIds = Kelas::where('tahun_ajaran_id', $tahunAjaranId)->pluck('id');
+
+            // Catat pasangan lama agar hanya penugasan BARU yang dinotifikasi (hindari spam).
+            $existingKeys = GuruPengajarKelas::whereIn('kelas_id', $kelasIds)
+                ->get(['tenaga_pendidik_id', 'kelas_id', 'mata_pelajaran_id'])
+                ->map(fn($g) => $g->tenaga_pendidik_id . '-' . $g->kelas_id . '-' . $g->mata_pelajaran_id)
+                ->flip();
+
             GuruPengajarKelas::whereIn('kelas_id', $kelasIds)->delete();
 
             // Re-create from jadwal
@@ -203,6 +210,12 @@ class GuruPengajarController extends Controller
             }
 
             DB::commit();
+
+            // Notif guru hanya untuk penugasan yang benar-benar baru.
+            $newAssignments = $fromJadwal->reject(fn($e, $key) => $existingKeys->has($key))->values();
+            if ($newAssignments->isNotEmpty()) {
+                app(\App\Services\NotificationService::class)->notifyGuruPengajarAssignments($newAssignments);
+            }
 
             return back()->with('success', "Berhasil menyinkronkan {$fromJadwal->count()} penugasan dari jadwal pelajaran.");
         } catch (\Exception $e) {

@@ -204,7 +204,12 @@ class AkademikController extends SekretarisController
                 ->store('pengumuman/lampiran', 'public');
         }
 
-        \App\Models\Pengumuman::create($validated);
+        $pengumuman = \App\Models\Pengumuman::create($validated);
+
+        // Notifikasi hanya untuk pengumuman yang benar-benar tayang (aktif).
+        if (($pengumuman->status ?? null) === 'aktif') {
+            app(\App\Services\NotificationService::class)->notifyPengumumanBaru($pengumuman);
+        }
 
         return redirect()->route('admin.akademik.pengumuman.index')
             ->with('success', 'Pengumuman berhasil ditambahkan!');
@@ -323,7 +328,13 @@ class AkademikController extends SekretarisController
             }
         }
 
-        \App\Models\Berita::create($validated);
+        $berita = \App\Models\Berita::create($validated);
+
+        // Notifikasi hanya untuk berita yang tayang (aktif) & ditandai penting (is_featured).
+        // (notifyBeritaBaru sendiri sudah memfilter is_featured.)
+        if (($berita->status ?? null) === 'aktif') {
+            app(\App\Services\NotificationService::class)->notifyBeritaBaru($berita);
+        }
 
         return redirect()->route('admin.akademik.berita.index')
             ->with('success', 'Berita berhasil ditambahkan!');

@@ -214,7 +214,7 @@ class PresensiController extends Controller
         $this->assertKelasMilikWali($request->kelas_id);
         $this->assertSiswaDiKelas($request->siswa_id, $request->kelas_id);
 
-        Presensi::updateOrCreate(
+        $presensi = Presensi::updateOrCreate(
             [
                 'siswa_id' => $request->siswa_id,
                 'kelas_id' => $request->kelas_id,
@@ -227,6 +227,12 @@ class PresensiController extends Controller
                 'diinput_oleh' => auth()->id(),
             ]
         );
+
+        // Notif ortu bila anak tercatat ALPHA (tanpa keterangan).
+        // Guard wasRecentlyCreated/wasChanged: hindari notif ulang saat status tak berubah.
+        if ($request->status === 'alpha' && ($presensi->wasRecentlyCreated || $presensi->wasChanged('status'))) {
+            app(\App\Services\NotificationService::class)->notifyAbsensiAlpha($presensi);
+        }
 
         return back()->with('success', 'Presensi berhasil diperbarui!');
     }

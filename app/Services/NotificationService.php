@@ -113,6 +113,39 @@ class NotificationService
     }
 
     /**
+     * Notify siswa di kelas ketika guru menjadwalkan kelas virtual (meeting).
+     * Berfungsi sebagai pengingat pertemuan daring.
+     */
+    public function notifyKelasVirtualBaru($meeting)
+    {
+        if (!$meeting || !$meeting->kelas_id) {
+            return;
+        }
+
+        $siswaList = Siswa::where('kelas_id', $meeting->kelas_id)
+            ->whereNotNull('user_id')
+            ->get();
+
+        $mapelNama = $meeting->mataPelajaran->nama_mapel ?? 'Mata Pelajaran';
+        $waktu = '';
+        if ($meeting->waktu_mulai) {
+            $waktu = ' • ' . \Illuminate\Support\Carbon::parse($meeting->waktu_mulai)
+                ->locale('id')->translatedFormat('d M Y, H:i');
+        }
+
+        foreach ($siswaList as $siswa) {
+            $this->create(
+                $siswa->user_id,
+                Notification::TIPE_MATERI,
+                'Kelas Virtual: ' . $meeting->judul,
+                $mapelNama . $waktu,
+                route('siswa.lms.mapel.meeting.index', [$meeting->mata_pelajaran_id]),
+                ['meeting_id' => $meeting->id, 'kelas_id' => $meeting->kelas_id]
+            );
+        }
+    }
+
+    /**
      * Notify about deadline reminder (1 day before)
      */
     public function notifyDeadlineReminder($tugas)
@@ -293,6 +326,35 @@ class NotificationService
                     'Pengajuan izin ' . $siswa->nama_lengkap . ' telah ' . strtolower($statusText),
                     route('wali-siswa.presensi.riwayat-izin', $siswa->id),
                     ['presensi_id' => $presensi->id, 'status' => $presensi->status_validasi]
+                );
+            }
+        }
+    }
+
+    /**
+     * Notify orang tua ketika anaknya tercatat ALPHA (absen tanpa keterangan)
+     * oleh wali kelas. Hanya untuk status 'alpha' (bukan hadir/sakit/izin).
+     */
+    public function notifyAbsensiAlpha($presensi)
+    {
+        $siswa = $presensi->siswa;
+        if (!$siswa) {
+            return;
+        }
+
+        $tgl = $presensi->tanggal
+            ? \Illuminate\Support\Carbon::parse($presensi->tanggal)->locale('id')->translatedFormat('d M Y')
+            : '';
+
+        foreach ($siswa->orangTua as $parent) {
+            if ($parent->id) {
+                $this->create(
+                    $parent->id,
+                    Notification::TIPE_IZIN,
+                    'Ketidakhadiran: ' . $siswa->nama_lengkap,
+                    $siswa->nama_lengkap . ' tercatat ALPHA (tanpa keterangan)' . ($tgl ? ' pada ' . $tgl : '') . '.',
+                    route('wali-siswa.presensi.riwayat-izin', $siswa->id),
+                    ['presensi_id' => $presensi->id, 'siswa_id' => $siswa->id, 'status' => 'alpha']
                 );
             }
         }
@@ -812,6 +874,33 @@ class NotificationService
     }
 
     /**
+     * Notify guru untuk penugasan mengajar BARU (hasil sinkronisasi dari jadwal).
+     * $assignments: iterable of ['tenaga_pendidik_id','kelas_id','mata_pelajaran_id'].
+     * Diringkas per guru agar tidak spam; controller hanya mengirim pasangan yang benar-benar baru.
+     */
+    public function notifyGuruPengajarAssignments($assignments)
+    {
+        $byGuru = collect($assignments)->groupBy('tenaga_pendidik_id');
+
+        foreach ($byGuru as $tenagaPendidikId => $items) {
+            $tp = TenagaPendidik::with('user')->find($tenagaPendidikId);
+            if (!$tp || !$tp->user_id) {
+                continue;
+            }
+
+            $count = count($items);
+            $this->create(
+                $tp->user_id,
+                Notification::TIPE_KELAS,
+                'Penugasan Mengajar Baru',
+                'Anda ditugaskan mengajar pada ' . $count . ' kelas/mata pelajaran baru. Silakan cek jadwal & LMS Anda.',
+                route('guru.dashboard'),
+                ['count' => $count]
+            );
+        }
+    }
+
+    /**
      * Notify siswa and wali siswa when assigned to a class
      */
     public function notifyPlottingSiswa($siswa)
@@ -872,7 +961,7 @@ class NotificationService
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
                 'Pengumuman: ' . $pengumuman->judul,
-                substr(strip_tags($pengumuman->isi), 0, 100) . '...',
+                \Illuminate\Support\Str::limit(strip_tags($pengumuman->isi_pengumuman ?? ''), 100),
                 $route,
                 ['pengumuman_id' => $pengumuman->id]
             );
@@ -904,7 +993,7 @@ class NotificationService
                 $user->id,
                 Notification::TIPE_PENGUMUMAN,
                 'Berita Terbaru: ' . $berita->judul,
-                substr(strip_tags($berita->konten), 0, 100) . '...',
+                \Illuminate\Support\Str::limit(strip_tags($berita->deskripsi_singkat ?? ''), 100),
                 $route,
                 ['berita_id' => $berita->id]
             );

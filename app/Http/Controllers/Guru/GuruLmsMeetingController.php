@@ -84,15 +84,19 @@ class GuruLmsMeetingController extends Controller
             'deskripsi' => $validated['deskripsi'],
         ];
 
-        // Buat untuk kelas utama
-        LmsMeeting::create(array_merge($meetingData, ['kelas_id' => $kelas]));
+        $notif = app(\App\Services\NotificationService::class);
+
+        // Buat untuk kelas utama + notif siswa sebagai pengingat
+        $meetingUtama = LmsMeeting::create(array_merge($meetingData, ['kelas_id' => $kelas]));
+        $notif->notifyKelasVirtualBaru($meetingUtama);
 
         // Duplikasi ke kelas tambahan
         $kelasTambahan = $request->input('kelas_tambahan', []);
         $jumlahDuplikasi = 0;
         foreach ($kelasTambahan as $kelasLainId) {
             if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapel)) {
-                LmsMeeting::create(array_merge($meetingData, ['kelas_id' => $kelasLainId]));
+                $meetingLain = LmsMeeting::create(array_merge($meetingData, ['kelas_id' => $kelasLainId]));
+                $notif->notifyKelasVirtualBaru($meetingLain);
                 $jumlahDuplikasi++;
             }
         }
