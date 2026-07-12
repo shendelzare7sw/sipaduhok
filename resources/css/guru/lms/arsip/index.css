@@ -287,8 +287,14 @@
     gap: 0.6rem;
 }
 
+.guru-lms-arsip-index-page .bulk-salin-bar .bulk-target {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
 .guru-lms-arsip-index-page .bulk-salin-bar .bulk-select {
-    min-width: 220px;
+    min-width: 200px;
 }
 
 .guru-lms-arsip-index-page .bulk-salin-bar .bulk-soal {
@@ -299,17 +305,59 @@
     white-space: nowrap;
 }
 
-@media (max-width: 575.98px) {
+.guru-lms-arsip-index-page .bulk-salin-bar .bulk-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Mobile & tablet kecil: bar penuh, kontrol menumpuk, target sentuh besar */
+@media (max-width: 767.98px) {
     .guru-lms-arsip-index-page .bulk-salin-bar {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.65rem;
+        padding: 0.9rem 1rem;
+        border-radius: 14px;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-info {
+        font-size: 0.95rem;
     }
     .guru-lms-arsip-index-page .bulk-salin-bar .bulk-fields {
-        justify-content: space-between;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.7rem;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-target {
+        gap: 0.5rem;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-target .bulk-label {
+        flex-shrink: 0;
     }
     .guru-lms-arsip-index-page .bulk-salin-bar .bulk-select {
         flex: 1;
         min-width: 0;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-soal {
+        font-size: 0.9rem;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-actions {
+        gap: 0.6rem;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-actions .btn {
+        flex: 1;
+    }
+    /* Perbesar target sentuh (select & tombol) */
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-select,
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-actions .btn {
+        min-height: 44px;
+        font-size: 0.92rem;
+    }
+    /* Checkbox kartu lebih besar & mudah disentuh */
+    .guru-lms-arsip-index-page .arsip-check {
+        width: 24px;
+        height: 24px;
+        top: 14px;
+        right: 14px;
     }
 }
 

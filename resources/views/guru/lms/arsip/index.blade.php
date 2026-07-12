@@ -22,19 +22,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="fas fa-check-circle me-1"></i>{{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-triangle me-1"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
     @if($kelasMapelTujuan->isEmpty())
         <div class="alert alert-warning d-flex align-items-start">
             <i class="fas fa-exclamation-triangle me-2 mt-1"></i>
@@ -227,23 +214,27 @@
                     <i class="fas fa-check-square me-1 text-primary"></i><span id="bulkCount">0</span> item dipilih
                 </div>
                 <div class="bulk-fields">
-                    <label class="bulk-label mb-0 small fw-bold">Tujuan:</label>
-                    <select id="bulkTujuan" class="form-select form-select-sm bulk-select">
-                        @foreach($kelasMapelTujuan as $t)
-                            <option value="{{ $t['kelas_id'] }}|{{ $t['mata_pelajaran_id'] }}">
-                                {{ $t['kelas']?->nama_kelas ?? '-' }} — {{ $t['mata_pelajaran']?->nama_mapel ?? '-' }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="bulk-target">
+                        <label class="bulk-label mb-0 small fw-bold">Tujuan:</label>
+                        <select id="bulkTujuan" class="form-select form-select-sm bulk-select">
+                            @foreach($kelasMapelTujuan as $t)
+                                <option value="{{ $t['kelas_id'] }}|{{ $t['mata_pelajaran_id'] }}">
+                                    {{ $t['kelas']?->nama_kelas ?? '-' }} — {{ $t['mata_pelajaran']?->nama_mapel ?? '-' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                     <label class="bulk-soal small">
                         <input type="checkbox" name="sertakan_soal" value="1" checked> Sertakan soal
                     </label>
                     <input type="hidden" name="kelas_id" id="bulkKelasId">
                     <input type="hidden" name="mata_pelajaran_id" id="bulkMapelId">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="bulkCancel">Batal</button>
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-copy me-1"></i>Salin <span id="bulkCountBtn">0</span> item
-                    </button>
+                    <div class="bulk-actions">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="bulkCancel">Batal</button>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-copy me-1"></i>Salin <span id="bulkCountBtn">0</span> item
+                        </button>
+                    </div>
                 </div>
             </div>
         @endif
