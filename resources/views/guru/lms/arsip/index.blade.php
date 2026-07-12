@@ -137,6 +137,14 @@
             <p class="mb-0">Anda belum pernah membuat materi/tugas/ujian, atau filter terlalu sempit.</p>
         </div>
     @else
+        <form id="bulkSalinForm" method="POST" action="{{ route('guru.lms.arsip.salin-bulk') }}">
+            @csrf
+            {{-- Pertahankan filter aktif setelah salin (redirect balik ke arsip) --}}
+            @if($filters['type'])<input type="hidden" name="type" value="{{ $filters['type'] }}">@endif
+            @if($filters['tahun_ajaran_id'] ?? null)<input type="hidden" name="tahun_ajaran_id" value="{{ $filters['tahun_ajaran_id'] }}">@endif
+            @if($filters['mapel_id'] ?? null)<input type="hidden" name="mapel_id" value="{{ $filters['mapel_id'] }}">@endif
+            @if($filters['search'] ?? null)<input type="hidden" name="search" value="{{ $filters['search'] }}">@endif
+
         @foreach(['materi' => ['fa-book-open', 'Materi'],
                   'tugas' => ['fa-tasks', 'Tugas'],
                   'latihan' => ['fa-pencil-ruler', 'Latihan'],
@@ -163,6 +171,11 @@
                                 $isAktif = $item->kelas?->tahunAjaran?->is_active;
                             @endphp
                             <div class="arsip-card">
+                                @if($kelasMapelTujuan->isNotEmpty())
+                                    <input type="checkbox" class="arsip-check" name="items[]"
+                                           value="{{ $sectionKey }}:{{ $item->id }}"
+                                           title="Pilih untuk salin massal">
+                                @endif
                                 <span class="badge-ta">
                                     {{ $item->kelas?->tahunAjaran?->nama_tahun_ajaran ?? 'TA -' }}
                                     @if($isAktif) - Aktif @endif
@@ -207,6 +220,38 @@
                 </div>
             @endif
         @endforeach
+
+        @if($kelasMapelTujuan->isNotEmpty())
+            <div class="bulk-salin-bar" id="bulkBar" hidden>
+                <div class="bulk-info">
+                    <i class="fas fa-check-square me-1 text-primary"></i><span id="bulkCount">0</span> item dipilih
+                </div>
+                <div class="bulk-fields">
+                    <label class="bulk-label mb-0 small fw-bold">Tujuan:</label>
+                    <select id="bulkTujuan" class="form-select form-select-sm bulk-select">
+                        @foreach($kelasMapelTujuan as $t)
+                            <option value="{{ $t['kelas_id'] }}|{{ $t['mata_pelajaran_id'] }}">
+                                {{ $t['kelas']?->nama_kelas ?? '-' }} — {{ $t['mata_pelajaran']?->nama_mapel ?? '-' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <label class="bulk-soal small">
+                        <input type="checkbox" name="sertakan_soal" value="1" checked> Sertakan soal
+                    </label>
+                    <input type="hidden" name="kelas_id" id="bulkKelasId">
+                    <input type="hidden" name="mata_pelajaran_id" id="bulkMapelId">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="bulkCancel">Batal</button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-copy me-1"></i>Salin <span id="bulkCountBtn">0</span> item
+                    </button>
+                </div>
+            </div>
+        @endif
+        </form>
     @endif
 </div>
 @endsection
+
+@push('scripts')
+    @vite(['resources/js/guru/lms/arsip/index.js'])
+@endpush

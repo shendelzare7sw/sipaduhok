@@ -246,6 +246,73 @@
     border-top: 1px dashed #e5e7eb;
 }
 
+/* ── Salin massal (bulk) ───────────────────────────────────────────── */
+.guru-lms-arsip-index-page .arsip-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    z-index: 3;
+    accent-color: #4361ee;
+}
+
+.guru-lms-arsip-index-page .bulk-salin-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.08);
+    padding: 0.7rem 1rem;
+    margin-top: 1rem;
+}
+
+.guru-lms-arsip-index-page .bulk-salin-bar .bulk-info {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.guru-lms-arsip-index-page .bulk-salin-bar .bulk-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.guru-lms-arsip-index-page .bulk-salin-bar .bulk-select {
+    min-width: 220px;
+}
+
+.guru-lms-arsip-index-page .bulk-salin-bar .bulk-soal {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .guru-lms-arsip-index-page .bulk-salin-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-fields {
+        justify-content: space-between;
+    }
+    .guru-lms-arsip-index-page .bulk-salin-bar .bulk-select {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 .guru-lms-arsip-index-page .btn-arsip {
     flex: 1;
     padding: 7px 10px;

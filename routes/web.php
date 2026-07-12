@@ -1253,6 +1253,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/preview/{type}/{id}', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'preview'])->name('preview');
             Route::get('/salin/{type}/{id}', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'formSalin'])->name('form-salin');
             Route::post('/salin', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'salin'])->name('salin');
+            Route::post('/salin-bulk', [\App\Http\Controllers\Guru\GuruLmsArsipController::class, 'salinBulk'])->name('salin-bulk');
         });
 
         /*

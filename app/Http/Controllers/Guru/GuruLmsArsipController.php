@@ -162,6 +162,65 @@ class GuruLmsArsipController extends Controller
             ->with('success', 'Konten arsip berhasil disalin ke kelas tujuan. Silakan cek dan sesuaikan jadwal sebelum diaktifkan.');
     }
 
+    /**
+     * Salin BANYAK konten arsip sekaligus ke satu kelas+mapel tujuan.
+     * $items berisi string "type:id" (mis. "materi:5", "ujian:12").
+     * Melaporkan ringkasan berhasil/gagal; item gagal tidak menggagalkan lainnya.
+     */
+    public function salinBulk(Request $request)
+    {
+        $guruId = $this->guruId();
+
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*' => 'required|string',
+            'kelas_id' => 'required|integer|exists:kelas,id',
+            'mata_pelajaran_id' => 'required|integer|exists:mata_pelajaran,id',
+            'sertakan_soal' => 'nullable|boolean',
+        ]);
+
+        $kelasId = (int) $validated['kelas_id'];
+        $mapelId = (int) $validated['mata_pelajaran_id'];
+        $sertakanSoal = (bool) ($validated['sertakan_soal'] ?? true);
+
+        $berhasil = 0;
+        $gagal = 0;
+        $errorTerakhir = null;
+
+        foreach ($validated['items'] as $item) {
+            [$type, $rawId] = array_pad(explode(':', $item, 2), 2, null);
+
+            if (!in_array($type, ['materi', 'tugas', 'latihan', 'ujian'], true) || !ctype_digit((string) $rawId)) {
+                $gagal++;
+                continue;
+            }
+
+            $sumberId = (int) $rawId;
+
+            try {
+                match ($type) {
+                    'materi' => $this->service->salinMateri($sumberId, $kelasId, $mapelId, $guruId),
+                    'tugas' => $this->service->salinTugas($sumberId, $kelasId, $mapelId, $guruId),
+                    'latihan', 'ujian' => $this->service->salinUjian($sumberId, $kelasId, $mapelId, $guruId, $sertakanSoal),
+                };
+                $berhasil++;
+            } catch (\Throwable $e) {
+                $gagal++;
+                $errorTerakhir = $e->getMessage();
+            }
+        }
+
+        $pesan = "{$berhasil} konten berhasil disalin ke kelas tujuan. Silakan cek & sesuaikan jadwal sebelum diaktifkan.";
+        if ($gagal > 0) {
+            $pesan = "{$berhasil} berhasil, {$gagal} gagal disalin"
+                . ($errorTerakhir ? " ({$errorTerakhir})" : '') . '.';
+        }
+
+        // Kembali ke Arsip (pertahankan filter) agar bisa lanjut memilih.
+        return redirect()->route('guru.lms.arsip.index', $request->only(['type', 'tahun_ajaran_id', 'mapel_id', 'search']))
+            ->with($berhasil === 0 ? 'error' : 'success', $pesan);
+    }
+
     protected function resolveKonten(string $type, int $id, int $guruId)
     {
         return match ($type) {
