@@ -383,6 +383,28 @@ class GuruNilaiController extends Controller
     }
     
     /**
+     * Normalisasi input desimal: ubah koma menjadi titik untuk field yang diberikan,
+     * agar aturan validasi 'numeric' (hanya terima titik) tetap lolos ketika guru
+     * mengetik koma (mis. 9,8 -> 9.8). Aturan tunggal: TITIK.
+     */
+    private function normalizeDecimalInputs(Request $request, array $keys): void
+    {
+        $normalized = [];
+        foreach ($keys as $key) {
+            if ($key === 'nilai_id') {
+                continue;
+            }
+            $value = $request->input($key);
+            if (is_string($value) && $value !== '') {
+                $normalized[$key] = str_replace(',', '.', $value);
+            }
+        }
+        if (!empty($normalized)) {
+            $request->merge($normalized);
+        }
+    }
+
+    /**
      * Calculate nilai from tugas and ujian
      */
     private function calculateNilai(Nilai $nilai): void
@@ -394,27 +416,6 @@ class GuruNilaiController extends Controller
             $nilai->semester,
             $nilai->tahun_ajaran_id
         );
-    }
-    
-    /**
-     * ATURAN DESIMAL tunggal: standar TITIK. Guru boleh mengetik koma; di sini
-     * di-normalisasi ke titik sebelum validasi 'numeric' (yang menolak koma).
-     */
-    private function normalizeDecimalInputs(Request $request, array $keys): void
-    {
-        $normalized = [];
-        foreach ($keys as $key) {
-            if ($key === 'nilai_id') {
-                continue;
-            }
-            $val = $request->input($key);
-            if (is_string($val) && $val !== '') {
-                $normalized[$key] = str_replace(',', '.', $val);
-            }
-        }
-        if (!empty($normalized)) {
-            $request->merge($normalized);
-        }
     }
 
     /**
