@@ -133,8 +133,7 @@
                     Apakah Anda yakin ingin menghapus {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} ini?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="deleteForm" method="POST" class="delete-form">
+                    <form id="deleteForm" method="POST" class="delete-form w-100 m-0">
                         @csrf
                         @method('DELETE')
                         <div class="form-check mb-3 text-start">
@@ -143,7 +142,10 @@
                                 Hapus juga {{ $tipeUjian === 'latihan' ? 'latihan' : 'ujian' }} ini dari kelas lain? (Jika ada duplikat)
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-danger w-100">Hapus</button>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-danger">Hapus</button>
+                        </div>
                     </form>
                 </div>
             </div>

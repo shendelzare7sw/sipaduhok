@@ -52,11 +52,14 @@
     }
 
     .guru-lms-ujian-hasil-page .hasil-table-responsive {
-        overflow-x: visible;
+        /* Jangan biarkan konten menonjol keluar border kartu section di mobile. */
+        overflow-x: hidden;
+        max-width: 100%;
     }
 
     .guru-lms-ujian-hasil-page .hasil-table {
         min-width: 0;
+        width: 100%;
         border-collapse: separate;
         border-spacing: 0;
     }
@@ -99,6 +102,13 @@
         gap: 16px;
         text-align: right !important;
         font-size: 0.9rem;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    /* Nilai (bagian kanan) tidak boleh mendorong lebar kartu keluar border. */
+    .guru-lms-ujian-hasil-page .hasil-table tbody tr:not(.hasil-empty-row) td > * {
+        min-width: 0;
     }
 
     .guru-lms-ujian-hasil-page .hasil-table tbody tr:not(.hasil-empty-row) td::before {
@@ -112,6 +122,7 @@
 
     .guru-lms-ujian-hasil-page .hasil-table .hasil-student-cell {
         max-width: none;
+        min-width: 0;
         border-bottom: 1px solid #eef2f7 !important;
         margin-bottom: 4px;
         padding-bottom: 12px !important;
