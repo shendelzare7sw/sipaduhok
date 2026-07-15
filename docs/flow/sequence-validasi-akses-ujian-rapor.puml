@@ -6,7 +6,6 @@ actor "Admin / Bendahara" as Admin
 boundary "UI_ValidasiAkses" as UI
 control "Control_Validasi" as Control
 entity "T_ValidasiAkses" as Entity
-entity "T_Notifikasi" as E_Notif
 
 == Skenario: Menampilkan Halaman Daftar Siswa ==
 
@@ -35,9 +34,7 @@ activate Entity
 deactivate Entity
 note right of Entity : Konvensi Assumed Success diterapkan
 
-Control -> E_Notif : 10. Kirim Notifikasi ke Siswa & Ortu
-activate E_Notif
-deactivate E_Notif
+Control -> Control : 10. Kirim Notifikasi ke Siswa & Ortu
 
 Control --> UI : 11. NotifikasiSukses()
 deactivate Control
@@ -65,9 +62,7 @@ else Sudah Divalidasi Ketua
     activate Entity
     deactivate Entity
     
-    Control -> E_Notif : 21. Kirim Notifikasi ke Wali Kelas
-    activate E_Notif
-    deactivate E_Notif
+    Control -> Control : 21. Kirim Notifikasi ke Wali Kelas
     
     Control --> UI : 22. NotifikasiSukses()
     UI --> Admin : 23. Pesan Sukses & Refresh Status
@@ -86,9 +81,7 @@ Control -> Entity : 26. ResetStatus(Bendahara & Wali Kelas)
 activate Entity
 deactivate Entity
 
-Control -> E_Notif : 27. Kirim Notifikasi Pembatalan
-activate E_Notif
-deactivate E_Notif
+Control -> Control : 27. Kirim Notifikasi Pembatalan
 
 Control --> UI : 28. NotifikasiSukses()
 deactivate Control
@@ -107,9 +100,7 @@ Control -> Entity : 33. Looping Update Status Validasi Massal
 activate Entity
 deactivate Entity
 
-Control -> E_Notif : 34. Looping Kirim Notifikasi Massal
-activate E_Notif
-deactivate E_Notif
+Control -> Control : 34. Looping Kirim Notifikasi Massal
 
 Control --> UI : 35. NotifikasiSuksesMassal()
 deactivate Control

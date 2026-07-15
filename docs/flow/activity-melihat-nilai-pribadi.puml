@@ -1,0 +1,31 @@
+@startuml activity-melihat-nilai-pribadi
+skinparam ActivityBackgroundColor #FEFECE
+skinparam ActivityBorderColor #A80036
+skinparam ArrowColor #A80036
+
+|Pengguna (Siswa)|
+start
+:Mengakses Menu "Nilai Akademik / Penilaian";
+
+|Sistem|
+:Menarik Data Semester Aktif (Current Semester)\nsecara Otomatis;
+:Menampilkan Antarmuka Pemilihan Semester\n(Default: Semester Berjalan);
+
+|Pengguna (Siswa)|
+:Melihat Antarmuka Filter Semester;
+
+if (Ingin Melihat Semester Lain?) then (Ya)
+    :Memilih Opsi Semester Lain\n(Misal: Ganjil / Genap) pada Dropdown;
+else (Tidak)
+endif
+
+|Sistem|
+:Menarik Data Mentah Nilai (Raw Grades)\nBerdasarkan ID Siswa, Kelas, dan Semester;
+:Menyusun Data beserta Atribut Pendukung\n(Nama Mata Pelajaran, Nama Guru Pengampu);
+:Menampilkan Tabel Daftar Nilai Pribadi;
+
+|Pengguna (Siswa)|
+:Membaca Rekapitulasi Nilai\n(Evaluasi Harian, Tugas, atau Ujian);
+:Selesai Melihat Nilai Pribadi;
+stop
+@enduml

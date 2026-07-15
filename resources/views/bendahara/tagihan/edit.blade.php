@@ -25,14 +25,14 @@
 
     {{-- Info Siswa Card --}}
     <div class="card shadow mb-4 border-start border-primary border-4">
-        <div class="card-body bg-primary bg-opacity-10">
+        <div class="card-body" style="background: linear-gradient(135deg, #4361ee 0%, #2b4162 100%);">
             <div class="d-flex gap-3 align-items-center">
                 <div class="student-avatar">
                     {{ strtoupper(substr($siswa->nama_lengkap, 0, 1)) }}
                 </div>
                 <div>
-                    <h5 class="mb-1 fw-bold text-gray-800">{{ $siswa->nama_lengkap }}</h5>
-                    <p class="mb-0 text-muted small">
+                    <h5 class="mb-1 fw-bold text-white">{{ $siswa->nama_lengkap }}</h5>
+                    <p class="mb-0 small" style="color: rgba(255,255,255,0.8);">
                         <i class="fas fa-id-card me-1"></i> NISN: {{ $siswa->nisn }}
                         <span class="mx-2">|</span>
                         <i class="fas fa-school me-1"></i> Kelas: {{ $siswa->kelas->nama_kelas ?? '-' }}

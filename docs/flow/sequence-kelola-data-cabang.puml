@@ -1,0 +1,102 @@
+@startuml
+title Sequence Diagram - Kelola Data Cabang
+autonumber
+
+actor "Admin" as Admin
+boundary "UI_KelolaCabang" as UI
+control "Control_Cabang" as Control
+entity "T_Cabang" as E_Cabang
+
+== Skenario: Menampilkan Daftar Data Cabang ==
+Admin -> UI : 1. Mengakses Menu Kelola Data Cabang
+activate UI
+UI -> Control : 2. RequestDaftarCabang()
+activate Control
+Control -> E_Cabang : 3. AmbilDataCabang()
+activate E_Cabang
+E_Cabang --> Control : 4. ReturnData()
+deactivate E_Cabang
+Control --> UI : 5. TampilkanDaftarCabang(Data)
+deactivate Control
+UI --> Admin : 6. Halaman Daftar Cabang Terbuka
+deactivate UI
+
+== Skenario A: Tambah Data Cabang ==
+Admin -> UI : 7. Memilih Aksi "Tambah"
+activate UI
+UI --> Admin : 8. Menampilkan Form Tambah Data
+Admin -> UI : 9. Mengisi Form & Klik Simpan
+UI -> Control : 10. SubmitDataCabang(Data)
+activate Control
+Control -> E_Cabang : 11. InsertData(Data)
+activate E_Cabang
+
+alt Proses Berhasil
+    E_Cabang --> Control : 12. StatusSukses
+    Control --> UI : 13. Update Tampilan & Pesan Sukses
+    UI --> Admin : 14. Data Cabang Diperbarui
+else Proses Gagal
+    E_Cabang --> Control : 15. StatusGagal
+    deactivate E_Cabang
+    Control --> UI : 16. ReturnPesanError()
+    UI --> Admin : 17. Menampilkan Pesan Error
+end
+deactivate Control
+deactivate UI
+
+== Skenario B: Edit Data Cabang ==
+Admin -> UI : 18. Klik ikon Edit pada Data Tertentu
+activate UI
+UI -> Control : 19. RequestDataDetail(ID_Cabang)
+activate Control
+Control --> UI : 20. ReturnDataDetail()
+deactivate Control
+UI --> Admin : 21. Menampilkan Form Edit
+Admin -> UI : 22. Mengubah Data & Klik Simpan
+UI -> Control : 23. SubmitEditData(ID_Cabang, DataBaru)
+activate Control
+Control -> E_Cabang : 24. UpdateData()
+activate E_Cabang
+
+alt Proses Berhasil
+    E_Cabang --> Control : 25. StatusSukses
+    Control --> UI : 26. Update Tampilan & Pesan Sukses
+    UI --> Admin : 27. Data Cabang Diperbarui
+else Proses Gagal
+    E_Cabang --> Control : 28. StatusGagal
+    deactivate E_Cabang
+    Control --> UI : 29. ReturnPesanError()
+    UI --> Admin : 30. Menampilkan Pesan Error
+end
+deactivate Control
+deactivate UI
+
+== Skenario C: Hapus Data Cabang ==
+Admin -> UI : 31. Klik ikon Hapus pada Data Tertentu
+activate UI
+UI --> Admin : 32. Menampilkan Konfirmasi Hapus
+alt Hapus = Ya
+    Admin -> UI : 33. Mengonfirmasi Penghapusan
+    UI -> Control : 34. ProsesHapusData(ID_Cabang)
+    activate Control
+    Control -> E_Cabang : 35. DeleteData()
+    activate E_Cabang
+    
+    alt Proses Berhasil
+        E_Cabang --> Control : 36. StatusSukses
+        Control --> UI : 37. Update Tampilan & Pesan Sukses
+        UI --> Admin : 38. Data Cabang Dihapus
+    else Proses Gagal (Data Terikat)
+        E_Cabang --> Control : 39. StatusGagal
+        deactivate E_Cabang
+        Control --> UI : 40. ReturnPesanError()
+        UI --> Admin : 41. Menampilkan Pesan Error
+    end
+    deactivate Control
+else Batal
+    Admin -> UI : 42. Klik Batal
+    UI --> Admin : 43. Kembali ke Daftar
+end
+deactivate UI
+
+@enduml

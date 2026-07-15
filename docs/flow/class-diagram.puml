@@ -1,0 +1,711 @@
+@startuml class-diagram
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam packageFontSize 14
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title Class Diagram - Sistem Informasi PKBM Duhok (SIPADUHOK)
+
+' ============================================================
+' PACKAGE: CORE (Pengguna, Cabang, Tahun Ajaran, Pengaturan)
+' ============================================================
+package "Core" #DDECEF {
+
+    enum RolePengguna {
+        ADMIN
+        KETUA_PKBM
+        WAKIL_KEPALA_SEKOLAH
+        SEKRETARIS
+        BENDAHARA
+        GURU
+        WALI_KELAS
+        SISWA
+        WALI_SISWA
+    }
+
+    class T_Pengguna {
+        - id : Integer <<PK>>
+        - username : String
+        - password : String
+        - nama : String
+        - email : String
+        - no_telp : String
+        - role : RolePengguna
+        - foto : String
+        - id_cabang : Integer <<FK>>
+        - is_aktif : Boolean
+        - created_at : DateTime
+        - updated_at : DateTime
+        --
+        + login(username, password) : Boolean
+        + logout() : void
+        + resetPassword(passwordBaru) : void
+        + generateSession() : String
+        + destroySession() : void
+    }
+
+    class T_Cabang {
+        - id : Integer <<PK>>
+        - nama_cabang : String
+        - alamat : Text
+        - no_telp : String
+        - email : String
+        - kepala_cabang : String
+        - is_aktif : Boolean
+        - created_at : DateTime
+        - updated_at : DateTime
+    }
+
+    class T_TahunAjaran {
+        - id : Integer <<PK>>
+        - nama : String
+        - semester : Enum(Ganjil, Genap)
+        - tanggal_mulai : Date
+        - tanggal_selesai : Date
+        - is_aktif : Boolean
+        - created_at : DateTime
+        - updated_at : DateTime
+        --
+        + getAktif() : T_TahunAjaran
+    }
+
+    class T_Pengaturan {
+        - id : Integer <<PK>>
+        - kategori : Enum(LMS, AI)
+        - kunci : String
+        - nilai : Text
+        - deskripsi : String
+        - updated_at : DateTime
+        --
+        + getConfigByKategori(kategori) : List
+        + updateConfig(kunci, nilai) : Boolean
+    }
+
+    class T_Tiket {
+        - id : Integer <<PK>>
+        - id_pengguna : Integer <<FK>>
+        - jenis_masalah : String
+        - deskripsi : Text
+        - status : Enum(Baru, Proses, Selesai)
+        - tanggal_pengajuan : DateTime
+        - tanggal_selesai : DateTime
+    }
+}
+
+' ============================================================
+' PACKAGE: AKADEMIK (Kelas, Mapel, Jadwal, Penugasan, Siswa)
+' ============================================================
+package "Akademik" #E2EFDA {
+
+    class T_Kelas {
+        - id : Integer <<PK>>
+        - nama_kelas : String
+        - jenjang : Enum(SD, SMP, SMA)
+        - id_tahun_ajaran : Integer <<FK>>
+        - id_cabang : Integer <<FK>>
+        - kapasitas : Integer
+        - created_at : DateTime
+        - updated_at : DateTime
+    }
+
+    class T_Siswa {
+        - id : Integer <<PK>>
+        - id_pengguna : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - nis : String
+        - nama_lengkap : String
+        - jenis_kelamin : Enum(L, P)
+        - tanggal_lahir : Date
+        - alamat : Text
+        - id_wali : Integer <<FK>>
+        - created_at : DateTime
+        --
+        + cetakKartuPelajar() : PDF
+    }
+
+    class T_MataPelajaran {
+        - id : Integer <<PK>>
+        - nama_mapel : String
+        - kode_mapel : String
+        - jenjang : Enum(SD, SMP, SMA)
+        - deskripsi : Text
+        - is_aktif : Boolean
+    }
+
+    class T_JadwalPelajaran {
+        - id : Integer <<PK>>
+        - id_kelas : Integer <<FK>>
+        - id_mapel : Integer <<FK>>
+        - id_guru : Integer <<FK>>
+        - hari : Enum(Senin..Minggu)
+        - jam_mulai : Time
+        - jam_selesai : Time
+        - id_tahun_ajaran : Integer <<FK>>
+        --
+        + validasiKesesuaianJenjang() : Boolean
+        + validasiBentrok() : Boolean
+        + sinkronisasiRelasiGuru() : void
+    }
+
+    class T_PenugasanWali {
+        - id : Integer <<PK>>
+        - id_kelas : Integer <<FK>>
+        - id_guru : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        --
+        + validasiBentrok() : Boolean
+    }
+
+    class T_PenugasanGuru {
+        - id : Integer <<PK>>
+        - id_guru : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - id_mapel : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        --
+        + sinkronisasiDariJadwal() : void
+    }
+
+    class T_LogJadwal {
+        - id : Integer <<PK>>
+        - id_jadwal : Integer <<FK>>
+        - id_guru_lama : Integer <<FK>>
+        - id_guru_baru : Integer <<FK>>
+        - alasan : Text
+        - tipe : Enum(Individual, Massal)
+        - tanggal_perubahan : DateTime
+    }
+}
+
+' ============================================================
+' PACKAGE: PENILAIAN (Nilai Akademik, Rapor)
+' ============================================================
+package "Penilaian" #FFF2CC {
+
+    class T_NilaiAkademik {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_mapel : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - semester : Enum(Ganjil, Genap)
+        - jenis_nilai : Enum(Harian, Tugas, UTS, UAS)
+        - nilai : Decimal
+        - catatan : Text
+        - id_guru : Integer <<FK>>
+        - created_at : DateTime
+        --
+        + inputBulk(dataArray) : Boolean
+        + inputExcel(file) : Boolean
+        + hitungRataRata() : Decimal
+    }
+
+    class T_Rapor {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - semester : Enum(Ganjil, Genap)
+        - status : Enum(Draft, Final, Tervalidasi)
+        - catatan_wali_kelas : Text
+        - catatan_kepala : Text
+        - tanggal_cetak : DateTime
+        --
+        + kompilasi() : void
+        + validasiTingkatAkhir() : Boolean
+        + generatePDF() : PDF
+    }
+}
+
+' ============================================================
+' PACKAGE: PRESENSI
+' ============================================================
+package "Presensi" #FCE4D6 {
+
+    class T_Presensi {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - id_mapel : Integer <<FK>>
+        - tanggal : Date
+        - status : Enum(Hadir, Sakit, Izin, Alpha)
+        - keterangan : Text
+        - id_guru : Integer <<FK>>
+        - created_at : DateTime
+        --
+        + hitungRekapBulanan() : Map
+        + tandaiIzin(id_siswa, alasan) : Boolean
+    }
+}
+
+' ============================================================
+' PACKAGE: KENAIKAN KELAS
+' ============================================================
+package "Kenaikan Kelas" #E2D9F3 {
+
+    class T_KKM {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - nilai_kkm : Decimal
+    }
+
+    class T_SyaratKenaikan {
+        - id : Integer <<PK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - jenjang : Enum(SD, SMP, SMA)
+        - batas_alpha : Integer
+        - batas_nilai_min : Decimal
+        - batas_tunggakan : Decimal
+    }
+
+    class T_KelayakanKenaikan {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - status_nilai : Enum(Lulus, Tidak)
+        - status_presensi : Enum(Lulus, Tidak)
+        - status_keuangan : Enum(Lulus, Tidak)
+        - is_layak : Boolean
+        --
+        + hitungKelayakan() : Boolean
+    }
+
+    class T_RiwayatKenaikan {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_kelas_asal : Integer <<FK>>
+        - id_kelas_tujuan : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - status : Enum(Naik, TidakNaik, Lulus)
+        - tanggal_proses : DateTime
+    }
+
+    class T_DispensasiKenaikan {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - alasan : Text
+        - status : Enum(Menunggu, Disetujui, Ditolak)
+        - id_pengaju : Integer <<FK>>
+        - id_penyetuju : Integer <<FK>>
+        - tanggal_pengajuan : DateTime
+        - tanggal_keputusan : DateTime
+    }
+}
+
+' ============================================================
+' PACKAGE: LMS (Ujian, Latihan, Materi, Tugas, Forum, Virtual)
+' ============================================================
+package "LMS" #D6E9F8 {
+
+    class T_ModulLMS {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - deskripsi : Text
+        - urutan : Integer
+    }
+
+    class T_Ujian {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - jenis_ujian : Enum(PH, PTS, PAS)
+        - durasi_menit : Integer
+        - tanggal_mulai : DateTime
+        - tanggal_selesai : DateTime
+        - is_acak : Boolean
+        - is_ai_generated : Boolean
+        - id_guru : Integer <<FK>>
+        --
+        + generateSoalAI() : void
+        + acakSoal() : void
+    }
+
+    class T_SesiUjian {
+        - id : Integer <<PK>>
+        - id_ujian : Integer <<FK>>
+        - id_siswa : Integer <<FK>>
+        - waktu_mulai : DateTime
+        - waktu_selesai : DateTime
+        - nilai : Decimal
+        - status : Enum(Belum, Sedang, Selesai)
+        --
+        + hitungNilaiOtomatis() : Decimal
+    }
+
+    class T_Latihan {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - deskripsi : Text
+        - is_ai_generated : Boolean
+        - id_guru : Integer <<FK>>
+        - created_at : DateTime
+        --
+        + generateSoalAI() : void
+    }
+
+    class T_Materi {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - konten : Text
+        - tipe_file : Enum(PDF, Video, Dokumen)
+        - path_file : String
+        - id_guru : Integer <<FK>>
+        - created_at : DateTime
+    }
+
+    class T_Tugas {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - deskripsi : Text
+        - deadline : DateTime
+        - id_guru : Integer <<FK>>
+        - created_at : DateTime
+    }
+
+    class T_TugasSiswa {
+        - id : Integer <<PK>>
+        - id_tugas : Integer <<FK>>
+        - id_siswa : Integer <<FK>>
+        - file_jawaban : String
+        - nilai : Decimal
+        - catatan_guru : Text
+        - status : Enum(BelumDikerjakan, Dikumpulkan, Dinilai, Revisi)
+        - tanggal_submit : DateTime
+    }
+
+    class T_ForumTopik {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - konten : Text
+        - id_pembuat : Integer <<FK>>
+        - is_terkunci : Boolean
+        - created_at : DateTime
+    }
+
+    class T_ForumBalasan {
+        - id : Integer <<PK>>
+        - id_topik : Integer <<FK>>
+        - id_pengguna : Integer <<FK>>
+        - konten : Text
+        - created_at : DateTime
+    }
+
+    class T_KelasVirtual {
+        - id : Integer <<PK>>
+        - id_mapel : Integer <<FK>>
+        - id_kelas : Integer <<FK>>
+        - judul : String
+        - platform : Enum(GoogleMeet, Zoom, Lainnya)
+        - link_meeting : String
+        - tanggal : Date
+        - jam_mulai : Time
+        - jam_selesai : Time
+        - id_guru : Integer <<FK>>
+        - status : Enum(Terjadwal, Berlangsung, Selesai)
+    }
+}
+
+' ============================================================
+' PACKAGE: KEUANGAN (Tagihan, Pembayaran, Dispensasi, Validasi)
+' ============================================================
+package "Keuangan" #F8D7DA {
+
+    class T_Tagihan {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - jenis_tagihan : Enum(SPP, Lainnya)
+        - bulan : Integer
+        - nominal : Decimal
+        - sisa : Decimal
+        - status : Enum(BelumLunas, Lunas, Dispensasi)
+        - created_at : DateTime
+        --
+        + generateSPP() : void
+        + cekDuplikasi() : Boolean
+        + carryoverTunggakan() : void
+        + kalkulasiSelisih() : Decimal
+    }
+
+    class T_Pembayaran {
+        - id : Integer <<PK>>
+        - id_tagihan : Integer <<FK>>
+        - kode_pembayaran : String
+        - metode : Enum(TransferManual, Midtrans)
+        - nominal_bayar : Decimal
+        - bukti_transfer : String
+        - status : Enum(Pending, MenungguPembayaran, Lunas, Ditolak)
+        - tanggal_bayar : DateTime
+        --
+        + generateKodePembayaran() : String
+        + validasiPembayaran(keputusan) : void
+        + cetakBuktiBayar() : PDF
+    }
+
+    class T_Dispensasi {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - tipe_akses : Enum(Ujian, Rapor)
+        - periode : String
+        - alasan : Text
+        - status : Enum(Menunggu, Disetujui, Ditolak)
+        - id_pengaju : Integer <<FK>>
+        - id_penyetuju : Integer <<FK>>
+        - tanggal_pengajuan : DateTime
+        - tanggal_keputusan : DateTime
+        --
+        + bukaAksesOtomatis() : void
+    }
+
+    class T_ValidasiAkses {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_tahun_ajaran : Integer <<FK>>
+        - akses_ujian : Boolean
+        - akses_rapor : Boolean
+        - alasan_blokir : Text
+        --
+        + cekKelayakanAkses() : Boolean
+        + blokirAkses() : void
+        + bukaAkses() : void
+    }
+
+    class Config_Pembayaran {
+        - id : Integer <<PK>>
+        - nama_bank : String
+        - no_rekening : String
+        - atas_nama : String
+        - midtrans_server_key : String
+        - midtrans_client_key : String
+        - is_aktif : Boolean
+    }
+}
+
+' ============================================================
+' PACKAGE: MONITORING & PUBLIKASI
+' ============================================================
+package "Monitoring" #FDE9D9 {
+
+    class T_Laporan {
+        - id : Integer <<PK>>
+        - judul : String
+        - konten : Text
+        - id_pembuat : Integer <<FK>>
+        - tipe_laporan : String
+        - id_tahun_ajaran : Integer <<FK>>
+        - tanggal : DateTime
+        --
+        + eksporPDF() : PDF
+        + eksporExcel() : File
+    }
+
+    class T_CatatanMonitoring {
+        - id : Integer <<PK>>
+        - id_pengirim : Integer <<FK>>
+        - id_penerima : Integer <<FK>>
+        - isi_pesan : Text
+        - status_baca : Enum(BelumDibaca, SudahDibaca)
+        - tanggal_kirim : DateTime
+        --
+        + markAsRead() : void
+        + broadcastKePenerima() : void
+    }
+
+    class T_PermintaanUnduh {
+        - id : Integer <<PK>>
+        - id_siswa : Integer <<FK>>
+        - id_rapor : Integer <<FK>>
+        - status : Enum(Menunggu, Disetujui, Ditolak)
+        - alasan_tolak : Text
+        - tanggal_permintaan : DateTime
+        - tanggal_proses : DateTime
+    }
+}
+
+package "Portal" #E8F5E9 {
+
+    class T_LandingPage {
+        - id : Integer <<PK>>
+        - section : String
+        - judul : String
+        - konten : Text
+        - gambar : String
+        - urutan : Integer
+        - is_aktif : Boolean
+    }
+
+    class T_Publikasi {
+        - id : Integer <<PK>>
+        - judul : String
+        - konten : Text
+        - gambar : String
+        - kategori : String
+        - id_penulis : Integer <<FK>>
+        - status : Enum(Draft, Published)
+        - tanggal_publish : DateTime
+    }
+}
+
+' ============================================================
+' EXTERNAL SERVICES
+' ============================================================
+package "External Service" #F5F5F5 {
+
+    class Service_AI <<external>> {
+        + generateSoal(topik, jumlah) : JSON
+        + koreksiOtomatis(jawaban) : JSON
+    }
+
+    class Storage <<external>> {
+        + uploadFile(file) : String
+        + deleteFile(path) : Boolean
+        + getFileUrl(path) : String
+    }
+
+    class API_Midtrans <<external>> {
+        + requestToken(transaksi) : String
+        + handleWebhook(notification) : void
+    }
+}
+
+' ============================================================
+' RELATIONSHIPS
+' ============================================================
+
+' --- Core Relationships ---
+T_Pengguna "1" -- "0..*" T_Tiket : mengajukan >
+T_Pengguna "*" -- "1" T_Cabang : berasal dari >
+T_Pengguna -- RolePengguna
+
+' --- Akademik Relationships ---
+T_Kelas "*" -- "1" T_TahunAjaran : berlaku pada >
+T_Kelas "*" -- "1" T_Cabang : milik >
+T_Kelas "1" -- "0..*" T_Siswa : berisi >
+T_Siswa "1" -- "1" T_Pengguna : akun >
+T_Siswa "*" -- "0..1" T_Pengguna : wali >
+
+T_PenugasanWali "0..1" -- "1" T_Kelas : ditugaskan di >
+T_PenugasanWali "*" -- "1" T_Pengguna : guru wali >
+T_PenugasanWali "*" -- "1" T_TahunAjaran
+
+T_PenugasanGuru "*" -- "1" T_Pengguna : guru pengajar >
+T_PenugasanGuru "*" -- "1" T_Kelas
+T_PenugasanGuru "*" -- "1" T_MataPelajaran
+T_PenugasanGuru "*" -- "1" T_TahunAjaran
+
+T_JadwalPelajaran "*" -- "1" T_Kelas : untuk >
+T_JadwalPelajaran "*" -- "1" T_MataPelajaran : mengajarkan >
+T_JadwalPelajaran "*" -- "1" T_Pengguna : diampu oleh >
+T_JadwalPelajaran "*" -- "1" T_TahunAjaran : berlaku pada >
+T_LogJadwal "*" -- "1" T_JadwalPelajaran : mencatat >
+
+' --- Penilaian Relationships ---
+T_NilaiAkademik "*" -- "1" T_Siswa : milik >
+T_NilaiAkademik "*" -- "1" T_MataPelajaran : untuk >
+T_NilaiAkademik "*" -- "1" T_TahunAjaran
+T_NilaiAkademik "*" -- "1" T_Pengguna : dinilai oleh >
+
+T_Rapor "*" -- "1" T_Siswa : milik >
+T_Rapor "*" -- "1" T_Kelas
+T_Rapor "*" -- "1" T_TahunAjaran
+
+' --- Presensi Relationships ---
+T_Presensi "*" -- "1" T_Siswa : mencatat >
+T_Presensi "*" -- "1" T_Kelas
+T_Presensi "*" -- "1" T_MataPelajaran
+T_Presensi "*" -- "1" T_Pengguna : oleh guru >
+
+' --- Kenaikan Kelas Relationships ---
+T_KKM "*" -- "1" T_MataPelajaran : untuk >
+T_KKM "*" -- "1" T_TahunAjaran
+T_SyaratKenaikan "*" -- "1" T_TahunAjaran
+
+T_KelayakanKenaikan "*" -- "1" T_Siswa : mengevaluasi >
+T_KelayakanKenaikan "*" -- "1" T_TahunAjaran
+
+T_RiwayatKenaikan "*" -- "1" T_Siswa : mencatat >
+T_RiwayatKenaikan "*" -- "1" T_TahunAjaran
+
+T_DispensasiKenaikan "*" -- "1" T_Siswa : untuk >
+T_DispensasiKenaikan "*" -- "1" T_TahunAjaran
+T_DispensasiKenaikan "*" -- "1" T_Pengguna : diajukan oleh >
+
+' --- LMS Relationships ---
+T_ModulLMS "*" -- "1" T_MataPelajaran : berisi >
+T_ModulLMS "*" -- "1" T_Kelas
+
+T_Ujian "*" -- "1" T_MataPelajaran : untuk >
+T_Ujian "*" -- "1" T_Kelas
+T_Ujian "*" -- "1" T_Pengguna : dibuat oleh >
+T_SesiUjian "*" -- "1" T_Ujian : sesi dari >
+T_SesiUjian "*" -- "1" T_Siswa : dikerjakan oleh >
+
+T_Latihan "*" -- "1" T_MataPelajaran
+T_Latihan "*" -- "1" T_Kelas
+T_Latihan "*" -- "1" T_Pengguna : dibuat oleh >
+
+T_Materi "*" -- "1" T_MataPelajaran
+T_Materi "*" -- "1" T_Kelas
+T_Materi "*" -- "1" T_Pengguna : diunggah oleh >
+
+T_Tugas "*" -- "1" T_MataPelajaran
+T_Tugas "*" -- "1" T_Kelas
+T_Tugas "*" -- "1" T_Pengguna : dibuat oleh >
+T_TugasSiswa "*" -- "1" T_Tugas : jawaban dari >
+T_TugasSiswa "*" -- "1" T_Siswa : dikerjakan oleh >
+
+T_ForumTopik "*" -- "1" T_MataPelajaran
+T_ForumTopik "*" -- "1" T_Kelas
+T_ForumTopik "*" -- "1" T_Pengguna : dibuat oleh >
+T_ForumBalasan "*" -- "1" T_ForumTopik : membalas >
+T_ForumBalasan "*" -- "1" T_Pengguna : ditulis oleh >
+
+T_KelasVirtual "*" -- "1" T_MataPelajaran
+T_KelasVirtual "*" -- "1" T_Kelas
+T_KelasVirtual "*" -- "1" T_Pengguna : diselenggarakan oleh >
+
+' --- Keuangan Relationships ---
+T_Tagihan "*" -- "1" T_Siswa : ditagihkan ke >
+T_Tagihan "*" -- "1" T_TahunAjaran
+T_Pembayaran "*" -- "1" T_Tagihan : membayar >
+
+T_Dispensasi "*" -- "1" T_Siswa : untuk >
+T_Dispensasi "*" -- "1" T_Pengguna : diajukan oleh >
+
+T_ValidasiAkses "*" -- "1" T_Siswa : mengatur akses >
+T_ValidasiAkses "*" -- "1" T_TahunAjaran
+
+' --- Monitoring Relationships ---
+T_Laporan "*" -- "1" T_Pengguna : dibuat oleh >
+T_Laporan "*" -- "1" T_TahunAjaran
+
+T_CatatanMonitoring "*" -- "1" T_Pengguna : pengirim >
+T_CatatanMonitoring "*" -- "1" T_Pengguna : penerima >
+
+T_PermintaanUnduh "*" -- "1" T_Siswa : dari >
+T_PermintaanUnduh "*" -- "1" T_Rapor : untuk >
+
+' --- Portal Relationships ---
+T_Publikasi "*" -- "1" T_Pengguna : ditulis oleh >
+
+' --- External Service Usage (Dependencies) ---
+T_Ujian ..> Service_AI : menggunakan
+T_Latihan ..> Service_AI : menggunakan
+T_Materi ..> Storage : menyimpan file
+T_Pembayaran ..> API_Midtrans : request token
+
+@enduml

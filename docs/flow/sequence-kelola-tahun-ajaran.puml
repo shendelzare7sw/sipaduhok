@@ -1,102 +1,102 @@
 @startuml
-title Sequence Diagram - UC04: Kelola Tahun Ajaran
+title Sequence Diagram - Kelola Tahun Ajaran
 autonumber
 
-actor "Admin / Waka" as Admin
+actor "Admin" as Admin
 boundary "UI_KelolaTahunAjaran" as UI
 control "Control_TahunAjaran" as Control
-entity "T_TahunAjaran" as Entity
+entity "T_TahunAjaran" as E_Tahun
 
-== Skenario: Menampilkan Daftar Data Tahun Ajaran ==
-
+== Skenario: Menampilkan Daftar Tahun Ajaran ==
 Admin -> UI : 1. Mengakses Menu Tahun Ajaran
 activate UI
 UI -> Control : 2. RequestDaftarTahunAjaran()
 activate Control
-Control -> Entity : 3. AmbilDataTahunAjaran()
-activate Entity
-Entity --> Control : 4. DataDitemukan(Data)
-deactivate Entity
-Control --> UI : 5. TampilkanDaftarData(Data)
+Control -> E_Tahun : 3. AmbilDataTahunAjaran()
+activate E_Tahun
+E_Tahun --> Control : 4. ReturnData()
+deactivate E_Tahun
+Control --> UI : 5. TampilkanDaftarTahunAjaran(Data)
 deactivate Control
-UI --> Admin : 6. Daftar Data Tahun Ajaran Terbuka
+UI --> Admin : 6. Halaman Daftar Tahun Ajaran Terbuka
 deactivate UI
 
-== Skenario: Tambah Data ==
-
-Admin -> UI : 7. Pilih Aksi "Tambah"
+== Skenario A: Tambah Data Tahun Ajaran ==
+Admin -> UI : 7. Memilih Aksi "Tambah"
 activate UI
-UI --> Admin : 8. Menampilkan Form Tambah Tahun Ajaran
-
-Admin -> UI : 9. Isi Form Tahun Ajaran
-Admin -> UI : 10. Klik Tombol Simpan
-UI -> Control : 11. SimpanDataTahunAjaran(Data)
+UI --> Admin : 8. Menampilkan Form Tambah Data
+Admin -> UI : 9. Mengisi Form & Klik Simpan
+UI -> Control : 10. SubmitDataBaru(Data)
 activate Control
+Control -> E_Tahun : 11. InsertData(Data)
+activate E_Tahun
 
-Control -> Control : 12. Proses Validasi
-alt Validasi Gagal
-    Control --> UI : 13. ErrorValidasi(Pesan)
-    UI --> Admin : 14. Menampilkan Pesan Error
-else Validasi Berhasil
-    Control -> Entity : 15. InsertData(Data)
-    activate Entity
-    deactivate Entity
+alt Proses Berhasil
+    E_Tahun --> Control : 12. StatusSukses
+    Control --> UI : 13. Update Tampilan & Pesan Sukses
+    UI --> Admin : 14. Data Tahun Ajaran Diperbarui
+else Proses Gagal
+    E_Tahun --> Control : 15. StatusGagal
+    deactivate E_Tahun
+    Control --> UI : 16. ReturnPesanError()
+    UI --> Admin : 17. Menampilkan Pesan Error
+end
+deactivate Control
+deactivate UI
+
+== Skenario B: Edit Data Tahun Ajaran ==
+Admin -> UI : 18. Klik ikon Edit pada Data Tertentu
+activate UI
+UI -> Control : 19. RequestDataDetail(ID_TahunAjaran)
+activate Control
+Control --> UI : 20. ReturnDataDetail()
+deactivate Control
+UI --> Admin : 21. Menampilkan Form Edit
+Admin -> UI : 22. Mengubah Data & Klik Simpan
+UI -> Control : 23. SubmitEditData(ID_TahunAjaran, DataBaru)
+activate Control
+Control -> E_Tahun : 24. UpdateData()
+activate E_Tahun
+
+alt Proses Berhasil
+    E_Tahun --> Control : 25. StatusSukses
+    Control --> UI : 26. Update Tampilan & Pesan Sukses
+    UI --> Admin : 27. Data Tahun Ajaran Diperbarui
+else Proses Gagal
+    E_Tahun --> Control : 28. StatusGagal
+    deactivate E_Tahun
+    Control --> UI : 29. ReturnPesanError()
+    UI --> Admin : 30. Menampilkan Pesan Error
+end
+deactivate Control
+deactivate UI
+
+== Skenario C: Hapus Data Tahun Ajaran ==
+Admin -> UI : 31. Klik ikon Hapus pada Data Tertentu
+activate UI
+UI --> Admin : 32. Menampilkan Konfirmasi Hapus
+alt Hapus = Ya
+    Admin -> UI : 33. Mengonfirmasi Penghapusan
+    UI -> Control : 34. ProsesHapusData(ID_TahunAjaran)
+    activate Control
+    Control -> E_Tahun : 35. DeleteData()
+    activate E_Tahun
     
-    Control --> UI : 16. Notifikasi Berhasil()
-    UI --> Admin : 17. Memperbarui Data Tahun Ajaran (Tabel Refresh)
+    alt Proses Berhasil
+        E_Tahun --> Control : 36. StatusSukses
+        Control --> UI : 37. Update Tampilan & Pesan Sukses
+        UI --> Admin : 38. Data Tahun Ajaran Dihapus
+    else Proses Gagal
+        E_Tahun --> Control : 39. StatusGagal
+        deactivate E_Tahun
+        Control --> UI : 40. ReturnPesanError()
+        UI --> Admin : 41. Menampilkan Pesan Error
+    end
+    deactivate Control
+else Batal
+    Admin -> UI : 42. Klik Batal
+    UI --> Admin : 43. Kembali ke Daftar
 end
-deactivate Control
-deactivate UI
-
-== Skenario: Edit Data ==
-
-Admin -> UI : 18. Klik ikon Edit pada Data Tahun Ajaran
-activate UI
-UI --> Admin : 19. Menampilkan Form Edit Tahun Ajaran
-
-Admin -> UI : 20. Mengubah Data Tahun Ajaran
-Admin -> UI : 21. Klik Tombol Simpan
-UI -> Control : 22. UpdateDataTahunAjaran(Data)
-activate Control
-
-Control -> Control : 23. Proses Validasi
-alt Validasi Gagal
-    Control --> UI : 24. ErrorValidasi(Pesan)
-    UI --> Admin : 25. Menampilkan Pesan Error
-else Validasi Berhasil
-    Control -> Entity : 26. UpdateData(Data)
-    activate Entity
-    deactivate Entity
-    
-    Control --> UI : 27. Notifikasi Berhasil()
-    UI --> Admin : 28. Memperbarui Data Tahun Ajaran (Tabel Refresh)
-end
-deactivate Control
-deactivate UI
-
-== Skenario: Hapus Data ==
-
-Admin -> UI : 29. Klik ikon Hapus pada Data Tahun Ajaran
-activate UI
-UI --> Admin : 30. Menampilkan Konfirmasi Hapus
-
-Admin -> UI : 31. Setuju Hapus Data
-UI -> Control : 32. HapusDataTahunAjaran(ID)
-activate Control
-
-Control -> Entity : 33. DeleteData(ID)
-activate Entity
-
-alt Proses Gagal (Constraint/Data Terikat)
-    Entity --> Control : 34. Proses Gagal(Pesan)
-    Control --> UI : 35. ErrorHapus(Pesan)
-    UI --> Admin : 36. Menampilkan Pesan Error
-else Proses Berhasil
-    deactivate Entity
-    Control --> UI : 37. Notifikasi Berhasil()
-    UI --> Admin : 38. Memperbarui Data Tahun Ajaran (Tabel Refresh)
-end
-deactivate Control
 deactivate UI
 
 @enduml

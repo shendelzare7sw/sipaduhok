@@ -1,0 +1,126 @@
+@startuml
+title Sequence Diagram - Kelola Materi Pembelajaran
+autonumber
+
+actor "Guru" as Guru
+boundary "UI_KelolaMateri" as UI
+control "Control_Materi" as Control
+entity "T_Materi" as E_Materi
+entity "Storage" as Storage
+
+== Skenario: Menampilkan Daftar Materi ==
+
+Guru -> UI : 1. Mengakses Dashboard LMS (Tab Materi Pembelajaran)
+activate UI
+UI -> Control : 2. RequestDaftarMateri(Kelas)
+activate Control
+Control -> E_Materi : 3. AmbilDataMateri()
+activate E_Materi
+E_Materi --> Control : 4. DataMateriDitemukan(Data)
+deactivate E_Materi
+Control --> UI : 5. TampilkanDaftarMateri(Data)
+deactivate Control
+UI --> Guru : 6. Daftar Materi Terbuka
+deactivate UI
+
+== Skenario A: Upload Materi Baru (dengan Duplikasi) ==
+
+Guru -> UI : 7. Klik "Tambah Materi" & Mengisi Form (Judul, Kategori)
+activate UI
+
+alt Tipe File = Upload Dokumen/Video
+    Guru -> UI : 8. Mengunggah File dari Perangkat
+else Tipe File = Tautan/Link
+    Guru -> UI : 9. Memasukkan URL Eksternal
+end
+
+Guru -> UI : 10. Memilih Opsi "Duplikasi ke Kelas Lain"
+Guru -> UI : 11. Klik "Simpan Materi"
+UI -> Control : 12. SubmitMateriBaru(Data, File/Link)
+activate Control
+Control -> Control : 13. Memvalidasi Input & Kapasitas File (Maks 50MB)
+
+alt Tipe File = Dokumen/Video
+    Control -> Storage : 14. UnggahFileKeServer()
+    activate Storage
+    Storage --> Control : 15. PathFile / URL_Storage
+    deactivate Storage
+end
+
+Control -> E_Materi : 16. InsertDataMateri()
+activate E_Materi
+deactivate E_Materi
+note right of E_Materi : Konvensi Assumed Success diterapkan
+
+alt Opsi Duplikasi Aktif
+    Control -> E_Materi : 17. Looping InsertDataMateri (Ke Kelas Tambahan)
+    activate E_Materi
+    deactivate E_Materi
+end
+
+Control -> Control : 18. Kirim Notifikasi ke Seluruh Siswa di Kelas Terkait
+
+Control --> UI : 19. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 20. Pesan Sukses (Materi Berhasil Ditambahkan)
+deactivate UI
+
+== Skenario B: Edit Materi (dengan Update Serentak) ==
+
+Guru -> UI : 21. Klik "Edit" pada Materi Tertentu
+activate UI
+UI -> Control : 22. RequestFormEdit(ID_Materi)
+activate Control
+Control --> UI : 23. TampilkanFormEdit()
+deactivate Control
+
+Guru -> UI : 24. Mengubah Data & Memilih "Update Semua Kelas Terkait"
+Guru -> UI : 25. Klik "Simpan Perubahan"
+UI -> Control : 26. UpdateDataMateri(DataEdit)
+activate Control
+
+Control -> E_Materi : 27. UpdateData()
+activate E_Materi
+deactivate E_Materi
+
+alt Opsi Update Semua Aktif
+    Control -> E_Materi : 28. Looping UpdateData (Pada Materi Duplikat)
+    activate E_Materi
+    deactivate E_Materi
+end
+
+Control --> UI : 29. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 30. Pesan Sukses
+deactivate UI
+
+== Skenario C: Hapus Materi ==
+
+Guru -> UI : 31. Klik "Hapus" pada Materi
+activate UI
+UI --> Guru : 32. Tampilkan Konfirmasi Hapus (Opsi: Hapus Beserta Duplikat)
+Guru -> UI : 33. Mengonfirmasi Penghapusan
+UI -> Control : 34. ProsesHapusMateri(ID_Materi, HapusDuplikat)
+activate Control
+
+Control -> Storage : 35. HapusFileFisikDariServer()
+activate Storage
+deactivate Storage
+note right of Storage : Konvensi Assumed Success diterapkan
+
+Control -> E_Materi : 36. DeleteDataMateri()
+activate E_Materi
+deactivate E_Materi
+
+alt Opsi Hapus Beserta Duplikat = True
+    Control -> E_Materi : 37. Looping DeleteDataMateri (Pada Kelas Lain)
+    activate E_Materi
+    deactivate E_Materi
+end
+
+Control --> UI : 38. NotifikasiSukses()
+deactivate Control
+UI --> Guru : 39. Pesan Sukses
+deactivate UI
+
+@enduml

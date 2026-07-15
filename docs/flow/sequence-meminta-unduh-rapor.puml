@@ -1,0 +1,95 @@
+@startuml
+title Sequence Diagram - UC23: Meminta dan Mengunduh Rapor
+autonumber
+
+actor "Orang Tua" as OT
+boundary "UI_RaporAnak" as UI
+control "Control_Rapor" as Control
+entity "T_Rapor" as E_Rapor
+entity "T_PermintaanUnduh" as E_Minta
+
+== Skenario: Menampilkan Rapor Anak ==
+
+OT -> UI : 1. Mengakses Menu Rapor Anak
+activate UI
+UI -> Control : 2. RequestDaftarRapor(ID_Anak)
+activate Control
+Control -> E_Rapor : 3. AmbilDaftarRapor(ID_Anak)
+activate E_Rapor
+E_Rapor --> Control : 4. DataDitemukan(Data)
+deactivate E_Rapor
+Control --> UI : 5. TampilkanDaftarRapor(Data)
+deactivate Control
+
+OT -> UI : 6. Memilih Rapor Tertentu
+UI -> Control : 7. RequestRingkasanRapor(ID_Rapor)
+activate Control
+Control -> E_Rapor : 8. AmbilDetailRapor()
+activate E_Rapor
+E_Rapor --> Control : 9. DataDitemukan(Data)
+deactivate E_Rapor
+Control --> UI : 10. TampilkanRingkasan(Data)
+deactivate Control
+UI --> OT : 11. Halaman Ringkasan Nilai Terbuka
+deactivate UI
+
+
+== Skenario: Mengajukan Permintaan Unduh (Cetak) ==
+
+OT -> UI : 12. Klik "Ajukan Unduh (Cetak)"
+activate UI
+UI -> Control : 13. CekStatusPermintaan(ID_Rapor)
+activate Control
+Control -> E_Minta : 14. AmbilStatusTerakhir()
+activate E_Minta
+E_Minta --> Control : 15. Status(Pending / Aktif / Kosong)
+deactivate E_Minta
+
+alt Status = Pending atau Token Masih Aktif
+    Control --> UI : 16. InfoStatus("Permintaan sedang diproses atau Token masih aktif")
+    UI --> OT : 17. Menampilkan Pesan Info (Tombol Disabled)
+else Status = Kosong / Expired
+    OT -> UI : 18. Mengisi Alasan (Opsional) & Klik "Kirim Permintaan"
+    UI -> Control : 19. SubmitPermintaan(Data)
+    
+    Control -> E_Minta : 20. InsertData(Status="Menunggu")
+    activate E_Minta
+    deactivate E_Minta
+    note right of E_Minta : Konvensi Assumed Success
+    
+    Control -> Control : 21. Kirim Notifikasi ke Wali Kelas
+    
+    Control --> UI : 22. NotifikasiSukses()
+    UI --> OT : 23. Pesan Permintaan Terkirim
+end
+deactivate Control
+deactivate UI
+
+note over OT, E_Minta : -- Menunggu Persetujuan Wali Kelas (Sesuai Alur UC22) --
+
+
+== Skenario: Mengunduh Rapor (Setelah Disetujui) ==
+
+OT -> UI : 24. Menerima Notifikasi & Mengklik Link Unduhan
+activate UI
+UI -> Control : 25. RequestDownloadRapor(Token, ID_Session)
+activate Control
+
+Control -> E_Minta : 26. ValidasiTokenDanSesi(Token, ID_Session)
+activate E_Minta
+E_Minta --> Control : 27. HasilValidasi(Valid / Invalid)
+deactivate E_Minta
+
+Control -> Control : 28. Evaluasi Hasil Validasi
+alt Token Tidak Valid / Kedaluwarsa
+    Control --> UI : 29. ErrorValidasi("Link tidak valid atau telah kedaluwarsa")
+    UI --> OT : 30. Menampilkan Pesan Error
+else Token Valid & Sesi Sesuai
+    Control -> Control : 31. Generate File PDF Rapor (Siap Cetak)
+    Control --> UI : 32. ReturnStreamPDF()
+    UI --> OT : 33. Mengunduh / Menampilkan PDF Rapor
+end
+deactivate Control
+deactivate UI
+
+@enduml

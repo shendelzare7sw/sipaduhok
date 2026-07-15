@@ -1,85 +1,73 @@
 @startuml
-title Sequence Diagram - UC12: Lihat Laporan Keuangan
+title Sequence Diagram - Laporan Keuangan
 autonumber
 
-actor "Admin / Bendahara" as Admin
+actor "Bendahara / Admin" as Pengguna
 boundary "UI_LaporanKeuangan" as UI
-control "Control_LaporanKeuangan" as Control
-entity "T_Tagihan" as E_Tagihan
+control "Control_Laporan" as Control
 entity "T_Pembayaran" as E_Pembayaran
+entity "T_Tagihan" as E_Tagihan
 
-== Skenario: Laporan Pembayaran Masuk ==
-
-Admin -> UI : 1. Pilih Sub-Menu "Laporan Pembayaran"
+== Skenario: Menampilkan Sub-Menu Laporan ==
+Pengguna -> UI : 1. Mengakses Menu Laporan Keuangan
 activate UI
-UI --> Admin : 2. Tampilkan Form Filter (Tgl Awal, Tgl Akhir, Status)
+UI --> Pengguna : 2. Menampilkan Pilihan Laporan
+deactivate UI
 
-Admin -> UI : 3. Masukkan Filter & Klik "Tampilkan"
-UI -> Control : 4. RequestLaporanPembayaran(Filter)
+== Skenario A: Laporan Pembayaran Masuk ==
+Pengguna -> UI : 3. Memilih "Laporan Pembayaran Masuk"
+activate UI
+Pengguna -> UI : 4. Memasukkan Rentang Waktu & Status, lalu Klik "Tampilkan"
+UI -> Control : 5. RequestLaporanPembayaran(FilterData)
 activate Control
-
-Control -> E_Pembayaran : 5. GetPembayaranByFilter(Filter)
+Control -> E_Pembayaran : 6. AmbilRiwayatPembayaran(FilterData)
 activate E_Pembayaran
-E_Pembayaran --> Control : 6. Return Data Laporan
+E_Pembayaran --> Control : 7. ReturnDataPembayaran()
 deactivate E_Pembayaran
-
-Control --> UI : 7. Render Laporan Pembayaran
+Control --> UI : 8. TampilkanTabelPembayaran()
 deactivate Control
-UI --> Admin : 8. Tampilkan Tabel Laporan
+UI --> Pengguna : 9. Data Pembayaran Masuk Ditampilkan
 deactivate UI
 
-== Skenario: Rekapitulasi Tagihan ==
-
-Admin -> UI : 9. Pilih Sub-Menu "Rekap Tagihan"
+== Skenario B: Rekapitulasi Tagihan ==
+Pengguna -> UI : 10. Memilih "Rekapitulasi Tagihan"
 activate UI
-UI --> Admin : 10. Tampilkan Form Filter (Tahun Ajaran, Kelas)
-
-Admin -> UI : 11. Masukkan Filter & Klik "Tampilkan"
-UI -> Control : 12. RequestRekapTagihan(Filter)
+Pengguna -> UI : 11. Memasukkan Filter (TA, Kelas), lalu Klik "Tampilkan"
+UI -> Control : 12. RequestRekapTagihan(FilterData)
 activate Control
-
-Control -> E_Tagihan : 13. GetRekapTagihanByFilter(Filter)
+Control -> E_Tagihan : 13. AmbilTotalTagihan(FilterData)
 activate E_Tagihan
-E_Tagihan --> Control : 14. Return Data Rekap
+E_Tagihan --> Control : 14. ReturnDataTagihan()
 deactivate E_Tagihan
-
-Control --> UI : 15. Render Rekap Tagihan
+Control --> UI : 15. TampilkanTabelRekap()
 deactivate Control
-UI --> Admin : 16. Tampilkan Tabel Rekap Tagihan
+UI --> Pengguna : 16. Data Rekapitulasi Ditampilkan
 deactivate UI
 
-== Skenario: Data Siswa Belum Lunas ==
-
-Admin -> UI : 17. Pilih Sub-Menu "Siswa Belum Lunas"
+== Skenario C: Data Siswa Belum Lunas ==
+Pengguna -> UI : 17. Memilih "Data Siswa Belum Lunas"
 activate UI
-UI --> Admin : 18. Tampilkan Form Filter (Bulan, Kelas)
-
-Admin -> UI : 19. Masukkan Filter & Klik "Tampilkan"
-UI -> Control : 20. RequestSiswaBelumLunas(Filter)
+Pengguna -> UI : 18. Memasukkan Filter (Bulan, Kelas), lalu Klik "Tampilkan"
+UI -> Control : 19. RequestSiswaMenunggak(FilterData)
 activate Control
-
-Control -> E_Tagihan : 21. GetSiswaBelumLunas(Filter)
+Control -> E_Tagihan : 20. KalkulasiSelisihTagihan(FilterData)
 activate E_Tagihan
-E_Tagihan --> Control : 22. Return Data Siswa
+E_Tagihan --> Control : 21. ReturnDaftarTunggakan()
 deactivate E_Tagihan
-
-Control --> UI : 23. Render Data Siswa
+Control --> UI : 22. TampilkanDaftarSiswaMenunggak()
 deactivate Control
-UI --> Admin : 24. Tampilkan Tabel Siswa Belum Lunas
+UI --> Pengguna : 23. Daftar Siswa Menunggak Ditampilkan
 deactivate UI
 
-== Skenario: Ekspor / Cetak Laporan (PDF/Excel) ==
-
-Admin -> UI : 25. Klik Tombol "Ekspor (PDF/Excel)" pada Laporan Aktif
+== Skenario D: Ekspor Dokumen (PDF / Excel) ==
+Pengguna -> UI : 24. Klik Tombol "Ekspor (PDF / Excel)"
 activate UI
-UI -> Control : 26. GenerateExportFile(Format, Filter)
+UI -> Control : 25. RequestEksporDokumen(Format)
 activate Control
-
-Control -> Control : 27. Format Data menjadi Dokumen (PDF/Excel)
-Control --> UI : 28. Return URL Download / File Stream
+Control -> Control : 26. Generate File sesuai Format (PDF/XLSX)
+Control --> UI : 27. ReturnFileDokumen()
 deactivate Control
-
-UI --> Admin : 29. Otomatis Mengunduh File Laporan
+UI --> Pengguna : 28. Memicu Pengunduhan Otomatis
 deactivate UI
 
 @enduml

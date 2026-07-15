@@ -1,139 +1,116 @@
 @startuml
-title Sequence Diagram - UC11: Kelola Tagihan & Pembayaran
+title Sequence Diagram - Kelola Tagihan & Pembayaran
 autonumber
 
-actor "Admin / Bendahara" as Admin
+actor "Bendahara / Admin" as Pengguna
 boundary "UI_KelolaKeuangan" as UI
-control "Control_KelolaKeuangan" as Control
+control "Control_Keuangan" as Control
 entity "T_Tagihan" as E_Tagihan
 entity "T_Pembayaran" as E_Pembayaran
-entity "T_Config" as E_Config
+entity "Config_Pembayaran" as E_Config
 
-== Skenario: Data Tagihan (Generate SPP / Tagihan) ==
-
-Admin -> UI : 1. Pilih Sub-Menu "Data Tagihan"
+== Skenario: Menampilkan Menu Kelola Tagihan & Pembayaran ==
+Pengguna -> UI : 1. Mengakses Menu "Tagihan & Pembayaran"
 activate UI
-UI -> Control : 2. RequestDataTagihan()
-activate Control
-Control -> E_Tagihan : 3. AmbilDataTagihan()
-activate E_Tagihan
-E_Tagihan --> Control : 4. DataDitemukan(Data)
-deactivate E_Tagihan
-Control --> UI : 5. TampilkanHalaman(Data)
-deactivate Control
+UI --> Pengguna : 2. Menampilkan Dropdown Menu
+deactivate UI
 
-Admin -> UI : 6. Pilih Aksi "Generate Tagihan"
-UI --> Admin : 7. Tampilkan Form Pembuatan Tagihan
-Admin -> UI : 8. Mengisi Data Tagihan (Nominal, Bulan, Siswa)
-Admin -> UI : 9. Klik "Generate / Simpan"
-UI -> Control : 10. GenerateTagihan(Data)
+== Skenario A: Data Tagihan (Generate SPP) ==
+Pengguna -> UI : 3. Memilih Sub-Menu "Data Tagihan" & Klik Generate
+activate UI
+Pengguna -> UI : 4. Mengisi Form (Nominal, Bulan, Siswa) & Simpan
+UI -> Control : 5. SubmitTagihanBaru(Data)
 activate Control
 
-Control -> Control : 11. Validasi Input & Cek Duplikasi
-alt Validasi Gagal / Duplikat
-    Control --> UI : 12. ErrorValidasi(Pesan)
-    UI --> Admin : 13. Tampilkan Pesan Error
-else Validasi Berhasil
-    Control -> E_Tagihan : 14. InsertData(Data)
+Control -> Control : 6. Validasi Input & Duplikasi
+alt Validasi Gagal (Duplikat)
+    Control --> UI : 7. ReturnPesanError("Tagihan bulan ini sudah ada")
+    UI --> Pengguna : 8. Menampilkan Pesan Error
+else Validasi Sukses
+    Control -> E_Tagihan : 9. InsertDataTagihan()
     activate E_Tagihan
-    E_Tagihan --> Control : 15. BerhasilDisimpan()
     deactivate E_Tagihan
-    Control --> UI : 16. NotifikasiSukses()
-    UI --> Admin : 17. Tampilkan Pesan Sukses & Refresh Tabel
+    note right of E_Tagihan : Konvensi Assumed Success diterapkan
+    Control --> UI : 10. NotifikasiSukses()
+    UI --> Pengguna : 11. Pesan Sukses
 end
 deactivate Control
 deactivate UI
 
-== Skenario: Pembayaran Masuk (Validasi Transfer) ==
-
-Admin -> UI : 18. Pilih Sub-Menu "Pembayaran Masuk"
+== Skenario B: Pembayaran Masuk (Validasi) ==
+Pengguna -> UI : 12. Memilih Sub-Menu "Pembayaran Masuk"
 activate UI
-UI -> Control : 19. RequestDaftarMenungguValidasi()
+UI -> Control : 13. RequestDataPembayaran()
 activate Control
-Control -> E_Pembayaran : 20. AmbilDataStatusMenunggu()
+Control -> E_Pembayaran : 14. AmbilDataMenungguValidasi()
 activate E_Pembayaran
-E_Pembayaran --> Control : 21. DataDitemukan(Data)
+E_Pembayaran --> Control : 15. ReturnData()
 deactivate E_Pembayaran
-Control --> UI : 22. TampilkanHalaman(Data)
+Control --> UI : 16. TampilkanDaftarPembayaran()
 deactivate Control
 
-Admin -> UI : 23. Klik "Validasi" pada salah satu pembayaran
-UI --> Admin : 24. Tampilkan Detail Bukti Transfer
-Admin -> UI : 25. Klik Keputusan (Setujui / Tolak)
-UI -> Control : 26. ValidasiPembayaran(ID, Keputusan)
+Pengguna -> UI : 17. Klik "Validasi" (Lihat Bukti Transfer)
+Pengguna -> UI : 18. Memutuskan Setuju (Lunas) / Tolak
+UI -> Control : 19. ProsesValidasiPembayaran(Status)
 activate Control
 
-alt Keputusan = Setujui (Lunas)
-    Control -> E_Pembayaran : 27. UpdateStatus(Lunas)
+alt Status = Lunas
+    Control -> E_Pembayaran : 20. UpdateStatusLunas()
     activate E_Pembayaran
-    E_Pembayaran --> Control : 28. StatusDiperbarui()
     deactivate E_Pembayaran
-    Control -> E_Tagihan : 29. UpdateSaldoSisaTagihan()
+    
+    Control -> E_Tagihan : 21. UpdateSaldoDanStatusTagihan()
     activate E_Tagihan
-    E_Tagihan --> Control : 30. SaldoDiperbarui()
     deactivate E_Tagihan
-    Control --> UI : 31. NotifikasiSukses()
-    UI --> Admin : 32. Tampilkan Pesan Lunas
-else Keputusan = Tolak
-    Control -> E_Pembayaran : 33. UpdateStatus(Ditolak)
+    
+    Control --> UI : 22. NotifikasiSukses()
+    UI --> Pengguna : 23. Pesan Sukses (Tagihan Lunas)
+else Status = Tolak
+    Control -> E_Pembayaran : 24. UpdateStatusDitolak()
     activate E_Pembayaran
-    E_Pembayaran --> Control : 34. StatusDiperbarui()
     deactivate E_Pembayaran
-    Control --> UI : 35. NotifikasiPenolakan()
-    UI --> Admin : 36. Tampilkan Pesan Ditolak
+    Control --> UI : 25. NotifikasiPenolakan()
+    UI --> Pengguna : 26. Pesan Penolakan
 end
 deactivate Control
 deactivate UI
 
-== Skenario: Tarik Tunggakan (Carryover) ==
-
-Admin -> UI : 37. Pilih Sub-Menu "Tarik Tunggakan"
+== Skenario C: Tarik Tunggakan (Carryover) ==
+Pengguna -> UI : 27. Memilih Sub-Menu "Tarik Tunggakan"
 activate UI
-Admin -> UI : 38. Klik "Preview Tunggakan" (Tahun Sebelumnya)
-UI -> Control : 39. RequestDaftarTunggakan(TahunLalu)
+Pengguna -> UI : 28. Klik "Preview Tunggakan Tahun Sebelumnya"
+UI -> Control : 29. RequestPreviewTunggakan()
 activate Control
-Control -> E_Tagihan : 40. AmbilDataTunggakan()
+Control -> E_Tagihan : 30. CekTunggakanSiswa()
 activate E_Tagihan
-E_Tagihan --> Control : 41. DataDitemukan(Data)
+E_Tagihan --> Control : 31. ReturnDaftarTunggakan()
 deactivate E_Tagihan
-Control --> UI : 42. Tampilkan Daftar Siswa Penunggak
+Control --> UI : 32. TampilkanDaftarTunggakan()
 deactivate Control
 
-Admin -> UI : 43. Klik "Eksekusi Tarik Tunggakan"
-UI -> Control : 44. EksekusiCarryover()
+Pengguna -> UI : 33. Klik "Eksekusi Tarik Tunggakan"
+UI -> Control : 34. EksekusiCarryover()
 activate Control
-Control -> E_Tagihan : 45. PindahkanTunggakanKeTahunSekarang()
+Control -> E_Tagihan : 35. InsertSisaTagihanKeTahunAktif()
 activate E_Tagihan
-E_Tagihan --> Control : 46. BerhasilDipindahkan()
 deactivate E_Tagihan
-Control --> UI : 47. NotifikasiSukses()
+Control --> UI : 36. NotifikasiSukses()
 deactivate Control
-UI --> Admin : 48. Tampilkan Pesan Sukses
+UI --> Pengguna : 37. Pesan Sukses (Tunggakan Ditarik)
 deactivate UI
 
-== Skenario: Config Pembayaran ==
-
-Admin -> UI : 49. Pilih Sub-Menu "Config Pembayaran"
+== Skenario D: Config Pembayaran ==
+Pengguna -> UI : 38. Memilih Sub-Menu "Config Pembayaran"
 activate UI
-UI --> Admin : 50. Tampilkan Form Konfigurasi (Bank / API Midtrans)
-Admin -> UI : 51. Memperbarui Data Konfigurasi
-Admin -> UI : 52. Klik "Simpan Konfigurasi"
-UI -> Control : 53. SimpanConfig(Data)
+Pengguna -> UI : 39. Memperbarui Data Rekening / API Key Midtrans
+UI -> Control : 40. SubmitConfigPembayaran(Data)
 activate Control
-
-Control -> Control : 54. ValidasiData()
-alt Validasi Gagal
-    Control --> UI : 55. ErrorValidasi(Pesan)
-    UI --> Admin : 56. Tampilkan Pesan Error
-else Validasi Berhasil
-    Control -> E_Config : 57. UpdateConfig(Data)
-    activate E_Config
-    E_Config --> Control : 58. BerhasilDiubah()
-    deactivate E_Config
-    Control --> UI : 59. NotifikasiSukses()
-    UI --> Admin : 60. Tampilkan Pesan Sukses
-end
+Control -> E_Config : 41. UpdateKonfigurasi()
+activate E_Config
+deactivate E_Config
+Control --> UI : 42. NotifikasiSukses()
 deactivate Control
+UI --> Pengguna : 43. Pesan Sukses
 deactivate UI
 
 @enduml

@@ -75,11 +75,11 @@
 
                 <div class="row">
                     {{-- Kolom Kiri: Pilih Tagihan --}}
-                    <div class="col-lg-6 mb-4">
+                    <div class="col-lg-6 d-flex flex-column">
                         <h6 class="fw-bold text-gray-800 mb-3">Pilih Tagihan yang Dibayar</h6>
 
                         @if($tagihanBelumLunas->count() > 0)
-                            <div class="border rounded shadow-sm tagihan-list-scroll">
+                            <div class="border rounded shadow-sm tagihan-list-scroll flex-fill">
                                 @foreach($tagihanBelumLunas as $tagihan)
                                     <div class="d-flex align-items-start p-3 border-bottom tagihan-item">
                                         <div class="d-flex align-items-center pt-2">
@@ -129,7 +129,7 @@
                                 <div class="text-danger small mt-2">{{ $message }}</div>
                             @enderror
                         @else
-                            <div class="text-center py-5 bg-success bg-opacity-10 rounded">
+                            <div class="text-center py-5 rounded" style="background-color: rgba(16, 185, 129, 0.1);">
                                 <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
                                 <p class="text-success fw-bold mb-0">Semua tagihan sudah lunas!</p>
                             </div>
@@ -177,7 +177,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="d-flex align-items-center p-3 bg-success bg-opacity-10 rounded border border-success border-2 direct-validation-label">
+                            <label class="d-flex align-items-center p-3 rounded border border-success border-2 direct-validation-label" style="background-color: rgba(16, 185, 129, 0.1);">
                                 <input type="checkbox" name="validasi_langsung" value="1" class="form-check-input me-2 payment-checkbox-lg" checked>
                                 <span class="text-success fw-bold">
                                     <i class="fas fa-check-circle"></i> Langsung validasi pembayaran ini
@@ -187,7 +187,7 @@
                         </div>
 
                         {{-- Summary --}}
-                        <div class="bg-primary bg-opacity-10 p-3 rounded border border-primary border-2 mb-3">
+                        <div class="p-3 rounded border border-primary border-2 mb-3" style="background-color: rgba(67, 97, 238, 0.1);">
                             <h6 class="small fw-bold text-primary mb-3"><i class="fas fa-chart-bar"></i> Ringkasan Pembayaran</h6>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Tagihan dipilih:</span>

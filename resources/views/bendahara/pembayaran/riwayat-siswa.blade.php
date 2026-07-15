@@ -62,37 +62,73 @@
             </div>
 
             {{-- Statistik Cards --}}
-            <div class="row mb-4">
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini stat-card-total shadow">
-                        <h6>Total Tagihan</h6>
-                        <div class="stat-value">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
-                        <div class="stat-label">Seluruh tagihan</div>
-                        <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="dashboard-card">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
+                                <div class="stat-label">Total Tagihan</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-primary">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Seluruh tagihan</span>
+                            <i class="fas fa-receipt opacity-50"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini stat-card-paid shadow">
-                        <h6>Total Terbayar</h6>
-                        <div class="stat-value">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</div>
-                        <div class="stat-label">Pembayaran disetujui</div>
-                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="dashboard-card">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</div>
+                                <div class="stat-label">Total Terbayar</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Pembayaran disetujui</span>
+                            <i class="fas fa-check opacity-50"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini stat-card-pending shadow">
-                        <h6>Menunggu Validasi</h6>
-                        <div class="stat-value">Rp {{ number_format($totalPending, 0, ',', '.') }}</div>
-                        <div class="stat-label">Belum divalidasi</div>
-                        <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="dashboard-card">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($totalPending, 0, ',', '.') }}</div>
+                                <div class="stat-label">Menunggu Validasi</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-warning">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Belum divalidasi</span>
+                            <i class="fas fa-clock opacity-50"></i>
+                        </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 mb-3">
-                    <div class="stat-card-mini stat-card-remaining shadow">
-                        <h6>Sisa Tagihan</h6>
-                        <div class="stat-value">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</div>
-                        <div class="stat-label">Belum dibayar</div>
-                        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="dashboard-card">
+                        <div class="stat-widget">
+                            <div class="stat-details">
+                                <div class="stat-value">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</div>
+                                <div class="stat-label">Sisa Tagihan</div>
+                            </div>
+                            <div class="stat-icon-wrapper stat-icon-danger">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                        </div>
+                        <div class="stat-footer">
+                            <span>Belum dibayar</span>
+                            <i class="fas fa-exclamation-circle opacity-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>

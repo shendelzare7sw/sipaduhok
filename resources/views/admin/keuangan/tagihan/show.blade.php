@@ -64,17 +64,17 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-3">
-                        <div class="stat-box bg-primary bg-opacity-10">
+                        <div class="stat-box bg-primary">
                             <div class="stat-label">Total Tagihan</div>
-                            <div class="stat-value text-primary">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
+                            <div class="stat-value">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</div>
                         </div>
-                        <div class="stat-box bg-success bg-opacity-10">
+                        <div class="stat-box bg-success">
                             <div class="stat-label">Sudah Bayar</div>
-                            <div class="stat-value text-success">Rp {{ number_format($tagihanLunas, 0, ',', '.') }}</div>
+                            <div class="stat-value">Rp {{ number_format($tagihanLunas, 0, ',', '.') }}</div>
                         </div>
-                        <div class="stat-box {{ $sisaTagihan > 0 ? 'bg-danger' : 'bg-success' }} bg-opacity-10">
+                        <div class="stat-box {{ $sisaTagihan > 0 ? 'bg-danger' : 'bg-success' }}">
                             <div class="stat-label">Sisa Tagihan</div>
-                            <div class="stat-value {{ $sisaTagihan > 0 ? 'text-danger' : 'text-success' }}">
+                            <div class="stat-value">
                                 Rp {{ number_format($sisaTagihan, 0, ',', '.') }}
                             </div>
                         </div>

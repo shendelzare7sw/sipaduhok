@@ -1,0 +1,87 @@
+@startuml
+title Sequence Diagram - Memproses Dispensasi Keuangan
+autonumber
+
+actor "Bendahara / Admin" as Pengaju
+actor "Ketua PKBM" as Approver
+boundary "UI_Dispensasi" as UI
+control "Control_Dispensasi" as Control
+entity "T_Dispensasi" as E_Dispensasi
+entity "T_Siswa_Akses" as E_Akses
+
+== Skenario: Pengajuan Dispensasi oleh Bendahara ==
+Pengaju -> UI : 1. Mengakses Menu "Validasi Akses Ujian & Rapor"
+activate UI
+UI -> Control : 2. RequestDaftarSiswa()
+activate Control
+Control --> UI : 3. TampilkanDataSiswaDenganStatus()
+deactivate Control
+
+Pengaju -> UI : 4. Memilih Siswa Menunggak & Klik "Ajukan Dispensasi"
+UI --> Pengaju : 5. Menampilkan Form Pengajuan
+Pengaju -> UI : 6. Mengisi Tipe Akses, Periode, Alasan & Klik "Kirim"
+UI -> Control : 7. SubmitPengajuanDispensasi(Data)
+activate Control
+
+Control -> E_Dispensasi : 8. InsertPengajuan(Status="Menunggu")
+activate E_Dispensasi
+deactivate E_Dispensasi
+note right of E_Dispensasi : Konvensi Assumed Success diterapkan
+
+Control -> Control : 9. KirimNotifikasi(Ketua PKBM)
+Control --> UI : 10. NotifikasiSukses()
+deactivate Control
+UI --> Pengaju : 11. Pesan Pengajuan Berhasil Terkirim
+deactivate UI
+
+== Skenario: Keputusan (Approval) oleh Ketua PKBM ==
+Approver -> UI : 12. Menerima Notifikasi & Mengakses "Dashboard Dispensasi"
+activate UI
+UI -> Control : 13. RequestDaftarPengajuan()
+activate Control
+Control -> E_Dispensasi : 14. AmbilDataPengajuan(Status="Menunggu")
+activate E_Dispensasi
+E_Dispensasi --> Control : 15. ReturnData()
+deactivate E_Dispensasi
+Control --> UI : 16. TampilkanDaftarPengajuan()
+deactivate Control
+
+Approver -> UI : 17. Melihat Detail Tunggakan & Memilih Keputusan
+UI -> Control : 18. SubmitKeputusan(ID_Dispensasi, Keputusan, Alasan)
+activate Control
+
+alt Keputusan = Setujui
+    Control -> E_Dispensasi : 19. UpdateStatus("Disetujui")
+    activate E_Dispensasi
+    deactivate E_Dispensasi
+    
+    Control -> E_Akses : 20. BukaAksesUjianRaporOtomatis()
+    activate E_Akses
+    deactivate E_Akses
+    
+    Control -> Control : 21. KirimNotifikasi(Bendahara, "Disetujui")
+    Control --> UI : 22. NotifikasiSukses()
+    UI --> Approver : 23. Pesan Sukses (Akses Terbuka)
+else Keputusan = Tolak
+    Control -> E_Dispensasi : 24. UpdateStatus("Ditolak", Alasan)
+    activate E_Dispensasi
+    deactivate E_Dispensasi
+    
+    Control -> Control : 25. KirimNotifikasi(Bendahara, "Ditolak")
+    Control --> UI : 26. NotifikasiSukses()
+    UI --> Approver : 27. Pesan Sukses (Penolakan Tersimpan)
+end
+deactivate Control
+deactivate UI
+
+== Skenario: Bendahara Melihat Status Akhir ==
+Pengaju -> UI : 28. Membuka Halaman Validasi Akses
+activate UI
+UI -> Control : 29. RequestStatusDispensasi()
+activate Control
+Control --> UI : 30. TampilkanStatusAkhir()
+deactivate Control
+UI --> Pengaju : 31. Melihat Status (Disetujui/Ditolak)
+deactivate UI
+
+@enduml

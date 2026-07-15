@@ -1,0 +1,55 @@
+@startuml
+title Sequence Diagram - Berpartisipasi di Forum Diskusi
+autonumber
+
+actor "Siswa" as Siswa
+boundary "UI_Forum" as UI
+control "Control_Forum" as Control
+entity "T_ForumTopik" as E_Topik
+entity "T_ForumBalasan" as E_Balasan
+
+== Skenario: Menampilkan Daftar Topik ==
+Siswa -> UI : 1. Mengakses Dashboard LMS (Tab Forum Diskusi)
+activate UI
+UI -> Control : 2. RequestDaftarTopik(Kelas)
+activate Control
+Control -> E_Topik : 3. AmbilDataTopik()
+activate E_Topik
+E_Topik --> Control : 4. DataDitemukan(Data)
+deactivate E_Topik
+Control --> UI : 5. TampilkanDaftarTopik(Data)
+deactivate Control
+UI --> Siswa : 6. Daftar Topik Terbuka
+deactivate UI
+
+== Skenario A: Berpartisipasi (Menulis Balasan) ==
+Siswa -> UI : 7. Membaca Topik & Menulis Balasan (Reply)
+activate UI
+UI -> Control : 8. SubmitBalasan(ID_Topik, ID_KomentarInduk, TeksBalasan)
+activate Control
+Control -> E_Balasan : 9. InsertBalasan()
+activate E_Balasan
+deactivate E_Balasan
+note right of E_Balasan: Konvensi Assumed Success diterapkan
+
+Control -> Control : 10. Kirim Notifikasi ke Pemilik Komentar Induk
+Control --> UI : 11. NotifikasiSukses()
+deactivate Control
+UI --> Siswa : 12. Balasan Berhasil Dikirim
+deactivate UI
+
+== Skenario B: Kelola Balasan Sendiri (Edit/Hapus) ==
+Siswa -> UI : 13. Memilih Balasan Miliknya Sendiri
+activate UI
+Siswa -> UI : 14. Melakukan Aksi (Edit / Hapus Balasan)
+UI -> Control : 15. EksekusiAksiBalasan(ID_Balasan, Aksi)
+activate Control
+Control -> E_Balasan : 16. Update / Delete DataBalasan()
+activate E_Balasan
+deactivate E_Balasan
+Control --> UI : 17. NotifikasiSukses()
+deactivate Control
+UI --> Siswa : 18. Balasan Berhasil Diperbarui
+deactivate UI
+
+@enduml

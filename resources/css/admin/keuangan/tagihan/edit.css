@@ -1,14 +1,15 @@
 .tagihan-edit-page {
-    max-width: 1400px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0;
 }
 
 .student-avatar {
     width: 60px;
     height: 60px;
     flex-shrink: 0;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -16,7 +17,7 @@
     color: white;
     font-size: 24px;
     font-weight: 600;
-    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .col-jenis {
