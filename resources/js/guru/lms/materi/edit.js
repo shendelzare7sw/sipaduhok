@@ -15,19 +15,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const toggleFileInput = () => {
-        const isLink = tipeFile.value === 'link';
+    // Ekstensi yang diizinkan per tipe — auto-filter di file picker (sinkron dgn backend).
+    const acceptForType = {
+        pdf: '.pdf',
+        ppt: '.ppt,.pptx',
+        doc: '.doc,.docx',
+        video: '.mp4,.avi,.mov,.mkv,.webm',
+    };
+
+    const toggleFileInput = (resetFile = false) => {
+        const selectedType = tipeFile.value;
+        const isLink = selectedType === 'link';
 
         fileInputContainer.hidden = isLink;
         linkInputContainer.hidden = !isLink;
         fileMateri.required = false;
         urlMateri.required = isLink;
 
+        // Batasi format di file explorer/manager sesuai tipe yang dipilih.
+        if (!isLink && acceptForType[selectedType]) {
+            fileMateri.setAttribute('accept', acceptForType[selectedType]);
+        } else {
+            fileMateri.removeAttribute('accept');
+        }
+
+        if (resetFile) {
+            fileMateri.value = '';
+        }
+
         if (fileRequired) {
             fileRequired.textContent = isLink ? '' : '*';
         }
     };
 
-    tipeFile.addEventListener('change', toggleFileInput);
-    toggleFileInput();
+    tipeFile.addEventListener('change', () => toggleFileInput(true));
+    toggleFileInput(false);
 });

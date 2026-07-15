@@ -103,8 +103,12 @@ class GuruMateriController extends Controller
                 'judul_materi' => 'required|string|max:255',
                 'kategori' => 'required|in:materi,modul_ajar',
                 'deskripsi' => 'nullable|string',
-                'file_materi' => 'required|file|max:51200', // 50MB
+                // Format file WAJIB cocok dengan tipe yang dipilih (mis. pilih PDF ->
+                // hanya .pdf). Juga menutup upload tipe berbahaya (html/svg/script).
+                'file_materi' => 'required|file|max:51200|mimes:' . $this->mimesForTipe($tipeFile),
                 'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
+            ], [
+                'file_materi.mimes' => 'Format file tidak didukung untuk tipe "' . $tipeFile . '" yang dipilih. Pastikan file sesuai (mis. tipe PDF hanya menerima .pdf).',
             ]);
         }
 
@@ -124,7 +128,7 @@ class GuruMateriController extends Controller
             'guru_id' => $tenagaPendidik->id,
             'judul_materi' => $validated['judul_materi'],
             'kategori' => $validated['kategori'],
-            'deskripsi' => $validated['deskripsi'],
+            'deskripsi' => $validated['deskripsi'] ?? null,
             'file_materi' => $filePath,
             'url_materi' => $urlMateri,
             'tipe_file' => $validated['tipe_file'],
@@ -232,9 +236,12 @@ class GuruMateriController extends Controller
                 'judul_materi' => 'required|string|max:255',
                 'kategori' => 'required|in:materi,modul_ajar',
                 'deskripsi' => 'nullable|string',
-                'file_materi' => 'nullable|file|max:51200',
+                // Bila ada file baru diunggah, format wajib cocok dengan tipe yang dipilih.
+                'file_materi' => 'nullable|file|max:51200|mimes:' . $this->mimesForTipe($tipeFile),
                 'tipe_file' => 'required|in:pdf,video,ppt,doc,link',
                 'tanggal_upload' => 'required|date',
+            ], [
+                'file_materi.mimes' => 'Format file tidak didukung untuk tipe "' . $tipeFile . '" yang dipilih. Pastikan file sesuai (mis. tipe PDF hanya menerima .pdf).',
             ]);
         }
 
@@ -403,6 +410,22 @@ class GuruMateriController extends Controller
         return redirect()
             ->route('guru.lms.materi.index', [$kelasId, $mapelId])
             ->with('success', $msg);
+    }
+
+    /**
+     * Ekstensi yang diizinkan untuk tiap tipe materi. Memastikan file yang diunggah
+     * cocok dengan tipe yang dipilih guru, sekaligus menolak tipe berbahaya
+     * (html/svg/php/js) yang bisa memicu stored-XSS ke siswa.
+     */
+    private function mimesForTipe(?string $tipe): string
+    {
+        return match ($tipe) {
+            'pdf'   => 'pdf',
+            'ppt'   => 'ppt,pptx',
+            'doc'   => 'doc,docx',
+            'video' => 'mp4,avi,mov,mkv,webm',
+            default => 'pdf,ppt,pptx,doc,docx,mp4,avi,mov,mkv,webm',
+        };
     }
 
     /**

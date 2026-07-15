@@ -88,7 +88,9 @@ class GuruTugasController extends Controller
         $validated = $request->validate([
             'judul_tugas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'file_tugas' => 'nullable|file|max:10240', // 10MB
+            // Batasi tipe lampiran (dokumen/gambar/arsip) & tolak tipe berbahaya
+            // (html/svg/php/js) yang bisa memicu stored-XSS ke siswa.
+            'file_tugas' => 'nullable|file|max:10240|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,gif,zip', // 10MB
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
             'tampilkan_nilai' => 'nullable|boolean',
@@ -205,7 +207,7 @@ class GuruTugasController extends Controller
         $validated = $request->validate([
             'judul_tugas' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'file_tugas' => 'nullable|file|max:10240',
+            'file_tugas' => 'nullable|file|max:10240|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,gif,zip',
             'tanggal_mulai' => 'required|date',
             'tanggal_deadline' => 'required|date|after:tanggal_mulai',
             'tampilkan_nilai' => 'nullable|boolean',
