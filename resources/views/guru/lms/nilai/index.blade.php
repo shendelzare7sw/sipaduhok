@@ -79,6 +79,12 @@
                     </div>
                 </div>
                 <div class="p-0">
+                    <div class="px-3 pt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Nilai desimal gunakan <strong>titik</strong>, contoh <code>9.8</code>. Jika mengetik koma (<code>9,8</code>) otomatis diubah menjadi titik.
+                        </small>
+                    </div>
                     <form action="{{ route('guru.lms.nilai.updateBatch', [$kelas->id, $mapel->id]) }}" method="POST" id="nilaiForm">
                         @csrf
                         <div class="table-responsive">
@@ -124,7 +130,7 @@
                                             @for($i = 1; $i <= 5; $i++)
                                                 <td class="text-center p-1" data-label="T{{ $i }}">
                                                     <div class="input-wrapper">
-                                                        <input type="number" step="0.01" min="0" max="100" 
+                                                        <input type="text" maxlength="6" 
                                                             name="nilai[{{ $nilai->id }}][tugas_{{ $i }}]"
                                                             class="form-control input-nilai"
                                                             id="tugas_{{ $nilai->id }}_{{ $i }}"
@@ -146,7 +152,7 @@
                                             @for($i = 1; $i <= 5; $i++)
                                                 <td class="text-center p-1" data-label="L{{ $i }}">
                                                     <div class="input-wrapper">
-                                                        <input type="number" step="0.01" min="0" max="100" 
+                                                        <input type="text" maxlength="6" 
                                                             name="nilai[{{ $nilai->id }}][latihan_{{ $i }}]"
                                                             class="form-control input-nilai"
                                                             id="latihan_{{ $nilai->id }}_{{ $i }}"
@@ -168,7 +174,7 @@
                                             @for($i = 1; $i <= 5; $i++)
                                                 <td class="text-center p-1" data-label="UH{{ $i }}">
                                                     <div class="input-wrapper">
-                                                        <input type="number" step="0.01" min="0" max="100" 
+                                                        <input type="text" maxlength="6" 
                                                             name="nilai[{{ $nilai->id }}][uh_{{ $i }}]"
                                                             class="form-control input-nilai"
                                                             id="uh_{{ $nilai->id }}_{{ $i }}"
@@ -189,7 +195,7 @@
                                             {{-- PTS --}}
                                             <td class="text-center p-1" data-label="PTS">
                                                 <div class="input-wrapper">
-                                                    <input type="number" step="0.01" min="0" max="100" 
+                                                    <input type="text" maxlength="6" 
                                                         name="nilai[{{ $nilai->id }}][pts]"
                                                         class="form-control input-nilai"
                                                         id="pts_{{ $nilai->id }}"
@@ -206,7 +212,7 @@
                                             {{-- PAS --}}
                                             <td class="text-center p-1" data-label="PAS">
                                                 <div class="input-wrapper">
-                                                    <input type="number" step="0.01" min="0" max="100" 
+                                                    <input type="text" maxlength="6" 
                                                         name="nilai[{{ $nilai->id }}][pas]"
                                                         class="form-control input-nilai"
                                                         id="pas_{{ $nilai->id }}"
@@ -282,7 +288,7 @@
                                             @foreach(['to_1', 'to_2', 'to_3', 'upk', 'ujian_praktek'] as $field)
                                             <td class="text-center p-1" data-label="{{ str_replace('_', ' ', strtoupper($field)) }}">
                                                 <div class="input-wrapper">
-                                                    <input type="number" step="0.01" min="0" max="100" 
+                                                    <input type="text" maxlength="6" 
                                                         name="nilai[{{ $nilai->id }}][{{ $field }}]"
                                                         class="form-control input-nilai"
                                                         id="{{ $field }}_{{ $nilai->id }}"

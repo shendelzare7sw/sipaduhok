@@ -194,6 +194,9 @@ class NilaiSiswaImport implements
             return false;
         }
 
+        // ATURAN DESIMAL: terima koma, samakan ke titik sebelum cek numeric.
+        $value = str_replace(',', '.', (string) $value);
+
         // Check if it's a valid number
         if (!is_numeric($value)) {
             return false;
@@ -211,7 +214,8 @@ class NilaiSiswaImport implements
             return null;
         }
 
-        $parsed = floatval($value);
+        // ATURAN DESIMAL: terima koma, simpan sebagai titik.
+        $parsed = floatval(str_replace(',', '.', (string) $value));
 
         // Validate range
         if ($parsed < 0 || $parsed > 100) {

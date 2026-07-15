@@ -29,19 +29,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     page.querySelectorAll('.input-nilai').forEach((input) => {
         input.addEventListener('input', function handleScoreInput() {
-            const value = this.value;
+            // ATURAN DESIMAL: titik. Koma otomatis dikonversi; karakter lain dibuang;
+            // hanya satu titik yang diperbolehkan.
+            let v = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+            const firstDot = v.indexOf('.');
+            if (firstDot !== -1) {
+                v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
+            }
+            if (v !== this.value) {
+                this.value = v;
+            }
 
-            if (value === '') {
+            if (v === '') {
                 return;
             }
 
-            const numberValue = parseFloat(value);
+            const numberValue = parseFloat(v);
 
             if (numberValue > 100) {
-                const stringValue = value.toString();
-
-                if (!stringValue.includes('.')) {
-                    const corrected = stringValue.slice(0, -1) + '.' + stringValue.slice(-1);
+                if (!v.includes('.')) {
+                    const corrected = v.slice(0, -1) + '.' + v.slice(-1);
 
                     if (parseFloat(corrected) <= 100) {
                         this.value = corrected;
@@ -54,20 +61,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         input.addEventListener('keydown', (event) => {
-            if (['e', 'E', '-', '+'].includes(event.key)) {
+            const k = event.key;
+            // Izinkan tombol kontrol & kombinasi Ctrl/Meta (copy/paste, panah, dll).
+            if (k.length !== 1 || event.ctrlKey || event.metaKey) {
+                return;
+            }
+            // Hanya digit, koma, dan titik yang boleh diketik.
+            if (!/[0-9.,]/.test(k)) {
                 event.preventDefault();
             }
         });
 
         input.addEventListener('blur', function handleScoreBlur() {
-            const value = parseFloat(this.value);
+            const raw = this.value.replace(/,/g, '.');
+            const value = parseFloat(raw);
 
             if (Number.isNaN(value)) {
+                this.value = '';
                 return;
             }
 
-            if (value > 100) this.value = 100;
-            if (value < 0) this.value = 0;
+            let clamped = Math.max(0, Math.min(100, value));
+            clamped = Math.round(clamped * 100) / 100;
+            this.value = String(clamped);
         });
     });
 

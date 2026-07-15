@@ -107,6 +107,10 @@ class GuruNilaiController extends Controller
             $rules["uh_$i"] = 'nullable|numeric|min:0|max:100';
         }
 
+        // ATURAN DESIMAL: standar TITIK. Terima input koma dari guru, ubah ke titik
+        // sebelum validasi 'numeric' (yang menolak koma).
+        $this->normalizeDecimalInputs($request, array_keys($rules));
+
         $validated = $request->validate($rules);
 
         // IDOR guard: nilai wajib milik kelas+mapel yang aksesnya sudah diverifikasi,
@@ -160,7 +164,9 @@ class GuruNilaiController extends Controller
             $newValues = [];
             foreach ($allowedFields as $field) {
                 if (array_key_exists($field, $data)) {
-                    $newValues[$field] = $data[$field] !== '' ? floatval($data[$field]) : null;
+                    // ATURAN DESIMAL: terima koma, simpan sebagai titik (cegah 9,8 -> 9.0).
+                    $raw = str_replace(',', '.', (string) $data[$field]);
+                    $newValues[$field] = $raw !== '' ? floatval($raw) : null;
                 }
             }
             if (empty($newValues)) continue;
@@ -390,6 +396,27 @@ class GuruNilaiController extends Controller
         );
     }
     
+    /**
+     * ATURAN DESIMAL tunggal: standar TITIK. Guru boleh mengetik koma; di sini
+     * di-normalisasi ke titik sebelum validasi 'numeric' (yang menolak koma).
+     */
+    private function normalizeDecimalInputs(Request $request, array $keys): void
+    {
+        $normalized = [];
+        foreach ($keys as $key) {
+            if ($key === 'nilai_id') {
+                continue;
+            }
+            $val = $request->input($key);
+            if (is_string($val) && $val !== '') {
+                $normalized[$key] = str_replace(',', '.', $val);
+            }
+        }
+        if (!empty($normalized)) {
+            $request->merge($normalized);
+        }
+    }
+
     /**
      * Verifikasi akses guru
      */
