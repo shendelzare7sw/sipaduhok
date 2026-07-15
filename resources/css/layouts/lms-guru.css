@@ -394,6 +394,15 @@ body {
     z-index: 10;
 }
 
+/* Mobile: modal mepet tepi layar, jangan biarkan tombol close menonjol keluar
+   viewport (terpotong). Tuck ke dalam sudut modal. */
+@media (max-width: 575.98px) {
+    .lms-logout-modal .modal-header .btn-close {
+        right: 10px;
+        top: 10px;
+    }
+}
+
 .lms-logout-icon {
     width: 36px;
     height: 36px;

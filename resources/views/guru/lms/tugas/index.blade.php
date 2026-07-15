@@ -1,7 +1,7 @@
 @extends('layouts.lms-guru')
 
 @section('title', 'Daftar Tugas')
-@section('page-title', 'Tugas & Latihan')
+@section('page-title', 'Tugas')
 @section('page-subtitle', $mapel->nama_mapel . ' - ' . $kelas->nama_kelas)
 
 @section('sidebar-menu')
@@ -15,7 +15,7 @@
 @section('content')
 <div class="guru-lms-tugas-page">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Daftar Tugas & Latihan</h4>
+        <h4 class="mb-0"><i class="fas fa-tasks me-2"></i>Daftar Tugas</h4>
         <a href="{{ route('guru.lms.tugas.create', [$kelas->id, $mapel->id]) }}" class="btn btn-primary">
             <i class="fas fa-plus-circle me-1"></i>Buat Tugas Baru
         </a>
