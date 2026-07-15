@@ -11,8 +11,9 @@ class FileController extends Controller
      * Restricts access to safe file types only.
      */
     private const ALLOWED_EXTENSIONS = [
-        // Images
-        'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico',
+        // Images (SVG SENGAJA DIKELUARKAN: disajikan inline dapat mengeksekusi
+        // JavaScript embedded -> stored XSS. Semua jalur upload juga menolak svg.)
+        'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'ico',
         // Documents
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
         // Media
