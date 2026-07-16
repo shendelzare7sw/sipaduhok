@@ -551,7 +551,6 @@ PROMPT;
             'ai settings',
             'pengaturan ai',
             'chatbot',
-            'google sheets',
         ];
 
         foreach ($keywords as $keyword) {

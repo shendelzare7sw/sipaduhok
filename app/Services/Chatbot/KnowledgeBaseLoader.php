@@ -50,7 +50,6 @@ class KnowledgeBaseLoader
             'Akademik: Kalender Akademik, Pengumuman, Flyer/Iklan, Kelola Berita',
             'Monitoring: Pengguna, Wali Kelas, Guru Pengajar, Siswa, Monitoring LMS',
             'Laporan dan Catatan internal',
-            'Google Sheets Sync ada di route admin.google-sheets.* tetapi hanya aktif jika config google-sheets.enabled true',
         ],
         'guru_pengajar' => [
             'Dashboard => guru.dashboard: ringkasan kelas & mapel yang diampu, aktivitas LMS terbaru',
@@ -380,11 +379,6 @@ class KnowledgeBaseLoader
             'owner' => ['admin'],
             'admin_view_route' => 'admin.lms-settings.index',
             'description' => 'Pengaturan akses LMS per jenjang dikelola Admin',
-        ],
-        'google sheets|sync sheets|pull sheets|push sheets' => [
-            'owner' => ['admin'],
-            'admin_view_route' => 'admin.google-sheets.index',
-            'description' => 'Google Sheets Sync adalah fitur Admin dan hanya tersedia jika konfigurasi google-sheets.enabled aktif',
         ],
         'bayar spp|bayar tagihan|transfer pembayaran' => [
             'owner' => ['orang_tua'],
