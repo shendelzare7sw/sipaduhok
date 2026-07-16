@@ -302,12 +302,58 @@ class UserController extends Controller
         return view('admin.users.tenaga-pendidik-show', compact('tenagaPendidik'));
     }
 
+    /**
+     * Jejak data yang menghalangi penghapusan seorang tenaga pendidik (guru/wali).
+     * Kosong = aman dihapus. Dipakai guard deleteTenagaPendidik & bulkDeleteTenagaPendidik.
+     * Menghapus guru ber-jejak akan cascade menghapus nilai siswa & rapor_nilai.
+     */
+    private function tenagaPendidikBlockers(int $tid): array
+    {
+        $b = [];
+        if (($n = \App\Models\Nilai::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} nilai siswa";
+        if (($n = \App\Models\Ujian::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} ujian/latihan";
+        if (($n = \App\Models\Materi::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} materi";
+        if (($n = \App\Models\Tugas::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} tugas";
+        if (($n = \App\Models\GuruPengajarKelas::where('tenaga_pendidik_id', $tid)->count()) > 0) $b[] = "{$n} penugasan mengajar";
+        if (($n = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tid)->count()) > 0) $b[] = "{$n} penugasan wali kelas";
+        return $b;
+    }
+
+    /**
+     * Jejak data yang menghalangi penghapusan seorang siswa.
+     * Kosong = aman dihapus. Dipakai guard deleteSiswa & bulkDeleteSiswa.
+     * Menghapus siswa ber-jejak akan cascade menghapus riwayat akademik & keuangan.
+     */
+    private function siswaBlockers(int $sid): array
+    {
+        $b = [];
+        if (($n = \App\Models\Pembayaran::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} pembayaran";
+        if (($n = \App\Models\Tagihan::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} tagihan";
+        if (($n = \App\Models\Rapor::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} rapor";
+        if (($n = \App\Models\UjianSiswa::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} riwayat ujian";
+        if (($n = \App\Models\Presensi::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} presensi";
+        if (($n = \App\Models\Nilai::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} nilai";
+        return $b;
+    }
+
     public function deleteTenagaPendidik($id)
     {
         // Try to find the profile
         $tenagaPendidik = TenagaPendidik::where('id', $id)->orWhere('user_id', $id)->first();
-        
+
         if ($tenagaPendidik) {
+            // GUARD INTEGRITAS: jangan hard-delete guru yang masih punya jejak akademik.
+            // FK cascade akan ikut memusnahkan nilai siswa, ujian_siswa/jawaban, materi,
+            // tugas, rapor_nilai (rapor jadi rusak), dan penugasan. Nonaktifkan akun saja.
+            $blockers = $this->tenagaPendidikBlockers($tenagaPendidik->id);
+
+            if (!empty($blockers)) {
+                return redirect()->route('admin.users.tenaga-pendidik')->with('error',
+                    'Tenaga pendidik ini tidak dapat dihapus karena masih terhubung ke data (' . implode(', ', $blockers) . '). '
+                    . 'Menghapusnya akan ikut menghilangkan NILAI SISWA & RAPOR secara permanen. '
+                    . 'Untuk menjaga data, NONAKTIFKAN akun ini (ubah status menjadi Nonaktif), jangan dihapus.');
+            }
+
             $user = $tenagaPendidik->user;
             $tenagaPendidik->delete();
             if ($user) $user->delete();
@@ -768,9 +814,22 @@ class UserController extends Controller
     public function deleteSiswa($id)
     {
         $siswa = Siswa::findOrFail($id);
+
+        // GUARD INTEGRITAS: jangan hard-delete siswa yang masih punya jejak akademik/keuangan.
+        // FK cascade akan ikut memusnahkan nilai, presensi, ujian_siswa/jawaban, rapor,
+        // TAGIHAN & PEMBAYARAN (riwayat keuangan hilang permanen). Ubah status siswa saja.
+        $blockers = $this->siswaBlockers($siswa->id);
+
+        if (!empty($blockers)) {
+            return redirect()->route('admin.users.siswa')->with('error',
+                'Siswa ini tidak dapat dihapus karena masih memiliki data terkait (' . implode(', ', $blockers) . '). '
+                . 'Menghapusnya akan menghilangkan RIWAYAT AKADEMIK & KEUANGAN secara permanen. '
+                . 'Untuk menjaga data, NONAKTIFKAN akun / ubah status siswa (mis. Lulus atau Keluar), jangan dihapus.');
+        }
+
         $user = $siswa->user;
         $siswa->delete();
-        $user->delete();
+        if ($user) $user->delete();
 
         return redirect()->route('admin.users.siswa')->with('success', 'Siswa berhasil dihapus!');
     }
@@ -1160,14 +1219,32 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
         }
 
-        // IDs received are User IDs (from blade checkboxes)
-        // Delete associated TenagaPendidik profiles first
-        TenagaPendidik::whereIn('user_id', $ids)->delete();
-        
-        // Then delete the User accounts
-        User::whereIn('id', $ids)->delete();
+        // IDs received are User IDs (from blade checkboxes).
+        // GUARD INTEGRITAS: lewati guru yang masih punya jejak akademik (nilai/rapor cascade).
+        $tenagaByUser = TenagaPendidik::whereIn('user_id', $ids)->get()->keyBy('user_id');
+        $safeUserIds = [];
+        $skipped = 0;
+        foreach ($ids as $uid) {
+            $tp = $tenagaByUser->get($uid);
+            if ($tp && !empty($this->tenagaPendidikBlockers($tp->id))) {
+                $skipped++;
+                continue;
+            }
+            $safeUserIds[] = $uid;
+        }
 
-        return redirect()->back()->with('success', count($ids) . ' data tenaga pendidik berhasil dihapus');
+        if (!empty($safeUserIds)) {
+            TenagaPendidik::whereIn('user_id', $safeUserIds)->delete();
+            User::whereIn('id', $safeUserIds)->delete();
+        }
+
+        if ($skipped > 0) {
+            return redirect()->back()->with('warning',
+                count($safeUserIds) . ' data tenaga pendidik dihapus. ' . $skipped . ' dilewati karena masih memiliki '
+                . 'nilai/materi/tugas/ujian/penugasan — NONAKTIFKAN akunnya, jangan dihapus (mencegah nilai & rapor siswa hilang).');
+        }
+
+        return redirect()->back()->with('success', count($safeUserIds) . ' data tenaga pendidik berhasil dihapus');
     }
 
     public function bulkDeleteSiswa(Request $request)
@@ -1177,13 +1254,33 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
         }
 
+        // GUARD INTEGRITAS: lewati siswa yang masih punya jejak akademik/keuangan
+        // (nilai/presensi/ujian/rapor/tagihan/pembayaran ikut cascade bila dihapus).
         $siswas = Siswa::whereIn('id', $ids)->get();
-        $userIds = $siswas->pluck('user_id')->filter()->toArray();
+        $safeSiswaIds = [];
+        $safeUserIds = [];
+        $skipped = 0;
+        foreach ($siswas as $siswa) {
+            if (!empty($this->siswaBlockers($siswa->id))) {
+                $skipped++;
+                continue;
+            }
+            $safeSiswaIds[] = $siswa->id;
+            if ($siswa->user_id) $safeUserIds[] = $siswa->user_id;
+        }
 
-        Siswa::whereIn('id', $ids)->delete();
-        User::whereIn('id', $userIds)->delete();
+        if (!empty($safeSiswaIds)) {
+            Siswa::whereIn('id', $safeSiswaIds)->delete();
+            if (!empty($safeUserIds)) User::whereIn('id', $safeUserIds)->delete();
+        }
 
-        return redirect()->back()->with('success', count($ids) . ' data siswa berhasil dihapus');
+        if ($skipped > 0) {
+            return redirect()->back()->with('warning',
+                count($safeSiswaIds) . ' data siswa dihapus. ' . $skipped . ' dilewati karena masih memiliki '
+                . 'riwayat akademik/keuangan — NONAKTIFKAN akun / ubah status (Lulus/Keluar), jangan dihapus.');
+        }
+
+        return redirect()->back()->with('success', count($safeSiswaIds) . ' data siswa berhasil dihapus');
     }
 
     public function bulkDeleteOrangTua(Request $request)
