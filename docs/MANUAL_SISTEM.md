@@ -482,9 +482,117 @@ guru pada satu jadwal otomatis berlaku untuk **semua kelas** yang ditautkan jadw
 
 ---
 
-## Bab 9+ - Peran lain (menyusul)
+## Bab 9 - Peran SEKRETARIS & BENDAHARA
 
-Urutan: Sekretaris & Bendahara (jalur uang/Midtrans) -> Wali Kelas & Guru (nilai, rapor,
-LMS) -> Siswa & Orang Tua. Format sama.
+**Sekretaris** mengurus konten & administrasi (kalender, pengumuman, berita, flyer).
+**Bendahara** memegang **jalur uang**: tagihan, pembayaran (tunai/transfer/online), validasi.
+Ini modul paling sensitif, jadi banyak pengaman (transaksi, audit log, verifikasi).
+
+### 9.1 Button "Generate Tagihan / SPP Massal" - dan kenapa tidak pernah dobel
+
+**Konsep.** Membuat tagihan (mis. SPP bulanan) untuk banyak siswa sekaligus.
+
+**Kode:** `Bendahara/TagihanController::generateSpp()` / `bulkCreate()`.
+**Logika anti-dobel (variabel kunci `$key = jenis_tagihan`):** sebelum membuat, sistem cek
+`Tagihan::where('siswa_id', ...)->where('tahun_ajaran_id', ...)->where('jenis_tagihan', $key)
+->exists()`. Kalau tagihan jenis itu sudah ada -> **dilewati (skip)**, tidak dibuat ulang.
+Tiap jenis SPP dibedakan dengan sufiks bulan (mis. `spp_juli`, `spp_agustus`).
+
+> **Penjelasan Umum:** Pembuatan tagihan bersifat idempoten per (siswa, TA, jenis_tagihan):
+> pengecekan `exists()` mencegah duplikasi saat tombol ditekan berkali-kali.
+>
+> **Penjelasan Sederhana:** Kalau kamu klik "buat SPP Juli" dua kali, siswa tidak dapat dua
+> tagihan Juli. Sistem cek dulu "sudah punya belum?"; kalau sudah, dilewati.
+
+### 9.2 Pembayaran MANUAL (tunai / transfer) + Button "Validasi"
+
+**Konsep.** Wali bayar tunai ke bendahara, atau transfer & upload bukti. Status awal
+**pending**; bendahara menekan **Setujui/Tolak**.
+
+**Kode saat disetujui:** `Bendahara/PembayaranController::validasi()`. Dibungkus
+`DB::transaction`. Logika inti:
+1. Update baris pembayaran -> `status_validasi = disetujui`, `divalidasi_oleh`, tanggal.
+2. Hitung ulang total pembayaran **disetujui** untuk tagihan itu:
+   `$totalBayar = Pembayaran::where('tagihan_id', ...)->where('status_validasi','disetujui')->sum('jumlah_bayar')`.
+3. Kalau `$totalBayar >= tagihan->jumlah` -> tagihan `sudah_bayar`, **dan** semua pembayaran
+   pending lain untuk tagihan itu otomatis **dibatalkan** (cegah bayar dobel), dicatat di
+   `FinancialAuditLog`.
+4. Kalau baru sebagian -> status `cicilan`.
+
+> **Penjelasan Umum:** Validasi pembayaran rekonsiliasi berbasis penjumlahan pembayaran
+> tervalidasi; status tagihan diturunkan dari total (lunas/cicilan) dengan pencegahan
+> double-payment dan jejak audit.
+>
+> **Penjelasan Sederhana:** Saat bendahara klik "Setuju", sistem menjumlah semua pembayaran
+> yang sah. Kalau sudah menutupi tagihan -> ditandai lunas dan pembayaran lain yang masih
+> menggantung dibatalkan supaya tidak bayar dobel. Kalau baru sebagian -> ditandai cicilan.
+
+### 9.3 Pembayaran ONLINE (Midtrans) - cara kerja "bayar lewat aplikasi"
+
+Ini yang sering ditanya: **"uangnya lewat mana, sistem tahu dari mana kalau sudah bayar?"**
+
+**Konsep.** Sekolah tidak memegang uang langsung. **Midtrans** (payment gateway) yang
+memproses kartu/e-wallet/Virtual Account, lalu **memberi tahu** sistem hasilnya.
+
+**Alur & kode (langkah demi langkah):**
+1. Wali klik "Bayar Online" -> `OrangTua/OrangTuaController::snapPayment()` memanggil
+   `MidtransService::createSnapToken($params)`. `$params` berisi `order_id`, jumlah, dan
+   rincian item. Midtrans mengembalikan **`snap_token`**.
+2. Halaman menampilkan popup pembayaran Midtrans (Snap) memakai token itu; wali membayar di
+   popup tersebut (di server Midtrans, bukan di server sekolah).
+3. Setelah pembayaran, **Midtrans mengirim notifikasi server-ke-server** ke
+   `POST /midtrans/notification` -> `MidtransWebhookController::notification()`.
+   URL ini **dikecualikan dari CSRF** (di `bootstrap/app.php`) karena pengirimnya server
+   Midtrans, bukan browser pengguna.
+4. **Verifikasi keaslian:** `MidtransService::verifySignature(...)` mengecek `signature_key`.
+   Kalau tidak cocok -> ditolak (mencegah orang memalsukan "sudah bayar").
+5. `transaction_status` (settlement/pending/deny/expire) dipetakan `mapTransactionStatus()`
+   ke `status_validasi` sistem, lalu baris `pembayaran` di-update **otomatis** + dicatat di
+   `FinancialAuditLog`.
+
+**Kemana datanya:** uang masuk ke rekening sekolah via Midtrans; status "lunas" di database
+di-update **oleh webhook**, bukan diketik manual bendahara.
+
+> **Penjelasan Umum:** Integrasi Snap berbasis token + webhook asinkron. Keamanan bertumpu
+> pada verifikasi signature server-side; status transaksi Midtrans dipetakan ke domain status
+> pembayaran aplikasi secara idempoten.
+>
+> **Penjelasan Sederhana:** Midtrans itu seperti loket bank pihak ketiga. Wali bayar di loket;
+> selesai bayar, loket "menelepon balik" sekolah: "si A sudah lunas". Sebelum percaya, sekolah
+> mengecek dulu ini benar-benar dari loket resmi (cek tanda tangan/signature), baru mencatat
+> lunas. Jadi bendahara tidak perlu memvalidasi manual untuk pembayaran online.
+
+### 9.4 Proteksi hapus tagihan
+`TagihanController::destroyItem()` menolak menghapus tagihan yang **sudah ada pembayaran
+disetujui** ("...tidak dapat dihapus untuk menjaga integritas data transaksi"). Mencegah
+hilangnya jejak keuangan.
+
+### 9.5 Sekretaris (ringkas)
+CRUD konten: kalender akademik, pengumuman, berita, flyer. Semua memakai `findOrFail`
+(aman bila id tak ada) + `$request->validate()` sebelum simpan. Membuat berita/pengumuman
+juga memicu notifikasi ke pihak terkait.
+
+### Kemungkinan Pertanyaan Penguji - SEKRETARIS & BENDAHARA (tertinggi -> terendah)
+1. **"Bagaimana pembayaran online (Midtrans) bekerja end-to-end?"** -> 9.3 (snap token ->
+   bayar di Midtrans -> webhook -> verifikasi signature -> update status otomatis).
+2. **"Bagaimana sistem tahu pembayaran online sudah lunas tanpa bendahara mengecek?"** ->
+   webhook + `mapTransactionStatus` (9.3).
+3. **"Bagaimana mencegah bayar dobel / kelebihan bayar?"** -> saat validasi, pending lain
+   dibatalkan + hitung total (9.2).
+4. **"Bagaimana status tagihan jadi lunas/cicilan?"** -> dihitung dari total pembayaran
+   disetujui (9.2).
+5. **"Bagaimana mencegah tagihan dobel saat generate massal?"** -> cek `exists()` per
+   jenis_tagihan (9.1).
+6. **"Kenapa URL webhook dikecualikan dari CSRF?"** -> pengirimnya server Midtrans, bukan
+   form browser (9.3).
+7. **"Kenapa tagihan yang sudah dibayar tidak boleh dihapus?"** -> integritas jejak keuangan
+   (9.4).
+8. **"Apa itu FinancialAuditLog?"** -> catatan audit tiap perubahan keuangan penting.
+
+---
+
+## Bab 10+ - Peran lain (menyusul)
+
+Urutan: Wali Kelas & Guru (nilai, rapor, LMS) -> Siswa & Orang Tua. Format sama.
 
 *(Dokumen dibangun bertahap.)*
