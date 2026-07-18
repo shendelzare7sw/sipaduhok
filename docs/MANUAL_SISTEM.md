@@ -337,10 +337,154 @@ Controller: `Admin/Akademik/Promotion*`, `Admin/Keuangan/ValidasiAksesController
 
 ---
 
-## Bab 8+ - Peran lain (menyusul)
+## Bab 8 - Peran KETUA PKBM & WAKIL KEPALA SEKOLAH
 
-Urutan berikutnya: Ketua & Waka -> Sekretaris & Bendahara -> Wali Kelas & Guru ->
-Siswa & Orang Tua. Format sama: cara kerja kode + Penjelasan Umum + Penjelasan Sederhana +
-daftar kemungkinan pertanyaan penguji per peran.
+Dua peran ini "atasan akademik". **Ketua** mengawasi lintas-cabang & menyetujui hal penting
+(dispensasi, rapor). **Waka** seperti admin tapi **dibatasi ke satu cabang**. Di bab ini kita
+bedah fitur-fitur rumit yang sering ditanya penguji, dengan gaya "button ini kerjanya gimana".
+
+### 8.1 Button "Eksekusi Kenaikan Kelas" - konsep, logika, kode
+
+**Konsep.** Memindahkan siswa ke kelas di **Tahun Ajaran berikutnya** berdasarkan hasil
+penilaian kelayakan (naik / tinggal / lulus).
+
+**Kode yang meng-handle.** `PromotionService::executeStudentPromotion($siswa, $taId, $tanggal)`
+(untuk satu siswa); `promoteSelectedStudents([...ids])` untuk banyak siswa sekaligus; dan
+command terjadwal `ExecuteScheduledPromotion` kalau dijadwalkan otomatis.
+
+**Logika langkah demi langkah (variabel kunci):**
+1. `$eligibility = $this->checkEligibility($siswa, $taId)` -> menilai keuangan + akademik.
+2. Tentukan `$statusKelulusan`:
+   - Kalau layak **dan** `isFinalYear($siswa)` -> `LULUS` (atau `LULUS_TUNGGAKAN` bila lolos
+     lewat dispensasi).
+   - Kalau layak dan bukan tingkat akhir -> `NAIK_KELAS` (atau `NAIK_KELAS_TUNGGAKAN`).
+   - Kalau tidak layak -> `TIDAK_NAIK_KELAS`.
+3. Tentukan kelas tujuan:
+   - Naik -> `findNextClass()` (cari kelas tingkat berikutnya di TA target) lalu
+     `$siswa->kelas_id = $kelasTujuanId; $siswa->save();`
+   - Tidak naik -> `findSameClass()` (kelas dengan nama sama di TA baru = tinggal kelas).
+   - Kalau kelas tujuan tak ditemukan -> `kelas_id = NULL` -> siswa muncul di daftar "belum
+     berkelas" agar admin merapikan manual.
+4. Hasil dicatat di tabel `status_naik_kelas_siswa` (menyimpan kelas asal, kelas tujuan,
+   status). Ini yang membuat aksi bisa **di-rollback** lewat `rollbackStudent()`.
+
+**Kemana datanya pergi:** kolom `siswa.kelas_id` berubah ke kelas TA baru; riwayat masuk
+`status_naik_kelas_siswa`; notifikasi hasil dikirim ke siswa & orang tua.
+
+> **Penjelasan Umum:** Eksekusi kenaikan adalah orkestrasi Service yang menggabungkan
+> evaluasi kelayakan, penentuan kelas tujuan (naik/tinggal/lulus), mutasi `kelas_id`, dan
+> pencatatan status yang reversibel.
+>
+> **Penjelasan Sederhana:** Tombol ini seperti "naik kelas serentak". Sistem mengecek tiap
+> siswa: layak naik, tinggal, atau lulus; lalu memindahkannya ke kelas tahun depan yang
+> sesuai. Semua dicatat, jadi kalau ada salah, bisa dibatalkan.
+
+### 8.2 Fitur "Dispensasi" - dikirim ke mana & cara kerjanya
+
+**Konsep.** Ada siswa yang **nilainya cukup tapi masih menunggak**. Secara aturan dia belum
+boleh naik/lulus karena keuangan. **Bendahara** mengajukan keringanan ("dispensasi") ke
+**Ketua PKBM**; kalau disetujui, siswa boleh naik/lulus walau ada tunggakan.
+
+**Alur & kode (kirim dari siapa ke siapa):**
+1. **Bendahara mengajukan.** `Bendahara/PromotionValidationController::store()` menjalankan
+   `DB::table('izin_naik_kelas_khusus')->insert([... 'status' => 'MENUNGGU',
+   'diajukan_oleh' => auth()->id(), 'siswa_id', 'tahun_ajaran_id', 'alasan_pengajuan'])`.
+   Pesan sukses: "...diajukan ke Ketua PKBM". -> Jadi datanya "dikirim" dengan membuat baris
+   berstatus **MENUNGGU** di tabel `izin_naik_kelas_khusus`.
+2. **Ketua memutuskan.** `Ketua/PromotionApprovalController::update()` meng-update baris itu:
+   `status` -> `DISETUJUI`/`DITOLAK`, `disetujui_oleh`, `catatan_ketua`, lalu memicu
+   notifikasi keputusan.
+3. **Saat eksekusi kenaikan**, `checkFinancial()` mengecek adakah dispensasi `DISETUJUI` untuk
+   siswa itu -> set `is_dispensasi = true` -> siswa diperlakukan "boleh naik meski nunggak"
+   (statusnya jadi `NAIK_KELAS_TUNGGAKAN` / `LULUS_TUNGGAKAN`).
+
+> **Penjelasan Umum:** Dispensasi adalah workflow persetujuan berbasis status pada tabel
+> `izin_naik_kelas_khusus` (MENUNGGU -> DISETUJUI/DITOLAK), dengan pengaju (bendahara) dan
+> penyetuju (ketua) berbeda, lalu dikonsumsi oleh logika kelayakan keuangan.
+>
+> **Penjelasan Sederhana:** Seperti surat izin keringanan. Kasir (bendahara) mengirim surat ke
+> kepala (ketua). Begitu kepala tanda tangan "setuju", sistem menganggap siswa itu "seolah
+> lunas" khusus untuk urusan naik kelas.
+
+### 8.3 Jadwal "Multi-Class Multi-Jenjang" - kok bisa satu sesi banyak kelas?
+
+**Konsep.** Satu sesi (hari + jam + guru yang sama) dipasang ke **banyak kelas sekaligus**,
+bahkan kelas dari **jenjang berbeda** (mis. SD & SMP) dalam satu aksi.
+
+**Kenapa bisa - kode:** `JadwalPelajaranTrait::storeMultiJenjang()`.
+- Input penting: `kelas_ids` (banyak kelas) dan `mapel_per_jenjang` (**mapel berbeda per
+  jenjang** - karena "Matematika SD" dan "Matematika SMP" adalah **dua record mapel berbeda**).
+- Kelas dikelompokkan: `$kelasGrouped = $kelasList->groupBy('jenjang')`.
+- Tiap grup jenjang divalidasi mapelnya cocok + dicek bentrok jadwalnya (`checkConflicts`).
+- Dalam satu `DB::transaction`: untuk **tiap jenjang** dibuat **satu** `JadwalPelajaran`, lalu
+  `$jadwal->kelas()->attach($groupKelasIds)` menautkan semua kelas grup itu (via tabel
+  jembatan `jadwal_kelas`), dan `syncGuruPengajar()` menautkan guru->kelas->mapel.
+
+**Kemana datanya:** satu baris jadwal per jenjang + banyak baris di `jadwal_kelas` (satu per
+kelas) + baris di `guru_pengajar_kelas`.
+
+> **Penjelasan Umum:** Relasi jadwal<->kelas bersifat many-to-many (pivot `jadwal_kelas`),
+> sehingga satu jadwal menaungi banyak kelas. Karena mapel di-scope per jenjang, input
+> dikelompokkan `groupBy('jenjang')` dan diproses per grup dalam satu transaksi.
+>
+> **Penjelasan Sederhana:** Bayangkan satu jam pelajaran yang "disiarkan" ke beberapa kelas.
+> Karena tiap jenjang punya mapelnya sendiri, sistem memisah per jenjang, tapi kamu cukup
+> sekali klik untuk semuanya.
+
+### 8.4 Button "Ganti Guru" pada Jadwal - kenapa efeknya bisa massal
+
+**Konsep.** Mengganti guru pengampu sebuah jadwal (mis. guru lama cuti, diganti guru lain).
+
+**Kode:** `gantiGuru($request, $jadwalPelajaran)`.
+- Validasi `guru_id_baru` + `alasan`.
+- Cek bentrok jadwal untuk guru baru (`checkConflicts`) - supaya guru tidak dobel jam.
+- Update `$jadwalPelajaran->guru_id`, catat perubahan ke tabel riwayat
+  `jadwal_pelajaran_history` (guru lama -> guru baru + alasan + siapa yang mengubah).
+- Sinkronkan `guru_pengajar_kelas` (hapus penugasan guru lama untuk kombinasi itu, tambah
+  guru baru).
+
+**Kenapa "massal":** karena satu jadwal bisa menaungi **banyak kelas** (Bab 8.3), mengganti
+guru pada satu jadwal otomatis berlaku untuk **semua kelas** yang ditautkan jadwal itu.
+(Waka: aksi ini dijaga agar hanya untuk jadwal cabangnya - lihat Bab keamanan.)
+
+> **Penjelasan Umum:** Perubahan guru bersifat idempotent terhadap pivot: `guru_id` jadwal
+> di-set, histori dicatat untuk audit, dan `guru_pengajar_kelas` di-resinkron; efeknya
+> menyebar ke semua kelas pivot jadwal tsb.
+>
+> **Penjelasan Sederhana:** Kamu ganti nama guru di satu slot jadwal. Kalau slot itu dipakai 3
+> kelas, ketiganya langsung ikut berganti guru. Perubahan juga dicatat (kapan, oleh siapa,
+> alasannya) supaya ada jejak.
+
+### 8.5 Ringkas menu lain Ketua & Waka
+- **Ketua - Validasi Rapor** (`ValidasiRaporController`): Ketua menyetujui rapor yang sudah
+  dikirim wali kelas; membatalkan validasi Ketua otomatis mereset validasi bendahara
+  (cascade), supaya status tetap konsisten.
+- **Waka - semua data akademik cabangnya**: identik menu Admin, tetapi **setiap query
+  disaring `where('cabang_id', $userCabangId)`** dan setiap akses ke satu data diperiksa
+  helper `ensure...InUserCabang()` -> `abort(403)` kalau data milik cabang lain.
+
+> **Penjelasan Sederhana (scoping Waka):** Waka itu "kepala cabang". Dia hanya boleh melihat &
+> mengubah data cabangnya sendiri; kalau mencoba membuka data cabang lain, sistem menolak.
+
+### Kemungkinan Pertanyaan Penguji - KETUA & WAKA (tertinggi -> terendah)
+1. **"Jelaskan proses kenaikan kelas dari awal sampai siswa pindah kelas."** -> 8.1
+   (checkEligibility -> status -> findNextClass -> update kelas_id -> catat status).
+2. **"Apa itu dispensasi, siapa yang mengajukan dan siapa yang menyetujui?"** -> 8.2
+   (Bendahara ajukan -> Ketua setujui -> dipakai checkFinancial).
+3. **"Bagaimana satu jadwal bisa untuk banyak kelas / lintas jenjang?"** -> 8.3
+   (relasi many-to-many `jadwal_kelas` + groupBy jenjang).
+4. **"Bagaimana ganti guru bekerja, dan kenapa bisa kena banyak kelas?"** -> 8.4.
+5. **"Bagaimana membedakan wewenang Waka dengan Admin?"** -> Waka dibatasi cabang via
+   `where('cabang_id')` + `ensure...InUserCabang()` (8.5).
+6. **"Kalau kenaikan salah, bisa dibatalkan?"** -> ya, `rollbackStudent()` memakai catatan
+   `status_naik_kelas_siswa` (8.1).
+7. **"Kenapa perubahan guru perlu dicatat?"** -> audit di `jadwal_pelajaran_history` (8.4).
+
+---
+
+## Bab 9+ - Peran lain (menyusul)
+
+Urutan: Sekretaris & Bendahara (jalur uang/Midtrans) -> Wali Kelas & Guru (nilai, rapor,
+LMS) -> Siswa & Orang Tua. Format sama.
 
 *(Dokumen dibangun bertahap.)*
