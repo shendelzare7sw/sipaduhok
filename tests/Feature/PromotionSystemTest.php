@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Uji kelayakan kenaikan kelas (PromotionService::checkEligibility) — inti fitur kenaikan.
+ * Uji kelayakan kenaikan kelas (PromotionService::checkEligibility) - inti fitur kenaikan.
  * Ditulis ulang ke pola proyek: MySQL nyata + data seed + rollback transaksi (bukan
  * sqlite/factory). Membuat TA non-aktif tersendiri lalu meneruskan id-nya eksplisit,
  * supaya tidak mengganggu TA aktif seed.
