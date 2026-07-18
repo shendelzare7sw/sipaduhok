@@ -318,6 +318,11 @@ class JadwalPelajaranController extends Controller
     {
         $jadwalPelajaran->load(['tahunAjaran', 'kelas', 'mataPelajaran', 'guru']);
 
+        // Authorization: waka hanya boleh akses jadwal milik cabangnya (konsisten dgn destroy)
+        if (!$jadwalPelajaran->kelas->contains('cabang_id', auth()->user()->cabang_id)) {
+            abort(403, 'Anda tidak berhak mengakses jadwal ini.');
+        }
+
         $tahunAjarans = TahunAjaran::orderBy('tanggal_mulai', 'desc')->get();
 
         $kelasList = Kelas::where('tahun_ajaran_id', $jadwalPelajaran->tahun_ajaran_id)
@@ -359,6 +364,11 @@ class JadwalPelajaranController extends Controller
      */
     public function update(Request $request, JadwalPelajaran $jadwalPelajaran)
     {
+        // Authorization: waka hanya boleh ubah jadwal milik cabangnya (konsisten dgn destroy)
+        if (!$jadwalPelajaran->kelas->contains('cabang_id', auth()->user()->cabang_id)) {
+            abort(403, 'Anda tidak berhak mengubah jadwal ini.');
+        }
+
         // Multi-jenjang mode: delegate to trait
         if ($request->input('is_multi_jenjang')) {
             return $this->updateMultiJenjang($request, $jadwalPelajaran, 'waka');
@@ -462,6 +472,11 @@ class JadwalPelajaranController extends Controller
      */
     public function gantiGuru(Request $request, JadwalPelajaran $jadwalPelajaran)
     {
+        // Authorization: waka hanya boleh ubah jadwal milik cabangnya (konsisten dgn destroy)
+        if (!$jadwalPelajaran->kelas->contains('cabang_id', auth()->user()->cabang_id)) {
+            abort(403, 'Anda tidak berhak mengubah jadwal ini.');
+        }
+
         $validated = $request->validate([
             'guru_id_baru' => 'nullable|exists:tenaga_pendidik,id',
             'alasan' => 'nullable|string',

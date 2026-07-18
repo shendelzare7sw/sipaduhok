@@ -150,5 +150,22 @@ Audit khusus (relasi antar-tabel rawan skip/broken data):
 
 Suite setelah perbaikan: **40 passed, 240 assertions, 0 gagal.**
 
-### 7.3–7.6 Modul lain — DIJADWALKAN
-Ketua/Waka, Sekretaris/Bendahara (jalur uang), Wali Kelas/Guru (LMS), Siswa/Orang Tua — akan diaudit pada sesi berikutnya dengan kedalaman sama. (Export jadwal Waka sudah ikut diperbaiki di §7.1.)
+### 7.3 Modul KETUA PKBM + WAKIL KEPALA SEKOLAH — SELESAI ✅
+
+**Ketua PKBM** (oversight lintas-cabang, 3 controller):
+- `KetuaController` monitoring/list — read-only, bersih.
+- `PromotionApprovalController` (approve/reject dispensasi kenaikan) — validasi benar, notifikasi keputusan wired. Catatan minor: `update()` tunggal tak memfilter `status='MENUNGGU'` seperti `bulkUpdate()` — namun index hanya menampilkan MENUNGGU & re-keputusan Ketua bisa disengaja, jadi bukan bug.
+- `ValidasiRaporController` (validasi/batal/dispensasi rapor) — `findOrFail` null-safe, prasyarat "wali sudah kirim" dicek, `batalkanRapor` cascade-reset validasi bendahara dengan benar.
+
+**Wakil Kepala Sekolah** (mirror Admin, **cabang-scoped**, 11 controller):
+- Scoping cabang **konsisten** di list/index (`where('cabang_id', $userCabangId)`).
+- Guard IDOR pada model binding **konsisten** di `ManajemenSiswa` (8/8 method), `Kelas` (8/8), `WaliKelas`, `GuruPengajar` (`ensure*InUserCabang` → abort 403). `MataPelajaran`/`TahunAjaran` global (tak perlu cabang guard).
+
+**Bug ditemukan & DIPERBAIKI (IDOR):**
+- **Waka JadwalPelajaran `edit`/`update`/`gantiGuru`** tidak memverifikasi jadwal (model binding) milik cabang Waka — padahal `destroy()` sudah melakukannya. Akibatnya Waka bisa **melihat/mengubah/ganti-guru jadwal cabang lain**. Ditutup dengan guard konsisten `$jadwal->kelas->contains('cabang_id', auth()->user()->cabang_id)` → abort 403. **Test** `WakaJadwalIdorTest`.
+- Export jadwal Waka null-deref sudah diperbaiki di §7.1.
+
+Suite setelah perbaikan: **41 passed, 244 assertions, 0 gagal.**
+
+### 7.4–7.6 Modul lain — DIJADWALKAN
+Sekretaris/Bendahara (jalur uang), Wali Kelas/Guru (LMS), Siswa/Orang Tua — sesi berikutnya, kedalaman sama.
