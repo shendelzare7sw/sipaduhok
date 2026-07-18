@@ -48,8 +48,12 @@ class NilaiSiswaImport implements
             return null;
         }
 
-        $siswa = Siswa::where('nis', $nisNisn)
-            ->orWhere('nisn', $nisNisn)
+        // Kelompokkan OR agar filter kelas_id berlaku ke KEDUA cabang (nis & nisn).
+        // Tanpa grouping: "nis=X OR (nisn=X AND kelas_id=Y)" -> scope kelas bocor,
+        // nilai bisa tertulis ke siswa kelas lain (nis/nisn unik global).
+        $siswa = Siswa::where(function ($q) use ($nisNisn) {
+                $q->where('nis', $nisNisn)->orWhere('nisn', $nisNisn);
+            })
             ->where('kelas_id', $this->kelasId)
             ->first();
 

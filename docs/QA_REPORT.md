@@ -180,8 +180,45 @@ Suite setelah perbaikan: **41 passed, 244 assertions, 0 gagal.**
 
 Hasil: **0 bug** — modul keuangan terekayasa dengan baik.
 
-### 7.5–7.6 Modul lain — DIJADWALKAN
-Wali Kelas/Guru (LMS), Siswa/Orang Tua — sesi berikutnya, kedalaman sama.
+### 7.5 Modul WALI KELAS + GURU PENGAJAR (LMS) — SELESAI
+
+**Import (prioritas) — 3 importer nilai/rapor tambahan diaudit** (total 11 importer):
+- **`Guru\NilaiSiswaImport`** — **BUG scoping DIPERBAIKI**: lookup siswa
+  `where('nis',X)->orWhere('nisn',X)->where('kelas_id',Y)` menghasilkan SQL
+  `nis=X OR (nisn=X AND kelas_id=Y)` — filter kelas bocor pada cabang `nis`.
+  Karena nis/nisn unik global, guru bisa **menulis nilai ke siswa kelas lain**.
+  Diperbaiki dgn mengelompokkan OR → `(nis=X OR nisn=X) AND kelas_id=Y`. **Test**
+  `NilaiImportScopeTest` (2 skenario).
+- **`WaliKelas\NilaiPerSiswaImport`** — inkonsistensi desimal (tak menerima koma
+  seperti importer nilai lain) → disamakan (terima koma, simpan titik).
+- **`WaliKelas\RaporImport`** — parser ter-scope ke rapor spesifik + validasi
+  jenis/semester match sebelum tulis. Aman.
+
+**Guru (LMS)** — leaf content (materi/tugas/ujian/forum/meeting):
+- `destroy` materi/tugas/ujian **IDOR-safe**: `verifyAccess(guru, kelas, mapel)` +
+  query di-double-scope `where('guru_id', $tp->id)->where('kelas_id', $kelasId)`.
+- Interaksi guru↔siswa (gating, monitoring ujian, autosave, review) sudah diaudit di
+  sesi awal (IDOR-safe, `Wali*IdorTest`).
+- 0 mass-assignment, 0 null-deref.
+
+Suite setelah perbaikan: **43 passed, 252 assertions, 0 gagal.**
+
+### 7.6 Modul SISWA + ORANG TUA — DIJADWALKAN
+Sesi berikutnya, kedalaman sama.
+
+### 8.6 Skenario Blackbox — Import Nilai antar-kelas (Bagian 7.5)
+**Login: Guru → kelas yang diampu → Nilai → Import Excel.**
+- Di template nilai, isi satu baris dengan **NIS milik siswa dari KELAS LAIN** (bukan
+  kelas yang sedang diimpor), beri nilai. Upload.
+  - **Harapan:** baris itu **ditolak** dengan pesan *"Siswa dengan NIS/NISN … tidak
+    ditemukan di kelas ini"*, dan **tidak** ada nilai yang tertulis untuk siswa kelas
+    lain. (Dulu: nilai bisa tertulis ke siswa kelas lain.)
+- Isi baris dengan NIS siswa **di kelas yang benar**, nilai pakai koma (mis. `85,5`).
+  - **Harapan:** nilai tersimpan (85.5).
+
+### 8.7 Skenario Blackbox — IDOR konten Guru (Bagian 7.5)
+**Login: Guru A.** Coba hapus/akses materi/tugas/ujian milik **kelas/guru lain** via
+URL langsung → **403 / ditolak**.
 
 ---
 

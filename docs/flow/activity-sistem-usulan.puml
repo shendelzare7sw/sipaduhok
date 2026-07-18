@@ -4,91 +4,47 @@ skinparam ActivityBackgroundColor #FEFECE
 skinparam ActivityBorderColor #A80036
 skinparam ArrowColor #A80036
 
-|Admin / Sekretaris|
+|Orang Tua / Wali Siswa|
 start
-:Login ke Sistem SIPADUHOK;
+:Melakukan Pendaftaran Digital\nvia Portal SIPADUHOK;
 
 |Sistem|
-:Memvalidasi Kredensial (Auth);
-:Menampilkan Dashboard\nSesuai Role Pengguna;
-
-|Admin / Sekretaris|
-:Menginput Data Siswa Baru\nMelalui Form Digital / Import Excel;
-
-|Sistem|
-:Menyimpan Data Siswa ke Database;
-:Otomatis Generate Akun Login\nuntuk Siswa dan Wali Siswa;
-:Menempatkan Siswa ke Kelas\nSesuai Konfigurasi Tahun Ajaran;
-
-|Bendahara|
-:Membuat Tagihan Secara Massal\n(Generate SPP Otomatis per Kelas);
-
-|Sistem|
-:Otomatis Menyimpan Tagihan\nke Seluruh Siswa yang Terdaftar;
-:Mengaktifkan Portal Pembayaran\n(Manual & Online via Midtrans);
-
-|Siswa / Wali Siswa|
-:Login ke Portal SIPADUHOK;
-:Melihat Rincian Tagihan\ndan Melakukan Pembayaran Online;
-
-|Sistem|
-:Memproses Pembayaran (Midtrans Webhook)\natau Menerima Bukti Transfer Manual;
-:Otomatis Memperbarui Status Tagihan\n(Belum Bayar → Cicilan → Lunas);
-:Mengirim Notifikasi Konfirmasi\nke Wali Siswa;
+:Menyimpan Data Terpusat &\nOtomatis Generate Akun Pengguna;
 
 |Guru Pengajar|
-:Login ke Dashboard LMS;
-:Mengunggah Materi Pembelajaran\n(PDF, Video, Dokumen);
-:Membuat Tugas, Ujian, dan Latihan\nSecara Digital (Termasuk AI Generate Soal);
-:Menjadwalkan Kelas Virtual\n(Zoom / Google Meet);
+:Mengelola Materi, Tugas, & Ujian\nMelalui Dashboard LMS;
 
 |Sistem|
-:Menyimpan Konten LMS ke Database;
-:Mengirim Notifikasi "Tugas Baru"\nkepada Siswa Secara Otomatis;
+:Menyimpan Konten LMS &\nMengirim Notifikasi ke Siswa;
 
-|Siswa / Wali Siswa|
-:Mengakses LMS untuk Belajar;
-:Mengunduh Materi, Mengerjakan Tugas,\nMengikuti Ujian Online, dan Kelas Virtual;
-
-|Sistem|
-:Merekam Jawaban, Menghitung Nilai\nSecara Otomatis (Auto-Grading);
-:Memperbarui Progress Belajar Siswa;
+|Siswa|
+:Mengakses LMS untuk Belajar\ndan Mengerjakan Evaluasi Akademik;
 
 |Guru Pengajar|
-:Mengoreksi Tugas/Ujian Essay\nMelalui Dashboard (Termasuk AI Grading);
-:Menginput Nilai Akhir Akademik\n(Individual, Massal, atau Import Excel);
+:Menginput Nilai & Mengoreksi\nTugas (Didukung AI Grading);
 
 |Sistem|
-:Menyimpan Nilai & Menghitung\nRata-rata dan Nilai Akhir Otomatis;
+:Menghitung Rata-rata\ndan Nilai Akhir Otomatis;
+
+|Staff Keuangan|
+:Membuat Tagihan Massal Otomatis;
+
+|Orang Tua / Wali Siswa|
+:Membayar Tagihan Secara Online\n(via Midtrans Payment Gateway);
+
+|Sistem|
+:Memproses Callback Pembayaran &\nMemperbarui Status Real-Time;
 
 |Wali Kelas|
-:Meng-generate Rapor Digital\nSecara Otomatis (Satu Klik);
-:Memeriksa Kelengkapan Rapor\ndan Mengirim ke Rantai Validasi;
+:Generate Rapor Digital 1-Klik\n& Mengajukan Validasi Rapor;
 
 |Sistem|
-:Mengeksekusi Rantai Validasi 3 Tingkat;
+:Memvalidasi Syarat Keuangan &\nAkademik Secara Otomatis;
+:Menerbitkan Rapor Digital &\nMemproses Kenaikan Kelas;
 
-fork
-    :Validasi Tingkat 1: Wali Kelas\n(Kelengkapan Nilai & Catatan);
-fork again
-    :Validasi Tingkat 2: Bendahara\n(Kelunasan Keuangan SPP);
-fork again
-    :Validasi Tingkat 3: Ketua PKBM\n(Persetujuan Akhir & Stempel Digital);
-end fork
+|Orang Tua / Wali Siswa|
+:Mengunduh Rapor Digital & Melihat\nStatus Kenaikan via Portal;
 
-:Rapor Siap Diakses oleh Wali Siswa\nMelalui Portal (Unduh PDF Otomatis);
-:Mengirim Notifikasi ke Wali Siswa\n(Link Unduh Rapor Ber-Token 24 Jam);
-
-|Siswa / Wali Siswa|
-:Mengakses Portal untuk Melihat\nNilai, Presensi, dan Mengunduh Rapor;
-
-|Admin / Sekretaris|
-:Mengeksekusi Kenaikan Kelas\nMelalui Fitur Promosi Otomatis;
-
-|Sistem|
-:Mengevaluasi Syarat Akademik & Keuangan\nSecara Otomatis (Promotion Service);
-:Memindahkan Siswa ke Kelas Baru\ndi Tahun Ajaran Berikutnya;
-:Mencatat Riwayat Kenaikan Kelas;
-:Selesai (Siklus Berulang Setiap Semester);
+:Selesai (Siklus Berulang);
 stop
 @enduml

@@ -140,13 +140,16 @@ class NilaiPerSiswaImport implements
         if (!isset($row[$key])) return false;
         $v = $row[$key];
         if ($v === null || $v === '' || $v === '-') return false;
-        return is_numeric($v);
+        // ATURAN DESIMAL: terima koma, samakan ke titik sebelum cek numeric
+        // (konsisten dgn Guru\NilaiSiswaImport & input nilai manual).
+        return is_numeric(str_replace(',', '.', (string) $v));
     }
 
     private function parseNilai($value): ?float
     {
         if ($value === null || $value === '' || $value === '-') return null;
-        $parsed = floatval($value);
+        // ATURAN DESIMAL: terima koma, simpan sebagai titik.
+        $parsed = floatval(str_replace(',', '.', (string) $value));
         return ($parsed >= 0 && $parsed <= 100) ? $parsed : null;
     }
 

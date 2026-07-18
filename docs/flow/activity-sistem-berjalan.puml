@@ -4,63 +4,49 @@ skinparam ActivityBackgroundColor #FEFECE
 skinparam ActivityBorderColor #A80036
 skinparam ArrowColor #A80036
 
-|Siswa / Wali Siswa|
+|Calon Siswa / Wali|
 start
-:Siswa Datang ke Sekolah (PKBM)\nuntuk Mendaftar / Konsultasi;
-:Mengisi Formulir Pendaftaran\nSecara Manual (Kertas);
+:Mengisi Formulir Pendaftaran (Kertas);
 
 |Admin / Sekretaris|
-:Menerima Formulir Pendaftaran;
-:Memasukkan Data Siswa\nke Buku Induk / Spreadsheet Manual;
-:Menentukan Kelas & Jadwal Pelajaran\nSecara Manual (Tabel Kertas / Excel);
-
-|Bendahara|
-:Membuat Nota Tagihan Pembayaran\nSecara Manual (Kwitansi Tulis Tangan);
-
-|Siswa / Wali Siswa|
-:Wali Siswa Datang ke Sekolah\nuntuk Melakukan Pembayaran Tunai;
-
-|Bendahara|
-:Menerima Pembayaran Tunai\ndan Menulis Kwitansi Manual;
-:Mencatat Pembayaran\nke Buku Kas / Spreadsheet;
-:Mengecek Kelunasan SPP Satu per Satu\n(Manual Cross-Check dengan Buku Tagihan);
-
-if (Siswa Lunas?) then (Belum Lunas)
-    :Menginformasikan Tunggakan\nkepada Wali Siswa via Telepon/Surat;
-    |Siswa / Wali Siswa|
-    :Wali Siswa Harus Datang Lagi\nuntuk Melunasi Tunggakan;
-else (Lunas)
-endif
+:Mencatat Data ke Buku Induk / Excel;
 
 |Guru Pengajar|
-:Melaksanakan Kegiatan Belajar Mengajar\nSecara Tatap Muka (Offline);
-:Mencatat Presensi Siswa\ndi Buku Absensi Kelas (Kertas);
-:Memberikan Materi Ajar\ndalam Bentuk Fotokopi / Buku;
-:Memberikan Tugas\ndan Mengumpulkan Jawaban Fisik (Kertas);
-:Mengoreksi Tugas & Ujian\nSecara Manual Satu per Satu;
-:Merekap Nilai Siswa\nke Buku Nilai / Spreadsheet Excel;
+:Mencatat Presensi Manual & Mengirim
+Tugas/Materi via Grup WhatsApp;
+
+|Calon Siswa / Wali|
+:Siswa Mengirim Jawaban Tugas\nvia Chat WhatsApp;
+
+|Guru Pengajar|
+:Mengoreksi Manual & Merekap\nNilai ke Buku / Excel Pribadi;
+
+note right
+  Arsip tidak terpusat,
+  rawan hilang & sulit dilacak.
+end note
+
+|Staff Keuangan|
+:Menginformasikan Tagihan SPP\nvia WA / Lisan;
+
+|Calon Siswa / Wali|
+:Transfer Bank & Kirim Foto\nBukti Struk via WhatsApp;
+
+|Staff Keuangan|
+:Cek Mutasi Rekening Manual &\nMencatat Pelunasan di Buku Kas;
 
 |Wali Kelas|
-:Mengumpulkan Nilai dari Semua Guru\nSecara Manual (Mengumpulkan Buku/Kertas);
-:Menghitung Rata-Rata Nilai Siswa\nMenggunakan Kalkulator / Excel;
-:Menulis Rapor Siswa\nSecara Manual (Cetak / Tulis Tangan);
+:Mengumpulkan Nilai, Menghitung Manual\ndan Menyusun Rapor Fisik;
 
-|Bendahara|
-:Mengecek Ulang Kelunasan SPP\nSebelum Rapor Dibagikan\n(Cross-Check Manual dengan Buku Kas);
-
-|Admin / Sekretaris|
-:Mencetak dan Mendistribusikan Rapor\nSecara Fisik ke Wali Kelas;
-
-|Wali Kelas|
-:Membagikan Rapor kepada Wali Siswa\ndalam Pertemuan Tatap Muka;
-
-|Siswa / Wali Siswa|
-:Wali Siswa Datang ke Sekolah\nuntuk Mengambil Rapor Fisik;
-:Melihat Hasil Belajar Anak\ndari Rapor Kertas;
+note right
+  Risiko human error tinggi
+  dan memakan waktu lama.
+end note
 
 |Admin / Sekretaris|
-:Menentukan Kenaikan Kelas\nBerdasarkan Rapat Manual;
-:Memperbarui Data Kelas Siswa\ndi Buku Induk / Spreadsheet;
-:Selesai (Siklus Berulang Setiap Semester);
+:Mendistribusikan Rapor Fisik;
+:Mengadakan Rapat Manual\nuntuk Kenaikan Kelas;
+
+:Selesai (Siklus Berulang);
 stop
 @enduml
