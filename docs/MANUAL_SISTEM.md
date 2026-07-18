@@ -14,7 +14,12 @@
 - Bab 4. Model & Relasi Data (Eloquent) - lemari arsip yang saling terhubung
 - Bab 5. Tampilan (Blade) & Aset (Vite)
 - Bab 6. Konsep Sentral: Tahun Ajaran
-- Bab 7+ (menyusul): penjelasan per-peran, per-menu, per-tombol
+- Bab 7. Peran ADMIN (semua menu)
+- Bab 8. Peran KETUA & WAKA (kenaikan, dispensasi, jadwal multi-jenjang, ganti guru)
+- Bab 9. Peran SEKRETARIS & BENDAHARA (jalur uang, Midtrans)
+- Bab 10. Peran WALI KELAS & GURU (nilai, mesin ujian online, rapor)
+- Bab 11. Peran SISWA & ORANG TUA (akses terkunci ke milik sendiri)
+- Bab 12. Gambaran Besar: Alur Antar-Peran (nilai, pembayaran, kenaikan)
 
 ---
 
@@ -696,8 +701,108 @@ tsb) -> kalau tidak, `abort(403)`. Query pun di-scope `where('guru_id', $tp->id)
 
 ---
 
-## Bab 11 - Peran lain (menyusul)
+## Bab 11 - Peran SISWA & ORANG TUA (Wali Siswa)
 
-Terakhir: Siswa & Orang Tua (Wali Siswa). Format sama.
+Dua peran "pengguna akhir". **Siswa** belajar & ujian di LMS, melihat nilai/rapor/tagihan.
+**Orang Tua** memantau anak & membayar. Ciri khas kedua modul: **semua akses dikunci ke
+milik sendiri** (tidak bisa mengintip data siswa/keluarga lain).
 
-*(Dokumen dibangun bertahap.)*
+### 11.1 Siswa - bagaimana sistem tahu "ini datamu"
+
+**Konsep.** Siswa login, lalu tiap halaman (rapor, tagihan, ujian) otomatis menampilkan
+**data miliknya sendiri**.
+
+**Kode (pola kunci):** di awal tiap method,
+`$siswa = Siswa::where('user_id', auth()->id())->first();` -> mengambil profil siswa dari
+akun yang login. Lalu tiap query resource **disaring ke siswa itu**, mis. rapor:
+`Rapor::where('id', $raporId)->where('siswa_id', $siswa->id)->firstOrFail()`.
+
+**Kenapa penting:** meski URL memuat id (mis. `/siswa/sia/rapor/5/download`), tambahan
+`where('siswa_id', $siswa->id)` membuat siswa **tidak bisa** membuka rapor id milik orang
+lain - hasilnya "tidak ditemukan".
+
+> **Penjelasan Umum:** Otorisasi horizontal (anti-IDOR) ditegakkan dengan menurunkan pemilik
+> dari `auth()->id()` lalu meng-constrain setiap query dengan `siswa_id`, bukan mempercayai id
+> di URL.
+>
+> **Penjelasan Sederhana:** Walau seseorang mengetik nomor rapor orang lain di alamat, sistem
+> tetap hanya mau menunjukkan rapor miliknya sendiri. Nomor di URL saja tidak cukup.
+
+Menu Siswa: **LMS** (kerjakan tugas/ujian, baca materi, forum - lihat mesin ujian Bab 10.2)
+dan **SIA** (rapor, presensi, tagihan/bukti bayar). Semua ter-scope seperti di atas.
+
+### 11.2 Orang Tua - "hanya anak saya" via tabel jembatan
+
+**Konsep.** Satu wali bisa punya beberapa anak; satu anak bisa punya beberapa wali. Wali
+hanya boleh melihat/membayar **anak yang terhubung** dengannya.
+
+**Kode (pola kunci):** hubungan wali<->anak disimpan di tabel jembatan `student_parents`,
+diakses lewat relasi `$user->children()`. Contoh: buka tagihan anak ->
+`$siswa = $user->children()->find($siswaId)` (kalau bukan anaknya -> null -> ditolak). Untuk
+aksi id-lain (bayar, rapor, invoice, izin) ada penjaga:
+`$user->children()->where('siswa.id', $resource->siswa_id)->exists()` -> kalau false,
+`abort(403)`.
+
+> **Penjelasan Umum:** Kepemilikan diverifikasi via relasi many-to-many `student_parents`;
+> setiap endpoint id-based memeriksa keanggotaan anak sebelum mengakses/memutasi data.
+>
+> **Penjelasan Sederhana:** Sistem punya "daftar keluarga". Wali hanya bisa mengurus anak yang
+> ada di daftarnya. Kalau mencoba membuka data anak keluarga lain, langsung ditolak.
+
+### 11.3 Button "Ajukan Izin" (ketidakhadiran)
+Wali mengajukan izin/sakit untuk anaknya (`ajukanIzin`/`storeIzin`) -> membuat/menandai baris
+`presensi` sebagai izin/sakit dengan alasan. Ini yang membuat rekap kehadiran anak akurat dan
+kelak ikut dipertimbangkan saat penilaian kenaikan kelas.
+
+> **Penjelasan Sederhana:** Kalau anak tidak masuk karena sakit, wali lapor lewat aplikasi;
+> guru/wali kelas melihat keterangannya, jadi tidak dihitung "alpha".
+
+### 11.4 Pembayaran (ringkas)
+Detail sudah di Bab 9. Untuk wali: pilih tagihan anak -> bayar tunai (dicatat bendahara),
+transfer (upload bukti, divalidasi), atau online (Midtrans, status update via webhook).
+`paid_by_parent_id` mencatat wali mana yang membayar.
+
+### Kemungkinan Pertanyaan Penguji - SISWA & ORANG TUA (tertinggi -> terendah)
+1. **"Bagaimana memastikan siswa tidak bisa melihat nilai/rapor siswa lain?"** -> 11.1
+   (scope `where('siswa_id', $siswa->id)`, id URL tidak dipercaya).
+2. **"Bagaimana wali hanya bisa mengurus anaknya sendiri?"** -> 11.2 (relasi `children()` via
+   `student_parents` + cek kepemilikan tiap aksi).
+3. **"Kalau URL diubah-ubah manual, apakah bisa bocor?"** -> tidak; ada guard IDOR di tiap
+   endpoint (11.1-11.2).
+4. **"Bagaimana pengajuan izin memengaruhi kehadiran?"** -> 11.3.
+5. **"Bagaimana satu anak bisa punya dua wali (mis. ayah & ibu)?"** -> tabel jembatan
+   many-to-many `student_parents` (11.2).
+
+---
+
+## Bab 12 - Gambaran Besar: Alur Antar-Peran (Data Berpindah Tangan)
+
+Kekuatan sistem ini ada di **kolaborasi antar-peran**. Tiga "perjalanan data" penting yang
+enak dipakai menjawab pertanyaan "bagaimana modul saling terhubung":
+
+**A. Perjalanan sebuah NILAI -> RAPOR.**
+Guru input nilai (`nilai`) -> Wali kelas mengompilasi jadi rapor (`rapor` + `rapor_nilai`) ->
+Bendahara validasi (cek keuangan) -> Ketua validasi -> Siswa/Orang Tua bisa lihat & download.
+> Satu angka dari guru menempuh beberapa meja persetujuan sebelum sampai ke wali murid.
+
+**B. Perjalanan sebuah PEMBAYARAN.**
+Bendahara/Admin buat tagihan (`tagihan`) -> Wali bayar (tunai/transfer/Midtrans) ->
+divalidasi (manual oleh bendahara, atau otomatis via webhook Midtrans) -> status tagihan jadi
+`cicilan`/`sudah_bayar` -> memengaruhi kelayakan naik kelas.
+> Uang & statusnya mengalir dari wali, lewat gateway/bendahara, sampai memengaruhi akademik.
+
+**C. Perjalanan KENAIKAN KELAS.**
+Guru & sistem menghitung kelayakan (nilai + keuangan) -> siswa nunggak bisa lewat jalur
+dispensasi (Bendahara ajukan -> Ketua setujui) -> Admin/Ketua eksekusi kenaikan
+(`executeStudentPromotion`) -> siswa pindah ke kelas TA baru -> tercatat & bisa di-rollback.
+> Keputusan naik/tinggal/lulus adalah hasil gotong-royong beberapa peran, diputuskan sistem.
+
+### Penutup
+Kalau menjelaskan sistem ini saat sidang, ingat **pola tunggal** dari Bab 2: setiap fitur =
+Route -> Middleware -> Controller -> Model/Database -> View. Yang membedakan hanyalah "logika
+bisnis" di Controller/Service (kenaikan, pembayaran, ujian). Pahami satu contoh mendalam
+(mis. kenaikan kelas atau pembayaran Midtrans), lalu tunjukkan bahwa fitur lain mengikuti pola
+yang sama - itu cara termudah meyakinkan penguji bahwa kamu paham keseluruhan sistem.
+
+*Manual ini melengkapi `docs/QA_REPORT.md` (audit keamanan/bug) - satu menjelaskan CARA KERJA,
+satu menjelaskan BUKTI KUALITAS.*
