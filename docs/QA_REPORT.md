@@ -15,7 +15,8 @@
 Sistem lulus seluruh pemeriksaan otomatis QA: **tidak ditemukan syntax error, route
 rusak, template Blade rusak, kegagalan build frontend, maupun test yang gagal.**
 Semua temuan keamanan/integritas yang muncul selama audit **sudah diperbaiki dan
-diverifikasi** (lihat Bagian 3). Suite pengujian otomatis **39 test, 231 assertion, 0 gagal.**
+diverifikasi** (lihat Bagian 3 & audit per-modul Bagian 7-9). Suite pengujian otomatis
+**43 test, 252 assertion, 0 gagal.** Audit menyeluruh 9 peran + fitur import: **SELESAI** (Bagian 9).
 
 Catatan kejujuran metodologis: QA otomatis membuktikan tidak adanya **kelas kesalahan
 tertentu** (sintaks, routing, build, regresi yang tercakup test). Ia **tidak** dapat
@@ -118,9 +119,9 @@ branch `add-cloudflare`.*
 
 ---
 
-## 7. Audit Mendalam Per-Modul (berlangsung)
+## 7. Audit Mendalam Per-Modul (SELESAI — 9/9 peran)
 
-Audit lanjutan modul-per-modul (9 peran). Status per sesi:
+Audit modul-per-modul seluruh 9 peran. Status:
 
 ### 7.1 Modul ADMIN — SELESAI ✅
 Diperiksa ~30 controller (`Admin/` + `Akademik/Keuangan/LandingPage`). Hasil:
@@ -203,8 +204,57 @@ Hasil: **0 bug** — modul keuangan terekayasa dengan baik.
 
 Suite setelah perbaikan: **43 passed, 252 assertions, 0 gagal.**
 
-### 7.6 Modul SISWA + ORANG TUA — DIJADWALKAN
-Sesi berikutnya, kedalaman sama.
+### 7.6 Modul SISWA + ORANG TUA (Wali Siswa) — SELESAI (bersih, tanpa bug)
+
+**Siswa** (11 controller, LMS + SIA):
+- Resolusi identitas: `Siswa::where('user_id', auth()->id())` — selalu dari akun login.
+- **IDOR-safe menyeluruh**: setiap akses resource di-scope `where('siswa_id', $siswa->id)`.
+  Contoh: `SiaRaporController` (rapor pribadi) → `Rapor::where('id',$raporId)->where('siswa_id',$siswa->id)`
+  + gate `hasFullRaporAccess`; `SiaPembayaranController::cetakBukti` → scoped siswa.
+- LMS ujian/materi/tugas/forum (gating, monitoring, autosave, review) sudah diaudit di
+  sesi awal — konsisten IDOR-safe.
+- 0 mass-assignment, 0 null-deref, tanpa fitur import.
+
+**Orang Tua / Wali Siswa** (1 controller):
+- Semua data anak diambil via relasi `$user->children()` (pivot `student_parents`) →
+  hanya anak yang terhubung.
+- **Setiap method id-based ter-guard IDOR**: `detailRapor`/`continuePayment`/`snapPayment`/
+  `cetakInvoice`/`editIzin` memeriksa `$user->children()->where('siswa.id', …)->exists()`
+  → abort 403 / redirect bila bukan anak wali. `prosesBayar`/`processBulkPay` menambah
+  guard eksplisit "tagihan harus milik anak ini".
+
+Hasil: **0 bug** — proteksi IDOR menyeluruh & konsisten.
+
+### 8.8 Skenario Blackbox — IDOR Siswa & Wali Siswa (Bagian 7.6)
+- **Login: Siswa A.** Buka URL rapor/bukti-bayar dengan id milik **Siswa B**
+  (mis. `/siswa/sia/rapor/{raporId_B}/download`) → **ditolak** (tidak menemukan/redirect).
+- **Login: Wali Siswa.** Buka URL bayar/rapor/invoice dengan id anak keluarga lain
+  (mis. `/wali-siswa/pembayaran/snap/{pembayaranId_lain}`) → **403**.
+
+---
+
+## 9. Kesimpulan Audit Menyeluruh Per-Modul (9 peran) — SELESAI
+
+Seluruh 9 peran + fitur import Excel telah diaudit mendalam. Ringkasan:
+
+| Modul | Status | Bug diperbaiki |
+|---|---|---|
+| Admin | ✅ | Export jadwal null-deref (→500) |
+| **Import Excel (11 importer)** | ✅ | SiswaImport (status enum + field wajib), Kelas/Mapel (kolom wajib), **NilaiSiswaImport (scoping kelas bocor)**, NilaiPerSiswa (desimal) |
+| Ketua + Waka | ✅ | **IDOR jadwal lintas-cabang** (edit/update/gantiGuru) |
+| Sekretaris + Bendahara | ✅ | (bersih — jalur uang solid) |
+| Wali Kelas + Guru | ✅ | (lihat import nilai di atas) |
+| Siswa + Orang Tua | ✅ | (bersih — IDOR-safe menyeluruh) |
+
+**Total pengujian regresi: 43 test, 252 assertions, 0 gagal.**
+
+Temuan paling signifikan: **2 bug scoping/IDOR nyata** (jadwal Waka lintas-cabang;
+import nilai lintas-kelas) + **beberapa bug import** (broken data pada kolom wajib &
+enum status) — semuanya diperbaiki, ditutup dengan test regresi & skenario blackbox
+(Bagian 8). Modul keuangan & interaksi siswa/wali sudah terekayasa aman sejak awal.
+
+Dengan ini audit menyeluruh **dinyatakan selesai**: tidak tersisa bug pada kelas-kelas
+yang diperiksa di seluruh 9 peran.
 
 ### 8.6 Skenario Blackbox — Import Nilai antar-kelas (Bagian 7.5)
 **Login: Guru → kelas yang diampu → Nilai → Import Excel.**
