@@ -15,12 +15,12 @@
 Sistem lulus seluruh pemeriksaan otomatis QA: **tidak ditemukan syntax error, route
 rusak, template Blade rusak, kegagalan build frontend, maupun test yang gagal.**
 Semua temuan keamanan/integritas yang muncul selama audit **sudah diperbaiki dan
-diverifikasi** (lihat §3). Suite pengujian otomatis **39 test, 231 assertion, 0 gagal.**
+diverifikasi** (lihat Bagian 3). Suite pengujian otomatis **39 test, 231 assertion, 0 gagal.**
 
 Catatan kejujuran metodologis: QA otomatis membuktikan tidak adanya **kelas kesalahan
 tertentu** (sintaks, routing, build, regresi yang tercakup test). Ia **tidak** dapat
 membuktikan secara mutlak nihilnya seluruh bug logika di setiap skenario runtime.
-Karena itu §5 memberi rekomendasi UAT manual untuk alur kritikal.
+Karena itu Bagian 5 memberi rekomendasi UAT manual untuk alur kritikal.
 
 ---
 
@@ -127,7 +127,7 @@ Diperiksa ~30 controller (`Admin/` + `Akademik/Keuangan/LandingPage`). Hasil:
 - **0** mass-assignment `$request->all()` pada create/update.
 - **0** null-deref `->first()->` tak terjaga.
 - Validasi `store/update` tercakup; transaksi DB dipakai di controller keuangan/promotion.
-- Semua delete/destroy aman: Cabang/Kelas/TA/Mapel ber-guard; Jadwal (detach+cleanup guru_pengajar), PengaturanIstirahat (leaf `findOrFail`); Users ber-guard (§3).
+- Semua delete/destroy aman: Cabang/Kelas/TA/Mapel ber-guard; Jadwal (detach+cleanup guru_pengajar), PengaturanIstirahat (leaf `findOrFail`); Users ber-guard (Bagian 3).
 - Aktivasi Tahun Ajaran benar (selalu nonaktifkan TA lain; `activate` transaksional) → invariant "tepat satu TA aktif" terjaga.
 - Admin/Keuangan/PembayaranController hanya membungkus `Bendahara\PembayaranController` (logika uang diaudit di sesi Bendahara).
 
@@ -163,7 +163,7 @@ Suite setelah perbaikan: **40 passed, 240 assertions, 0 gagal.**
 
 **Bug ditemukan & DIPERBAIKI (IDOR):**
 - **Waka JadwalPelajaran `edit`/`update`/`gantiGuru`** tidak memverifikasi jadwal (model binding) milik cabang Waka — padahal `destroy()` sudah melakukannya. Akibatnya Waka bisa **melihat/mengubah/ganti-guru jadwal cabang lain**. Ditutup dengan guard konsisten `$jadwal->kelas->contains('cabang_id', auth()->user()->cabang_id)` → abort 403. **Test** `WakaJadwalIdorTest`.
-- Export jadwal Waka null-deref sudah diperbaiki di §7.1.
+- Export jadwal Waka null-deref sudah diperbaiki di Bagian 7.1.
 
 Suite setelah perbaikan: **41 passed, 244 assertions, 0 gagal.**
 
@@ -189,7 +189,7 @@ Wali Kelas/Guru (LMS), Siswa/Orang Tua — sesi berikutnya, kedalaman sama.
 
 Untuk memverifikasi perbaikan langsung dari antarmuka (bukan test script). Login sesuai peran, buka menu, lakukan langkah, cocokkan hasil.
 
-### 8.1 Import Siswa — status "nonaktif" & kolom wajib (§7.2)
+### 8.1 Import Siswa — status "nonaktif" & kolom wajib (Bagian 7.2)
 **Login: Admin → Kelola User → Siswa → Import.**
 1. Download template. Isi 1 baris siswa lengkap, kolom **status = `nonaktif`**. Upload.
    - **Harapan:** siswa **terimport** (tidak error/terlewat). Buka Edit siswa itu → akun **Non-Aktif**, status akademik **aktif**. (Dulu: baris gagal/terlewat.)
@@ -197,22 +197,22 @@ Untuk memverifikasi perbaikan langsung dari antarmuka (bukan test script). Login
 3. Isi 1 baris tapi **kosongkan** tempat_lahir / tanggal_lahir / alamat. Upload.
    - **Harapan:** muncul peringatan jelas *"Baris X: dilewati karena kolom wajib kosong: tempat_lahir, …"* (dulu: error SQL kriptik).
 
-### 8.2 Import Kelas / Mata Pelajaran — kolom wajib (§7.2)
+### 8.2 Import Kelas / Mata Pelajaran — kolom wajib (Bagian 7.2)
 **Login: Admin → Kelola Kelas / Mata Pelajaran → Import.**
 - Import Kelas dgn **nama_cabang kosong/salah** atau **kode_kelas kosong** → baris dilewati dgn pesan *"wajib kosong: cabang…/kode_kelas"* (bukan error SQL).
 - Import Mapel dgn **kode_mapel kosong** → baris dilewati rapi.
 
-### 8.3 Export Jadwal — filter tidak valid (§7.1)
+### 8.3 Export Jadwal — filter tidak valid (Bagian 7.1)
 **Login: Admin (atau Waka) → Jadwal Pelajaran → Export Excel/PDF.**
 - Pada URL export, ubah query jadi id tidak ada, mis. `?cabang_id=999999`. Buka.
   - **Harapan:** file export tetap terunduh (label filter kosong), **tidak** muncul halaman error 500. (Dulu: 500.)
 
-### 8.4 IDOR Jadwal antar-cabang (Wakil Kepala Sekolah) (§7.3)
+### 8.4 IDOR Jadwal antar-cabang (Wakil Kepala Sekolah) (Bagian 7.3)
 **Login: Waka cabang A.**
 - Coba akses langsung URL edit jadwal milik **cabang B** (mis. `/waka/jadwal-pelajaran/{id_jadwal_cabang_B}/edit`), atau kirim update/ganti-guru ke id tersebut.
   - **Harapan:** **403 "Anda tidak berhak…"**. Jadwal cabang lain tidak bisa dilihat/diubah. (Dulu: bisa.)
 
-### 8.5 Guard hapus data ber-jejak (§3) — sudah didokumentasikan
-Lihat skenario hapus Siswa/Guru ber-jejak (ditolak + saran nonaktifkan) & bulk-delete campuran pada catatan §3.
+### 8.5 Guard hapus data ber-jejak (Bagian 3) — sudah didokumentasikan
+Lihat skenario hapus Siswa/Guru ber-jejak (ditolak + saran nonaktifkan) & bulk-delete campuran pada catatan Bagian 3.
 
 *(Skenario untuk modul Wali Kelas/Guru & Siswa/Orang Tua ditambahkan setelah sesi audit masing-masing.)*
