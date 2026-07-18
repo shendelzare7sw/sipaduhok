@@ -167,5 +167,52 @@ Suite setelah perbaikan: **40 passed, 240 assertions, 0 gagal.**
 
 Suite setelah perbaikan: **41 passed, 244 assertions, 0 gagal.**
 
-### 7.4–7.6 Modul lain — DIJADWALKAN
-Sekretaris/Bendahara (jalur uang), Wali Kelas/Guru (LMS), Siswa/Orang Tua — sesi berikutnya, kedalaman sama.
+### 7.4 Modul SEKRETARIS + BENDAHARA (jalur uang) — SELESAI ✅ (bersih, tanpa bug)
+
+**Bendahara** (7 controller, jalur uang — paling kritikal):
+- `PembayaranController::validasi` (validasi pembayaran) — **sangat solid**: `findOrFail`, transaksi DB, rekomputasi total pembayaran disetujui, set `sudah_bayar`/`cicilan` benar, **cegah double-payment** (auto-batalkan pending duplikat) + `FinancialAuditLog`.
+- `validasiLangsung` — validasi `tagihan_id` `exists:` sebelum `find()` (aman), `jumlah_bayar >= 1`.
+- `TagihanController::destroyItem` — **memblokir hapus tagihan yang sudah ada pembayaran disetujui** (jaga integritas transaksi).
+- `ValidasiAksesController` (validasi ujian/rapor) — `findOrFail` null-safe, notifikasi wired.
+- Laporan/Info/PromotionValidation — `find()` report ter-guard (else null), tanpa null-deref.
+
+**Sekretaris** (1 controller, konten): kalender/pengumuman/flyer/berita CRUD — semua `findOrFail` + `$request->validate` konsisten. Bersih.
+
+Hasil: **0 bug** — modul keuangan terekayasa dengan baik.
+
+### 7.5–7.6 Modul lain — DIJADWALKAN
+Wali Kelas/Guru (LMS), Siswa/Orang Tua — sesi berikutnya, kedalaman sama.
+
+---
+
+## 8. Skenario Uji Blackbox (UI, sebagai end-user)
+
+Untuk memverifikasi perbaikan langsung dari antarmuka (bukan test script). Login sesuai peran, buka menu, lakukan langkah, cocokkan hasil.
+
+### 8.1 Import Siswa — status "nonaktif" & kolom wajib (§7.2)
+**Login: Admin → Kelola User → Siswa → Import.**
+1. Download template. Isi 1 baris siswa lengkap, kolom **status = `nonaktif`**. Upload.
+   - **Harapan:** siswa **terimport** (tidak error/terlewat). Buka Edit siswa itu → akun **Non-Aktif**, status akademik **aktif**. (Dulu: baris gagal/terlewat.)
+2. Isi 1 baris status **`lulus`**. Upload → siswa terimport dgn **status Lulus** (dulu dipaksa jadi 'aktif').
+3. Isi 1 baris tapi **kosongkan** tempat_lahir / tanggal_lahir / alamat. Upload.
+   - **Harapan:** muncul peringatan jelas *"Baris X: dilewati karena kolom wajib kosong: tempat_lahir, …"* (dulu: error SQL kriptik).
+
+### 8.2 Import Kelas / Mata Pelajaran — kolom wajib (§7.2)
+**Login: Admin → Kelola Kelas / Mata Pelajaran → Import.**
+- Import Kelas dgn **nama_cabang kosong/salah** atau **kode_kelas kosong** → baris dilewati dgn pesan *"wajib kosong: cabang…/kode_kelas"* (bukan error SQL).
+- Import Mapel dgn **kode_mapel kosong** → baris dilewati rapi.
+
+### 8.3 Export Jadwal — filter tidak valid (§7.1)
+**Login: Admin (atau Waka) → Jadwal Pelajaran → Export Excel/PDF.**
+- Pada URL export, ubah query jadi id tidak ada, mis. `?cabang_id=999999`. Buka.
+  - **Harapan:** file export tetap terunduh (label filter kosong), **tidak** muncul halaman error 500. (Dulu: 500.)
+
+### 8.4 IDOR Jadwal antar-cabang (Wakil Kepala Sekolah) (§7.3)
+**Login: Waka cabang A.**
+- Coba akses langsung URL edit jadwal milik **cabang B** (mis. `/waka/jadwal-pelajaran/{id_jadwal_cabang_B}/edit`), atau kirim update/ganti-guru ke id tersebut.
+  - **Harapan:** **403 "Anda tidak berhak…"**. Jadwal cabang lain tidak bisa dilihat/diubah. (Dulu: bisa.)
+
+### 8.5 Guard hapus data ber-jejak (§3) — sudah didokumentasikan
+Lihat skenario hapus Siswa/Guru ber-jejak (ditolak + saran nonaktifkan) & bulk-delete campuran pada catatan §3.
+
+*(Skenario untuk modul Wali Kelas/Guru & Siswa/Orang Tua ditambahkan setelah sesi audit masing-masing.)*
