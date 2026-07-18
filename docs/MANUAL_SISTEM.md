@@ -591,8 +591,113 @@ juga memicu notifikasi ke pihak terkait.
 
 ---
 
-## Bab 10+ - Peran lain (menyusul)
+## Bab 10 - Peran WALI KELAS & GURU PENGAJAR
 
-Urutan: Wali Kelas & Guru (nilai, rapor, LMS) -> Siswa & Orang Tua. Format sama.
+**Guru** mengajar mapel: bikin materi, tugas, ujian, menilai. **Wali kelas** mengurus satu
+kelas: presensi, rapor, template capaian, validasi. Keduanya berputar di seputar **nilai**,
+**rapor**, dan **LMS (ujian online)**.
+
+### 10.1 Input Nilai - bagaimana "nilai akhir" terbentuk
+
+**Konsep.** Guru mengisi komponen nilai (tugas, latihan, ulangan harian/UH, PTS, PAS). Sistem
+menghitung rata-rata tiap komponen lalu menggabungkannya jadi **nilai akhir**.
+
+**Kode:** model `Nilai` (`app/Models/Nilai.php`).
+- `hitungSemuaRata()` mengisi `rata_tugas`, `rata_latihan`, `rata_uh` = rata-rata dari
+  `tugas_1..5`, `latihan_1..5`, `uh_1..5` (mengabaikan yang kosong).
+- `hitungNilaiAkhir()` menggabungkan rata-rata komponen + `pts` + `pas` dengan **bobot
+  tertentu** menjadi `nilai_akhir`.
+- **Aturan desimal:** input menerima koma maupun titik ("9,5" atau "9.5"); sistem
+  menormalkan ke titik sebelum disimpan. Nilai dibatasi 0-100.
+
+**Kemana datanya:** satu baris `nilai` per (siswa, mapel, kelas, TA, semester, guru).
+Nilai inilah yang nanti "ditarik" ke rapor.
+
+> **Penjelasan Umum:** Perhitungan nilai dienkapsulasi di model (fat model): komponen ->
+> rata-rata -> nilai akhir berbobot, dengan normalisasi desimal & clamping rentang.
+>
+> **Penjelasan Sederhana:** Guru cukup isi angka-angka; sistem yang menghitung rata-rata dan
+> nilai akhirnya, jadi tidak perlu hitung manual. Boleh pakai koma atau titik, hasilnya sama.
+
+### 10.2 Mesin UJIAN ONLINE (LMS) - mulai, autosave, submit, koreksi otomatis
+
+Ini fitur paling "wow" untuk sidang. **Konsep:** siswa mengerjakan ujian di browser dengan
+timer; jawaban tersimpan otomatis; saat submit, soal objektif dinilai otomatis.
+
+**Alur & kode (`Siswa/LmsUjianController` + model `UjianSiswa`):**
+1. **Mulai** (`mulai()`): dibuat baris `UjianSiswa` berstatus `sedang_mengerjakan` + waktu
+   mulai dicatat. Kalau siswa sudah pernah mulai, statusnya dipertahankan (tidak reset).
+2. **Autosave** (`autosave()`): setiap kali siswa menjawab, jawaban dikirim diam-diam &
+   disimpan. Jadi kalau browser tertutup / internet putus, jawaban tidak hilang.
+3. **Timer habis** (`isTimeUp()`): kalau waktu ujian lewat, sistem otomatis menganggap ujian
+   selesai (auto-submit) supaya tidak bisa curang menambah waktu.
+4. **Submit** (`submit()`): sistem mengoreksi:
+   - Soal objektif (pilihan ganda, benar-salah, isian) dinilai **otomatis** dengan
+     membandingkan jawaban ke kunci.
+   - Soal uraian **menunggu koreksi guru** (nilai sementara ditampilkan dulu).
+   - Status `UjianSiswa` di-update jadi selesai + nilai dicatat.
+
+**Kemana datanya:** jawaban per soal disimpan (`jawaban_siswa`), status & nilai di
+`ujian_siswa`. Guru mengoreksi soal uraian lewat `Guru/GuruKoreksiController`.
+
+> **Penjelasan Umum:** Ujian adalah state machine (belum_mulai -> sedang_mengerjakan ->
+> selesai) dengan autosave inkremental, penegakan batas waktu server-side, dan auto-grading
+> objektif; soal esai menunggu penilaian manual.
+>
+> **Penjelasan Sederhana:** Seperti ujian di kertas tapi otomatis: waktu dijaga sistem,
+> jawaban tersimpan sendiri (aman kalau mati lampu), dan begitu dikumpulkan, pilihan ganda
+> langsung dinilai komputer; soal esai baru dinilai guru.
+
+### 10.3 RAPOR - menarik nilai jadi laporan + rantai validasi
+
+**Konsep.** Rapor adalah "kompilasi" nilai semua mapel seorang siswa di satu semester, plus
+kehadiran & catatan, yang harus **divalidasi berjenjang** sebelum bisa dibuka/dicetak.
+
+**Kode & alur:**
+- Wali kelas menyusun rapor (`WaliKelas/RaporController`): mengambil `nilai` tiap mapel ->
+  disimpan ke `rapor` + `rapor_nilai` (tabel detail per mapel). Ada juga template "capaian
+  kompetensi" (kalimat deskripsi) yang dikelola wali - `TemplateCapaianController`, di-scope
+  `created_by = auth()->id()` (wali hanya kelola template miliknya).
+- **Rantai validasi rapor:** Wali kirim -> Bendahara validasi (pastikan keuangan) -> Ketua
+  validasi. Kolom `validasi_rapor_wali/bendahara/ketua` di tabel `siswa` menandai tiap tahap.
+  Membatalkan validasi di tingkat atas otomatis mereset tingkat di bawahnya (konsistensi).
+- Siswa/ortu baru bisa **download rapor** kalau `hasFullRaporAccess()` true (semua tahap
+  validasi lengkap).
+
+> **Penjelasan Umum:** Rapor mengagregasi `nilai` ke `rapor_nilai`; aksesnya dijaga workflow
+> multi-approval (wali -> bendahara -> ketua) yang direpresentasikan flag boolean di `siswa`.
+>
+> **Penjelasan Sederhana:** Rapor itu rangkuman semua nilai. Sebelum boleh dibuka, harus
+> "ditandatangani" berurutan: wali kelas, bendahara (cek keuangan), lalu ketua. Kalau salah
+> satu membatalkan, tanda tangan di bawahnya ikut batal.
+
+### 10.4 Keamanan konten Guru (kenapa guru tak bisa utak-atik kelas lain)
+Setiap aksi (hapus materi/tugas/ujian, input nilai) diawali:
+`$tp = TenagaPendidik::where('user_id', auth()->id())->firstOrFail()` lalu
+`verifyAccess($tp->id, $kelasId, $mapelId)` (memastikan guru itu memang mengajar kelas+mapel
+tsb) -> kalau tidak, `abort(403)`. Query pun di-scope `where('guru_id', $tp->id)`.
+
+> **Penjelasan Sederhana:** Guru hanya bisa mengubah materi/nilai di kelas & mapel yang dia
+> ampu. Kalau coba menyentuh kelas guru lain, sistem menolak.
+
+### Kemungkinan Pertanyaan Penguji - WALI KELAS & GURU (tertinggi -> terendah)
+1. **"Bagaimana ujian online bekerja? Bagaimana kalau internet siswa putus?"** -> 10.2
+   (state machine + autosave + timer server-side + auto-grade).
+2. **"Bagaimana nilai akhir dihitung?"** -> 10.1 (rata komponen -> nilai_akhir berbobot,
+   di model `Nilai`).
+3. **"Bagaimana soal esai dinilai vs pilihan ganda?"** -> objektif auto-grade, esai manual
+   oleh guru (10.2).
+4. **"Bagaimana rapor dibuat dan kenapa harus divalidasi bertingkat?"** -> 10.3.
+5. **"Bagaimana mencegah guru mengubah data kelas lain?"** -> `verifyAccess` + scope guru_id
+   (10.4).
+6. **"Kenapa input nilai boleh koma dan titik?"** -> normalisasi desimal (10.1).
+7. **"Bagaimana timer ujian mencegah kecurangan?"** -> `isTimeUp()` dievaluasi di server,
+   auto-submit (10.2).
+
+---
+
+## Bab 11 - Peran lain (menyusul)
+
+Terakhir: Siswa & Orang Tua (Wali Siswa). Format sama.
 
 *(Dokumen dibangun bertahap.)*
