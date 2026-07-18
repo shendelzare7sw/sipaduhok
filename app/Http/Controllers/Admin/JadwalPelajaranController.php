@@ -862,10 +862,10 @@ class JadwalPelajaranController extends Controller
 
         // Get filter info for display
         $filterInfo = [
-            'cabang' => $cabangId ? \App\Models\Cabang::find($cabangId)->nama_cabang : null,
+            'cabang' => $cabangId ? \App\Models\Cabang::find($cabangId)?->nama_cabang : null,
             'jenjang' => $jenjang,
-            'kelas' => $kelasId ? Kelas::find($kelasId)->nama_kelas : null,
-            'guru' => $guruId ? TenagaPendidik::find($guruId)->nama_lengkap : null,
+            'kelas' => $kelasId ? Kelas::find($kelasId)?->nama_kelas : null,
+            'guru' => $guruId ? TenagaPendidik::find($guruId)?->nama_lengkap : null,
         ];
 
         // Get pengaturan istirahat aktif
@@ -941,10 +941,10 @@ class JadwalPelajaranController extends Controller
 
         // Get filter info for display
         $filterInfo = [
-            'cabang' => $cabangId ? \App\Models\Cabang::find($cabangId)->nama_cabang : null,
+            'cabang' => $cabangId ? \App\Models\Cabang::find($cabangId)?->nama_cabang : null,
             'jenjang' => $jenjang,
-            'kelas' => $kelasId ? Kelas::find($kelasId)->nama_kelas : null,
-            'guru' => $guruId ? TenagaPendidik::find($guruId)->nama_lengkap : null,
+            'kelas' => $kelasId ? Kelas::find($kelasId)?->nama_kelas : null,
+            'guru' => $guruId ? TenagaPendidik::find($guruId)?->nama_lengkap : null,
         ];
 
         // Get pengaturan istirahat aktif

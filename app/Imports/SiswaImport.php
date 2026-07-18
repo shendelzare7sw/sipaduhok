@@ -99,11 +99,39 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            \Log::info("Importing Row {$rowNumber}: CabangID = " . ($cabangId ?? 'NULL'));
+            // Field wajib (konsisten dgn form manual & constraint NOT NULL di DB).
+            // Tanpa pra-validasi ini, sel kosong -> error SQL kriptik lalu baris di-skip
+            // tanpa penjelasan. Beri pesan jelas agar admin tahu kolom mana yang kurang.
+            $wajibKosong = [];
+            if (empty($row['tempat_lahir'])) $wajibKosong[] = 'tempat_lahir';
+            if (empty($row['tanggal_lahir'])) $wajibKosong[] = 'tanggal_lahir';
+            if (empty($row['alamat'])) $wajibKosong[] = 'alamat';
+            if (!empty($wajibKosong)) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: dilewati karena kolom wajib kosong: " . implode(', ', $wajibKosong) . ".";
+                continue;
+            }
 
             // Prepare User data
             $username = !empty($row['username']) ? $row['username'] : (!empty($row['nis']) ? $row['nis'] : Str::slug($row['nama_lengkap']) . '-' . rand(100, 999));
             $email = !empty($row['email']) ? $row['email'] : $username . '@siswa.sipaduhok.com';
+
+            // Normalisasi status. Template menawarkan "aktif/nonaktif", sedangkan enum
+            // siswa.status = aktif|lulus|pindah|keluar (TIDAK ada 'nonaktif'). Menulis
+            // 'nonaktif' langsung => nilai enum invalid => baris gagal/broken data.
+            // "nonaktif" diterjemahkan sbg akun dinonaktifkan (is_active=false), status
+            // akademik tetap 'aktif'. Nilai enum asli tetap diterima apa adanya.
+            $rawStatus = strtolower(trim((string)($row['status'] ?? 'aktif')));
+            if (in_array($rawStatus, ['aktif', 'lulus', 'pindah', 'keluar'], true)) {
+                $siswaStatus = $rawStatus;
+                $isActive = ($rawStatus === 'aktif');
+            } elseif (in_array($rawStatus, ['nonaktif', 'non-aktif', 'non aktif', 'tidak aktif', 'inactive', '0', 'false'], true)) {
+                $siswaStatus = 'aktif';
+                $isActive = false;
+            } else {
+                $siswaStatus = 'aktif';
+                $isActive = true;
+            }
 
             DB::beginTransaction();
             try {
@@ -119,7 +147,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                         'role' => 'siswa',
                         'role_id' => $siswaRole ? $siswaRole->id : null,
                         'cabang_id' => $cabangId,
-                        'is_active' => true,
+                        'is_active' => $isActive,
                     ]);
                 }
 
@@ -137,7 +165,7 @@ class SiswaImport implements ToCollection, WithHeadingRow
                     'nama_ayah' => $row['nama_ayah'] ?? null,
                     'nama_ibu' => $row['nama_ibu'] ?? null,
                     'telepon_orangtua' => $row['telepon_orangtua'] ?? null,
-                    'status' => strtolower($row['status'] ?? 'aktif') === 'nonaktif' ? 'nonaktif' : 'aktif',
+                    'status' => $siswaStatus,
                     'tanggal_masuk' => $this->parseDate($row['tanggal_masuk'] ?? now()), // Default to now if missing
                     'agama' => $row['agama'] ?? null,
                 ]);

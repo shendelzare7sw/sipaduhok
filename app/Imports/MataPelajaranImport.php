@@ -29,6 +29,13 @@ class MataPelajaranImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+            // kode_mapel NOT NULL + unique di DB. Sel kosong -> error SQL kriptik.
+            // Beri pesan jelas & lewati.
+            if (empty($row['kode_mapel']) || trim($row['kode_mapel']) === '') {
+                $this->skippedCount++;
+                continue;
+            }
+
             // Skip if already exists (by kode_mapel or nama_mapel+jenjang)
             $exists = false;
             if (!empty($row['kode_mapel'])) {

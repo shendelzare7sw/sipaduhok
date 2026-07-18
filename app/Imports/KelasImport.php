@@ -93,6 +93,19 @@ class KelasImport implements ToCollection, WithHeadingRow
                 }
             }
 
+            // Relasi/kolom wajib (NOT NULL di DB: cabang_id, tahun_ajaran_id, kode_kelas).
+            // Tanpa guard ini, nilai kosong -> error SQL kriptik lalu baris di-skip tanpa
+            // penjelasan jelas. Beri pesan actionable.
+            $wajibKurang = [];
+            if (!$cabangId) $wajibKurang[] = 'cabang (nama_cabang kosong/tidak cocok)';
+            if (!$tahunAjaranId) $wajibKurang[] = 'tahun ajaran (tidak ada TA aktif/cocok)';
+            if (empty($row['kode_kelas'])) $wajibKurang[] = 'kode_kelas';
+            if (!empty($wajibKurang)) {
+                $this->skippedCount++;
+                $this->warnings[] = "Baris {$rowNumber}: dilewati karena wajib kosong: " . implode(', ', $wajibKurang) . ".";
+                continue;
+            }
+
             // Skip if class already exists
             $exists = Kelas::where('nama_kelas', $row['nama_kelas'])
                 ->where('jenjang', $jenjang)

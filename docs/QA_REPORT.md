@@ -115,3 +115,40 @@ berada dalam kondisi **stabil dan siap didemonstrasikan**.
 
 *Disusun sebagai bagian dari proses QA pra-sidang. Semua perubahan ter-commit di
 branch `add-cloudflare`.*
+
+---
+
+## 7. Audit Mendalam Per-Modul (berlangsung)
+
+Audit lanjutan modul-per-modul (9 peran). Status per sesi:
+
+### 7.1 Modul ADMIN — SELESAI ✅
+Diperiksa ~30 controller (`Admin/` + `Akademik/Keuangan/LandingPage`). Hasil:
+- **0** mass-assignment `$request->all()` pada create/update.
+- **0** null-deref `->first()->` tak terjaga.
+- Validasi `store/update` tercakup; transaksi DB dipakai di controller keuangan/promotion.
+- Semua delete/destroy aman: Cabang/Kelas/TA/Mapel ber-guard; Jadwal (detach+cleanup guru_pengajar), PengaturanIstirahat (leaf `findOrFail`); Users ber-guard (§3).
+- Aktivasi Tahun Ajaran benar (selalu nonaktifkan TA lain; `activate` transaksional) → invariant "tepat satu TA aktif" terjaga.
+- Admin/Keuangan/PembayaranController hanya membungkus `Bendahara\PembayaranController` (logika uang diaudit di sesi Bendahara).
+
+**Bug ditemukan & DIPERBAIKI:**
+- **Export jadwal null-deref (Admin + Waka, 12 baris)**: `Model::find($id)->prop` pada filter export (Excel/PDF). Bila `cabang_id/kelas_id/guru_id` di URL export tidak valid → `find()` null → **HTTP 500**. Diperbaiki dgn operator nullsafe `?->` (behavior-preserving: id valid → hasil sama; id invalid → null seperti "tanpa filter").
+
+### 7.2 PRIORITAS — Fitur Import Excel (8 importer) — SELESAI ✅
+Audit khusus (relasi antar-tabel rawan skip/broken data):
+
+| Importer | Temuan | Aksi |
+|---|---|---|
+| **SiswaImport** | (a) `status` menulis `'nonaktif'` → **enum invalid** (`siswa.status`=aktif/lulus/pindah/keluar) → baris error/broken; lulus/pindah/keluar dipaksa 'aktif'. (b) `tempat_lahir/tanggal_lahir/alamat` (NOT NULL) dipetakan nullable → sel kosong = error SQL kriptik. | ✅ **Diperbaiki**: normalisasi status ("nonaktif"→akun `is_active=false`, status akademik 'aktif'; enum asli diterima); pra-validasi field wajib dgn pesan jelas. Debug `\Log::info` per-baris dihapus. **Test** `SiswaImportStatusTest`. |
+| **KelasImport** | `cabang_id/tahun_ajaran_id/kode_kelas` (NOT NULL) diperlakukan optional → error SQL kriptik saat kosong. | ✅ **Diperbaiki**: guard pesan actionable sebelum insert. |
+| **MataPelajaranImport** | `kode_mapel` (NOT NULL+unique) dipetakan nullable. | ✅ **Diperbaiki**: guard kode_mapel kosong. |
+| **TenagaPendidikImport** | Kolom opsional memang nullable di DB. | ✅ Aman |
+| **OrangTuaImport** | Kolom `users.phone` & `student_parents.relationship` diverifikasi ada; lookup nis_anak→siswa ber-warning. | ✅ Aman |
+| **TagihanImport** | Lookup siswa (nis/nisn/nama) + warning + dedup. | ✅ Aman (edge-case TA-null minor) |
+| **JadwalPelajaranImport** | Validasi hari, multi-kelas/jenjang, findMapelForJenjang, auto-sync guru_pengajar, warning lengkap. | ✅ Kuat (minor: create+sync tanpa transaksi → potensi jadwal yatim bila sync gagal, jarang) |
+| **SoalUjianImport** | `WithValidation` penuh (enum tipe_soal, required_if, pesan kustom). | ✅ Sangat baik |
+
+Suite setelah perbaikan: **40 passed, 240 assertions, 0 gagal.**
+
+### 7.3–7.6 Modul lain — DIJADWALKAN
+Ketua/Waka, Sekretaris/Bendahara (jalur uang), Wali Kelas/Guru (LMS), Siswa/Orang Tua — akan diaudit pada sesi berikutnya dengan kedalaman sama. (Export jadwal Waka sudah ikut diperbaiki di §7.1.)
