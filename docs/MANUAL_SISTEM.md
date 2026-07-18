@@ -806,3 +806,88 @@ yang sama - itu cara termudah meyakinkan penguji bahwa kamu paham keseluruhan si
 
 *Manual ini melengkapi `docs/QA_REPORT.md` (audit keamanan/bug) - satu menjelaskan CARA KERJA,
 satu menjelaskan BUKTI KUALITAS.*
+
+---
+
+## Lampiran A - Peta Lokasi Kode (file : baris)
+
+Rujukan cepat "kode fitur ada di mana". **Baris AWAL akurat** (baris tanda tangan method);
+baris akhir adalah perkiraan (batas method). Catatan: nomor baris bisa **bergeser** kalau
+kode diedit lagi; kalau meleset, cari nama method-nya (mis. `function executeStudentPromotion`).
+
+### Fondasi (Bab 2-3)
+| Fitur | Method | Lokasi (baris) |
+|---|---|---|
+| Cek hak akses peran (middleware) | `handle` | `app/Http/Middleware/CheckRole.php` : 19-54 |
+| Contoh Controller -> View | `index` | `app/Http/Controllers/Admin/DashboardController.php` : 17-101 |
+
+### Bab 7 - Admin
+| Fitur | Method | Lokasi (baris) |
+|---|---|---|
+| Tambah siswa (buat user+siswa) | `storeSiswa` | `app/Http/Controllers/Admin/UserController.php` : 484-602 |
+| Hapus siswa (ber-guard) | `deleteSiswa` | `.../Admin/UserController.php` : 814-835 |
+| Hapus guru (ber-guard) | `deleteTenagaPendidik` | `.../Admin/UserController.php` : 339-371 |
+| Guard jejak siswa | `siswaBlockers` | `.../Admin/UserController.php` : 327-337 |
+| Guard jejak guru | `tenagaPendidikBlockers` | `.../Admin/UserController.php` : 310-320 |
+| Aktifkan Tahun Ajaran (transaksi) | `activate` | `app/Http/Controllers/Admin/TahunAjaranController.php` : 168-187 |
+| Kelayakan naik kelas | `checkEligibility` | `app/Services/PromotionService.php` : 19-44 |
+| Cek keuangan | `checkFinancial` | `app/Services/PromotionService.php` : 46-76 |
+| Cek akademik (tuntas vs KKM) | `checkAcademic` | `app/Services/PromotionService.php` : 78-120 |
+| Carryover tunggakan | (service) | `app/Services/TunggakanCarryoverService.php` |
+
+### Bab 8 - Ketua & Waka
+| Fitur | Method | Lokasi (baris) |
+|---|---|---|
+| Eksekusi kenaikan (1 siswa) | `executeStudentPromotion` | `app/Services/PromotionService.php` : 156-273 |
+| Cari kelas naik | `findNextClass` | `app/Services/PromotionService.php` : 307-353 |
+| Cari kelas tinggal | `findSameClass` | `app/Services/PromotionService.php` : 355-379 |
+| Batalkan kenaikan | `rollbackStudent` | `app/Services/PromotionService.php` : 389-445 |
+| Ajukan dispensasi (Bendahara) | `store` | `app/Http/Controllers/Bendahara/PromotionValidationController.php` : 66-98 |
+| Setujui dispensasi (Ketua) | `update` | `app/Http/Controllers/Ketua/PromotionApprovalController.php` : 35-59 |
+| Jadwal multi-jenjang (buat) | `storeMultiJenjang` | `app/Traits/JadwalPelajaranTrait.php` : 20-121 |
+| Jadwal multi-jenjang (edit) | `updateMultiJenjang` | `app/Traits/JadwalPelajaranTrait.php` : 127-242 |
+| Ganti guru pada jadwal | `gantiGuru` | `app/Http/Controllers/Admin/JadwalPelajaranController.php` : 430-500 |
+| Hapus jadwal (cleanup) | `destroy` | `.../Admin/JadwalPelajaranController.php` : 407-425 |
+| Validasi rapor (Ketua) | `validasiRapor` | `app/Http/Controllers/Ketua/ValidasiRaporController.php` : 126-144 |
+| Batalkan validasi rapor | `batalkanRapor` | `.../Ketua/ValidasiRaporController.php` : 149-166 |
+
+> Guard IDOR cabang Waka pada jadwal ada di `app/Http/Controllers/WakilKepalaSekolah/JadwalPelajaranController.php`
+> (method `edit`, `update`, `gantiGuru`, `destroy`).
+
+### Bab 9 - Sekretaris & Bendahara (jalur uang)
+| Fitur | Method | Lokasi (baris) |
+|---|---|---|
+| Generate SPP (anti-dobel) | `generateSpp` | `app/Http/Controllers/Bendahara/TagihanController.php` : 873-1034 |
+| Buat tagihan massal | `bulkCreate` | `.../Bendahara/TagihanController.php` : 528-675 |
+| Proteksi hapus tagihan | `destroyItem` | `.../Bendahara/TagihanController.php` : 794-839 |
+| Validasi pembayaran (setujui) | `validasi` | `app/Http/Controllers/Bendahara/PembayaranController.php` : 164-294 |
+| Pembayaran tunai langsung | `validasiLangsung` | `.../Bendahara/PembayaranController.php` : 494-571 |
+| Catat pembayaran | `store` | `.../Bendahara/PembayaranController.php` : 358-489 |
+| Buat Snap token (Midtrans) | `createSnapToken` | `app/Services/MidtransService.php` : 61-97 |
+| Verifikasi signature webhook | `verifySignature` | `app/Services/MidtransService.php` : 171-177 |
+| Petakan status Midtrans | `mapTransactionStatus` | `app/Services/MidtransService.php` : 204-219 |
+| Terima notifikasi Midtrans | `notification` | `app/Http/Controllers/MidtransWebhookController.php` : 23-167 |
+
+### Bab 10 - Wali Kelas & Guru
+| Fitur | Method | Lokasi (baris) |
+|---|---|---|
+| Rata-rata komponen nilai | `hitungSemuaRata` | `app/Models/Nilai.php` : 168-174 |
+| Hitung nilai akhir | `hitungNilaiAkhir` | `app/Models/Nilai.php` : 178-196 |
+| Mulai ujian | `mulai` | `app/Http/Controllers/Siswa/LmsUjianController.php` : 145-224 |
+| Autosave jawaban | `autosave` | `.../Siswa/LmsUjianController.php` : 449-508 |
+| Submit + auto-grade | `submit` | `.../Siswa/LmsUjianController.php` : 229-309 |
+| Template capaian (kelola) | `store`/`update`/`destroy` | `app/Http/Controllers/WaliKelas/TemplateCapaianController.php` : 63-124 |
+| Guard konten guru (hapus materi) | `destroy` | `app/Http/Controllers/Guru/GuruMateriController.php` : 352-413 |
+| Cek guru mengajar kelas+mapel | `verifyAccess` | `.../Guru/GuruMateriController.php` : 434-439 |
+
+### Bab 11 - Siswa & Orang Tua
+| Fitur | Method | Lokasi (baris) |
+|---|---|---|
+| Download rapor (scoped siswa) | `download` | `app/Http/Controllers/Siswa/SiaRaporController.php` : 125-160 |
+| Bayar via Snap (Midtrans) | `snapPayment` | `app/Http/Controllers/OrangTua/OrangTuaController.php` : 1046-1146 |
+| Tagihan anak (scoped children) | `tagihanAnak` | `.../OrangTua/OrangTuaController.php` : 161-300 |
+| Detail rapor anak (guard) | `detailRapor` | `.../OrangTua/OrangTuaController.php` : 687-711 |
+| Proses bayar (guard tagihan) | `prosesBayar` | `.../OrangTua/OrangTuaController.php` : 306-501 |
+
+*(Kalau nanti ada penambahan kode dan nomor bergeser, jalankan pencarian `function <namaMethod>`
+di file terkait untuk menemukan posisi terbarunya.)*
