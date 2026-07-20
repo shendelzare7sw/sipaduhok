@@ -319,6 +319,18 @@
                         <i class="fab fa-whatsapp me-1"></i> Hubungi Developer
                     </a>
                 </div>
+                <script>
+                    // Info kontak developer hanya tampil 5 detik lalu menghilang (tidak permanen).
+                    (function () {
+                        setTimeout(function () {
+                            document.querySelectorAll('.dashboard-bug-card').forEach(function (el) {
+                                el.style.transition = 'opacity .5s ease';
+                                el.style.opacity = '0';
+                                setTimeout(function () { el.style.display = 'none'; }, 500);
+                            });
+                        }, 5000);
+                    })();
+                </script>
                 
             </div>
         </div>

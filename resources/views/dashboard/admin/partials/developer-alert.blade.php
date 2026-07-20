@@ -16,3 +16,16 @@
         <i class="fab fa-whatsapp me-2"></i>Kontak Developer
     </a>
 </div>
+
+<script>
+    // Info kontak developer hanya tampil 5 detik lalu menghilang (tidak permanen).
+    (function () {
+        setTimeout(function () {
+            document.querySelectorAll('.dev-alert').forEach(function (el) {
+                el.style.transition = 'opacity .5s ease';
+                el.style.opacity = '0';
+                setTimeout(function () { el.style.display = 'none'; }, 500);
+            });
+        }, 5000);
+    })();
+</script>
