@@ -40,3 +40,6 @@ groq_models.json
 
 /*.md
 !/README.md
+
+# Berkas laporan/pengujian internal - lokal saja, jangan di-push
+/laporan-pengujian/
