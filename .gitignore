@@ -44,3 +44,6 @@ groq_models.json
 # clean-production branch only: internal docs/diagrams/flow not needed on VPS
 /docs/
 /flow.md
+
+# Berkas laporan/pengujian internal - lokal saja, jangan di-push
+/laporan-pengujian/
