@@ -6,6 +6,7 @@
     <title>Daftar Kelas - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
     <link rel="stylesheet" href="{{ asset('css/admin/kelas/print.css') }}">
     <script src="{{ asset('js/admin/kelas/print.js') }}" defer></script>
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('admin.kelas.index') }}" class="back-button no-print">

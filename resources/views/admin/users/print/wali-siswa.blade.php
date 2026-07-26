@@ -55,8 +55,8 @@
                                     <ul class="child-list">
                                         @foreach($ortu->studentParents as $sp)
                                             <li>
-                                                {{ $sp->siswa->nama_lengkap }}
-                                                @if($sp->siswa->kelas)
+                                                {{ $sp->siswa?->nama_lengkap ?? '-' }}
+                                                @if($sp->siswa && $sp->siswa->kelas)
                                                     <small>({{ $sp->siswa->kelas->nama_kelas }})</small>
                                                 @endif
                                             </li>

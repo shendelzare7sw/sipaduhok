@@ -39,6 +39,7 @@
             .btn-actions { top: auto; bottom: 15px; }
         }
     </style>
+    @include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">

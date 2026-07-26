@@ -36,6 +36,7 @@
         .btn-back { background: #6b7280; color: white; }
         @media print { .no-print { display: none !important; } .container { padding: 0; } }
     </style>
+@include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">
@@ -71,6 +72,7 @@
 
         {{-- Rekap Per Cabang --}}
         <div class="section-title">📍 Rekap Per Cabang</div>
+        <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -102,9 +104,11 @@
                 </tr>
             </tbody>
         </table>
+        </div>
 
         {{-- Rekap Per Jenjang --}}
         <div class="section-title"><i class="fas fa-books"></i> Rekap Per Jenjang</div>
+        <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -143,9 +147,11 @@
                 </tr>
             </tbody>
         </table>
+        </div>
 
         {{-- Komposisi Gender --}}
         <div class="section-title"><i class="fas fa-users"></i> Komposisi Gender Siswa</div>
+        <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
@@ -172,6 +178,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
 
         <div class="footer">
             <div class="print-date">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>

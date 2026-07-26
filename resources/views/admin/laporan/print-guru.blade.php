@@ -33,6 +33,7 @@
         .role-other { background: #f3f4f6; color: #374151; }
         @media print { .no-print { display: none !important; } .container { padding: 0; } }
     </style>
+@include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">
@@ -55,6 +56,7 @@
         </div>
 
         @if($guruList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -91,6 +93,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <strong>Ringkasan:</strong>

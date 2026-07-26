@@ -236,6 +236,7 @@
             }
         }
     </style>
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('waka.wali-kelas.index') }}" class="back-button no-print">

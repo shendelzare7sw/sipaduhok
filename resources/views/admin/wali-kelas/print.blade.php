@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Wali Kelas - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
     <link rel="stylesheet" href="{{ asset('css/admin/wali-kelas/print.css') }}?v={{ filemtime(public_path('css/admin/wali-kelas/print.css')) }}">
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('admin.wali-kelas.index') }}" class="back-button no-print">
