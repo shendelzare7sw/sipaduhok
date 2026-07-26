@@ -1,0 +1,54 @@
+/*
+ * print-base.css — Basis cetak bersama untuk halaman laporan/cetak (window.print()).
+ * Disisipkan via partial `partials.print-head` di AKHIR <head> tiap halaman cetak portrait,
+ * agar aturan di sini menang atas CSS halaman pada selector setara.
+ *
+ * Tujuan:
+ *   1. Ukuran kertas deterministik (A4), tak bergantung setelan dialog printer.
+ *   2. Tabel panjang tetap rapi saat dicetak (header berulang, baris tak terbelah).
+ *   3. Responsif di ponsel (tabel bisa di-scroll, kontainer ikut lebar layar).
+ *
+ * Catatan: footer URL bawaan browser SENGAJA dibiarkan (margin != 0) — keputusan
+ * penundaan perubahan footer. Jangan set `@page { margin: 0 }` di sini.
+ */
+
+/* 1. Ukuran & margin kertas */
+@page {
+    size: A4 portrait;
+    margin: 12mm;
+}
+
+/* 2. Perilaku saat mencetak */
+@media print {
+    /* Header (dan footer) tabel berulang di tiap halaman */
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+
+    /* Jangan belah baris / kartu ringkasan di tengah antar-halaman */
+    tr { page-break-inside: avoid; }
+    .summary-item,
+    .stat-box,
+    .signature,
+    .footer-right { page-break-inside: avoid; }
+
+    /*
+     * PENTING: wrapper scroll layar tidak boleh mengurung tabel saat cetak.
+     * `overflow: auto/hidden` membentuk block formatting context yang mencegah
+     * tabel terpaginasi (baris ke-2 dst bisa terpotong). Paksa terlihat penuh.
+     */
+    .table-wrapper { overflow: visible !important; }
+}
+
+/* 3. Scroll horizontal HANYA di layar (mobile) — nonaktif saat cetak (lihat blok di atas) */
+@media screen {
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* 4. Ponsel: kontainer ikut lebar layar (banyak halaman cetak mematok max-width: 210mm) */
+@media screen and (max-width: 768px) {
+    .container { max-width: 100% !important; }
+    body { -webkit-text-size-adjust: 100%; }
+}

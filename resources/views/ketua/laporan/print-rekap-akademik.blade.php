@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <title>Rekap Akademik - {{ $tahunAjaran->nama_tahun_ajaran }}</title>
+    <title>Rekap Akademik - {{ $tahunAjaran?->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.4; color: #1a1a1a; }
@@ -43,13 +43,20 @@
         .btn-back { background: #6b7280; color: white; }
         .btn-print { background: #4361ee; color: white; }
 
+        @media screen and (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
         @media print {
             .no-print, .btn-actions { display: none !important; }
             body { background: white; }
             .container { padding: 0; }
-            .stat-box, table, .section { page-break-inside: avoid; }
+            /* Jangan paksa seluruh tabel/section muat 1 halaman (bisa terpotong).
+               Cukup jaga kartu statistik & judul section tak terbelah; base menangani <tr>. */
+            .stat-box, .section h4 { page-break-inside: avoid; }
         }
     </style>
+@include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">
@@ -63,7 +70,7 @@
         <div class="title">
             <h3>REKAP AKADEMIK PER TAHUN AJARAN</h3>
             <p>
-                Tahun Ajaran: <strong>{{ $tahunAjaran->nama_tahun_ajaran }}</strong>
+                Tahun Ajaran: <strong>{{ $tahunAjaran?->nama_tahun_ajaran ?? 'Semua Tahun' }}</strong>
                 @if($cabang) | Cabang: <strong>{{ $cabang->nama_cabang }}</strong> @endif
             </p>
         </div>
@@ -93,6 +100,7 @@
                 @if($rows->isEmpty())
                     <div class="empty">Tidak ada siswa pada kategori ini.</div>
                 @else
+                    <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
@@ -126,6 +134,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </div>
         @endforeach

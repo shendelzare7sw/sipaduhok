@@ -5,6 +5,7 @@
     <title>Daftar Siswa {{ $kelas ? '- Kelas ' . $kelas->nama_kelas : '' }}</title>
     <link rel="stylesheet" href="{{ asset('css/admin/manajemen-siswa/print.css') }}?v={{ filemtime(public_path('css/admin/manajemen-siswa/print.css')) }}">
     <script src="{{ asset('js/admin/manajemen-siswa/print.js') }}?v={{ filemtime(public_path('js/admin/manajemen-siswa/print.js')) }}" defer></script>
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('admin.manajemen-siswa.index') }}" class="back-button no-print">&larr; Kembali</a>
@@ -71,7 +72,7 @@
                                 <td>{{ $siswa->nis ?? '-' }}</td>
                                 <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
                                 <td class="center">{{ $siswa->jenis_kelamin }}</td>
-                                <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d/m/Y') }}</td>
+                                <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
                                 @if(!$kelas)
                                     <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
                                 @endif

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Daftar Siswa {{ $kelas ? '- ' . $kelas->nama_kelas : '' }}</title>
     <link rel="stylesheet" href="{{ asset('css/admin/laporan/print.css') }}">
+@include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">
@@ -24,6 +25,7 @@
         </div>
 
         @if($siswaList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -54,12 +56,13 @@
                             <td>{{ $siswa->nis ?? '-' }}</td>
                             <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
                             <td class="center">{{ $siswa->jenis_kelamin }}</td>
-                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d/m/Y') }}</td>
+                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
                             @if(!$kelas)<td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>@endif
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <strong>Ringkasan:</strong>

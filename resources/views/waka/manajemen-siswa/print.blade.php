@@ -36,6 +36,7 @@
             .back-button { top: auto; bottom: 20px; right: 110px; }
         }
     </style>
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('waka.manajemen-siswa.index') }}" class="back-button no-print">← Kembali</a>
@@ -97,7 +98,7 @@
                             <td>{{ $siswa->nis ?? '-' }}</td>
                             <td><strong>{{ $siswa->nama_lengkap }}</strong></td>
                             <td class="center">{{ $siswa->jenis_kelamin }}</td>
-                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir->format('d/m/Y') }}</td>
+                            <td>{{ $siswa->tempat_lahir }}, {{ $siswa->tanggal_lahir?->format('d/m/Y') ?? '-' }}</td>
                             @if(!$kelas)
                             <td>{{ $siswa->kelas->nama_kelas ?? '-' }}</td>
                             @endif

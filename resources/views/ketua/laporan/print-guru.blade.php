@@ -35,6 +35,7 @@
         .role-other { background: #f3f4f6; color: #374151; }
         @media (max-width: 768px) { body { font-size: 9pt; } .container { padding: 5mm; } table { font-size: 8pt; } table th, table td { padding: 3px 5px; } .header h1 { font-size: 12pt; } .header h2 { font-size: 10pt; } .btn-actions { padding: 8px 10px; } .btn { padding: 8px 14px; font-size: 12px; } .footer { flex-direction: column; gap: 15px; } } @media print { .no-print { display: none !important; } .container { padding: 0; } }
     </style>
+@include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">
@@ -57,6 +58,7 @@
         </div>
 
         @if($guruList->count() > 0)
+            <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -93,6 +95,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
 
             <div class="summary">
                 <strong>Ringkasan:</strong>

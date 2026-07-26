@@ -38,6 +38,7 @@
             .back-button { top: auto; bottom: 20px; right: 110px; font-size: 13px; padding: 8px 14px; }
         }
     </style>
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('waka.guru-pengajar.index') }}" class="back-button no-print">← Kembali</a>
@@ -74,7 +75,7 @@
                             @if($guru->guruKelas->count() > 0)
                                 <ul class="assignment-list">
                                     @foreach($guru->guruKelas as $assignment)
-                                        <li>{{ $assignment->kelas->nama_kelas }} - {{ $assignment->mataPelajaran->nama_mapel }}</li>
+                                        <li>{{ $assignment->kelas?->nama_kelas ?? '-' }} - {{ $assignment->mataPelajaran?->nama_mapel ?? '-' }}</li>
                                     @endforeach
                                 </ul>
                             @else

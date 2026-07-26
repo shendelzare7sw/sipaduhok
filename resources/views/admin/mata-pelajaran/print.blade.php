@@ -6,6 +6,7 @@
     <title>Daftar Mata Pelajaran</title>
     <link rel="stylesheet" href="{{ asset('css/admin/mata-pelajaran/print.css') }}?v={{ filemtime(public_path('css/admin/mata-pelajaran/print.css')) }}">
     <script src="{{ asset('js/admin/mata-pelajaran/print.js') }}?v={{ filemtime(public_path('js/admin/mata-pelajaran/print.js')) }}" defer></script>
+    @include('partials.print-head')
 </head>
 <body>
     <div class="btn-actions no-print">

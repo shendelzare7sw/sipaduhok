@@ -60,7 +60,7 @@
                                 @endif
                             </td>
                             <td>{{ $s->cabang->nama_cabang ?? '-' }}</td>
-                            <td class="text-center">{{ ucfirst($s->status) }}</td>
+                            <td class="text-center">{{ ucfirst($s->status ?? '-') }}</td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Daftar Guru Pengajar - {{ $tahunAjaran->nama_tahun_ajaran ?? 'Semua Tahun' }}</title>
     <link rel="stylesheet" href="{{ asset('css/admin/guru-pengajar/print.css') }}">
+    @include('partials.print-head')
 </head>
 <body>
     <a href="{{ route('admin.guru-pengajar.index') }}" class="back-button no-print">&larr; Kembali</a>
@@ -40,7 +41,7 @@
                             @if($guru->guruKelas->count() > 0)
                                 <ul class="assignment-list">
                                     @foreach($guru->guruKelas as $assignment)
-                                        <li>{{ $assignment->kelas->nama_kelas }} - {{ $assignment->mataPelajaran->nama_mapel }}</li>
+                                        <li>{{ $assignment->kelas?->nama_kelas ?? '-' }} - {{ $assignment->mataPelajaran?->nama_mapel ?? '-' }}</li>
                                     @endforeach
                                 </ul>
                             @else
