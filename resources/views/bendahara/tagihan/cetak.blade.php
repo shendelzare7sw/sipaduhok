@@ -105,6 +105,7 @@
             }
         }
     </style>
+    @include('partials.print-head')
 </head>
 <body>
     <div class="no-print" style="margin-bottom: 20px; text-align: center;">
@@ -144,6 +145,7 @@
         </table>
     </div>
 
+    <div class="table-wrapper">
     <table class="tagihan-table">
         <thead>
             <tr>
@@ -183,6 +185,7 @@
             </tr>
         </tfoot>
     </table>
+    </div>
 
     <div class="summary">
         <table>

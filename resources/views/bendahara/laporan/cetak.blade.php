@@ -118,6 +118,7 @@
             }
         }
     </style>
+    @include('partials.print-head')
 </head>
 <body>
     <div class="no-print" style="margin-bottom: 20px; text-align: center;">
@@ -156,6 +157,7 @@
         </table>
     </div>
 
+    <div class="table-wrapper">
     <table class="pembayaran-table">
         <thead>
             <tr>
@@ -173,10 +175,10 @@
             @forelse($pembayaranList as $index => $bayar)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td>{{ $bayar->tanggal_bayar->format('d/m/Y') }}</td>
+                    <td>{{ $bayar->tanggal_bayar?->format('d/m/Y') ?? '-' }}</td>
                     <td style="font-size: 9pt;">{{ $bayar->kode_pembayaran }}</td>
-                    <td>{{ $bayar->siswa->nama_lengkap ?? '-' }}</td>
-                    <td>{{ $bayar->siswa->kelas->nama_kelas ?? '-' }}</td>
+                    <td>{{ $bayar->siswa?->nama_lengkap ?? '-' }}</td>
+                    <td>{{ $bayar->siswa?->kelas?->nama_kelas ?? '-' }}</td>
                     <td>
                         @if($bayar->tagihan)
                             {{ ucwords(str_replace('_', ' ', $bayar->tagihan->jenis_tagihan)) }}
@@ -201,6 +203,7 @@
             </tr>
         </tfoot>
     </table>
+    </div>
 
     <div class="summary">
         <table>
