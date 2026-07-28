@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK UI Kit — Foundations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="ui-kit.css">
+<style>
+    body { background: #f1f5f9; }
+    .wrap { width: 1440px; margin: 0 auto; background: #fff; padding: 48px 56px 72px; }
+    h2.sec { font-size: 22px; font-weight: 700; color: #0f172a; margin: 52px 0 6px; }
+    h2.sec:first-of-type { margin-top: 0; }
+    p.sec { margin: 0 0 22px; color: #64748b; font-size: 14px; }
+    .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+    .sw { border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .sw .chip { height: 76px; }
+    .sw .meta { padding: 10px 12px; }
+    .sw .nm { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .sw .hx { font-size: 12px; color: #64748b; font-family: ui-monospace, Menlo, monospace; }
+    .grads { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .gd { border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+    .gd .chip { height: 92px; }
+    .type-row { display: flex; align-items: baseline; gap: 24px; padding: 14px 0; border-bottom: 1px solid #e2e8f0; }
+    .type-row .tag { width: 210px; font-size: 12px; color: #64748b; font-family: ui-monospace, monospace; flex-shrink: 0; }
+    .radii, .shadows { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .rbox { height: 92px; background: #4361ee; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 13px; }
+    .sbox { height: 92px; background: #fff; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #64748b; border-radius: 12px; }
+    .spacers { display: flex; align-items: flex-end; gap: 18px; }
+    .spacers div { background: #4361ee; width: 34px; border-radius: 4px 4px 0 0; position: relative; }
+    .spacers div span { position: absolute; bottom: -22px; left: 0; right: 0; text-align: center; font-size: 12px; color: #64748b; }
+    .icons { display: grid; grid-template-columns: repeat(8, 1fr); gap: 14px; }
+    .ic { text-align: center; padding: 14px 6px; border: 1px solid #e2e8f0; border-radius: 10px; }
+    .ic i { font-size: 20px; color: #4361ee; display: block; margin-bottom: 8px; }
+    .ic span { font-size: 11px; color: #64748b; font-family: ui-monospace, monospace; word-break: break-all; }
+    .note { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 8px; font-size: 14px; color: #78350f; margin: 22px 0; }
+</style>
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>SIPADUHOK — Foundations</h1>
+    <p>Warna, tipografi, radius, shadow, dan spacing. Semua nilai disalin dari CSS produksi (<code>resources/css/layouts/sneat.css</code>, <code>lms.css</code>, <code>public/js/tailwind.config.js</code>).</p>
+</div>
+
+<div class="wrap">
+
+    <h2 class="sec">1. Warna — Sistem Dashboard</h2>
+    <p class="sec">Sistem utama, dipakai 236 halaman di seluruh 9 role.</p>
+    <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#4361ee"></div><div class="meta"><div class="nm">brand/primary</div><div class="hx">#4361EE</div></div></div>
+        <div class="sw"><div class="chip" style="background:#3651d4"></div><div class="meta"><div class="nm">brand/primary-hover</div><div class="hx">#3651D4</div></div></div>
+        <div class="sw"><div class="chip" style="background:#2b4162"></div><div class="meta"><div class="nm">brand/primary-dark</div><div class="hx">#2B4162</div></div></div>
+        <div class="sw"><div class="chip" style="background:#eff6ff"></div><div class="meta"><div class="nm">brand/primary-light</div><div class="hx">#EFF6FF</div></div></div>
+        <div class="sw"><div class="chip" style="background:#10b981"></div><div class="meta"><div class="nm">semantic/success</div><div class="hx">#10B981</div></div></div>
+        <div class="sw"><div class="chip" style="background:#f59e0b"></div><div class="meta"><div class="nm">semantic/warning</div><div class="hx">#F59E0B</div></div></div>
+        <div class="sw"><div class="chip" style="background:#ef4444"></div><div class="meta"><div class="nm">semantic/danger</div><div class="hx">#EF4444</div></div></div>
+        <div class="sw"><div class="chip" style="background:#06b6d4"></div><div class="meta"><div class="nm">semantic/info</div><div class="hx">#06B6D4</div></div></div>
+        <div class="sw"><div class="chip" style="background:#8b5cf6"></div><div class="meta"><div class="nm">semantic/purple</div><div class="hx">#8B5CF6</div></div></div>
+        <div class="sw"><div class="chip" style="background:#3b82f6"></div><div class="meta"><div class="nm">semantic/blue</div><div class="hx">#3B82F6</div></div></div>
+        <div class="sw"><div class="chip" style="background:#14b8a6"></div><div class="meta"><div class="nm">semantic/teal</div><div class="hx">#14B8A6</div></div></div>
+        <div class="sw"><div class="chip" style="background:#ffffff;border-bottom:1px solid #e2e8f0"></div><div class="meta"><div class="nm">neutral/surface</div><div class="hx">#FFFFFF</div></div></div>
+        <div class="sw"><div class="chip" style="background:#f8fafc"></div><div class="meta"><div class="nm">neutral/background</div><div class="hx">#F8FAFC</div></div></div>
+        <div class="sw"><div class="chip" style="background:#f1f5f9"></div><div class="meta"><div class="nm">neutral/soft</div><div class="hx">#F1F5F9</div></div></div>
+        <div class="sw"><div class="chip" style="background:#e2e8f0"></div><div class="meta"><div class="nm">neutral/border</div><div class="hx">#E2E8F0</div></div></div>
+        <div class="sw"><div class="chip" style="background:#94a3b8"></div><div class="meta"><div class="nm">neutral/text-muted</div><div class="hx">#94A3B8</div></div></div>
+        <div class="sw"><div class="chip" style="background:#64748b"></div><div class="meta"><div class="nm">neutral/secondary</div><div class="hx">#64748B</div></div></div>
+        <div class="sw"><div class="chip" style="background:#344054"></div><div class="meta"><div class="nm">neutral/text-heading</div><div class="hx">#344054</div></div></div>
+        <div class="sw"><div class="chip" style="background:#334155"></div><div class="meta"><div class="nm">neutral/text-main</div><div class="hx">#334155</div></div></div>
+        <div class="sw"><div class="chip" style="background:#1e293b"></div><div class="meta"><div class="nm">neutral/text-strong</div><div class="hx">#1E293B</div></div></div>
+    </div>
+
+    <h2 class="sec">2. Warna lembut (background badge &amp; ikon)</h2>
+    <p class="sec">Pasangan latar untuk tiap warna semantik — dipakai pada badge status dan wrapper ikon statistik.</p>
+    <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#ecfdf5"></div><div class="meta"><div class="nm">success-soft</div><div class="hx">#ECFDF5</div></div></div>
+        <div class="sw"><div class="chip" style="background:#fffbeb"></div><div class="meta"><div class="nm">warning-soft</div><div class="hx">#FFFBEB</div></div></div>
+        <div class="sw"><div class="chip" style="background:#fee2e2"></div><div class="meta"><div class="nm">danger-soft</div><div class="hx">#FEE2E2</div></div></div>
+        <div class="sw"><div class="chip" style="background:#f5f3ff"></div><div class="meta"><div class="nm">purple-soft</div><div class="hx">#F5F3FF</div></div></div>
+        <div class="sw"><div class="chip" style="background:#ecfeff"></div><div class="meta"><div class="nm">info-soft</div><div class="hx">#ECFEFF</div></div></div>
+        <div class="sw"><div class="chip" style="background:rgba(67,97,238,.08)"></div><div class="meta"><div class="nm">primary-icon-bg</div><div class="hx">rgba(67,97,238,.08)</div></div></div>
+    </div>
+
+    <h2 class="sec">3. Warna — Sistem LMS &amp; Landing</h2>
+    <p class="sec">Dua sistem lain yang hidup berdampingan di aplikasi yang sama. Keduanya berpangkal pada biru <code>#165FAC</code>.</p>
+    <div class="swatches">
+        <div class="sw"><div class="chip" style="background:#165fac"></div><div class="meta"><div class="nm">lms/primary</div><div class="hx">#165FAC</div></div></div>
+        <div class="sw"><div class="chip" style="background:#0d3f7a"></div><div class="meta"><div class="nm">lms/primary-dark</div><div class="hx">#0D3F7A</div></div></div>
+        <div class="sw"><div class="chip" style="background:#ea580c"></div><div class="meta"><div class="nm">lms/accent-orange</div><div class="hx">#EA580C</div></div></div>
+        <div class="sw"><div class="chip" style="background:#287f3b"></div><div class="meta"><div class="nm">landing/secondary</div><div class="hx">#287F3B</div></div></div>
+        <div class="sw"><div class="chip" style="background:#d45930"></div><div class="meta"><div class="nm">landing/accent-orange</div><div class="hx">#D45930</div></div></div>
+        <div class="sw"><div class="chip" style="background:#fac030"></div><div class="meta"><div class="nm">landing/accent-yellow</div><div class="hx">#FAC030</div></div></div>
+        <div class="sw"><div class="chip" style="background:#ffe400"></div><div class="meta"><div class="nm">landing/accent-bright</div><div class="hx">#FFE400</div></div></div>
+        <div class="sw"><div class="chip" style="background:#e8e7e2"></div><div class="meta"><div class="nm">landing/cream</div><div class="hx">#E8E7E2</div></div></div>
+    </div>
+
+    <h2 class="sec">4. Gradient</h2>
+    <p class="sec">Selalu 135°, kecuali sidebar dashboard yang 180°. Ini tanda tangan visual sistem — kalau hilang, prototype tidak terasa seperti aplikasi ini.</p>
+    <div class="grads">
+        <div class="gd"><div class="chip" style="background:linear-gradient(180deg,#4361ee,#2b4162)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/sidebar (180°)</div><div class="hx">#4361EE → #2B4162</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,#165fac,#0d3f7a)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/sidebar-lms</div><div class="hx">#165FAC → #0D3F7A</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/purple</div><div class="hx">kartu kelas aktif</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/blue</div><div class="hx">#3B82F6 → #2563EB</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,#10b981,#059669)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/green</div><div class="hx">#10B981 → #059669</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,#f59e0b,#f97316)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/orange</div><div class="hx">#F59E0B → #F97316</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,#4361ee,#06b6d4)"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/primary-cyan</div><div class="hx">#4361EE → #06B6D4</div></div></div>
+        <div class="gd"><div class="chip" style="background:linear-gradient(135deg,rgba(22,95,172,.9),rgba(40,127,59,.8))"></div><div class="meta" style="padding:10px 12px"><div class="nm">gradient/hero-overlay</div><div class="hx">landing.css:28</div></div></div>
+    </div>
+
+    <h2 class="sec">5. Tipografi — Public Sans</h2>
+    <p class="sec">Font dashboard. LMS memakai Segoe UI (mode ujian: Inter), landing memakai Poppins. Bobot 400 hampir tidak dipakai di luar body — jangan buat text style tipis yang tidak ada di aplikasi.</p>
+    <div>
+        <div class="type-row"><span class="tag">heading/page-title · 20/600</span><span style="font-size:20px;font-weight:600;color:#344054">Kelola Tagihan Siswa</span></div>
+        <div class="type-row"><span class="tag">heading/page-subtitle · 13/400</span><span style="font-size:13px;color:#6c757d">Tahun Ajaran 2025/2026 — Semester Genap</span></div>
+        <div class="type-row"><span class="tag">heading/card-title · 17/600</span><span style="font-size:17px;font-weight:600;color:#334155">Statistik Pembayaran</span></div>
+        <div class="type-row"><span class="tag">display/stat-value · 28/700</span><span style="font-size:28px;font-weight:700;color:#334155">1.248</span></div>
+        <div class="type-row"><span class="tag">label/stat-label · 14/500 upper</span><span style="font-size:14px;font-weight:500;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px">Total Siswa Aktif</span></div>
+        <div class="type-row"><span class="tag">body/default · 15/400</span><span style="font-size:15px;color:#334155">Pembayaran SPP bulan Januari telah divalidasi oleh bendahara.</span></div>
+        <div class="type-row"><span class="tag">body/small · 13/400</span><span style="font-size:13px;color:#64748b">Terakhir diperbarui 12 menit yang lalu</span></div>
+        <div class="type-row"><span class="tag">label/table-head · 13/600 upper</span><span style="font-size:13px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Nama Siswa</span></div>
+        <div class="type-row"><span class="tag">label/menu-header · 12/600 upper</span><span style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px">Manajemen Pengguna</span></div>
+        <div class="type-row"><span class="tag">label/badge · 12/600</span><span class="badge success">Sudah Bayar</span></div>
+    </div>
+
+    <div class="note">
+        <strong>Skala ukuran yang benar-benar dipakai:</strong> 10 · 11 · 12 · 13 · 14 · 15 · 16 · 17 · 18 · 20 · 24 · 28 px.
+        Ukuran 12px dan 13px adalah yang paling sering muncul (466× dan 403×), bukan 16px.
+    </div>
+
+    <h2 class="sec">6. Radius</h2>
+    <p class="sec">12px adalah default kartu dan keputusan paling terlihat di seluruh aplikasi.</p>
+    <div class="radii">
+        <div><div class="rbox" style="border-radius:4px">4px — tag, tombol close</div></div>
+        <div><div class="rbox" style="border-radius:6px">6px — chip, tab</div></div>
+        <div><div class="rbox" style="border-radius:8px">8px — tombol, input, badge</div></div>
+        <div><div class="rbox" style="border-radius:10px">10px — wrapper ikon</div></div>
+        <div><div class="rbox" style="border-radius:12px">12px — KARTU (default)</div></div>
+        <div><div class="rbox" style="border-radius:14px">14px — modal</div></div>
+        <div><div class="rbox" style="border-radius:16px">16px — kartu besar</div></div>
+        <div><div class="rbox" style="border-radius:999px">999px — pill badge, FAB</div></div>
+    </div>
+
+    <h2 class="sec">7. Shadow</h2>
+    <div class="shadows">
+        <div class="sbox" style="box-shadow:0 1px 3px rgba(0,0,0,.02)">shadow/flat<br>kartu dashboard</div>
+        <div class="sbox" style="box-shadow:0 10px 24px rgba(15,23,42,.05)">shadow/card<br>kartu elevasi</div>
+        <div class="sbox" style="box-shadow:0 4px 6px rgba(0,0,0,.04)">shadow/card-hover</div>
+        <div class="sbox" style="box-shadow:0 2px 6px 0 rgba(0,0,0,.08)">shadow/navbar<br>navbar sticky</div>
+        <div class="sbox" style="box-shadow:0 8px 16px rgba(15,23,42,.18)">shadow/overlay<br>dropdown</div>
+        <div class="sbox" style="box-shadow:0 4px 20px rgba(0,0,0,.08)">shadow/modal</div>
+        <div class="sbox" style="box-shadow:0 0 0 3px rgba(67,97,238,.12);border-color:#4361ee">shadow/focus-ring</div>
+        <div class="sbox" style="box-shadow:0 10px 18px rgba(67,97,238,.18)">shadow/button-primary</div>
+    </div>
+
+    <h2 class="sec">8. Spacing</h2>
+    <p class="sec">Grid dasar 4px, tapi 14px dan 18px juga sering dipakai — jangan dipaksa jadi kelipatan 4. Gap paling sering: 12px, lalu 8px.</p>
+    <div class="spacers" style="height:120px;margin-bottom:34px">
+        <div style="height:4px"><span>4</span></div>
+        <div style="height:6px"><span>6</span></div>
+        <div style="height:8px"><span>8</span></div>
+        <div style="height:10px"><span>10</span></div>
+        <div style="height:12px"><span>12</span></div>
+        <div style="height:14px"><span>14</span></div>
+        <div style="height:16px"><span>16</span></div>
+        <div style="height:20px"><span>20</span></div>
+        <div style="height:24px"><span>24</span></div>
+        <div style="height:26px"><span>26</span></div>
+    </div>
+
+    <h2 class="sec">9. Ikon — FontAwesome 6 Free</h2>
+    <p class="sec">Set dominan dengan ~4.484 pemakaian di blade. Boxicons (~142) hanya sisa Sneat dan sidebar wali siswa; Bootstrap Icons (~89) hanya di LMS siswa.</p>
+    <div class="icons">
+        <div class="ic"><i class="fas fa-home"></i><span>fa-home</span></div>
+        <div class="ic"><i class="fas fa-users"></i><span>fa-users</span></div>
+        <div class="ic"><i class="fas fa-chalkboard-teacher"></i><span>fa-chalkboard-teacher</span></div>
+        <div class="ic"><i class="fas fa-file-invoice-dollar"></i><span>fa-file-invoice-dollar</span></div>
+        <div class="ic"><i class="fas fa-calendar-week"></i><span>fa-calendar-week</span></div>
+        <div class="ic"><i class="fas fa-clipboard-check"></i><span>fa-clipboard-check</span></div>
+        <div class="ic"><i class="fas fa-file-alt"></i><span>fa-file-alt</span></div>
+        <div class="ic"><i class="fas fa-chart-bar"></i><span>fa-chart-bar</span></div>
+        <div class="ic"><i class="fas fa-check-circle"></i><span>fa-check-circle</span></div>
+        <div class="ic"><i class="fas fa-check-double"></i><span>fa-check-double</span></div>
+        <div class="ic"><i class="fas fa-hand-holding-usd"></i><span>fa-hand-holding-usd</span></div>
+        <div class="ic"><i class="fas fa-graduation-cap"></i><span>fa-graduation-cap</span></div>
+        <div class="ic"><i class="fas fa-book"></i><span>fa-book</span></div>
+        <div class="ic"><i class="fas fa-tasks"></i><span>fa-tasks</span></div>
+        <div class="ic"><i class="fas fa-bullhorn"></i><span>fa-bullhorn</span></div>
+        <div class="ic"><i class="fas fa-life-ring"></i><span>fa-life-ring</span></div>
+        <div class="ic"><i class="fas fa-archive"></i><span>fa-archive</span></div>
+        <div class="ic"><i class="fas fa-certificate"></i><span>fa-certificate</span></div>
+        <div class="ic"><i class="fas fa-exchange-alt"></i><span>fa-exchange-alt</span></div>
+        <div class="ic"><i class="fas fa-comment-dots"></i><span>fa-comment-dots</span></div>
+        <div class="ic"><i class="fas fa-video"></i><span>fa-video</span></div>
+        <div class="ic"><i class="fas fa-bell"></i><span>fa-bell</span></div>
+        <div class="ic"><i class="fas fa-globe"></i><span>fa-globe</span></div>
+        <div class="ic"><i class="fas fa-sticky-note"></i><span>fa-sticky-note</span></div>
+    </div>
+
+    <div class="note" style="background:#eff6ff;border-color:#4361ee;color:#1e3a8a">
+        <strong>Dua palet semantik hidup bersamaan.</strong> Sneat bawaan memakai success <code>#71DD37</code>,
+        warning <code>#FFAB00</code>, danger <code>#FF3E1D</code>. CSS scoped buatan sendiri memakai
+        <code>#10B981</code> / <code>#F59E0B</code> / <code>#EF4444</code> dan <em>itu</em> yang menang di hampir
+        semua halaman. Pakai yang kedua di Figma.
+    </div>
+
+</div>
+</body>
+</html>

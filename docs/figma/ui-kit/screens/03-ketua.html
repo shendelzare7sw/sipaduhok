@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Layar Ketua PKBM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>Ketua PKBM — 6 layar</h1>
+    <p>Peran <strong>approver</strong>, hampir seluruhnya read-only. Tidak ada CRUD data master — hanya persetujuan, monitoring, dan laporan.</p>
+</div>
+
+<!-- ═══ 01 Dashboard ═══ -->
+<div class="screen-label">Ketua / 01 Dashboard <span>ketua.dashboard · dashboard/ketua.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.dashboard"
+     data-title="Dashboard" data-subtitle="Ringkasan persetujuan dan kondisi lembaga" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-clock"></i> Ada <strong>5 pengajuan dispensasi keuangan</strong> dan <strong>18 rapor</strong> menunggu persetujuan Anda.</div>
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget">
+            <div class="stat-icon yellow"><i class="fas fa-hand-holding-heart"></i></div>
+            <div class="stat-details"><div class="stat-value">5</div><div class="stat-label">Dispensasi Menunggu</div>
+                <div class="stat-footer"><span>Tertua 4 hari lalu</span><span class="badge warning">Perlu tindakan</span></div></div>
+        </div></div>
+        <div class="card"><div class="stat-widget">
+            <div class="stat-icon purple"><i class="fas fa-certificate"></i></div>
+            <div class="stat-details"><div class="stat-value">18</div><div class="stat-label">Rapor Menunggu</div>
+                <div class="stat-footer"><span>Dari 4 wali kelas</span><span class="badge warning">Perlu tindakan</span></div></div>
+        </div></div>
+        <div class="card"><div class="stat-widget">
+            <div class="stat-icon green"><i class="fas fa-check-double"></i></div>
+            <div class="stat-details"><div class="stat-value">247</div><div class="stat-label">Disetujui Bulan Ini</div>
+                <div class="stat-footer"><span>Rata-rata 1,2 hari</span><span class="badge success">Lancar</span></div></div>
+        </div></div>
+        <div class="card"><div class="stat-widget">
+            <div class="stat-icon blue"><i class="fas fa-user-graduate"></i></div>
+            <div class="stat-details"><div class="stat-value">1.248</div><div class="stat-label">Siswa Aktif</div>
+                <div class="stat-footer"><span>3 cabang</span><span class="muted">TA 2025/2026</span></div></div>
+        </div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-inbox"></i> Antrean Persetujuan</h3>
+                <a class="btn ghost sm">Lihat semua</a></div>
+            <table class="data">
+                <thead><tr><th>Pengajuan</th><th>Pemohon</th><th>Jenis</th><th>Diajukan</th><th style="width:170px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="cell-main">Dispensasi SPP — Budi Santoso</span><div class="cell-sub">Kelas 8B · tunggakan Rp 1.350.000</div></td>
+                        <td>Sri Rahayu</td><td><span class="badge warning">Keuangan</span></td><td>4 hari lalu</td>
+                        <td><a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn danger sm"><i class="fas fa-times"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                    <tr><td><span class="cell-main">Validasi Rapor — Kelas 7A</span><div class="cell-sub">34 siswa · Semester Genap</div></td>
+                        <td>Dewi Lestari</td><td><span class="badge purple">Rapor</span></td><td>2 hari lalu</td>
+                        <td><a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                    <tr><td><span class="cell-main">Dispensasi Kenaikan — Rizky Aditya P.</span><div class="cell-sub">Kelas 10 IPA · 2 mapel di bawah KKM</div></td>
+                        <td>Yusuf Maulana</td><td><span class="badge primary">Kenaikan</span></td><td>1 hari lalu</td>
+                        <td><a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn danger sm"><i class="fas fa-times"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                    <tr><td><span class="cell-main">Validasi Rapor — Kelas 8B</span><div class="cell-sub">39 siswa · Semester Genap</div></td>
+                        <td>Sri Rahayu</td><td><span class="badge purple">Rapor</span></td><td>6 jam lalu</td>
+                        <td><a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie"></i> Ketuntasan Rapor</h3></div>
+            <div class="donut"></div>
+            <div style="padding:0 24px 24px">
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Sudah terbit</span><span class="strong">16 kelas</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Menunggu validasi</span><span class="strong">9 kelas</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Perlu revisi</span><span class="strong">5 kelas</span></div>
+                <div class="row between small" style="padding:7px 0"><span>Belum diisi</span><span class="strong">6 kelas</span></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Validasi Rapor ═══ -->
+<div class="screen-label">Ketua / 02 Validasi Rapor <span>ketua.validasi-rapor.index · ketua/validasi-rapor/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.validasi-rapor"
+     data-title="Validasi Rapor" data-subtitle="Semester Genap TA 2025/2026" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Menunggu (18)</a><a>Tervalidasi</a><a>Perlu Revisi</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:250px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa atau kelas…"></div>
+            <select class="control" style="width:160px"><option>Semua Kelas</option></select>
+            <a class="btn success"><i class="fas fa-check-double"></i> Validasi Terpilih</a>
+        </div>
+        <table class="data">
+            <thead><tr>
+                <th style="width:48px"><input type="checkbox"></th>
+                <th>Siswa</th><th>Kelas</th><th>Wali Kelas</th><th class="num">Rata-rata</th>
+                <th>Kehadiran</th><th>Dikirim</th><th>Status</th><th style="width:190px">Aksi</th>
+            </tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox" checked></td>
+                    <td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi Ramadhan</span></td>
+                    <td>7A</td><td>Dewi Lestari</td><td class="num strong">84,2</td>
+                    <td><span class="badge success">96%</span></td><td>2 hari lalu</td>
+                    <td><span class="badge warning">Menunggu</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a></td></tr>
+                <tr><td><input type="checkbox" checked></td>
+                    <td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td>
+                    <td>7A</td><td>Dewi Lestari</td><td class="num strong">88,7</td>
+                    <td><span class="badge success">98%</span></td><td>2 hari lalu</td>
+                    <td><span class="badge warning">Menunggu</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td>
+                    <td>8B</td><td>Sri Rahayu</td><td class="num strong">71,4</td>
+                    <td><span class="badge warning">82%</span></td><td>6 jam lalu</td>
+                    <td><span class="badge warning">Menunggu</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td>
+                    <td>9C</td><td>Yusuf Maulana</td><td class="num strong">79,8</td>
+                    <td><span class="badge success">94%</span></td><td>1 hari lalu</td>
+                    <td><span class="badge danger">Perlu Revisi</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <span class="muted xsmall">Dikembalikan</span></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Preview Rapor (A4) ═══ -->
+<div class="screen-label">Ketua / 03 Preview Rapor <span>ketua.validasi-rapor.preview · memakai ulang view wali-kelas/rapor/preview-pas.blade.php</span></div>
+<div class="screen" style="background:#94a3b8;padding:40px 0">
+<div class="print-sheet">
+    <div class="print-header">
+        <img src="../assets/img/logo.png" alt="Logo">
+        <div>
+            <div class="t1">PUSAT KEGIATAN BELAJAR MASYARAKAT</div>
+            <div class="t2">HOUSE OF KNOWLEDGE</div>
+            <div class="t3">Jl. Contoh No. 123, Kota · Telp. (021) 1234-5678 · info@sipaduhok.sch.id</div>
+        </div>
+    </div>
+
+    <div class="print-title">LAPORAN HASIL BELAJAR PESERTA DIDIK</div>
+
+    <table style="width:100%;font-size:12px;margin-bottom:18px">
+        <tr><td style="width:130px">Nama Peserta Didik</td><td style="width:14px">:</td><td style="font-weight:700">Ahmad Fauzi Ramadhan</td>
+            <td style="width:110px">Kelas</td><td style="width:14px">:</td><td style="font-weight:700">7A</td></tr>
+        <tr><td>NISN / NIS</td><td>:</td><td>0087654321 / 2025-0112</td>
+            <td>Semester</td><td>:</td><td>Genap</td></tr>
+        <tr><td>Satuan Pendidikan</td><td>:</td><td>Paket B (Setara SMP)</td>
+            <td>Tahun Ajaran</td><td>:</td><td>2025/2026</td></tr>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:18px 0 8px">A. Nilai Akademik</div>
+    <table class="print">
+        <thead><tr><th style="width:34px">No</th><th>Mata Pelajaran</th><th style="width:52px">KKM</th><th style="width:58px">Nilai</th><th style="width:64px">Predikat</th><th>Capaian Kompetensi</th></tr></thead>
+        <tbody>
+            <tr><td style="text-align:center">1</td><td>Pendidikan Agama dan Budi Pekerti</td><td style="text-align:center">75</td><td style="text-align:center;font-weight:700">88</td><td style="text-align:center">B</td><td>Menunjukkan pemahaman baik pada materi akhlak dan ibadah.</td></tr>
+            <tr><td style="text-align:center">2</td><td>Pendidikan Pancasila</td><td style="text-align:center">75</td><td style="text-align:center;font-weight:700">85</td><td style="text-align:center">B</td><td>Mampu menjelaskan nilai-nilai Pancasila dalam kehidupan sehari-hari.</td></tr>
+            <tr><td style="text-align:center">3</td><td>Bahasa Indonesia</td><td style="text-align:center">75</td><td style="text-align:center;font-weight:700">86</td><td style="text-align:center">B</td><td>Terampil menyusun teks eksposisi dengan struktur yang runtut.</td></tr>
+            <tr><td style="text-align:center">4</td><td>Matematika</td><td style="text-align:center">70</td><td style="text-align:center;font-weight:700">79</td><td style="text-align:center">C</td><td>Menguasai operasi aljabar; perlu penguatan pada bangun ruang.</td></tr>
+            <tr><td style="text-align:center">5</td><td>Ilmu Pengetahuan Alam</td><td style="text-align:center">70</td><td style="text-align:center;font-weight:700">83</td><td style="text-align:center">B</td><td>Aktif dalam praktikum dan mampu menyusun laporan pengamatan.</td></tr>
+            <tr><td style="text-align:center">6</td><td>Ilmu Pengetahuan Sosial</td><td style="text-align:center">70</td><td style="text-align:center;font-weight:700">81</td><td style="text-align:center">B</td><td>Memahami konsep interaksi sosial dan kegiatan ekonomi.</td></tr>
+            <tr><td style="text-align:center">7</td><td>Bahasa Inggris</td><td style="text-align:center">70</td><td style="text-align:center;font-weight:700">84</td><td style="text-align:center">B</td><td>Percaya diri dalam percakapan sederhana.</td></tr>
+            <tr><td style="text-align:center">8</td><td>Seni Budaya</td><td style="text-align:center">70</td><td style="text-align:center;font-weight:700">90</td><td style="text-align:center">A</td><td>Menonjol pada seni rupa dua dimensi.</td></tr>
+            <tr><td colspan="3" style="text-align:right;font-weight:700">Rata-rata</td><td style="text-align:center;font-weight:700">84,5</td><td colspan="2"></td></tr>
+        </tbody>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:20px 0 8px">B. Ketidakhadiran</div>
+    <table class="print" style="width:320px">
+        <tr><td>Sakit</td><td style="text-align:center;width:60px">2 hari</td></tr>
+        <tr><td>Izin</td><td style="text-align:center">3 hari</td></tr>
+        <tr><td>Tanpa Keterangan</td><td style="text-align:center">0 hari</td></tr>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:20px 0 8px">C. Catatan Wali Kelas</div>
+    <div style="border:1px solid #111827;padding:12px;min-height:64px;font-size:12px;line-height:1.7">
+        Ananda menunjukkan perkembangan yang baik, terutama pada mata pelajaran seni dan bahasa.
+        Perlu penguatan pada materi bangun ruang. Pertahankan kedisiplinan dan keaktifan di kelas.
+    </div>
+
+    <div class="print-sign">
+        <div class="box"><div>Mengetahui,<br>Orang Tua/Wali</div><div class="space"></div><div>(………………………………)</div></div>
+        <div class="box"><div>Kota, 20 Juni 2026<br>Wali Kelas</div><div class="space"></div><div class="nm">Dewi Lestari, S.Pd.</div></div>
+        <div class="box"><div>Mengesahkan,<br>Ketua PKBM</div><div class="space"></div><div class="nm">Drs. H. Suryadi, M.Pd.</div></div>
+    </div>
+</div>
+</div>
+
+<!-- ═══ 04 Dispensasi Keuangan ═══ -->
+<div class="screen-label">Ketua / 04 Dispensasi Keuangan <span>ketua.dispensasi.index · ketua/dispensasi/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.dispensasi"
+     data-title="Dispensasi Keuangan" data-subtitle="Pengajuan keringanan pembayaran dari wali kelas" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="grid grid-3 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-hourglass-half"></i></div><div class="stat-details"><div class="stat-value">5</div><div class="stat-label">Menunggu</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-check"></i></div><div class="stat-details"><div class="stat-value">31</div><div class="stat-label">Disetujui</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon red"><i class="fas fa-times"></i></div><div class="stat-details"><div class="stat-value">7</div><div class="stat-label">Ditolak</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-hand-holding-heart"></i> Pengajuan Menunggu Keputusan</h3></div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas</th><th>Diajukan Oleh</th><th class="num">Tunggakan</th><th>Alasan</th><th>Tanggal</th><th style="width:210px">Keputusan</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>Sri Rahayu</td>
+                    <td class="num money">Rp 1.350.000</td>
+                    <td style="max-width:280px"><span class="small">Orang tua kehilangan pekerjaan sejak November; mengajukan penundaan hingga akhir semester.</span></td>
+                    <td>12 Jan 2026</td>
+                    <td><a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i> Tolak</a></td></tr>
+                <tr><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>Yusuf Maulana</td>
+                    <td class="num money">Rp 2.100.000</td>
+                    <td style="max-width:280px"><span class="small">Anak yatim, ditanggung nenek. Mengajukan keringanan 50% SPP.</span></td>
+                    <td>13 Jan 2026</td>
+                    <td><a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i> Tolak</a></td></tr>
+                <tr><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Yusuf Maulana</td>
+                    <td class="num money">Rp 850.000</td>
+                    <td style="max-width:280px"><span class="small">Menunggu pencairan bantuan; meminta perpanjangan tempo 30 hari.</span></td>
+                    <td>14 Jan 2026</td>
+                    <td><a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i> Tolak</a></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Approval Kenaikan Kelas ═══ -->
+<div class="screen-label">Ketua / 05 Approval Kenaikan Kelas <span>ketua.kenaikan-kelas.approval.index · ketua/promotion/approval.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.approval"
+     data-title="Approval Dispensasi Kenaikan" data-subtitle="Siswa yang tidak memenuhi syarat otomatis naik kelas" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="alert info"><i class="fas fa-info-circle"></i> Daftar ini berisi siswa yang <strong>tidak lolos kriteria otomatis</strong> (nilai di bawah KKM atau kehadiran kurang) dan memerlukan keputusan manual.</div>
+
+    <div class="card">
+        <div class="toolbar">
+            <select class="control" style="width:180px"><option>Semua Jenjang</option></select>
+            <select class="control" style="width:180px"><option>Semua Kelas</option></select>
+            <div class="spacer"></div>
+            <span class="muted small">Batas keputusan: 30 Juni 2026</span>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas Asal</th><th>Kelas Tujuan</th><th>Alasan Tertahan</th><th class="num">Rata-rata</th><th>Kehadiran</th><th>Rekomendasi</th><th style="width:200px">Keputusan</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>11 IPA</td>
+                    <td><span class="badge danger">2 mapel &lt; KKM</span></td><td class="num strong">68,4</td><td><span class="badge success">92%</span></td>
+                    <td><span class="badge warning">Pertimbangkan</span></td>
+                    <td><a class="btn success sm"><i class="fas fa-arrow-up"></i> Naik</a> <a class="btn danger sm"><i class="fas fa-repeat"></i> Tinggal</a></td></tr>
+                <tr><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>9B</td>
+                    <td><span class="badge warning">Kehadiran &lt; 85%</span></td><td class="num strong">76,1</td><td><span class="badge warning">82%</span></td>
+                    <td><span class="badge success">Layak Naik</span></td>
+                    <td><a class="btn success sm"><i class="fas fa-arrow-up"></i> Naik</a> <a class="btn danger sm"><i class="fas fa-repeat"></i> Tinggal</a></td></tr>
+                <tr><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>8B</td>
+                    <td><span class="badge danger">4 mapel &lt; KKM</span></td><td class="num strong">61,7</td><td><span class="badge danger">74%</span></td>
+                    <td><span class="badge danger">Tidak Disarankan</span></td>
+                    <td><a class="btn success sm"><i class="fas fa-arrow-up"></i> Naik</a> <a class="btn danger sm"><i class="fas fa-repeat"></i> Tinggal</a></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Cetak Laporan ═══ -->
+<div class="screen-label">Ketua / 06 Cetak Laporan <span>ketua.laporan.index · ketua/laporan/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.laporan.index"
+     data-title="Cetak Laporan" data-subtitle="Laporan kelembagaan untuk pengawas dan yayasan" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="card-body"><div class="grid grid-4">
+        <div class="field" style="margin:0"><label>Tahun Ajaran</label><select class="control"><option>2025/2026</option></select></div>
+        <div class="field" style="margin:0"><label>Semester</label><select class="control"><option>Genap</option></select></div>
+        <div class="field" style="margin:0"><label>Cabang</label><select class="control"><option>Semua Cabang</option></select></div>
+        <div class="field" style="margin:0"><label>Format</label><select class="control"><option>PDF (A4)</option><option>Excel</option></select></div>
+    </div></div></div>
+
+    <div class="grid grid-3">
+        <div class="card"><div class="card-body"><div class="stat-icon blue mb-20"><i class="fas fa-user-graduate"></i></div>
+            <h3 style="margin:0 0 6px;font-size:17px">Rekap Siswa</h3><p class="small muted">Jumlah dan sebaran peserta didik per jenjang dan cabang.</p>
+            <a class="btn outline block"><i class="fas fa-print"></i> Cetak</a></div></div>
+        <div class="card"><div class="card-body"><div class="stat-icon green mb-20"><i class="fas fa-chalkboard-teacher"></i></div>
+            <h3 style="margin:0 0 6px;font-size:17px">Rekap Guru</h3><p class="small muted">Daftar tenaga pendidik beserta beban mengajar.</p>
+            <a class="btn outline block"><i class="fas fa-print"></i> Cetak</a></div></div>
+        <div class="card"><div class="card-body"><div class="stat-icon purple mb-20"><i class="fas fa-chalkboard"></i></div>
+            <h3 style="margin:0 0 6px;font-size:17px">Rekap Kelas</h3><p class="small muted">Rombongan belajar dan penugasan wali kelas.</p>
+            <a class="btn outline block"><i class="fas fa-print"></i> Cetak</a></div></div>
+        <div class="card"><div class="card-body"><div class="stat-icon mb-20"><i class="fas fa-user-tie"></i></div>
+            <h3 style="margin:0 0 6px;font-size:17px">Rekap Wali Kelas</h3><p class="small muted">Wali kelas per rombel dan status pengisian rapor.</p>
+            <a class="btn outline block"><i class="fas fa-print"></i> Cetak</a></div></div>
+        <div class="card"><div class="card-body"><div class="stat-icon yellow mb-20"><i class="fas fa-graduation-cap"></i></div>
+            <h3 style="margin:0 0 6px;font-size:17px">Rekap Akademik</h3><p class="small muted">Ketuntasan KKM dan status kenaikan kelas.</p>
+            <a class="btn outline block"><i class="fas fa-print"></i> Cetak</a></div></div>
+        <div class="card"><div class="card-body"><div class="stat-icon red mb-20"><i class="fas fa-file-contract"></i></div>
+            <h3 style="margin:0 0 6px;font-size:17px">Rekap Lembaga</h3><p class="small muted">Ringkasan menyeluruh untuk laporan ke yayasan.</p>
+            <a class="btn outline block"><i class="fas fa-print"></i> Cetak</a></div></div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+$kind: collection
+name: 'SIPADUHOK Web Testing'
+description: |-
+  Collection pengujian endpoint web SIPADUHOK via Postman.
+
+  CATATAN PENTING (kenapa ini bukan "REST API testing"):
+  Aplikasi ini adalah web app Laravel berbasis session + CSRF dan TIDAK memiliki
+  routes/api.php. Jadi tidak ada endpoint JSON stateless seperti /api/siswa.
+  Collection ini menguji endpoint NYATA di routes/web.php, fokus pada pengujian
+  NEGATIF/keamanan: penjagaan autentikasi, proteksi CSRF, dan penolakan token invalid.
+
+  CARA PAKAI:
+  1. Jalankan server lokal:  php artisan serve --host=127.0.0.1 --port=8000
+  2. Sesuaikan variabel base_url di bawah bila memakai host lain
+     (mis. http://sipaduhok.test bila vhost Laragon aktif, atau URL produksi).
+  3. Jalankan collection (Run collection). Semua request diuji TANPA login,
+     sehingga yang diharapkan adalah DITOLAK (redirect ke /login atau 403/404).
+
+  Hasil verifikasi terakhir (server lokal): 6/6 request lulus.
+variables:
+  - key: base_url
+    value: 'http://127.0.0.1:8000'
+  - key: siswa_id
+    value: '1'
+  - key: order_id
+    value: 'ORD-TEST-001'
+  - key: preview_token
+    value: 'replace-me'

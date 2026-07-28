@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Layar Wakil Kepala Sekolah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>Wakil Kepala Sekolah — 5 layar</h1>
+    <p>Cermin sisi akademik dari Admin: <strong>tanpa</strong> keuangan, konten publikasi, dan manajemen pengguna. Isi halaman hampir identik dengan Admin — yang membedakan adalah varian sidebar.</p>
+</div>
+
+<!-- ═══ 01 Dashboard ═══ -->
+<div class="screen-label">Waka / 01 Dashboard <span>waka.dashboard · waka/dashboard.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.dashboard"
+     data-title="Dashboard" data-subtitle="Ringkasan akademik TA 2025/2026" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-chalkboard"></i></div>
+            <div class="stat-details"><div class="stat-value">36</div><div class="stat-label">Rombongan Belajar</div>
+            <div class="stat-footer"><span>3 cabang</span><span class="muted">Rata-rata 34 siswa</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-book"></i></div>
+            <div class="stat-details"><div class="stat-value">24</div><div class="stat-label">Mata Pelajaran</div>
+            <div class="stat-footer"><span>Semua jenjang</span><span class="badge success">KKM lengkap</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-calendar-week"></i></div>
+            <div class="stat-details"><div class="stat-value">31 / 36</div><div class="stat-label">Jadwal Tersusun</div>
+            <div class="stat-footer"><span>5 kelas belum lengkap</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-user-tie"></i></div>
+            <div class="stat-details"><div class="stat-value">24 / 36</div><div class="stat-label">Wali Kelas Ditetapkan</div>
+            <div class="stat-footer"><span>12 kelas kosong</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-triangle-exclamation"></i> Perlu Tindak Lanjut</h3></div>
+            <table class="data">
+                <thead><tr><th>Kelas</th><th>Jenjang</th><th>Masalah</th><th>Dampak</th><th style="width:130px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">9C</td><td>SMP / Paket B</td><td><span class="badge warning">Wali kelas belum ditetapkan</span></td><td class="small muted">Rapor tidak bisa diisi</td><td><a class="btn primary sm">Tetapkan</a></td></tr>
+                    <tr><td class="cell-main">10 IPS</td><td>SMA / Paket C</td><td><span class="badge danger">Jadwal belum lengkap</span></td><td class="small muted">4 slot kosong</td><td><a class="btn primary sm">Susun</a></td></tr>
+                    <tr><td class="cell-main">11 IPA</td><td>SMA / Paket C</td><td><span class="badge warning">Guru pengajar kurang</span></td><td class="small muted">Fisika belum ada pengampu</td><td><a class="btn primary sm">Tugaskan</a></td></tr>
+                    <tr><td class="cell-main">7C</td><td>SMP / Paket B</td><td><span class="badge danger">KKM belum diatur</span></td><td class="small muted">Prediksi kenaikan tidak akurat</td><td><a class="btn primary sm">Atur KKM</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-simple"></i> Beban Mengajar</h3></div>
+            <div class="card-body">
+                <div class="row between small" style="margin-bottom:6px"><span>Hendra Wijaya</span><span class="strong">28 JP</span></div>
+                <div class="progress mb-20"><i style="width:93%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>Dewi Lestari</span><span class="strong">24 JP</span></div>
+                <div class="progress mb-20"><i style="width:80%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>Sri Rahayu</span><span class="strong">22 JP</span></div>
+                <div class="progress mb-20"><i style="width:73%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>Yusuf Maulana</span><span class="strong">18 JP</span></div>
+                <div class="progress warn mb-20"><i style="width:60%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>M. Ridwan</span><span class="strong">10 JP</span></div>
+                <div class="progress danger"><i style="width:33%"></i></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Data Kelas ═══ -->
+<div class="screen-label">Waka / 02 Data Kelas <span>waka.kelas.index · waka/kelas/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.kelas.index"
+     data-title="Data Kelas" data-subtitle="36 rombongan belajar pada TA 2025/2026" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+    <div class="card">
+        <div class="toolbar">
+            <div class="search" style="width:260px"><i class="fas fa-search"></i><input class="control" placeholder="Cari nama kelas…"></div>
+            <select class="control" style="width:160px"><option>Semua Cabang</option></select>
+            <select class="control" style="width:150px"><option>Semua Jenjang</option></select>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-print"></i> Cetak</a>
+            <a class="btn primary"><i class="fas fa-plus"></i> Tambah Kelas</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:52px">No</th><th>Nama Kelas</th><th>Jenjang</th><th>Cabang</th><th>Wali Kelas</th><th class="num">Siswa</th><th>Jadwal</th><th style="width:130px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td class="cell-main">7A</td><td>SMP / Paket B</td><td>Pusat</td><td><span class="avatar-sm gray">DL</span>Dewi Lestari</td><td class="num strong">34</td><td><span class="badge success">Lengkap</span></td><td><a class="btn ghost sm"><i class="fas fa-users"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>2</td><td class="cell-main">7B</td><td>SMP / Paket B</td><td>Pusat</td><td><span class="avatar-sm gray">HW</span>Hendra Wijaya</td><td class="num strong">31</td><td><span class="badge success">Lengkap</span></td><td><a class="btn ghost sm"><i class="fas fa-users"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>3</td><td class="cell-main">7C</td><td>SMP / Paket B</td><td>Cabang 2</td><td><span class="avatar-sm gray">MR</span>M. Ridwan</td><td class="num strong">29</td><td><span class="badge warning">2 slot kosong</span></td><td><a class="btn ghost sm"><i class="fas fa-users"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>4</td><td class="cell-main">8B</td><td>SMP / Paket B</td><td>Cabang 2</td><td><span class="avatar-sm gray">SR</span>Sri Rahayu</td><td class="num strong">39</td><td><span class="badge success">Lengkap</span></td><td><a class="btn ghost sm"><i class="fas fa-users"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>5</td><td class="cell-main">9C</td><td>SMP / Paket B</td><td>Cabang 3</td><td><span class="muted">Belum ditetapkan</span></td><td class="num strong">28</td><td><span class="badge success">Lengkap</span></td><td><a class="btn primary sm">Set Wali</a></td></tr>
+                <tr><td>6</td><td class="cell-main">10 IPS</td><td>SMA / Paket C</td><td>Pusat</td><td><span class="avatar-sm gray">YM</span>Yusuf Maulana</td><td class="num strong">26</td><td><span class="badge danger">4 slot kosong</span></td><td><a class="btn ghost sm"><i class="fas fa-users"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+</div>
+</div>
+
+<!-- ═══ 03 Jadwal Pelajaran ═══ -->
+<div class="screen-label">Waka / 03 Jadwal Pelajaran <span>waka.jadwal-pelajaran.index · waka/jadwal-pelajaran/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.jadwal-pelajaran.index"
+     data-title="Jadwal Pelajaran" data-subtitle="Kelas 10 IPS — Semester Genap · 4 slot masih kosong" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-exclamation-triangle"></i> Kelas ini masih memiliki <strong>4 slot kosong</strong>. Jadwal belum dapat diterbitkan ke guru dan siswa.</div>
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <select class="control" style="width:190px"><option>Kelas 10 IPS — Pusat</option></select>
+        <select class="control" style="width:170px"><option>Semester Genap</option></select>
+        <div class="spacer"></div>
+        <a class="btn ghost"><i class="fas fa-mug-hot"></i> Atur Istirahat</a>
+        <a class="btn primary"><i class="fas fa-plus"></i> Tambah Jadwal</a>
+    </div></div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-week"></i> Grid Jadwal Mingguan</h3><span class="muted small">Sel kosong menandai slot yang belum diisi</span></div>
+        <div class="card-body">
+            <table class="jadwal">
+                <thead><tr><th style="width:110px">Jam</th><th>Senin</th><th>Selasa</th><th>Rabu</th><th>Kamis</th><th>Jumat</th></tr></thead>
+                <tbody>
+                    <tr><td class="jam">07.00 – 07.40</td><td class="slot">Upacara</td><td class="slot">Ekonomi</td><td class="slot">Sejarah</td><td class="slot">Geografi</td><td class="slot">PAI</td></tr>
+                    <tr><td class="jam">07.40 – 08.20</td><td class="slot">Ekonomi</td><td class="slot">Ekonomi</td><td class="slot">Sejarah</td><td class="slot">Geografi</td><td class="slot">PAI</td></tr>
+                    <tr><td class="jam">08.20 – 09.00</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="kosong">Kosong</td><td class="slot">Sosiologi</td><td class="slot">Penjaskes</td></tr>
+                    <tr><td class="istirahat" colspan="6">Istirahat Pertama · 09.00 – 09.20</td></tr>
+                    <tr><td class="jam">09.20 – 10.00</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="kosong">Kosong</td><td class="slot">Sosiologi</td><td class="slot">Penjaskes</td></tr>
+                    <tr><td class="jam">10.00 – 10.40</td><td class="slot">B. Indonesia</td><td class="slot">Sosiologi</td><td class="slot">Matematika</td><td class="slot">Pancasila</td><td class="kosong">Kosong</td></tr>
+                    <tr><td class="jam">10.40 – 11.20</td><td class="slot">B. Indonesia</td><td class="slot">Sosiologi</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="kosong">Kosong</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Pengaturan KKM ═══ -->
+<div class="screen-label">Waka / 04 Pengaturan KKM <span>waka.kenaikan-kelas.kkm.index · waka/akademik/promotion/kkm.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.kkm.index"
+     data-title="Pengaturan KKM" data-subtitle="Kriteria Ketuntasan Minimal per mata pelajaran dan jenjang" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="alert info"><i class="fas fa-info-circle"></i> KKM dipakai untuk menghitung prediksi kenaikan kelas dan menentukan predikat pada rapor. Perubahan berlaku untuk TA aktif.</div>
+
+    <div class="card">
+        <div class="toolbar">
+            <select class="control" style="width:190px"><option>SMP / Paket B</option></select>
+            <select class="control" style="width:170px"><option>Semua Tingkat</option></select>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-copy"></i> Salin dari TA Lalu</a>
+            <a class="btn primary"><i class="fas fa-save"></i> Simpan Semua</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:52px">No</th><th>Mata Pelajaran</th><th>Kelompok</th><th style="width:120px">Tingkat 7</th><th style="width:120px">Tingkat 8</th><th style="width:120px">Tingkat 9</th><th>Terakhir Diubah</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td class="cell-main">Pendidikan Agama dan Budi Pekerti</td><td><span class="badge neutral square">Wajib A</span></td>
+                    <td><input class="control" value="75" style="text-align:center;padding:7px"></td><td><input class="control" value="75" style="text-align:center;padding:7px"></td><td><input class="control" value="78" style="text-align:center;padding:7px"></td><td class="small muted">08 Jan 2026</td></tr>
+                <tr><td>2</td><td class="cell-main">Pendidikan Pancasila</td><td><span class="badge neutral square">Wajib A</span></td>
+                    <td><input class="control" value="75" style="text-align:center;padding:7px"></td><td><input class="control" value="75" style="text-align:center;padding:7px"></td><td><input class="control" value="75" style="text-align:center;padding:7px"></td><td class="small muted">08 Jan 2026</td></tr>
+                <tr><td>3</td><td class="cell-main">Bahasa Indonesia</td><td><span class="badge neutral square">Wajib A</span></td>
+                    <td><input class="control" value="75" style="text-align:center;padding:7px"></td><td><input class="control" value="76" style="text-align:center;padding:7px"></td><td><input class="control" value="78" style="text-align:center;padding:7px"></td><td class="small muted">08 Jan 2026</td></tr>
+                <tr><td>4</td><td class="cell-main">Matematika</td><td><span class="badge neutral square">Wajib A</span></td>
+                    <td><input class="control focus" value="70" style="text-align:center;padding:7px"></td><td><input class="control" value="70" style="text-align:center;padding:7px"></td><td><input class="control" value="72" style="text-align:center;padding:7px"></td><td class="small muted">Belum disimpan</td></tr>
+                <tr><td>5</td><td class="cell-main">Ilmu Pengetahuan Alam</td><td><span class="badge neutral square">Wajib A</span></td>
+                    <td><input class="control" value="70" style="text-align:center;padding:7px"></td><td><input class="control" value="72" style="text-align:center;padding:7px"></td><td><input class="control" value="72" style="text-align:center;padding:7px"></td><td class="small muted">08 Jan 2026</td></tr>
+                <tr><td>6</td><td class="cell-main">Seni Budaya</td><td><span class="badge primary square">Wajib B</span></td>
+                    <td><input class="control" value="70" style="text-align:center;padding:7px"></td><td><input class="control" value="70" style="text-align:center;padding:7px"></td><td><input class="control" value="70" style="text-align:center;padding:7px"></td><td class="small muted">08 Jan 2026</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Monitoring Siswa ═══ -->
+<div class="screen-label">Waka / 05 Monitoring Siswa <span>waka.monitoring.siswa · waka/monitoring/siswa.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.monitoring.siswa"
+     data-title="Monitoring Siswa" data-subtitle="Pantauan aktivitas dan capaian peserta didik" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon green" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-check"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">1.094</div><div class="stat-label" style="font-size:12px">Aktif 7 Hari Terakhir</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon yellow" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-clock"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">118</div><div class="stat-label" style="font-size:12px">Tidak Aktif &gt; 14 Hari</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon red" style="width:42px;height:42px;font-size:17px"><i class="fas fa-arrow-trend-down"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">64</div><div class="stat-label" style="font-size:12px">Nilai Turun</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon" style="width:42px;height:42px;font-size:17px"><i class="fas fa-calendar-xmark"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">47</div><div class="stat-label" style="font-size:12px">Kehadiran &lt; 85%</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Perlu Perhatian</a><a>Semua Siswa</a><a>Berprestasi</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:240px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa…"></div>
+            <select class="control" style="width:150px"><option>Semua Kelas</option></select>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas</th><th>Wali Kelas</th><th>Kehadiran</th><th class="num">Rata-rata</th><th>Aktivitas LMS</th><th>Indikasi</th><th style="width:120px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Hendra Wijaya</td>
+                    <td><div class="progress danger" style="width:90px"><i style="width:74%"></i></div><span class="xsmall muted">74%</span></td>
+                    <td class="num strong">61,7</td><td><span class="badge danger">Tidak aktif 21 hari</span></td><td><span class="badge danger">Risiko tinggi</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+                <tr><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>Sri Rahayu</td>
+                    <td><div class="progress warn" style="width:90px"><i style="width:82%"></i></div><span class="xsmall muted">82%</span></td>
+                    <td class="num strong">76,1</td><td><span class="badge warning">Aktif 9 hari lalu</span></td><td><span class="badge warning">Perlu dipantau</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+                <tr><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>Yusuf Maulana</td>
+                    <td><div class="progress" style="width:90px"><i style="width:92%"></i></div><span class="xsmall muted">92%</span></td>
+                    <td class="num strong">68,4</td><td><span class="badge success">Aktif hari ini</span></td><td><span class="badge warning">Nilai di bawah KKM</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+                <tr><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Yusuf Maulana</td>
+                    <td><div class="progress" style="width:90px"><i style="width:94%"></i></div><span class="xsmall muted">94%</span></td>
+                    <td class="num strong">79,8</td><td><span class="badge warning">Aktif 12 hari lalu</span></td><td><span class="badge neutral">Nilai turun 6 poin</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

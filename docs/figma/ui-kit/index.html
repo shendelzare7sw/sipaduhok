@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK UI Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="ui-kit.css">
+<style>
+    body { background: #f1f5f9; }
+    .wrap { width: 1100px; margin: 0 auto; padding: 40px 0 80px; }
+    .lead { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 26px 30px; margin-bottom: 26px; }
+    .lead h2 { margin: 0 0 10px; font-size: 18px; color: #0f172a; }
+    .lead p { margin: 0 0 10px; font-size: 15px; line-height: 1.75; color: #334155; }
+    .lead p:last-child { margin-bottom: 0; }
+    .files { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    a.file {
+        display: flex; gap: 16px; align-items: flex-start;
+        background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+        padding: 20px 22px; text-decoration: none; color: inherit;
+    }
+    a.file .ic { width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; color: #4361ee;
+        display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    a.file .nm { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 3px; }
+    a.file .ds { font-size: 13px; color: #64748b; line-height: 1.6; }
+    a.file .ct { font-size: 12px; font-weight: 700; color: #4361ee; margin-top: 6px; }
+    h3.grp { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+        color: #94a3b8; margin: 32px 0 14px; }
+    .warn { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 8px;
+        font-size: 14px; line-height: 1.75; color: #78350f; margin-bottom: 26px; }
+    .warn strong { color: #713f12; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>SIPADUHOK UI Kit</h1>
+    <p>Rekonstruksi seluruh antarmuka aplikasi sebagai HTML statis, untuk di-import menjadi layer Figma. Nilai desainnya diambil dari CSS produksi, bukan dikarang.</p>
+</div>
+
+<div class="wrap">
+
+    <div class="lead">
+        <h2>Untuk apa berkas ini</h2>
+        <p>Aplikasi SIPADUHOK sudah selesai dibangun, tetapi artefak prototype Figma-nya hilang. UI kit ini adalah jalan pintas untuk merekonstruksinya: buka berkasnya di browser, lalu import dengan plugin <strong>html.to.design</strong> — hasilnya <strong>layer Figma asli</strong> (frame, teks, warna yang bisa diedit), bukan tangkapan gambar.</p>
+        <p>Yang perlu direkonstruksi adalah <strong>57 layar setelah login</strong> untuk 9 peran pengguna. Desain halaman publik sudah dibuat sebelumnya dan sudah ada di workspace Figma — berkas <code>screens/01-publik.html</code> disertakan hanya sebagai pembanding, <strong>lewati saat import</strong>. Semua penamaan frame mengikuti <code>docs/figma/03-inventaris-layar.md</code>.</p>
+    </div>
+
+    <div class="warn">
+        <strong>Penting saat import.</strong> Shell (sidebar + navbar) dirakit oleh JavaScript agar 11 varian sidebar tidak perlu disalin ulang di puluhan berkas. Karena itu import <strong>harus memakai mode ekstensi browser</strong> html.to.design yang membaca DOM setelah halaman ter-render — bukan mode “import from URL”. Untuk berkas lokal (<code>file://</code>), mode ekstensi memang satu-satunya pilihan.
+    </div>
+
+    <h3 class="grp">Fondasi</h3>
+    <div class="files">
+        <a class="file" href="00-foundations.html">
+            <div class="ic"><i class="fas fa-palette"></i></div>
+            <div><div class="nm">Foundations</div>
+                <div class="ds">Warna 3 sistem desain, gradient, skala tipografi, radius, shadow, spacing, dan set ikon.</div>
+                <div class="ct">Buat color style, text style, dan effect style dari sini</div></div></a>
+        <a class="file" href="01-komponen.html">
+            <div class="ic"><i class="fas fa-cubes"></i></div>
+            <div><div class="nm">Komponen</div>
+                <div class="ds">Sidebar (5 varian), navbar, kartu statistik, badge status, tombol, form, tabel, modal, kartu berkas, 5 tipe soal, stepper.</div>
+                <div class="ct">Jadikan Component + Variant di Figma</div></div></a>
+    </div>
+
+    <h3 class="grp">Layar setelah login — 57 frame</h3>
+    <div class="files">
+        <a class="file" href="screens/01-publik.html" style="opacity:.62;border-style:dashed">
+            <div class="ic" style="background:#f1f5f9;color:#94a3b8"><i class="fas fa-globe"></i></div>
+            <div><div class="nm">Publik &amp; Autentikasi <span style="font-size:11px;font-weight:700;color:#b45309;background:#fffbeb;padding:2px 8px;border-radius:999px;margin-left:6px">LEWATI</span></div>
+                <div class="ds">Beranda, PPDB, Login, Pemulihan Akun. <strong>Desainnya sudah ada di workspace Figma</strong> — jangan di-import ulang. Disertakan hanya sebagai pembanding token warna.</div>
+                <div class="ct" style="color:#b45309">4 layar · opsional</div></div></a>
+        <a class="file" href="screens/02-admin.html">
+            <div class="ic"><i class="fas fa-user-shield"></i></div>
+            <div><div class="nm">Admin</div>
+                <div class="ds">Dashboard, data siswa, form tambah siswa, kelas, jadwal, tagihan, laporan, CMS landing page.</div>
+                <div class="ct">8 layar</div></div></a>
+        <a class="file" href="screens/03-ketua.html">
+            <div class="ic" style="background:#f5f3ff;color:#8b5cf6"><i class="fas fa-user-tie"></i></div>
+            <div><div class="nm">Ketua PKBM</div>
+                <div class="ds">Dashboard, validasi rapor, preview rapor A4, dispensasi, approval kenaikan, cetak laporan.</div>
+                <div class="ct">6 layar</div></div></a>
+        <a class="file" href="screens/04-waka.html">
+            <div class="ic" style="background:#ecfdf5;color:#10b981"><i class="fas fa-user-gear"></i></div>
+            <div><div class="nm">Wakil Kepala Sekolah</div>
+                <div class="ds">Dashboard, data kelas, jadwal, pengaturan KKM, monitoring siswa.</div>
+                <div class="ct">5 layar</div></div></a>
+        <a class="file" href="screens/05-sekretaris.html">
+            <div class="ic" style="background:#fffbeb;color:#f59e0b"><i class="fas fa-bullhorn"></i></div>
+            <div><div class="nm">Sekretaris</div>
+                <div class="ds">Dashboard, kelola berita, form berita, kalender akademik.</div>
+                <div class="ct">4 layar</div></div></a>
+        <a class="file" href="screens/06-bendahara.html">
+            <div class="ic" style="background:#ecfeff;color:#06b6d4"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div><div class="nm">Bendahara</div>
+                <div class="ds">Dashboard, kelola tagihan, detail tagihan, kelola &amp; validasi pembayaran, laporan, siswa belum lunas.</div>
+                <div class="ct">7 layar</div></div></a>
+        <a class="file" href="screens/07-wali-kelas.html">
+            <div class="ic" style="background:#f5f3ff;color:#8b5cf6"><i class="fas fa-chalkboard-user"></i></div>
+            <div><div class="nm">Wali Kelas</div>
+                <div class="ds">Pilih kelas, dashboard, presensi, edit nilai, kelola &amp; edit rapor, preview A4, permintaan unduh.</div>
+                <div class="ct">8 layar</div></div></a>
+        <a class="file" href="screens/08-guru.html">
+            <div class="ic" style="background:#e0edfa;color:#165fac"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div><div class="nm">Guru Pengajar</div>
+                <div class="ds">Dashboard SIA, semua kelas, lalu 5 layar shell LMS: dashboard, materi, buat tugas, koreksi, kelola soal.</div>
+                <div class="ct">7 layar · 2 shell</div></div></a>
+        <a class="file" href="screens/09-siswa.html">
+            <div class="ic" style="background:#e0edfa;color:#165fac"><i class="fas fa-user-graduate"></i></div>
+            <div><div class="nm">Siswa</div>
+                <div class="ds">Dashboard SIA, presensi, dashboard LMS, halaman mapel, kerjakan tugas, ujian fullscreen tanpa sidebar.</div>
+                <div class="ct">6 layar · 3 shell</div></div></a>
+        <a class="file" href="screens/10-wali-siswa.html">
+            <div class="ic" style="background:#ecfdf5;color:#10b981"><i class="fas fa-users"></i></div>
+            <div><div class="nm">Wali Siswa</div>
+                <div class="ds">Dashboard multi-anak, tagihan, pembayaran Midtrans, invoice A4, detail rapor, ajukan izin.</div>
+                <div class="ct">6 layar</div></div></a>
+    </div>
+
+    <h3 class="grp">Dokumen pendamping</h3>
+    <div class="lead" style="margin-top:0">
+        <p><strong>01-design-tokens.md</strong> — nilai token lengkap beserta lokasi sumbernya di kode.</p>
+        <p><strong>02-inventaris-komponen.md</strong> — spesifikasi tertulis tiap komponen dan variannya.</p>
+        <p><strong>03-inventaris-layar.md</strong> — pemetaan tiap frame ke route dan berkas blade.</p>
+        <p><strong>04-navigasi-sidebar-per-role.md</strong> — pohon menu 11 varian sidebar.</p>
+        <p><strong>05-alur-prototype.md</strong> — 6 alur untuk dipasang sebagai link prototype.</p>
+        <p><strong>06-prompt-claude-web.md</strong> — prompt siap tempel untuk Claude web yang terhubung Figma.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

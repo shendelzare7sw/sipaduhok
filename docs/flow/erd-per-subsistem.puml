@@ -1,0 +1,1147 @@
+' ERD per Subsistem SIPADUHOK - detail kolom + PK/FK (gaya referensi Gambar 49)
+' File ini berisi 6 diagram (satu @startuml per subsistem).
+' Entitas dari subsistem lain yang dirujuk ditampilkan sebagai stub (nama saja).
+
+@startuml erd-1
+title ERD Subsistem A. Pengguna, Peran & Organisasi
+!theme plain
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "roles" as roles {
+  * id : bigint unsigned <<PK>>
+  --
+  * name : varchar
+  * display_name : varchar
+  * level : int
+    description : text
+    permissions : json
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "users" as users {
+  * id : bigint unsigned <<PK>>
+  --
+  * name : varchar
+    username : varchar
+  * email : varchar
+    personal_email : varchar
+    foto_profil : varchar
+    phone : varchar
+    avatar : varchar
+    last_login_at : timestamp
+    last_login_ip : varchar
+  * role : enum
+    role_id : bigint unsigned <<FK>>
+    email_verified_at : timestamp
+  * password : varchar
+    security_question : varchar
+    security_answer : varchar
+    security_pin : varchar
+    password_changed_at : timestamp
+  * is_active : tinyint
+    remember_token : varchar
+    created_at : timestamp
+    updated_at : timestamp
+    cabang_id : bigint unsigned <<FK>>
+}
+entity "cabang" as cabang {
+  * id : bigint unsigned <<PK>>
+  --
+  * kode_cabang : varchar
+  * nama_cabang : varchar
+  * alamat : text
+    telepon : varchar
+  * is_active : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "tenaga_pendidik" as tenaga_pendidik {
+  * id : bigint unsigned <<PK>>
+  --
+  * user_id : bigint unsigned <<FK>>
+    nip : varchar
+  * nama_lengkap : varchar
+  * jenis_kelamin : enum
+    tempat_lahir : varchar
+    tanggal_lahir : date
+    alamat : text
+    telepon : varchar
+    email : varchar
+    pendidikan_terakhir : varchar
+    foto : varchar
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "siswa" as siswa {
+  * id : bigint unsigned <<PK>>
+  --
+  * user_id : bigint unsigned <<FK>>
+  * cabang_id : bigint unsigned <<FK>>
+    kelas_id : bigint unsigned <<FK>>
+  * nisn : varchar
+    nis : varchar
+  * nama_lengkap : varchar
+  * jenis_kelamin : enum
+  * tempat_lahir : varchar
+  * tanggal_lahir : date
+  * alamat : text
+    agama : varchar
+    pelajaran_agama : varchar
+    nama_ayah : varchar
+    nama_ibu : varchar
+    telepon_orangtua : varchar
+    foto : varchar
+  * tanggal_masuk : date
+  * status : enum
+  * validasi_ujian_bendahara : tinyint
+  * validasi_ujian_wali : tinyint
+    tanggal_validasi_ujian_bendahara : timestamp
+    tanggal_validasi_ujian_wali : timestamp
+  * validasi_rapor_bendahara : tinyint
+  * validasi_rapor_wali : tinyint
+  * validasi_rapor_ketua : tinyint
+    tanggal_validasi_rapor_ketua : timestamp
+    validasi_rapor_ketua_oleh : bigint unsigned <<FK>>
+    tanggal_validasi_rapor_bendahara : timestamp
+    tanggal_validasi_rapor_wali : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+    validasi_ujian_oleh : bigint unsigned <<FK>>
+    validasi_rapor_oleh : bigint unsigned <<FK>>
+}
+entity "student_parents" as student_parents {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * parent_id : bigint unsigned <<FK>>
+  * relationship : varchar
+  * is_primary : tinyint
+  * is_financial_responsible : tinyint
+  * can_access_academic : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "tahun_ajaran" as tahun_ajaran {
+  * id : bigint unsigned <<PK>>
+  --
+  * nama_tahun_ajaran : varchar
+  * tanggal_mulai : date
+  * tanggal_selesai : date
+    tanggal_mulai_genap : date
+    tanggal_akhir_pts_ganjil : date
+    tanggal_akhir_pts_genap : date
+  * is_active : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "kelas" as kelas <<external>>
+
+roles ||--o{ users : role_id
+cabang ||--o{ users : cabang_id
+users ||--|{ tenaga_pendidik : user_id
+users ||--|{ siswa : user_id
+cabang ||--|{ siswa : cabang_id
+kelas ||--o{ siswa : kelas_id
+users ||--o{ siswa : validasi_rapor_ketua_oleh
+users ||--o{ siswa : validasi_ujian_oleh
+users ||--o{ siswa : validasi_rapor_oleh
+siswa ||--|{ student_parents : siswa_id
+users ||--|{ student_parents : parent_id
+@enduml
+
+@startuml erd-2
+title ERD Subsistem B. Akademik: Kelas, Mapel & Jadwal
+!theme plain
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "mata_pelajaran" as mata_pelajaran {
+  * id : bigint unsigned <<PK>>
+  --
+  * kode_mapel : varchar
+  * nama_mapel : varchar
+  * jenjang : enum
+    kelompok : enum
+    deskripsi : text
+  * is_active : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "kelas" as kelas {
+  * id : bigint unsigned <<PK>>
+  --
+  * cabang_id : bigint unsigned <<FK>>
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+    wali_kelas_id : bigint unsigned <<FK>>
+  * nama_kelas : varchar
+  * jenjang : enum
+  * kode_kelas : varchar
+  * kuota_siswa : int
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "guru_pengajar_kelas" as guru_pengajar_kelas {
+  * id : bigint unsigned <<PK>>
+  --
+  * tenaga_pendidik_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "wali_kelas_assignments" as wali_kelas_assignments {
+  * id : bigint unsigned <<PK>>
+  --
+  * tenaga_pendidik_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+  * assigned_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "jadwal_pelajaran" as jadwal_pelajaran {
+  * id : bigint unsigned <<PK>>
+  --
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+    guru_id : bigint unsigned <<FK>>
+  * hari : enum
+  * jam_mulai : time
+  * jam_selesai : time
+  * status : enum
+    siswa_ids : json
+    keterangan : text
+    updated_by : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "jadwal_pelajaran_history" as jadwal_pelajaran_history {
+  * id : bigint unsigned <<PK>>
+  --
+  * jadwal_pelajaran_id : bigint unsigned <<FK>>
+  * field_changed : varchar
+    old_value : text
+    new_value : text
+    keterangan : text
+    changed_by : bigint unsigned <<FK>>
+  * changed_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "jadwal_kelas" as jadwal_kelas {
+  * id : bigint unsigned <<PK>>
+  --
+  * jadwal_pelajaran_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "pengaturan_istirahat" as pengaturan_istirahat {
+  * id : bigint unsigned <<PK>>
+  --
+  * jenjang : enum
+  * urutan : int
+  * jam_mulai : time
+  * jam_selesai : time
+  * hari_aktif : json
+  * nama_istirahat : varchar
+  * is_active : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "presensi" as presensi {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+    mata_pelajaran_id : bigint unsigned <<FK>>
+  * tanggal : date
+  * status : enum
+    status_validasi : enum
+    keterangan : text
+    bukti_file : varchar
+  * diinput_oleh : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "cabang" as cabang <<external>>
+entity "tahun_ajaran" as tahun_ajaran <<external>>
+entity "tenaga_pendidik" as tenaga_pendidik <<external>>
+entity "users" as users <<external>>
+entity "siswa" as siswa <<external>>
+
+cabang ||--|{ kelas : cabang_id
+tahun_ajaran ||--|{ kelas : tahun_ajaran_id
+tenaga_pendidik ||--o{ kelas : wali_kelas_id
+tenaga_pendidik ||--|{ guru_pengajar_kelas : tenaga_pendidik_id
+kelas ||--|{ guru_pengajar_kelas : kelas_id
+mata_pelajaran ||--|{ guru_pengajar_kelas : mata_pelajaran_id
+tenaga_pendidik ||--|{ wali_kelas_assignments : tenaga_pendidik_id
+kelas ||--|{ wali_kelas_assignments : kelas_id
+tahun_ajaran ||--|{ jadwal_pelajaran : tahun_ajaran_id
+kelas ||--|{ jadwal_pelajaran : kelas_id
+mata_pelajaran ||--|{ jadwal_pelajaran : mata_pelajaran_id
+tenaga_pendidik ||--o{ jadwal_pelajaran : guru_id
+users ||--o{ jadwal_pelajaran : updated_by
+jadwal_pelajaran ||--|{ jadwal_pelajaran_history : jadwal_pelajaran_id
+users ||--o{ jadwal_pelajaran_history : changed_by
+jadwal_pelajaran ||--|{ jadwal_kelas : jadwal_pelajaran_id
+kelas ||--|{ jadwal_kelas : kelas_id
+siswa ||--|{ presensi : siswa_id
+kelas ||--|{ presensi : kelas_id
+mata_pelajaran ||--o{ presensi : mata_pelajaran_id
+users ||--|{ presensi : diinput_oleh
+@enduml
+
+@startuml erd-3
+title ERD Subsistem C. Penilaian, Rapor & Kenaikan Kelas
+!theme plain
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "nilai" as nilai {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * semester : enum
+  * guru_id : bigint unsigned <<FK>>
+    tugas_1 : decimal
+    tugas_2 : decimal
+    tugas_3 : decimal
+    tugas_4 : decimal
+    tugas_5 : decimal
+    rata_tugas : decimal
+    latihan_1 : decimal
+    latihan_2 : decimal
+    latihan_3 : decimal
+    latihan_4 : decimal
+    latihan_5 : decimal
+    rata_latihan : decimal
+    uh_1 : decimal
+    uh_2 : decimal
+    uh_3 : decimal
+    uh_4 : decimal
+    uh_5 : decimal
+    rata_uh : decimal
+    pts : decimal
+    pas : decimal
+    nilai_akhir : decimal
+    keterampilan : decimal
+    to_1 : decimal
+    to_2 : decimal
+    to_3 : decimal
+    upk : decimal
+    ujian_praktek : decimal
+    tugas_5_guru : decimal
+    latihan_5_guru : decimal
+    uh_5_guru : decimal
+    tugas_4_guru : decimal
+    latihan_4_guru : decimal
+    uh_4_guru : decimal
+    tugas_3_guru : decimal
+    latihan_3_guru : decimal
+    uh_3_guru : decimal
+    tugas_2_guru : decimal
+    latihan_2_guru : decimal
+    uh_2_guru : decimal
+    tugas_1_guru : decimal
+    latihan_1_guru : decimal
+    uh_1_guru : decimal
+    created_at : timestamp
+    updated_at : timestamp
+    pts_guru : decimal
+    pas_guru : decimal
+    keterampilan_guru : decimal
+    to_1_guru : decimal
+    to_2_guru : decimal
+    to_3_guru : decimal
+    upk_guru : decimal
+    ujian_praktek_guru : decimal
+    guru_terakhir_simpan_at : timestamp
+    wali_terakhir_edit_at : timestamp
+    edited_by_wali_id : bigint unsigned <<FK>>
+}
+entity "pengaturan_kkm" as pengaturan_kkm {
+  * id : bigint unsigned <<PK>>
+  --
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * jenjang : enum
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * nilai_kkm : int
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "rapor" as rapor {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * semester : enum
+  * jenis_rapor : enum
+    catatan_wali_kelas : text
+  * catatan_alignment : varchar
+  * deskripsi_alignment : varchar
+  * keterangan_ekstra_alignment : varchar
+  * jumlah_sakit : int
+  * jumlah_izin : int
+  * jumlah_alpha : int
+  * status : enum
+    tanggal_terbit : date
+    tanggal_rilis : date
+    catatan_revisi_ketua : text
+  * status_review_ketua : enum
+    uploaded_pdf_path : varchar
+  * input_mode : enum
+  * allow_download : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "rapor_nilai" as rapor_nilai {
+  * id : bigint unsigned <<PK>>
+  --
+  * rapor_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * nilai_id : bigint unsigned <<FK>>
+  * nilai_angka : decimal
+  * nilai_huruf : varchar
+    deskripsi : text
+  * urutan : int
+  * is_visible : tinyint
+    kelompok_override : varchar
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "rapor_kegiatan_ekstra" as rapor_kegiatan_ekstra {
+  * id : bigint unsigned <<PK>>
+  --
+  * rapor_id : bigint unsigned <<FK>>
+  * kegiatan_nama : varchar
+    predikat : enum
+    keterangan : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "template_capaian_kompetensi" as template_capaian_kompetensi {
+  * id : bigint unsigned <<PK>>
+  --
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * template_text : text
+    created_by : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "pengajuan_rapor_ketua" as pengajuan_rapor_ketua {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * diajukan_oleh : bigint unsigned <<FK>>
+  * alasan : text
+  * tipe : enum
+    periode : enum
+  * status : enum
+    diputuskan_oleh : bigint unsigned <<FK>>
+    catatan_ketua : text
+  * tanggal_pengajuan : timestamp
+    tanggal_keputusan : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "request_download_rapor" as request_download_rapor {
+  * id : bigint unsigned <<PK>>
+  --
+  * rapor_id : bigint unsigned <<FK>>
+  * user_id : bigint unsigned <<FK>>
+  * siswa_id : bigint unsigned <<FK>>
+  * status : enum
+    alasan : text
+    diputuskan_oleh : bigint unsigned <<FK>>
+    catatan_admin : text
+    tanggal_request : timestamp
+    tanggal_keputusan : timestamp
+    download_expired_at : timestamp
+    download_token : varchar
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "status_naik_kelas_siswa" as status_naik_kelas_siswa {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+    kelas_asal : varchar
+    kelas_tujuan : varchar
+    original_kelas_id : bigint unsigned <<FK>>
+  * status_pembayaran : enum
+  * persentase_nilai_tuntas : decimal
+  * jumlah_mapel_tuntas : int
+  * total_mapel : int
+  * status_kelulusan : enum
+  * izin_khusus_ketua : tinyint
+    tanggal_eksekusi : date
+  * is_processed : tinyint
+    rolled_back_at : timestamp
+    rolled_back_by : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "promotion_schedules" as promotion_schedules {
+  * id : bigint unsigned <<PK>>
+  --
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * scheduled_at : datetime
+  * status : enum
+    created_by : bigint unsigned <<FK>>
+    executed_at : datetime
+  * students_processed : int
+  * students_promoted : int
+  * students_graduated : int
+  * students_failed : int
+    execution_log : text
+  * notify_on_complete : tinyint
+    notification_email : varchar
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "pengaturan_naik_kelas" as pengaturan_naik_kelas {
+  * id : bigint unsigned <<PK>>
+  --
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * tanggal_pengambilan_rapor : date
+    tanggal_eksekusi : date
+  * persentase_minimal_tuntas : int
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "izin_naik_kelas_khusus" as izin_naik_kelas_khusus {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+    diajukan_oleh : bigint unsigned <<FK>>
+  * tanggal_pengajuan : timestamp
+    alasan_pengajuan : text
+  * total_tunggakan : decimal
+    disetujui_oleh : bigint unsigned <<FK>>
+    tanggal_persetujuan : timestamp
+  * status : enum
+    catatan_ketua : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "siswa" as siswa <<external>>
+entity "mata_pelajaran" as mata_pelajaran <<external>>
+entity "kelas" as kelas <<external>>
+entity "tahun_ajaran" as tahun_ajaran <<external>>
+entity "tenaga_pendidik" as tenaga_pendidik <<external>>
+entity "users" as users <<external>>
+
+siswa ||--|{ nilai : siswa_id
+mata_pelajaran ||--|{ nilai : mata_pelajaran_id
+kelas ||--|{ nilai : kelas_id
+tahun_ajaran ||--|{ nilai : tahun_ajaran_id
+tenaga_pendidik ||--|{ nilai : guru_id
+tenaga_pendidik ||--o{ nilai : edited_by_wali_id
+tahun_ajaran ||--|{ pengaturan_kkm : tahun_ajaran_id
+mata_pelajaran ||--|{ pengaturan_kkm : mata_pelajaran_id
+siswa ||--|{ rapor : siswa_id
+kelas ||--|{ rapor : kelas_id
+tahun_ajaran ||--|{ rapor : tahun_ajaran_id
+rapor ||--|{ rapor_nilai : rapor_id
+mata_pelajaran ||--|{ rapor_nilai : mata_pelajaran_id
+nilai ||--|{ rapor_nilai : nilai_id
+rapor ||--|{ rapor_kegiatan_ekstra : rapor_id
+mata_pelajaran ||--|{ template_capaian_kompetensi : mata_pelajaran_id
+users ||--o{ template_capaian_kompetensi : created_by
+siswa ||--|{ pengajuan_rapor_ketua : siswa_id
+users ||--|{ pengajuan_rapor_ketua : diajukan_oleh
+users ||--o{ pengajuan_rapor_ketua : diputuskan_oleh
+rapor ||--|{ request_download_rapor : rapor_id
+users ||--|{ request_download_rapor : user_id
+siswa ||--|{ request_download_rapor : siswa_id
+users ||--o{ request_download_rapor : diputuskan_oleh
+siswa ||--|{ status_naik_kelas_siswa : siswa_id
+tahun_ajaran ||--|{ status_naik_kelas_siswa : tahun_ajaran_id
+kelas ||--o{ status_naik_kelas_siswa : original_kelas_id
+users ||--o{ status_naik_kelas_siswa : rolled_back_by
+tahun_ajaran ||--|{ promotion_schedules : tahun_ajaran_id
+users ||--o{ promotion_schedules : created_by
+tahun_ajaran ||--|{ pengaturan_naik_kelas : tahun_ajaran_id
+siswa ||--|{ izin_naik_kelas_khusus : siswa_id
+tahun_ajaran ||--|{ izin_naik_kelas_khusus : tahun_ajaran_id
+users ||--o{ izin_naik_kelas_khusus : diajukan_oleh
+users ||--o{ izin_naik_kelas_khusus : disetujui_oleh
+@enduml
+
+@startuml erd-4
+title ERD Subsistem D. LMS: Pertemuan, Materi, Tugas, Ujian & Forum
+!theme plain
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "pertemuans" as pertemuans {
+  * id : bigint unsigned <<PK>>
+  --
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * guru_id : bigint unsigned <<FK>>
+  * judul : varchar
+  * pekan : int
+    deskripsi : text
+  * tanggal : date
+    zoom_link : varchar
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "materi" as materi {
+  * id : bigint unsigned <<PK>>
+  --
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+    pertemuan_id : bigint unsigned <<FK>>
+  * guru_id : bigint unsigned <<FK>>
+  * judul_materi : varchar
+  * kategori : enum
+    deskripsi : text
+    file_materi : varchar
+    url_materi : varchar
+    tipe_file : enum
+  * tanggal_upload : date
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "tugas" as tugas {
+  * id : bigint unsigned <<PK>>
+  --
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+    pertemuan_id : bigint unsigned <<FK>>
+  * guru_id : bigint unsigned <<FK>>
+  * jenis_tugas : enum
+    urutan : int
+  * judul_tugas : varchar
+    judul_bab : varchar
+    nama_materi : varchar
+  * deskripsi : text
+    file_tugas : varchar
+  * tampilkan_nilai : tinyint
+  * bisa_diulang : tinyint
+    batas_pengulangan : int
+  * tanggal_mulai : date
+  * tanggal_deadline : date
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "tugas_siswa" as tugas_siswa {
+  * id : bigint unsigned <<PK>>
+  --
+  * tugas_id : bigint unsigned <<FK>>
+  * siswa_id : bigint unsigned <<FK>>
+    file_jawaban : varchar
+    jawaban_text : text
+    tanggal_submit : timestamp
+    nilai : decimal
+  * status : enum
+  * pengulangan_ke : int
+    feedback_guru : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "ujian" as ujian {
+  * id : bigint unsigned <<PK>>
+  --
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+    pertemuan_id : bigint unsigned <<FK>>
+  * guru_id : bigint unsigned <<FK>>
+  * judul_ujian : varchar
+    deskripsi : text
+  * tipe_ujian : enum
+    urutan : int
+  * tanggal_mulai : datetime
+  * tanggal_selesai : datetime
+  * durasi_menit : int
+  * is_active : tinyint
+  * tampilkan_nilai : tinyint
+  * bisa_diulang : tinyint
+    batas_pengulangan : int
+  * tampilkan_riwayat : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "soal_ujian" as soal_ujian {
+  * id : bigint unsigned <<PK>>
+  --
+  * ujian_id : bigint unsigned <<FK>>
+    narasi : text
+    image_path : varchar
+    urutan : int
+  * pertanyaan : text
+  * tipe_soal : enum
+  * jumlah_pilihan : int
+    pilihan_jawaban : json
+    jawaban_benar : varchar
+    kunci_jawaban : text
+  * bobot_nilai : int
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "ujian_siswa" as ujian_siswa {
+  * id : bigint unsigned <<PK>>
+  --
+  * ujian_id : bigint unsigned <<FK>>
+  * siswa_id : bigint unsigned <<FK>>
+    current_soal_ujian_id : bigint unsigned <<FK>>
+    current_nomor_soal : int unsigned
+    waktu_mulai : timestamp
+    waktu_selesai : timestamp
+    last_activity_at : timestamp
+    last_heartbeat_at : timestamp
+    nilai : decimal
+  * pengulangan_ke : int
+    nilai_terbaik : decimal
+  * answered_count : int unsigned
+  * doubt_count : int unsigned
+  * visited_count : int unsigned
+  * focus_lost_count : int unsigned
+  * focus_lost_total_seconds : int unsigned
+    active_focus_lost_at : timestamp
+  * status : enum
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "jawaban_siswa" as jawaban_siswa {
+  * id : bigint unsigned <<PK>>
+  --
+  * ujian_siswa_id : bigint unsigned <<FK>>
+  * soal_ujian_id : bigint unsigned <<FK>>
+  * jawaban : text
+    nilai_soal : decimal
+    feedback : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "ujian_siswa_soal_statuses" as ujian_siswa_soal_statuses {
+  * id : bigint unsigned <<PK>>
+  --
+  * ujian_siswa_id : bigint unsigned <<FK>>
+  * soal_ujian_id : bigint unsigned <<FK>>
+    nomor_soal : int unsigned
+  * is_visited : tinyint
+  * is_answered : tinyint
+  * is_doubt : tinyint
+    last_visited_at : timestamp
+    last_answered_at : timestamp
+    last_doubt_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "ujian_pengawasan_logs" as ujian_pengawasan_logs {
+  * id : bigint unsigned <<PK>>
+  --
+  * ujian_siswa_id : bigint unsigned <<FK>>
+  * event_type : varchar
+    description : varchar
+    metadata : json
+    ip_address : varchar
+    user_agent : text
+  * occurred_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "forum_diskusi" as forum_diskusi {
+  * id : bigint unsigned <<PK>>
+  --
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+    pertemuan_id : bigint unsigned <<FK>>
+  * kelas_id : bigint unsigned <<FK>>
+  * user_id : bigint unsigned <<FK>>
+  * topik : enum
+  * judul : varchar
+  * isi : text
+    reference_id : bigint unsigned
+  * is_pinned : tinyint
+  * is_closed : tinyint
+    lampiran : json
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "forum_replies" as forum_replies {
+  * id : bigint unsigned <<PK>>
+  --
+  * forum_diskusi_id : bigint unsigned <<FK>>
+  * user_id : bigint unsigned <<FK>>
+    parent_id : bigint unsigned <<FK>>
+  * isi : text
+  * is_answer : tinyint
+  * is_teacher_reply : tinyint
+    attachment : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "lms_meetings" as lms_meetings {
+  * id : bigint unsigned <<PK>>
+  --
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * guru_id : bigint unsigned <<FK>>
+  * judul : varchar
+  * platform : enum
+  * link_meeting : text
+  * waktu_mulai : datetime
+    waktu_selesai : datetime
+    deskripsi : text
+  * is_active : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "kelas" as kelas <<external>>
+entity "mata_pelajaran" as mata_pelajaran <<external>>
+entity "tenaga_pendidik" as tenaga_pendidik <<external>>
+entity "siswa" as siswa <<external>>
+entity "users" as users <<external>>
+
+kelas ||--|{ pertemuans : kelas_id
+mata_pelajaran ||--|{ pertemuans : mata_pelajaran_id
+tenaga_pendidik ||--|{ pertemuans : guru_id
+kelas ||--|{ materi : kelas_id
+mata_pelajaran ||--|{ materi : mata_pelajaran_id
+pertemuans ||--o{ materi : pertemuan_id
+tenaga_pendidik ||--|{ materi : guru_id
+kelas ||--|{ tugas : kelas_id
+mata_pelajaran ||--|{ tugas : mata_pelajaran_id
+pertemuans ||--o{ tugas : pertemuan_id
+tenaga_pendidik ||--|{ tugas : guru_id
+tugas ||--|{ tugas_siswa : tugas_id
+siswa ||--|{ tugas_siswa : siswa_id
+kelas ||--|{ ujian : kelas_id
+mata_pelajaran ||--|{ ujian : mata_pelajaran_id
+pertemuans ||--o{ ujian : pertemuan_id
+tenaga_pendidik ||--|{ ujian : guru_id
+ujian ||--|{ soal_ujian : ujian_id
+ujian ||--|{ ujian_siswa : ujian_id
+siswa ||--|{ ujian_siswa : siswa_id
+soal_ujian ||--o{ ujian_siswa : current_soal_ujian_id
+ujian_siswa ||--|{ jawaban_siswa : ujian_siswa_id
+soal_ujian ||--|{ jawaban_siswa : soal_ujian_id
+ujian_siswa ||--|{ ujian_siswa_soal_statuses : ujian_siswa_id
+soal_ujian ||--|{ ujian_siswa_soal_statuses : soal_ujian_id
+ujian_siswa ||--|{ ujian_pengawasan_logs : ujian_siswa_id
+mata_pelajaran ||--|{ forum_diskusi : mata_pelajaran_id
+pertemuans ||--o{ forum_diskusi : pertemuan_id
+kelas ||--|{ forum_diskusi : kelas_id
+users ||--|{ forum_diskusi : user_id
+forum_diskusi ||--|{ forum_replies : forum_diskusi_id
+users ||--|{ forum_replies : user_id
+forum_replies ||--o{ forum_replies : parent_id
+kelas ||--|{ lms_meetings : kelas_id
+mata_pelajaran ||--|{ lms_meetings : mata_pelajaran_id
+tenaga_pendidik ||--|{ lms_meetings : guru_id
+@enduml
+
+@startuml erd-5
+title ERD Subsistem E. Keuangan
+!theme plain
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "tagihan" as tagihan {
+  * id : bigint unsigned <<PK>>
+  --
+  * siswa_id : bigint unsigned <<FK>>
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+    tagihan_asal_id : bigint unsigned <<FK>>
+    dialihkan_ke_id : bigint unsigned <<FK>>
+    dialihkan_pada : timestamp
+  * jenis_tagihan : varchar
+    keterangan : varchar
+  * jumlah : decimal
+  * tanggal_jatuh_tempo : date
+    status : enum
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "pembayaran" as pembayaran {
+  * id : bigint unsigned <<PK>>
+  --
+  * tagihan_id : bigint unsigned <<FK>>
+  * siswa_id : bigint unsigned <<FK>>
+    paid_by_parent_id : bigint unsigned <<FK>>
+  * kode_pembayaran : varchar
+  * jumlah_bayar : decimal
+  * tanggal_bayar : datetime
+  * metode_pembayaran : enum
+    payment_gateway : varchar
+    transaction_id : varchar
+    order_id : varchar
+    payment_type : varchar
+    gateway_response : json
+    bukti_pembayaran : varchar
+  * status_validasi : enum
+    divalidasi_oleh : bigint unsigned <<FK>>
+    tanggal_validasi : timestamp
+    catatan : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "info_pembayaran" as info_pembayaran {
+  * id : bigint unsigned <<PK>>
+  --
+    nama_bank : varchar
+    rekening_bank : varchar
+    atas_nama : varchar
+    midtrans_merchant_id : varchar
+    midtrans_server_key : text
+    midtrans_client_key : text
+  * midtrans_is_production : tinyint
+  * midtrans_enabled : tinyint
+    tunai_lokasi : varchar
+    tunai_jam_operasional : varchar
+    tunai_deskripsi : text
+    updated_by : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "pengaturan_batas_pembayaran" as pengaturan_batas_pembayaran {
+  * id : bigint unsigned <<PK>>
+  --
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * periode : enum
+  * jenis_tagihan_required : json
+  * created_by : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "financial_audit_logs" as financial_audit_logs {
+  * id : bigint unsigned <<PK>>
+  --
+    user_id : bigint unsigned <<FK>>
+  * action : varchar
+  * model_type : varchar
+    model_id : bigint unsigned
+    old_values : json
+    new_values : json
+    ip_address : varchar
+    user_agent : text
+    description : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "siswa" as siswa <<external>>
+entity "tahun_ajaran" as tahun_ajaran <<external>>
+entity "users" as users <<external>>
+
+siswa ||--|{ tagihan : siswa_id
+tahun_ajaran ||--|{ tagihan : tahun_ajaran_id
+tagihan ||--o{ tagihan : tagihan_asal_id
+tagihan ||--o{ tagihan : dialihkan_ke_id
+tagihan ||--|{ pembayaran : tagihan_id
+siswa ||--|{ pembayaran : siswa_id
+users ||--o{ pembayaran : paid_by_parent_id
+users ||--o{ pembayaran : divalidasi_oleh
+users ||--o{ info_pembayaran : updated_by
+tahun_ajaran ||--|{ pengaturan_batas_pembayaran : tahun_ajaran_id
+users ||--|{ pengaturan_batas_pembayaran : created_by
+users ||--o{ financial_audit_logs : user_id
+@enduml
+
+@startuml erd-6
+title ERD Subsistem F. Konten, Notifikasi & Sistem
+!theme plain
+hide circle
+hide empty methods
+skinparam linetype ortho
+
+entity "berita" as berita {
+  * id : bigint unsigned <<PK>>
+  --
+  * judul : varchar
+  * deskripsi_singkat : text
+  * gambar_thumbnail : varchar
+  * url_berita : varchar
+  * kategori : enum
+  * tanggal_berita : date
+  * is_featured : tinyint
+  * urutan_tampil : int
+  * status : enum
+  * dibuat_oleh : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "flyer" as flyer {
+  * id : bigint unsigned <<PK>>
+  --
+  * judul : varchar
+    deskripsi : text
+  * gambar_flyer : varchar
+    link_url : varchar
+  * tanggal_mulai : date
+  * tanggal_selesai : date
+  * target_audience : enum
+  * urutan_tampil : int
+  * status : enum
+  * dibuat_oleh : bigint unsigned <<FK>>
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "pengumuman" as pengumuman {
+  * id : bigint unsigned <<PK>>
+  --
+    kalender_akademik_id : bigint unsigned <<FK>>
+  * dibuat_oleh : bigint unsigned <<FK>>
+  * judul : varchar
+  * isi_pengumuman : text
+  * tanggal_pengumuman : date
+  * prioritas : enum
+    lampiran_surat : varchar
+  * is_from_kalender : tinyint
+  * status : enum
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "kalender_akademik" as kalender_akademik {
+  * id : bigint unsigned <<PK>>
+  --
+  * tahun_ajaran_id : bigint unsigned <<FK>>
+  * nama_kegiatan : varchar
+  * tanggal_mulai : date
+    tanggal_selesai : date
+    waktu_mulai : time
+    waktu_selesai : time
+    keterangan : text
+  * jenis_kegiatan : varchar
+    lampiran_surat : varchar
+  * status : enum
+  * is_hidden_siswa : tinyint
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "landing_pages" as landing_pages {
+  * id : bigint unsigned <<PK>>
+  --
+  * slug : varchar
+  * title : varchar
+  * order : int
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "landing_page_sections" as landing_page_sections {
+  * id : bigint unsigned <<PK>>
+  --
+  * landing_page_id : bigint unsigned <<FK>>
+  * section_key : varchar
+  * type : enum
+  * content : json
+  * is_visible : tinyint
+  * order : int
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "notifications" as notifications {
+  * id : bigint unsigned <<PK>>
+  --
+  * user_id : bigint unsigned <<FK>>
+  * tipe : varchar
+  * judul : varchar
+  * pesan : text
+    link : varchar
+    data : json
+    icon : varchar
+    color : varchar
+    read_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "catatan" as catatan {
+  * id : bigint unsigned <<PK>>
+  --
+  * pengirim_id : bigint unsigned <<FK>>
+  * judul : varchar
+  * isi_catatan : text
+  * tipe_penerima : enum
+    role_penerima : varchar
+    penerima_id : bigint unsigned <<FK>>
+  * prioritas : enum
+  * is_read : tinyint
+  * tanggal_kirim : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "catatan_dibaca" as catatan_dibaca {
+  * id : bigint unsigned <<PK>>
+  --
+  * catatan_id : bigint unsigned <<FK>>
+  * user_id : bigint unsigned <<FK>>
+  * dibaca_pada : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "catatan_monitoring" as catatan_monitoring {
+  * id : bigint unsigned <<PK>>
+  --
+  * pengirim_id : bigint unsigned <<FK>>
+  * pengirim_role : varchar
+  * guru_id : bigint unsigned <<FK>>
+  * konten_type : varchar
+  * konten_id : bigint unsigned
+  * kelas_id : bigint unsigned <<FK>>
+  * mata_pelajaran_id : bigint unsigned <<FK>>
+  * isi_catatan : text
+    dibaca_pada : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "recovery_tickets" as recovery_tickets {
+  * id : bigint unsigned <<PK>>
+  --
+  * user_id : bigint unsigned <<FK>>
+  * tipe_recovery : enum
+    status : enum
+    token_reset : varchar
+    target_phone : varchar
+    requested_ip : varchar
+    user_agent : varchar
+    expires_at : timestamp
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "app_settings" as app_settings {
+  * id : bigint unsigned <<PK>>
+  --
+  * key : varchar
+    value : text
+    created_at : timestamp
+    updated_at : timestamp
+}
+entity "users" as users <<external>>
+entity "tahun_ajaran" as tahun_ajaran <<external>>
+entity "tenaga_pendidik" as tenaga_pendidik <<external>>
+entity "kelas" as kelas <<external>>
+entity "mata_pelajaran" as mata_pelajaran <<external>>
+
+users ||--|{ berita : dibuat_oleh
+users ||--|{ flyer : dibuat_oleh
+kalender_akademik ||--o{ pengumuman : kalender_akademik_id
+users ||--|{ pengumuman : dibuat_oleh
+tahun_ajaran ||--|{ kalender_akademik : tahun_ajaran_id
+landing_pages ||--|{ landing_page_sections : landing_page_id
+users ||--|{ notifications : user_id
+users ||--|{ catatan : pengirim_id
+users ||--o{ catatan : penerima_id
+catatan ||--|{ catatan_dibaca : catatan_id
+users ||--|{ catatan_dibaca : user_id
+users ||--|{ catatan_monitoring : pengirim_id
+tenaga_pendidik ||--|{ catatan_monitoring : guru_id
+kelas ||--|{ catatan_monitoring : kelas_id
+mata_pelajaran ||--|{ catatan_monitoring : mata_pelajaran_id
+users ||--|{ recovery_tickets : user_id
+@enduml

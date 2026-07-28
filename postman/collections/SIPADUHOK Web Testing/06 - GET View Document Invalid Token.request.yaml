@@ -1,0 +1,19 @@
+$kind: http-request
+method: GET
+url: '{{base_url}}/view-document/{{preview_token}}'
+order: 6000
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Endpoint /view-document/{id} berada di balik middleware auth.
+      // Tanpa login -> 302 redirect ke /login (guard autentikasi jalan lebih dulu).
+      // Dengan login tapi token invalid/bukan milik user -> 403/404 dari FileController.
+      pm.test('Akses dokumen dgn token invalid harus ditolak', function () {
+        pm.expect([302, 403, 404]).to.include(pm.response.code);
+      });
+      pm.test('Tidak boleh menyajikan file (200)', function () {
+        pm.expect(pm.response.code).to.not.eql(200);
+      });

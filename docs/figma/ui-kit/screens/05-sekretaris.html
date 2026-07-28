@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Layar Sekretaris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>Sekretaris — 4 layar</h1>
+    <p>Role paling ringan: sidebar hanya 2 node (Dashboard + Konten Publikasi). Cocok dipakai sebagai flow prototype pendek yang utuh dari awal sampai akhir.</p>
+</div>
+
+<!-- ═══ 01 Dashboard ═══ -->
+<div class="screen-label">Sekretaris / 01 Dashboard <span>sekretaris.dashboard · dashboard/sekretaris.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="sekretaris" data-active="sekretaris.dashboard"
+     data-title="Dashboard" data-subtitle="Ringkasan konten publikasi sekolah" data-user="S|Sekretaris">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-newspaper"></i></div>
+            <div class="stat-details"><div class="stat-value">48</div><div class="stat-label">Berita Terbit</div>
+            <div class="stat-footer"><span>3 draft menunggu</span><span class="muted">Total 51</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-bullhorn"></i></div>
+            <div class="stat-details"><div class="stat-value">12</div><div class="stat-label">Pengumuman Aktif</div>
+            <div class="stat-footer"><span>4 kedaluwarsa</span><span class="badge success">Tampil</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-image"></i></div>
+            <div class="stat-details"><div class="stat-value">7</div><div class="stat-label">Flyer Terpasang</div>
+            <div class="stat-footer"><span>2 dijadwalkan</span><span class="muted">Slider beranda</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-calendar-days"></i></div>
+            <div class="stat-details"><div class="stat-value">26</div><div class="stat-label">Agenda Semester Ini</div>
+            <div class="stat-footer"><span>Terdekat 3 hari lagi</span><span class="badge warning">UTS</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Konten Terbaru</h3><a class="btn primary sm"><i class="fas fa-plus"></i> Tulis Berita</a></div>
+            <table class="data">
+                <thead><tr><th>Judul</th><th>Jenis</th><th>Penulis</th><th>Tanggal</th><th>Status</th><th style="width:110px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">Pembukaan PPDB TA 2026/2027</td><td><span class="badge primary square">Berita</span></td><td>M. Fadli</td><td>12 Jan 2026</td><td><span class="badge success">Terbit</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Jadwal Ujian Tengah Semester Genap</td><td><span class="badge neutral square">Pengumuman</span></td><td>M. Fadli</td><td>10 Jan 2026</td><td><span class="badge success">Terbit</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Peserta Didik Raih Juara Lomba Karya Tulis</td><td><span class="badge primary square">Berita</span></td><td>M. Fadli</td><td>08 Jan 2026</td><td><span class="badge success">Terbit</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Flyer Open House Februari</td><td><span class="badge purple square">Flyer</span></td><td>M. Fadli</td><td>06 Jan 2026</td><td><span class="badge warning">Dijadwalkan</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Pelatihan Guru Pendamping Inklusi</td><td><span class="badge primary square">Berita</span></td><td>M. Fadli</td><td>02 Jan 2026</td><td><span class="badge neutral">Draft</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-day"></i> Agenda Terdekat</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#fee2e2;color:#b91c1c">17</div><div><div class="activity-title">Ujian Tengah Semester</div><div class="activity-meta">17 – 22 Januari 2026</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb">28</div><div><div class="activity-title">Rapat Wali Murid</div><div class="activity-meta">28 Januari 2026 · 09.00</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857">05</div><div><div class="activity-title">Open House Gelombang I</div><div class="activity-meta">05 Februari 2026</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309">14</div><div><div class="activity-title">Pekan Kreativitas Siswa</div><div class="activity-meta">14 – 18 Februari 2026</div></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Kelola Berita ═══ -->
+<div class="screen-label">Sekretaris / 02 Kelola Berita <span>sekretaris.berita.index · sekretaris/berita/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="sekretaris" data-active="sekretaris.berita"
+     data-title="Kelola Berita" data-subtitle="51 berita — 48 terbit, 3 draft" data-user="S|Sekretaris">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Semua</a><a>Terbit</a><a>Draft</a><a>Arsip</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:250px"><i class="fas fa-search"></i><input class="control" placeholder="Cari judul berita…"></div>
+            <a class="btn primary"><i class="fas fa-plus"></i> Tulis Berita</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:110px">Gambar</th><th>Judul</th><th>Kategori</th><th>Tanggal Terbit</th><th class="num">Dilihat</th><th>Status</th><th style="width:130px">Aksi</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><img src="../assets/img/news-1.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Pembukaan Pendaftaran Peserta Didik Baru TA 2026/2027</span><div class="cell-sub">Pendaftaran gelombang pertama dibuka 15 Januari…</div></td>
+                    <td><span class="badge primary square">Pengumuman</span></td><td>12 Jan 2026</td><td class="num">1.284</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-2.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Peserta Didik Paket C Raih Juara Lomba Karya Tulis</span><div class="cell-sub">Tiga peserta didik meraih juara tingkat kota…</div></td>
+                    <td><span class="badge neutral square">Prestasi</span></td><td>08 Jan 2026</td><td class="num">876</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-3.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Pelatihan Guru Pendamping Kelas Inklusi</span><div class="cell-sub">Peningkatan kompetensi tenaga pendidik…</div></td>
+                    <td><span class="badge neutral square">Kegiatan</span></td><td><span class="muted">—</span></td><td class="num">—</td>
+                    <td><span class="badge neutral">Draft</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-4.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Kunjungan Edukatif ke Museum Daerah</span><div class="cell-sub">Kegiatan pembelajaran luar kelas kelas 8…</div></td>
+                    <td><span class="badge neutral square">Kegiatan</span></td><td>22 Des 2025</td><td class="num">642</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-5.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Penerimaan Rapor Semester Ganjil</span><div class="cell-sub">Pembagian rapor dilaksanakan serentak…</div></td>
+                    <td><span class="badge primary square">Pengumuman</span></td><td>18 Des 2025</td><td class="num">1.907</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">…</a><a class="page-link">11</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Form Berita ═══ -->
+<div class="screen-label">Sekretaris / 03 Form Berita <span>sekretaris.berita.create · sekretaris/berita/form.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="sekretaris" data-active="sekretaris.berita"
+     data-title="Tulis Berita" data-subtitle="Konten akan tampil di halaman publik setelah diterbitkan" data-user="S|Sekretaris">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-pen-to-square"></i> Isi Berita</h3></div>
+            <div class="card-body">
+                <div class="field"><label>Judul <span class="req">*</span></label><input class="control" value="Pembukaan Pendaftaran Peserta Didik Baru TA 2026/2027"></div>
+                <div class="field"><label>Ringkasan</label><textarea class="control" rows="2">Pendaftaran gelombang pertama dibuka mulai 15 Januari hingga 28 Februari 2026 untuk seluruh jenjang.</textarea><div class="hint">Tampil pada kartu berita di beranda, maksimal 160 karakter.</div></div>
+                <div class="field" style="margin-bottom:0">
+                    <label>Isi Berita <span class="req">*</span></label>
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+                        <div class="row" style="padding:8px 12px;border-bottom:1px solid #e2e8f0;background:#f8fafc;gap:14px;color:#64748b">
+                            <i class="fas fa-bold"></i><i class="fas fa-italic"></i><i class="fas fa-underline"></i>
+                            <span style="width:1px;height:16px;background:#e2e8f0"></span>
+                            <i class="fas fa-list-ul"></i><i class="fas fa-list-ol"></i>
+                            <span style="width:1px;height:16px;background:#e2e8f0"></span>
+                            <i class="fas fa-link"></i><i class="fas fa-image"></i><i class="fas fa-quote-left"></i>
+                        </div>
+                        <div style="padding:16px;min-height:230px;font-size:15px;line-height:1.8">
+                            <p style="margin-top:0">PKBM House of Knowledge dengan bangga mengumumkan pembukaan Penerimaan Peserta Didik Baru untuk Tahun Ajaran 2026/2027.</p>
+                            <p>Pendaftaran gelombang pertama dibuka mulai <strong>15 Januari 2026</strong> hingga <strong>28 Februari 2026</strong>, meliputi program PAUD/TK, Paket A, Paket B, Paket C, homeschooling, serta kelas inklusi.</p>
+                            <p>Calon peserta didik dapat mendaftar secara daring melalui halaman PPDB atau datang langsung ke kantor cabang terdekat pada jam kerja.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-gear"></i> Publikasi</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Status</label><select class="control"><option>Terbit sekarang</option><option>Simpan sebagai draft</option><option>Jadwalkan</option></select></div>
+                    <div class="field"><label>Kategori</label><select class="control"><option>Pengumuman</option><option>Prestasi</option><option>Kegiatan</option></select></div>
+                    <div class="field" style="margin-bottom:0"><label>Tanggal Terbit</label><input class="control" type="date" value="2026-01-12"></div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-image"></i> Gambar Utama</h3></div>
+                <div class="card-body" style="padding:0">
+                    <img src="../assets/img/news-1.jpg" style="width:100%;height:160px;object-fit:cover" alt="Gambar berita">
+                    <div style="padding:16px">
+                        <div class="file-card" style="margin-bottom:12px"><div class="ico img"><i class="fas fa-image"></i></div><div><div class="nm">news-1.jpg</div><div class="sz">199 KB · 1200×800</div></div></div>
+                        <a class="btn ghost block sm"><i class="fas fa-arrows-rotate"></i> Ganti Gambar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20"><i class="fas fa-paper-plane"></i> Terbitkan</a>
+                <a class="btn ghost block"><i class="fas fa-eye"></i> Pratinjau</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Kalender Akademik ═══ -->
+<div class="screen-label">Sekretaris / 04 Kalender Akademik <span>sekretaris.kalender.index · sekretaris/kalender/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="sekretaris" data-active="sekretaris.kalender"
+     data-title="Kalender Akademik" data-subtitle="Januari 2026 — Semester Genap TA 2025/2026" data-user="S|Sekretaris">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-calendar-days"></i> Januari 2026</h3>
+                <div class="row">
+                    <a class="btn ghost sm"><i class="fas fa-chevron-left"></i></a>
+                    <a class="btn ghost sm">Hari ini</a>
+                    <a class="btn ghost sm"><i class="fas fa-chevron-right"></i></a>
+                    <a class="btn primary sm"><i class="fas fa-plus"></i> Agenda</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="jadwal" style="table-layout:fixed">
+                    <thead><tr><th>Min</th><th>Sen</th><th>Sel</th><th>Rab</th><th>Kam</th><th>Jum</th><th>Sab</th></tr></thead>
+                    <tbody>
+                        <tr style="height:76px">
+                            <td class="kosong" style="vertical-align:top;text-align:left;color:#cbd5e1">28</td>
+                            <td class="kosong" style="vertical-align:top;text-align:left;color:#cbd5e1">29</td>
+                            <td class="kosong" style="vertical-align:top;text-align:left;color:#cbd5e1">30</td>
+                            <td class="kosong" style="vertical-align:top;text-align:left;color:#cbd5e1">31</td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">1</div><div class="badge danger" style="font-size:10px;padding:2px 6px;margin-top:4px">Libur Tahun Baru</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">2</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">3</div></td>
+                        </tr>
+                        <tr style="height:76px">
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">4</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">5</div><div class="badge success" style="font-size:10px;padding:2px 6px;margin-top:4px">Awal Semester</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">6</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">7</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">8</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">9</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">10</div></td>
+                        </tr>
+                        <tr style="height:76px">
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">11</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">12</div><div class="badge primary" style="font-size:10px;padding:2px 6px;margin-top:4px">PPDB Dibuka</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">13</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">14</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">15</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">16</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">17</div><div class="badge warning" style="font-size:10px;padding:2px 6px;margin-top:4px">UTS Mulai</div></td>
+                        </tr>
+                        <tr style="height:76px">
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">18</div></td>
+                            <td style="vertical-align:top;text-align:left;background:#fffbeb"><div style="font-weight:600">19</div><div class="badge warning" style="font-size:10px;padding:2px 6px;margin-top:4px">UTS</div></td>
+                            <td style="vertical-align:top;text-align:left;background:#fffbeb"><div style="font-weight:600">20</div><div class="badge warning" style="font-size:10px;padding:2px 6px;margin-top:4px">UTS</div></td>
+                            <td style="vertical-align:top;text-align:left;background:#fffbeb"><div style="font-weight:600">21</div><div class="badge warning" style="font-size:10px;padding:2px 6px;margin-top:4px">UTS</div></td>
+                            <td style="vertical-align:top;text-align:left;background:#fffbeb"><div style="font-weight:600">22</div><div class="badge warning" style="font-size:10px;padding:2px 6px;margin-top:4px">UTS Akhir</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">23</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">24</div></td>
+                        </tr>
+                        <tr style="height:76px">
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">25</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">26</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">27</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">28</div><div class="badge primary" style="font-size:10px;padding:2px 6px;margin-top:4px">Rapat Wali</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">29</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">30</div></td>
+                            <td style="vertical-align:top;text-align:left"><div style="font-weight:600">31</div></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-list"></i> Agenda Bulan Ini</h3></div>
+                <div class="activity">
+                    <div class="activity-item"><div class="activity-avatar" style="background:#fee2e2;color:#b91c1c">01</div><div><div class="activity-title">Libur Tahun Baru</div><div class="activity-meta">Hari libur nasional</div></div></div>
+                    <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857">05</div><div><div class="activity-title">Awal Semester Genap</div><div class="activity-meta">Seluruh jenjang</div></div></div>
+                    <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb">12</div><div><div class="activity-title">PPDB Gelombang I Dibuka</div><div class="activity-meta">12 Jan – 28 Feb 2026</div></div></div>
+                    <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309">17</div><div><div class="activity-title">Ujian Tengah Semester</div><div class="activity-meta">17 – 22 Januari 2026</div></div></div>
+                    <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb">28</div><div><div class="activity-title">Rapat Wali Murid</div><div class="activity-meta">09.00 · Aula Pusat</div></div></div>
+                </div>
+            </div>
+            <div class="card"><div class="card-body">
+                <a class="btn ghost block mb-20"><i class="fas fa-print"></i> Cetak Kalender Bulanan</a>
+                <a class="btn ghost block"><i class="fas fa-print"></i> Cetak Kalender Tahunan</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

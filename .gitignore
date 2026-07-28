@@ -43,3 +43,10 @@ groq_models.json
 
 # Berkas laporan/pengujian internal - lokal saja, jangan di-push
 /laporan-pengujian/
+
+# Kredensial skrip screenshot UI - JANGAN PERNAH di-commit
+/tools/ui-capture/akun.local.json
+# Hasil screenshot (berat, dan bisa memuat data siswa nyata)
+/docs/figma/screenshots/
+# Arsip zip UI kit (3,9 MB) - duplikat dari folder docs/figma/ui-kit/ yang sudah dilacak
+/docs/figma/ui-kit.zip

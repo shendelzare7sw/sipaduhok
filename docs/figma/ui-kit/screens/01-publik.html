@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Layar Publik &amp; Autentikasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>Publik &amp; Autentikasi — 4 layar</h1>
+    <p>Sistem desain <strong>landing</strong> (Poppins, primary #165FAC) — berbeda dari dashboard. Gambar hero, tentang, dan galeri memakai berkas asli dari <code>public/img/</code>.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="screen-label">Publik / 01 Beranda <span>home · resources/views/home.blade.php</span></div>
+<div class="screen">
+<div class="landing">
+
+    <div class="landing-nav">
+        <img src="../assets/img/logo.png" alt="Logo">
+        <div class="brand">PKBM House of Knowledge<small>Duta House of Knowledge</small></div>
+        <nav>
+            <a class="active">Beranda</a><a>Profil</a><a>Program</a><a>Fasilitas</a><a>Berita</a><a>Kontak</a>
+        </nav>
+        <a class="cta">Daftar PPDB</a>
+    </div>
+
+    <div class="hero">
+        <div>
+            <h1>Pendidikan Kesetaraan yang Memerdekakan Setiap Anak</h1>
+            <p>PKBM House of Knowledge menyelenggarakan program Paket A, B, dan C, homeschooling, kelas inklusi, serta layanan terapi — dengan pendampingan yang menyesuaikan kebutuhan tiap peserta didik.</p>
+            <div class="actions">
+                <a class="btn-hero solid">Daftar Sekarang</a>
+                <a class="btn-hero outline">Lihat Program</a>
+            </div>
+        </div>
+        <img src="../assets/img/hero-img.jpg" alt="Suasana belajar">
+    </div>
+
+    <div class="landing-section">
+        <div class="stat-row">
+            <div><div class="n">1.248</div><div class="l">Peserta Didik Aktif</div></div>
+            <div><div class="n">86</div><div class="l">Tenaga Pendidik</div></div>
+            <div><div class="n">3</div><div class="l">Cabang</div></div>
+            <div><div class="n">12</div><div class="l">Tahun Berdiri</div></div>
+        </div>
+    </div>
+
+    <div class="landing-section cream">
+        <h2>Program Pendidikan</h2>
+        <p class="lead">Enam jalur layanan yang dapat dipilih sesuai kebutuhan dan usia peserta didik.</p>
+        <div class="grid grid-3">
+            <div class="card" style="padding:26px"><div style="font-size:26px;color:#165fac;margin-bottom:12px"><i class="fas fa-child"></i></div><h3 style="margin:0 0 8px;font-size:17px">PAUD &amp; TK</h3><p class="small muted" style="margin:0">Pendidikan usia dini berbasis bermain dan pembiasaan karakter.</p></div>
+            <div class="card" style="padding:26px"><div style="font-size:26px;color:#287f3b;margin-bottom:12px"><i class="fas fa-book-open"></i></div><h3 style="margin:0 0 8px;font-size:17px">Paket A, B, C</h3><p class="small muted" style="margin:0">Kesetaraan SD, SMP, dan SMA dengan ijazah resmi dan terakreditasi.</p></div>
+            <div class="card" style="padding:26px"><div style="font-size:26px;color:#d45930;margin-bottom:12px"><i class="fas fa-house-user"></i></div><h3 style="margin:0 0 8px;font-size:17px">Homeschooling</h3><p class="small muted" style="margin:0">Belajar dari rumah dengan kurikulum dan pendampingan terjadwal.</p></div>
+            <div class="card" style="padding:26px"><div style="font-size:26px;color:#8b5cf6;margin-bottom:12px"><i class="fas fa-hands-holding-child"></i></div><h3 style="margin:0 0 8px;font-size:17px">Kelas Inklusi</h3><p class="small muted" style="margin:0">Layanan untuk ABK: autisme, ADHD, disleksia, dan slow learner.</p></div>
+            <div class="card" style="padding:26px"><div style="font-size:26px;color:#06b6d4;margin-bottom:12px"><i class="fas fa-hand-holding-medical"></i></div><h3 style="margin:0 0 8px;font-size:17px">Terapi</h3><p class="small muted" style="margin:0">Terapi wicara, okupasi, dan perilaku oleh terapis berpengalaman.</p></div>
+            <div class="card" style="padding:26px"><div style="font-size:26px;color:#f59e0b;margin-bottom:12px"><i class="fas fa-award"></i></div><h3 style="margin:0 0 8px;font-size:17px">Bimbingan Ujian</h3><p class="small muted" style="margin:0">Persiapan ujian kesetaraan dan asesmen kompetensi minimum.</p></div>
+        </div>
+    </div>
+
+    <div class="landing-section">
+        <div class="about-grid">
+            <img src="../assets/img/about-img.jpg" alt="Tentang sekolah">
+            <div>
+                <h2 style="text-align:left">Tentang Kami</h2>
+                <p style="color:#64748b;line-height:1.85">Berdiri sejak 2014, PKBM House of Knowledge hadir untuk anak-anak yang membutuhkan jalur pendidikan berbeda — baik karena kebutuhan khusus, mobilitas keluarga, maupun pilihan belajar mandiri.</p>
+                <p style="color:#64748b;line-height:1.85">Kami percaya setiap anak punya ritme belajarnya sendiri, dan tugas kami menyediakan ruang yang menghormati ritme itu.</p>
+                <a class="btn primary" style="background:#165fac;margin-top:10px">Selengkapnya <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="landing-section cream">
+        <h2>Galeri Kegiatan</h2>
+        <p class="lead">Dokumentasi pembelajaran dan kegiatan peserta didik.</p>
+        <div class="gallery-grid">
+            <img src="../assets/img/gallery-1.jpg" alt="Kegiatan 1">
+            <img src="../assets/img/gallery-2.jpg" alt="Kegiatan 2">
+            <img src="../assets/img/gallery-3.jpg" alt="Kegiatan 3">
+            <img src="../assets/img/gallery-4.jpg" alt="Kegiatan 4">
+            <img src="../assets/img/gallery-5.jpg" alt="Kegiatan 5">
+            <img src="../assets/img/gallery-6.jpg" alt="Kegiatan 6">
+        </div>
+    </div>
+
+    <div class="landing-section">
+        <h2>Berita Terbaru</h2>
+        <p class="lead">Kabar kegiatan dan pengumuman dari PKBM House of Knowledge.</p>
+        <div class="grid grid-3">
+            <div class="card" style="overflow:hidden">
+                <img src="../assets/img/news-1.jpg" style="width:100%;height:190px;object-fit:cover" alt="Berita">
+                <div style="padding:20px"><div class="xsmall muted">12 Januari 2026</div><h3 style="margin:6px 0 8px;font-size:16px">Pembukaan Pendaftaran Peserta Didik Baru TA 2026/2027</h3><p class="small muted" style="margin:0">Pendaftaran gelombang pertama dibuka mulai 15 Januari hingga 28 Februari 2026.</p></div>
+            </div>
+            <div class="card" style="overflow:hidden">
+                <img src="../assets/img/news-2.jpg" style="width:100%;height:190px;object-fit:cover" alt="Berita">
+                <div style="padding:20px"><div class="xsmall muted">08 Januari 2026</div><h3 style="margin:6px 0 8px;font-size:16px">Peserta Didik Paket C Raih Juara Lomba Karya Tulis</h3><p class="small muted" style="margin:0">Tiga peserta didik kami meraih juara pada lomba tingkat kota.</p></div>
+            </div>
+            <div class="card" style="overflow:hidden">
+                <img src="../assets/img/news-3.jpg" style="width:100%;height:190px;object-fit:cover" alt="Berita">
+                <div style="padding:20px"><div class="xsmall muted">02 Januari 2026</div><h3 style="margin:6px 0 8px;font-size:16px">Pelatihan Guru Pendamping Kelas Inklusi</h3><p class="small muted" style="margin:0">Peningkatan kompetensi tenaga pendidik untuk layanan ABK.</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="landing-footer">
+        <div class="cols">
+            <div>
+                <h4>PKBM House of Knowledge</h4>
+                <p style="line-height:1.8;margin:0">Pusat Kegiatan Belajar Masyarakat penyelenggara pendidikan kesetaraan, homeschooling, inklusi, dan terapi.</p>
+            </div>
+            <div><h4>Program</h4><a>PAUD &amp; TK</a><a>Paket A, B, C</a><a>Homeschooling</a><a>Kelas Inklusi</a></div>
+            <div><h4>Informasi</h4><a>Tentang Kami</a><a>Visi &amp; Misi</a><a>Legalitas</a><a>Kebijakan Privasi</a></div>
+            <div><h4>Kontak</h4><a><i class="fas fa-map-marker-alt"></i> Jl. Contoh No. 123, Kota</a><a><i class="fas fa-phone"></i> (021) 1234-5678</a><a><i class="fas fa-envelope"></i> info@sipaduhok.sch.id</a></div>
+        </div>
+        <div class="bottom">© 2026 PKBM House of Knowledge. Seluruh hak cipta dilindungi.</div>
+    </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="screen-label">Publik / 02 PPDB <span>ppdb · resources/views/ppdb.blade.php</span></div>
+<div class="screen">
+<div class="landing">
+
+    <div class="landing-nav">
+        <img src="../assets/img/logo.png" alt="Logo">
+        <div class="brand">PKBM House of Knowledge<small>Duta House of Knowledge</small></div>
+        <nav><a>Beranda</a><a>Profil</a><a>Program</a><a>Fasilitas</a><a>Berita</a><a>Kontak</a></nav>
+        <a class="cta">Daftar PPDB</a>
+    </div>
+
+    <div style="background:linear-gradient(135deg,rgba(22,95,172,.92),rgba(40,127,59,.86)),url('../assets/img/bg-ppdb.jpg') center/cover;color:#fff;padding:52px 56px;text-align:center">
+        <h1 style="font-size:34px;font-weight:800;margin:0 0 10px">Penerimaan Peserta Didik Baru</h1>
+        <p style="margin:0;opacity:.92;font-size:15px">Tahun Ajaran 2026/2027 — Gelombang I dibuka 15 Januari s.d. 28 Februari 2026</p>
+    </div>
+
+    <div class="landing-section" style="max-width:1000px;margin:0 auto">
+        <div class="stepper">
+            <div class="step done"><span class="bulat"><i class="fas fa-check"></i></span><span class="lbl">Data Calon Siswa</span></div>
+            <div class="garis"></div>
+            <div class="step active"><span class="bulat">2</span><span class="lbl">Data Orang Tua</span></div>
+            <div class="garis"></div>
+            <div class="step"><span class="bulat">3</span><span class="lbl">Unggah Berkas</span></div>
+            <div class="garis"></div>
+            <div class="step"><span class="bulat">4</span><span class="lbl">Konfirmasi</span></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-user-friends" style="color:#165fac"></i> Data Orang Tua / Wali</h3></div>
+            <div class="card-body">
+                <div class="grid grid-2">
+                    <div class="field"><label>Nama Ayah <span class="req">*</span></label><input class="control" value="Rahmat Hidayat"></div>
+                    <div class="field"><label>Nama Ibu <span class="req">*</span></label><input class="control" value="Dewi Lestari"></div>
+                    <div class="field"><label>Pekerjaan Ayah</label><input class="control" value="Wiraswasta"></div>
+                    <div class="field"><label>Pekerjaan Ibu</label><input class="control" value="Ibu Rumah Tangga"></div>
+                    <div class="field"><label>Nomor WhatsApp Aktif <span class="req">*</span></label><input class="control" value="0812-3456-7890"><div class="hint">Dipakai untuk pemberitahuan status pendaftaran.</div></div>
+                    <div class="field"><label>Email <span class="req">*</span></label><input class="control focus" value="rahmat.hidayat@email.com"></div>
+                </div>
+                <div class="field"><label>Alamat Domisili <span class="req">*</span></label><textarea class="control" rows="3">Jl. Melati Raya No. 45, RT 03 / RW 07, Kelurahan Sukamaju</textarea></div>
+                <div class="row between" style="margin-top:26px">
+                    <a class="btn ghost"><i class="fas fa-arrow-left"></i> Sebelumnya</a>
+                    <a class="btn primary" style="background:#165fac">Lanjutkan <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert info" style="margin-top:24px"><i class="fas fa-info-circle"></i> Data yang sudah diisi tersimpan otomatis. Anda dapat melanjutkan pendaftaran kapan saja menggunakan nomor WhatsApp yang sama.</div>
+    </div>
+
+    <div class="landing-footer">
+        <div class="cols">
+            <div><h4>PKBM House of Knowledge</h4><p style="line-height:1.8;margin:0">Pusat Kegiatan Belajar Masyarakat penyelenggara pendidikan kesetaraan.</p></div>
+            <div><h4>Program</h4><a>PAUD &amp; TK</a><a>Paket A, B, C</a><a>Homeschooling</a></div>
+            <div><h4>Informasi</h4><a>Tentang Kami</a><a>Legalitas</a><a>Kebijakan Privasi</a></div>
+            <div><h4>Kontak</h4><a><i class="fas fa-phone"></i> (021) 1234-5678</a><a><i class="fas fa-envelope"></i> info@sipaduhok.sch.id</a></div>
+        </div>
+        <div class="bottom">© 2026 PKBM House of Knowledge.</div>
+    </div>
+
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="screen-label">Publik / 03 Login <span>login · resources/views/auth/login.blade.php</span></div>
+<div class="screen">
+<div class="auth-shell">
+    <div class="auth-visual">
+        <img src="../assets/img/logo.png" alt="Logo">
+        <h2>Sistem Informasi PKBM<br>House of Knowledge</h2>
+        <p>Satu pintu untuk akademik, pembelajaran daring, dan administrasi keuangan — bagi pengelola, pendidik, peserta didik, dan wali siswa.</p>
+    </div>
+    <div class="auth-form">
+        <div class="inner">
+            <h1>Masuk ke Akun Anda</h1>
+            <p class="sub">Gunakan email atau username yang terdaftar.</p>
+
+            <div class="field">
+                <label>Email atau Username</label>
+                <input class="control" name="login" value="bendahara@sipaduhok.sch.id">
+            </div>
+            <div class="field">
+                <label>Kata Sandi</label>
+                <div style="position:relative">
+                    <input class="control" type="password" value="••••••••••">
+                    <i class="fas fa-eye muted" style="position:absolute;right:14px;top:12px"></i>
+                </div>
+            </div>
+            <div class="row between" style="margin-bottom:24px">
+                <label class="row small" style="gap:8px;margin:0;font-weight:400"><input type="checkbox" checked> Ingat saya</label>
+                <a class="small" style="color:#165fac;text-decoration:none;font-weight:600">Lupa kata sandi?</a>
+            </div>
+            <a class="btn primary block" style="background:#165fac;padding:12px"><i class="fas fa-sign-in-alt"></i> Masuk</a>
+
+            <p class="tac small muted" style="margin-top:28px">Belum punya akun? Akun dibuat oleh Administrator sekolah.<br>Hubungi bagian tata usaha untuk pendaftaran.</p>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="screen-label">Publik / 04 Pemulihan Akun <span>user.recovery · resources/views/auth/user-recovery.blade.php</span></div>
+<div class="screen">
+<div class="auth-shell">
+    <div class="auth-visual">
+        <img src="../assets/img/logo.png" alt="Logo">
+        <h2>Pemulihan Akun</h2>
+        <p>Permintaan Anda akan diteruskan ke Administrator. Setelah diverifikasi, tautan penggantian kata sandi dikirim melalui email atau WhatsApp yang terdaftar.</p>
+    </div>
+    <div class="auth-form">
+        <div class="inner">
+            <h1>Ajukan Tiket Pemulihan</h1>
+            <p class="sub">Isi data di bawah agar Administrator dapat memverifikasi kepemilikan akun.</p>
+
+            <div class="alert warning"><i class="fas fa-clock"></i> Proses verifikasi memerlukan waktu 1×24 jam kerja.</div>
+
+            <div class="field"><label>Email atau Username Terdaftar <span class="req">*</span></label><input class="control" value="wali.ahmad@email.com"></div>
+            <div class="field"><label>Nomor WhatsApp Aktif <span class="req">*</span></label><input class="control" value="0812-3456-7890"></div>
+            <div class="field">
+                <label>Alasan Pengajuan <span class="req">*</span></label>
+                <textarea class="control" rows="3">Lupa kata sandi setelah ganti perangkat.</textarea>
+            </div>
+            <a class="btn primary block" style="background:#165fac;padding:12px"><i class="fas fa-paper-plane"></i> Kirim Permintaan</a>
+            <p class="tac small" style="margin-top:22px"><a style="color:#165fac;text-decoration:none;font-weight:600"><i class="fas fa-arrow-left"></i> Kembali ke halaman masuk</a></p>
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/wali-siswa/tagihan/anak/{{siswa_id}}/bayar'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    - key: tagihan_id
+      value: '999999'
+    - key: jumlah_bayar
+      value: '50000'
+    - key: metode_pembayaran
+      value: 'transfer'
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Dua lapis pertahanan: (1) CSRF menolak POST tanpa token -> 419 diubah jadi
+      // redirect 302; (2) middleware role:orang_tua menolak yang belum login.
+      // Keduanya membuat pembayaran mustahil dieksekusi pihak luar.
+      pm.test('Endpoint pembayaran tanpa auth tidak boleh lolos', function () {
+        pm.expect([302, 401, 403, 419]).to.include(pm.response.code);
+      });
+      pm.test('Tidak ada pembayaran yang terbuat (bukan 200/201)', function () {
+        pm.expect([200, 201]).to.not.include(pm.response.code);
+      });

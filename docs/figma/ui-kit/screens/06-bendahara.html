@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Layar Bendahara</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>Bendahara — 7 layar</h1>
+    <p>Label menu bendahara berawalan “Kelola” (Kelola Tagihan, Kelola Pembayaran), berbeda dari admin yang memakai label polos. Perbedaan kecil ini terlihat jelas saat dua frame ditaruh bersebelahan.</p>
+</div>
+
+<!-- ═══ 01 Dashboard ═══ -->
+<div class="screen-label">Bendahara / 01 Dashboard <span>bendahara.dashboard · dashboard/bendahara.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.dashboard"
+     data-title="Dashboard" data-subtitle="Ringkasan keuangan Januari 2026" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-money-bill-trend-up"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 487,2 jt</div><div class="stat-label">Penerimaan Bulan Ini</div>
+            <div class="stat-footer"><span>78% dari target</span><span class="badge success"><i class="fas fa-arrow-up"></i> 12%</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 142,8 jt</div><div class="stat-label">Total Tunggakan</div>
+            <div class="stat-footer"><span>382 tagihan</span><span class="badge danger">Perlu tindakan</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-details"><div class="stat-value">24</div><div class="stat-label">Menunggu Validasi</div>
+            <div class="stat-footer"><span>18 transfer manual</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-credit-card"></i></div>
+            <div class="stat-details"><div class="stat-value">312</div><div class="stat-label">Transaksi Midtrans</div>
+            <div class="stat-footer"><span>Otomatis tervalidasi</span><span class="muted">Bulan ini</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1 mb-20">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-column"></i> Penerimaan 8 Bulan Terakhir</h3>
+                <select class="control" style="width:150px;padding:6px 12px;font-size:13px"><option>TA 2025/2026</option></select></div>
+            <div class="chart-box">
+                <div class="chart-bar" style="height:58%"><span>Jul</span></div>
+                <div class="chart-bar" style="height:71%"><span>Agu</span></div>
+                <div class="chart-bar" style="height:64%"><span>Sep</span></div>
+                <div class="chart-bar" style="height:83%"><span>Okt</span></div>
+                <div class="chart-bar" style="height:69%"><span>Nov</span></div>
+                <div class="chart-bar" style="height:52%"><span>Des</span></div>
+                <div class="chart-bar" style="height:88%"><span>Jan</span></div>
+                <div class="chart-bar" style="height:41%;background:linear-gradient(180deg,#cbd5e1,#e2e8f0)"><span>Feb</span></div>
+            </div>
+            <div class="chart-legend" style="padding-top:14px"><span><i style="background:#4361ee"></i> Terealisasi</span><span><i style="background:#e2e8f0"></i> Berjalan</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-pie"></i> Komposisi Tagihan</h3></div>
+            <div class="donut"></div>
+            <div style="padding:0 24px 24px">
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#4361ee;margin-right:8px"></i>SPP</span><span class="strong">Rp 312 jt</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3b82f6;margin-right:8px"></i>Uang Kegiatan</span><span class="strong">Rp 94 jt</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#8b5cf6;margin-right:8px"></i>Uang Ujian</span><span class="strong">Rp 52 jt</span></div>
+                <div class="row between small" style="padding:7px 0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#e2e8f0;margin-right:8px"></i>Lainnya</span><span class="strong">Rp 29 jt</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-clock"></i> Pembayaran Menunggu Validasi</h3><a class="btn ghost sm">Lihat semua (24)</a></div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas</th><th>Tagihan</th><th class="num">Nominal</th><th>Metode</th><th>Bukti</th><th>Diterima</th><th style="width:170px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi R.</span></td><td>7A</td><td>SPP Januari</td><td class="num money">Rp 450.000</td>
+                    <td><span class="badge neutral square">Transfer Manual</span></td><td><a class="small"><i class="fas fa-file-pdf"></i> Lihat</a></td><td>2 jam lalu</td>
+                    <td><a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td><td>7A</td><td>SPP Januari (cicilan 2)</td><td class="num money">Rp 250.000</td>
+                    <td><span class="badge neutral square">Transfer Manual</span></td><td><a class="small"><i class="fas fa-file-image"></i> Lihat</a></td><td>5 jam lalu</td>
+                    <td><a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Uang Ujian</td><td class="num money">Rp 350.000</td>
+                    <td><span class="badge neutral square">Tunai</span></td><td><span class="muted small">—</span></td><td>1 hari lalu</td>
+                    <td><a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Kelola Tagihan ═══ -->
+<div class="screen-label">Bendahara / 02 Kelola Tagihan <span>bendahara.tagihan.index · bendahara/tagihan/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.tagihan.index"
+     data-title="Kelola Tagihan" data-subtitle="3.842 tagihan pada TA 2025/2026" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <a class="btn primary"><i class="fas fa-layer-group"></i> Buat Massal</a>
+        <a class="btn ghost"><i class="fas fa-calendar-plus"></i> Generate SPP</a>
+        <a class="btn ghost"><i class="fas fa-copy"></i> Duplikat Tagihan</a>
+        <a class="btn ghost"><i class="fas fa-arrow-right-arrow-left"></i> Tarik Tunggakan</a>
+        <a class="btn ghost"><i class="fas fa-plus"></i> Tagihan Kustom</a>
+        <div class="spacer"></div>
+        <a class="btn ghost"><i class="fas fa-print"></i> Cetak Laporan</a>
+    </div></div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Semua</a><a>Belum Bayar</a><a>Cicilan</a><a>Terlambat</a><a>Lunas</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:230px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa…"></div>
+            <select class="control" style="width:140px"><option>Semua Kelas</option></select>
+            <select class="control" style="width:150px"><option>Semua Jenis</option></select>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:48px"><input type="checkbox"></th><th>Siswa</th><th>Kelas</th><th>Jenis Tagihan</th><th>Jatuh Tempo</th><th class="num">Nominal</th><th class="num">Sisa</th><th>Status</th><th style="width:140px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi R.</span></td><td>7A</td><td>SPP Januari</td><td>10 Jan 2026</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Sudah Bayar</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td><td>7A</td><td>SPP Januari</td><td>10 Jan 2026</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#b45309">Rp 250.000</td><td><span class="badge warning">Cicilan</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>Uang Kegiatan</td><td>05 Jan 2026</td><td class="num money">Rp 750.000</td><td class="num money" style="color:#b91c1c">Rp 750.000</td><td><span class="badge danger">Terlambat</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>SPP Desember <span class="badge purple square" style="font-size:10px">Carryover</span></td><td>10 Des 2025</td><td class="num money">Rp 500.000</td><td class="num money" style="color:#b91c1c">Rp 500.000</td><td><span class="badge danger">Terlambat</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Uang Ujian</td><td>20 Feb 2026</td><td class="num money">Rp 350.000</td><td class="num money">Rp 350.000</td><td><span class="badge neutral">Belum Bayar</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Seragam</td><td>28 Feb 2026</td><td class="num money">Rp 620.000</td><td class="num money">Rp 620.000</td><td><span class="badge neutral">Belum Bayar</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">…</a><a class="page-link">77</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Detail Tagihan Siswa ═══ -->
+<div class="screen-label">Bendahara / 03 Detail Tagihan Siswa <span>bendahara.tagihan.show · bendahara/tagihan/show.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.tagihan.index"
+     data-title="Detail Tagihan Siswa" data-subtitle="Siti Nurhaliza — Kelas 7A" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-file-invoice"></i> Rincian Tagihan TA 2025/2026</h3>
+                    <a class="btn primary sm"><i class="fas fa-plus"></i> Catat Pembayaran</a></div>
+                <table class="data">
+                    <thead><tr><th>Jenis Tagihan</th><th>Jatuh Tempo</th><th class="num">Nominal</th><th class="num">Terbayar</th><th class="num">Sisa</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td class="cell-main">Uang Pangkal</td><td>15 Jul 2025</td><td class="num money">Rp 3.500.000</td><td class="num money">Rp 3.500.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Sudah Bayar</span></td></tr>
+                        <tr><td class="cell-main">SPP Juli</td><td>10 Jul 2025</td><td class="num money">Rp 450.000</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Sudah Bayar</span></td></tr>
+                        <tr><td class="cell-main">SPP Agustus</td><td>10 Agu 2025</td><td class="num money">Rp 450.000</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Sudah Bayar</span></td></tr>
+                        <tr><td class="cell-main">Uang Kegiatan</td><td>30 Sep 2025</td><td class="num money">Rp 750.000</td><td class="num money">Rp 750.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Sudah Bayar</span></td></tr>
+                        <tr style="background:#fffbeb"><td class="cell-main">SPP Januari</td><td>10 Jan 2026</td><td class="num money">Rp 450.000</td><td class="num money">Rp 200.000</td><td class="num money" style="color:#b45309">Rp 250.000</td><td><span class="badge warning">Cicilan</span></td></tr>
+                        <tr><td class="cell-main">Uang Ujian</td><td>20 Feb 2026</td><td class="num money">Rp 350.000</td><td class="num money">Rp 0</td><td class="num money">Rp 350.000</td><td><span class="badge neutral">Belum Bayar</span></td></tr>
+                        <tr style="background:#f8fafc"><td colspan="2" class="strong tar">TOTAL</td><td class="num money strong">Rp 5.950.000</td><td class="num money strong">Rp 5.350.000</td><td class="num money strong" style="color:#b45309">Rp 600.000</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Riwayat Pembayaran</h3></div>
+                <table class="data">
+                    <thead><tr><th>Tanggal</th><th>Tagihan</th><th class="num">Nominal</th><th>Metode</th><th>Validator</th><th>Status</th><th style="width:90px">Kwitansi</th></tr></thead>
+                    <tbody>
+                        <tr><td>12 Jan 2026</td><td>SPP Januari (cicilan 1)</td><td class="num money">Rp 200.000</td><td><span class="badge neutral square">Transfer Manual</span></td><td>Siti Rahmawati</td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                        <tr><td>28 Sep 2025</td><td>Uang Kegiatan</td><td class="num money">Rp 750.000</td><td><span class="badge primary square">Midtrans</span></td><td><span class="muted">Otomatis</span></td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                        <tr><td>08 Agu 2025</td><td>SPP Agustus</td><td class="num money">Rp 450.000</td><td><span class="badge primary square">Midtrans</span></td><td><span class="muted">Otomatis</span></td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                        <tr><td>09 Jul 2025</td><td>SPP Juli</td><td class="num money">Rp 450.000</td><td><span class="badge neutral square">Tunai</span></td><td>Siti Rahmawati</td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20"><div class="card-body tac">
+                <div class="avatar-initial" style="width:72px;height:72px;font-size:26px;margin:0 auto 14px">SN</div>
+                <h3 style="margin:0 0 2px;font-size:18px">Siti Nurhaliza</h3>
+                <p class="small muted" style="margin:0 0 16px">NISN 0087654322 · Kelas 7A</p>
+                <div style="border-top:1px solid #e2e8f0;padding-top:16px;text-align:left">
+                    <div class="row between small" style="padding:6px 0"><span class="muted">Cabang</span><span class="strong">Pusat</span></div>
+                    <div class="row between small" style="padding:6px 0"><span class="muted">Wali Siswa</span><span class="strong">Rahmat Hidayat</span></div>
+                    <div class="row between small" style="padding:6px 0"><span class="muted">Kontak</span><span class="strong">0812-3456-7890</span></div>
+                </div>
+            </div></div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-wallet"></i> Ringkasan</h3></div>
+                <div class="card-body">
+                    <div class="row between" style="margin-bottom:6px"><span class="small muted">Ketuntasan pembayaran</span><span class="strong">90%</span></div>
+                    <div class="progress mb-20"><i style="width:90%"></i></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Total tagihan</span><span class="strong money">Rp 5.950.000</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Sudah dibayar</span><span class="strong money" style="color:#047857">Rp 5.350.000</span></div>
+                    <div class="row between small" style="padding:7px 0"><span>Sisa</span><span class="strong money" style="color:#b45309">Rp 600.000</span></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20"><i class="fas fa-plus"></i> Catat Pembayaran</a>
+                <a class="btn ghost block mb-20"><i class="fas fa-print"></i> Cetak Rincian</a>
+                <a class="btn ghost block"><i class="fab fa-whatsapp"></i> Kirim Pengingat</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Kelola Pembayaran ═══ -->
+<div class="screen-label">Bendahara / 04 Kelola Pembayaran <span>bendahara.pembayaran.index · bendahara/pembayaran/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.pembayaran.index"
+     data-title="Kelola Pembayaran" data-subtitle="24 pembayaran menunggu validasi" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Menunggu (24)</a><a>Disetujui</a><a>Ditolak</a><a>Semua</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:230px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa…"></div>
+            <select class="control" style="width:170px"><option>Semua Metode</option><option>Midtrans</option><option>Transfer Manual</option><option>Tunai</option></select>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:48px"><input type="checkbox"></th><th>Siswa</th><th>Kelas</th><th>Tagihan</th><th class="num">Nominal</th><th>Metode</th><th>Bukti</th><th>Diterima</th><th style="width:180px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi R.</span></td><td>7A</td><td>SPP Januari</td><td class="num money">Rp 450.000</td>
+                    <td><span class="badge neutral square">Transfer Manual</span></td><td><span class="badge primary square"><i class="fas fa-paperclip"></i> Ada</span></td><td>2 jam lalu</td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td><td>7A</td><td>SPP Januari (cicilan 2)</td><td class="num money">Rp 250.000</td>
+                    <td><span class="badge neutral square">Transfer Manual</span></td><td><span class="badge primary square"><i class="fas fa-paperclip"></i> Ada</span></td><td>5 jam lalu</td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Uang Ujian</td><td class="num money">Rp 350.000</td>
+                    <td><span class="badge neutral square">Tunai</span></td><td><span class="muted small">—</span></td><td>1 hari lalu</td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Seragam</td><td class="num money">Rp 620.000</td>
+                    <td><span class="badge primary square">Midtrans</span></td><td><span class="muted small">Otomatis</span></td><td>1 hari lalu</td>
+                    <td><span class="badge success">Tervalidasi otomatis</span></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Validasi Pembayaran ═══ -->
+<div class="screen-label">Bendahara / 05 Validasi Pembayaran <span>bendahara.pembayaran.show · bendahara/pembayaran/show.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.pembayaran.index"
+     data-title="Detail &amp; Validasi Pembayaran" data-subtitle="PB-2026-0148 — Ahmad Fauzi Ramadhan" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-hourglass-half"></i> Pembayaran ini <strong>menunggu validasi</strong>. Periksa kesesuaian nominal dan bukti transfer sebelum menyetujui.</div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-receipt"></i> Rincian Pembayaran</h3><span class="badge warning">Menunggu Validasi</span></div>
+                <div class="card-body">
+                    <div class="grid grid-2">
+                        <div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Kode Pembayaran</span><span class="strong">PB-2026-0148</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Siswa</span><span class="strong">Ahmad Fauzi Ramadhan</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Kelas</span><span class="strong">7A — Pusat</span></div>
+                            <div class="row between small" style="padding:9px 0"><span class="muted">Dibayar oleh</span><span class="strong">Rahmat Hidayat (Wali)</span></div>
+                        </div>
+                        <div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Tagihan</span><span class="strong">SPP Januari 2026</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Nominal Tagihan</span><span class="strong money">Rp 450.000</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Nominal Dibayar</span><span class="strong money" style="color:#047857">Rp 450.000</span></div>
+                            <div class="row between small" style="padding:9px 0"><span class="muted">Metode</span><span class="badge neutral square">Transfer Manual — BCA</span></div>
+                        </div>
+                    </div>
+                    <div class="field" style="margin:22px 0 0"><label>Catatan dari Wali</label>
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:14px">Transfer dilakukan atas nama Rahmat Hidayat pada 14 Januari 2026 pukul 09.42 WIB.</div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-paperclip"></i> Bukti Pembayaran</h3></div>
+                <div class="card-body">
+                    <div class="file-card mb-20"><div class="ico"><i class="fas fa-file-pdf"></i></div>
+                        <div style="flex:1"><div class="nm">bukti-transfer-spp-januari.pdf</div><div class="sz">248 KB · diunggah 14 Jan 2026, 09.51</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-eye"></i> Lihat</a><a class="btn ghost sm"><i class="fas fa-download"></i></a></div>
+                    <div class="file-card"><div class="ico img"><i class="fas fa-file-image"></i></div>
+                        <div style="flex:1"><div class="nm">struk-atm.jpg</div><div class="sz">1,2 MB · diunggah 14 Jan 2026, 09.52</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-eye"></i> Lihat</a><a class="btn ghost sm"><i class="fas fa-download"></i></a></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-gavel"></i> Keputusan</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Catatan Validator</label><textarea class="control" rows="3" placeholder="Opsional — wajib diisi bila menolak."></textarea></div>
+                    <a class="btn success block mb-20"><i class="fas fa-check"></i> Setujui Pembayaran</a>
+                    <a class="btn danger block mb-20"><i class="fas fa-times"></i> Tolak</a>
+                    <a class="btn ghost block"><i class="fas fa-arrow-left"></i> Kembali</a>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Jejak Audit</h3></div>
+                <div class="activity">
+                    <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb"><i class="fas fa-upload"></i></div><div><div class="activity-title">Bukti diunggah</div><div class="activity-meta">Rahmat Hidayat · 14 Jan, 09.52</div></div></div>
+                    <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309"><i class="fas fa-hourglass"></i></div><div><div class="activity-title">Menunggu validasi</div><div class="activity-meta">Otomatis · 14 Jan, 09.52</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Laporan Pembayaran ═══ -->
+<div class="screen-label">Bendahara / 06 Laporan Pembayaran <span>bendahara.laporan.index · bendahara/laporan/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.laporan.index"
+     data-title="Laporan Pembayaran" data-subtitle="Periode 1 – 31 Januari 2026" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="card-body"><div class="grid grid-4">
+        <div class="field" style="margin:0"><label>Dari Tanggal</label><input class="control" type="date" value="2026-01-01"></div>
+        <div class="field" style="margin:0"><label>Sampai Tanggal</label><input class="control" type="date" value="2026-01-31"></div>
+        <div class="field" style="margin:0"><label>Metode</label><select class="control"><option>Semua Metode</option></select></div>
+        <div class="field" style="margin:0"><label>&nbsp;</label><div class="row"><a class="btn primary"><i class="fas fa-filter"></i> Terapkan</a><a class="btn ghost"><i class="fas fa-print"></i> Cetak</a></div></div>
+    </div></div></div>
+
+    <div class="grid grid-3 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 487.250.000</div><div class="stat-label">Total Diterima</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-receipt"></i></div>
+            <div class="stat-details"><div class="stat-value">1.084</div><div class="stat-label">Jumlah Transaksi</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-calculator"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 449.492</div><div class="stat-label">Rata-rata / Transaksi</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-table-list"></i> Rekapitulasi per Jenis Tagihan</h3></div>
+        <table class="data">
+            <thead><tr><th>Jenis Tagihan</th><th class="num">Transaksi</th><th class="num">Midtrans</th><th class="num">Transfer Manual</th><th class="num">Tunai</th><th class="num">Total</th></tr></thead>
+            <tbody>
+                <tr><td class="cell-main">SPP</td><td class="num">742</td><td class="num money">Rp 198.400.000</td><td class="num money">Rp 92.150.000</td><td class="num money">Rp 21.450.000</td><td class="num money strong">Rp 312.000.000</td></tr>
+                <tr><td class="cell-main">Uang Kegiatan</td><td class="num">148</td><td class="num money">Rp 62.500.000</td><td class="num money">Rp 24.750.000</td><td class="num money">Rp 6.750.000</td><td class="num money strong">Rp 94.000.000</td></tr>
+                <tr><td class="cell-main">Uang Ujian</td><td class="num">126</td><td class="num money">Rp 31.200.000</td><td class="num money">Rp 16.400.000</td><td class="num money">Rp 4.400.000</td><td class="num money strong">Rp 52.000.000</td></tr>
+                <tr><td class="cell-main">Seragam</td><td class="num">42</td><td class="num money">Rp 12.400.000</td><td class="num money">Rp 8.200.000</td><td class="num money">Rp 2.650.000</td><td class="num money strong">Rp 23.250.000</td></tr>
+                <tr><td class="cell-main">Buku</td><td class="num">26</td><td class="num money">Rp 3.100.000</td><td class="num money">Rp 2.400.000</td><td class="num money">Rp 500.000</td><td class="num money strong">Rp 6.000.000</td></tr>
+                <tr style="background:#f8fafc"><td class="strong">TOTAL</td><td class="num strong">1.084</td><td class="num money strong">Rp 307.600.000</td><td class="num money strong">Rp 143.900.000</td><td class="num money strong">Rp 35.750.000</td><td class="num money strong">Rp 487.250.000</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 07 Siswa Belum Lunas ═══ -->
+<div class="screen-label">Bendahara / 07 Siswa Belum Lunas <span>bendahara.laporan.belum-lunas · bendahara/laporan/belum-lunas.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.laporan.belum-lunas"
+     data-title="Siswa Belum Lunas" data-subtitle="382 tagihan tertunggak senilai Rp 142.800.000" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="alert danger"><i class="fas fa-triangle-exclamation"></i> <strong>64 siswa</strong> memiliki tunggakan lebih dari 2 bulan dan akan otomatis terblokir dari akses ujian serta rapor.</div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Semua Tunggakan</a><a>&gt; 1 Bulan</a><a>&gt; 2 Bulan</a><a>Diblokir</a></div>
+            <div class="spacer"></div>
+            <select class="control" style="width:150px"><option>Semua Kelas</option></select>
+            <a class="btn ghost"><i class="fab fa-whatsapp"></i> Kirim Pengingat Massal</a>
+            <a class="btn ghost"><i class="fas fa-print"></i> Cetak</a>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas</th><th>Wali Siswa</th><th class="num">Tunggakan</th><th class="num">Bulan</th><th>Rincian</th><th>Akses</th><th style="width:130px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>Yusuf M. <div class="cell-sub">0813-1111-2222</div></td>
+                    <td class="num money" style="color:#b91c1c">Rp 2.100.000</td><td class="num strong">4</td>
+                    <td class="small">SPP Okt–Jan, Uang Kegiatan</td><td><span class="badge danger">Diblokir</span></td>
+                    <td><a class="btn ghost sm"><i class="fab fa-whatsapp"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                <tr><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>Sumarni <div class="cell-sub">0813-3333-4444</div></td>
+                    <td class="num money" style="color:#b91c1c">Rp 1.350.000</td><td class="num strong">3</td>
+                    <td class="small">Uang Kegiatan, SPP Des–Jan</td><td><span class="badge warning">Dispensasi diajukan</span></td>
+                    <td><a class="btn ghost sm"><i class="fab fa-whatsapp"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                <tr><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Yusuf M. <div class="cell-sub">0813-1111-2222</div></td>
+                    <td class="num money" style="color:#b45309">Rp 850.000</td><td class="num strong">2</td>
+                    <td class="small">Uang Ujian, SPP Januari</td><td><span class="badge warning">Peringatan</span></td>
+                    <td><a class="btn ghost sm"><i class="fab fa-whatsapp"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                <tr><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td><td>7A</td><td>Rahmat H. <div class="cell-sub">0812-3456-7890</div></td>
+                    <td class="num money" style="color:#b45309">Rp 600.000</td><td class="num strong">1</td>
+                    <td class="small">SPP Januari (cicilan), Uang Ujian</td><td><span class="badge success">Normal</span></td>
+                    <td><a class="btn ghost sm"><i class="fab fa-whatsapp"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+                <tr><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Wahyuni <div class="cell-sub">0815-5555-6666</div></td>
+                    <td class="num money" style="color:#b45309">Rp 620.000</td><td class="num strong">1</td>
+                    <td class="small">Seragam</td><td><span class="badge success">Normal</span></td>
+                    <td><a class="btn ghost sm"><i class="fab fa-whatsapp"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">…</a><a class="page-link">13</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

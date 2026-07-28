@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK UI Kit — Komponen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="ui-kit.css">
+<style>
+    body { background: #f1f5f9; }
+    .wrap { width: 1440px; margin: 0 auto; background: #fff; padding: 48px 56px 72px; }
+    h2.sec { font-size: 22px; font-weight: 700; color: #0f172a; margin: 52px 0 6px; }
+    h2.sec:first-of-type { margin-top: 0; }
+    p.sec { margin: 0 0 22px; color: #64748b; font-size: 14px; }
+    .demo { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; margin-bottom: 20px; }
+    .demo.plain { background: #fff; }
+    .lbl { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+    .sidebar-preview { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px; }
+    .sidebar-preview .sidebar { height: 720px; overflow: hidden; border-radius: 12px; }
+    .sidebar-preview .cap { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>SIPADUHOK — Komponen</h1>
+    <p>Setiap komponen ditampilkan dengan seluruh state/variant-nya, siap dijadikan Component + Variant di Figma. Spesifikasi tertulis ada di <code>docs/figma/02-inventaris-komponen.md</code>.</p>
+</div>
+
+<div class="wrap">
+
+    <h2 class="sec">1. Sidebar — 11 varian</h2>
+    <p class="sec">Navigasi utama aplikasi. Isinya berbeda total tiap role; shell-nya (gradient, brand, spacing) sama. Lima varian ditampilkan di sini; sisanya bisa dilihat pada berkas layar tiap role.</p>
+    <div class="demo plain">
+        <div class="sidebar-preview">
+            <div><div class="cap">role = admin</div><div id="sb-admin"></div></div>
+            <div><div class="cap">role = bendahara</div><div id="sb-bendahara"></div></div>
+            <div><div class="cap">role = wali-kelas</div><div id="sb-wali"></div></div>
+            <div><div class="cap">role = sekretaris</div><div id="sb-sekretaris"></div></div>
+            <div><div class="cap">role = wali-siswa</div><div id="sb-walisiswa"></div></div>
+        </div>
+    </div>
+
+    <h2 class="sec">2. Navbar detached</h2>
+    <p class="sec">Judul + sub-judul halaman di kiri, lonceng notifikasi dan avatar di kanan. Avatar memakai <strong>inisial</strong> — itu fallback asli aplikasi saat <code>foto_profil</code> kosong.</p>
+    <div class="demo plain" style="padding:0;overflow:hidden">
+        <div class="navbar">
+            <div class="navbar-title">
+                <h5>Kelola Tagihan</h5>
+                <small>Tahun Ajaran 2025/2026 — Semester Genap</small>
+            </div>
+            <div class="navbar-actions">
+                <span class="bell"><i class="fas fa-bell"></i><span class="dot">3</span></span>
+                <span class="avatar-initial">B</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="sec">3. Kartu statistik</h2>
+    <p class="sec">Wrapper ikon 48×48, radius 10, latar warna semantik 8%. Angka 28/700, label 14/500 uppercase.</p>
+    <div class="demo">
+        <div class="grid grid-4">
+            <div class="card"><div class="stat-widget">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-details"><div class="stat-value">1.248</div><div class="stat-label">Total Siswa</div></div>
+            </div></div>
+            <div class="card"><div class="stat-widget">
+                <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-details"><div class="stat-value">982</div><div class="stat-label">Lunas</div></div>
+            </div></div>
+            <div class="card"><div class="stat-widget">
+                <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
+                <div class="stat-details"><div class="stat-value">184</div><div class="stat-label">Cicilan</div></div>
+            </div></div>
+            <div class="card"><div class="stat-widget">
+                <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-details"><div class="stat-value">82</div><div class="stat-label">Terlambat</div></div>
+            </div></div>
+        </div>
+        <div style="height:20px"></div>
+        <div class="grid grid-2">
+            <div class="card"><div class="stat-widget">
+                <div class="stat-icon purple"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="stat-details">
+                    <div class="stat-value">Rp 487.250.000</div>
+                    <div class="stat-label">Penerimaan Bulan Ini</div>
+                    <div class="stat-footer"><span>Naik 12% dari bulan lalu</span><span class="badge success"><i class="fas fa-arrow-up"></i> 12%</span></div>
+                </div>
+            </div></div>
+            <div class="card"><div class="stat-widget">
+                <div class="stat-icon blue"><i class="fas fa-chalkboard"></i></div>
+                <div class="stat-details">
+                    <div class="stat-value">36</div>
+                    <div class="stat-label">Rombongan Belajar</div>
+                    <div class="stat-footer"><span>Tersebar di 3 cabang</span><span class="muted">TA 2025/2026</span></div>
+                </div>
+            </div></div>
+        </div>
+    </div>
+
+    <h2 class="sec">4. Badge status</h2>
+    <p class="sec">Status keuangan dan presensi adalah dua kelompok badge terpenting — muncul di hampir semua tabel.</p>
+    <div class="demo">
+        <div class="lbl">Status tagihan (kolom <code>status</code> pada tabel tagihan)</div>
+        <div class="row wrap" style="margin-bottom:24px">
+            <span class="badge success"><i class="fas fa-check-circle"></i> Sudah Bayar</span>
+            <span class="badge warning"><i class="fas fa-clock"></i> Cicilan</span>
+            <span class="badge neutral"><i class="fas fa-circle"></i> Belum Bayar</span>
+            <span class="badge danger"><i class="fas fa-exclamation-circle"></i> Terlambat</span>
+        </div>
+        <div class="lbl">Status presensi</div>
+        <div class="row wrap" style="margin-bottom:24px">
+            <span class="badge success">Hadir</span>
+            <span class="badge warning">Izin</span>
+            <span class="badge info">Sakit</span>
+            <span class="badge danger">Alpa</span>
+        </div>
+        <div class="lbl">Status validasi / alur rapor</div>
+        <div class="row wrap" style="margin-bottom:24px">
+            <span class="badge neutral">Draft</span>
+            <span class="badge warning">Menunggu Validasi</span>
+            <span class="badge danger">Perlu Revisi</span>
+            <span class="badge primary">Tervalidasi</span>
+            <span class="badge success">Terbit</span>
+        </div>
+        <div class="lbl">Metode pembayaran</div>
+        <div class="row wrap">
+            <span class="badge primary square">Midtrans</span>
+            <span class="badge neutral square">Transfer Manual</span>
+            <span class="badge neutral square">Tunai</span>
+            <span class="badge purple square">Dispensasi</span>
+        </div>
+    </div>
+
+    <h2 class="sec">5. Tombol</h2>
+    <div class="demo">
+        <div class="row wrap" style="margin-bottom:16px">
+            <a class="btn primary"><i class="fas fa-plus"></i> Tambah Data</a>
+            <a class="btn success"><i class="fas fa-check"></i> Setujui</a>
+            <a class="btn danger"><i class="fas fa-times"></i> Tolak</a>
+            <a class="btn warning"><i class="fas fa-undo"></i> Minta Revisi</a>
+            <a class="btn outline"><i class="fas fa-download"></i> Ekspor Excel</a>
+            <a class="btn ghost"><i class="fas fa-filter"></i> Filter</a>
+        </div>
+        <div class="row wrap">
+            <a class="btn primary sm"><i class="fas fa-eye"></i> Detail</a>
+            <a class="btn ghost sm"><i class="fas fa-pen"></i> Ubah</a>
+            <a class="btn ghost icon"><i class="fas fa-ellipsis-v"></i></a>
+            <a class="btn danger sm"><i class="fas fa-trash"></i> Hapus</a>
+        </div>
+    </div>
+
+    <h2 class="sec">6. Field form</h2>
+    <div class="demo">
+        <div class="grid grid-3">
+            <div>
+                <div class="field">
+                    <label>Nama Lengkap <span class="req">*</span></label>
+                    <input class="control" value="Ahmad Fauzi Ramadhan">
+                </div>
+                <div class="field">
+                    <label>NISN <span class="req">*</span></label>
+                    <input class="control" placeholder="10 digit NISN">
+                    <div class="hint">Nomor Induk Siswa Nasional, 10 digit angka.</div>
+                </div>
+            </div>
+            <div>
+                <div class="field">
+                    <label>Kelas <span class="req">*</span></label>
+                    <select class="control"><option>7A — SMP — Cabang Pusat</option></select>
+                </div>
+                <div class="field">
+                    <label>Email Wali</label>
+                    <input class="control focus" value="wali.ahmad@">
+                    <div class="err">Format email belum benar.</div>
+                </div>
+            </div>
+            <div>
+                <div class="field">
+                    <label>Cari</label>
+                    <div class="search"><i class="fas fa-search"></i><input class="control" placeholder="Cari nama atau NISN…"></div>
+                </div>
+                <div class="field">
+                    <label>Catatan Wali Kelas</label>
+                    <textarea class="control" rows="3">Menunjukkan perkembangan baik pada mata pelajaran eksakta.</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="sec">7. Tabel data + toolbar</h2>
+    <p class="sec">Semua tabel di aplikasi ditulis tangan — <strong>tidak ada DataTables</strong>. Jangan meniru gaya DataTables (kotak search bawaan, tombol paging default).</p>
+    <div class="demo plain" style="padding:0;overflow:hidden">
+        <div class="card" style="border:none;border-radius:0">
+            <div class="toolbar">
+                <div class="search" style="width:280px"><i class="fas fa-search"></i><input class="control" placeholder="Cari nama atau NISN…"></div>
+                <select class="control" style="width:170px"><option>Semua Kelas</option></select>
+                <select class="control" style="width:170px"><option>Semua Status</option></select>
+                <div class="spacer"></div>
+                <a class="btn ghost"><i class="fas fa-file-excel"></i> Ekspor</a>
+                <a class="btn primary"><i class="fas fa-plus"></i> Tambah</a>
+            </div>
+            <table class="data">
+                <thead><tr>
+                    <th style="width:52px">No</th><th>Siswa</th><th>Kelas</th><th>Jenis Tagihan</th>
+                    <th class="num">Nominal</th><th class="num">Terbayar</th><th>Status</th><th style="width:120px">Aksi</th>
+                </tr></thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi Ramadhan</span><div class="cell-sub" style="margin-left:44px">NISN 0087654321</div></td>
+                        <td>7A</td><td>SPP Januari</td>
+                        <td class="num money">Rp 450.000</td><td class="num money">Rp 450.000</td>
+                        <td><span class="badge success">Sudah Bayar</span></td>
+                        <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span><div class="cell-sub" style="margin-left:44px">NISN 0087654322</div></td>
+                        <td>7A</td><td>SPP Januari</td>
+                        <td class="num money">Rp 450.000</td><td class="num money">Rp 200.000</td>
+                        <td><span class="badge warning">Cicilan</span></td>
+                        <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span><div class="cell-sub" style="margin-left:44px">NISN 0087654323</div></td>
+                        <td>8B</td><td>Uang Kegiatan</td>
+                        <td class="num money">Rp 750.000</td><td class="num money">Rp 0</td>
+                        <td><span class="badge danger">Terlambat</span></td>
+                        <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <a class="page-link disabled"><i class="fas fa-chevron-left"></i></a>
+                <a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a>
+                <a class="page-link"><i class="fas fa-chevron-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <p class="sec" style="margin-top:-8px"><strong>Catat:</strong> halaman aktif pada pagination memakai teal <code>#14B8A6</code>, bukan primary. Itu anomali nyata di <code>sneat.css:304</code> — dipertahankan supaya prototype jujur.</p>
+
+    <h2 class="sec">8. Alert &amp; empty state</h2>
+    <div class="demo">
+        <div class="alert success"><i class="fas fa-check-circle"></i> Data tagihan berhasil disimpan.</div>
+        <div class="alert danger"><i class="fas fa-exclamation-circle"></i> Gagal menyimpan — NISN sudah terdaftar.</div>
+        <div class="alert warning"><i class="fas fa-exclamation-triangle"></i> 12 siswa belum melunasi tagihan ujian.</div>
+        <div class="alert info"><i class="fas fa-info-circle"></i> Tahun ajaran aktif saat ini adalah 2025/2026.</div>
+        <div class="card"><div class="empty">
+            <i class="fas fa-inbox"></i>
+            <p>Belum ada data untuk filter yang dipilih.</p>
+        </div></div>
+    </div>
+
+    <h2 class="sec">9. Modal konfirmasi</h2>
+    <div class="demo" style="display:flex;justify-content:center;background:rgba(15,23,42,.5)">
+        <div class="modal-demo">
+            <div class="mh"><span><i class="fas fa-sign-out-alt"></i> Konfirmasi Logout</span><i class="fas fa-times muted"></i></div>
+            <div class="mb">Apakah Anda yakin ingin keluar dari sistem?<br><small class="muted">Anda perlu login kembali untuk mengakses dashboard.</small></div>
+            <div class="mf"><a class="btn ghost"><i class="fas fa-times"></i> Batal</a><a class="btn danger"><i class="fas fa-sign-out-alt"></i> Ya, Logout</a></div>
+        </div>
+    </div>
+
+    <h2 class="sec">10. Kartu berkas</h2>
+    <p class="sec">Pengganti unggahan pengguna nyata (bukti transfer, lampiran materi, berkas tugas). Ini memang tampilan aslinya di aplikasi, jadi bukan kompromi.</p>
+    <div class="demo">
+        <div class="grid grid-3">
+            <div class="file-card"><div class="ico"><i class="fas fa-file-pdf"></i></div><div><div class="nm">bukti-transfer-jan.pdf</div><div class="sz">248 KB · diunggah 12 Jan 2026</div></div></div>
+            <div class="file-card"><div class="ico img"><i class="fas fa-file-image"></i></div><div><div class="nm">struk-bca.jpg</div><div class="sz">1,2 MB · diunggah 14 Jan 2026</div></div></div>
+            <div class="file-card"><div class="ico" style="background:#eff6ff;color:#2563eb"><i class="fas fa-file-word"></i></div><div><div class="nm">tugas-ipa-bab3.docx</div><div class="sz">86 KB · dikumpulkan tepat waktu</div></div></div>
+        </div>
+    </div>
+
+    <h2 class="sec">11. Kartu soal (5 tipe)</h2>
+    <p class="sec">Aplikasi mendukung lima tipe soal — lihat <code>siswa/lms/partials/_soal_*.blade.php</code>.</p>
+    <div class="demo">
+        <div class="card mb-20"><div class="card-body">
+            <div class="row between mb-20"><span class="badge primary">Pilihan Ganda</span><span class="muted small">Bobot 5 poin</span></div>
+            <p class="strong" style="margin-top:0">1. Hasil dari 15 × (8 + 4) adalah…</p>
+            <div class="opsi"><span class="huruf">A</span><span>160</span></div>
+            <div class="opsi picked"><span class="huruf">B</span><span>180</span></div>
+            <div class="opsi"><span class="huruf">C</span><span>200</span></div>
+            <div class="opsi" style="margin-bottom:0"><span class="huruf">D</span><span>220</span></div>
+        </div></div>
+        <div class="grid grid-2">
+            <div class="card"><div class="card-body">
+                <span class="badge purple">Pilihan Ganda Kompleks</span>
+                <p class="strong">Pilih semua bilangan prima berikut.</p>
+                <div class="opsi picked"><span class="huruf"><i class="fas fa-check"></i></span><span>13</span></div>
+                <div class="opsi"><span class="huruf"></span><span>21</span></div>
+                <div class="opsi picked" style="margin-bottom:0"><span class="huruf"><i class="fas fa-check"></i></span><span>29</span></div>
+            </div></div>
+            <div class="card"><div class="card-body">
+                <span class="badge info">Benar / Salah</span>
+                <p class="strong">Setiap bilangan genap habis dibagi 2.</p>
+                <div class="row"><a class="btn success sm"><i class="fas fa-check"></i> Benar</a><a class="btn ghost sm"><i class="fas fa-times"></i> Salah</a></div>
+                <hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0">
+                <span class="badge warning">Isian Singkat</span>
+                <p class="strong">Ibu kota Provinsi Jawa Barat adalah …</p>
+                <input class="control" value="Bandung">
+            </div></div>
+        </div>
+        <div class="card" style="margin-top:20px"><div class="card-body">
+            <span class="badge neutral">Uraian</span>
+            <p class="strong">Jelaskan proses fotosintesis beserta faktor yang memengaruhinya.</p>
+            <textarea class="control" rows="4">Fotosintesis adalah proses tumbuhan mengubah karbon dioksida dan air menjadi glukosa dengan bantuan cahaya matahari…</textarea>
+            <div class="row between" style="margin-top:12px"><span class="muted small">248 / 1000 karakter</span><span class="badge primary"><i class="fas fa-robot"></i> Dinilai otomatis oleh AI</span></div>
+        </div></div>
+    </div>
+
+    <h2 class="sec">12. Stepper PPDB</h2>
+    <div class="demo plain">
+        <div class="stepper">
+            <div class="step done"><span class="bulat"><i class="fas fa-check"></i></span><span class="lbl">Data Calon Siswa</span></div>
+            <div class="garis"></div>
+            <div class="step active"><span class="bulat">2</span><span class="lbl">Data Orang Tua</span></div>
+            <div class="garis"></div>
+            <div class="step"><span class="bulat">3</span><span class="lbl">Unggah Berkas</span></div>
+            <div class="garis"></div>
+            <div class="step"><span class="bulat">4</span><span class="lbl">Konfirmasi</span></div>
+        </div>
+    </div>
+
+    <h2 class="sec">13. Tab pil &amp; progress</h2>
+    <div class="demo">
+        <div class="pill-tab mb-24">
+            <a class="active">Semua</a><a>Belum Bayar</a><a>Cicilan</a><a>Terlambat</a><a>Lunas</a>
+        </div>
+        <div style="max-width:420px">
+            <div class="row between small mb-20" style="margin-bottom:6px"><span>Ketuntasan pembayaran</span><span class="strong">78%</span></div>
+            <div class="progress mb-20"><i style="width:78%"></i></div>
+            <div class="row between small" style="margin-bottom:6px"><span>Rapor terisi</span><span class="strong">45%</span></div>
+            <div class="progress warn mb-20"><i style="width:45%"></i></div>
+            <div class="row between small" style="margin-bottom:6px"><span>Presensi hari ini</span><span class="strong">18%</span></div>
+            <div class="progress danger"><i style="width:18%"></i></div>
+        </div>
+    </div>
+
+</div>
+
+<script src="ui-kit.js"></script>
+<script>
+    // Render lima varian sidebar untuk galeri komponen.
+    document.addEventListener('DOMContentLoaded', () => {
+        const target = { 'sb-admin': 'admin', 'sb-bendahara': 'bendahara', 'sb-wali': 'wali-kelas', 'sb-sekretaris': 'sekretaris', 'sb-walisiswa': 'wali-siswa' };
+        const aktif = { admin: 'admin.dashboard', bendahara: 'bendahara.tagihan.index', 'wali-kelas': 'wali.rapor.index', sekretaris: 'sekretaris.berita', 'wali-siswa': 'anak.1.tagihan' };
+        for (const [id, role] of Object.entries(target)) {
+            const el = document.getElementById(id);
+            if (el) el.outerHTML = renderSidebarSneat(role, aktif[role]);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Layar Guru Pengajar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="kit-header">
+    <h1>Guru Pengajar — 7 layar</h1>
+    <p><strong>Dua shell berbeda.</strong> Layar 01–02 memakai shell Sneat (biru <code>#4361EE</code>, sidebar 260px). Layar 03–07 memakai shell LMS (biru <code>#165FAC</code>, sidebar 280px, blok konteks mengajar). Perpindahan 02 → 03 adalah transisi visual paling mencolok di seluruh aplikasi.</p>
+</div>
+
+<!-- ═══ 01 Dashboard SIA ═══ -->
+<div class="screen-label">Guru / 01 Dashboard SIA <span>guru.dashboard · dashboard/guru.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="guru" data-active="guru.dashboard"
+     data-title="Dashboard" data-subtitle="Hendra Wijaya — 3 kelas, 4 mata pelajaran" data-user="H|Hendra Wijaya">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-chalkboard"></i></div>
+            <div class="stat-details"><div class="stat-value">3</div><div class="stat-label">Kelas Diampu</div>
+            <div class="stat-footer"><span>97 siswa total</span><span class="muted">28 JP / minggu</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-details"><div class="stat-value">8</div><div class="stat-label">Tugas Belum Dikoreksi</div>
+            <div class="stat-footer"><span>Tertua 3 hari lalu</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-details"><div class="stat-value">2</div><div class="stat-label">Ujian Berlangsung</div>
+            <div class="stat-footer"><span>7A &amp; 8B</span><span class="badge primary">Pengawasan aktif</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-comment-dots"></i></div>
+            <div class="stat-details"><div class="stat-value">1</div><div class="stat-label">Catatan Monitoring Baru</div>
+            <div class="stat-footer"><span>Dari Wakil Kepala</span><span class="badge warning">Belum dibaca</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-day"></i> Jadwal Mengajar Hari Ini — Kamis</h3></div>
+            <table class="data">
+                <thead><tr><th style="width:150px">Jam</th><th>Kelas</th><th>Mata Pelajaran</th><th>Ruang</th><th style="width:150px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">07.00 – 08.20</td><td>7A</td><td>IPA Terpadu</td><td>R-201</td><td><a class="btn primary sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                    <tr><td class="cell-main">08.20 – 09.00</td><td>8B</td><td>Matematika</td><td>R-105</td><td><a class="btn ghost sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                    <tr><td class="cell-main">10.00 – 11.20</td><td>7A</td><td>Matematika</td><td>R-201</td><td><a class="btn ghost sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                    <tr><td class="cell-main">11.50 – 12.30</td><td>10 IPA</td><td>Fisika</td><td>Lab-1</td><td><a class="btn ghost sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-list-check"></i> Perlu Dikoreksi</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309">12</div>
+                    <div><div class="activity-title">Tugas Bab 3 — Aljabar</div><div class="activity-meta">Matematika 7A · 12 dari 34 dikumpulkan</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#fee2e2;color:#b91c1c">28</div>
+                    <div><div class="activity-title">Laporan Praktikum Fotosintesis</div><div class="activity-meta">IPA 7A · 28 dari 34 dikumpulkan</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb">31</div>
+                    <div><div class="activity-title">Ulangan Harian Geometri</div><div class="activity-meta">Matematika 8B · perlu koreksi uraian</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#f5f3ff;color:#6d28d9">9</div>
+                    <div><div class="activity-title">Tugas Gerak Lurus</div><div class="activity-meta">Fisika 10 IPA · 9 dari 30 dikumpulkan</div></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Semua Kelas ═══ -->
+<div class="screen-label">Guru / 02 Semua Kelas <span>guru.kelas.index · guru/kelas/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="guru" data-active="guru.kelas.index"
+     data-title="Semua Kelas" data-subtitle="Pilih kelas dan mata pelajaran untuk masuk ke ruang LMS" data-user="H|Hendra Wijaya">
+<div class="content-slot">
+
+    <div class="grid grid-3">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chalkboard"></i> Kelas 7A</h3><span class="badge neutral">34 siswa</span></div>
+            <div class="card-body" style="padding:0">
+                <a class="row between" style="padding:16px 24px;border-bottom:1px solid #e2e8f0;text-decoration:none;color:inherit">
+                    <div><div class="cell-main">Matematika</div><div class="cell-sub">4 JP · Senin, Rabu</div></div>
+                    <span class="badge warning">12 tugas</span></a>
+                <a class="row between" style="padding:16px 24px;text-decoration:none;color:inherit">
+                    <div><div class="cell-main">IPA Terpadu</div><div class="cell-sub">4 JP · Selasa, Kamis</div></div>
+                    <span class="badge danger">28 tugas</span></a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chalkboard"></i> Kelas 8B</h3><span class="badge neutral">39 siswa</span></div>
+            <div class="card-body" style="padding:0">
+                <a class="row between" style="padding:16px 24px;text-decoration:none;color:inherit">
+                    <div><div class="cell-main">Matematika</div><div class="cell-sub">4 JP · Selasa, Jumat</div></div>
+                    <span class="badge primary">Ujian aktif</span></a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chalkboard"></i> Kelas 10 IPA</h3><span class="badge neutral">30 siswa</span></div>
+            <div class="card-body" style="padding:0">
+                <a class="row between" style="padding:16px 24px;text-decoration:none;color:inherit">
+                    <div><div class="cell-main">Fisika</div><div class="cell-sub">3 JP · Kamis</div></div>
+                    <span class="badge warning">9 tugas</span></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-archive"></i> Arsip LMS Tahun Ajaran Sebelumnya</h3>
+            <a class="btn ghost sm">Buka Arsip</a></div>
+        <div class="card-body">
+            <p class="small muted" style="margin:0">Materi, tugas, dan bank soal dari TA 2024/2025 dapat disalin ke kelas aktif tanpa membuat ulang dari nol.</p>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Dashboard LMS ═══ -->
+<div class="screen-label">Guru / 03 Dashboard LMS <span>guru.lms.dashboard · guru/lms/dashboard.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.dashboard"
+     data-title="Beranda Kelas" data-subtitle="Matematika — Kelas 7A · Semester Genap 2025/2026">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon" style="background:rgba(22,95,172,.08);color:#165fac"><i class="fas fa-users"></i></div>
+            <div class="stat-details"><div class="stat-value">34</div><div class="stat-label">Siswa</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-book"></i></div>
+            <div class="stat-details"><div class="stat-value">18</div><div class="stat-label">Materi</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-tasks"></i></div>
+            <div class="stat-details"><div class="stat-value">12</div><div class="stat-label">Perlu Dikoreksi</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-details"><div class="stat-value">6</div><div class="stat-label">Ujian &amp; Latihan</div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-clock-rotate-left" style="color:#165fac"></i> Aktivitas Terbaru</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#e0edfa;color:#165fac"><i class="fas fa-upload"></i></div>
+                    <div><div class="activity-title">12 siswa mengumpulkan Tugas Bab 3 — Aljabar</div><div class="activity-meta">Batas kumpul 18 Januari 2026 · 22 belum mengumpulkan</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857"><i class="fas fa-comments"></i></div>
+                    <div><div class="activity-title">6 balasan baru pada Forum “Soal Cerita Persamaan Linear”</div><div class="activity-meta">Terakhir 24 menit lalu</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-eye"></i></div>
+                    <div><div class="activity-title">Materi “Bangun Ruang Sisi Datar” dibuka 28 siswa</div><div class="activity-meta">Diunggah 3 hari lalu</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309"><i class="fas fa-video"></i></div>
+                    <div><div class="activity-title">Kelas virtual dijadwalkan Jumat 09.00</div><div class="activity-meta">Pembahasan latihan soal UTS</div></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-bolt" style="color:#165fac"></i> Aksi Cepat</h3></div>
+            <div class="quick-links" style="grid-template-columns:repeat(2,1fr)">
+                <a class="quick-link"><i class="fas fa-plus"></i><span>Unggah Materi</span></a>
+                <a class="quick-link"><i class="fas fa-clipboard-list"></i><span>Buat Tugas</span></a>
+                <a class="quick-link"><i class="fas fa-file-circle-plus"></i><span>Buat Ujian</span></a>
+                <a class="quick-link"><i class="fas fa-video"></i><span>Kelas Virtual</span></a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Materi ═══ -->
+<div class="screen-label">Guru / 04 Materi <span>guru.lms.materi.index · guru/lms/materi/index.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.materi"
+     data-title="Materi Pembelajaran" data-subtitle="Matematika — Kelas 7A · 18 materi">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="search" style="width:280px"><i class="fas fa-search"></i><input class="control" placeholder="Cari materi…"></div>
+            <select class="control" style="width:170px"><option>Semua Bab</option></select>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-archive"></i> Salin dari Arsip</a>
+            <a class="btn primary" style="background:#165fac"><i class="fas fa-plus"></i> Unggah Materi</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:52px">No</th><th>Judul Materi</th><th>Bab</th><th>Lampiran</th><th class="num">Dibuka</th><th>Diunggah</th><th>Status</th><th style="width:130px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td><span class="cell-main">Bangun Ruang Sisi Datar</span><div class="cell-sub">Pengantar kubus, balok, prisma, dan limas</div></td>
+                    <td>Bab 8</td><td><span class="badge neutral square"><i class="fas fa-file-pdf"></i> PDF</span> <span class="badge neutral square"><i class="fas fa-video"></i> Video</span></td>
+                    <td class="num">28 / 34</td><td>3 hari lalu</td><td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr><td>2</td><td><span class="cell-main">Persamaan Linear Satu Variabel</span><div class="cell-sub">Konsep dasar dan penyelesaian</div></td>
+                    <td>Bab 7</td><td><span class="badge neutral square"><i class="fas fa-file-pdf"></i> PDF</span></td>
+                    <td class="num">34 / 34</td><td>1 minggu lalu</td><td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr><td>3</td><td><span class="cell-main">Latihan Soal Cerita Aljabar</span><div class="cell-sub">Kumpulan 25 soal beserta pembahasan</div></td>
+                    <td>Bab 7</td><td><span class="badge neutral square"><i class="fas fa-file-pdf"></i> PDF</span></td>
+                    <td class="num">31 / 34</td><td>2 minggu lalu</td><td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr><td>4</td><td><span class="cell-main">Statistika Dasar</span><div class="cell-sub">Mean, median, modus</div></td>
+                    <td>Bab 9</td><td><span class="badge neutral square"><i class="fas fa-file-powerpoint"></i> Slide</span></td>
+                    <td class="num">0 / 34</td><td>Baru saja</td><td><span class="badge neutral">Draft</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Buat Tugas ═══ -->
+<div class="screen-label">Guru / 05 Buat Tugas <span>guru.lms.tugas.create · guru/lms/tugas/create.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.tugas"
+     data-title="Buat Tugas Baru" data-subtitle="Matematika — Kelas 7A">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-clipboard-list" style="color:#165fac"></i> Detail Tugas</h3></div>
+            <div class="card-body">
+                <div class="field"><label>Judul Tugas <span class="req">*</span></label><input class="control" value="Tugas Bab 8 — Volume Bangun Ruang"></div>
+                <div class="field"><label>Instruksi <span class="req">*</span></label>
+                    <textarea class="control" rows="6">Kerjakan 10 soal pada lampiran PDF. Tuliskan langkah pengerjaan secara lengkap, bukan hanya hasil akhirnya.
+
+Jawaban ditulis tangan, lalu difoto atau dipindai menjadi satu berkas PDF. Beri nama berkas dengan format: NamaLengkap_Kelas_Bab8.</textarea></div>
+                <div class="grid grid-2">
+                    <div class="field"><label>Tipe Pengumpulan</label><select class="control"><option>Unggah berkas</option><option>Teks langsung</option><option>Keduanya</option></select></div>
+                    <div class="field"><label>Format Berkas Diizinkan</label><select class="control"><option>PDF, JPG, PNG</option></select></div>
+                </div>
+                <div class="field" style="margin-bottom:0"><label>Lampiran Soal</label>
+                    <div class="file-card"><div class="ico"><i class="fas fa-file-pdf"></i></div>
+                        <div style="flex:1"><div class="nm">soal-bab8-volume.pdf</div><div class="sz">412 KB</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-trash"></i></a></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-calendar" style="color:#165fac"></i> Penjadwalan</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Mulai Tersedia</label><input class="control" type="datetime-local" value="2026-01-15T07:00"></div>
+                    <div class="field"><label>Batas Pengumpulan <span class="req">*</span></label><input class="control focus" type="datetime-local" value="2026-01-22T23:59"></div>
+                    <div class="field" style="margin-bottom:0">
+                        <label class="row small" style="gap:8px;font-weight:400;margin-bottom:8px"><input type="checkbox" checked> Izinkan pengumpulan terlambat</label>
+                        <label class="row small" style="gap:8px;font-weight:400;margin:0"><input type="checkbox"> Kirim notifikasi WhatsApp ke wali</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-star" style="color:#165fac"></i> Penilaian</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Bobot Nilai</label><input class="control" value="100"></div>
+                    <div class="field" style="margin-bottom:0"><label class="row small" style="gap:8px;font-weight:400;margin:0"><input type="checkbox"> Aktifkan bantuan koreksi AI</label>
+                        <div class="hint">AI memberi saran nilai dan umpan balik; keputusan akhir tetap di tangan guru.</div></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20" style="background:#165fac"><i class="fas fa-paper-plane"></i> Terbitkan Tugas</a>
+                <a class="btn ghost block">Simpan sebagai Draft</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Koreksi Tugas ═══ -->
+<div class="screen-label">Guru / 06 Koreksi Tugas <span>guru.lms.tugas.koreksi · guru/lms/tugas/koreksi.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.tugas"
+     data-title="Koreksi Tugas" data-subtitle="Tugas Bab 3 — Aljabar · Matematika 7A">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon green" style="width:40px;height:40px;font-size:16px"><i class="fas fa-check"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">22</div><div class="stat-label" style="font-size:12px">Sudah Dinilai</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon yellow" style="width:40px;height:40px;font-size:16px"><i class="fas fa-hourglass"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">12</div><div class="stat-label" style="font-size:12px">Belum Dinilai</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon red" style="width:40px;height:40px;font-size:16px"><i class="fas fa-xmark"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">0</div><div class="stat-label" style="font-size:12px">Belum Kumpul</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon" style="width:40px;height:40px;font-size:16px;background:rgba(22,95,172,.08);color:#165fac"><i class="fas fa-calculator"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">81,4</div><div class="stat-label" style="font-size:12px">Rata-rata</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Belum Dinilai (12)</a><a>Sudah Dinilai</a><a>Terlambat</a><a>Semua</a></div>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-robot"></i> Saran Nilai AI</a>
+            <a class="btn primary" style="background:#165fac"><i class="fas fa-check-double"></i> Simpan Semua Nilai</a>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Dikumpulkan</th><th>Berkas</th><th style="width:110px">Nilai</th><th>Umpan Balik</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi Ramadhan</span></td>
+                    <td>17 Jan, 20.14 <div class="cell-sub">Tepat waktu</div></td>
+                    <td><a class="small"><i class="fas fa-file-pdf"></i> AhmadFauzi_7A_Bab3.pdf</a></td>
+                    <td><input class="control" placeholder="0–100" style="text-align:center;padding:7px"></td>
+                    <td><input class="control" placeholder="Umpan balik…" style="padding:7px;font-size:13px"></td>
+                    <td><span class="badge warning">Belum Dinilai</span></td></tr>
+                <tr><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td>
+                    <td>18 Jan, 09.02 <div class="cell-sub">Tepat waktu</div></td>
+                    <td><a class="small"><i class="fas fa-file-pdf"></i> SitiNurhaliza_7A_Bab3.pdf</a></td>
+                    <td><input class="control focus" value="92" style="text-align:center;padding:7px"></td>
+                    <td><input class="control" value="Langkah pengerjaan rapi dan lengkap." style="padding:7px;font-size:13px"></td>
+                    <td><span class="badge warning">Belum Disimpan</span></td></tr>
+                <tr><td><span class="avatar-sm gray">FR</span><span class="cell-main">Fajar Ramdani</span></td>
+                    <td>19 Jan, 01.37 <div class="cell-sub" style="color:#b45309">Terlambat 2 jam</div></td>
+                    <td><a class="small"><i class="fas fa-file-image"></i> tugas-fajar.jpg</a></td>
+                    <td><input class="control" placeholder="0–100" style="text-align:center;padding:7px"></td>
+                    <td><input class="control" placeholder="Umpan balik…" style="padding:7px;font-size:13px"></td>
+                    <td><span class="badge danger">Terlambat</span></td></tr>
+                <tr style="background:#f8fafc"><td><span class="avatar-sm gray">LK</span><span class="cell-main">Laila Kusuma</span></td>
+                    <td>17 Jan, 15.48 <div class="cell-sub">Tepat waktu</div></td>
+                    <td><a class="small"><i class="fas fa-file-pdf"></i> LailaKusuma_7A_Bab3.pdf</a></td>
+                    <td><span class="strong tac" style="display:block">85</span></td>
+                    <td class="small">Sudah baik, perhatikan ketelitian pada soal nomor 7.</td>
+                    <td><span class="badge success">Sudah Dinilai</span></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 07 Kelola Soal Ujian ═══ -->
+<div class="screen-label">Guru / 07 Kelola Soal Ujian <span>guru.lms.ujian.soal.manage · guru/lms/ujian/manage_soal.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.ujian"
+     data-title="Kelola Soal Ujian" data-subtitle="UTS Matematika Semester Genap — Kelas 7A · 25 soal">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <a class="btn primary" style="background:#165fac"><i class="fas fa-plus"></i> Tambah Soal</a>
+        <a class="btn ghost"><i class="fas fa-robot"></i> Generate Soal dengan AI</a>
+        <a class="btn ghost"><i class="fas fa-file-import"></i> Impor dari Template</a>
+        <a class="btn ghost"><i class="fas fa-archive"></i> Ambil dari Bank Soal</a>
+        <div class="spacer"></div>
+        <span class="muted small">Total bobot: <strong>100 poin</strong></span>
+    </div></div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20"><div class="card-body">
+                <div class="row between mb-20"><div class="row"><span class="badge primary">Pilihan Ganda</span><span class="muted small">Soal 1 · 4 poin</span></div>
+                    <div class="row"><a class="btn ghost sm"><i class="fas fa-arrow-up"></i></a><a class="btn ghost sm"><i class="fas fa-arrow-down"></i></a><a class="btn ghost sm"><i class="fas fa-pen"></i></a><a class="btn ghost sm"><i class="fas fa-trash"></i></a></div></div>
+                <p class="strong" style="margin-top:0">Volume sebuah kubus dengan panjang rusuk 12 cm adalah…</p>
+                <div class="opsi"><span class="huruf">A</span><span>144 cm³</span></div>
+                <div class="opsi"><span class="huruf">B</span><span>864 cm³</span></div>
+                <div class="opsi picked"><span class="huruf">C</span><span>1.728 cm³ <span class="badge success" style="margin-left:8px">Kunci</span></span></div>
+                <div class="opsi" style="margin-bottom:0"><span class="huruf">D</span><span>2.048 cm³</span></div>
+            </div></div>
+
+            <div class="card mb-20"><div class="card-body">
+                <div class="row between mb-20"><div class="row"><span class="badge purple">Pilihan Ganda Kompleks</span><span class="muted small">Soal 2 · 5 poin</span></div>
+                    <div class="row"><a class="btn ghost sm"><i class="fas fa-arrow-up"></i></a><a class="btn ghost sm"><i class="fas fa-arrow-down"></i></a><a class="btn ghost sm"><i class="fas fa-pen"></i></a><a class="btn ghost sm"><i class="fas fa-trash"></i></a></div></div>
+                <p class="strong" style="margin-top:0">Pilih semua bangun ruang yang memiliki sisi berbentuk persegi panjang.</p>
+                <div class="opsi picked"><span class="huruf"><i class="fas fa-check"></i></span><span>Balok</span></div>
+                <div class="opsi"><span class="huruf"></span><span>Bola</span></div>
+                <div class="opsi picked"><span class="huruf"><i class="fas fa-check"></i></span><span>Prisma segitiga</span></div>
+                <div class="opsi" style="margin-bottom:0"><span class="huruf"></span><span>Kerucut</span></div>
+            </div></div>
+
+            <div class="card"><div class="card-body">
+                <div class="row between mb-20"><div class="row"><span class="badge neutral">Uraian</span><span class="muted small">Soal 3 · 10 poin</span></div>
+                    <div class="row"><a class="btn ghost sm"><i class="fas fa-arrow-up"></i></a><a class="btn ghost sm"><i class="fas fa-arrow-down"></i></a><a class="btn ghost sm"><i class="fas fa-pen"></i></a><a class="btn ghost sm"><i class="fas fa-trash"></i></a></div></div>
+                <p class="strong" style="margin-top:0">Sebuah bak air berbentuk balok berukuran 80 cm × 50 cm × 40 cm. Hitunglah volume air maksimum dalam liter, lalu jelaskan langkah pengerjaanmu.</p>
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:13px">
+                    <div class="strong" style="margin-bottom:6px">Kunci / rubrik jawaban</div>
+                    V = p × l × t = 80 × 50 × 40 = 160.000 cm³ = 160 liter. Poin penuh bila langkah konversi cm³ → liter dituliskan.
+                </div>
+                <div class="row" style="margin-top:12px"><span class="badge primary"><i class="fas fa-robot"></i> Koreksi otomatis AI aktif</span></div>
+            </div></div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-gear" style="color:#165fac"></i> Pengaturan Ujian</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Durasi</span><span class="strong">90 menit</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Mulai</span><span class="strong">19 Jan, 07.30</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Acak soal</span><span class="badge success">Aktif</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Acak opsi</span><span class="badge success">Aktif</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Anti-screenshot</span><span class="badge success">Aktif</span></div>
+                    <div class="row between small" style="padding:8px 0"><span class="muted">Syarat lunas</span><span class="badge warning">Diperiksa</span></div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-list-ol" style="color:#165fac"></i> Komposisi Soal</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Pilihan Ganda</span><span class="strong">15 soal · 60 poin</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>PG Kompleks</span><span class="strong">4 soal · 20 poin</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Benar / Salah</span><span class="strong">3 soal · 6 poin</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Isian Singkat</span><span class="strong">2 soal · 4 poin</span></div>
+                    <div class="row between small" style="padding:7px 0"><span>Uraian</span><span class="strong">1 soal · 10 poin</span></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20" style="background:#165fac"><i class="fas fa-check"></i> Terbitkan Ujian</a>
+                <a class="btn ghost block"><i class="fas fa-eye"></i> Pratinjau Sisi Siswa</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>
