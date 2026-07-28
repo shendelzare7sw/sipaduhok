@@ -19,7 +19,7 @@
     $items = is_object($pengumuman) && method_exists($pengumuman, 'getCollection') ? $pengumuman->getCollection() : collect($pengumuman);
     $total = is_object($pengumuman) && method_exists($pengumuman, 'total') ? $pengumuman->total() : $items->count();
     $autoCount = $items->where('is_from_kalender', true)->count();
-    $highCount = $items->where('prioritas', 'tinggi')->count();
+    $highCount = $items->where('prioritas', 'mendesak')->count();
 @endphp
 
 <div class="ak-page">
@@ -51,7 +51,7 @@
             <i class="fas fa-robot"></i>
         </div>
         <div class="ak-stat purple">
-            <span>Prioritas Tinggi</span>
+            <span>Prioritas Mendesak</span>
             <strong>{{ number_format($highCount) }}</strong>
             <small>Membutuhkan perhatian</small>
             <i class="fas fa-exclamation-circle"></i>
@@ -79,17 +79,17 @@
                     <tbody>
                         @foreach($items as $item)
                             @php
-                                $priority = $item->prioritas ?? 'rendah';
+                                $priority = $item->prioritas ?? 'biasa';
                                 $priorityClass = match($priority) {
-                                    'tinggi' => 'danger',
-                                    'sedang' => 'warning',
+                                    'mendesak' => 'danger',
+                                    'penting' => 'warning',
                                     default => 'primary',
                                 };
                                 $status = strtolower($item->status ?? 'aktif');
                                 $statusClass = match($status) {
                                     'aktif' => 'success',
-                                    'dijadwalkan' => 'info',
-                                    'kadaluarsa' => 'danger',
+                                    'draft' => 'warning',
+                                    'arsip' => 'muted',
                                     default => 'muted',
                                 };
                             @endphp
