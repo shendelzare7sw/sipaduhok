@@ -172,7 +172,7 @@ class UserController extends Controller
         return redirect_to_previous('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil ditambahkan!');
     }
 
-    public function editTenagaPendidik($id)
+    public function editTenagaPendidik(int $id)
     {
         // Prioritize finding by user_id first to avoid ID collisions
         $tenagaPendidik = TenagaPendidik::with('user')->where('user_id', $id)->first();
@@ -204,7 +204,7 @@ class UserController extends Controller
         return view('admin.users.tenaga-pendidik-edit', compact('tenagaPendidik', 'cabangList', 'roles'));
     }
 
-    public function updateTenagaPendidik(Request $request, $id)
+    public function updateTenagaPendidik(Request $request, int $id)
     {
         // Prioritize finding by user_id first
         $tenagaPendidik = TenagaPendidik::where('user_id', $id)->first();
@@ -287,7 +287,7 @@ class UserController extends Controller
         return redirect_to_previous('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil diupdate!');
     }
 
-    public function showTenagaPendidik($id)
+    public function showTenagaPendidik(int $id)
     {
         $tenagaPendidik = TenagaPendidik::with(['user.cabang'])->where('user_id', $id)->first();
         if (! $tenagaPendidik) {
@@ -361,7 +361,7 @@ class UserController extends Controller
         return $b;
     }
 
-    public function deleteTenagaPendidik($id)
+    public function deleteTenagaPendidik(int $id)
     {
         // Try to find the profile
         $tenagaPendidik = TenagaPendidik::where('id', $id)->orWhere('user_id', $id)->first();
@@ -634,7 +634,7 @@ class UserController extends Controller
         return redirect_to_previous('admin.users.siswa')->with('success', 'Siswa berhasil ditambahkan!');
     }
 
-    public function editSiswa($id)
+    public function editSiswa(int $id)
     {
         $siswa = Siswa::with(['user', 'studentParents.parent'])->findOrFail($id);
         $cabangList = Cabang::where('is_active', true)->get();
@@ -653,7 +653,7 @@ class UserController extends Controller
         return view('admin.users.siswa-edit', compact('siswa', 'cabangList', 'kelasList', 'orangTuaList'));
     }
 
-    public function updateSiswa(Request $request, $id)
+    public function updateSiswa(Request $request, int $id)
     {
         $siswa = Siswa::findOrFail($id);
 
@@ -832,7 +832,7 @@ class UserController extends Controller
         return redirect_to_previous('admin.users.siswa')->with('success', 'Siswa berhasil diupdate!');
     }
 
-    public function showSiswa($id)
+    public function showSiswa(int $id)
     {
         $siswa = Siswa::with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('id', $id)->first();
         if (! $siswa) {
@@ -846,7 +846,7 @@ class UserController extends Controller
         return view('admin.users.siswa-show', compact('siswa'));
     }
 
-    public function deleteSiswa($id)
+    public function deleteSiswa(int $id)
     {
         $siswa = Siswa::findOrFail($id);
 
@@ -1043,7 +1043,7 @@ class UserController extends Controller
             ->with('success', 'Akun wali siswa berhasil dibuat!');
     }
 
-    public function toggleOrangTuaStatus($id)
+    public function toggleOrangTuaStatus(int $id)
     {
         $user = User::where('role', 'orang_tua')->findOrFail($id);
         $user->is_active = ! $user->is_active;
@@ -1054,7 +1054,7 @@ class UserController extends Controller
         return redirect_to_previous('admin.users.wali-siswa')->with('success', "Akun wali siswa berhasil {$status}!");
     }
 
-    public function showOrangTua($id)
+    public function showOrangTua(int $id)
     {
         $orangTua = User::where('role', 'orang_tua')
             ->with(['studentParents.siswa.kelas.cabang', 'studentParents.siswa.cabang'])
@@ -1063,7 +1063,7 @@ class UserController extends Controller
         return view('admin.users.wali-siswa-show', compact('orangTua'));
     }
 
-    public function editOrangTua($id)
+    public function editOrangTua(int $id)
     {
         $orangTua = User::where('role', 'orang_tua')
             ->with(['studentParents.siswa.kelas'])
@@ -1072,7 +1072,7 @@ class UserController extends Controller
         return view('admin.users.wali-siswa-edit', compact('orangTua'));
     }
 
-    public function updateOrangTua(Request $request, $id)
+    public function updateOrangTua(Request $request, int $id)
     {
         $orangTua = User::where('role', 'orang_tua')->findOrFail($id);
 
@@ -1135,7 +1135,7 @@ class UserController extends Controller
             ->with('success', 'Data wali siswa berhasil diperbarui!');
     }
 
-    public function deleteOrangTua($id)
+    public function deleteOrangTua(int $id)
     {
         $user = User::where('role', 'orang_tua')->findOrFail($id);
         $user->delete();
