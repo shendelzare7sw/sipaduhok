@@ -220,7 +220,7 @@
     min-width: 300px;
     max-height: 80vh;
     overflow-y: auto;
-    z-index: 9999;
+    z-index: 1000;
 }
 
 .payment-filter-title {
