@@ -11,6 +11,7 @@ use App\Models\MataPelajaran;
 use App\Models\Nilai;
 use App\Models\TenagaPendidik;
 use App\Models\TahunAjaran;
+use App\Models\GuruPengajarKelas;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -539,19 +540,37 @@ class NilaiController extends Controller
         }
 
         $validated = $request->validate($rules);
-        
+
         $wali = $this->getTenagaPendidik();
+
+        if (!$wali) {
+            return redirect()->route('wali.dashboard')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
 
         if ($this->needsKelasSelection($wali)) {
             return $this->redirectToPilihKelas();
         }
 
         $kelas = $this->getSelectedKelas($wali);
-        
+
+        if (!$kelas) {
+            return redirect()->route('wali.nilai.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
+
         $siswa = Siswa::where('id', $siswaId)
             ->where('kelas_id', $kelas->id)
             ->firstOrFail();
-        
+
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $currentSemester = Nilai::getCurrentSemester();
+        $semester = in_array($request->input('semester'), ['ganjil', 'genap'])
+            ? $request->input('semester')
+            : $currentSemester;
+
+        $mapelTanpaGuru = [];
+
         foreach ($request->nilai as $nilaiInput) {
             $dataToUpdate = [
                 'edited_by_wali_id' => $wali->id,
@@ -572,26 +591,45 @@ class NilaiController extends Controller
             $dataToUpdate['upk'] = $nilaiInput['upk'] ?? null;
             $dataToUpdate['ujian_praktek'] = $nilaiInput['ujian_praktek'] ?? null;
 
-            $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
-            $currentSemester = Nilai::getCurrentSemester();
-            $semester = in_array($request->input('semester'), ['ganjil', 'genap'])
-                ? $request->input('semester')
-                : $currentSemester;
+            $criteria = [
+                'siswa_id' => $siswa->id,
+                'mata_pelajaran_id' => $nilaiInput['mata_pelajaran_id'],
+                'kelas_id' => $kelas->id,
+                'tahun_ajaran_id' => $tahunAjaranAktif?->id,
+                'semester' => $semester,
+            ];
 
-            $nilai = Nilai::updateOrCreate(
-                [
-                    'siswa_id' => $siswa->id,
-                    'mata_pelajaran_id' => $nilaiInput['mata_pelajaran_id'],
-                    'kelas_id' => $kelas->id,
-                    'tahun_ajaran_id' => $tahunAjaranAktif?->id,
-                    'semester' => $semester,
-                ],
-                $dataToUpdate
-            );
+            // guru_id NOT NULL di tabel nilai. Kalau belum ada baris nilai sama sekali
+            // untuk kombinasi ini (guru belum pernah menyentuh mapel ini), updateOrCreate()
+            // di bawah akan INSERT baris baru — tanpa guru_id, insert itu gagal (500).
+            // Ambil guru_id dari penugasan GuruPengajarKelas, sumber kebenaran yang sama
+            // dipakai GuruNilaiController::verifyAccess().
+            if (!Nilai::where($criteria)->exists()) {
+                $guruId = GuruPengajarKelas::where('kelas_id', $kelas->id)
+                    ->where('mata_pelajaran_id', $nilaiInput['mata_pelajaran_id'])
+                    ->value('tenaga_pendidik_id');
+
+                if (!$guruId) {
+                    // Tidak ada guru pengajar ditugaskan untuk mapel ini di kelas ini —
+                    // lewati daripada memaksa insert yang pasti gagal.
+                    $mapelTanpaGuru[] = $nilaiInput['mata_pelajaran_id'];
+                    continue;
+                }
+
+                $dataToUpdate['guru_id'] = $guruId;
+            }
+
+            $nilai = Nilai::updateOrCreate($criteria, $dataToUpdate);
 
             $nilai->hitungNilaiAkhir();
         }
-        
+
+        if (!empty($mapelTanpaGuru)) {
+            $namaMapel = MataPelajaran::whereIn('id', $mapelTanpaGuru)->pluck('nama_mapel')->implode(', ');
+            return redirect()->route('wali.nilai.index')
+                ->with('warning', "Nilai lainnya tersimpan. Mapel berikut dilewati karena belum ada guru pengajar yang ditugaskan di kelas ini: {$namaMapel}.");
+        }
+
         return redirect()->route('wali.nilai.index')
             ->with('success', 'Nilai siswa berhasil diperbarui.');
     }
