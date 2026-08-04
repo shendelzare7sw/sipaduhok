@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\MataPelajaran;
-use App\Imports\MataPelajaranImport;
 use App\Exports\Templates\MataPelajaranTemplate;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Controller;
+use App\Imports\MataPelajaranImport;
+use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MataPelajaranController extends Controller
 {
@@ -50,6 +49,7 @@ class MataPelajaranController extends Controller
     public function create()
     {
         $jenjangList = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
         return view('admin.mata-pelajaran.create', compact('jenjangList'));
     }
 
@@ -68,8 +68,7 @@ class MataPelajaranController extends Controller
 
         MataPelajaran::create($validated);
 
-        return redirect()
-            ->route('admin.mata-pelajaran.index')
+        return redirect_to_previous('admin.mata-pelajaran.index')
             ->with('success', 'Mata pelajaran berhasil ditambahkan!');
     }
 
@@ -96,6 +95,7 @@ class MataPelajaranController extends Controller
     public function edit(MataPelajaran $mataPelajaran)
     {
         $jenjangList = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
         return view('admin.mata-pelajaran.edit', compact('mataPelajaran', 'jenjangList'));
     }
 
@@ -108,14 +108,13 @@ class MataPelajaranController extends Controller
             'nama_mapel' => 'required|string|max:100',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
-            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,' . $mataPelajaran->id,
+            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
             'deskripsi' => 'nullable|string',
         ]);
 
         $mataPelajaran->update($validated);
 
-        return redirect()
-            ->route('admin.mata-pelajaran.index')
+        return redirect_to_previous('admin.mata-pelajaran.index')
             ->with('success', 'Mata pelajaran berhasil diperbarui!');
     }
 
@@ -133,8 +132,7 @@ class MataPelajaranController extends Controller
 
         $mataPelajaran->delete();
 
-        return redirect()
-            ->route('admin.mata-pelajaran.index')
+        return redirect_to_previous('admin.mata-pelajaran.index')
             ->with('success', 'Mata pelajaran berhasil dihapus!');
     }
 
@@ -160,7 +158,7 @@ class MataPelajaranController extends Controller
         ]);
 
         try {
-            $import = new MataPelajaranImport();
+            $import = new MataPelajaranImport;
             Excel::import($import, $request->file('file'));
 
             $imported = $import->getImportedCount();
@@ -172,8 +170,7 @@ class MataPelajaranController extends Controller
                 $message .= " {$skipped} data dilewati (sudah ada atau format salah).";
             }
 
-            return redirect()
-                ->route('admin.mata-pelajaran.index')
+            return redirect_to_previous('admin.mata-pelajaran.index')
                 ->with('warning', $message); // Using warning color to indicate mixed results if any
         } catch (\Exception $e) {
 
@@ -182,7 +179,7 @@ class MataPelajaranController extends Controller
                 ->with('success', $message);
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimport data: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengimport data: '.$e->getMessage());
         }
     }
 
@@ -191,7 +188,7 @@ class MataPelajaranController extends Controller
      */
     public function downloadTemplate()
     {
-        return Excel::download(new MataPelajaranTemplate(), 'template_mata_pelajaran.xlsx');
+        return Excel::download(new MataPelajaranTemplate, 'template_mata_pelajaran.xlsx');
     }
 
     /**
@@ -200,8 +197,8 @@ class MataPelajaranController extends Controller
     public function suggestKodeMapel(Request $request)
     {
         $jenjang = $request->input('jenjang');
-        
-        if (!$jenjang) {
+
+        if (! $jenjang) {
             return response()->json(['suggestions' => []]);
         }
 
@@ -215,24 +212,24 @@ class MataPelajaranController extends Controller
         $usedNumbers = [];
         foreach ($existingCodes as $code) {
             // Match pattern: JENJANG-XXX
-            if (preg_match('/^' . preg_quote($jenjang, '/') . '-(\d+)$/', $code, $matches)) {
-                $usedNumbers[] = (int)$matches[1];
+            if (preg_match('/^'.preg_quote($jenjang, '/').'-(\d+)$/', $code, $matches)) {
+                $usedNumbers[] = (int) $matches[1];
             }
         }
 
         // Find next available numbers (suggest 5 options)
         $suggestions = [];
         $nextNumber = empty($usedNumbers) ? 1 : max($usedNumbers) + 1;
-        
+
         for ($i = 0; $i < 5; $i++) {
             $number = $nextNumber + $i;
-            $code = $jenjang . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            $code = $jenjang.'-'.str_pad($number, 3, '0', STR_PAD_LEFT);
             $suggestions[] = $code;
         }
 
         return response()->json([
             'suggestions' => $suggestions,
-            'jenjang' => $jenjang
+            'jenjang' => $jenjang,
         ]);
     }
 
@@ -244,13 +241,13 @@ class MataPelajaranController extends Controller
         $jenjangFilter = $request->input('jenjang');
 
         // Normalize to array (supports single string or array input from multi-select)
-        if ($jenjangFilter && !is_array($jenjangFilter)) {
+        if ($jenjangFilter && ! is_array($jenjangFilter)) {
             $jenjangFilter = [$jenjangFilter];
         }
 
         $query = MataPelajaran::query()->orderBy('jenjang')->orderBy('nama_mapel');
 
-        if (!empty($jenjangFilter)) {
+        if (! empty($jenjangFilter)) {
             $query->whereIn('jenjang', $jenjangFilter);
         }
 

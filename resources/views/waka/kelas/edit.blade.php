@@ -56,6 +56,7 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
             <form action="{{ route('waka.kelas.update', $kelas) }}" method="POST" id="kelasForm">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="_return_url" value="{{ url()->previous(route('waka.kelas.index')) }}">
 
                 <div class="form-section">
                     <div class="form-section-title">
@@ -189,7 +190,7 @@ Perbarui data kelas {{ $kelas->nama_kelas }}
 
                 <div class="form-actions">
                     <div class="form-actions-left">
-                        <a href="{{ route('waka.kelas.index') }}" class="btn btn-secondary">
+                        <a href="{{ url()->previous(route('waka.kelas.index')) }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
                         <a href="{{ route('waka.kelas.show', $kelas) }}" class="btn btn-secondary">

@@ -21,7 +21,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 @section('content')
 {{-- Header with Back Button --}}
 <div class="page-header">
-    <a href="{{ route('admin.users.tenaga-pendidik') }}" class="btn-back" title="Kembali">
+    <a href="{{ url()->previous(route('admin.users.tenaga-pendidik')) }}" class="btn-back" title="Kembali">
         <i class="fas fa-arrow-left"></i>
     </a>
     <div class="page-header-title">
@@ -48,6 +48,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 <form action="{{ route('admin.users.update-tenaga-pendidik', $tenagaPendidik->user_id) }}" method="POST">
     @csrf
     @method('PUT')
+    <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.users.tenaga-pendidik')) }}">
 
     {{-- Section 1: Account Information --}}
     <div class="card">
@@ -190,7 +191,7 @@ Perbarui data {{ $tenagaPendidik->nama_lengkap ?? 'N/A' }}
 
     {{-- Form Actions --}}
     <div class="form-actions">
-        <a href="{{ route('admin.users.tenaga-pendidik') }}" class="btn btn-secondary">
+        <a href="{{ url()->previous(route('admin.users.tenaga-pendidik')) }}" class="btn btn-secondary">
             <i class="fas fa-times"></i>
             Batal
         </a>

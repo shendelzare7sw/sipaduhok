@@ -4,11 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cabang;
-use App\Models\Siswa;
 use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CabangController extends Controller
 {
@@ -18,26 +17,26 @@ class CabangController extends Controller
     public function index(Request $request)
     {
         $query = Cabang::query();
-        
+
         // Search functionality
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama_cabang', 'like', "%{$search}%")
-                  ->orWhere('kode_cabang', 'like', "%{$search}%")
-                  ->orWhere('alamat', 'like', "%{$search}%");
+                    ->orWhere('kode_cabang', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%");
             });
         }
-        
+
         // Filter by status
         if ($request->has('status') && $request->status !== '') {
             $query->where('is_active', $request->status === 'aktif');
         }
-        
+
         $cabangs = $query->withCount(['siswa', 'kelas', 'users'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         // Statistics
         $stats = [
             'totalCabang' => Cabang::count(),
@@ -45,7 +44,7 @@ class CabangController extends Controller
             'cabangNonAktif' => Cabang::where('is_active', false)->count(),
             'totalSiswaSemuaCabang' => Siswa::count(),
         ];
-        
+
         return view('admin.cabang.index', compact('cabangs', 'stats'));
     }
 
@@ -67,7 +66,7 @@ class CabangController extends Controller
             'nama_cabang' => 'required|string|max:255',
             'alamat' => 'required|string',
             'telepon' => 'nullable|string|max:20',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ], [
             'kode_cabang.required' => 'Kode cabang harus diisi',
             'kode_cabang.unique' => 'Kode cabang sudah digunakan',
@@ -84,7 +83,7 @@ class CabangController extends Controller
 
         Cabang::create($validated);
 
-        return redirect()->route('admin.cabang.index')
+        return redirect_to_previous('admin.cabang.index')
             ->with('success', 'Cabang berhasil ditambahkan!');
     }
 
@@ -95,28 +94,28 @@ class CabangController extends Controller
     {
         // Load related data with counts
         $cabang->loadCount(['siswa', 'kelas', 'users']);
-        
+
         // Get siswa in this cabang with pagination
         $siswa = Siswa::with('kelas')
             ->where('cabang_id', $cabang->id)
             ->where('status', 'aktif')
             ->orderBy('nama_lengkap')
             ->paginate(10, ['*'], 'siswa_page');
-        
+
         // Get kelas in this cabang
         $kelas = Kelas::with(['tahunAjaran', 'waliKelas'])
             ->where('cabang_id', $cabang->id)
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
             ->get();
-        
+
         // Get users/tenaga pendidik in this cabang
         $users = User::where('cabang_id', $cabang->id)
             ->where('role', '!=', 'siswa')
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
-        
+
         // Statistics for this cabang
         $stats = [
             'totalSiswa' => Siswa::where('cabang_id', $cabang->id)->count(),
@@ -127,7 +126,7 @@ class CabangController extends Controller
                 ->where('is_active', true)
                 ->count(),
         ];
-        
+
         return view('admin.cabang.show', compact('cabang', 'siswa', 'kelas', 'users', 'stats'));
     }
 
@@ -145,11 +144,11 @@ class CabangController extends Controller
     public function update(Request $request, Cabang $cabang)
     {
         $validated = $request->validate([
-            'kode_cabang' => 'required|string|max:10|alpha_num|unique:cabang,kode_cabang,' . $cabang->id,
+            'kode_cabang' => 'required|string|max:10|alpha_num|unique:cabang,kode_cabang,'.$cabang->id,
             'nama_cabang' => 'required|string|max:255',
             'alamat' => 'required|string',
             'telepon' => 'nullable|string|max:20',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ], [
             'kode_cabang.required' => 'Kode cabang harus diisi',
             'kode_cabang.unique' => 'Kode cabang sudah digunakan',
@@ -166,7 +165,7 @@ class CabangController extends Controller
 
         $cabang->update($validated);
 
-        return redirect()->route('admin.cabang.index')
+        return redirect_to_previous('admin.cabang.index')
             ->with('success', 'Cabang berhasil diperbarui!');
     }
 
@@ -179,15 +178,15 @@ class CabangController extends Controller
         $siswaCount = Siswa::where('cabang_id', $cabang->id)->count();
         $kelasCount = Kelas::where('cabang_id', $cabang->id)->count();
         $userCount = User::where('cabang_id', $cabang->id)->count();
-        
+
         if ($siswaCount > 0 || $kelasCount > 0 || $userCount > 0) {
-            return redirect()->route('admin.cabang.index')
+            return redirect_to_previous('admin.cabang.index')
                 ->with('error', 'Cabang tidak dapat dihapus karena masih memiliki data siswa, kelas, atau user terkait.');
         }
 
         $cabang->delete();
 
-        return redirect()->route('admin.cabang.index')
+        return redirect_to_previous('admin.cabang.index')
             ->with('success', 'Cabang berhasil dihapus!');
     }
 
@@ -196,11 +195,11 @@ class CabangController extends Controller
      */
     public function toggleStatus(Cabang $cabang)
     {
-        $cabang->update(['is_active' => !$cabang->is_active]);
-        
+        $cabang->update(['is_active' => ! $cabang->is_active]);
+
         $status = $cabang->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        
-        return redirect()->route('admin.cabang.index')
+
+        return redirect_to_previous('admin.cabang.index')
             ->with('success', "Cabang berhasil {$status}!");
     }
 }

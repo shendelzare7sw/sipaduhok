@@ -20,7 +20,7 @@
             <div class="card">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Form Edit Tahun Ajaran</h5>
-                    <a href="{{ route('admin.tahun-ajaran.index') }}" class="btn btn-secondary btn-sm">
+                    <a href="{{ url()->previous(route('admin.tahun-ajaran.index')) }}" class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left btn-icon"></i> Kembali
                     </a>
                 </div>
@@ -28,6 +28,7 @@
                 <form action="{{ route('admin.tahun-ajaran.update', $tahunAjaran->id) }}" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.tahun-ajaran.index')) }}">
 
                     <div class="card-body">
                         <div class="mb-3">
@@ -164,7 +165,7 @@
                     </div>
 
                     <div class="card-footer d-flex justify-content-end gap-2">
-                        <a href="{{ route('admin.tahun-ajaran.index') }}" class="btn btn-secondary">
+                        <a href="{{ url()->previous(route('admin.tahun-ajaran.index')) }}" class="btn btn-secondary">
                             Batal
                         </a>
                         <button type="submit" class="btn btn-warning">

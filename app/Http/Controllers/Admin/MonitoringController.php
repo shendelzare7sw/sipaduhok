@@ -24,24 +24,28 @@ class MonitoringController extends KetuaController
     public function monitoringPengguna(Request $request)
     {
         $response = parent::monitoringPengguna($request);
+
         return $this->wrapView($response, 'monitoring.pengguna');
     }
 
     public function monitoringWaliKelas(Request $request)
     {
         $response = parent::monitoringWaliKelas($request);
+
         return $this->wrapView($response, 'monitoring.wali-kelas');
     }
 
     public function monitoringGuruPengajar(Request $request)
     {
         $response = parent::monitoringGuruPengajar($request);
+
         return $this->wrapView($response, 'monitoring.guru-pengajar');
     }
 
     public function monitoringSiswa(Request $request)
     {
         $response = parent::monitoringSiswa($request);
+
         return $this->wrapView($response, 'monitoring.siswa');
     }
 
@@ -49,6 +53,7 @@ class MonitoringController extends KetuaController
     public function index()
     {
         $response = parent::index();
+
         return $this->wrapView($response, 'laporan.index');
     }
 
@@ -86,12 +91,14 @@ class MonitoringController extends KetuaController
     public function catatanIndex()
     {
         $response = parent::catatanIndex();
+
         return $this->wrapView($response, 'catatan.index');
     }
 
     public function catatanCreate()
     {
         $response = parent::catatanCreate();
+
         return $this->wrapView($response, 'catatan.create');
     }
 
@@ -139,12 +146,13 @@ class MonitoringController extends KetuaController
             $notificationService->notifyCatatan($catatan);
         }
 
-        return redirect()->route('admin.catatan.index')->with('success', 'Catatan berhasil dikirim!');
+        return redirect_to_previous('admin.catatan.index')->with('success', 'Catatan berhasil dikirim!');
     }
 
     public function catatanShow($id)
     {
         $response = parent::catatanShow($id);
+
         return $this->wrapView($response, 'catatan.show');
     }
 
@@ -153,7 +161,7 @@ class MonitoringController extends KetuaController
         $catatan = Catatan::where('pengirim_id', auth()->id())->findOrFail($id);
         $catatan->delete();
 
-        return redirect()->route('admin.catatan.index')->with('success', 'Catatan berhasil dihapus dari riwayat.');
+        return back()->with('success', 'Catatan berhasil dihapus dari riwayat.');
     }
 
     /**
@@ -162,8 +170,9 @@ class MonitoringController extends KetuaController
     private function wrapView($response, $viewSuffix)
     {
         if ($response instanceof \Illuminate\View\View) {
-            return view($this->viewPath('ketua.' . $viewSuffix), $response->getData());
+            return view($this->viewPath('ketua.'.$viewSuffix), $response->getData());
         }
+
         return $response;
     }
 

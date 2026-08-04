@@ -25,6 +25,7 @@
                 @if(isset($flyer))
                     @method('PUT')
                 @endif
+                <input type="hidden" name="_return_url" value="{{ url()->previous(route('sekretaris.flyer.index')) }}">
 
                 <!-- Judul -->
                 <div class="form-group">
@@ -201,7 +202,7 @@
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-between flyer-form-actions">
-                    <a href="{{ route('sekretaris.flyer.index') }}" class="btn btn-secondary">
+                    <a href="{{ url()->previous(route('sekretaris.flyer.index')) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Kembali
                     </a>
                     <button type="submit" class="btn btn-primary">

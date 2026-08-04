@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\WakilKepalaSekolah;
 
+use App\Exports\Templates\KelasTemplate;
 use App\Http\Controllers\Controller;
-use App\Models\Kelas;
+use App\Imports\KelasImport;
 use App\Models\Cabang;
+use App\Models\Kelas;
+use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\TenagaPendidik;
-use App\Models\Siswa;
 use App\Models\WaliKelasAssignment;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\Templates\KelasTemplate;
-use App\Imports\KelasImport;
 
 class KelasController extends Controller
 {
@@ -20,7 +20,7 @@ class KelasController extends Controller
     {
         $cabangId = auth()->user()->cabang_id;
 
-        if (!$cabangId) {
+        if (! $cabangId) {
             abort(403, 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
         }
 
@@ -36,7 +36,7 @@ class KelasController extends Controller
 
     private function ensureWaliKelasInUserCabang(?int $waliKelasId): void
     {
-        if (!$waliKelasId) {
+        if (! $waliKelasId) {
             return;
         }
 
@@ -50,7 +50,7 @@ class KelasController extends Controller
             })
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             abort(403, 'Wali kelas harus berasal dari cabang Anda.');
         }
     }
@@ -58,7 +58,7 @@ class KelasController extends Controller
     public function index(Request $request)
     {
         $userCabangId = auth()->user()->cabang_id;
-        if (!$userCabangId) {
+        if (! $userCabangId) {
             return redirect()->back()->with('error', 'Akun Anda belum memiliki cabang yang ditetapkan. Hubungi administrator.');
         }
 
@@ -112,13 +112,13 @@ class KelasController extends Controller
         // Statistics (filtered by user's cabang)
         $stats = [
             'totalKelas' => Kelas::where('cabang_id', $userCabangId)
-                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
+                ->when($currentTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))->count(),
             'totalSiswa' => Siswa::where('status', 'aktif')->where('cabang_id', $userCabangId)->count(),
             'kelasWithWali' => Kelas::where('cabang_id', $userCabangId)
-                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+                ->when($currentTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereHas('waliKelasAssignments')->count(),
             'kelasWithoutWali' => Kelas::where('cabang_id', $userCabangId)
-                ->when($currentTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
+                ->when($currentTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $currentTahunAjaran->id))
                 ->whereDoesntHave('waliKelasAssignments')->count(),
         ];
 
@@ -161,8 +161,8 @@ class KelasController extends Controller
         $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
         $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
 
-        $kodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
-            strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
+        $kodeKelas = $cabang->kode_cabang.'-'.$validated['jenjang'].'-'.
+            strtoupper(str_replace(' ', '', $validated['nama_kelas'])).'-'.$tahun;
 
         // Check if kode_kelas already exists
         $existingKelas = Kelas::where('kode_kelas', $kodeKelas)->first();
@@ -187,7 +187,7 @@ class KelasController extends Controller
             );
         }
 
-        return redirect()->route('waka.kelas.index')
+        return redirect_to_previous('waka.kelas.index')
             ->with('success', 'Kelas berhasil ditambahkan');
     }
 
@@ -254,8 +254,8 @@ class KelasController extends Controller
         $tahunAjaran = TahunAjaran::find($validated['tahun_ajaran_id']);
         $tahun = date('Y', strtotime($tahunAjaran->tanggal_mulai));
 
-        $newKodeKelas = $cabang->kode_cabang . '-' . $validated['jenjang'] . '-' .
-            strtoupper(str_replace(' ', '', $validated['nama_kelas'])) . '-' . $tahun;
+        $newKodeKelas = $cabang->kode_cabang.'-'.$validated['jenjang'].'-'.
+            strtoupper(str_replace(' ', '', $validated['nama_kelas'])).'-'.$tahun;
 
         if ($newKodeKelas !== $kelas->kode_kelas) {
             $existingKelas = Kelas::where('kode_kelas', $newKodeKelas)->first();
@@ -269,7 +269,7 @@ class KelasController extends Controller
 
         // Sync with pivot table wali_kelas_assignments
         WaliKelasAssignment::where('kelas_id', $kelas->id)->delete();
-        
+
         if (isset($validated['wali_kelas_id']) && $validated['wali_kelas_id']) {
             WaliKelasAssignment::create([
                 'tenaga_pendidik_id' => $validated['wali_kelas_id'],
@@ -278,7 +278,7 @@ class KelasController extends Controller
             ]);
         }
 
-        return redirect()->route('waka.kelas.index')
+        return redirect_to_previous('waka.kelas.index')
             ->with('success', 'Kelas berhasil diperbarui');
     }
 
@@ -293,7 +293,8 @@ class KelasController extends Controller
             }
 
             $kelas->delete();
-            return redirect()->route('waka.kelas.index')
+
+            return redirect_to_previous('waka.kelas.index')
                 ->with('success', 'Kelas berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus kelas');
@@ -314,16 +315,17 @@ class KelasController extends Controller
 
         // Sync with pivot table wali_kelas_assignments
         WaliKelasAssignment::where('kelas_id', $kelas->id)->delete();
-        
+
         if ($validated['wali_kelas_id']) {
             WaliKelasAssignment::create([
                 'tenaga_pendidik_id' => $validated['wali_kelas_id'],
                 'kelas_id' => $kelas->id,
                 'assigned_at' => now(),
             ]);
-            
+
             $waliKelas = TenagaPendidik::find($validated['wali_kelas_id']);
-            return back()->with('success', $waliKelas->nama_lengkap . ' berhasil ditunjuk sebagai Wali Kelas!');
+
+            return back()->with('success', $waliKelas->nama_lengkap.' berhasil ditunjuk sebagai Wali Kelas!');
         } else {
             return back()->with('success', 'Wali Kelas berhasil dihapus dari kelas ini!');
         }
@@ -370,7 +372,7 @@ class KelasController extends Controller
         ]);
 
         $siswaIds = collect($validated['siswa_ids'] ?? [])
-            ->when(isset($validated['siswa_id']), fn($ids) => $ids->push($validated['siswa_id']))
+            ->when(isset($validated['siswa_id']), fn ($ids) => $ids->push($validated['siswa_id']))
             ->filter()
             ->unique()
             ->values();
@@ -401,7 +403,7 @@ class KelasController extends Controller
         Siswa::whereIn('id', $eligibleIds->all())->update(['kelas_id' => $kelas->id]);
 
         return redirect()->route('waka.kelas.manage-siswa', $kelas)
-            ->with('success', $eligibleIds->count() . ' siswa berhasil ditambahkan ke kelas');
+            ->with('success', $eligibleIds->count().' siswa berhasil ditambahkan ke kelas');
     }
 
     public function removeSiswa(Request $request, Kelas $kelas)
@@ -409,7 +411,7 @@ class KelasController extends Controller
         $this->ensureKelasInUserCabang($kelas);
 
         $validated = $request->validate([
-            'siswa_id' => 'required|exists:siswa,id'
+            'siswa_id' => 'required|exists:siswa,id',
         ]);
 
         $siswa = Siswa::findOrFail($validated['siswa_id']);
@@ -500,14 +502,14 @@ class KelasController extends Controller
             }
 
             if (count($warnings) > 0) {
-                return redirect()->route('waka.kelas.index')
+                return redirect_to_previous('waka.kelas.index')
                     ->with('success', $message)
-                    ->with('warning', 'Beberapa data memiliki peringatan: ' . implode(', ', array_slice($warnings, 0, 5)) . (count($warnings) > 5 ? '...' : ''));
+                    ->with('warning', 'Beberapa data memiliki peringatan: '.implode(', ', array_slice($warnings, 0, 5)).(count($warnings) > 5 ? '...' : ''));
             }
 
-            return redirect()->route('waka.kelas.index')->with('success', $message);
+            return redirect_to_previous('waka.kelas.index')->with('success', $message);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Gagal import: '.$e->getMessage());
         }
     }
 }

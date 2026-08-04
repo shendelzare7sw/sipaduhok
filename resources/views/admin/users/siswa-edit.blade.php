@@ -25,7 +25,7 @@
 @section('content')
 {{-- Header with Back Button --}}
     <div class="page-header">
-        <a href="{{ route('admin.users.siswa') }}" class="btn-back" title="Kembali">
+        <a href="{{ url()->previous(route('admin.users.siswa')) }}" class="btn-back" title="Kembali">
             <i class="fas fa-arrow-left"></i>
         </a>
         <div class="page-header-title">
@@ -66,6 +66,7 @@
     <form action="{{ route('admin.users.update-siswa', $siswa->id) }}" method="POST">
         @csrf
         @method('PUT')
+        <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.users.siswa')) }}">
 
         {{-- Section 1: Account Information --}}
         <div class="card">
@@ -609,7 +610,7 @@
 
         {{-- Form Actions --}}
         <div class="form-actions">
-            <a href="{{ route('admin.users.siswa') }}" class="btn btn-secondary">
+            <a href="{{ url()->previous(route('admin.users.siswa')) }}" class="btn btn-secondary">
                 <i class="fas fa-times"></i>
                 Batal
             </a>

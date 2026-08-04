@@ -32,6 +32,7 @@
                         @if(isset($berita))
                             @method('PUT')
                         @endif
+                        <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.akademik.berita.index')) }}">
 
                         <div class="form-group">
                             <label class="form-label">Judul Berita <span class="required">*</span></label>
@@ -154,7 +155,7 @@
                         </div>
 
                         <div class="form-footer-actions">
-                            <a href="{{ route('admin.akademik.berita.index') }}" class="btn btn-secondary">Batal</a>
+                            <a href="{{ url()->previous(route('admin.akademik.berita.index')) }}" class="btn btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> {{ isset($berita) ? 'Update Perubahan' : 'Simpan Berita' }}
                             </button>

@@ -4,11 +4,11 @@ namespace App\Http\Controllers\WaliKelas;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
+use App\Models\MataPelajaran;
+use App\Models\TemplateCapaianKompetensi;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use App\Models\TemplateCapaianKompetensi;
-use App\Models\MataPelajaran;
 
 class TemplateCapaianController extends Controller
 {
@@ -30,12 +30,12 @@ class TemplateCapaianController extends Controller
 
         // Search by isi deskripsi (template_text)
         if ($request->has('search') && $request->search != '') {
-            $query->where('template_text', 'like', '%' . $request->search . '%');
+            $query->where('template_text', 'like', '%'.$request->search.'%');
         }
 
         $templates = $query->orderBy('mata_pelajaran_id')
-                           ->orderByDesc('id')
-                           ->paginate(20);
+            ->orderByDesc('id')
+            ->paginate(20);
 
         // Batasi daftar mapel ke jenjang kelas yang diampu wali (mis. SMA) agar dropdown
         // tidak menampilkan mapel lintas jenjang yang tampak "duplikat" (mis. Bahasa
@@ -73,8 +73,7 @@ class TemplateCapaianController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        return redirect()->route('wali.template-capaian.index')
-            ->with('success', 'Template berhasil ditambahkan!');
+        return back()->with('success', 'Template berhasil ditambahkan!');
     }
 
     /**
@@ -91,8 +90,7 @@ class TemplateCapaianController extends Controller
 
         // Pustaka private per wali: hanya pemilik yang boleh mengubah.
         if ($template->created_by != auth()->id()) {
-            return redirect()->route('wali.template-capaian.index')
-                ->with('error', 'Anda hanya dapat mengubah template yang Anda buat sendiri.');
+            return back()->with('error', 'Anda hanya dapat mengubah template yang Anda buat sendiri.');
         }
 
         $template->update([
@@ -100,8 +98,7 @@ class TemplateCapaianController extends Controller
             'template_text' => $request->template_text,
         ]);
 
-        return redirect()->route('wali.template-capaian.index')
-            ->with('success', 'Template berhasil diperbarui!');
+        return back()->with('success', 'Template berhasil diperbarui!');
     }
 
     /**
@@ -113,13 +110,11 @@ class TemplateCapaianController extends Controller
 
         // Pustaka private per wali: hanya pemilik yang boleh menghapus.
         if ($template->created_by != auth()->id()) {
-            return redirect()->route('wali.template-capaian.index')
-                ->with('error', 'Anda hanya dapat menghapus template yang Anda buat sendiri.');
+            return back()->with('error', 'Anda hanya dapat menghapus template yang Anda buat sendiri.');
         }
 
         $template->delete();
 
-        return redirect()->route('wali.template-capaian.index')
-            ->with('success', 'Template berhasil dihapus!');
+        return back()->with('success', 'Template berhasil dihapus!');
     }
 }

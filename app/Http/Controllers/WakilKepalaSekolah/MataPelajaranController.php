@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\WakilKepalaSekolah;
 
+use App\Exports\Templates\MataPelajaranTemplate;
 use App\Http\Controllers\Controller;
+use App\Imports\MataPelajaranImport;
 use App\Models\MataPelajaran;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\Templates\MataPelajaranTemplate;
-use App\Imports\MataPelajaranImport;
 
 class MataPelajaranController extends Controller
 {
@@ -23,7 +23,7 @@ class MataPelajaranController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('nama_mapel', 'like', '%' . $request->search . '%');
+            $query->where('nama_mapel', 'like', '%'.$request->search.'%');
         }
 
         $mataPelajaranList = $query->orderBy('jenjang')->orderBy('nama_mapel')->paginate(20);
@@ -45,6 +45,7 @@ class MataPelajaranController extends Controller
     public function create()
     {
         $jenjangList = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
         return view('waka.mata-pelajaran.create', compact('jenjangList'));
     }
 
@@ -55,12 +56,12 @@ class MataPelajaranController extends Controller
             'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel',
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
-            'deskripsi' => 'nullable|string'
+            'deskripsi' => 'nullable|string',
         ]);
 
         MataPelajaran::create($validated);
 
-        return redirect()->route('waka.mata-pelajaran.index')
+        return redirect_to_previous('waka.mata-pelajaran.index')
             ->with('success', 'Mata Pelajaran berhasil ditambahkan');
     }
 
@@ -81,6 +82,7 @@ class MataPelajaranController extends Controller
     public function edit(MataPelajaran $mataPelajaran)
     {
         $jenjangList = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+
         return view('waka.mata-pelajaran.edit', compact('mataPelajaran', 'jenjangList'));
     }
 
@@ -88,15 +90,15 @@ class MataPelajaranController extends Controller
     {
         $validated = $request->validate([
             'nama_mapel' => 'required|string|max:100',
-            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,' . $mataPelajaran->id,
+            'kode_mapel' => 'nullable|string|max:20|unique:mata_pelajaran,kode_mapel,'.$mataPelajaran->id,
             'jenjang' => 'required|in:KB,TKA,TKB,SD,SMP,SMA',
             'kelompok' => 'nullable|in:A,B',
-            'deskripsi' => 'nullable|string'
+            'deskripsi' => 'nullable|string',
         ]);
 
         $mataPelajaran->update($validated);
 
-        return redirect()->route('waka.mata-pelajaran.index')
+        return redirect_to_previous('waka.mata-pelajaran.index')
             ->with('success', 'Mata Pelajaran berhasil diperbarui');
     }
 
@@ -104,7 +106,8 @@ class MataPelajaranController extends Controller
     {
         try {
             $mataPelajaran->delete();
-            return redirect()->route('waka.mata-pelajaran.index')
+
+            return redirect_to_previous('waka.mata-pelajaran.index')
                 ->with('success', 'Mata Pelajaran berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus mata pelajaran. Mungkin masih ada data terkait.');
@@ -115,13 +118,13 @@ class MataPelajaranController extends Controller
     {
         $jenjangFilter = $request->input('jenjang');
 
-        if ($jenjangFilter && !is_array($jenjangFilter)) {
+        if ($jenjangFilter && ! is_array($jenjangFilter)) {
             $jenjangFilter = [$jenjangFilter];
         }
 
         $query = MataPelajaran::query()->orderBy('jenjang')->orderBy('nama_mapel');
 
-        if (!empty($jenjangFilter)) {
+        if (! empty($jenjangFilter)) {
             $query->whereIn('jenjang', $jenjangFilter);
         }
 
@@ -164,9 +167,9 @@ class MataPelajaranController extends Controller
                 $message .= " {$skipped} data dilewati (duplikat/invalid).";
             }
 
-            return redirect()->route('waka.mata-pelajaran.index')->with('success', $message);
+            return redirect_to_previous('waka.mata-pelajaran.index')->with('success', $message);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Gagal import: '.$e->getMessage());
         }
     }
 
@@ -176,8 +179,8 @@ class MataPelajaranController extends Controller
     public function suggestKodeMapel(Request $request)
     {
         $jenjang = $request->input('jenjang');
-        
-        if (!$jenjang) {
+
+        if (! $jenjang) {
             return response()->json(['suggestions' => []]);
         }
 
@@ -191,24 +194,24 @@ class MataPelajaranController extends Controller
         $usedNumbers = [];
         foreach ($existingCodes as $code) {
             // Match pattern: JENJANG-XXX
-            if (preg_match('/^' . preg_quote($jenjang, '/') . '-(\d+)$/', $code, $matches)) {
-                $usedNumbers[] = (int)$matches[1];
+            if (preg_match('/^'.preg_quote($jenjang, '/').'-(\d+)$/', $code, $matches)) {
+                $usedNumbers[] = (int) $matches[1];
             }
         }
 
         // Find next available numbers (suggest 5 options)
         $suggestions = [];
         $nextNumber = empty($usedNumbers) ? 1 : max($usedNumbers) + 1;
-        
+
         for ($i = 0; $i < 5; $i++) {
             $number = $nextNumber + $i;
-            $code = $jenjang . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            $code = $jenjang.'-'.str_pad($number, 3, '0', STR_PAD_LEFT);
             $suggestions[] = $code;
         }
 
         return response()->json([
             'suggestions' => $suggestions,
-            'jenjang' => $jenjang
+            'jenjang' => $jenjang,
         ]);
     }
 }
