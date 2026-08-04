@@ -23,6 +23,26 @@ class NilaiController extends Controller
     use WaliKelasHelper;
 
     /**
+     * Query dasar mata pelajaran yang relevan untuk kelas ini: mapel yang SEDANG
+     * ditugaskan ke guru pengajar (GuruPengajarKelas) di kelas ini, ditambah mapel
+     * yang sudah punya baris nilai (supaya nilai lama tetap kelihatan meski
+     * penugasan gurunya sudah dicabut/diubah). Sebelumnya query ini memakai
+     * where('jenjang', $kelas->jenjang) — menampilkan SEMUA mapel jenjang itu tanpa
+     * peduli apakah ada guru yang mengajar mapel tsb di kelas ini, jadi mapel yang
+     * sudah dihapus dari penugasan guru tetap muncul di form nilai wali kelas.
+     */
+    private function mataPelajaranQuery($kelas, array $existingNilaiMapelIds)
+    {
+        $mapelDenganGuru = GuruPengajarKelas::where('kelas_id', $kelas->id)->pluck('mata_pelajaran_id');
+
+        return MataPelajaran::where(function ($q) use ($mapelDenganGuru, $existingNilaiMapelIds) {
+                $q->whereIn('id', $mapelDenganGuru)
+                  ->orWhereIn('id', $existingNilaiMapelIds);
+            })
+            ->where('is_active', true);
+    }
+
+    /**
      * Display nilai siswa page with optional filter
      */
     public function index(Request $request)
@@ -90,11 +110,7 @@ class NilaiController extends Controller
             ->toArray();
 
         // Get mata pelajaran untuk filter
-        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
-                $q->where('jenjang', $kelas->jenjang)
-                  ->orWhereIn('id', $existingNilaiMapelIds);
-            })
-            ->where('is_active', true)
+        $mataPelajaranList = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
             ->orderBy('nama_mapel', 'asc')
             ->get();
         
@@ -215,11 +231,7 @@ class NilaiController extends Controller
             ->unique()
             ->toArray();
 
-        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
-                $q->where('jenjang', $kelas->jenjang)
-                  ->orWhereIn('id', $existingNilaiMapelIds);
-            })
-            ->where('is_active', true)
+        $mataPelajaranList = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
             ->orderBy('nama_mapel', 'asc')
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
@@ -337,11 +349,7 @@ class NilaiController extends Controller
                 ->unique()
                 ->toArray();
 
-            $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
-                    $q->where('jenjang', $kelas->jenjang)
-                      ->orWhereIn('id', $existingNilaiMapelIds);
-                })
-                ->where('is_active', true)
+            $mataPelajaranList = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
                 ->orderBy('nama_mapel', 'asc')
                 ->get();
 
@@ -418,11 +426,7 @@ class NilaiController extends Controller
             ->unique()
             ->toArray();
 
-        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
-                $q->where('jenjang', $kelas->jenjang)
-                  ->orWhereIn('id', $existingNilaiMapelIds);
-            })
-            ->where('is_active', true)
+        $mataPelajaranList = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
             ->orderBy('nama_mapel', 'asc')
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
@@ -488,11 +492,7 @@ class NilaiController extends Controller
             ->unique()
             ->toArray();
 
-        $mataPelajaranList = MataPelajaran::where(function($q) use ($kelas, $existingNilaiMapelIds) {
-                $q->where('jenjang', $kelas->jenjang)
-                  ->orWhereIn('id', $existingNilaiMapelIds);
-            })
-            ->where('is_active', true)
+        $mataPelajaranList = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
             ->orderBy('nama_mapel', 'asc')
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel));
@@ -725,11 +725,7 @@ class NilaiController extends Controller
             ->unique()
             ->toArray();
 
-        $mataPelajaranList = MataPelajaran::where(function ($q) use ($kelas, $existingNilaiMapelIds) {
-                $q->where('jenjang', $kelas->jenjang)
-                  ->orWhereIn('id', $existingNilaiMapelIds);
-            })
-            ->where('is_active', true)
+        $mataPelajaranList = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
             ->orderBy('nama_mapel', 'asc')
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel))
@@ -789,11 +785,7 @@ class NilaiController extends Controller
             ->unique()
             ->toArray();
 
-        $mapelCollection = MataPelajaran::where(function ($q) use ($kelas, $existingNilaiMapelIds) {
-                $q->where('jenjang', $kelas->jenjang)
-                  ->orWhereIn('id', $existingNilaiMapelIds);
-            })
-            ->where('is_active', true)
+        $mapelCollection = $this->mataPelajaranQuery($kelas, $existingNilaiMapelIds)
             ->get()
             ->filter(fn($mapel) => $siswa->canAccessMapel($mapel))
             ->values();
