@@ -48,20 +48,35 @@ class GuruNilaiController extends Controller
         // Buat atau ambil nilai untuk setiap siswa (per semester)
         $nilaiList = [];
         foreach ($siswaList as $siswa) {
-            $nilai = Nilai::firstOrCreate([
-                'siswa_id' => $siswa->id,
-                'mata_pelajaran_id' => $mapelId,
-                'kelas_id' => $kelasId,
-                'tahun_ajaran_id' => $tahunAjaran->id,
-                'semester' => $semester,
-                'guru_id' => $tenagaPendidik->id,
-            ]);
-            
+            // guru_id TIDAK ikut kriteria pencarian: kalau ikut, saat penugasan guru
+            // untuk mapel ini berganti, baris lama (guru sebelumnya) tidak pernah
+            // ketemu lagi - firstOrCreate() malah bikin baris BARU untuk guru baru,
+            // baris lama jadi duplikat yatim yang tetap ikut dihitung checkAcademic()
+            // (kelas bug yang sama dengan kasus semester ganjil/genap kosong).
+            $nilai = Nilai::firstOrCreate(
+                [
+                    'siswa_id' => $siswa->id,
+                    'mata_pelajaran_id' => $mapelId,
+                    'kelas_id' => $kelasId,
+                    'tahun_ajaran_id' => $tahunAjaran->id,
+                    'semester' => $semester,
+                ],
+                ['guru_id' => $tenagaPendidik->id]
+            );
+
+            // Baris sudah ada tapi milik guru lain (penugasan berganti) - perbarui
+            // guru_id supaya tetap mencerminkan guru yang sekarang bertanggung jawab,
+            // tanpa membuat baris baru.
+            if ($nilai->guru_id !== $tenagaPendidik->id) {
+                $nilai->guru_id = $tenagaPendidik->id;
+                $nilai->save();
+            }
+
             // Calculate nilai if empty
             if (!$nilai->nilai_akhir) {
                 $this->calculateNilai($nilai);
             }
-            
+
             // Load siswa relation on nilai
             $nilai->siswa = $siswa;
             $nilaiList[] = $nilai;
@@ -261,17 +276,25 @@ class GuruNilaiController extends Controller
             ->get()
             ->filter(fn($siswa) => $siswa->canAccessMapel($mataPelajaran));
 
-        // Buat atau ambil nilai untuk setiap siswa (per semester)
+        // Buat atau ambil nilai untuk setiap siswa (per semester) - lihat catatan di
+        // index() soal kenapa guru_id tidak boleh ikut kriteria pencarian.
         $nilaiCollection = [];
         foreach ($siswaList as $siswa) {
-            $nilai = Nilai::firstOrCreate([
-                'siswa_id' => $siswa->id,
-                'mata_pelajaran_id' => $mapelId,
-                'kelas_id' => $kelasId,
-                'tahun_ajaran_id' => $tahunAjaran->id,
-                'semester' => $semester,
-                'guru_id' => $tenagaPendidik->id,
-            ]);
+            $nilai = Nilai::firstOrCreate(
+                [
+                    'siswa_id' => $siswa->id,
+                    'mata_pelajaran_id' => $mapelId,
+                    'kelas_id' => $kelasId,
+                    'tahun_ajaran_id' => $tahunAjaran->id,
+                    'semester' => $semester,
+                ],
+                ['guru_id' => $tenagaPendidik->id]
+            );
+
+            if ($nilai->guru_id !== $tenagaPendidik->id) {
+                $nilai->guru_id = $tenagaPendidik->id;
+                $nilai->save();
+            }
 
             // Calculate nilai if empty
             if (!$nilai->nilai_akhir) {

@@ -90,11 +90,20 @@ class PromotionService
             ->groupBy('mata_pelajaran_id');
 
         if ($gradesByMapel->isEmpty()) {
+            // 'unmeasurable' cuma info tambahan, TIDAK mengubah is_tuntas/percentage -
+            // status sebelum eksekusi tetap jujur "belum tuntas". Dipakai khusus oleh
+            // promoteSelectedStudents() untuk membuka celah override manual bagi siswa
+            // yang kelasnya memang belum punya Jadwal Pelajaran sama sekali (jadi tidak
+            // ada guru yang bisa/berhak mengisi nilai) - beda dengan siswa yang kelasnya
+            // sudah lengkap tapi nilainya belum diisi guru (itu harus tetap gagal).
+            $kelasPunyaJadwal = $siswa->kelas && $siswa->kelas->jadwalPelajaran()->exists();
+
             return [
                 'is_tuntas' => false,
                 'percentage' => 0,
                 'tuntas_count' => 0,
-                'total_mapel' => 0
+                'total_mapel' => 0,
+                'unmeasurable' => ! $kelasPunyaJadwal,
             ];
         }
 
@@ -137,7 +146,8 @@ class PromotionService
             'percentage' => round($percentage, 2),
             'tuntas_count' => $tuntasCount,
             'total_mapel' => $totalMapel,
-            'threshold' => $batasTuntas
+            'threshold' => $batasTuntas,
+            'unmeasurable' => false,
         ];
     }
 
@@ -174,14 +184,29 @@ class PromotionService
     /**
      * Execute promotion for a single student.
      * Can be called in batch.
+     *
+     * @param  bool  $forceAcademicOverride  Hanya dipakai jalur manual "Naikkan Terpilih"
+     *      (lihat promoteSelectedStudents()) - meloloskan syarat akademik KHUSUS untuk
+     *      siswa yang academic['unmeasurable']=true (kelasnya belum punya Jadwal
+     *      Pelajaran sama sekali). Syarat keuangan tetap berlaku normal (lunas/dispensasi).
+     *      Proses massal (execute()) TIDAK pernah mengirim true di sini.
      */
-    public function executeStudentPromotion($siswa, $tahunAjaranId, $executionDate)
+    public function executeStudentPromotion($siswa, $tahunAjaranId, $executionDate, bool $forceAcademicOverride = false)
     {
         $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
-        
+
         $statusKelulusan = 'TIDAK_NAIK_KELAS';
         $finalStatusPembayaran = $eligibility['financial']['status'];
-        
+
+        $akademikOverrideDipakai = false;
+        if (! $eligibility['eligible']
+            && $forceAcademicOverride
+            && ($eligibility['financial']['status'] === 'LUNAS' || $eligibility['financial']['is_dispensasi'])
+            && ($eligibility['academic']['unmeasurable'] ?? false)) {
+            $eligibility['eligible'] = true;
+            $akademikOverrideDipakai = true;
+        }
+
         if ($eligibility['eligible']) {
             // CRITICAL: Check final year FIRST before dispensation logic
             // Final year students ALWAYS graduate regardless of financial status
@@ -274,6 +299,7 @@ class PromotionService
                 'persentase_nilai_tuntas' => $eligibility['academic']['percentage'],
                 'jumlah_mapel_tuntas' => $eligibility['academic']['tuntas_count'],
                 'total_mapel' => $eligibility['academic']['total_mapel'],
+                'akademik_override_tanpa_jadwal' => $akademikOverrideDipakai,
                 'status_kelulusan' => $statusKelulusan,
                 'izin_khusus_ketua' => $eligibility['financial']['is_dispensasi'],
                 'tanggal_eksekusi' => $executionDate,
@@ -490,14 +516,24 @@ class PromotionService
                 // Re-check eligibility
                 $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
 
-                if (!$eligibility['eligible']) {
+                // Override manual: kalau alasan gagalnya PERSIS "akademik tidak bisa
+                // diukur karena kelas belum ada Jadwal Pelajaran" (keuangan tetap harus
+                // lunas/dispensasi seperti biasa), izinkan lolos lewat jalur pilih-manual
+                // ini. Data lama/dummy yang belum dirapikan, akan diukur ulang normal
+                // begitu jadwal TA berikutnya disetel.
+                $financialOk = $eligibility['financial']['status'] === 'LUNAS' || $eligibility['financial']['is_dispensasi'];
+                $academicOverride = ! $eligibility['eligible']
+                    && $financialOk
+                    && ($eligibility['academic']['unmeasurable'] ?? false);
+
+                if (!$eligibility['eligible'] && !$academicOverride) {
                     $results['failed']++;
                     $results['errors'][] = "{$siswa->nama_lengkap}: Belum memenuhi syarat (Keuangan: {$eligibility['financial']['status']}, Akademik: {$eligibility['academic']['percentage']}%).";
                     continue;
                 }
 
                 // Execute promotion
-                $this->executeStudentPromotion($siswa, $tahunAjaranId, now());
+                $this->executeStudentPromotion($siswa, $tahunAjaranId, now(), $academicOverride);
                 $results['success']++;
             }
             DB::commit();
