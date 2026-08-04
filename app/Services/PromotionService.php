@@ -493,8 +493,24 @@ class PromotionService
     }
 
     /**
+     * Tentukan apakah syarat akademik boleh dilewatkan manual: HANYA untuk siswa yang
+     * keuangannya sudah lunas/dispensasi tapi akademiknya "unmeasurable" (kelasnya
+     * belum punya Jadwal Pelajaran sama sekali - memang tidak ada yang bisa diukur,
+     * bukan soal nilai kurang). Dipakai bersama oleh promoteSelectedStudents() dan
+     * eksekusi massal (PromotionReportController::execute()) supaya konsisten -
+     * sebelumnya eksekusi massal tidak memakai celah ini sama sekali, jadi siswa yang
+     * seharusnya lolos manual malah tercatat TIDAK_NAIK_KELAS.
+     */
+    public function computeAcademicOverride(array $eligibility): bool
+    {
+        $financialOk = $eligibility['financial']['status'] === 'LUNAS' || $eligibility['financial']['is_dispensasi'];
+
+        return ! $eligibility['eligible'] && $financialOk && ($eligibility['academic']['unmeasurable'] ?? false);
+    }
+
+    /**
      * Promote selected students individually (for those who failed initial batch).
-     * 
+     *
      * @param array $siswaIds - Array of siswa IDs to promote
      * @param int $tahunAjaranId - Current academic year
      * @return array - Results with count and any errors
@@ -515,16 +531,7 @@ class PromotionService
 
                 // Re-check eligibility
                 $eligibility = $this->checkEligibility($siswa, $tahunAjaranId);
-
-                // Override manual: kalau alasan gagalnya PERSIS "akademik tidak bisa
-                // diukur karena kelas belum ada Jadwal Pelajaran" (keuangan tetap harus
-                // lunas/dispensasi seperti biasa), izinkan lolos lewat jalur pilih-manual
-                // ini. Data lama/dummy yang belum dirapikan, akan diukur ulang normal
-                // begitu jadwal TA berikutnya disetel.
-                $financialOk = $eligibility['financial']['status'] === 'LUNAS' || $eligibility['financial']['is_dispensasi'];
-                $academicOverride = ! $eligibility['eligible']
-                    && $financialOk
-                    && ($eligibility['academic']['unmeasurable'] ?? false);
+                $academicOverride = $this->computeAcademicOverride($eligibility);
 
                 if (!$eligibility['eligible'] && !$academicOverride) {
                     $results['failed']++;

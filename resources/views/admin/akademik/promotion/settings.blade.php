@@ -45,13 +45,6 @@
                         </div>
                     </div>
                     <div class="content-card-body">
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
-                            <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
                     <form action="{{ route($routePrefix . '.settings.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">

@@ -108,6 +108,13 @@ const clearSearchAndSubmit = (button) => {
     form?.submit();
 };
 
+const updateHistoryButtonState = () => {
+    const trigger = document.querySelector('#promoteHistorySelectedTrigger');
+    if (trigger) {
+        trigger.disabled = document.querySelectorAll('.histCheck:checked').length === 0;
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-auto-submit]').forEach((field) => {
         field.addEventListener('change', () => {
@@ -227,6 +234,54 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             promoteForm.submit();
+        });
+    }
+
+    document.getElementById('selectAllHist')?.addEventListener('change', function () {
+        document.querySelectorAll('.histCheck').forEach((checkbox) => {
+            checkbox.checked = this.checked;
+        });
+        updateHistoryButtonState();
+    });
+
+    document.querySelectorAll('.histCheck').forEach((checkbox) => {
+        checkbox.addEventListener('change', updateHistoryButtonState);
+    });
+    updateHistoryButtonState();
+
+    const historyPromoteBtn = document.querySelector('[data-bs-target="#promoteHistorySelectedModal"]');
+    if (historyPromoteBtn) {
+        historyPromoteBtn.addEventListener('click', () => {
+            const selectedHistoryCount = document.getElementById('selectedHistoryCount');
+            if (selectedHistoryCount) {
+                selectedHistoryCount.textContent = document.querySelectorAll('.histCheck:checked').length;
+            }
+        });
+    }
+
+    const historyForm = document.getElementById('promoteHistorySelectedForm');
+    const historyConfirmBtn = document.getElementById('confirmPromoteHistoryBtn');
+
+    if (historyForm && historyConfirmBtn) {
+        historyConfirmBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+            historyForm.querySelectorAll('.dynamic-siswa-id').forEach((element) => element.remove());
+
+            const ids = new Set();
+            document.querySelectorAll('.histCheck:checked').forEach((checkbox) => {
+                ids.add(checkbox.value);
+            });
+
+            ids.forEach((id) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'siswa_ids[]';
+                input.value = id;
+                input.className = 'dynamic-siswa-id';
+                historyForm.appendChild(input);
+            });
+
+            historyForm.submit();
         });
     }
 
