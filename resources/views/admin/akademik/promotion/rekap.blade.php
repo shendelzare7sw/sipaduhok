@@ -95,123 +95,126 @@
                             <small class="text-muted">Tahun Ajaran: {{ $tahun->nama_tahun_ajaran }}</small>
                         </div>
 
-                        {{-- Print Button --}}
-                        @php
-                            $printRouteName = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.kenaikan-kelas.report.print' : 'waka.kenaikan-kelas.report.print';
-                        @endphp
-                        <a href="{{ route($printRouteName, array_merge(request()->only(['tahun_ajaran_id', 'status', 'cabang_id', 'jenjang', 'kelas_id']))) }}"
-                           target="_blank"
-                           class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-print me-1"></i> Cetak Laporan
-                        </a>
+                        {{-- Actions: Print + Filter & Search (grouped so they stay together on the right) --}}
+                        <div class="d-flex flex-wrap align-items-center gap-2 history-header-actions">
+                            {{-- Print Button --}}
+                            @php
+                                $printRouteName = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik.kenaikan-kelas.report.print' : 'waka.kenaikan-kelas.report.print';
+                            @endphp
+                            <a href="{{ route($printRouteName, array_merge(request()->only(['tahun_ajaran_id', 'status', 'cabang_id', 'jenjang', 'kelas_id']))) }}"
+                               target="_blank"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-print me-1"></i> Cetak Laporan
+                            </a>
 
-                        {{-- Filter & Search --}}
-                        <form action="{{ route(Route::currentRouteName()) }}" method="GET" id="historyFilterForm" class="d-flex gap-2 align-items-center">
-                            <input type="hidden" name="tab" value="history">
+                            {{-- Filter & Search --}}
+                            <form action="{{ route(Route::currentRouteName()) }}" method="GET" id="historyFilterForm" class="d-flex gap-2 align-items-center">
+                                <input type="hidden" name="tab" value="history">
 
-                            {{-- Tahun Ajaran Selector (Priority) --}}
-                            <select name="tahun_ajaran_id" class="form-select form-select-sm year-select-sm" data-auto-submit>
-                                @foreach($allTahunAjaran as $ta)
-                                    <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
-                                        {{ $ta->nama_tahun_ajaran }}
-                                    </option>
-                                @endforeach
-                            </select>
+                                {{-- Tahun Ajaran Selector (Priority) --}}
+                                <select name="tahun_ajaran_id" class="form-select form-select-sm year-select-sm" data-auto-submit>
+                                    @foreach($allTahunAjaran as $ta)
+                                        <option value="{{ $ta->id }}" {{ $tahun->id == $ta->id ? 'selected' : '' }}>
+                                            {{ $ta->nama_tahun_ajaran }}
+                                        </option>
+                                    @endforeach
+                                </select>
 
-                            {{-- Filter Dropdown --}}
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                    <i class="fas fa-filter me-1"></i> Filter
-                                    @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || $filterStatus)
-                                        <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId, $filterStatus])->filter()->count() }}</span>
-                                    @endif
-                                </button>
-                                <div class="dropdown-menu p-3 shadow filter-dropdown-menu">
-                                    <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
-
-                                    {{-- Filter Cabang (hanya untuk admin) --}}
-                                    @if(auth()->user()->role !== 'wakil_kepala_sekolah')
-                                    <div class="mb-2">
-                                        <label class="form-label small fw-bold mb-1">Cabang</label>
-                                        <select name="cabang_id" class="form-select form-select-sm">
-                                            <option value="">Semua Cabang</option>
-                                            @foreach($cabangs as $cabang)
-                                                <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
-                                                    {{ $cabang->nama_cabang }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    @endif
-
-                                    {{-- Filter Jenjang --}}
-                                    <div class="mb-2">
-                                        <label class="form-label small fw-bold mb-1">Jenjang</label>
-                                        <select name="jenjang" class="form-select form-select-sm">
-                                            <option value="">Semua Jenjang</option>
-                                            @foreach(['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'] as $j)
-                                                <option value="{{ $j }}" {{ $jenjangFilter == $j ? 'selected' : '' }}>{{ $j }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    {{-- Filter Kelas --}}
-                                    <div class="mb-2">
-                                        <label class="form-label small fw-bold mb-1">Kelas</label>
-                                        <select name="kelas_id" class="form-select form-select-sm">
-                                            <option value="">Semua Kelas</option>
-                                            @foreach($kelasList as $kelas)
-                                                <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
-                                                    {{ $kelas->nama_kelas }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    {{-- Filter Status --}}
-                                    <div class="mb-3">
-                                        <label class="form-label small fw-bold mb-1">Status Kelulusan</label>
-                                        <select name="status" class="form-select form-select-sm">
-                                            <option value="">Semua Status</option>
-                                            <option value="NAIK_KELAS" {{ $filterStatus == 'NAIK_KELAS' ? 'selected' : '' }}>Naik Kelas</option>
-                                            <option value="LULUS" {{ $filterStatus == 'LULUS' ? 'selected' : '' }}>Lulus</option>
-                                            <option value="NAIK_KELAS_TUNGGAKAN" {{ $filterStatus == 'NAIK_KELAS_TUNGGAKAN' ? 'selected' : '' }}>Naik (Dispensasi)</option>
-                                            <option value="LULUS_TUNGGAKAN" {{ $filterStatus == 'LULUS_TUNGGAKAN' ? 'selected' : '' }}>Lulus (Dispensasi)</option>
-                                            <option value="TIDAK_NAIK_KELAS" {{ $filterStatus == 'TIDAK_NAIK_KELAS' ? 'selected' : '' }}>Tidak Naik</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-check me-1"></i> Terapkan Filter
-                                        </button>
+                                {{-- Filter Dropdown --}}
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                        <i class="fas fa-filter me-1"></i> Filter
                                         @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || $filterStatus)
-                                            <a href="{{ route(Route::currentRouteName(), ['tab' => 'history', 'tahun_ajaran_id' => $tahun->id]) }}"
-                                               class="btn btn-outline-secondary btn-sm">
-                                                <i class="fas fa-times me-1"></i> Reset Filter
-                                            </a>
+                                            <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId, $filterStatus])->filter()->count() }}</span>
                                         @endif
+                                    </button>
+                                    <div class="dropdown-menu p-3 shadow filter-dropdown-menu">
+                                        <h6 class="dropdown-header px-0 text-uppercase small fw-bold mb-2">Opsi Filter</h6>
+
+                                        {{-- Filter Cabang (hanya untuk admin) --}}
+                                        @if(auth()->user()->role !== 'wakil_kepala_sekolah')
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold mb-1">Cabang</label>
+                                            <select name="cabang_id" class="form-select form-select-sm">
+                                                <option value="">Semua Cabang</option>
+                                                @foreach($cabangs as $cabang)
+                                                    <option value="{{ $cabang->id }}" {{ $cabangId == $cabang->id ? 'selected' : '' }}>
+                                                        {{ $cabang->nama_cabang }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        @endif
+
+                                        {{-- Filter Jenjang --}}
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold mb-1">Jenjang</label>
+                                            <select name="jenjang" class="form-select form-select-sm">
+                                                <option value="">Semua Jenjang</option>
+                                                @foreach(['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'] as $j)
+                                                    <option value="{{ $j }}" {{ $jenjangFilter == $j ? 'selected' : '' }}>{{ $j }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        {{-- Filter Kelas --}}
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold mb-1">Kelas</label>
+                                            <select name="kelas_id" class="form-select form-select-sm">
+                                                <option value="">Semua Kelas</option>
+                                                @foreach($kelasList as $kelas)
+                                                    <option value="{{ $kelas->id }}" {{ $kelasId == $kelas->id ? 'selected' : '' }}>
+                                                        {{ $kelas->nama_kelas }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        {{-- Filter Status --}}
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold mb-1">Status Kelulusan</label>
+                                            <select name="status" class="form-select form-select-sm">
+                                                <option value="">Semua Status</option>
+                                                <option value="NAIK_KELAS" {{ $filterStatus == 'NAIK_KELAS' ? 'selected' : '' }}>Naik Kelas</option>
+                                                <option value="LULUS" {{ $filterStatus == 'LULUS' ? 'selected' : '' }}>Lulus</option>
+                                                <option value="NAIK_KELAS_TUNGGAKAN" {{ $filterStatus == 'NAIK_KELAS_TUNGGAKAN' ? 'selected' : '' }}>Naik (Dispensasi)</option>
+                                                <option value="LULUS_TUNGGAKAN" {{ $filterStatus == 'LULUS_TUNGGAKAN' ? 'selected' : '' }}>Lulus (Dispensasi)</option>
+                                                <option value="TIDAK_NAIK_KELAS" {{ $filterStatus == 'TIDAK_NAIK_KELAS' ? 'selected' : '' }}>Tidak Naik</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-check me-1"></i> Terapkan Filter
+                                            </button>
+                                            @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || $filterStatus)
+                                                <a href="{{ route(Route::currentRouteName(), ['tab' => 'history', 'tahun_ajaran_id' => $tahun->id]) }}"
+                                                   class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-times me-1"></i> Reset Filter
+                                                </a>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {{-- Search --}}
-                            <div class="input-group search-input-group">
-                                <span class="input-group-text bg-white">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="text" name="search" class="form-control form-control-sm"
-                                       placeholder="Cari nama..." value="{{ $search }}" autocomplete="off">
-                                @if($search)
-                                    <button type="button" class="btn btn-outline-secondary btn-sm"
-                                            data-clear-search
-                                            title="Hapus pencarian">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                @endif
-                            </div>
-                        </form>
+                                {{-- Search --}}
+                                <div class="input-group search-input-group">
+                                    <span class="input-group-text bg-white">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" name="search" class="form-control form-control-sm"
+                                           placeholder="Cari nama..." value="{{ $search }}" autocomplete="off">
+                                    @if($search)
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                data-clear-search
+                                                title="Hapus pencarian">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 <div class="table-responsive text-nowrap">
@@ -461,18 +464,26 @@
                         </div>
                     @endif
 
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-1"></i> Data di bawah ini adalah <strong>SIMULASI REAL-TIME</strong> berdasarkan data keuangan dan nilai saat ini.
-                    </div>
+                    @if(($simMode ?? 'current') === 'current')
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i> Data di bawah ini adalah <strong>SIMULASI REAL-TIME</strong> berdasarkan data keuangan dan nilai saat ini.
+                        </div>
+                    @else
+                        <div class="alert alert-secondary py-2 mb-3">
+                            <i class="fas fa-lock me-1"></i> Tampilan ini adalah <strong>snapshot riwayat</strong> (kondisi siswa saat eksekusi terakhir dijalankan) dan bersifat baca-saja. Untuk menaikkan siswa yang tertinggal, gunakan tab <strong>Keadaan Saat Ini</strong>.
+                        </div>
+                    @endif
 
                     {{-- Mobile Select All --}}
+                    @if(($simMode ?? 'current') === 'current')
                     <div class="mobile-select-all mb-2 align-items-center gap-2 px-2">
                         <input type="checkbox" id="selectAllSimMobile" data-toggle-all-checkboxes data-target-class="simCheck">
                         <label for="selectAllSimMobile" class="form-label mb-0 small fw-bold">Pilih Semua</label>
                     </div>
+                    @endif
 
                     {{-- Select All Across Pages Banner --}}
-                    @if($activeStudentsLinks->lastPage() > 1)
+                    @if(($simMode ?? 'current') === 'current' && $activeStudentsLinks->lastPage() > 1)
                     <div id="selectAllBanner" class="alert alert-warning py-2 px-3 mb-2 d-none">
                         <i class="fas fa-info-circle me-1"></i>
                         <span id="bannerText">Semua <strong>{{ $activeStudentsLinks->count() }}</strong> siswa di halaman ini dipilih.</span>
@@ -489,7 +500,9 @@
                         <table class="table table-hover table-card-mobile">
                             <thead>
                                 <tr>
+                                    @if(($simMode ?? 'current') === 'current')
                                     <th class="table-checkbox-col"><input type="checkbox" id="selectAllSim" data-toggle-all-checkboxes data-target-class="simCheck"></th>
+                                    @endif
                                     <th>Nama Siswa</th>
                                     <th>Kelas</th>
                                     <th>Status Keuangan</th>
@@ -500,15 +513,17 @@
                             <tbody>
                                 @foreach($simulationData as $sim)
                                 <tr>
+                                    @if(($simMode ?? 'current') === 'current')
                                     <td class="desktop-only-cell">
                                         @if(!$sim['result']['eligible'])
                                         <input type="checkbox" class="simCheck" value="{{ $sim['siswa']->id }}">
                                         @endif
                                     </td>
+                                    @endif
                                     <td class="mobile-card-head">
                                         <div class="d-flex justify-content-between align-items-start gap-2 student-summary-row">
                                             <div class="d-flex align-items-center gap-2 student-summary-main">
-                                                @if(!$sim['result']['eligible'])
+                                                @if(($simMode ?? 'current') === 'current' && !$sim['result']['eligible'])
                                                 <input type="checkbox" class="simCheck mobile-only-cell flex-shrink-0 mobile-sim-checkbox" value="{{ $sim['siswa']->id }}">
                                                 @endif
                                                 <span class="text-wrap text-break lh-sm student-name-text">{{ $sim['siswa']->nama_lengkap }}</span>
@@ -568,7 +583,8 @@
                         </table>
                     </div>
 
-                    {{-- Bulk Promote Selected Form --}}
+                    {{-- Bulk Promote Selected Form (hanya untuk mode "Keadaan Saat Ini") --}}
+                    @if(($simMode ?? 'current') === 'current')
                     @php
                         $routePrefix = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik' : 'waka';
                     @endphp
@@ -582,12 +598,15 @@
                         <input type="hidden" name="kelas_id" value="{{ $kelasId }}">
                         <input type="hidden" name="search" value="{{ $search }}">
                     </form>
+                    @endif
 
                     <div class="p-3 d-flex justify-content-between align-items-center sim-footer-area">
                         <div>
+                            @if(($simMode ?? 'current') === 'current')
                             <button type="button" id="promoteSelectedTrigger" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#promoteSelectedModal" disabled>
                                 <i class="fas fa-arrow-up me-1"></i> Naikkan Terpilih
                             </button>
+                            @endif
                         </div>
                         {{ $activeStudentsLinks->appends(['tab' => 'simulation'])->withQueryString()->links() }}
                     </div>
