@@ -103,8 +103,27 @@ class PromotionService
         $jenjang = $siswa->kelas->jenjang ?? 'SMA';
 
         foreach ($gradesByMapel as $mapelId => $semesterGrades) {
-            // Rata-rata nilai_akhir dari semester ganjil + genap
-            $avgNilaiAkhir = $semesterGrades->avg('nilai_akhir');
+            // Rata-rata nilai_akhir dari semester ganjil + genap — TAPI cuma semester yang
+            // sudah pernah diisi (minimal 1 komponen terisi). Baris semester yang belum
+            // pernah disentuh sama sekali punya nilai_akhir=0 (default hitungNilaiAkhir()),
+            // dan kalau ikut dirata-rata akan menarik turun nilai semester yang sudah tuntas
+            // (mis. ganjil 78 + genap kosong 0 -> rata-rata 39, padahal genap belum dijalani).
+            $semesterTerisi = $semesterGrades->filter(function ($nilai) {
+                foreach (Nilai::COMPONENT_FIELDS as $field) {
+                    if ($nilai->{$field} !== null) return true;
+                }
+                // Tidak ada komponen terisi sama sekali - baru dianggap "kosong" kalau
+                // nilai_akhir juga belum pernah diisi eksplisit (null, atau default 0 hasil
+                // hitungNilaiAkhir() saat semua komponen null). nilai_akhir yang diisi
+                // langsung tanpa lewat komponen (mis. import/override manual) tetap dihitung.
+                return $nilai->nilai_akhir !== null && (float) $nilai->nilai_akhir > 0;
+            });
+
+            if ($semesterTerisi->isEmpty()) {
+                continue;
+            }
+
+            $avgNilaiAkhir = $semesterTerisi->avg('nilai_akhir');
             $kkm = $this->getKKM($mapelId, $tahunAjaranId, $jenjang);
             if ($avgNilaiAkhir >= $kkm) {
                 $tuntasCount++;
