@@ -16,7 +16,7 @@
                 <h5 class="mb-0">
                     <i class="fas fa-edit text-warning me-2"></i>Form Edit Mata Pelajaran
                 </h5>
-                <a href="{{ route('admin.mata-pelajaran.index') }}" class="btn btn-sm btn-secondary">
+                <a href="{{ url()->previous(route('admin.mata-pelajaran.index')) }}" class="btn btn-sm btn-secondary">
                     <i class="fas fa-arrow-left me-1"></i> Kembali
                 </a>
             </div>
@@ -24,6 +24,7 @@
                 <form action="{{ route('admin.mata-pelajaran.update', $mataPelajaran) }}" method="POST">
                     @csrf
                     @method('PUT')
+                    <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.mata-pelajaran.index')) }}">
 
                     {{-- Nama Mata Pelajaran --}}
                     <div class="mb-3">
@@ -124,7 +125,7 @@
 
                     {{-- Submit Buttons --}}
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ route('admin.mata-pelajaran.index') }}" class="btn btn-secondary">
+                        <a href="{{ url()->previous(route('admin.mata-pelajaran.index')) }}" class="btn btn-secondary">
                             <i class="fas fa-times me-1"></i> Batal
                         </a>
                         <button type="submit" class="btn btn-warning">

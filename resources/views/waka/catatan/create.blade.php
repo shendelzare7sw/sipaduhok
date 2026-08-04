@@ -27,11 +27,12 @@
 
     <form action="{{ route($routePrefix . '.catatan.store') }}" method="POST" data-catatan-create-form>
         @csrf
+        <input type="hidden" name="_return_url" value="{{ url()->previous(route($routePrefix . '.catatan.index')) }}">
 
         <div class="catatan-form-card">
             <div class="catatan-form-header">
                 <h5><i class="fas fa-edit text-primary me-2"></i>Form Kirim Catatan</h5>
-                <a href="{{ route($routePrefix . '.catatan.index') }}" class="catatan-btn secondary">
+                <a href="{{ url()->previous(route($routePrefix . '.catatan.index')) }}" class="catatan-btn secondary">
                     <i class="fas fa-arrow-left"></i>
                     Kembali
                 </a>
@@ -253,7 +254,7 @@
                         <i class="fas fa-paper-plane"></i>
                         Kirim Catatan
                     </button>
-                    <a href="{{ route($routePrefix . '.catatan.index') }}" class="catatan-btn secondary">
+                    <a href="{{ url()->previous(route($routePrefix . '.catatan.index')) }}" class="catatan-btn secondary">
                         <i class="fas fa-times"></i>
                         Batal
                     </a>

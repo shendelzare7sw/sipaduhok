@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers\WaliKelas;
 
+use App\Exports\RaporExport;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
-use App\Models\TenagaPendidik;
 use App\Models\Kelas;
-use App\Models\Siswa;
-use App\Models\Rapor;
-use App\Models\RaporNilai;
+use App\Models\MataPelajaran;
 use App\Models\Nilai;
 use App\Models\Presensi;
-use App\Models\MataPelajaran;
+use App\Models\Rapor;
 use App\Models\RaporKegiatanEkstra;
-use App\Models\TemplateCapaianKompetensi;
-use App\Models\TahunAjaran;
+use App\Models\RaporNilai;
 use App\Models\RequestDownloadRapor;
+use App\Models\Siswa;
+use App\Models\TahunAjaran;
+use App\Models\TemplateCapaianKompetensi;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\RaporExport;
 
 class RaporController extends Controller
 {
@@ -36,7 +35,7 @@ class RaporController extends Controller
     {
         $tenagaPendidik = $this->getTenagaPendidik();
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return view('wali-kelas.rapor.index')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
                 'kelas' => null,
@@ -66,7 +65,7 @@ class RaporController extends Controller
 
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
-        if (!$kelas) {
+        if (! $kelas) {
             return $this->redirectToPilihKelas();
         }
 
@@ -81,7 +80,7 @@ class RaporController extends Controller
             ->get();
 
         // For each student, check if rapor exists
-        $raporList = $siswaList->map(function($siswa) use ($kelas, $semester, $jenisRapor) {
+        $raporList = $siswaList->map(function ($siswa) use ($kelas, $semester, $jenisRapor) {
             $rapor = Rapor::where('siswa_id', $siswa->id)
                 ->where('kelas_id', $kelas->id)
                 ->where('tahun_ajaran_id', $kelas->tahun_ajaran_id)
@@ -143,7 +142,7 @@ class RaporController extends Controller
 
         $tenagaPendidik = $this->getTenagaPendidik();
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
@@ -153,7 +152,7 @@ class RaporController extends Controller
 
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
-        if (!$kelas) {
+        if (! $kelas) {
             return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
@@ -173,7 +172,7 @@ class RaporController extends Controller
                 ->where('jenis_rapor', $request->jenis_rapor)
                 ->exists();
 
-            if (!$raporExists) {
+            if (! $raporExists) {
                 $this->generateRaporSiswa($siswa, $kelas, $request->semester, $request->jenis_rapor);
                 $generated++;
             } else {
@@ -185,7 +184,7 @@ class RaporController extends Controller
             return back()->with('info', 'Tidak ada siswa aktif di kelas ini.');
         }
 
-        return back()->with('success', "Berhasil generate {$generated} rapor! " . ($skipped > 0 ? "({$skipped} sudah ada)" : ""));
+        return back()->with('success', "Berhasil generate {$generated} rapor! ".($skipped > 0 ? "({$skipped} sudah ada)" : ''));
     }
 
     /**
@@ -200,13 +199,13 @@ class RaporController extends Controller
 
         $tenagaPendidik = $this->getTenagaPendidik();
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
-        if (!$kelas) {
+        if (! $kelas) {
             return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
@@ -215,7 +214,7 @@ class RaporController extends Controller
             ->where('status', 'aktif')
             ->first();
 
-        if (!$siswa) {
+        if (! $siswa) {
             return back()->with('error', 'Siswa tidak ditemukan di kelas ini.');
         }
 
@@ -305,8 +304,7 @@ class RaporController extends Controller
 
         // Pastikan rapor ini milik kelas wali kelas
         if ($rapor->kelas_id != $kelas->id) {
-            return redirect()->route('wali.rapor.index')
-                ->with('error', 'Rapor tidak ditemukan.');
+            return back()->with('error', 'Rapor tidak ditemukan.');
         }
 
         // Auto-fill kehadiran dari presensi agar langsung tampil data terbaru
@@ -315,7 +313,7 @@ class RaporController extends Controller
         // If no kegiatan ekstra yet, use defaults
         $kegiatanEkstra = $rapor->kegiatanEkstra->isNotEmpty()
             ? $rapor->kegiatanEkstra
-            : collect(RaporKegiatanEkstra::getDefaultKegiatan())->map(fn($nama) => new RaporKegiatanEkstra(['kegiatan_nama' => $nama, 'predikat' => null, 'keterangan' => null]));
+            : collect(RaporKegiatanEkstra::getDefaultKegiatan())->map(fn ($nama) => new RaporKegiatanEkstra(['kegiatan_nama' => $nama, 'predikat' => null, 'keterangan' => null]));
 
         return view('wali-kelas.rapor.edit', [
             'rapor' => $rapor,
@@ -394,7 +392,7 @@ class RaporController extends Controller
 
             // Create new from request
             foreach ($request->kegiatan_ekstra as $kegiatan) {
-                if (!empty($kegiatan['kegiatan_nama'])) {
+                if (! empty($kegiatan['kegiatan_nama'])) {
                     RaporKegiatanEkstra::create([
                         'rapor_id' => $rapor->id,
                         'kegiatan_nama' => $kegiatan['kegiatan_nama'],
@@ -431,14 +429,14 @@ class RaporController extends Controller
             'include_kegiatan',
             'include_catatan',
             'include_alignment',
-        ])->filter(fn($key) => $request->boolean($key));
+        ])->filter(fn ($key) => $request->boolean($key));
 
         if ($selectedParts->isEmpty()) {
             return back()->with('error', 'Pilih minimal satu bagian format rapor yang ingin diterapkan.');
         }
 
         $tenagaPendidik = $this->getTenagaPendidik();
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
@@ -447,7 +445,7 @@ class RaporController extends Controller
 
         $sourceRapor = Rapor::with(['siswa', 'kelas', 'raporNilai', 'kegiatanEkstra'])->findOrFail($raporId);
 
-        if (!$accessibleClassIds->contains($sourceRapor->kelas_id)) {
+        if (! $accessibleClassIds->contains($sourceRapor->kelas_id)) {
             return back()->with('error', 'Anda tidak memiliki akses ke rapor ini.');
         }
 
@@ -462,7 +460,7 @@ class RaporController extends Controller
             ->where('jenis_rapor', $sourceRapor->jenis_rapor)
             ->where('id', '!=', $sourceRapor->id)
             ->where('status', 'draft')
-            ->whereHas('siswa', fn($query) => $query->where('validasi_rapor_wali', false))
+            ->whereHas('siswa', fn ($query) => $query->where('validasi_rapor_wali', false))
             ->get();
 
         if ($targetRapors->isEmpty()) {
@@ -472,7 +470,7 @@ class RaporController extends Controller
         $overwriteFilled = $request->has('overwrite_filled');
         $sourceNilaiByMapel = $sourceRapor->raporNilai
             ->values()
-            ->mapWithKeys(fn($nilai, $index) => [
+            ->mapWithKeys(fn ($nilai, $index) => [
                 $nilai->mata_pelajaran_id => [
                     'urutan' => $index,
                     'deskripsi' => $nilai->deskripsi,
@@ -509,14 +507,14 @@ class RaporController extends Controller
                     $raporUpdates['keterangan_ekstra_alignment'] = $sourceRapor->keterangan_ekstra_alignment ?: 'left';
                 }
 
-                if (!empty($raporUpdates)) {
+                if (! empty($raporUpdates)) {
                     $targetRapor->update($raporUpdates);
                 }
 
                 if ($request->boolean('include_order') || $request->boolean('include_deskripsi') || $request->boolean('include_display')) {
                     foreach ($targetRapor->raporNilai as $targetNilai) {
                         $sourceNilai = $sourceNilaiByMapel->get($targetNilai->mata_pelajaran_id);
-                        if (!$sourceNilai) {
+                        if (! $sourceNilai) {
                             continue;
                         }
 
@@ -538,7 +536,7 @@ class RaporController extends Controller
                             $nilaiUpdates['kelompok_override'] = $sourceNilai['kelompok_override'];
                         }
 
-                        if (!empty($nilaiUpdates)) {
+                        if (! empty($nilaiUpdates)) {
                             $targetNilai->update($nilaiUpdates);
                             $updatedNilai++;
                         }
@@ -582,7 +580,7 @@ class RaporController extends Controller
         $tenagaPendidik = $this->getTenagaPendidik();
         $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
 
-        if (!$kelasIds->contains($rapor->kelas_id)) {
+        if (! $kelasIds->contains($rapor->kelas_id)) {
             abort(404);
         }
     }
@@ -603,7 +601,7 @@ class RaporController extends Controller
         $rapor->load('siswa.orangTua');
         app(\App\Services\NotificationService::class)->notifyRaporTerbit($rapor);
 
-        return back()->with('success', 'Rapor berhasil diterbitkan! Tanggal rilis: ' . \Carbon\Carbon::parse($tanggalRilis)->format('d/m/Y'));
+        return back()->with('success', 'Rapor berhasil diterbitkan! Tanggal rilis: '.\Carbon\Carbon::parse($tanggalRilis)->format('d/m/Y'));
     }
 
     /**
@@ -673,7 +671,7 @@ class RaporController extends Controller
                     ->where('jenis_rapor', $rapor->jenis_rapor)
                     ->where('id', '!=', $rapor->id)
                     ->where('status', 'draft')
-                    ->whereHas('siswa', fn($query) => $query->where('validasi_rapor_wali', false))
+                    ->whereHas('siswa', fn ($query) => $query->where('validasi_rapor_wali', false))
                     ->pluck('id');
 
                 foreach ($targetRapors as $targetRaporId) {
@@ -702,14 +700,14 @@ class RaporController extends Controller
     {
         $rapor = Rapor::findOrFail($raporId);
         $this->assertRaporMilikWali($rapor);
-        
+
         // Only allow retract if currently published
         if ($rapor->status !== 'diterbitkan') {
             return back()->with('error', 'Hanya rapor yang sudah diterbitkan yang bisa ditarik kembali.');
         }
-        
+
         $rapor->tarikKembali();
-        
+
         return back()->with('success', 'Rapor berhasil ditarik kembali. Status kembali ke draft dan tidak terlihat oleh wali siswa.');
     }
 
@@ -720,13 +718,13 @@ class RaporController extends Controller
     {
         $tenagaPendidik = $this->getTenagaPendidik();
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return back()->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
-        if (!$kelas) {
+        if (! $kelas) {
             return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
@@ -820,7 +818,7 @@ class RaporController extends Controller
         $siswa = Siswa::findOrFail($request->siswa_id);
         $kelas = $siswa->kelas;
 
-        if (!$kelas) {
+        if (! $kelas) {
             return back()->with('error', 'Siswa tidak terdaftar di kelas manapun.');
         }
 
@@ -908,7 +906,7 @@ class RaporController extends Controller
             ->where('mata_pelajaran_id', $request->mata_pelajaran_id)
             ->first();
 
-        if (!$raporNilai) {
+        if (! $raporNilai) {
             return back()->with('error', 'Rapor nilai tidak ditemukan.');
         }
 
@@ -917,6 +915,7 @@ class RaporController extends Controller
             $raporNilai->update([
                 'deskripsi' => $template->template_text,
             ]);
+
             return back()->with('success', 'Template berhasil diterapkan!');
         } else {
             return back()->with('info', 'Deskripsi sudah ada, tidak di-overwrite. Kosongkan dulu jika mau ganti.');
@@ -939,7 +938,7 @@ class RaporController extends Controller
         // IDOR guard (F-22): kelas tujuan harus diampu wali (cegah terapkan massal lintas-kelas).
         $tenagaPendidik = $this->getTenagaPendidik();
         $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
-        if (!$kelasIds->contains((int) $request->kelas_id)) {
+        if (! $kelasIds->contains((int) $request->kelas_id)) {
             abort(404);
         }
 
@@ -957,9 +956,9 @@ class RaporController extends Controller
         // Update all rapor_nilai for this mapel (ONLY empty deskripsi)
         $updated = RaporNilai::whereIn('rapor_id', $raporList)
             ->where('mata_pelajaran_id', $request->mata_pelajaran_id)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('deskripsi')
-                  ->orWhere('deskripsi', '');
+                    ->orWhere('deskripsi', '');
             })
             ->update([
                 'deskripsi' => $template->template_text,
@@ -986,7 +985,7 @@ class RaporController extends Controller
 
         $tenagaPendidik = $this->getTenagaPendidik();
         $kelas = $tenagaPendidik ? $this->getSelectedKelas($tenagaPendidik) : null;
-        if (!$kelas) {
+        if (! $kelas) {
             return back()->with('error', 'Kelas yang dikelola tidak ditemukan.');
         }
 
@@ -1016,14 +1015,14 @@ class RaporController extends Controller
                 ->where('mata_pelajaran_id', $mapelId)
                 ->first();
 
-            if (!$template) {
+            if (! $template) {
                 continue;
             }
 
             $query = RaporNilai::whereIn('rapor_id', $raporIds)
                 ->where('mata_pelajaran_id', $mapelId);
 
-            if (!$overwrite) {
+            if (! $overwrite) {
                 $query->where(function ($q) {
                     $q->whereNull('deskripsi')->orWhere('deskripsi', '');
                 });
@@ -1064,9 +1063,9 @@ class RaporController extends Controller
         }
 
         $siswa->update([
-            'validasi_rapor_wali'              => true,
-            'tanggal_validasi_rapor_wali'      => now(),
-            'validasi_rapor_oleh'              => auth()->id(),
+            'validasi_rapor_wali' => true,
+            'tanggal_validasi_rapor_wali' => now(),
+            'validasi_rapor_oleh' => auth()->id(),
         ]);
 
         // Clear revisi status if previously returned for revision
@@ -1100,14 +1099,14 @@ class RaporController extends Controller
         $siswa = $rapor->siswa;
 
         $siswa->update([
-            'validasi_rapor_wali'              => false,
-            'tanggal_validasi_rapor_wali'      => null,
-            'validasi_rapor_oleh'              => null,
+            'validasi_rapor_wali' => false,
+            'tanggal_validasi_rapor_wali' => null,
+            'validasi_rapor_oleh' => null,
             // CASCADE: reset ketua & bendahara
-            'validasi_rapor_ketua'             => false,
-            'tanggal_validasi_rapor_ketua'     => null,
-            'validasi_rapor_ketua_oleh'        => null,
-            'validasi_rapor_bendahara'         => false,
+            'validasi_rapor_ketua' => false,
+            'tanggal_validasi_rapor_ketua' => null,
+            'validasi_rapor_ketua_oleh' => null,
+            'validasi_rapor_bendahara' => false,
             'tanggal_validasi_rapor_bendahara' => null,
         ]);
 
@@ -1120,14 +1119,14 @@ class RaporController extends Controller
     public function kirimValidasiSemua(Request $request): RedirectResponse
     {
         $request->validate([
-            'semester'   => 'required|in:ganjil,genap',
+            'semester' => 'required|in:ganjil,genap',
             'jenis_rapor' => 'required|in:tengah_semester,akhir_semester',
         ]);
 
         $tenagaPendidik = $this->getTenagaPendidik();
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
-        if (!$kelas) {
+        if (! $kelas) {
             return back()->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
@@ -1141,11 +1140,11 @@ class RaporController extends Controller
         $sent = 0;
         foreach ($raporList as $rapor) {
             $siswa = $rapor->siswa;
-            if ($siswa && !$siswa->validasi_rapor_wali) {
+            if ($siswa && ! $siswa->validasi_rapor_wali) {
                 $siswa->update([
-                    'validasi_rapor_wali'         => true,
+                    'validasi_rapor_wali' => true,
                     'tanggal_validasi_rapor_wali' => now(),
-                    'validasi_rapor_oleh'         => auth()->id(),
+                    'validasi_rapor_oleh' => auth()->id(),
                 ]);
                 $sent++;
             }
@@ -1170,7 +1169,7 @@ class RaporController extends Controller
             ->findOrFail($raporId);
         $this->assertRaporMilikWali($rapor);
 
-        $filename = "Rapor_" . Str::slug($rapor->siswa->nama_lengkap) . "_{$rapor->getPeriodeLabel()}.xlsx";
+        $filename = 'Rapor_'.Str::slug($rapor->siswa->nama_lengkap)."_{$rapor->getPeriodeLabel()}.xlsx";
 
         return Excel::download(new RaporExport($rapor), $filename);
     }
@@ -1190,7 +1189,7 @@ class RaporController extends Controller
         // Verify ownership: rapor harus di kelas yang sedang diwalikan
         $tenagaPendidik = $this->getTenagaPendidik();
         $kelas = $this->getSelectedKelas($tenagaPendidik);
-        if (!$kelas || $rapor->kelas_id !== $kelas->id) {
+        if (! $kelas || $rapor->kelas_id !== $kelas->id) {
             return back()->with('error', 'Anda tidak memiliki akses ke rapor ini.');
         }
 
@@ -1205,15 +1204,17 @@ class RaporController extends Controller
         $importer = new \App\Imports\WaliKelas\RaporImport($rapor);
         $result = $importer->import($request->file('file'));
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return back()->with('error', implode(' | ', $result['errors']));
         }
 
         $msg = "Import berhasil: {$result['updated_count']} mata pelajaran ter-update.";
-        if (!empty($result['errors'])) {
-            $msg .= ' Peringatan: ' . implode(' | ', array_slice($result['errors'], 0, 5));
+        if (! empty($result['errors'])) {
+            $msg .= ' Peringatan: '.implode(' | ', array_slice($result['errors'], 0, 5));
+
             return back()->with('warning', $msg);
         }
+
         return back()->with('success', $msg);
     }
 
@@ -1230,11 +1231,11 @@ class RaporController extends Controller
             ->latest('tanggal_request');
 
         if ($kelas) {
-            $query->whereHas('siswa', fn($q) => $q->where('kelas_id', $kelas->id));
+            $query->whereHas('siswa', fn ($q) => $q->where('kelas_id', $kelas->id));
         } else {
             // Tanpa kelas terpilih: batasi ke seluruh kelas yang diampu wali (cegah bocornya request kelas lain).
             $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
-            $query->whereHas('siswa', fn($q) => $q->whereIn('kelas_id', $kelasIds));
+            $query->whereHas('siswa', fn ($q) => $q->whereIn('kelas_id', $kelasIds));
         }
 
         $requests = $query->paginate(25);
@@ -1251,7 +1252,7 @@ class RaporController extends Controller
         $kelasIds = $tenagaPendidik ? $this->getKelasWali($tenagaPendidik)->pluck('id') : collect();
         $kelasId = optional($downloadRequest->rapor)->kelas_id ?? optional($downloadRequest->siswa)->kelas_id;
 
-        if (!$kelasId || !$kelasIds->contains($kelasId)) {
+        if (! $kelasId || ! $kelasIds->contains($kelasId)) {
             abort(404);
         }
     }
@@ -1299,6 +1300,6 @@ class RaporController extends Controller
         $downloadRequest->load('siswa');
         app(\App\Services\NotificationService::class)->notifyKeputusanDownloadRapor($downloadRequest);
 
-        return back()->with('success', "Request download berhasil ditolak.");
+        return back()->with('success', 'Request download berhasil ditolak.');
     }
 }

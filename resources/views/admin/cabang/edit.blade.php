@@ -72,6 +72,7 @@ Perbarui data cabang {{ $cabang->nama_cabang }}
             <form action="{{ route('admin.cabang.update', $cabang) }}" method="POST" id="cabangForm">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.cabang.index')) }}">
 
                 {{-- Basic Information --}}
                 <div class="form-section">
@@ -164,7 +165,7 @@ Perbarui data cabang {{ $cabang->nama_cabang }}
                 {{-- Form Actions --}}
                 <div class="form-actions">
                     <div class="form-actions-left">
-                        <a href="{{ route('admin.cabang.index') }}" class="btn btn-secondary">
+                        <a href="{{ url()->previous(route('admin.cabang.index')) }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Kembali
                         </a>
                         <a href="{{ route('admin.cabang.show', $cabang) }}" class="btn btn-secondary">

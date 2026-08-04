@@ -27,8 +27,8 @@ class NotificationController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('judul', 'like', '%' . $search . '%')
-                    ->orWhere('pesan', 'like', '%' . $search . '%');
+                $q->where('judul', 'like', '%'.$search.'%')
+                    ->orWhere('pesan', 'like', '%'.$search.'%');
             });
         }
 
@@ -73,7 +73,7 @@ class NotificationController extends Controller
             return redirect($notification->link);
         }
 
-        return redirect()->route('notifications.index');
+        return back();
     }
 
     /**
@@ -94,15 +94,15 @@ class NotificationController extends Controller
         switch ($action) {
             case 'delete':
                 $query->delete();
-                $message = $count . ' notifikasi dihapus';
+                $message = $count.' notifikasi dihapus';
                 break;
             case 'read':
                 $query->update(['read_at' => now()]);
-                $message = $count . ' notifikasi ditandai dibaca';
+                $message = $count.' notifikasi ditandai dibaca';
                 break;
             case 'unread':
                 $query->update(['read_at' => null]);
-                $message = $count . ' notifikasi ditandai belum dibaca';
+                $message = $count.' notifikasi ditandai belum dibaca';
                 break;
             default:
                 return response()->json(['success' => false, 'message' => 'Aksi tidak dikenal']);
@@ -126,6 +126,7 @@ class NotificationController extends Controller
         // Add human-readable timestamp for display in bell dropdown
         $notifications = $notifications->map(function ($notif) {
             $notif->created_at_formatted = $notif->created_at->copy()->locale('id')->diffForHumans();
+
             return $notif;
         });
 

@@ -25,6 +25,7 @@
                 @if(isset($kalender))
                     @method('PUT')
                 @endif
+                <input type="hidden" name="_return_url" value="{{ url()->previous(route('admin.akademik.kalender.index')) }}">
 
                 <!-- Nama Kegiatan -->
                 <div class="form-group">
@@ -217,7 +218,7 @@
 
                 <!-- Buttons -->
                 <div class="d-flex justify-content-between calendar-form-actions">
-                    <a href="{{ route('admin.akademik.kalender.index') }}" class="btn btn-secondary">
+                    <a href="{{ url()->previous(route('admin.akademik.kalender.index')) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Kembali
                     </a>
                     <button type="submit" class="btn btn-primary">

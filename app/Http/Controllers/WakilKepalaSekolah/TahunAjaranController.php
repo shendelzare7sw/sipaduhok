@@ -36,10 +36,12 @@ class TahunAjaranController extends Controller
             $tahunAjaran->save();
 
             DB::commit();
-            return redirect()->route('waka.tahun-ajaran.index')
-                ->with('success', 'Tahun Ajaran ' . $tahunAjaran->nama_tahun_ajaran . ' berhasil diaktifkan');
+
+            return redirect_to_previous('waka.tahun-ajaran.index')
+                ->with('success', 'Tahun Ajaran '.$tahunAjaran->nama_tahun_ajaran.' berhasil diaktifkan');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->back()->with('error', 'Gagal mengaktifkan tahun ajaran');
         }
     }
@@ -58,7 +60,7 @@ class TahunAjaranController extends Controller
             'tanggal_mulai_genap' => 'nullable|date|after:tanggal_mulai|before:tanggal_selesai',
             'tanggal_akhir_pts_ganjil' => 'nullable|date|after_or_equal:tanggal_mulai|before:tanggal_selesai',
             'tanggal_akhir_pts_genap' => 'nullable|date|after_or_equal:tanggal_mulai|before_or_equal:tanggal_selesai',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ], [
             'nama_tahun_ajaran.required' => 'Nama tahun ajaran harus diisi',
             'nama_tahun_ajaran.unique' => 'Nama tahun ajaran sudah ada',
@@ -75,7 +77,7 @@ class TahunAjaranController extends Controller
             'tanggal_akhir_pts_ganjil.before' => 'Tanggal akhir PTS ganjil harus sebelum tanggal selesai tahun ajaran',
             'tanggal_akhir_pts_genap.date' => 'Tanggal akhir PTS genap harus berupa tanggal yang valid',
             'tanggal_akhir_pts_genap.after_or_equal' => 'Tanggal akhir PTS genap harus pada/setelah tanggal mulai tahun ajaran',
-            'tanggal_akhir_pts_genap.before_or_equal' => 'Tanggal akhir PTS genap harus pada/sebelum tanggal selesai tahun ajaran'
+            'tanggal_akhir_pts_genap.before_or_equal' => 'Tanggal akhir PTS genap harus pada/sebelum tanggal selesai tahun ajaran',
         ]);
 
         // If is_active is checked, deactivate all other tahun ajaran
@@ -88,13 +90,14 @@ class TahunAjaranController extends Controller
 
         TahunAjaran::create($validated);
 
-        return redirect()->route('waka.tahun-ajaran.index')
+        return redirect_to_previous('waka.tahun-ajaran.index')
             ->with('success', 'Tahun Ajaran berhasil ditambahkan');
     }
 
     public function show(TahunAjaran $tahunAjaran)
     {
         $tahunAjaran->load('kelas.cabang');
+
         return view('waka.tahun-ajaran.show', compact('tahunAjaran'));
     }
 
@@ -106,13 +109,13 @@ class TahunAjaranController extends Controller
     public function update(Request $request, TahunAjaran $tahunAjaran)
     {
         $validated = $request->validate([
-            'nama_tahun_ajaran' => 'required|string|max:255|unique:tahun_ajaran,nama_tahun_ajaran,' . $tahunAjaran->id,
+            'nama_tahun_ajaran' => 'required|string|max:255|unique:tahun_ajaran,nama_tahun_ajaran,'.$tahunAjaran->id,
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'tanggal_mulai_genap' => 'nullable|date|after:tanggal_mulai|before:tanggal_selesai',
             'tanggal_akhir_pts_ganjil' => 'nullable|date|after_or_equal:tanggal_mulai|before:tanggal_selesai',
             'tanggal_akhir_pts_genap' => 'nullable|date|after_or_equal:tanggal_mulai|before_or_equal:tanggal_selesai',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
         ], [
             'nama_tahun_ajaran.required' => 'Nama tahun ajaran harus diisi',
             'nama_tahun_ajaran.unique' => 'Nama tahun ajaran sudah ada',
@@ -129,7 +132,7 @@ class TahunAjaranController extends Controller
             'tanggal_akhir_pts_ganjil.before' => 'Tanggal akhir PTS ganjil harus sebelum tanggal selesai tahun ajaran',
             'tanggal_akhir_pts_genap.date' => 'Tanggal akhir PTS genap harus berupa tanggal yang valid',
             'tanggal_akhir_pts_genap.after_or_equal' => 'Tanggal akhir PTS genap harus pada/setelah tanggal mulai tahun ajaran',
-            'tanggal_akhir_pts_genap.before_or_equal' => 'Tanggal akhir PTS genap harus pada/sebelum tanggal selesai tahun ajaran'
+            'tanggal_akhir_pts_genap.before_or_equal' => 'Tanggal akhir PTS genap harus pada/sebelum tanggal selesai tahun ajaran',
         ]);
 
         // If is_active is checked, deactivate all other tahun ajaran
@@ -144,7 +147,7 @@ class TahunAjaranController extends Controller
 
         $tahunAjaran->update($validated);
 
-        return redirect()->route('waka.tahun-ajaran.index')
+        return redirect_to_previous('waka.tahun-ajaran.index')
             ->with('success', 'Tahun Ajaran berhasil diperbarui');
     }
 
@@ -157,7 +160,8 @@ class TahunAjaranController extends Controller
             }
 
             $tahunAjaran->delete();
-            return redirect()->route('waka.tahun-ajaran.index')
+
+            return redirect_to_previous('waka.tahun-ajaran.index')
                 ->with('success', 'Tahun Ajaran berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal menghapus tahun ajaran');

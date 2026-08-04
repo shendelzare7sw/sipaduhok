@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\TenagaPendidik;
-use App\Models\Siswa;
-use App\Models\StudentParent;
 use App\Models\Cabang;
 use App\Models\Kelas;
+use App\Models\Siswa;
+use App\Models\StudentParent;
+use App\Models\TenagaPendidik;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -61,9 +60,9 @@ class UserController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('username', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhereHas('tenagaPendidik', function($q2) use ($search) {
+                    ->orWhereHas('tenagaPendidik', function ($q2) use ($search) {
                         $q2->where('nip', 'like', "%{$search}%")
-                           ->orWhere('nama_lengkap', 'like', "%{$search}%");
+                            ->orWhere('nama_lengkap', 'like', "%{$search}%");
                     });
             });
         }
@@ -100,9 +99,9 @@ class UserController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('username', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhereHas('tenagaPendidik', function($q2) use ($search) {
+                    ->orWhereHas('tenagaPendidik', function ($q2) use ($search) {
                         $q2->where('nip', 'like', "%{$search}%")
-                           ->orWhere('nama_lengkap', 'like', "%{$search}%");
+                            ->orWhere('nama_lengkap', 'like', "%{$search}%");
                     });
             });
         }
@@ -170,24 +169,24 @@ class UserController extends Controller
             'pendidikan_terakhir' => $validated['pendidikan_terakhir'],
         ]);
 
-        return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil ditambahkan!');
+        return redirect_to_previous('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil ditambahkan!');
     }
 
     public function editTenagaPendidik($id)
     {
         // Prioritize finding by user_id first to avoid ID collisions
         $tenagaPendidik = TenagaPendidik::with('user')->where('user_id', $id)->first();
-        
-        if (!$tenagaPendidik) {
+
+        if (! $tenagaPendidik) {
             // Fallback: Check if it's a direct ID, or if it's a User ID without a profile yet
             $tenagaPendidik = TenagaPendidik::with('user')->find($id);
-            
-            if (!$tenagaPendidik) {
+
+            if (! $tenagaPendidik) {
                 // Check if User exists but profile is missing
                 $user = User::find($id);
                 if ($user && in_array($user->role, ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'])) {
                     // Initialize an empty TenagaPendidik object with the user relationship for the view
-                    $tenagaPendidik = new TenagaPendidik();
+                    $tenagaPendidik = new TenagaPendidik;
                     $tenagaPendidik->user_id = $user->id;
                     $tenagaPendidik->nama_lengkap = $user->name;
                     $tenagaPendidik->email = $user->email;
@@ -209,18 +208,18 @@ class UserController extends Controller
     {
         // Prioritize finding by user_id first
         $tenagaPendidik = TenagaPendidik::where('user_id', $id)->first();
-        
-        if (!$tenagaPendidik) {
+
+        if (! $tenagaPendidik) {
             $tenagaPendidik = TenagaPendidik::where('id', $id)->first();
-            
+
             // If still not found, check if it's a User ID we are trying to update (create profile for)
-            if (!$tenagaPendidik) {
+            if (! $tenagaPendidik) {
                 $user = User::find($id);
-                if (!$user) {
+                if (! $user) {
                     abort(404);
                 }
                 // Create new instance but don't save yet
-                $tenagaPendidik = new TenagaPendidik();
+                $tenagaPendidik = new TenagaPendidik;
                 $tenagaPendidik->user_id = $user->id;
             }
         }
@@ -256,7 +255,7 @@ class UserController extends Controller
             'phone' => $validated['telepon'],
         ];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $userData['password'] = Hash::make($validated['password']);
         }
 
@@ -285,17 +284,17 @@ class UserController extends Controller
             TenagaPendidik::create($tenagaPendidikData);
         }
 
-        return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil diupdate!');
+        return redirect_to_previous('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil diupdate!');
     }
 
     public function showTenagaPendidik($id)
     {
         $tenagaPendidik = TenagaPendidik::with(['user.cabang'])->where('user_id', $id)->first();
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             $tenagaPendidik = TenagaPendidik::with(['user.cabang'])->find($id);
         }
 
-        if (!$tenagaPendidik) {
+        if (! $tenagaPendidik) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
@@ -310,12 +309,25 @@ class UserController extends Controller
     private function tenagaPendidikBlockers(int $tid): array
     {
         $b = [];
-        if (($n = \App\Models\Nilai::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} nilai siswa";
-        if (($n = \App\Models\Ujian::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} ujian/latihan";
-        if (($n = \App\Models\Materi::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} materi";
-        if (($n = \App\Models\Tugas::where('guru_id', $tid)->count()) > 0) $b[] = "{$n} tugas";
-        if (($n = \App\Models\GuruPengajarKelas::where('tenaga_pendidik_id', $tid)->count()) > 0) $b[] = "{$n} penugasan mengajar";
-        if (($n = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tid)->count()) > 0) $b[] = "{$n} penugasan wali kelas";
+        if (($n = \App\Models\Nilai::where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} nilai siswa";
+        }
+        if (($n = \App\Models\Ujian::where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} ujian/latihan";
+        }
+        if (($n = \App\Models\Materi::where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} materi";
+        }
+        if (($n = \App\Models\Tugas::where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} tugas";
+        }
+        if (($n = \App\Models\GuruPengajarKelas::where('tenaga_pendidik_id', $tid)->count()) > 0) {
+            $b[] = "{$n} penugasan mengajar";
+        }
+        if (($n = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tid)->count()) > 0) {
+            $b[] = "{$n} penugasan wali kelas";
+        }
+
         return $b;
     }
 
@@ -327,12 +339,25 @@ class UserController extends Controller
     private function siswaBlockers(int $sid): array
     {
         $b = [];
-        if (($n = \App\Models\Pembayaran::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} pembayaran";
-        if (($n = \App\Models\Tagihan::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} tagihan";
-        if (($n = \App\Models\Rapor::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} rapor";
-        if (($n = \App\Models\UjianSiswa::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} riwayat ujian";
-        if (($n = \App\Models\Presensi::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} presensi";
-        if (($n = \App\Models\Nilai::where('siswa_id', $sid)->count()) > 0) $b[] = "{$n} nilai";
+        if (($n = \App\Models\Pembayaran::where('siswa_id', $sid)->count()) > 0) {
+            $b[] = "{$n} pembayaran";
+        }
+        if (($n = \App\Models\Tagihan::where('siswa_id', $sid)->count()) > 0) {
+            $b[] = "{$n} tagihan";
+        }
+        if (($n = \App\Models\Rapor::where('siswa_id', $sid)->count()) > 0) {
+            $b[] = "{$n} rapor";
+        }
+        if (($n = \App\Models\UjianSiswa::where('siswa_id', $sid)->count()) > 0) {
+            $b[] = "{$n} riwayat ujian";
+        }
+        if (($n = \App\Models\Presensi::where('siswa_id', $sid)->count()) > 0) {
+            $b[] = "{$n} presensi";
+        }
+        if (($n = \App\Models\Nilai::where('siswa_id', $sid)->count()) > 0) {
+            $b[] = "{$n} nilai";
+        }
+
         return $b;
     }
 
@@ -347,16 +372,18 @@ class UserController extends Controller
             // tugas, rapor_nilai (rapor jadi rusak), dan penugasan. Nonaktifkan akun saja.
             $blockers = $this->tenagaPendidikBlockers($tenagaPendidik->id);
 
-            if (!empty($blockers)) {
-                return redirect()->route('admin.users.tenaga-pendidik')->with('error',
-                    'Tenaga pendidik ini tidak dapat dihapus karena masih terhubung ke data (' . implode(', ', $blockers) . '). '
-                    . 'Menghapusnya akan ikut menghilangkan NILAI SISWA & RAPOR secara permanen. '
-                    . 'Untuk menjaga data, NONAKTIFKAN akun ini (ubah status menjadi Nonaktif), jangan dihapus.');
+            if (! empty($blockers)) {
+                return redirect_to_previous('admin.users.tenaga-pendidik')->with('error',
+                    'Tenaga pendidik ini tidak dapat dihapus karena masih terhubung ke data ('.implode(', ', $blockers).'). '
+                    .'Menghapusnya akan ikut menghilangkan NILAI SISWA & RAPOR secara permanen. '
+                    .'Untuk menjaga data, NONAKTIFKAN akun ini (ubah status menjadi Nonaktif), jangan dihapus.');
             }
 
             $user = $tenagaPendidik->user;
             $tenagaPendidik->delete();
-            if ($user) $user->delete();
+            if ($user) {
+                $user->delete();
+            }
         } else {
             // If profile not found, maybe we are trying to delete a User by ID directly
             $user = User::find($id);
@@ -367,7 +394,7 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil dihapus!');
+        return redirect_to_previous('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil dihapus!');
     }
 
     // --- SISWA ---
@@ -406,7 +433,7 @@ class UserController extends Controller
 
         $siswa = $query->orderBy('nama_lengkap')->paginate(15);
         $kelasList = Kelas::orderBy('jenjang')->orderBy('nama_kelas')->get()
-            ->unique(fn($k) => $k->cabang_id . '|' . $k->jenjang . '|' . $k->nama_kelas)
+            ->unique(fn ($k) => $k->cabang_id.'|'.$k->jenjang.'|'.$k->nama_kelas)
             ->values();
         $cabangList = Cabang::where('is_active', true)->get();
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
@@ -450,15 +477,21 @@ class UserController extends Controller
 
         // Prepare filter info for display
         $filterInfo = [];
-        if ($request->jenjang) $filterInfo[] = "Jenjang: " . $request->jenjang;
+        if ($request->jenjang) {
+            $filterInfo[] = 'Jenjang: '.$request->jenjang;
+        }
         if ($request->kelas_nama) {
-            $filterInfo[] = "Kelas: " . $request->kelas_nama;
+            $filterInfo[] = 'Kelas: '.$request->kelas_nama;
         }
         if ($request->cabang_id) {
             $cabang = Cabang::find($request->cabang_id);
-            if($cabang) $filterInfo[] = "Cabang: " . $cabang->nama_cabang;
+            if ($cabang) {
+                $filterInfo[] = 'Cabang: '.$cabang->nama_cabang;
+            }
         }
-        if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
+        if ($request->status) {
+            $filterInfo[] = 'Status: '.ucfirst($request->status);
+        }
 
         return view('admin.users.print.siswa', compact('siswa', 'filterInfo'));
     }
@@ -467,8 +500,8 @@ class UserController extends Controller
     {
         $cabangList = Cabang::where('is_active', true)->get();
         $tahunAjaranAktif = \App\Models\TahunAjaran::where('is_active', true)->first();
-        
-        $kelasList = Kelas::when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+
+        $kelasList = Kelas::when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->with(['cabang'])
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
@@ -520,10 +553,10 @@ class UserController extends Controller
 
         // Get cabang from kelas relationship
         $kelas = Kelas::findOrFail($validated['kelas_id']);
-        
+
         $user = User::create([
             'name' => $validated['nama_lengkap'],
-            'email' => $validated['email'] ?? $validated['username'] . '@siswa.sipaduhok.sch.id',
+            'email' => $validated['email'] ?? $validated['username'].'@siswa.sipaduhok.sch.id',
             'personal_email' => $validated['personal_email'] ?? null,
             'username' => $validated['username'],
             'password' => Hash::make($validated['password']),
@@ -555,7 +588,7 @@ class UserController extends Controller
         if ($request->parent_option === 'existing' && $request->parent_id) {
             // Determine the actual relationship value
             $existingRelationship = $request->existing_relationship;
-            if ($existingRelationship === 'lainnya' && !empty($request->existing_relationship_lainnya)) {
+            if ($existingRelationship === 'lainnya' && ! empty($request->existing_relationship_lainnya)) {
                 $existingRelationship = $request->existing_relationship_lainnya;
             }
 
@@ -571,7 +604,7 @@ class UserController extends Controller
         } elseif ($request->parent_option === 'new') {
             // Determine the actual relationship value
             $newRelationship = $request->new_relationship;
-            if ($newRelationship === 'lainnya' && !empty($request->new_relationship_lainnya)) {
+            if ($newRelationship === 'lainnya' && ! empty($request->new_relationship_lainnya)) {
                 $newRelationship = $request->new_relationship_lainnya;
             }
 
@@ -598,7 +631,7 @@ class UserController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.users.siswa')->with('success', 'Siswa berhasil ditambahkan!');
+        return redirect_to_previous('admin.users.siswa')->with('success', 'Siswa berhasil ditambahkan!');
     }
 
     public function editSiswa($id)
@@ -606,8 +639,8 @@ class UserController extends Controller
         $siswa = Siswa::with(['user', 'studentParents.parent'])->findOrFail($id);
         $cabangList = Cabang::where('is_active', true)->get();
         $tahunAjaranAktif = \App\Models\TahunAjaran::where('is_active', true)->first();
-        
-        $kelasList = Kelas::when($tahunAjaranAktif, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+
+        $kelasList = Kelas::when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->with(['cabang'])
             ->orderBy('jenjang')
             ->orderBy('nama_kelas')
@@ -684,7 +717,7 @@ class UserController extends Controller
             'is_active' => $validated['is_active'],
         ];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $userData['password'] = Hash::make($validated['password']);
         }
 
@@ -711,7 +744,7 @@ class UserController extends Controller
         // Handle removing parent relationships
         if ($request->has('remove_parents')) {
             $removeIds = array_filter($request->remove_parents);
-            if (!empty($removeIds)) {
+            if (! empty($removeIds)) {
                 StudentParent::whereIn('id', $removeIds)->delete();
             }
         }
@@ -723,10 +756,10 @@ class UserController extends Controller
                 ->where('parent_id', $request->add_existing_parent_id)
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 // Determine the actual relationship value
                 $addExistingRelationship = $request->add_existing_relationship;
-                if ($addExistingRelationship === 'lainnya' && !empty($request->add_existing_relationship_lainnya)) {
+                if ($addExistingRelationship === 'lainnya' && ! empty($request->add_existing_relationship_lainnya)) {
                     $addExistingRelationship = $request->add_existing_relationship_lainnya;
                 }
 
@@ -738,6 +771,7 @@ class UserController extends Controller
 
                     if ($duplicateRelation) {
                         $relationLabel = $addExistingRelationship === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+
                         return back()->with('error', "Siswa sudah memiliki {$relationLabel}! Satu siswa hanya boleh memiliki 1 Ayah Kandung dan 1 Ibu Kandung.");
                     }
                 }
@@ -757,7 +791,7 @@ class UserController extends Controller
         if ($request->add_parent_option === 'new' && $request->add_new_parent_name) {
             // Determine the actual relationship value
             $addNewRelationship = $request->add_new_relationship;
-            if ($addNewRelationship === 'lainnya' && !empty($request->add_new_relationship_lainnya)) {
+            if ($addNewRelationship === 'lainnya' && ! empty($request->add_new_relationship_lainnya)) {
                 $addNewRelationship = $request->add_new_relationship_lainnya;
             }
 
@@ -769,6 +803,7 @@ class UserController extends Controller
 
                 if ($duplicateRelation) {
                     $relationLabel = $addNewRelationship === 'ayah_kandung' ? 'Ayah Kandung' : 'Ibu Kandung';
+
                     return back()->with('error', "Siswa sudah memiliki {$relationLabel}! Satu siswa hanya boleh memiliki 1 Ayah Kandung dan 1 Ibu Kandung.");
                 }
             }
@@ -794,17 +829,17 @@ class UserController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.users.siswa')->with('success', 'Siswa berhasil diupdate!');
+        return redirect_to_previous('admin.users.siswa')->with('success', 'Siswa berhasil diupdate!');
     }
 
     public function showSiswa($id)
     {
         $siswa = Siswa::with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('id', $id)->first();
-        if (!$siswa) {
+        if (! $siswa) {
             $siswa = Siswa::with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('user_id', $id)->first();
         }
 
-        if (!$siswa) {
+        if (! $siswa) {
             return redirect()->back()->with('error', 'Data tidak ditemukan');
         }
 
@@ -820,18 +855,20 @@ class UserController extends Controller
         // TAGIHAN & PEMBAYARAN (riwayat keuangan hilang permanen). Ubah status siswa saja.
         $blockers = $this->siswaBlockers($siswa->id);
 
-        if (!empty($blockers)) {
-            return redirect()->route('admin.users.siswa')->with('error',
-                'Siswa ini tidak dapat dihapus karena masih memiliki data terkait (' . implode(', ', $blockers) . '). '
-                . 'Menghapusnya akan menghilangkan RIWAYAT AKADEMIK & KEUANGAN secara permanen. '
-                . 'Untuk menjaga data, NONAKTIFKAN akun / ubah status siswa (mis. Lulus atau Keluar), jangan dihapus.');
+        if (! empty($blockers)) {
+            return redirect_to_previous('admin.users.siswa')->with('error',
+                'Siswa ini tidak dapat dihapus karena masih memiliki data terkait ('.implode(', ', $blockers).'). '
+                .'Menghapusnya akan menghilangkan RIWAYAT AKADEMIK & KEUANGAN secara permanen. '
+                .'Untuk menjaga data, NONAKTIFKAN akun / ubah status siswa (mis. Lulus atau Keluar), jangan dihapus.');
         }
 
         $user = $siswa->user;
         $siswa->delete();
-        if ($user) $user->delete();
+        if ($user) {
+            $user->delete();
+        }
 
-        return redirect()->route('admin.users.siswa')->with('success', 'Siswa berhasil dihapus!');
+        return redirect_to_previous('admin.users.siswa')->with('success', 'Siswa berhasil dihapus!');
     }
 
     // --- WALI SISWA ---
@@ -913,12 +950,18 @@ class UserController extends Controller
 
         // Prepare filter info
         $filterInfo = [];
-        if ($request->jenjang) $filterInfo[] = "Jenjang Anak: " . $request->jenjang;
+        if ($request->jenjang) {
+            $filterInfo[] = 'Jenjang Anak: '.$request->jenjang;
+        }
         if ($request->cabang_id) {
             $cabang = Cabang::find($request->cabang_id);
-            if($cabang) $filterInfo[] = "Cabang: " . $cabang->nama_cabang;
+            if ($cabang) {
+                $filterInfo[] = 'Cabang: '.$cabang->nama_cabang;
+            }
         }
-        if ($request->status) $filterInfo[] = "Status: " . ucfirst($request->status);
+        if ($request->status) {
+            $filterInfo[] = 'Status: '.ucfirst($request->status);
+        }
 
         return view('admin.users.print.wali-siswa', compact('orangTua', 'filterInfo'));
     }
@@ -977,10 +1020,10 @@ class UserController extends Controller
         ]);
 
         // Link to students if selected
-        if (!empty($validated['siswa_ids']) && !empty($validated['hubungan_keluarga'])) {
+        if (! empty($validated['siswa_ids']) && ! empty($validated['hubungan_keluarga'])) {
             // Determine the actual relationship value
             $relationship = $validated['hubungan_keluarga'];
-            if ($relationship === 'lainnya' && !empty($validated['hubungan_keluarga_lainnya'])) {
+            if ($relationship === 'lainnya' && ! empty($validated['hubungan_keluarga_lainnya'])) {
                 $relationship = $validated['hubungan_keluarga_lainnya'];
             }
 
@@ -996,18 +1039,19 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.wali-siswa')
+        return redirect_to_previous('admin.users.wali-siswa')
             ->with('success', 'Akun wali siswa berhasil dibuat!');
     }
 
     public function toggleOrangTuaStatus($id)
     {
         $user = User::where('role', 'orang_tua')->findOrFail($id);
-        $user->is_active = !$user->is_active;
+        $user->is_active = ! $user->is_active;
         $user->save();
 
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        return redirect()->route('admin.users.wali-siswa')->with('success', "Akun wali siswa berhasil {$status}!");
+
+        return redirect_to_previous('admin.users.wali-siswa')->with('success', "Akun wali siswa berhasil {$status}!");
     }
 
     public function showOrangTua($id)
@@ -1038,12 +1082,12 @@ class UserController extends Controller
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('users', 'username')->ignore($orangTua->id)
+                Rule::unique('users', 'username')->ignore($orangTua->id),
             ],
             'email' => [
                 'nullable',
                 'email',
-                Rule::unique('users', 'email')->ignore($orangTua->id)
+                Rule::unique('users', 'email')->ignore($orangTua->id),
             ],
             'personal_email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
@@ -1073,7 +1117,7 @@ class UserController extends Controller
         // Update relationships if provided
         if ($request->has('relationships')) {
             foreach ($request->relationships as $studentParentId => $relationship) {
-                if (!empty($relationship)) {
+                if (! empty($relationship)) {
                     // Determine the actual relationship value
                     $actualRelationship = $relationship;
                     if ($relationship === 'lainnya' && isset($request->relationships_lainnya[$studentParentId])) {
@@ -1087,7 +1131,7 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('admin.users.show-wali-siswa', $orangTua->id)
+        return redirect_to_previous('admin.users.wali-siswa')
             ->with('success', 'Data wali siswa berhasil diperbarui!');
     }
 
@@ -1096,7 +1140,7 @@ class UserController extends Controller
         $user = User::where('role', 'orang_tua')->findOrFail($id);
         $user->delete();
 
-        return redirect()->route('admin.users.wali-siswa')->with('success', 'Akun wali siswa berhasil dihapus!');
+        return redirect_to_previous('admin.users.wali-siswa')->with('success', 'Akun wali siswa berhasil dihapus!');
     }
 
     // --- IMPORT SISWA ---
@@ -1113,7 +1157,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $import = new \App\Imports\SiswaImport();
+            $import = new \App\Imports\SiswaImport;
             \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
 
             $imported = $import->getImportedCount();
@@ -1123,19 +1167,19 @@ class UserController extends Controller
             if ($skipped > 0) {
                 $message .= " {$skipped} data dilewati (sudah ada).";
             }
-            
+
             // Collect warnings
             $warnings = $import->getWarnings();
 
             return redirect()->route('admin.users.siswa')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengimport: '.$e->getMessage());
         }
     }
 
     public function downloadSiswaTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\SiswaTemplate(), 'template_siswa.xlsx');
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\SiswaTemplate, 'template_siswa.xlsx');
     }
 
     // --- IMPORT TENAGA PENDIDIK ---
@@ -1152,7 +1196,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $import = new \App\Imports\TenagaPendidikImport();
+            $import = new \App\Imports\TenagaPendidikImport;
             \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
 
             $imported = $import->getImportedCount();
@@ -1166,13 +1210,13 @@ class UserController extends Controller
 
             return redirect()->route('admin.users.tenaga-pendidik')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengimport: '.$e->getMessage());
         }
     }
 
     public function downloadTenagaPendidikTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\TenagaPendidikTemplate(), 'template_tenaga_pendidik.xlsx');
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\TenagaPendidikTemplate, 'template_tenaga_pendidik.xlsx');
     }
 
     // --- IMPORT WALI SISWA ---
@@ -1189,7 +1233,7 @@ class UserController extends Controller
         ]);
 
         try {
-            $import = new \App\Imports\OrangTuaImport();
+            $import = new \App\Imports\OrangTuaImport;
             \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('file'));
 
             $imported = $import->getImportedCount();
@@ -1203,13 +1247,13 @@ class UserController extends Controller
 
             return redirect()->route('admin.users.wali-siswa')->with('success', $message)->with('import_warnings', $warnings);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengimport: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengimport: '.$e->getMessage());
         }
     }
 
     public function downloadOrangTuaTemplate()
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\OrangTuaTemplate(), 'template_orang_tua.xlsx');
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\Templates\OrangTuaTemplate, 'template_orang_tua.xlsx');
     }
 
     public function bulkDeleteTenagaPendidik(Request $request)
@@ -1226,25 +1270,26 @@ class UserController extends Controller
         $skipped = 0;
         foreach ($ids as $uid) {
             $tp = $tenagaByUser->get($uid);
-            if ($tp && !empty($this->tenagaPendidikBlockers($tp->id))) {
+            if ($tp && ! empty($this->tenagaPendidikBlockers($tp->id))) {
                 $skipped++;
+
                 continue;
             }
             $safeUserIds[] = $uid;
         }
 
-        if (!empty($safeUserIds)) {
+        if (! empty($safeUserIds)) {
             TenagaPendidik::whereIn('user_id', $safeUserIds)->delete();
             User::whereIn('id', $safeUserIds)->delete();
         }
 
         if ($skipped > 0) {
             return redirect()->back()->with('warning',
-                count($safeUserIds) . ' data tenaga pendidik dihapus. ' . $skipped . ' dilewati karena masih memiliki '
-                . 'nilai/materi/tugas/ujian/penugasan — NONAKTIFKAN akunnya, jangan dihapus (mencegah nilai & rapor siswa hilang).');
+                count($safeUserIds).' data tenaga pendidik dihapus. '.$skipped.' dilewati karena masih memiliki '
+                .'nilai/materi/tugas/ujian/penugasan — NONAKTIFKAN akunnya, jangan dihapus (mencegah nilai & rapor siswa hilang).');
         }
 
-        return redirect()->back()->with('success', count($safeUserIds) . ' data tenaga pendidik berhasil dihapus');
+        return redirect()->back()->with('success', count($safeUserIds).' data tenaga pendidik berhasil dihapus');
     }
 
     public function bulkDeleteSiswa(Request $request)
@@ -1261,26 +1306,31 @@ class UserController extends Controller
         $safeUserIds = [];
         $skipped = 0;
         foreach ($siswas as $siswa) {
-            if (!empty($this->siswaBlockers($siswa->id))) {
+            if (! empty($this->siswaBlockers($siswa->id))) {
                 $skipped++;
+
                 continue;
             }
             $safeSiswaIds[] = $siswa->id;
-            if ($siswa->user_id) $safeUserIds[] = $siswa->user_id;
+            if ($siswa->user_id) {
+                $safeUserIds[] = $siswa->user_id;
+            }
         }
 
-        if (!empty($safeSiswaIds)) {
+        if (! empty($safeSiswaIds)) {
             Siswa::whereIn('id', $safeSiswaIds)->delete();
-            if (!empty($safeUserIds)) User::whereIn('id', $safeUserIds)->delete();
+            if (! empty($safeUserIds)) {
+                User::whereIn('id', $safeUserIds)->delete();
+            }
         }
 
         if ($skipped > 0) {
             return redirect()->back()->with('warning',
-                count($safeSiswaIds) . ' data siswa dihapus. ' . $skipped . ' dilewati karena masih memiliki '
-                . 'riwayat akademik/keuangan — NONAKTIFKAN akun / ubah status (Lulus/Keluar), jangan dihapus.');
+                count($safeSiswaIds).' data siswa dihapus. '.$skipped.' dilewati karena masih memiliki '
+                .'riwayat akademik/keuangan — NONAKTIFKAN akun / ubah status (Lulus/Keluar), jangan dihapus.');
         }
 
-        return redirect()->back()->with('success', count($safeSiswaIds) . ' data siswa berhasil dihapus');
+        return redirect()->back()->with('success', count($safeSiswaIds).' data siswa berhasil dihapus');
     }
 
     public function bulkDeleteOrangTua(Request $request)
@@ -1292,6 +1342,6 @@ class UserController extends Controller
 
         User::whereIn('id', $ids)->where('role', 'orang_tua')->delete();
 
-        return redirect()->back()->with('success', count($ids) . ' Data wali siswa berhasil dihapus');
+        return redirect()->back()->with('success', count($ids).' Data wali siswa berhasil dihapus');
     }
 }

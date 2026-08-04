@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Sekretaris;
 
 use App\Http\Controllers\Controller;
+use App\Models\Berita;
+use App\Models\Flyer;
 use App\Models\KalenderAkademik;
 use App\Models\Pengumuman;
-use App\Models\Flyer;
-use App\Models\Berita;
 use App\Models\TahunAjaran;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class SekretarisController extends Controller
 {
@@ -56,26 +56,26 @@ class SekretarisController extends Controller
 
     // Kalender Akademik
 
-
     public function kalenderToggleVisibility($id)
     {
         try {
-            \Log::info('Toggle Visibility Request for ID: ' . $id);
+            \Log::info('Toggle Visibility Request for ID: '.$id);
             $kalender = \App\Models\KalenderAkademik::findOrFail($id);
-            \Log::info('Current status: ' . $kalender->is_hidden_siswa);
-            
-            $kalender->is_hidden_siswa = !$kalender->is_hidden_siswa;
+            \Log::info('Current status: '.$kalender->is_hidden_siswa);
+
+            $kalender->is_hidden_siswa = ! $kalender->is_hidden_siswa;
             $saved = $kalender->save();
-            
-            \Log::info('New status: ' . $kalender->is_hidden_siswa . ' | Saved: ' . ($saved ? 'Yes' : 'No'));
+
+            \Log::info('New status: '.$kalender->is_hidden_siswa.' | Saved: '.($saved ? 'Yes' : 'No'));
 
             return response()->json([
                 'success' => true,
                 'is_hidden' => $kalender->is_hidden_siswa,
-                'message' => $kalender->is_hidden_siswa ? 'Kegiatan disembunyikan dari siswa' : 'Kegiatan ditampilkan ke siswa'
+                'message' => $kalender->is_hidden_siswa ? 'Kegiatan disembunyikan dari siswa' : 'Kegiatan ditampilkan ke siswa',
             ]);
         } catch (\Exception $e) {
-            \Log::error('Toggle Error: ' . $e->getMessage());
+            \Log::error('Toggle Error: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -87,7 +87,7 @@ class SekretarisController extends Controller
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
         // Jika tidak ada tahun ajaran aktif, buat default
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             $tahunAjaranAktif = (object) ['nama_tahun_ajaran' => 'Belum Ada', 'id' => null];
         }
 
@@ -203,6 +203,7 @@ class SekretarisController extends Controller
                     $end = $event->tanggal_selesai
                         ? Carbon::parse($event->tanggal_selesai)->endOfDay()
                         : $start->copy()->endOfDay();
+
                     return $currentDate->between($start, $end);
                 });
 
@@ -270,7 +271,7 @@ class SekretarisController extends Controller
                     'nextYear',
                     'baseDate',
                     'weekDays'
-                ))->render()
+                ))->render(),
             ]);
         }
 
@@ -301,6 +302,7 @@ class SekretarisController extends Controller
     public function kalenderCreate()
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+
         return view('sekretaris.kalender.form', compact('tahunAjaranAktif'));
     }
 
@@ -334,13 +336,14 @@ class SekretarisController extends Controller
 
         KalenderAkademik::create($validated);
 
-        return redirect()->route('sekretaris.kalender.index')
+        return redirect_to_previous('sekretaris.kalender.index')
             ->with('success', 'Kalender akademik berhasil ditambahkan!');
     }
 
     public function kalenderShow($id)
     {
         $kalender = KalenderAkademik::findOrFail($id);
+
         return view('sekretaris.kalender.show', compact('kalender'));
     }
 
@@ -388,13 +391,13 @@ class SekretarisController extends Controller
         // Update pengumuman terkait
         if ($kalender->pengumuman()->exists()) {
             $kalender->pengumuman()->update([
-                'judul' => 'Pengingat: ' . $validated['nama_kegiatan'],
-                'isi_pengumuman' => "Kegiatan {$validated['nama_kegiatan']} akan dilaksanakan pada tanggal " .
-                    Carbon::parse($validated['tanggal_mulai'])->format('d F Y') . ". " . ($validated['keterangan'] ?? ''),
+                'judul' => 'Pengingat: '.$validated['nama_kegiatan'],
+                'isi_pengumuman' => "Kegiatan {$validated['nama_kegiatan']} akan dilaksanakan pada tanggal ".
+                    Carbon::parse($validated['tanggal_mulai'])->format('d F Y').'. '.($validated['keterangan'] ?? ''),
             ]);
         }
 
-        return redirect()->route('sekretaris.kalender.index')
+        return redirect_to_previous('sekretaris.kalender.index')
             ->with('success', 'Kalender akademik berhasil diperbarui!');
     }
 
@@ -408,7 +411,7 @@ class SekretarisController extends Controller
 
         $kalender->delete();
 
-        return redirect()->route('sekretaris.kalender.index')
+        return redirect_to_previous('sekretaris.kalender.index')
             ->with('success', 'Kalender akademik berhasil dihapus!');
     }
 
@@ -417,7 +420,7 @@ class SekretarisController extends Controller
         try {
             $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-            if (!$tahunAjaranAktif) {
+            if (! $tahunAjaranAktif) {
                 return response()->json([]);
             }
 
@@ -425,8 +428,8 @@ class SekretarisController extends Controller
             $bulan = $request->get('bulan', now()->format('Y-m'));
 
             // Parse tanggal
-            $startOfMonth = Carbon::parse($bulan . '-01')->startOfMonth();
-            $endOfMonth = Carbon::parse($bulan . '-01')->endOfMonth();
+            $startOfMonth = Carbon::parse($bulan.'-01')->startOfMonth();
+            $endOfMonth = Carbon::parse($bulan.'-01')->endOfMonth();
 
             // Query dengan kondisi yang lebih fleksibel
             $kegiatan = KalenderAkademik::where('tahun_ajaran_id', $tahunAjaranAktif->id)
@@ -438,9 +441,9 @@ class SekretarisController extends Controller
                         ->orWhereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
                         // ATAU event yang melewati bulan ini (mulai sebelum, selesai sesudah)
                         ->orWhere(function ($q2) use ($startOfMonth, $endOfMonth) {
-                        $q2->where('tanggal_mulai', '<=', $startOfMonth)
-                            ->where('tanggal_selesai', '>=', $endOfMonth);
-                    });
+                            $q2->where('tanggal_mulai', '<=', $startOfMonth)
+                                ->where('tanggal_selesai', '>=', $endOfMonth);
+                        });
                 })
                 ->orderBy('tanggal_mulai')
                 ->get();
@@ -463,7 +466,7 @@ class SekretarisController extends Controller
                     'extendedProps' => [
                         'jenis' => $k->jenis_label,
                         'keterangan' => $k->keterangan,
-                    ]
+                    ],
                 ];
             });
 
@@ -472,12 +475,12 @@ class SekretarisController extends Controller
         } catch (\Exception $e) {
             \Log::error('❌ Kalender Bulanan Error', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'error' => true,
-                'message' => 'Gagal memuat kalender: ' . $e->getMessage()
+                'message' => 'Gagal memuat kalender: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -489,7 +492,7 @@ class SekretarisController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -508,7 +511,7 @@ class SekretarisController extends Controller
      */
     private function cetakBulanan($tahunAjaran, $bulan)
     {
-        $tanggal = Carbon::parse($bulan . '-01');
+        $tanggal = Carbon::parse($bulan.'-01');
         $startOfMonth = $tanggal->copy()->startOfMonth();
         $endOfMonth = $tanggal->copy()->endOfMonth();
 
@@ -543,7 +546,7 @@ class SekretarisController extends Controller
             ->setPaper('a4', 'landscape');
 
         // ⭐ FIX: Replace slash dengan dash
-        $fileName = 'Kalender-' . $tanggal->format('F-Y') . '.pdf';
+        $fileName = 'Kalender-'.$tanggal->format('F-Y').'.pdf';
 
         return $pdf->stream($fileName);
     }
@@ -570,7 +573,7 @@ class SekretarisController extends Controller
             ->setPaper('a4', 'portrait');
 
         // ⭐ FIX: Replace slash dengan dash
-        $fileName = 'Kalender-Akademik-' . str_replace('/', '-', $tahunAjaran->nama_tahun_ajaran) . '.pdf';
+        $fileName = 'Kalender-Akademik-'.str_replace('/', '-', $tahunAjaran->nama_tahun_ajaran).'.pdf';
 
         return $pdf->stream($fileName);
     }
@@ -693,7 +696,7 @@ class SekretarisController extends Controller
 
         Pengumuman::create($validated);
 
-        return redirect()->route('sekretaris.pengumuman.index')
+        return redirect_to_previous('sekretaris.pengumuman.index')
             ->with('success', 'Pengumuman berhasil ditambahkan!');
     }
 
@@ -733,7 +736,7 @@ class SekretarisController extends Controller
 
         $pengumuman->update($validated);
 
-        return redirect()->route('sekretaris.pengumuman.index')
+        return redirect_to_previous('sekretaris.pengumuman.index')
             ->with('success', 'Pengumuman berhasil diperbarui!');
     }
 
@@ -747,7 +750,7 @@ class SekretarisController extends Controller
 
         $pengumuman->delete();
 
-        return redirect()->route('sekretaris.pengumuman.index')
+        return redirect_to_previous('sekretaris.pengumuman.index')
             ->with('success', 'Pengumuman berhasil dihapus!');
     }
 
@@ -792,13 +795,14 @@ class SekretarisController extends Controller
 
         Flyer::create($validated);
 
-        return redirect()->route('sekretaris.flyer.index')
+        return redirect_to_previous('sekretaris.flyer.index')
             ->with('success', 'Flyer berhasil ditambahkan!');
     }
 
     public function flyerEdit($id)
     {
         $flyer = Flyer::findOrFail($id);
+
         return view('sekretaris.flyer.form', compact('flyer'));
     }
 
@@ -829,7 +833,7 @@ class SekretarisController extends Controller
 
         $flyer->update($validated);
 
-        return redirect()->route('sekretaris.flyer.index')
+        return redirect_to_previous('sekretaris.flyer.index')
             ->with('success', 'Flyer berhasil diperbarui!');
     }
 
@@ -843,7 +847,7 @@ class SekretarisController extends Controller
 
         $flyer->delete();
 
-        return redirect()->route('sekretaris.flyer.index')
+        return redirect_to_previous('sekretaris.flyer.index')
             ->with('success', 'Flyer berhasil dihapus!');
     }
 
@@ -919,11 +923,11 @@ class SekretarisController extends Controller
         if ($request->hasFile('gambar_thumbnail')) {
             try {
                 $file = $request->file('gambar_thumbnail');
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
 
                 // Pastikan folder ada
                 $destinationPath = public_path('img/berita');
-                if (!file_exists($destinationPath)) {
+                if (! file_exists($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
 
@@ -931,14 +935,14 @@ class SekretarisController extends Controller
                 $file->move($destinationPath, $filename);
                 $validated['gambar_thumbnail'] = $filename;
             } catch (\Exception $e) {
-                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: ' . $e->getMessage()])
+                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: '.$e->getMessage()])
                     ->withInput();
             }
         }
 
         Berita::create($validated);
 
-        return redirect()->route('sekretaris.berita.index')
+        return redirect_to_previous('sekretaris.berita.index')
             ->with('success', 'Berita berhasil ditambahkan!');
     }
 
@@ -986,18 +990,18 @@ class SekretarisController extends Controller
             try {
                 // Hapus gambar lama
                 if ($berita->gambar_thumbnail) {
-                    $oldImagePath = public_path('img/berita/' . $berita->gambar_thumbnail);
+                    $oldImagePath = public_path('img/berita/'.$berita->gambar_thumbnail);
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                 }
 
                 $file = $request->file('gambar_thumbnail');
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
 
                 // Pastikan folder ada
                 $destinationPath = public_path('img/berita');
-                if (!file_exists($destinationPath)) {
+                if (! file_exists($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
 
@@ -1005,14 +1009,14 @@ class SekretarisController extends Controller
                 $file->move($destinationPath, $filename);
                 $validated['gambar_thumbnail'] = $filename;
             } catch (\Exception $e) {
-                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: ' . $e->getMessage()])
+                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: '.$e->getMessage()])
                     ->withInput();
             }
         }
 
         $berita->update($validated);
 
-        return redirect()->route('sekretaris.berita.index')
+        return redirect_to_previous('sekretaris.berita.index')
             ->with('success', 'Berita berhasil diperbarui!');
     }
 
@@ -1022,7 +1026,7 @@ class SekretarisController extends Controller
 
         // Hapus gambar
         if ($berita->gambar_thumbnail) {
-            $imagePath = public_path('img/berita/' . $berita->gambar_thumbnail);
+            $imagePath = public_path('img/berita/'.$berita->gambar_thumbnail);
             if (file_exists($imagePath)) {
                 unlink($imagePath);
             }
@@ -1030,14 +1034,14 @@ class SekretarisController extends Controller
 
         $berita->delete();
 
-        return redirect()->route('sekretaris.berita.index')
+        return redirect_to_previous('sekretaris.berita.index')
             ->with('success', 'Berita berhasil dihapus!');
     }
 
     public function beritaToggleFeatured($id)
     {
         $berita = Berita::findOrFail($id);
-        $berita->is_featured = !$berita->is_featured;
+        $berita->is_featured = ! $berita->is_featured;
         $berita->save();
 
         $status = $berita->is_featured ? 'ditampilkan sebagai berita utama' : 'dihapus dari berita utama';
@@ -1045,7 +1049,7 @@ class SekretarisController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Berita berhasil {$status}",
-            'is_featured' => $berita->is_featured
+            'is_featured' => $berita->is_featured,
         ]);
     }
 }

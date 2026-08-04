@@ -23,12 +23,14 @@ class AkademikController extends SekretarisController
     public function kalenderIndex(Request $request)
     {
         $response = parent::kalenderIndex($request);
+
         return $this->wrapView($response, 'kalender.index');
     }
 
     public function kalenderCreate()
     {
         $response = parent::kalenderCreate();
+
         return $this->wrapView($response, 'kalender.form');
     }
 
@@ -46,7 +48,7 @@ class AkademikController extends SekretarisController
             'lampiran_surat' => 'nullable|file|mimes:pdf|max:5120',
             'status' => 'required|in:draft,aktif,selesai',
         ]);
-        
+
         // Process custom event type
         if ($request->jenis_kegiatan === 'lainnya' && $request->custom_jenis_kegiatan) {
             $validated['jenis_kegiatan'] = $request->custom_jenis_kegiatan;
@@ -62,19 +64,21 @@ class AkademikController extends SekretarisController
 
         \App\Models\KalenderAkademik::create($validated);
 
-        return redirect()->route('admin.akademik.kalender.index')
+        return redirect_to_previous('admin.akademik.kalender.index')
             ->with('success', 'Kalender akademik berhasil ditambahkan!');
     }
 
     public function kalenderShow($id)
     {
         $response = parent::kalenderShow($id);
+
         return $this->wrapView($response, 'kalender.show');
     }
 
     public function kalenderEdit($id)
     {
         $response = parent::kalenderEdit($id);
+
         return $this->wrapView($response, 'kalender.form');
     }
 
@@ -94,7 +98,7 @@ class AkademikController extends SekretarisController
             'lampiran_surat' => 'nullable|file|mimes:pdf|max:5120',
             'status' => 'required|in:draft,aktif,selesai',
         ]);
-        
+
         // Process custom event type
         if ($request->jenis_kegiatan === 'lainnya' && $request->custom_jenis_kegiatan) {
             $validated['jenis_kegiatan'] = $request->custom_jenis_kegiatan;
@@ -114,13 +118,13 @@ class AkademikController extends SekretarisController
         // Update pengumuman terkait
         if ($kalender->pengumuman()->exists()) {
             $kalender->pengumuman()->update([
-                'judul' => 'Pengingat: ' . $validated['nama_kegiatan'],
-                'isi_pengumuman' => "Kegiatan {$validated['nama_kegiatan']} akan dilaksanakan pada tanggal " .
-                    \Carbon\Carbon::parse($validated['tanggal_mulai'])->format('d F Y') . ". " . ($validated['keterangan'] ?? ''),
+                'judul' => 'Pengingat: '.$validated['nama_kegiatan'],
+                'isi_pengumuman' => "Kegiatan {$validated['nama_kegiatan']} akan dilaksanakan pada tanggal ".
+                    \Carbon\Carbon::parse($validated['tanggal_mulai'])->format('d F Y').'. '.($validated['keterangan'] ?? ''),
             ]);
         }
 
-        return redirect()->route('admin.akademik.kalender.index')
+        return redirect_to_previous('admin.akademik.kalender.index')
             ->with('success', 'Kalender akademik berhasil diperbarui!');
     }
 
@@ -134,29 +138,30 @@ class AkademikController extends SekretarisController
 
         $kalender->delete();
 
-        return redirect()->route('admin.akademik.kalender.index')
+        return redirect_to_previous('admin.akademik.kalender.index')
             ->with('success', 'Kalender akademik berhasil dihapus!');
     }
 
     public function kalenderToggleVisibility($id)
     {
         try {
-            \Log::info('Admin Toggle Visibility Request for ID: ' . $id);
+            \Log::info('Admin Toggle Visibility Request for ID: '.$id);
             $kalender = \App\Models\KalenderAkademik::findOrFail($id);
-            \Log::info('Current status: ' . $kalender->is_hidden_siswa);
-            
-            $kalender->is_hidden_siswa = !$kalender->is_hidden_siswa;
+            \Log::info('Current status: '.$kalender->is_hidden_siswa);
+
+            $kalender->is_hidden_siswa = ! $kalender->is_hidden_siswa;
             $saved = $kalender->save();
-            
-            \Log::info('New status: ' . $kalender->is_hidden_siswa . ' | Saved: ' . ($saved ? 'Yes' : 'No'));
+
+            \Log::info('New status: '.$kalender->is_hidden_siswa.' | Saved: '.($saved ? 'Yes' : 'No'));
 
             return response()->json([
                 'success' => true,
                 'is_hidden' => $kalender->is_hidden_siswa,
-                'message' => $kalender->is_hidden_siswa ? 'Kegiatan disembunyikan dari siswa' : 'Kegiatan ditampilkan ke siswa'
+                'message' => $kalender->is_hidden_siswa ? 'Kegiatan disembunyikan dari siswa' : 'Kegiatan ditampilkan ke siswa',
             ]);
         } catch (\Exception $e) {
-            \Log::error('Admin Toggle Error: ' . $e->getMessage());
+            \Log::error('Admin Toggle Error: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -175,12 +180,14 @@ class AkademikController extends SekretarisController
     public function pengumumanIndex()
     {
         $response = parent::pengumumanIndex();
+
         return $this->wrapView($response, 'pengumuman.index');
     }
 
     public function pengumumanCreate()
     {
         $response = parent::pengumumanCreate();
+
         return $this->wrapView($response, 'pengumuman.form');
     }
 
@@ -211,13 +218,14 @@ class AkademikController extends SekretarisController
             app(\App\Services\NotificationService::class)->notifyPengumumanBaru($pengumuman);
         }
 
-        return redirect()->route('admin.akademik.pengumuman.index')
+        return redirect_to_previous('admin.akademik.pengumuman.index')
             ->with('success', 'Pengumuman berhasil ditambahkan!');
     }
 
     public function pengumumanEdit($id)
     {
         $response = parent::pengumumanEdit($id);
+
         return $this->wrapView($response, 'pengumuman.form');
     }
 
@@ -246,7 +254,7 @@ class AkademikController extends SekretarisController
 
         $pengumuman->update($validated);
 
-        return redirect()->route('admin.akademik.pengumuman.index')
+        return redirect_to_previous('admin.akademik.pengumuman.index')
             ->with('success', 'Pengumuman berhasil diperbarui!');
     }
 
@@ -260,7 +268,7 @@ class AkademikController extends SekretarisController
 
         $pengumuman->delete();
 
-        return redirect()->route('admin.akademik.pengumuman.index')
+        return redirect_to_previous('admin.akademik.pengumuman.index')
             ->with('success', 'Pengumuman berhasil dihapus!');
     }
 
@@ -268,12 +276,14 @@ class AkademikController extends SekretarisController
     public function beritaIndex(Request $request)
     {
         $response = parent::beritaIndex($request);
+
         return $this->wrapView($response, 'berita.index');
     }
 
     public function beritaCreate()
     {
         $response = parent::beritaCreate();
+
         return $this->wrapView($response, 'berita.form');
     }
 
@@ -311,11 +321,11 @@ class AkademikController extends SekretarisController
         if ($request->hasFile('gambar_thumbnail')) {
             try {
                 $file = $request->file('gambar_thumbnail');
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
 
                 // Pastikan folder ada
                 $destinationPath = public_path('img/berita');
-                if (!file_exists($destinationPath)) {
+                if (! file_exists($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
 
@@ -323,7 +333,7 @@ class AkademikController extends SekretarisController
                 $file->move($destinationPath, $filename);
                 $validated['gambar_thumbnail'] = $filename;
             } catch (\Exception $e) {
-                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: ' . $e->getMessage()])
+                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: '.$e->getMessage()])
                     ->withInput();
             }
         }
@@ -336,13 +346,14 @@ class AkademikController extends SekretarisController
             app(\App\Services\NotificationService::class)->notifyBeritaBaru($berita);
         }
 
-        return redirect()->route('admin.akademik.berita.index')
+        return redirect_to_previous('admin.akademik.berita.index')
             ->with('success', 'Berita berhasil ditambahkan!');
     }
 
     public function beritaEdit($id)
     {
         $response = parent::beritaEdit($id);
+
         return $this->wrapView($response, 'berita.form');
     }
 
@@ -381,18 +392,18 @@ class AkademikController extends SekretarisController
             try {
                 // Hapus gambar lama
                 if ($berita->gambar_thumbnail) {
-                    $oldImagePath = public_path('img/berita/' . $berita->gambar_thumbnail);
+                    $oldImagePath = public_path('img/berita/'.$berita->gambar_thumbnail);
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                 }
 
                 $file = $request->file('gambar_thumbnail');
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
 
                 // Pastikan folder ada
                 $destinationPath = public_path('img/berita');
-                if (!file_exists($destinationPath)) {
+                if (! file_exists($destinationPath)) {
                     mkdir($destinationPath, 0755, true);
                 }
 
@@ -400,14 +411,14 @@ class AkademikController extends SekretarisController
                 $file->move($destinationPath, $filename);
                 $validated['gambar_thumbnail'] = $filename;
             } catch (\Exception $e) {
-                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: ' . $e->getMessage()])
+                return back()->withErrors(['gambar_thumbnail' => 'Gagal mengunggah gambar: '.$e->getMessage()])
                     ->withInput();
             }
         }
 
         $berita->update($validated);
 
-        return redirect()->route('admin.akademik.berita.index')
+        return redirect_to_previous('admin.akademik.berita.index')
             ->with('success', 'Berita berhasil diperbarui!');
     }
 
@@ -417,7 +428,7 @@ class AkademikController extends SekretarisController
 
         // Hapus gambar
         if ($berita->gambar_thumbnail) {
-            $imagePath = public_path('img/berita/' . $berita->gambar_thumbnail);
+            $imagePath = public_path('img/berita/'.$berita->gambar_thumbnail);
             if (file_exists($imagePath)) {
                 unlink($imagePath);
             }
@@ -425,7 +436,7 @@ class AkademikController extends SekretarisController
 
         $berita->delete();
 
-        return redirect()->route('admin.akademik.berita.index')
+        return redirect_to_previous('admin.akademik.berita.index')
             ->with('success', 'Berita berhasil dihapus!');
     }
 
@@ -438,12 +449,14 @@ class AkademikController extends SekretarisController
     public function flyerIndex()
     {
         $response = parent::flyerIndex();
+
         return $this->wrapView($response, 'flyer.index');
     }
 
     public function flyerCreate()
     {
         $response = parent::flyerCreate();
+
         return $this->wrapView($response, 'flyer.form');
     }
 
@@ -470,13 +483,14 @@ class AkademikController extends SekretarisController
 
         \App\Models\Flyer::create($validated);
 
-        return redirect()->route('admin.akademik.flyer.index')
+        return redirect_to_previous('admin.akademik.flyer.index')
             ->with('success', 'Flyer berhasil ditambahkan!');
     }
 
     public function flyerEdit($id)
     {
         $response = parent::flyerEdit($id);
+
         return $this->wrapView($response, 'flyer.form');
     }
 
@@ -507,7 +521,7 @@ class AkademikController extends SekretarisController
 
         $flyer->update($validated);
 
-        return redirect()->route('admin.akademik.flyer.index')
+        return redirect_to_previous('admin.akademik.flyer.index')
             ->with('success', 'Flyer berhasil diperbarui!');
     }
 
@@ -521,7 +535,7 @@ class AkademikController extends SekretarisController
 
         $flyer->delete();
 
-        return redirect()->route('admin.akademik.flyer.index')
+        return redirect_to_previous('admin.akademik.flyer.index')
             ->with('success', 'Flyer berhasil dihapus!');
     }
 
@@ -531,8 +545,9 @@ class AkademikController extends SekretarisController
     private function wrapView($response, $viewSuffix)
     {
         if ($response instanceof \Illuminate\View\View) {
-            return view($this->viewPath('sekretaris.' . $viewSuffix), $response->getData());
+            return view($this->viewPath('sekretaris.'.$viewSuffix), $response->getData());
         }
+
         return $response;
     }
 }

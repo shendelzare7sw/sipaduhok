@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Bendahara;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\FinancialAuditLog;
+use App\Models\Kelas;
+use App\Models\Pembayaran;
 use App\Models\Siswa;
 use App\Models\Tagihan;
-use App\Models\Pembayaran;
-use App\Models\Kelas;
 use App\Models\TahunAjaran;
-use App\Models\FinancialAuditLog;
 use App\Services\NotificationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -57,9 +57,9 @@ class PembayaranController extends Controller
         // Pencarian
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('kode_pembayaran', 'like', '%' . $request->search . '%')
+                $q->where('kode_pembayaran', 'like', '%'.$request->search.'%')
                     ->orWhereHas('siswa', function ($q2) use ($request) {
-                        $q2->where('nama_lengkap', 'like', '%' . $request->search . '%');
+                        $q2->where('nama_lengkap', 'like', '%'.$request->search.'%');
                     });
             });
         }
@@ -181,7 +181,7 @@ class PembayaranController extends Controller
                     ->get();
 
                 // If for some reason the target ID isn't in the list (e.g. status changed concurrently), ensure it's included or handled
-                if (!$relatedPayments->contains('id', $targetPembayaran->id)) {
+                if (! $relatedPayments->contains('id', $targetPembayaran->id)) {
                     $relatedPayments->push($targetPembayaran);
                 }
             }
@@ -216,7 +216,7 @@ class PembayaranController extends Controller
                             ->where('status_validasi', 'pending')
                             ->update([
                                 'status_validasi' => 'ditolak',
-                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: ' . $pembayaran->kode_pembayaran . ')',
+                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Kode: '.$pembayaran->kode_pembayaran.')',
                                 'divalidasi_oleh' => auth()->id(),
                                 'tanggal_validasi' => now(),
                             ]);
@@ -250,7 +250,7 @@ class PembayaranController extends Controller
             if ($request->status_validasi === 'disetujui') {
                 $processedSiswaIds = [];
                 foreach ($relatedPayments as $pembayaran) {
-                    if ($pembayaran->siswa_id && !in_array($pembayaran->siswa_id, $processedSiswaIds)) {
+                    if ($pembayaran->siswa_id && ! in_array($pembayaran->siswa_id, $processedSiswaIds)) {
                         $siswa = \App\Models\Siswa::find($pembayaran->siswa_id);
                         if ($siswa) {
                             app(\App\Services\ValidasiAksesService::class)->autoValidasiSetelahBayar($siswa);
@@ -282,14 +282,15 @@ class PembayaranController extends Controller
             if ($countUpdated > 1) {
                 $message .= " ({$countUpdated} item dalam transaksi bulk).";
             } else {
-                $message .= ".";
+                $message .= '.';
             }
 
-            return redirect()->route('bendahara.pembayaran.index')
+            return redirect_to_previous('bendahara.pembayaran.index')
                 ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -315,11 +316,11 @@ class PembayaranController extends Controller
         // (Mengurangi pembayaran yang sudah masuk untuk tagihan cicilan)
         $sisaTagihan = 0;
         foreach ($tagihanBelumLunas as $tagihan) {
-             $terbayar = Pembayaran::where('tagihan_id', $tagihan->id)
+            $terbayar = Pembayaran::where('tagihan_id', $tagihan->id)
                 ->where('status_validasi', 'disetujui')
                 ->sum('jumlah_bayar');
-             $tagihan->sisa_per_item = $tagihan->jumlah - $terbayar;
-             $sisaTagihan += $tagihan->sisa_per_item;
+            $tagihan->sisa_per_item = $tagihan->jumlah - $terbayar;
+            $sisaTagihan += $tagihan->sisa_per_item;
         }
 
         // Total tagihan untuk tahun ajaran aktif (untuk info)
@@ -371,10 +372,10 @@ class PembayaranController extends Controller
         DB::beginTransaction();
         try {
             $validasiLangsung = $request->has('validasi_langsung');
-            
+
             // Generate a shared Order ID for this transaction batch
             // This links all payments made in this single request together
-            $orderId = 'ORD-' . strtoupper(Str::random(10)) . '-' . date('YmdHis');
+            $orderId = 'ORD-'.strtoupper(Str::random(10)).'-'.date('YmdHis');
 
             // Ambil input nominal bayar (cleanup format currency)
             $inputNominals = $request->input('nominal_bayar', []);
@@ -388,16 +389,16 @@ class PembayaranController extends Controller
                     ->where('status_validasi', 'disetujui')
                     ->sum('jumlah_bayar');
                 $sisaTagihan = $tagihan->jumlah - $totalSudahBayar;
-                
+
                 // Tentukan jumlah bayar berdasarkan input dan jenis tagihan
                 $jumlahBayar = $sisaTagihan; // Default ke sisa tagihan
 
                 // Jika bukan SPP, gunakan input user (jika ada)
                 if ($tagihan->jenis_tagihan !== 'spp' && isset($inputNominals[$tagihanId])) {
-                     $cleanNominal = preg_replace('/\D/', '', $inputNominals[$tagihanId]);
-                     if (is_numeric($cleanNominal) && $cleanNominal > 0) {
-                         $jumlahBayar = (int) $cleanNominal;
-                     }
+                    $cleanNominal = preg_replace('/\D/', '', $inputNominals[$tagihanId]);
+                    if (is_numeric($cleanNominal) && $cleanNominal > 0) {
+                        $jumlahBayar = (int) $cleanNominal;
+                    }
                 }
 
                 // Safety: Jangan biarkan bayar lebih dari sisa
@@ -406,16 +407,17 @@ class PembayaranController extends Controller
                     $namaTagihan = $tagihan->keterangan ?: ucwords(str_replace('_', ' ', $tagihan->jenis_tagihan));
                     $formattedInput = number_format($jumlahBayar, 0, ',', '.');
                     $formattedSisa = number_format($sisaTagihan, 0, ',', '.');
-                    
+
                     // Rollback transaksi dan lempar error
                     DB::rollBack();
+
                     return redirect()->back()
                         ->withInput()
                         ->with('error', "Pembayaran untuk tagihan '{$namaTagihan}' melebihi sisa tagihan! (Input: Rp {$formattedInput}, Sisa: Rp {$formattedSisa})");
                 }
 
                 // Generate kode pembayaran unik per tagihan
-                $kodePembayaran = 'PAY-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
+                $kodePembayaran = 'PAY-'.strtoupper(Str::random(8)).'-'.date('Ymd');
 
                 $pembayaran = Pembayaran::create([
                     'tagihan_id' => $tagihanId,
@@ -423,7 +425,7 @@ class PembayaranController extends Controller
                     'kode_pembayaran' => $kodePembayaran,
                     'order_id' => $orderId, // Link grouping for receipt
                     'jumlah_bayar' => $jumlahBayar,
-                    'tanggal_bayar' => $request->tanggal_bayar . ' ' . now()->format('H:i:s'),
+                    'tanggal_bayar' => $request->tanggal_bayar.' '.now()->format('H:i:s'),
                     'metode_pembayaran' => 'tunai',
                     'status_validasi' => $validasiLangsung ? 'disetujui' : 'pending',
                     'divalidasi_oleh' => $validasiLangsung ? auth()->id() : null,
@@ -447,7 +449,7 @@ class PembayaranController extends Controller
                             ->where('status_validasi', 'pending')
                             ->update([
                                 'status_validasi' => 'ditolak',
-                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: ' . $kodePembayaran . ')',
+                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: '.$kodePembayaran.')',
                                 'divalidasi_oleh' => auth()->id(),
                                 'tanggal_validasi' => now(),
                             ]);
@@ -484,7 +486,8 @@ class PembayaranController extends Controller
                 ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -504,14 +507,14 @@ class PembayaranController extends Controller
 
         DB::beginTransaction();
         try {
-            $kodePembayaran = 'PAY-' . strtoupper(Str::random(8)) . '-' . date('Ymd');
+            $kodePembayaran = 'PAY-'.strtoupper(Str::random(8)).'-'.date('Ymd');
 
             $pembayaran = Pembayaran::create([
                 'tagihan_id' => $request->tagihan_id,
                 'siswa_id' => $siswaId,
                 'kode_pembayaran' => $kodePembayaran,
                 'jumlah_bayar' => $request->jumlah_bayar,
-                'tanggal_bayar' => $request->tanggal_bayar . ' ' . now()->format('H:i:s'),
+                'tanggal_bayar' => $request->tanggal_bayar.' '.now()->format('H:i:s'),
                 'metode_pembayaran' => 'tunai',
                 'status_validasi' => 'disetujui',
                 'divalidasi_oleh' => auth()->id(),
@@ -535,7 +538,7 @@ class PembayaranController extends Controller
                     ->where('status_validasi', 'pending')
                     ->update([
                         'status_validasi' => 'ditolak',
-                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: ' . $kodePembayaran . ')',
+                        'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar tunai di loket (Kode: '.$kodePembayaran.')',
                         'divalidasi_oleh' => auth()->id(),
                         'tanggal_validasi' => now(),
                     ]);
@@ -566,7 +569,8 @@ class PembayaranController extends Controller
                 ->with('success', 'Pembayaran tunai berhasil dicatat dan divalidasi.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -602,7 +606,7 @@ class PembayaranController extends Controller
                 $totalDibayar = Pembayaran::where('tagihan_id', $item->tagihan_id)
                     ->where('status_validasi', 'disetujui')
                     ->sum('jumlah_bayar');
-                
+
                 // Sisa saat ini
                 $item->sisa_current = max(0, $item->tagihan->jumlah - $totalDibayar);
                 // Flag lunas

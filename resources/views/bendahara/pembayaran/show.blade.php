@@ -294,6 +294,7 @@
                     @csrf
                     <input type="hidden" name="status_validasi" value="disetujui">
                     <input type="hidden" name="catatan" id="catatanSetujui">
+                    <input type="hidden" name="_return_url" value="{{ url()->previous(route('bendahara.pembayaran.index')) }}">
                     <button type="submit" class="btn btn-success fw-bold">
                         <i class="fas fa-check me-1"></i> Ya, Setujui
                     </button>
@@ -333,6 +334,7 @@
                     @csrf
                     <input type="hidden" name="status_validasi" value="ditolak">
                     <input type="hidden" name="catatan" id="catatanTolak">
+                    <input type="hidden" name="_return_url" value="{{ url()->previous(route('bendahara.pembayaran.index')) }}">
                     <button type="button" class="btn btn-danger fw-bold" data-submit-tolak>
                         <i class="fas fa-times me-1"></i> Ya, Tolak
                     </button>
