@@ -80,9 +80,12 @@ class PromotionService
         $batasTuntas = $this->getPassingThreshold($tahunAjaranId); // e.g. 70%
 
         // Get all grades and group by mata pelajaran (handles ganjil+genap semesters)
+        // TIDAK difilter kelas_id: siswa_id + tahun_ajaran_id sudah unik per rapor akademik
+        // siswa di TA itu. kelas_id di baris nilai hanya relevan untuk scoping akses guru
+        // saat input, bukan syarat baca ulang — kalau difilter, nilai jadi "hilang" tiap kali
+        // siswa pindah kelas di tengah TA yang sama (transfer manual, dsb).
         $gradesByMapel = Nilai::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunAjaranId)
-            ->where('kelas_id', $siswa->kelas_id)
             ->get()
             ->groupBy('mata_pelajaran_id');
 
