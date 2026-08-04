@@ -637,7 +637,8 @@
 
 /* Page-specific styles. */
 .col-no {
-    width: 40px;
+    width: 48px;
+    white-space: nowrap;
 }
 
 .col-score {

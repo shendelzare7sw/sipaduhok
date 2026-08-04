@@ -116,7 +116,7 @@
                                 $isTuntas = $nilai && $nilai->nilai_akhir >= $kkm;
                             @endphp
                             <tr>
-                                <td class="text-center fw-bold" data-label="No">{{ $no++ }}</td>
+                                <td class="text-center fw-bold col-no" data-label="No">{{ $no++ }}</td>
                                 <td class="wk-main-cell" data-label="Mata Pelajaran">
                                     <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
                                     <small class="text-muted">{{ $mapel->kode_mapel }}</small>
@@ -199,7 +199,7 @@
                                 $nilai = $nilaiData[$mapel->id] ?? null;
                             @endphp
                             <tr>
-                                <td class="text-center fw-bold">{{ $no++ }}</td>
+                                <td class="text-center fw-bold col-no">{{ $no++ }}</td>
                                 <td>
                                     <div class="fw-bold">{{ $mapel->nama_mapel }}</div>
                                 </td>
