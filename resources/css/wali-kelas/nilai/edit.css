@@ -666,7 +666,8 @@
 }
 
 .sticky-no {
-    min-width: 36px;
+    min-width: 44px;
+    white-space: nowrap;
 }
 .sticky-mapel {
     min-width: 190px;
