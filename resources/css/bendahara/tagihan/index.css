@@ -303,6 +303,8 @@
 
 .tagihan-filter-menu {
     z-index: 9999;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .student-identity {

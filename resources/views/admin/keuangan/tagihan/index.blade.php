@@ -102,7 +102,7 @@
                                     </div>
 
                                     {{-- Filter Kelas --}}
-                                    <div class="mb-3">
+                                    <div class="mb-2">
                                         <label class="form-label small fw-bold">Kelas</label>
                                         <select name="kelas_id" class="form-select form-select-sm">
                                             <option value="">Semua Kelas</option>
@@ -112,6 +112,17 @@
                                                 </option>
                                             @empty
                                             @endforelse
+                                        </select>
+                                    </div>
+
+                                    {{-- Filter Status Tagihan --}}
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-bold">Status Tagihan</label>
+                                        <select name="status_tagihan" class="form-select form-select-sm">
+                                            <option value="">Semua Status</option>
+                                            <option value="belum_lunas" {{ (($filters ?? [])['status_tagihan'] ?? '') == 'belum_lunas' ? 'selected' : '' }}>Belum Lunas</option>
+                                            <option value="lunas" {{ (($filters ?? [])['status_tagihan'] ?? '') == 'lunas' ? 'selected' : '' }}>Lunas</option>
+                                            <option value="kosong" {{ (($filters ?? [])['status_tagihan'] ?? '') == 'kosong' ? 'selected' : '' }}>Kosong (Belum Ada Tagihan)</option>
                                         </select>
                                     </div>
 
