@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Bendahara;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Kelas;
+use App\Models\Pembayaran;
 use App\Models\Siswa;
 use App\Models\Tagihan;
-use App\Models\Kelas;
 use App\Models\TahunAjaran;
-use App\Models\Pembayaran;
 use App\Services\TunggakanCarryoverService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class TagihanController extends Controller
@@ -54,12 +54,12 @@ class TagihanController extends Controller
         }
 
         // If still no year, use latest year
-        if (!$selectedYear) {
+        if (! $selectedYear) {
             $selectedYear = $allTahunAjaran->first();
         }
 
         // If truly no year, abort
-        if (!$selectedYear) {
+        if (! $selectedYear) {
             return redirect()->back()->with('error', 'Tidak ada data tahun ajaran. Silakan hubungi Admin.');
         }
 
@@ -91,13 +91,56 @@ class TagihanController extends Controller
 
         // Filter berdasarkan pencarian nama (berlaku di kedua mode)
         if ($request->filled('search')) {
-            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+            $query->where('nama_lengkap', 'like', '%'.$request->search.'%');
         }
 
         // Urutkan berdasarkan kelas (jenjang) kemudian abjad nama
         // Use LEFT JOIN to include students without class assignment
-        $siswaList = $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
-            ->select('siswa.*')
+        $query->leftJoin('kelas', 'siswa.kelas_id', '=', 'kelas.id')
+            ->select('siswa.*'); // Wajib sebelum selectSub() di bawah (select() me-reset kolom)
+
+        // Hitung total tagihan & total terbayar per siswa lewat correlated subquery,
+        // supaya filter status_tagihan bisa diterapkan SEBELUM paginate() (bukan
+        // sesudahnya) — kalau tidak, halaman yang sudah dipotong 15 baris difilter
+        // ulang dan siswa yang cocok di halaman lain tidak pernah ikut ditarik.
+        $totalSub = Tagihan::query()
+            ->selectRaw('COALESCE(SUM(jumlah),0)')
+            ->whereColumn('tagihan.siswa_id', 'siswa.id');
+        if ($isAlumniMode) {
+            // Alumni: hanya tagihan yang MASIH menunggak, lintas semua tahun ajaran.
+            $totalSub->belumLunasOriginal();
+        } else {
+            $totalSub->where('tagihan.tahun_ajaran_id', $selectedYear->id);
+        }
+
+        $paidSub = Pembayaran::query()
+            ->selectRaw('COALESCE(SUM(jumlah_bayar),0)')
+            ->join('tagihan', 'tagihan.id', '=', 'pembayaran.tagihan_id')
+            ->whereColumn('tagihan.siswa_id', 'siswa.id')
+            ->where('pembayaran.status_validasi', 'disetujui');
+        if ($isAlumniMode) {
+            $paidSub->whereNull('tagihan.dialihkan_ke_id')
+                ->whereIn('tagihan.status', ['belum_bayar', 'cicilan', 'terlambat']);
+        } else {
+            $paidSub->where('tagihan.tahun_ajaran_id', $selectedYear->id);
+        }
+
+        $query->selectSub($totalSub, 'total_tagihan')
+            ->selectSub($paidSub, 'tagihan_lunas');
+
+        // Filter berdasarkan status tagihan — diterapkan lewat HAVING sebelum
+        // paginate() supaya ->total() dan isi tiap halaman konsisten.
+        $statusTagihan = $request->get('status_tagihan');
+        if ($statusTagihan) {
+            match ($statusTagihan) {
+                'belum_lunas' => $query->havingRaw('(total_tagihan - tagihan_lunas) > 0 AND total_tagihan > 0'),
+                'lunas' => $query->havingRaw('(total_tagihan - tagihan_lunas) <= 0 AND total_tagihan > 0'),
+                'kosong' => $query->having('total_tagihan', '=', 0),
+                default => null,
+            };
+        }
+
+        $siswaList = $query
             ->orderByRaw('COALESCE(kelas.jenjang, 999) asc')  // NULL classes last
             ->orderBy('siswa.nama_lengkap', 'asc')
             ->orderBy('siswa.id', 'asc')  // For consistency across pagination
@@ -109,79 +152,15 @@ class TagihanController extends Controller
             $siswaList->getCollection()->each(function ($siswa) {
                 if ($siswa) {
                     $siswa->load(['kelas', 'cabang']);
+                    $siswa->sisa_tagihan = $siswa->total_tagihan - $siswa->tagihan_lunas;
                 }
             });
-        }
-
-        // Hitung total tagihan per siswa berdasarkan tahun yang dipilih
-        if ($siswaList && $siswaList->isNotEmpty()) {
-            $siswaList->getCollection()->transform(function ($siswa) use ($selectedYear, $isAlumniMode) {
-                try {
-                    $tagihan = Tagihan::where('siswa_id', $siswa->id)
-                        ->when($isAlumniMode, function ($q) {
-                            // Alumni: hanya tagihan yang MASIH menunggak, lintas semua tahun ajaran.
-                            return $q->belumLunasOriginal();
-                        })
-                        ->when(!$isAlumniMode && $selectedYear, function ($q) use ($selectedYear) {
-                            return $q->where('tahun_ajaran_id', $selectedYear->id);
-                        })
-                        ->get();
-
-                    $totalTagihan = $tagihan ? $tagihan->sum('jumlah') : 0;
-
-                    // Calculate Total Paid
-                    $tagihanIds = $tagihan ? $tagihan->pluck('id') : collect();
-                    $totalTerbayar = Pembayaran::where('siswa_id', $siswa->id)
-                        ->when($tagihanIds->isNotEmpty(), function ($q) use ($tagihanIds) {
-                            return $q->whereIn('tagihan_id', $tagihanIds);
-                        })
-                        ->where('status_validasi', 'disetujui')
-                        ->sum('jumlah_bayar');
-
-                    // Sisa tagihan = Total - Terbayar
-                    $sisaTagihan = $totalTagihan - $totalTerbayar;
-
-                    $siswa->total_tagihan = $totalTagihan ?? 0;
-                    $siswa->tagihan_lunas = $totalTerbayar ?? 0;
-                    $siswa->sisa_tagihan = $sisaTagihan ?? 0;
-                    $siswa->tagihan_detail = $tagihan ?? collect();
-                } catch (\Exception $e) {
-                    // Fallback values if there's an error
-                    $siswa->total_tagihan = 0;
-                    $siswa->tagihan_lunas = 0;
-                    $siswa->sisa_tagihan = 0;
-                    $siswa->tagihan_detail = collect();
-                }
-
-                return $siswa;
-            });
-        }
-
-        // Filter berdasarkan status tagihan (post-query karena status dihitung dari agregasi)
-        $statusTagihan = $request->get('status_tagihan');
-        if ($statusTagihan && $siswaList && $siswaList->isNotEmpty()) {
-            $siswaList->getCollection()->transform(function ($siswa) use ($statusTagihan) {
-                $siswa->_status_match = match ($statusTagihan) {
-                    'belum_lunas' => $siswa->sisa_tagihan > 0 && $siswa->total_tagihan > 0,
-                    'lunas'       => $siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0,
-                    'kosong'      => $siswa->total_tagihan == 0,
-                    default       => true,
-                };
-                return $siswa;
-            });
-
-            $filtered = $siswaList->getCollection()->filter(fn($s) => $s->_status_match);
-            $siswaList->getCollection()->transform(function ($siswa) {
-                unset($siswa->_status_match);
-                return $siswa;
-            });
-            $siswaList->setCollection($filtered->values());
         }
 
         // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif;
         // di mode alumni tidak relevan karena sudah lintas-tahun).
         $tunggakanSummary = null;
-        if (!$isAlumniMode && $tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
+        if (! $isAlumniMode && $tahunAjaranAktif && $selectedYear && $selectedYear->id === $tahunAjaranAktif->id) {
             $tunggakanData = Tagihan::where('tahun_ajaran_id', '!=', $tahunAjaranAktif->id)
                 ->whereIn('status', ['belum_bayar', 'cicilan', 'terlambat'])
                 ->select('tahun_ajaran_id', DB::raw('COUNT(DISTINCT siswa_id) as jumlah_siswa'), DB::raw('SUM(jumlah) as total_tunggakan'))
@@ -194,6 +173,7 @@ class TagihanController extends Controller
                     'total_tunggakan' => $tunggakanData->sum('total_tunggakan'),
                     'per_tahun' => $tunggakanData->map(function ($item) {
                         $ta = TahunAjaran::find($item->tahun_ajaran_id);
+
                         return [
                             'tahun_ajaran_id' => $item->tahun_ajaran_id,
                             'nama_tahun' => $ta->nama_tahun_ajaran ?? '-',
@@ -243,6 +223,7 @@ class TagihanController extends Controller
         return $bills->groupBy('siswa_id')
             ->filter(function ($grup) use ($paidByTagihan) {
                 $sisa = $grup->sum(fn ($t) => max(0, (float) $t->jumlah - (float) ($paidByTagihan[$t->id] ?? 0)));
+
                 return $sisa > 0;
             })
             ->keys()
@@ -319,7 +300,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif. Silakan hubungi Admin.');
         }
 
@@ -338,7 +319,7 @@ class TagihanController extends Controller
 
         foreach ($allTagihan as $tagihan) {
             // Jika jenis tagihan tidak ada di default list, tambahkan
-            if (!isset($jenisTagihanWithExisting[$tagihan->jenis_tagihan])) {
+            if (! isset($jenisTagihanWithExisting[$tagihan->jenis_tagihan])) {
                 // Gunakan keterangan jika ada, atau format jenis_tagihan
                 $label = $tagihan->keterangan ?: ucwords(str_replace(['_', '-'], ' ', $tagihan->jenis_tagihan));
                 $jenisTagihanWithExisting[$tagihan->jenis_tagihan] = $label;
@@ -365,7 +346,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -443,11 +424,13 @@ class TagihanController extends Controller
             }
 
             DB::commit();
-            return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
+
+            return redirect()->route($this->getRoutePrefix().'.show', $siswaId)
                 ->with('success', 'Tagihan siswa berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
@@ -502,7 +485,7 @@ class TagihanController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
+            $query->where('nama_lengkap', 'like', '%'.$request->search.'%');
         }
 
         $siswaList = $query->orderBy(
@@ -550,7 +533,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -604,6 +587,7 @@ class TagihanController extends Controller
                             if ($existingTagihan) {
                                 // Skip siswa ini untuk jenis tagihan ini
                                 $totalSkipped++;
+
                                 continue;
                             }
 
@@ -631,7 +615,7 @@ class TagihanController extends Controller
                         $jumlahCustom = $customTagihan[$index] ?? 0;
                         $jatuhTempoCustom = $customJatuhTempo[$index] ?? now()->addMonth()->format('Y-m-d');
 
-                        if (!empty($jenisNama) && $jumlahCustom > 0) {
+                        if (! empty($jenisNama) && $jumlahCustom > 0) {
                             // Create slug from jenis nama
                             $jenisSlug = str()->slug($jenisNama);
 
@@ -644,6 +628,7 @@ class TagihanController extends Controller
                             if ($existingCustom) {
                                 // Skip siswa ini untuk custom tagihan ini
                                 $totalSkipped++;
+
                                 continue;
                             }
 
@@ -667,7 +652,7 @@ class TagihanController extends Controller
                 DB::commit();
 
                 // Notif ortu (setelah commit agar tak terkirim bila transaksi gagal).
-                if (!empty($notifSiswaIds)) {
+                if (! empty($notifSiswaIds)) {
                     app(\App\Services\NotificationService::class)->notifyTagihanMassal(
                         array_keys($notifSiswaIds),
                         'Beberapa tagihan baru telah ditambahkan. Silakan cek rincian tagihan Anda.'
@@ -680,11 +665,12 @@ class TagihanController extends Controller
                 }
                 $message .= " dari {$kelasCount} kelas.";
 
-                return redirect()->route($this->getRoutePrefix() . '.index')
+                return redirect()->route($this->getRoutePrefix().'.index')
                     ->with('success', $message);
             } catch (\Exception $e) {
                 DB::rollBack();
-                return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+
+                return redirect()->back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
             }
         }
 
@@ -702,7 +688,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -743,7 +729,7 @@ class TagihanController extends Controller
 
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -767,6 +753,7 @@ class TagihanController extends Controller
                 if ($existing) {
                     // Skip siswa ini, sudah punya tagihan jenis ini
                     $skipped++;
+
                     continue;
                 }
 
@@ -798,16 +785,16 @@ class TagihanController extends Controller
             if ($skipped > 0) {
                 $message .= " ({$skipped} siswa dilewati karena sudah memiliki tagihan '{$request->jenis_tagihan}')";
             }
-            $message .= ".";
+            $message .= '.';
 
-            return redirect()->route($this->getRoutePrefix() . '.index')
+            return redirect()->route($this->getRoutePrefix().'.index')
                 ->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menambahkan tagihan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal menambahkan tagihan: '.$e->getMessage());
         }
     }
-
 
     /**
      * Hapus item tagihan tertentu
@@ -845,10 +832,10 @@ class TagihanController extends Controller
                 return response()->json(['success' => true, 'message' => 'Tagihan berhasil dihapus.']);
             }
 
-            return redirect()->route($this->getRoutePrefix() . '.show', $siswaId)
+            return redirect()->route($this->getRoutePrefix().'.show', $siswaId)
                 ->with('success', 'Tagihan berhasil dihapus.');
         } catch (\Exception $e) {
-            $errorMessage = 'Gagal menghapus tagihan: ' . $e->getMessage();
+            $errorMessage = 'Gagal menghapus tagihan: '.$e->getMessage();
 
             // Return JSON for AJAX requests
             if (request()->expectsJson()) {
@@ -866,7 +853,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -919,7 +906,7 @@ class TagihanController extends Controller
 
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -952,7 +939,7 @@ class TagihanController extends Controller
             9 => 'September',
             10 => 'Oktober',
             11 => 'November',
-            12 => 'Desember'
+            12 => 'Desember',
         ];
 
         DB::beginTransaction();
@@ -977,7 +964,7 @@ class TagihanController extends Controller
                     // Hitung tanggal jatuh tempo
                     $tanggalJatuhTempo = date('Y-m-d', strtotime("$tahunSPP-$bulanIndex-{$request->tanggal_jatuh_tempo}"));
 
-                    $sppKey = 'spp_' . strtolower($namaBulan[$bulanIndex]);
+                    $sppKey = 'spp_'.strtolower($namaBulan[$bulanIndex]);
 
                     if ($isBulkOperation) {
                         // BULK OPERATION: Skip jika sudah ada
@@ -988,6 +975,7 @@ class TagihanController extends Controller
 
                         if ($existingSpp) {
                             $totalSkipped++;
+
                             continue;
                         }
 
@@ -999,7 +987,7 @@ class TagihanController extends Controller
                             'jumlah' => $request->jumlah_spp,
                             'tanggal_jatuh_tempo' => $tanggalJatuhTempo,
                             'status' => 'belum_bayar',
-                            'keterangan' => 'SPP ' . $namaBulan[$bulanIndex] . ' ' . $tahunSPP,
+                            'keterangan' => 'SPP '.$namaBulan[$bulanIndex].' '.$tahunSPP,
                         ]);
                         $tagihan->updateStatusBayar();
                     } else {
@@ -1012,9 +1000,9 @@ class TagihanController extends Controller
 
                         $tagihan->jumlah = $request->jumlah_spp;
                         $tagihan->tanggal_jatuh_tempo = $tanggalJatuhTempo;
-                        $tagihan->keterangan = 'SPP ' . $namaBulan[$bulanIndex] . ' ' . $tahunSPP;
+                        $tagihan->keterangan = 'SPP '.$namaBulan[$bulanIndex].' '.$tahunSPP;
 
-                        if (!$tagihan->exists) {
+                        if (! $tagihan->exists) {
                             $tagihan->status = 'belum_bayar'; // Hanya diset default jika memang data baru
                         }
 
@@ -1030,7 +1018,7 @@ class TagihanController extends Controller
             DB::commit();
 
             // Notif ortu (setelah commit agar tak terkirim bila transaksi gagal).
-            if (!empty($notifSiswaIds)) {
+            if (! empty($notifSiswaIds)) {
                 app(\App\Services\NotificationService::class)->notifyTagihanMassal(
                     array_keys($notifSiswaIds),
                     'Tagihan SPP telah ditambahkan/diperbarui. Silakan cek rincian tagihan Anda.'
@@ -1046,14 +1034,14 @@ class TagihanController extends Controller
                 $successMessage = "Berhasil generate $totalCreated tagihan SPP {$tipeSppText} untuk {$siswaList->count()} siswa.";
             }
 
-            return redirect()->route($this->getRoutePrefix() . '.index')
+            return redirect()->route($this->getRoutePrefix().'.index')
                 ->with('success', $successMessage);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal generate SPP: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal generate SPP: '.$e->getMessage());
         }
     }
-
 
     /**
      * Form untuk duplikasi tagihan dari siswa ke siswa lain
@@ -1062,7 +1050,7 @@ class TagihanController extends Controller
     {
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -1098,7 +1086,7 @@ class TagihanController extends Controller
 
         $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
 
-        if (!$tahunAjaranAktif) {
+        if (! $tahunAjaranAktif) {
             return redirect()->back()->with('error', 'Tidak ada tahun ajaran aktif.');
         }
 
@@ -1134,7 +1122,7 @@ class TagihanController extends Controller
                         $targetTagihan->tanggal_jatuh_tempo = $tagihan->tanggal_jatuh_tempo;
                         $targetTagihan->keterangan = $tagihan->keterangan;
 
-                        if (!$targetTagihan->exists) {
+                        if (! $targetTagihan->exists) {
                             $targetTagihan->status = 'belum_bayar';
                         }
 
@@ -1148,7 +1136,7 @@ class TagihanController extends Controller
                             ->where('jenis_tagihan', $tagihan->jenis_tagihan)
                             ->exists();
 
-                        if (!$exists) {
+                        if (! $exists) {
                             Tagihan::create([
                                 'siswa_id' => $targetSiswaId,
                                 'tahun_ajaran_id' => $tahunAjaranAktif->id,
@@ -1166,11 +1154,13 @@ class TagihanController extends Controller
 
             DB::commit();
             $targetCount = count($request->target_siswa_ids);
-            return redirect()->route($this->getRoutePrefix() . '.index')
+
+            return redirect()->route($this->getRoutePrefix().'.index')
                 ->with('success', "Berhasil menduplikasi $totalDuplicated tagihan ke $targetCount siswa.");
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal duplikasi tagihan: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal duplikasi tagihan: '.$e->getMessage());
         }
     }
 
@@ -1216,8 +1206,8 @@ class TagihanController extends Controller
     public function carryoverIndex(Request $request, TunggakanCarryoverService $service)
     {
         $taAktif = TahunAjaran::where('is_active', true)->first();
-        if (!$taAktif) {
-            return redirect()->route($this->getRoutePrefix() . '.index')
+        if (! $taAktif) {
+            return redirect()->route($this->getRoutePrefix().'.index')
                 ->with('error', 'Tidak ada tahun ajaran aktif. Aktifkan TA terlebih dahulu sebelum menarik tunggakan.');
         }
 
@@ -1247,7 +1237,7 @@ class TagihanController extends Controller
         ]);
 
         $taAktif = TahunAjaran::where('is_active', true)->first();
-        if (!$taAktif) {
+        if (! $taAktif) {
             return response()->json(['error' => 'Tidak ada TA aktif.'], 422);
         }
 
@@ -1268,7 +1258,7 @@ class TagihanController extends Controller
         ]);
 
         $taAktif = TahunAjaran::where('is_active', true)->first();
-        if (!$taAktif) {
+        if (! $taAktif) {
             return redirect()->back()->with('error', 'Tidak ada TA aktif.');
         }
 
@@ -1278,7 +1268,8 @@ class TagihanController extends Controller
             auth()->user()
         );
 
-        $route = redirect()->route($this->getRoutePrefix() . '.carryover');
+        $route = redirect()->route($this->getRoutePrefix().'.carryover');
+
         return $hasil['success']
             ? $route->with('success', $hasil['message'])
             : $route->with('error', $hasil['message']);
