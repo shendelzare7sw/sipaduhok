@@ -39,17 +39,30 @@ class PromotionController extends Controller
         }
 
         $kelas = $this->getSelectedKelas($wali);
-        
+
         if (!$kelas) {
             return view('wali-kelas.promotion.index', [
                 'error' => 'Anda tidak tercatat sebagai Wali Kelas di tahun aktif saat ini.',
                 'students' => []
             ]);
         }
-        
+
+        // Kelas belum punya Jadwal Pelajaran sama sekali -> siswanya tidak pernah bisa
+        // punya nilai (tidak ada guru yang punya alasan/akses mengisi), jadi tabel
+        // prediksi akan selalu tampil "Rawan 0%" untuk semua orang. Itu bukan hasil
+        // evaluasi yang valid - tampilkan pesan setup, bukan tabel yang menyesatkan.
+        if (!$kelas->jadwalPelajaran()->exists()) {
+            return view('wali-kelas.promotion.index', [
+                'kelas' => $kelas,
+                'tahun' => $activeYear,
+                'error' => 'Kelas ' . $kelas->nama_kelas . ' belum punya Jadwal Pelajaran sama sekali, jadi belum bisa dievaluasi untuk kenaikan kelas. Hubungi Admin/Waka untuk menyetel jadwalnya terlebih dahulu.',
+                'prediction' => [],
+            ]);
+        }
+
         // Ensure $kelas relationship loaded if needed by view (usually nice to have)
         // Helper returns class with cabang and tahunAjaran.
-        
+
         // Load data siswa with Name Search
         $query = Siswa::where('kelas_id', $kelas->id)->where('status', 'aktif');
         

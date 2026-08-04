@@ -144,9 +144,29 @@ class PromotionReportController extends Controller
             })->toArray();
         } else {
             // Current mode: Show students currently enrolled in this year
+            // Kelas yang belum punya JadwalPelajaran sama sekali (mis. KB/TKA yang
+            // baru dibuat, belum disetup) dikecualikan DARI TAMPILAN UTAMA -
+            // siswanya TIDAK PERNAH bisa punya nilai (tidak ada guru yang punya
+            // alasan/akses mengisi), jadi selalu nongol "RAWAN 0%" bukan karena
+            // akademiknya kurang, tapi karena kelasnya memang belum siap dievaluasi.
+            // Beda dengan kelas yang sudah lengkap tapi nilainya belum diisi guru -
+            // itu tetap valid tampil RAWAN di tampilan utama.
+            //
+            // ?tanpa_jadwal=1 membalik kondisi ini: menampilkan KHUSUS siswa yang
+            // tadi dikecualikan, supaya admin bisa sengaja pilih & "Naikkan Terpilih"
+            // mereka lewat celah override manual di PromotionService (lihat
+            // promoteSelectedStudents()) - dipisah dari tampilan utama supaya tidak
+            // mengotori daftar RAWAN yang memang butuh perhatian guru/nilai asli.
+            $showTanpaJadwal = $request->boolean('tanpa_jadwal');
+
             $simQuery = Siswa::where('status', 'aktif')
-                ->whereHas('kelas', function($q) use ($selectedYear) {
+                ->whereHas('kelas', function ($q) use ($selectedYear, $showTanpaJadwal) {
                     $q->where('tahun_ajaran_id', $selectedYear->id);
+                    if ($showTanpaJadwal) {
+                        $q->whereDoesntHave('jadwalPelajaran');
+                    } else {
+                        $q->whereHas('jadwalPelajaran');
+                    }
                 })
                 ->with(['kelas', 'tagihan']);
 
@@ -174,6 +194,16 @@ class PromotionReportController extends Controller
             // Count total active students across ALL pages for "Select All" feature
             $totalActiveGlobal = $allStudentsQuery->count();
             $totalIneligibleGlobal = $totalActiveGlobal;
+
+            // Info transparansi: berapa siswa aktif di TA ini yang dikecualikan dari
+            // simulasi karena kelasnya belum ada jadwal sama sekali (dihitung terlepas
+            // dari mode $showTanpaJadwal, supaya banner-nya tetap akurat di kedua mode).
+            $siswaTanpaJadwalCount = Siswa::where('status', 'aktif')
+                ->whereHas('kelas', function ($q) use ($selectedYear) {
+                    $q->where('tahun_ajaran_id', $selectedYear->id)
+                      ->whereDoesntHave('jadwalPelajaran');
+                })
+                ->count();
         }
 
         // --- 3. TA Validation for Promotion ---
@@ -208,6 +238,8 @@ class PromotionReportController extends Controller
             'activeStudentsLinks' => $activeStudents,
             'totalActiveGlobal' => $totalActiveGlobal ?? 0,
             'totalIneligibleGlobal' => $totalIneligibleGlobal ?? 0,
+            'siswaTanpaJadwalCount' => $siswaTanpaJadwalCount ?? 0,
+            'showTanpaJadwal' => $showTanpaJadwal ?? false,
             'tahun' => $selectedYear, // Displayed Year
             'activeYear' => $activeYear, // Actual Active Year (for checks)
             'allTahunAjaran' => $allTahunAjaran, // Dropdown list

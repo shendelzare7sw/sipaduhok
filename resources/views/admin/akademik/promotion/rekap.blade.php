@@ -272,9 +272,17 @@
                                 </td>
                                 <td data-label="Akademik">
                                     <div class="mobile-text-end">
-                                        {{ $data->persentase_nilai_tuntas }}% Tuntas
-                                        <br>
-                                        <small class="text-muted">{{ $data->jumlah_mapel_tuntas }}/{{ $data->total_mapel }} Mapel</small>
+                                        @if($data->akademik_override_tanpa_jadwal ?? false)
+                                            <span class="badge bg-warning text-dark" title="Kelas belum ada Jadwal Pelajaran saat dinaikkan - dilewatkan manual oleh admin, bukan hasil ukur nilai asli.">
+                                                Aman <i class="fas fa-user-check ms-1"></i>
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">Override manual (belum ada jadwal)</small>
+                                        @else
+                                            {{ $data->persentase_nilai_tuntas }}% Tuntas
+                                            <br>
+                                            <small class="text-muted">{{ $data->jumlah_mapel_tuntas }}/{{ $data->total_mapel }} Mapel</small>
+                                        @endif
                                     </div>
                                 </td>
                                 <td data-label="Hasil Akhir" class="desktop-only-cell">
@@ -465,9 +473,36 @@
                     @endif
 
                     @if(($simMode ?? 'current') === 'current')
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-1"></i> Data di bawah ini adalah <strong>SIMULASI REAL-TIME</strong> berdasarkan data keuangan dan nilai saat ini.
-                        </div>
+                        @if($showTanpaJadwal ?? false)
+                            <div class="alert alert-warning">
+                                <i class="fas fa-user-clock me-1"></i>
+                                Anda sedang melihat <strong>siswa yang kelasnya belum punya Jadwal Pelajaran</strong> -
+                                status akademik mereka jujur tampil "Rawan 0%" (memang belum ada yang bisa diukur).
+                                Kalau dinaikkan lewat <strong>"Naikkan Terpilih"</strong> di bawah, status akademiknya akan
+                                otomatis ditandai <strong>"Aman"</strong> (override manual, bukan hasil ukur nilai asli) -
+                                data akan terukur normal begitu jadwal TA berikutnya disetel.
+                                <a href="{{ route(Route::currentRouteName(), array_merge(request()->except('tanpa_jadwal'), ['tab' => 'simulation'])) }}" class="alert-link">Kembali ke tampilan normal</a>.
+                            </div>
+                        @else
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i> Data di bawah ini adalah <strong>SIMULASI REAL-TIME</strong> berdasarkan data keuangan dan nilai saat ini.
+                            </div>
+                            @if(($siswaTanpaJadwalCount ?? 0) > 0)
+                                @php
+                                    $isAdminCtx = str_contains(Route::currentRouteName(), 'admin.');
+                                    $jadwalRoute = $isAdminCtx ? 'admin.jadwal-pelajaran.index' : 'waka.jadwal-pelajaran.index';
+                                    $siswaRoute = $isAdminCtx ? 'admin.users.siswa' : 'waka.manajemen-siswa.index';
+                                @endphp
+                                <div class="alert alert-warning py-2 mb-3">
+                                    <i class="fas fa-calendar-times me-1"></i>
+                                    <strong>{{ $siswaTanpaJadwalCount }} siswa aktif disembunyikan</strong> dari simulasi ini karena kelasnya
+                                    belum punya Jadwal Pelajaran sama sekali (belum bisa dinilai oleh guru manapun, bukan soal nilainya kurang).
+                                    Setup jadwalnya dulu di <a href="{{ route($jadwalRoute) }}" class="alert-link">Jadwal Pelajaran</a>,
+                                    pindahkan siswanya ke kelas lain lewat <a href="{{ route($siswaRoute) }}" class="alert-link">Kelola Siswa</a>,
+                                    atau <a href="{{ route(Route::currentRouteName(), array_merge(request()->except('tanpa_jadwal'), ['tanpa_jadwal' => 1, 'tab' => 'simulation'])) }}" class="alert-link">tampilkan &amp; naikkan manual</a>.
+                                </div>
+                            @endif
+                        @endif
                     @else
                         <div class="alert alert-secondary py-2 mb-3">
                             <i class="fas fa-lock me-1"></i> Tampilan ini adalah <strong>snapshot riwayat</strong> (kondisi siswa saat eksekusi terakhir dijalankan) dan bersifat baca-saja. Untuk menaikkan siswa yang tertinggal, gunakan tab <strong>Keadaan Saat Ini</strong>.
