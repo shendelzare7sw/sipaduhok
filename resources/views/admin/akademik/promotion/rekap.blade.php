@@ -217,10 +217,26 @@
                         </div>
                     </div>
                 </div>
+                @php
+                    $anyOverrideEligible = collect($students->items())->contains('bisa_dinaikkan_manual', true);
+                    $routePrefixHistory = str_contains(Route::currentRouteName(), 'admin.') ? 'admin.akademik' : 'waka';
+                @endphp
+                @if($anyOverrideEligible)
+                <div class="alert alert-warning py-2 mx-3 mt-3 mb-0">
+                    <i class="fas fa-user-clock me-1"></i>
+                    Ada siswa <strong>Tidak Naik Kelas</strong> di halaman ini yang sebenarnya bisa dinaikkan manual -
+                    keuangan sudah lunas/dispensasi, tapi akademiknya tidak terukur karena kelasnya belum punya
+                    Jadwal Pelajaran saat eksekusi masal dijalankan. Centang baris yang ditandai lalu klik
+                    <strong>"Naikkan Terpilih"</strong> di bawah tabel.
+                </div>
+                @endif
                 <div class="table-responsive text-nowrap">
                     <table class="table table-striped table-card-mobile">
                         <thead>
                             <tr>
+                                @if($anyOverrideEligible)
+                                <th class="table-checkbox-col"><input type="checkbox" id="selectAllHist"></th>
+                                @endif
                                 <th>Nama Siswa</th>
                                 <th>Kelas Asal</th>
                                 <th>Kelas Tujuan</th>
@@ -242,9 +258,19 @@
                                 };
                             @endphp
                             <tr>
+                                @if($anyOverrideEligible)
+                                <td class="desktop-only-cell">
+                                    @if($data->bisa_dinaikkan_manual)
+                                    <input type="checkbox" class="histCheck" value="{{ $data->siswa_id }}">
+                                    @endif
+                                </td>
+                                @endif
                                 <td class="mobile-card-head">
                                     <div class="d-flex justify-content-between align-items-start gap-2 student-summary-row">
                                         <div class="d-flex align-items-center gap-2 student-summary-main">
+                                            @if($anyOverrideEligible && $data->bisa_dinaikkan_manual)
+                                            <input type="checkbox" class="histCheck mobile-only-cell flex-shrink-0 mobile-sim-checkbox" value="{{ $data->siswa_id }}">
+                                            @endif
                                             <span class="text-wrap text-break lh-sm">{{ $data->nama_lengkap }}</span>
                                         </div>
                                         <div class="mobile-only-cell flex-shrink-0 ms-auto">
@@ -287,11 +313,14 @@
                                 </td>
                                 <td data-label="Hasil Akhir" class="desktop-only-cell">
                                     <span class="badge bg-{{ $badge }}">{{ str_replace('_', ' ', $data->status_kelulusan) }}</span>
+                                    @if($data->bisa_dinaikkan_manual)
+                                        <br><small class="text-warning fw-bold">Bisa dinaikkan manual (tanpa jadwal)</small>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center">
+                                <td colspan="{{ $anyOverrideEligible ? 7 : 6 }}" class="text-center">
                                     <div class="py-4">
                                         <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
                                         <p class="text-muted">
@@ -305,7 +334,22 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="p-3">
+
+                @if($anyOverrideEligible)
+                <form id="promoteHistorySelectedForm" action="{{ route($routePrefixHistory . '.kenaikan-kelas.promote-selected') }}" method="POST" class="d-none">
+                    @csrf
+                    <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
+                </form>
+                @endif
+
+                <div class="p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        @if($anyOverrideEligible)
+                        <button type="button" id="promoteHistorySelectedTrigger" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#promoteHistorySelectedModal" disabled>
+                            <i class="fas fa-arrow-up me-1"></i> Naikkan Terpilih
+                        </button>
+                        @endif
+                    </div>
                     {{ $students->withQueryString()->links() }}
                 </div>
             </div>
@@ -889,6 +933,31 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-success" id="confirmPromoteBtn">
+                        <i class="fas fa-check me-1"></i> Ya, Naikkan Siswa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promote Selected From History Modal -->
+    <div class="modal fade" id="promoteHistorySelectedModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="fas fa-arrow-up me-2"></i>Naikkan Manual (Tanpa Jadwal)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Anda akan menaikkan <strong id="selectedHistoryCount" class="text-warning fs-4">0</strong> siswa terpilih yang sebelumnya <strong>Tidak Naik Kelas</strong>.</p>
+                    <div class="alert alert-info">
+                        <small><i class="fas fa-info-circle me-1"></i> Keuangan mereka sudah lunas/dispensasi, tapi akademik tidak terukur karena kelasnya belum punya Jadwal Pelajaran. Status akademik akan ditandai <strong>"Aman"</strong> (override manual), bukan hasil ukur nilai asli.</small>
+                    </div>
+                    <p class="mb-0">Pastikan data siswa benar sebelum melanjutkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-warning" id="confirmPromoteHistoryBtn">
                         <i class="fas fa-check me-1"></i> Ya, Naikkan Siswa
                     </button>
                 </div>

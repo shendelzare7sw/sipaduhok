@@ -82,6 +82,28 @@ class PromotionReportController extends Controller
         $students = $query->orderBy('status_naik_kelas_siswa.tanggal_eksekusi', 'desc')
             ->paginate(20);
 
+        // Tandai baris TIDAK_NAIK_KELAS yang sekarang bisa dinaikkan manual: siswa
+        // LUNAS/dispensasi tapi akademiknya "unmeasurable" (kelas belum punya Jadwal
+        // Pelajaran saat eksekusi masal dijalankan - execute() dulu tidak memakai
+        // celah override yang sama seperti "Naikkan Terpilih", jadi bisa tertinggal).
+        // Dicek ULANG live (bukan dari snapshot lama) supaya juga menangkap dispensasi
+        // yang baru disetujui Ketua setelah eksekusi gagal.
+        $promotionServiceForHistory = app(\App\Services\PromotionService::class);
+        $siswaUntukOverride = Siswa::whereIn('id', collect($students->items())
+            ->where('status_kelulusan', 'TIDAK_NAIK_KELAS')
+            ->pluck('siswa_id'))
+            ->get()
+            ->keyBy('id');
+
+        $students->getCollection()->transform(function ($row) use ($promotionServiceForHistory, $siswaUntukOverride, $selectedYear) {
+            $row->bisa_dinaikkan_manual = false;
+            if ($row->status_kelulusan === 'TIDAK_NAIK_KELAS' && $siswaUntukOverride->has($row->siswa_id)) {
+                $eligibility = $promotionServiceForHistory->checkEligibility($siswaUntukOverride->get($row->siswa_id), $selectedYear->id);
+                $row->bisa_dinaikkan_manual = $eligibility['eligible'] || $promotionServiceForHistory->computeAcademicOverride($eligibility);
+            }
+            return $row;
+        });
+
         // --- 2. Simulation Query ---
         // NEW: Support historical mode to show students as they were at execution time
         $simMode = $request->get('sim_mode', 'current');
@@ -354,7 +376,14 @@ class PromotionReportController extends Controller
                 // Execute promotion logic
                 // This checks grades in $contextYear->id
                 // And moves them to Next Year (relative to $contextYear)
-                $promotionService->executeStudentPromotion($siswa, $contextYear->id, now());
+                // Sama seperti promoteSelectedStudents(): siswa LUNAS/dispensasi tapi
+                // akademiknya "unmeasurable" (kelas belum punya Jadwal Pelajaran) tetap
+                // dilewatkan lewat override manual, supaya eksekusi massal konsisten
+                // dengan "Naikkan Terpilih" (dulu tidak, jadi siswa begini tercatat
+                // TIDAK_NAIK_KELAS padahal seharusnya lolos).
+                $eligibility = $promotionService->checkEligibility($siswa, $contextYear->id);
+                $academicOverride = $promotionService->computeAcademicOverride($eligibility);
+                $promotionService->executeStudentPromotion($siswa, $contextYear->id, now(), $academicOverride);
                 $count++;
             }
             DB::commit();
