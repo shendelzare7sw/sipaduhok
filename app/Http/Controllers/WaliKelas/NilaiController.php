@@ -860,8 +860,7 @@ class NilaiController extends Controller
         $semester = $request->input('semester', $nilai->semester);
 
         return redirect()
-            ->route('wali.nilai.edit', ['siswa' => $siswaId, 'semester' => $semester])
-            ->with('success', 'Nilai mapel berhasil disinkronkan dengan snapshot dari guru pengajar.');
+            ->route('wali.nilai.edit', ['siswa' => $siswaId, 'semester' => $semester]);
     }
 
 }
