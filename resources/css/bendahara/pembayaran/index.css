@@ -278,6 +278,21 @@
         width: 100%;
     }
 
+    .payment-filter-menu {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .dashboard-card {
+        transition: none;
+    }
+
+    .dashboard-card:hover {
+        transform: none;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
     .table-clean thead {
         display: none;
     }
