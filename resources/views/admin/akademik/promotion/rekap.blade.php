@@ -365,8 +365,8 @@
                             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                                     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                                 <i class="fas fa-filter me-1"></i> Filter
-                                @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId)
-                                    <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId])->filter()->count() }}</span>
+                                @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || ($showTanpaJadwal ?? false))
+                                    <span class="badge bg-primary ms-1">{{ collect([auth()->user()->role !== 'wakil_kepala_sekolah' ? $cabangId : null, $jenjangFilter, $kelasId, ($showTanpaJadwal ?? false) ? 1 : null])->filter()->count() }}</span>
                                 @endif
                             </button>
                             <div class="dropdown-menu p-3 shadow filter-dropdown-menu">
@@ -411,11 +411,25 @@
                                     </select>
                                 </div>
 
+                                {{-- Toggle: siswa di kelas tanpa Jadwal Pelajaran (disembunyikan default) --}}
+                                @if(($siswaTanpaJadwalCount ?? 0) > 0 || ($showTanpaJadwal ?? false))
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="tanpaJadwalCheck" name="tanpa_jadwal" value="1"
+                                           {{ ($showTanpaJadwal ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label small" for="tanpaJadwalCheck">
+                                        Tampilkan siswa tanpa jadwal
+                                        @if(($siswaTanpaJadwalCount ?? 0) > 0)
+                                            <span class="badge bg-warning text-dark">{{ $siswaTanpaJadwalCount }}</span>
+                                        @endif
+                                    </label>
+                                </div>
+                                @endif
+
                                 <div class="d-grid gap-2">
                                     <button type="submit" class="btn btn-primary btn-sm">
                                         <i class="fas fa-check me-1"></i> Terapkan Filter
                                     </button>
-                                    @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId)
+                                    @if((auth()->user()->role !== 'wakil_kepala_sekolah' && $cabangId) || $jenjangFilter || $kelasId || ($showTanpaJadwal ?? false))
                                         <a href="{{ route(Route::currentRouteName(), ['tab' => 'simulation', 'sim_mode' => $simMode ?? 'current', 'tahun_ajaran_id' => $tahun->id]) }}"
                                            class="btn btn-outline-secondary btn-sm">
                                             <i class="fas fa-times me-1"></i> Reset Filter
@@ -499,7 +513,7 @@
                                     belum punya Jadwal Pelajaran sama sekali (belum bisa dinilai oleh guru manapun, bukan soal nilainya kurang).
                                     Setup jadwalnya dulu di <a href="{{ route($jadwalRoute) }}" class="alert-link">Jadwal Pelajaran</a>,
                                     pindahkan siswanya ke kelas lain lewat <a href="{{ route($siswaRoute) }}" class="alert-link">Kelola Siswa</a>,
-                                    atau <a href="{{ route(Route::currentRouteName(), array_merge(request()->except('tanpa_jadwal'), ['tanpa_jadwal' => 1, 'tab' => 'simulation'])) }}" class="alert-link">tampilkan &amp; naikkan manual</a>.
+                                    atau centang <strong>"Tampilkan siswa tanpa jadwal"</strong> di menu Filter di atas untuk menaikkan mereka manual.
                                 </div>
                             @endif
                         @endif
