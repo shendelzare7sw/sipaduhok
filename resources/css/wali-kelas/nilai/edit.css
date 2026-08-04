@@ -13,26 +13,19 @@
         --wk-soft: #f8fafc;
     }
 
+    /* Lebar konten: .wk-page ada DI DALAM .container-xxl bawaan layout Sneat, jadi
+       max-width di .wk-page saja tidak cukup - .container-xxl ancestor-nya (Bootstrap,
+       terbatas ~1320px) yang duluan membatasi. Lebarkan keduanya sekaligus, tanpa
+       digantung media query + prefix .layout-page yang gampang tidak match. Halaman
+       edit ini juga langsung pakai class .container-xxl di root-nya sendiri - ikut
+       melebar juga, penting karena tabelnya sangat lebar (30+ kolom).*/
     .container-xxl,
     .container-fluid.px-0,
-    div[style*="max-width: 1600px"],
-    div[style*="max-width: 1400px"],
-    div[style*="max-width: 1200px"] {
-        max-width: 1280px !important;
-    }
-
-    @media (min-width: 1200px) {
-        .layout-page .container-xxl,
-        .layout-page .container-fluid.px-0,
-        .layout-page .wk-page,
-        .layout-page div[style*="max-width: 1600px"],
-        .layout-page div[style*="max-width: 1400px"],
-        .layout-page div[style*="max-width: 1200px"] {
-            max-width: calc(100% - 4rem) !important;
-            width: 100% !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
+    .wk-page {
+        max-width: 1600px !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
 .card {
@@ -204,8 +197,6 @@
     }
 
     .wk-page {
-        max-width: 1280px;
-        margin: 0 auto;
         padding: 0 1rem;
     }
 

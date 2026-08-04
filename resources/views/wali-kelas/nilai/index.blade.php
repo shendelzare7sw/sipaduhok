@@ -169,8 +169,8 @@
                     <table class="table table-hover wk-card-table mb-0">
                         <thead>
                             <tr>
-                                <th width="50">NO</th>
-                                <th width="120">NIS</th>
+                                <th class="col-no">NO</th>
+                                <th class="col-nis">NIS</th>
                                 <th class="text-start col-siswa">NAMA LENGKAP SISWA</th>
                                 @if(isset($selectedMapelId) && $selectedMapelId)
                                     <th>TUGAS</th>
@@ -198,8 +198,8 @@
                                         && !$guruBaruUpdate;
                                 @endphp
                                 <tr>
-                                    <td class="text-center align-middle fw-bold text-gray-600">{{ $loop->iteration }}</td>
-                                    <td class="text-center align-middle fw-bold text-gray-800">{{ $siswa->nis }}</td>
+                                    <td class="text-center align-middle fw-bold text-gray-600 col-no">{{ $loop->iteration }}</td>
+                                    <td class="text-center align-middle fw-bold text-gray-800 col-nis">{{ $siswa->nis }}</td>
                                     <td class="align-middle col-siswa">
                                         <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>
                                         <small class="text-muted">Kelas: {{ $kelas->nama_kelas }}</small>
