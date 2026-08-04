@@ -4,7 +4,6 @@
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    overflow: hidden;
 }
 
 .dashboard-card:hover {
@@ -219,7 +218,9 @@
 
 .payment-filter-menu {
     min-width: 300px;
-    z-index: 9999;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
 }
 
 .payment-filter-title {
@@ -275,6 +276,21 @@
     .filter-area .dropdown,
     .filter-area .dropdown-toggle {
         width: 100%;
+    }
+
+    .payment-filter-menu {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+    }
+
+    .dashboard-card {
+        transition: none;
+    }
+
+    .dashboard-card:hover {
+        transform: none;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .table-clean thead {

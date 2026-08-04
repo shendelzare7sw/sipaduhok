@@ -157,6 +157,27 @@ class TagihanController extends Controller
             });
         }
 
+        // Filter berdasarkan status tagihan (post-query karena status dihitung dari agregasi)
+        $statusTagihan = $request->get('status_tagihan');
+        if ($statusTagihan && $siswaList && $siswaList->isNotEmpty()) {
+            $siswaList->getCollection()->transform(function ($siswa) use ($statusTagihan) {
+                $siswa->_status_match = match ($statusTagihan) {
+                    'belum_lunas' => $siswa->sisa_tagihan > 0 && $siswa->total_tagihan > 0,
+                    'lunas'       => $siswa->sisa_tagihan <= 0 && $siswa->total_tagihan > 0,
+                    'kosong'      => $siswa->total_tagihan == 0,
+                    default       => true,
+                };
+                return $siswa;
+            });
+
+            $filtered = $siswaList->getCollection()->filter(fn($s) => $s->_status_match);
+            $siswaList->getCollection()->transform(function ($siswa) {
+                unset($siswa->_status_match);
+                return $siswa;
+            });
+            $siswaList->setCollection($filtered->values());
+        }
+
         // Hitung ringkasan tunggakan tahun sebelumnya (hanya tampil saat melihat tahun aktif;
         // di mode alumni tidak relevan karena sudah lintas-tahun).
         $tunggakanSummary = null;
@@ -192,7 +213,7 @@ class TagihanController extends Controller
             'allTahunAjaran' => $allTahunAjaran ?? collect(),
             'tunggakanSummary' => $tunggakanSummary,
             'jenisTagihan' => $this->jenisTagihan ?? [],
-            'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id']) ?? [],
+            'filters' => $request->only(['kelas_id', 'search', 'tahun_ajaran_id', 'status_tagihan']) ?? [],
             'isAlumniMode' => $isAlumniMode,
         ]);
     }
