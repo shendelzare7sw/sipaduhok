@@ -687,29 +687,41 @@
         padding: 6px 10px;
     }
     .nilai-show-table {
-        table-layout: fixed;
+        /* auto, bukan fixed: dengan fixed, kalau total lebar kolom yang dipatok pixel
+           (mapel+tugas+latihan+uh+pts+pas+akhir+predikat+status) melebihi lebar
+           tabel yang tersedia, browser menyusutkan SEMUA kolom secara proporsional -
+           termasuk PTS/PAS/N.Akhir yang cuma 58-78px, sampai angka 2 digit pun
+           kebungkus jadi 2 baris ("78" -> "7" baris baru "8"). auto membiarkan tiap
+           kolom selebar kontennya dan melimpahkan sisa ke scroll horizontal
+           (.table-responsive sudah ada), bukan memaksa muat dengan membungkus teks. */
+        table-layout: auto;
     }
     .nilai-show-table .mapel-col {
-        width: 220px;
         min-width: 190px;
     }
+    .nilai-show-table .count-col,
+    .nilai-show-table .average-col,
+    .nilai-show-table .exam-col,
+    .nilai-show-table .final-col {
+        white-space: nowrap;
+    }
     .nilai-show-table .count-col {
-        width: 56px;
+        min-width: 56px;
     }
     .nilai-show-table .average-col {
-        width: 64px;
+        min-width: 64px;
     }
     .nilai-show-table .exam-col {
-        width: 58px;
+        min-width: 58px;
     }
     .nilai-show-table .final-col {
-        width: 78px;
+        min-width: 78px;
     }
     .nilai-show-table .predikat-col {
-        width: 98px;
+        min-width: 98px;
     }
     .nilai-show-table .status-col {
-        width: 122px;
+        min-width: 122px;
     }
     .nilai-show-table .nilai-pill {
         display: inline-flex;
