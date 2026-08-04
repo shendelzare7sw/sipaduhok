@@ -14,12 +14,7 @@
 
 @section('content')
 <div class="container-xxl">
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle me-1"></i>{{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    {{-- Flash error sudah dirender layouts.sneat secara global - jangan diulang di sini. --}}
 
     {{-- Stat ringkas --}}
     <div class="arsip-stat-row">

@@ -21,16 +21,17 @@
         </div>
     @endif
 
-    @if(session('warning'))
+    {{-- Teks session('warning') sudah dirender layouts.sneat secara global (dulu dobel
+         di sini). Blok ini cuma untuk detail baris-per-baris import_errors, yang layout
+         tidak tahu cara menampilkannya. --}}
+    @if(session('import_errors'))
         <div class="alert alert-warning shadow-sm border-start border-warning border-4 alert-dismissible fade show">
-            <i class="fas fa-exclamation-circle me-2"></i><strong>Perhatian:</strong> {{ session('warning') }}
-            @if(session('import_errors'))
-                <ul class="mt-2 mb-0 small">
-                    @foreach(session('import_errors') as $ie)
-                        <li>{{ $ie }}</li>
-                    @endforeach
-                </ul>
-            @endif
+            <strong>Detail:</strong>
+            <ul class="mt-2 mb-0 small">
+                @foreach(session('import_errors') as $ie)
+                    <li>{{ $ie }}</li>
+                @endforeach
+            </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
