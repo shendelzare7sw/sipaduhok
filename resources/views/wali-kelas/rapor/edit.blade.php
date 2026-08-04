@@ -64,25 +64,8 @@
         </div>
     </div>
 
-    {{-- Flash messages dari import --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-triangle me-1"></i> {{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-times-circle me-1"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    {{-- Flash success/error/warning sudah dirender layouts.sneat secara global - jangan
+         diulang di sini (dulu dobel, mis. pesan import Excel muncul 2x). --}}
 
     {{-- Modal Import Excel --}}
     <div class="modal fade" id="importExcelModal" tabindex="-1" aria-hidden="true">

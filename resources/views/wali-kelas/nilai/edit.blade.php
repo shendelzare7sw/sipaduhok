@@ -77,24 +77,8 @@
         </div>
     @endif
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-3">
-            <i class="bx bx-check-circle me-1"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show mb-3">
-            <i class="bx bx-error me-1"></i> {{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show mb-3">
-            <i class="bx bx-x-circle me-1"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    {{-- Flash success/error/warning sudah dirender layouts.sneat secara global - jangan
+         diulang di sini (dulu dobel, mis. pesan import Excel muncul 2x). --}}
 
     @php
         $countGuruUpdate = $nilaiData->filter(function ($n) {
