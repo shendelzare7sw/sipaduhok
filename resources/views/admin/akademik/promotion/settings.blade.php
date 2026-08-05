@@ -45,6 +45,28 @@
                         </div>
                     </div>
                     <div class="content-card-body">
+                    {{-- TA Readiness Warning - sama seperti tab Proses & Rekap, supaya admin
+                         diperingatkan SEBELUM set jadwal otomatis, bukan sesudah gagal diam-diam --}}
+                    @if(!$promotionReadiness['hasNextTA'])
+                        <div class="alert alert-danger d-flex align-items-start mb-3">
+                            <i class="fas fa-exclamation-triangle fa-lg me-3 mt-1"></i>
+                            <div>
+                                <strong>Tahun Ajaran Baru Belum Dibuat!</strong><br>
+                                <small>Jadwal eksekusi otomatis tidak bisa diaktifkan sebelum Tahun Ajaran baru dibuat.
+                                <a href="{{ route('admin.tahun-ajaran.create') }}" class="alert-link">Buat Tahun Ajaran →</a></small>
+                            </div>
+                        </div>
+                    @elseif($promotionReadiness['kelasBaruCount'] == 0)
+                        <div class="alert alert-warning d-flex align-items-start mb-3">
+                            <i class="fas fa-exclamation-circle fa-lg me-3 mt-1"></i>
+                            <div>
+                                <strong>Kelas Belum Dibuat di TA Baru!</strong><br>
+                                <small>Jadwal eksekusi otomatis tidak bisa diaktifkan sebelum ada kelas di TA {{ $promotionReadiness['nextTA']->nama_tahun_ajaran }}.
+                                <a href="{{ route('admin.kelas.index') }}" class="alert-link">Kelola Kelas →</a></small>
+                            </div>
+                        </div>
+                    @endif
+
                     <form action="{{ route($routePrefix . '.settings.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
@@ -66,17 +88,23 @@
                             <label class="form-label">Tanggal Eksekusi Kenaikan (Otomatis)</label>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <input type="date" name="tanggal_eksekusi" class="form-control" 
-                                           value="{{ $tanggalEksekusi }}">
+                                    <input type="date" name="tanggal_eksekusi" class="form-control"
+                                           value="{{ $tanggalEksekusi }}"
+                                           {{ $promotionReadiness['isReady'] ? '' : 'disabled' }}>
                                     <div class="form-text">Tanggal eksekusi</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <input type="time" name="waktu_eksekusi" class="form-control" 
-                                           value="{{ $waktuEksekusi }}">
+                                    <input type="time" name="waktu_eksekusi" class="form-control"
+                                           value="{{ $waktuEksekusi }}"
+                                           {{ $promotionReadiness['isReady'] ? '' : 'disabled' }}>
                                     <div class="form-text">Waktu eksekusi (WIB)</div>
                                 </div>
                             </div>
-                            <div class="form-text mt-2">Jika diisi, sistem akan menjalankan job kenaikan otomatis pada tanggal & waktu ini. Kosongkan jika ingin eksekusi manual via tombol.</div>
+                            @if($promotionReadiness['isReady'])
+                                <div class="form-text mt-2">Jika diisi, sistem akan menjalankan job kenaikan otomatis pada tanggal & waktu ini. Kosongkan jika ingin eksekusi manual via tombol.</div>
+                            @else
+                                <div class="form-text mt-2 text-danger">Nonaktif sampai Tahun Ajaran baru & kelasnya siap (lihat peringatan di atas) - eksekusi otomatis akan gagal diam-diam kalau dipaksa jalan tanpa kelas tujuan.</div>
+                            @endif
                         </div>
 
                         <div class="form-block">
