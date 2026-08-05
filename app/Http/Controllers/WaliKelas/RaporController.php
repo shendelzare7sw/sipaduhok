@@ -310,6 +310,14 @@ class RaporController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
         $kelasList = $this->getKelasWali($tenagaPendidik);
 
+        // Pasca ganti tahun ajaran, wali kelas kehilangan penugasan sampai admin
+        // menugaskan ulang - getSelectedKelas() mengembalikan null. Tanpa penjagaan
+        // ini, baris perbandingan di bawah meledak "Attempt to read property id on null".
+        if (! $kelas) {
+            return redirect()->route('wali.rapor.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas pada tahun ajaran aktif.');
+        }
+
         $rapor = Rapor::with(['siswa', 'kelas', 'raporNilai.mataPelajaran', 'raporNilai.nilai', 'kegiatanEkstra'])->findOrFail($raporId);
 
         // Pastikan rapor ini milik kelas wali kelas

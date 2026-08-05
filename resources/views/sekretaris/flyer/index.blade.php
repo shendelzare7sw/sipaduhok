@@ -74,7 +74,7 @@
                             <div class="ak-title">{{ $item->judul }}</div>
                             <span class="ak-badge primary">#{{ $item->urutan_tampil }}</span>
                         </div>
-                        <div class="ak-sub">{{ \Illuminate\Support\Str::limit($item->deskripsi, 110) }}</div>
+                        <div class="ak-sub">{{ \Illuminate\Support\Str::limit($item->deskripsi ?? '', 110) }}</div>
 
                         <div class="ak-flyer-meta">
                             <div><i class="fas fa-users text-primary me-1"></i>Target: <strong>{{ $item->target_label }}</strong></div>

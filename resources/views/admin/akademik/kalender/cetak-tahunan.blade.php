@@ -35,7 +35,7 @@
                                 <td>
                                     <strong>{{ $event->nama_kegiatan }}</strong>
                                     @if($event->keterangan)
-                                        <br><small class="muted-desc">{{ Str::limit($event->keterangan, 80) }}</small>
+                                        <br><small class="muted-desc">{{ Str::limit($event->keterangan ?? '', 80) }}</small>
                                     @endif
                                 </td>
                                 <td>

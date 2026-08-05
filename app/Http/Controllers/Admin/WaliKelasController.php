@@ -82,13 +82,16 @@ class WaliKelasController extends Controller
                     ->orWhereHas('roleRelation', fn($rq) => $rq->where('name', 'wali_kelas'));
             })->where('is_active', true);
         })->with([
-                    'waliKelasAssignments.kelas' => function ($query) use ($tahunAjaranId) {
-                        if ($tahunAjaranId) {
-                            $query->where('tahun_ajaran_id', $tahunAjaranId);
-                        }
-                        $query->with('cabang');
-                    }
-                ])->orderBy('nama_lengkap')->get();
+            // Filter di PENUGASAN-nya, bukan di kelas. Kalau difilter di kelas,
+            // penugasan TA lama tetap termuat tapi ->kelas jadi null.
+            'waliKelasAssignments' => function ($query) use ($tahunAjaranId) {
+                if ($tahunAjaranId) {
+                    $query->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $tahunAjaranId));
+                }
+            },
+            'waliKelasAssignments.kelas.cabang',
+        ])->orderBy('nama_lengkap')->get();
+
 
         // Statistics
         $currentTahunAjaran = $tahunAjaranId ? TahunAjaran::find($tahunAjaranId) : $tahunAjaranAktif;
