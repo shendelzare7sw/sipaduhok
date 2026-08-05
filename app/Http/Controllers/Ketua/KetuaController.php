@@ -283,8 +283,14 @@ class KetuaController extends Controller
         });
 
         // Data for Filters
+        // Dropdown kelas di-scope ke TA aktif (pola yang sama dipakai di index()
+        // laporan). Tanpa ini, pasca ganti TA dropdown berisi kelas dari SEMUA TA
+        // sehingga nama kelas muncul berkali-kali (mis. "KB1" 6x) dan user tidak
+        // bisa membedakan mana yang tahun berjalan.
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $cabangs = Cabang::all();
-        $kelasList = Kelas::query();
+        $kelasList = Kelas::query()
+            ->when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id));
         if ($request->filled('cabang_id')) {
             $kelasList->where('cabang_id', $request->cabang_id);
         }

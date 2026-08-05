@@ -52,10 +52,15 @@ class DashboardController extends Controller
      */
     public function admin(): View
     {
+        // Kelas dihitung per TA aktif saja. Tanpa scoping ini angkanya menumpuk tiap
+        // ganti TA (45 kelas jadi 90, lalu 135, dst) karena kelas TA lama tetap ada
+        // di tabel - sama seperti dashboard guru yang sudah di-scope.
+        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+
         $data = [
             'totalSiswa' => Siswa::where('status', 'aktif')->count(),
             'totalGuru' => TenagaPendidik::count(),
-            'totalKelas' => Kelas::count(),
+            'totalKelas' => Kelas::when($taAktifId, fn ($q) => $q->where('tahun_ajaran_id', $taAktifId))->count(),
             'totalUser' => User::where('is_active', true)->count(),
             'siswaBaruBulanIni' => Siswa::whereMonth('tanggal_masuk', now()->month)
                 ->whereYear('tanggal_masuk', now()->year)
@@ -70,10 +75,14 @@ class DashboardController extends Controller
      */
     public function ketua(): View
     {
+        // Lihat catatan di admin(): kelas di-scope ke TA aktif supaya angkanya tidak
+        // menumpuk tiap ganti tahun ajaran.
+        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+
         $data = [
             'totalSiswa' => Siswa::where('status', 'aktif')->count(),
             'totalGuru' => TenagaPendidik::count(),
-            'totalKelas' => Kelas::count(),
+            'totalKelas' => Kelas::when($taAktifId, fn ($q) => $q->where('tahun_ajaran_id', $taAktifId))->count(),
             'pendingDispensasi' => \App\Models\PengajuanRaporKetua::where('status', 'menunggu')->count(),
             'recent_logins' => User::whereNotNull('last_login_at')
                 ->where('role', '!=', 'admin') // exclude admin

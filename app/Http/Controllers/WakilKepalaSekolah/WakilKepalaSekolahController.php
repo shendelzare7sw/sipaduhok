@@ -495,8 +495,12 @@ class WakilKepalaSekolahController extends Controller
             return $s;
         });
 
-        // Data for Filters (kelas only from user's cabang)
+        // Data for Filters (kelas only from user's cabang, TA aktif saja)
+        // Tanpa scoping TA, pasca ganti tahun ajaran dropdown ini berisi kelas dari
+        // semua TA sehingga nama kelas muncul dobel dan tidak bisa dibedakan.
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
         $kelasList = Kelas::where('cabang_id', $userCabangId)
+            ->when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
             ->orderBy('jenjang')->orderBy('nama_kelas')->get();
 
         return view('waka.monitoring.siswa', compact('siswa', 'kelasList'));
