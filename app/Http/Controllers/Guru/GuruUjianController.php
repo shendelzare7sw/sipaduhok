@@ -36,7 +36,7 @@ class GuruUjianController extends Controller
 
         $query = Ujian::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id);
+;
 
         // Filter by type
         if ($isLatihan) {
@@ -181,7 +181,7 @@ class GuruUjianController extends Controller
         $ujian = Ujian::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
@@ -227,7 +227,7 @@ class GuruUjianController extends Controller
         $ujian = Ujian::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
@@ -295,7 +295,6 @@ class GuruUjianController extends Controller
             foreach ($kelasTambahan as $kelasLainId) {
                 if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
                     $existing = Ujian::where('kelas_id', $kelasLainId)
-                        ->where('guru_id', $tenagaPendidik->id)
                         ->where('mata_pelajaran_id', $mapelId)
                         ->where('judul_ujian', $originalTitle)
                         ->first();
@@ -335,7 +334,7 @@ class GuruUjianController extends Controller
         $ujian = Ujian::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $isLatihan = request()->routeIs('guru.lms.latihan.*');
@@ -343,7 +342,7 @@ class GuruUjianController extends Controller
 
         // BULK DELETE LOGIC
         if ($request->has('hapus_terkait')) {
-            $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+            $relatedUjian = Ujian::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mapelId))
                 ->where('mata_pelajaran_id', $mapelId)
                 ->where('judul_ujian', $ujian->judul_ujian)
                 ->where('tipe_ujian', $ujian->tipe_ujian)
@@ -443,7 +442,6 @@ class GuruUjianController extends Controller
         $ujian = Ujian::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->with(['soalUjian' => function ($query) {
                 $query->orderBy('urutan', 'asc')->orderBy('id', 'asc');
             }])
@@ -471,7 +469,6 @@ class GuruUjianController extends Controller
         $ujian = Ujian::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->with(['soalUjian' => function ($query) {
                 $query->orderBy('urutan', 'asc')->orderBy('id', 'asc');
             }])
@@ -763,7 +760,7 @@ class GuruUjianController extends Controller
             'guru' => $tenagaPendidik,
             'tipeUjian' => $tipeUjian,
             'aiQuestionGeneratorEnabled' => $aiQuestionGeneratorEnabled,
-            'relatedUjianCount' => Ujian::where('guru_id', $tenagaPendidik->id)
+            'relatedUjianCount' => Ujian::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mataPelajaran->id))
                 ->where('mata_pelajaran_id', $mataPelajaran->id)
                 ->where('judul_ujian', $ujian->judul_ujian)
                 ->where('tipe_ujian', $ujian->tipe_ujian)
@@ -932,7 +929,7 @@ class GuruUjianController extends Controller
         // SYNC LOGIC HERE
         // Periksa apakah user mencentang 'sync_kelas'
         if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
-            $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+            $relatedUjian = Ujian::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mapelId))
                 ->where('mata_pelajaran_id', $mapelId)
                 ->where('judul_ujian', $request->input('original_judul', $ujian->judul_ujian)) // Fallback if not passed
                 ->where('tipe_ujian', $ujian->tipe_ujian)
@@ -982,7 +979,7 @@ class GuruUjianController extends Controller
 
         $syncedCount = 0;
         if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
-             $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+             $relatedUjian = Ujian::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mapelId))
                 ->where('mata_pelajaran_id', $mapelId)
                 ->where('judul_ujian', $ujian->judul_ujian)
                 ->where('tipe_ujian', $ujian->tipe_ujian)
@@ -1020,7 +1017,7 @@ class GuruUjianController extends Controller
 
         $syncedCount = 0;
         if ($request->has('sync_kelas') && $request->sync_kelas == '1') {
-            $relatedUjian = Ujian::where('guru_id', $tenagaPendidik->id)
+            $relatedUjian = Ujian::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mapelId))
                 ->where('mata_pelajaran_id', $mapelId)
                 ->where('judul_ujian', $ujian->judul_ujian)
                 ->where('tipe_ujian', $ujian->tipe_ujian)
@@ -1663,6 +1660,23 @@ class GuruUjianController extends Controller
         if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }
+    }
+
+    /**
+     * Kelas mana saja yang guru ini ampu untuk satu mata pelajaran.
+     *
+     * Dipakai oleh fitur lintas-kelas (terapkan/hapus konten serupa di kelas lain).
+     * Dulu dibatasi guru_id = pembuat, sehingga guru PENGGANTI tidak bisa menyentuh
+     * konten guru sebelumnya. Sekarang batasannya "kelas yang saya ampu" - tetap
+     * aman dari IDOR (guru tidak bisa menjangkau kelas yang tidak ia ajar), tapi
+     * serah terima antar guru jadi mulus.
+     */
+    private function kelasDiampu(int $guruId, int $mapelId): array
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->pluck('kelas_id')
+            ->all();
     }
 
     private function hasAccess($guruId, $kelasId, $mapelId): bool
