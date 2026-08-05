@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\AkunAktifScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +12,26 @@ class Siswa extends Model
     use HasFactory;
 
     protected $table = 'siswa';
+
+    /**
+     * Siswa dengan akun nonaktif otomatis hilang dari seluruh query
+     * (detail kelas, presensi wali, penilaian guru, ujian, LMS, keuangan, dst).
+     * Lihat AkunAktifScope untuk alasan pemilihan global scope.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new AkunAktifScope);
+    }
+
+    /**
+     * Buka kembali siswa berakun nonaktif - khusus halaman pengelolaan admin
+     * (Kelola Siswa) yang justru butuh melihatnya untuk mengaktifkan kembali
+     * atau menghapus permanen.
+     */
+    public function scopeTermasukNonaktif(Builder $query): Builder
+    {
+        return $query->withoutGlobalScope(AkunAktifScope::class);
+    }
 
     protected $fillable = [
         'user_id',

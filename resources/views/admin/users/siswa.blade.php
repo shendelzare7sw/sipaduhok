@@ -14,6 +14,46 @@
 
 @section('content')
 <div class="user-list-shell">
+        {{-- KONFIRMASI KEDUA HAPUS PERMANEN --}}
+        {{-- Tahap 1 (peringatan berisi rincian data terkait) sudah dirender sebagai
+             flash 'error' oleh layouts.sneat. Blok ini tahap 2: penegasan terakhir
+             sebelum data benar-benar dimusnahkan. --}}
+        @if(session('hapus_siswa_konfirmasi'))
+            @php $konf = session('hapus_siswa_konfirmasi'); @endphp
+            <div class="alert alert-danger border-danger border-3 shadow-sm">
+                <h5 class="fw-bold mb-2">
+                    <i class="fas fa-triangle-exclamation me-2"></i>Konfirmasi Terakhir - Hapus Permanen
+                </h5>
+                <p class="mb-2">
+                    Anda akan menghapus <strong>{{ $konf['nama'] }}</strong>
+                    @if(!empty($konf['nis'])) (NIS: {{ $konf['nis'] }}) @endif
+                    beserta seluruh data berikut, <strong>permanen dan tidak bisa dikembalikan</strong>:
+                </p>
+                <ul class="mb-3">
+                    @foreach($konf['blockers'] as $b)
+                        <li>{{ $b }}</li>
+                    @endforeach
+                </ul>
+                <p class="mb-3 small">
+                    Data keuangan (tagihan &amp; pembayaran) dan akademik (nilai, presensi, rapor, ujian)
+                    milik siswa ini akan ikut terhapus dari seluruh menu. Pastikan ini memang yang Anda inginkan.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <form action="{{ route('admin.users.delete-siswa', $konf['id']) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="konfirmasi_permanen" value="1">
+                        <button type="submit" class="btn btn-danger fw-bold">
+                            <i class="fas fa-trash me-1"></i> Ya, Saya Yakin - Hapus Permanen
+                        </button>
+                    </form>
+                    <a href="{{ route('admin.users.siswa') }}" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> Batal, Jangan Hapus
+                    </a>
+                </div>
+            </div>
+        @endif
+
         {{-- Success Message --}}
 
         {{-- Import Warnings --}}
