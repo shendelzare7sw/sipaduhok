@@ -14,15 +14,43 @@ class PromotionSettingsController extends Controller
     public function index(): View
     {
         $tahunActive = TahunAjaran::where('is_active', true)->firstOrFail();
-        
+
         $setting = DB::table('pengaturan_naik_kelas')
             ->where('tahun_ajaran_id', $tahunActive->id)
             ->first();
 
         return view('admin.akademik.promotion.settings', [
             'tahun' => $tahunActive,
-            'setting' => $setting
+            'setting' => $setting,
+            'promotionReadiness' => $this->checkPromotionReadiness($tahunActive),
         ]);
+    }
+
+    /**
+     * Sama seperti PromotionReportController::index() - dipakai supaya halaman
+     * Pengaturan juga memperingatkan admin SEBELUM mereka set jadwal eksekusi
+     * otomatis, bukan cuma di halaman Proses & Rekap. Kalau TA/kelas baru belum
+     * siap, jadwal yang di-set di sini akan tetap tersimpan tapi eksekusinya nanti
+     * gagal diam-diam (siswa NAIK_KELAS di riwayat tapi kelas_id tidak pernah
+     * pindah, karena findNextClass() tidak menemukan kelas tujuan).
+     */
+    private function checkPromotionReadiness(TahunAjaran $activeYear): array
+    {
+        $nextTahunAjaran = TahunAjaran::where('is_active', false)
+            ->where('tanggal_mulai', '>', $activeYear->tanggal_selesai)
+            ->orderBy('tanggal_mulai', 'asc')
+            ->first();
+
+        $kelasBaruCount = $nextTahunAjaran
+            ? \App\Models\Kelas::where('tahun_ajaran_id', $nextTahunAjaran->id)->count()
+            : 0;
+
+        return [
+            'hasNextTA' => $nextTahunAjaran !== null,
+            'nextTA' => $nextTahunAjaran,
+            'kelasBaruCount' => $kelasBaruCount,
+            'isReady' => $nextTahunAjaran !== null && $kelasBaruCount > 0,
+        ];
     }
 
     public function store(Request $request): RedirectResponse
@@ -34,6 +62,32 @@ class PromotionSettingsController extends Controller
             'waktu_eksekusi' => 'nullable|date_format:H:i',
             'persentase_minimal_tuntas' => 'required|integer|min:0|max:100',
         ]);
+
+        $tahunAjaran = TahunAjaran::findOrFail($validated['tahun_ajaran_id']);
+        $isReady = $this->checkPromotionReadiness($tahunAjaran)['isReady'];
+
+        if ($validated['tanggal_eksekusi'] && ! $isReady) {
+            return back()
+                ->withInput()
+                ->with('error', 'Jadwal eksekusi otomatis tidak bisa diaktifkan: Tahun Ajaran baru dan/atau kelasnya belum dibuat. Buat dulu di menu Tahun Ajaran & Kelas, baru jadwal bisa disetel.');
+        }
+
+        // Field tanggal/waktu eksekusi di-disable di form kalau belum siap, jadi
+        // browser tidak ikut mengirimnya - JANGAN anggap itu sebagai "kosongkan
+        // jadwal", pertahankan jadwal yang sudah tersimpan (kalau ada) supaya tidak
+        // ke-wipe cuma karena admin menyimpan pengaturan lain (mis. tanggal rapor).
+        // Ambil dari PromotionSchedule.scheduled_at (dateTime, presisi jam), BUKAN
+        // dari kolom pengaturan_naik_kelas.tanggal_eksekusi yang cuma date - jamnya
+        // sudah hilang di situ, kalau dipakai malah menimpa jadwal jadi jam 00:00.
+        if (! $isReady && ! $validated['tanggal_eksekusi']) {
+            $existingSchedule = \App\Models\PromotionSchedule::where('tahun_ajaran_id', $validated['tahun_ajaran_id'])
+                ->where('status', 'PENDING')
+                ->first();
+            if ($existingSchedule) {
+                $validated['tanggal_eksekusi'] = $existingSchedule->scheduled_at->format('Y-m-d');
+                $validated['waktu_eksekusi'] = $existingSchedule->scheduled_at->format('H:i');
+            }
+        }
 
         DB::transaction(function () use ($validated, $request) {
             // Parse dates (browser sends yyyy-mm-dd format)
