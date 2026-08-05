@@ -73,7 +73,19 @@
 }
 
 .th-status {
-    width: 100px;
+    /* Dulu width dipaku 100px -> keterangan panjang ("Pindah", "Nonaktif")
+       terdesak sehingga ikon dan teksnya patah jadi dua baris. Pakai min-width
+       supaya kolom boleh melebar mengikuti isi terpanjang. */
+    min-width: 110px;
+    white-space: nowrap;
+}
+
+/* Badge status jangan pernah dipatah di tengah kata. */
+.badge-status {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
 }
 
 .th-actions {

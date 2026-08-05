@@ -360,6 +360,8 @@ class PembayaranController extends Controller
     {
         $siswa = Siswa::findOrFail($siswaId);
 
+        normalisasi_input_rupiah($request, ['jumlah_bayar']);
+
         $request->validate([
             'tagihan_ids' => 'required|array|min:1',
             'tagihan_ids.*' => 'exists:tagihan,id',
@@ -497,6 +499,8 @@ class PembayaranController extends Controller
     public function validasiLangsung(Request $request, $siswaId)
     {
         $siswa = Siswa::findOrFail($siswaId);
+
+        normalisasi_input_rupiah($request, ['jumlah_bayar']);
 
         $request->validate([
             'tagihan_id' => 'required|exists:tagihan,id',

@@ -72,9 +72,14 @@ function initializeSiswaCascadeFilters() {
         const selectedCabangId = cabangSelect.value;
         const selectedJenjang = jenjangSelect.value;
 
-        if (selectedCabangId) {
-            jenjangContainer.style.display = 'block';
+        // Semua filter SELALU terlihat. Dulu Jenjang & Kelas disembunyikan sampai
+        // filter induknya dipilih, sehingga saat dropdown dibuka pertama kali user
+        // hanya melihat Cabang + Status dan mengira filternya tidak lengkap.
+        // Yang menyesuaikan cukup ISI pilihannya, bukan tampil/tidaknya.
+        jenjangContainer.style.display = 'block';
+        kelasContainer.style.display = 'block';
 
+        if (selectedCabangId) {
             const availableJenjangs = new Set();
             allKelasData.forEach((option) => {
                 if (option.value !== '' && option.cabang == selectedCabangId) {
@@ -91,22 +96,20 @@ function initializeSiswaCascadeFilters() {
                 jenjangSelect.value = selectedJenjang;
             }
         } else {
-            jenjangContainer.style.display = 'none';
             rebuildSelect(jenjangSelect, allJenjangData);
         }
 
         const currentJenjang = jenjangSelect.value;
         if (selectedCabangId && currentJenjang) {
-            kelasContainer.style.display = 'block';
-
             const filteredKelas = allKelasData.filter((option) => (
                 option.value === '' ||
                 (option.cabang == selectedCabangId && option.jenjang == currentJenjang)
             ));
             rebuildSelect(kelasSelect, filteredKelas);
         } else {
-            kelasContainer.style.display = 'none';
-            kelasSelect.value = '';
+            // Belum menyaring cabang/jenjang: tampilkan seluruh kelas apa adanya
+            // supaya filter Kelas tetap bisa dipakai langsung.
+            rebuildSelect(kelasSelect, allKelasData);
         }
     };
 
