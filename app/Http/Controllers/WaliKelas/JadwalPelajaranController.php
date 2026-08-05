@@ -87,7 +87,8 @@ class JadwalPelajaranController extends Controller
         $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
-            abort(403, 'Data tenaga pendidik tidak ditemukan.');
+            return redirect()->route('wali.jadwal-pelajaran')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
         if ($this->needsKelasSelection($tenagaPendidik)) {
@@ -97,7 +98,8 @@ class JadwalPelajaranController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (!$kelas) {
-            abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+            return redirect()->route('wali.jadwal-pelajaran')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];

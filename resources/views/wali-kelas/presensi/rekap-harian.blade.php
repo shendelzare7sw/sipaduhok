@@ -16,6 +16,12 @@
 <div class="wk-page">
 <div class="container-fluid px-0">
 
+    @if($error ?? false)
+        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ $error }}
+        </div>
+    @endif
+
     {{-- Header --}}
     <div class="card shadow-sm mb-4 border-start border-primary border-4">
         <div class="card-body">
@@ -31,6 +37,7 @@
         </div>
     </div>
 
+    @if(!($error ?? false))
     {{-- Filter Bulan & Tahun --}}
     <div class="card shadow-sm mb-4">
         <div class="card-body py-3">
@@ -69,7 +76,9 @@
             </form>
         </div>
     </div>
+    @endif
 
+    @if(!($error ?? false))
     {{-- Date List --}}
     @if($dates->isEmpty())
         <div class="card shadow-sm">
@@ -129,6 +138,7 @@
                 </div>
             @endforeach
         </div>
+    @endif
     @endif
 
 </div>

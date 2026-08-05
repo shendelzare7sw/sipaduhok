@@ -20,6 +20,12 @@
         </a>
     </div>
 
+    @if($error ?? false)
+        <div class="alert alert-danger shadow-sm border-start border-danger border-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ $error }}
+        </div>
+    @endif
+
     {{-- FILTER --}}
     <div class="card card-filter shadow-sm mb-4">
         <div class="card-body">

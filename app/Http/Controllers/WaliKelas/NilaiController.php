@@ -282,9 +282,10 @@ class NilaiController extends Controller
         }
 
         $kelas = $this->getSelectedKelas($wali);
-        
+
         if (!$kelas) {
-            abort(404, 'Kelas tidak ditemukan');
+            return redirect()->route('wali.nilai.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
         $kelas->load(['siswa', 'tahunAjaran', 'cabang']);
@@ -405,7 +406,8 @@ class NilaiController extends Controller
         $kelas = $this->getSelectedKelas($wali);
 
         if (!$kelas) {
-            abort(404, 'Kelas tidak ditemukan');
+            return redirect()->route('wali.nilai.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
         $kelas->load(['tahunAjaran', 'cabang']);

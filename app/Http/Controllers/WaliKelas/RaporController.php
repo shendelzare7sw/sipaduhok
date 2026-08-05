@@ -35,6 +35,10 @@ class RaporController extends Controller
     {
         $tenagaPendidik = $this->getTenagaPendidik();
 
+        // NB: modal-modal di bagian bawah view (generate/kirim/terapkan template) berada
+        // DI LUAR blok @if($error)/@else, jadi selalu dirender walau $error true - wajib
+        // ikut kirim jenisRapor/templateMapelList/templatesByMapel di sini juga, kalau
+        // tidak Blade fatal error "Call to a member function ... on null".
         if (! $tenagaPendidik) {
             return view('wali-kelas.rapor.index')->with([
                 'error' => 'Data tenaga pendidik tidak ditemukan.',
@@ -42,7 +46,10 @@ class RaporController extends Controller
                 'kelasList' => collect(),
                 'raporList' => collect(),
                 'semester' => 'ganjil',
+                'jenisRapor' => 'akhir_semester',
                 'statusCount' => ['draft' => 0, 'diterbitkan' => 0],
+                'templateMapelList' => collect(),
+                'templatesByMapel' => collect(),
             ]);
         }
 
@@ -55,7 +62,10 @@ class RaporController extends Controller
                 'kelasList' => collect(),
                 'raporList' => collect(),
                 'semester' => 'ganjil',
+                'jenisRapor' => 'akhir_semester',
                 'statusCount' => ['draft' => 0, 'diterbitkan' => 0],
+                'templateMapelList' => collect(),
+                'templatesByMapel' => collect(),
             ]);
         }
 
