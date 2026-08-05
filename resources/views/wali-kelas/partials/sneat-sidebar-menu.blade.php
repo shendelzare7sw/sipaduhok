@@ -8,20 +8,32 @@
 
 @php
     $currentRoute = Route::currentRouteName();
-    // Get selected kelas from session
+
+    // Kelas yang sah untuk wali ini HANYA yang assignment-nya di TA AKTIF - sama
+    // seperti WaliKelasHelper::getKelasWali(). Tanpa scoping ini, kartu "Kelas Aktif"
+    // bisa nampilin kelas TA lama yang sudah tidak valid (mis. session belum ke-reset
+    // setelah TA baru diaktifkan & wali belum ditugaskan ulang), padahal halaman lain
+    // (rapor, presensi, dst) sudah benar menganggap wali ini "belum ditugaskan".
+    $tenagaPendidik = \App\Models\TenagaPendidik::where('user_id', auth()->id())->first();
+    $kelasAktifWaliIds = collect();
+
+    if ($tenagaPendidik) {
+        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+        $kelasAktifWaliIds = \App\Models\Kelas::whereHas('waliKelasAssignments', function ($q) use ($tenagaPendidik) {
+                $q->where('tenaga_pendidik_id', $tenagaPendidik->id);
+            })
+            ->when($taAktifId, fn ($q) => $q->where('tahun_ajaran_id', $taAktifId))
+            ->pluck('id');
+    }
+
+    $hasMultipleKelas = $kelasAktifWaliIds->count() > 1;
+
+    // Get selected kelas from session, tapi cuma valid kalau masih ada di daftar TA aktif
     $selectedKelasId = session('wali_kelas_selected');
     $selectedKelas = null;
-    $hasMultipleKelas = false;
-    
-    if ($selectedKelasId) {
+
+    if ($selectedKelasId && $kelasAktifWaliIds->contains($selectedKelasId)) {
         $selectedKelas = \App\Models\Kelas::with('cabang')->find($selectedKelasId);
-    }
-    
-    // Check if wali has multiple kelas
-    $tenagaPendidik = \App\Models\TenagaPendidik::where('user_id', auth()->id())->first();
-    if ($tenagaPendidik) {
-        $kelasCount = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tenagaPendidik->id)->count();
-        $hasMultipleKelas = $kelasCount > 1;
     }
 @endphp
 
