@@ -29,7 +29,7 @@ class GuruMateriController extends Controller
 
         $materiList = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+
             ->when(request('tanggal'), function ($q) {
                 return $q->whereDate('tanggal_upload', request('tanggal'));
             })
@@ -174,7 +174,7 @@ class GuruMateriController extends Controller
         $materi = Materi::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $kelas = Kelas::findOrFail($kelasId);
@@ -213,7 +213,7 @@ class GuruMateriController extends Controller
         $materi = Materi::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         // Capture original state for matching in other classes
@@ -308,7 +308,6 @@ class GuruMateriController extends Controller
                     // Try to find existing material in target class to update
                     // Match priorities: 1. By Original File Path (strong link), 2. By Original Title
                     $query = Materi::where('kelas_id', $kelasLainId)
-                        ->where('guru_id', $tenagaPendidik->id)
                         ->where('mata_pelajaran_id', $mapelId);
 
                     $existing = null;
@@ -357,7 +356,7 @@ class GuruMateriController extends Controller
         $materi = Materi::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $filesToDelete = []; // Collect files to delete safely
@@ -366,7 +365,7 @@ class GuruMateriController extends Controller
         // BULK DELETE LOGIC
         if ($request->has('hapus_terkait')) {
             // Cari materi lain dengan Judul, Tipe, dan Guru yang sama di mapel ini (beda kelas)
-            $relatedMateris = Materi::where('guru_id', $tenagaPendidik->id)
+            $relatedMateris = Materi::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mapelId))
                 ->where('mata_pelajaran_id', $mapelId)
                 ->where('judul_materi', $materi->judul_materi)
                 ->where('tipe_file', $materi->tipe_file)
@@ -436,6 +435,23 @@ class GuruMateriController extends Controller
         if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }
+    }
+
+    /**
+     * Kelas mana saja yang guru ini ampu untuk satu mata pelajaran.
+     *
+     * Dipakai oleh fitur lintas-kelas (terapkan/hapus konten serupa di kelas lain).
+     * Dulu dibatasi guru_id = pembuat, sehingga guru PENGGANTI tidak bisa menyentuh
+     * konten guru sebelumnya. Sekarang batasannya "kelas yang saya ampu" - tetap
+     * aman dari IDOR (guru tidak bisa menjangkau kelas yang tidak ia ajar), tapi
+     * serah terima antar guru jadi mulus.
+     */
+    private function kelasDiampu(int $guruId, int $mapelId): array
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->pluck('kelas_id')
+            ->all();
     }
 
     private function hasAccess($guruId, $kelasId, $mapelId): bool

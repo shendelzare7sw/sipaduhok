@@ -31,7 +31,7 @@ class GuruTugasController extends Controller
 
         $tugasList = Tugas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+
             ->withCount([
                 'tugasSiswa as submitted_count' => function ($query) {
                     $query->where('status', '!=', 'belum_dikerjakan');
@@ -159,7 +159,7 @@ class GuruTugasController extends Controller
         $tugas = Tugas::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $kelas = Kelas::findOrFail($kelasId);
@@ -197,7 +197,7 @@ class GuruTugasController extends Controller
         $tugas = Tugas::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         // Capture original state for matching in other classes
@@ -258,7 +258,6 @@ class GuruTugasController extends Controller
             foreach ($kelasTambahan as $kelasLainId) {
                 if ($this->hasAccess($tenagaPendidik->id, $kelasLainId, $mapelId)) {
                     $query = Tugas::where('kelas_id', $kelasLainId)
-                        ->where('guru_id', $tenagaPendidik->id)
                         ->where('mata_pelajaran_id', $mapelId);
 
                     $existing = null;
@@ -304,7 +303,7 @@ class GuruTugasController extends Controller
         $tugas = Tugas::where('id', $id)
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
+            
             ->firstOrFail();
 
         $filesToDelete = [];
@@ -312,7 +311,7 @@ class GuruTugasController extends Controller
 
         // BULK DELETE LOGIC
         if ($request->has('hapus_terkait')) {
-            $relatedTugas = Tugas::where('guru_id', $tenagaPendidik->id)
+            $relatedTugas = Tugas::whereIn('kelas_id', $this->kelasDiampu($tenagaPendidik->id, $mapelId))
                 ->where('mata_pelajaran_id', $mapelId)
                 ->where('judul_tugas', $tugas->judul_tugas)
                 ->where('id', '!=', $tugas->id)
@@ -381,6 +380,23 @@ class GuruTugasController extends Controller
         if (!$this->hasAccess($guruId, $kelasId, $mapelId)) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }
+    }
+
+    /**
+     * Kelas mana saja yang guru ini ampu untuk satu mata pelajaran.
+     *
+     * Dipakai oleh fitur lintas-kelas (terapkan/hapus konten serupa di kelas lain).
+     * Dulu dibatasi guru_id = pembuat, sehingga guru PENGGANTI tidak bisa menyentuh
+     * konten guru sebelumnya. Sekarang batasannya "kelas yang saya ampu" - tetap
+     * aman dari IDOR (guru tidak bisa menjangkau kelas yang tidak ia ajar), tapi
+     * serah terima antar guru jadi mulus.
+     */
+    private function kelasDiampu(int $guruId, int $mapelId): array
+    {
+        return GuruPengajarKelas::where('tenaga_pendidik_id', $guruId)
+            ->where('mata_pelajaran_id', $mapelId)
+            ->pluck('kelas_id')
+            ->all();
     }
 
     private function hasAccess($guruId, $kelasId, $mapelId): bool

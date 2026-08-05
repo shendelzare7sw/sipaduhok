@@ -327,6 +327,20 @@ class UserController extends Controller
         if (($n = \App\Models\WaliKelasAssignment::where('tenaga_pendidik_id', $tid)->count()) > 0) {
             $b[] = "{$n} penugasan wali kelas";
         }
+        // Tiga tabel di bawah ini juga ON DELETE CASCADE ke tenaga_pendidik, tapi dulu
+        // TIDAK ikut dicek - jadi guru yang cuma punya data di sini (mis. baru sempat
+        // bikin kelas virtual, belum input nilai) bisa lolos dihapus dan datanya lenyap
+        // diam-diam. Ditutup supaya tidak ada penghapusan yang menghancurkan data
+        // tanpa peringatan.
+        if (($n = \App\Models\LmsMeeting::where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} kelas virtual";
+        }
+        if (($n = \Illuminate\Support\Facades\DB::table('pertemuans')->where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} pertemuan";
+        }
+        if (($n = \Illuminate\Support\Facades\DB::table('catatan_monitoring')->where('guru_id', $tid)->count()) > 0) {
+            $b[] = "{$n} catatan monitoring";
+        }
 
         return $b;
     }
@@ -400,9 +414,11 @@ class UserController extends Controller
 
             if (! empty($blockers)) {
                 return redirect_to_previous('admin.users.tenaga-pendidik')->with('error',
-                    'Tenaga pendidik ini tidak dapat dihapus karena masih terhubung ke data ('.implode(', ', $blockers).'). '
-                    .'Menghapusnya akan ikut menghilangkan NILAI SISWA & RAPOR secara permanen. '
-                    .'Untuk menjaga data, NONAKTIFKAN akun ini (ubah status menjadi Nonaktif), jangan dihapus.');
+                    'Tenaga pendidik ini TIDAK DAPAT DIHAPUS karena masih terhubung ke data ('.implode(', ', $blockers).'). '
+                    .'Berbeda dengan menghapus siswa yang hanya memusnahkan datanya sendiri, menghapus guru akan ikut '
+                    .'memusnahkan NILAI, UJIAN, dan TUGAS milik BANYAK SISWA LAIN secara permanen. '
+                    .'Kalau guru ini sudah tidak mengajar: NONAKTIFKAN akunnya, lalu tugaskan guru pengganti di kelas & '
+                    .'mata pelajaran terkait - guru baru otomatis bisa melanjutkan materi, tugas, dan ujian yang sudah ada.');
             }
 
             $user = $tenagaPendidik->user;
