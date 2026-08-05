@@ -278,13 +278,17 @@
 }
 
 .modal .modal-content .disp-modal-header .btn-close.disp-close-btn {
+    /* Dulu top/right -15px -> tombol menggantung DI LUAR sudut modal: mudah
+       ketutup elemen lain, dan pada layar sempit bisa keluar viewport sehingga
+       modal jadi sulit ditutup. Dipindah ke DALAM header, sejajar padding-nya,
+       konsisten dengan modal lain di aplikasi. */
     position: absolute !important;
-    top: -15px !important;
-    right: -15px !important;
+    top: 0.75rem !important;
+    right: 0.75rem !important;
     margin: 0 !important;
     z-index: 1055 !important;
-    box-shadow: 0 0.125rem 0.25rem rgba(161, 172, 184, 0.4) !important;
     background-color: #fff !important;
+    border-radius: 50% !important;
 }
 
 

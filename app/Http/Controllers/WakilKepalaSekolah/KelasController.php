@@ -131,11 +131,21 @@ class KelasController extends Controller
         $userCabangId = $this->getUserCabangId();
         $userCabang = auth()->user()->cabang;
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+        // Penugasan wajib di-eager-load DAN di-scope ke cabang + TA aktif. Kalau
+        // tidak, blade memicu lazy-load yang menarik SELURUH penugasan lintas cabang
+        // & lintas tahun ajaran, sehingga badge "Mengajar 3A/6A/..." menampilkan
+        // penugasan TA lama yang sudah tidak berlaku.
+        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
         $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) use ($userCabangId) {
             $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
                 ->where('is_active', true)
                 ->where('cabang_id', $userCabangId);
-        })->orderBy('nama_lengkap')->get();
+        })->with(['waliKelasAssignments' => function ($q) use ($userCabangId, $taAktifId) {
+            $q->whereHas('kelas', function ($k) use ($userCabangId, $taAktifId) {
+                $k->where('cabang_id', $userCabangId)
+                    ->when($taAktifId, fn ($kk) => $kk->where('tahun_ajaran_id', $taAktifId));
+            })->with('kelas');
+        }])->orderBy('nama_lengkap')->get();
 
         return view('waka.kelas.create', compact('tahunAjarans', 'userCabang', 'jenjangs', 'waliKelasOptions'));
     }
@@ -222,11 +232,21 @@ class KelasController extends Controller
         $userCabangId = $this->getUserCabangId();
         $userCabang = auth()->user()->cabang;
         $jenjangs = ['KB', 'TKA', 'TKB', 'SD', 'SMP', 'SMA'];
+        // Penugasan wajib di-eager-load DAN di-scope ke cabang + TA aktif. Kalau
+        // tidak, blade memicu lazy-load yang menarik SELURUH penugasan lintas cabang
+        // & lintas tahun ajaran, sehingga badge "Mengajar 3A/6A/..." menampilkan
+        // penugasan TA lama yang sudah tidak berlaku.
+        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
         $waliKelasOptions = TenagaPendidik::whereHas('user', function ($q) use ($userCabangId) {
             $q->whereIn('role', ['wali_kelas', 'guru_pengajar'])
                 ->where('is_active', true)
                 ->where('cabang_id', $userCabangId);
-        })->orderBy('nama_lengkap')->get();
+        })->with(['waliKelasAssignments' => function ($q) use ($userCabangId, $taAktifId) {
+            $q->whereHas('kelas', function ($k) use ($userCabangId, $taAktifId) {
+                $k->where('cabang_id', $userCabangId)
+                    ->when($taAktifId, fn ($kk) => $kk->where('tahun_ajaran_id', $taAktifId));
+            })->with('kelas');
+        }])->orderBy('nama_lengkap')->get();
 
         return view('waka.kelas.edit', compact('kelas', 'tahunAjarans', 'userCabang', 'jenjangs', 'waliKelasOptions'));
     }

@@ -60,11 +60,19 @@ class WaliKelasController extends Controller
 
     private function getWaliKelasOptions(int $userCabangId)
     {
+        // Penugasan di-scope ke TA AKTIF, bukan cuma cabang. Tanpa filter tahun
+        // ajaran, badge "Mengajar 3A/6A/..." di modal pilih wali kelas menampilkan
+        // penugasan tahun ajaran LAMA - menyesatkan, karena pasca ganti TA semua
+        // penugasan lama sudah tidak berlaku sampai admin/waka menugaskan ulang.
+        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+
         return TenagaPendidik::with([
             'user.cabang',
-            'waliKelasAssignments' => function ($query) use ($userCabangId) {
-                $query->whereHas('kelas', fn($kelasQuery) => $kelasQuery->where('cabang_id', $userCabangId))
-                    ->with(['kelas.cabang']);
+            'waliKelasAssignments' => function ($query) use ($userCabangId, $taAktifId) {
+                $query->whereHas('kelas', function ($kelasQuery) use ($userCabangId, $taAktifId) {
+                    $kelasQuery->where('cabang_id', $userCabangId)
+                        ->when($taAktifId, fn ($k) => $k->where('tahun_ajaran_id', $taAktifId));
+                })->with(['kelas.cabang']);
             },
         ])
             ->whereHas('user', function ($query) use ($userCabangId) {
