@@ -408,17 +408,21 @@ class UserController extends Controller
             $user = $tenagaPendidik->user;
             $tenagaPendidik->delete();
             if ($user) {
+                $this->bersihkanSesiUser($user->id);
                 $user->delete();
             }
         } else {
             // If profile not found, maybe we are trying to delete a User by ID directly
             $user = User::find($id);
             if ($user && in_array($user->role, ['ketua_pkbm', 'wakil_kepala_sekolah', 'sekretaris', 'bendahara', 'wali_kelas', 'guru_pengajar'])) {
+                $this->bersihkanSesiUser($user->id);
                 $user->delete();
             } else {
                 abort(404);
             }
         }
+
+        $this->bersihkanNotifikasiYatim();
 
         return redirect_to_previous('admin.users.tenaga-pendidik')->with('success', 'Tenaga Pendidik berhasil dihapus!');
     }
@@ -920,6 +924,8 @@ class UserController extends Controller
      * harus dibersihkan manual:
      *   - jadwal_pelajaran.siswa_ids : kolom JSON tanpa foreign key, jadi ID siswa
      *     yang sudah dihapus akan tertinggal di situ (sampah).
+     *   - sessions.user_id : juga tanpa foreign key, sesi login milik user yang sudah
+     *     dihapus akan menggantung (sampah + sesi yatim yang tidak seharusnya ada).
      *   - baris users milik siswa : menghapus user justru meng-cascade siswa, tapi
      *     urutannya dibalik supaya guard/relasi lain aman.
      */
@@ -946,8 +952,81 @@ class UserController extends Controller
 
             // Hapus siswa lebih dulu (memicu cascade seluruh tabel anak), lalu akunnya.
             $siswa->delete();
-            $user?->delete();
+
+            if ($user) {
+                $this->bersihkanSesiUser($user->id);
+                $user->delete();
+            }
+
+            $this->bersihkanNotifikasiYatim();
         });
+    }
+
+    /**
+     * Buang notifikasi yang menunjuk record yang sudah tidak ada.
+     *
+     * Notifikasi MILIK user yang dihapus memang ikut cascade lewat
+     * notifications.user_id. Yang tidak ikut: notifikasi ke user LAIN yang
+     * membicarakan record milik user tadi. Contoh nyata yang ditemukan saat
+     * menghapus akun siswa uji - tiga baris "testuser2 membayar Rp 100.000 untuk
+     * <siswa>" nangkring di kotak Admin & Bendahara dengan data = {"siswa_id": 233},
+     * menunjuk siswa yang sudah lenyap.
+     *
+     * Menghapus siswa juga meng-cascade ujian_siswa/tugas_siswa/presensi miliknya,
+     * jadi notifikasi yang membawa ID tabel-tabel itu ikut jadi yatim. Karena itu
+     * pembersihan dibuat generik (menyapu semua kunci referensi yang dipakai di
+     * notifications.data) dan dipanggil di SEMUA jalur hapus akun - siswa, tenaga
+     * pendidik, maupun wali siswa - bukan cuma siswa.
+     */
+    private function bersihkanNotifikasiYatim(): void
+    {
+        // kunci di notifications.data => tabel yang seharusnya memuat ID tersebut
+        $referensi = [
+            'siswa_id' => 'siswa',
+            'ujian_siswa_id' => 'ujian_siswa',
+            'tugas_siswa_id' => 'tugas_siswa',
+            'presensi_id' => 'presensi',
+            'catatan_id' => 'catatan',
+            'catatan_monitoring_id' => 'catatan_monitoring',
+            'materi_id' => 'materi',
+            'tugas_id' => 'tugas',
+            'ujian_id' => 'ujian',
+            'forum_id' => 'forum_diskusi',
+            'kelas_id' => 'kelas',
+            'mapel_id' => 'mata_pelajaran',
+            'ticket_id' => 'recovery_tickets',
+            'wali_kelas_assignment_id' => 'wali_kelas_assignments',
+        ];
+
+        foreach ($referensi as $kunci => $tabel) {
+            \Illuminate\Support\Facades\DB::table('notifications')
+                ->whereNotNull('data->'.$kunci)
+                ->whereNotExists(function ($q) use ($tabel, $kunci) {
+                    $q->select(\Illuminate\Support\Facades\DB::raw(1))
+                        ->from($tabel)
+                        ->whereColumn(
+                            $tabel.'.id',
+                            \Illuminate\Support\Facades\DB::raw(
+                                'CAST(JSON_UNQUOTE(JSON_EXTRACT(notifications.data, \'$."'.$kunci.'"\')) AS UNSIGNED)'
+                            )
+                        );
+                })
+                ->delete();
+        }
+    }
+
+    /**
+     * Hapus baris sessions milik user. Tabel sessions TIDAK punya foreign key ke
+     * users, jadi tanpa ini sesi login milik akun yang sudah dihapus akan
+     * menggantung selamanya - sampah, sekaligus sesi yatim yang tidak semestinya
+     * masih ada. Dipakai di semua jalur penghapusan akun (siswa, tenaga pendidik,
+     * wali siswa).
+     */
+    private function bersihkanSesiUser(int|array $userIds): void
+    {
+        \Illuminate\Support\Facades\DB::table('sessions')
+            ->whereIn('user_id', (array) $userIds)
+            ->delete();
     }
 
     // --- WALI SISWA ---
@@ -1217,7 +1296,9 @@ class UserController extends Controller
     public function deleteOrangTua(int $id)
     {
         $user = User::where('role', 'orang_tua')->findOrFail($id);
+        $this->bersihkanSesiUser($user->id);
         $user->delete();
+        $this->bersihkanNotifikasiYatim();
 
         return redirect_to_previous('admin.users.wali-siswa')->with('success', 'Akun wali siswa berhasil dihapus!');
     }
@@ -1359,7 +1440,9 @@ class UserController extends Controller
 
         if (! empty($safeUserIds)) {
             TenagaPendidik::whereIn('user_id', $safeUserIds)->delete();
+            $this->bersihkanSesiUser($safeUserIds);
             User::whereIn('id', $safeUserIds)->delete();
+            $this->bersihkanNotifikasiYatim();
         }
 
         if ($skipped > 0) {
@@ -1420,7 +1503,11 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data yang dipilih');
         }
 
+        $this->bersihkanSesiUser(
+            User::whereIn('id', $ids)->where('role', 'orang_tua')->pluck('id')->all()
+        );
         User::whereIn('id', $ids)->where('role', 'orang_tua')->delete();
+        $this->bersihkanNotifikasiYatim();
 
         return redirect()->back()->with('success', count($ids).' Data wali siswa berhasil dihapus');
     }

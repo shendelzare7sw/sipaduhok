@@ -137,6 +137,29 @@ class SiswaNonaktifDanHapusBersihTest extends TestCase
             $this->assertSame(0, DB::table('users')->where('id', $target->user_id)->count(),
                 'Akun user siswa harus ikut terhapus');
 
+            // sessions & notifications tidak punya FK yg menutup kasus ini:
+            // - sessions.user_id sama sekali tanpa FK -> sesi yatim.
+            // - notifications milik user lain yg membicarakan siswa ini (data->siswa_id)
+            //   tidak ikut cascade -> referensi menggantung di kotak Admin/Bendahara.
+            $this->assertSame(0, DB::table('sessions')->where('user_id', $target->user_id)->count(),
+                'Sesi login milik akun yang dihapus tidak boleh menggantung');
+            $this->assertSame(0, DB::table('notifications')->where('data->siswa_id', $sid)->count(),
+                'Notifikasi yang menunjuk siswa terhapus harus ikut dibersihkan');
+            foreach (['ujian_siswa_id', 'tugas_siswa_id', 'presensi_id'] as $kunci) {
+                $this->assertSame(0,
+                    DB::table('notifications')
+                        ->whereNotNull('data->'.$kunci)
+                        ->whereNotExists(function ($q) use ($kunci) {
+                            $tabel = ['ujian_siswa_id' => 'ujian_siswa', 'tugas_siswa_id' => 'tugas_siswa', 'presensi_id' => 'presensi'][$kunci];
+                            $q->select(DB::raw(1))->from($tabel)->whereColumn(
+                                $tabel.'.id',
+                                DB::raw('CAST(JSON_UNQUOTE(JSON_EXTRACT(notifications.data, \'$."'.$kunci.'"\')) AS UNSIGNED)')
+                            );
+                        })->count(),
+                    "Notifikasi yatim lewat {$kunci} harus ikut dibersihkan"
+                );
+            }
+
             if ($jadwal) {
                 $sisa = \App\Models\JadwalPelajaran::find($jadwal->id)->siswa_ids ?? [];
                 $this->assertNotContains($sid, $sisa,
