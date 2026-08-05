@@ -286,7 +286,12 @@ Kelola penunjukan wali kelas {{ $currentTahunAjaran ? '- ' . $currentTahunAjaran
                                             @if($hasAssignments)
                                                 <div class="d-flex flex-wrap gap-1 mt-1">
                                                     @foreach($assignedKelasList as $assignment)
-                                                        <span class="badge bg-primary text-white px-2 modal-kelas-badge">Mengajar {{ $assignment->kelas->nama_kelas }}</span>
+                                                        {{-- Jaring pengaman: ->kelas bisa null kalau kelasnya sudah
+                                                             dihapus. Halaman jangan sampai pecah cuma karena satu
+                                                             data tidak lengkap. --}}
+                                                        @if($assignment->kelas)
+                                                            <span class="badge bg-primary text-white px-2 modal-kelas-badge">Mengajar {{ $assignment->kelas->nama_kelas }}</span>
+                                                        @endif
                                                     @endforeach
                                                 </div>
                                             @endif

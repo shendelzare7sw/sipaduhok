@@ -42,7 +42,7 @@
                             <td>
                                 <div class="fw-bold text-dark">{{ $ujian->judul_ujian }}</div>
                                 @if($ujian->deskripsi)
-                                    <small class="text-muted">{{ Str::limit($ujian->deskripsi, 80) }}</small>
+                                    <small class="text-muted">{{ Str::limit($ujian->deskripsi ?? '', 80) }}</small>
                                 @endif
                             </td>
                             <td class="text-center">

@@ -791,7 +791,7 @@
                                     </td>
                                     <td data-label="Log">
                                         <div class="mobile-text-end">
-                                            <small class="text-muted">{{ Str::limit($schedule->execution_log, 50) }}</small>
+                                            <small class="text-muted">{{ Str::limit($schedule->execution_log ?? '', 50) }}</small>
                                         </div>
                                     </td>
                                     <td class="mobile-card-actions">

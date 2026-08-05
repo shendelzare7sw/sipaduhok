@@ -166,7 +166,7 @@
                                 <i class="fas fa-info-circle me-1"></i>Soal essay/uraian - koreksi manual oleh guru.
                                 @if($soal->kunci_jawaban)
                                     <div class="preview-guidance">
-                                        <strong>Pedoman jawaban:</strong> {{ \Illuminate\Support\Str::limit($soal->kunci_jawaban, 200) }}
+                                        <strong>Pedoman jawaban:</strong> {{ \Illuminate\Support\Str::limit($soal->kunci_jawaban ?? '', 200) }}
                                     </div>
                                 @endif
                             </div>

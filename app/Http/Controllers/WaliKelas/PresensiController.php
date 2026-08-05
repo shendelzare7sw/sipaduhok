@@ -747,10 +747,18 @@ class PresensiController extends Controller
     public function downloadTemplate(Request $request)
     {
         $tenagaPendidik = $this->getTenagaPendidik();
-        if (!$tenagaPendidik) abort(403);
+        if (! $tenagaPendidik) {
+            return redirect()->route('wali.presensi.index')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
 
+        // Konsisten dengan halaman presensi lain: pasca ganti tahun ajaran wali
+        // belum ditugaskan, jadi arahkan balik dengan pesan - bukan 403 mentah.
         $kelas = $this->getSelectedKelas($tenagaPendidik);
-        if (!$kelas) abort(403, 'Kelas tidak ditemukan.');
+        if (! $kelas) {
+            return redirect()->route('wali.presensi.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas pada tahun ajaran aktif.');
+        }
 
         $tanggal = $request->get('tanggal', now()->toDateString());
 
