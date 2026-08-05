@@ -7,8 +7,7 @@ use App\Http\Controllers\WaliKelas\Traits\WaliKelasHelper;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use App\Models\TenagaPendidik;
-use App\Models\Kelas;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Siswa;
 use App\Models\Presensi;
 use App\Models\TahunAjaran;
@@ -42,7 +41,7 @@ class PresensiController extends Controller
      * Pastikan kelas yang dituju benar-benar diampu wali. Cegah wali mengubah presensi
      * kelas lain lewat kelas_id sembarang (IDOR lintas-kelas).
      */
-    private function assertKelasMilikWali($kelasId): void
+    private function assertKelasMilikWali(int $kelasId): void
     {
         if (!$this->kelasIdsWali()->contains((int) $kelasId)) {
             abort(403, 'Anda tidak memiliki akses ke kelas ini.');
@@ -52,7 +51,7 @@ class PresensiController extends Controller
     /**
      * Pastikan siswa memang berada di kelas tujuan. Cegah penyisipan siswa kelas lain.
      */
-    private function assertSiswaDiKelas($siswaId, $kelasId): void
+    private function assertSiswaDiKelas(int $siswaId, int $kelasId): void
     {
         $milik = Siswa::where('id', $siswaId)
             ->where('kelas_id', $kelasId)
@@ -224,7 +223,7 @@ class PresensiController extends Controller
                 'status' => $request->status,
                 'keterangan' => $request->keterangan,
                 'status_validasi' => $this->statusValidasiForWaliInput($request->status),
-                'diinput_oleh' => auth()->id(),
+                'diinput_oleh' => Auth::id(),
             ]
         );
 
@@ -306,7 +305,7 @@ class PresensiController extends Controller
     /**
      * Validasi pengajuan izin
      */
-    public function prosesValidasiIzin(Request $request, $presensiId): RedirectResponse
+    public function prosesValidasiIzin(Request $request, int $presensiId): RedirectResponse
     {
         $request->validate([
             'status' => 'required|in:setuju,tolak',
@@ -390,7 +389,7 @@ class PresensiController extends Controller
                     'status' => $data['status'],
                     'keterangan' => $data['keterangan'] ?? null,
                     'status_validasi' => $this->statusValidasiForWaliInput($data['status']),
-                    'diinput_oleh' => auth()->id(),
+                    'diinput_oleh' => Auth::id(),
                 ]
             );
         }
@@ -469,7 +468,7 @@ class PresensiController extends Controller
     /**
      * Update specific presensi record from history
      */
-    public function updateRiwayat(Request $request, $id): RedirectResponse
+    public function updateRiwayat(Request $request, int $id): RedirectResponse
     {
         $presensi = Presensi::with('siswa')->findOrFail($id);
 
@@ -501,7 +500,7 @@ class PresensiController extends Controller
             'status' => $statusToSave,
             'keterangan' => $validated['keterangan'],
             'status_validasi' => $statusValidasi,
-            'diinput_oleh' => auth()->id(),
+            'diinput_oleh' => Auth::id(),
         ]);
 
         return back()->with('success', 'Data presensi berhasil diperbarui.');
@@ -720,7 +719,7 @@ class PresensiController extends Controller
     /**
      * Preview bukti file with inline disposition
      */
-    public function previewBukti($id)
+    public function previewBukti(int $id)
     {
         $presensi = Presensi::with('siswa')->findOrFail($id);
 
@@ -919,7 +918,7 @@ class PresensiController extends Controller
                     'status'      => $statusRaw,
                     'keterangan'  => $keterangan ?: null,
                     'status_validasi' => $this->statusValidasiForWaliInput($statusRaw),
-                    'diinput_oleh' => auth()->id(),
+                    'diinput_oleh' => Auth::id(),
                 ]
             );
             $imported++;

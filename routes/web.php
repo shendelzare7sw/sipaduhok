@@ -84,7 +84,7 @@ use App\Http\Controllers\Siswa\LmsUjianController;
 |--------------------------------------------------------------------------
 */
 
-// Midtrans Webhook (must be outside auth middleware)
+// Midtrans Webhook (outside auth middleware)
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'notification'])->name('midtrans.notification');
 
 // Sitemap
@@ -144,7 +144,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'index'])->name('user.recovery');
     Route::post('/recovery', [\App\Http\Controllers\Auth\UserRecoveryController::class, 'store'])->name('user.recovery.store')
         ->middleware('throttle:5,1');
-    
+
     // Recovery Password Reset via Link
     Route::get('/recovery/reset/{token}', function ($token) {
         $ticket = \App\Models\RecoveryTicket::where('token_reset', $token)
@@ -587,7 +587,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::put('/{id}', [$controller, 'flyerUpdate'])->name('update');
                 Route::delete('/{id}', [$controller, 'flyerDestroy'])->name('destroy');
             });
-            
+
             // Promotion System (Report, KKM, Settings)
             Route::prefix('kenaikan-kelas')->name('kenaikan-kelas.')->group(function () {
                 Route::get('/report', [\App\Http\Controllers\Admin\Akademik\PromotionReportController::class, 'index'])->name('report');
