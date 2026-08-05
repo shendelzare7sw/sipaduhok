@@ -343,6 +343,18 @@ class ManajemenSiswaController extends Controller
         $userCabangId = $this->getUserCabangId();
         $query = Siswa::with(['kelas.waliKelas', 'kelas.tahunAjaran', 'cabang']);
 
+        // Samakan scope tahun ajaran dengan index(). Sebelumnya filter TA tidak ikut
+        // di sini, sehingga hasil CETAK berbeda dari yang tampil di layar - mis. layar
+        // menampilkan 0 siswa (TA baru belum diisi) tapi cetakan tetap keluar 88 siswa
+        // dari TA lama.
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $taFilterId = $request->tahun_ajaran_id ?: ($tahunAjaranAktif?->id);
+        $isHistorical = $taFilterId && $tahunAjaranAktif && $taFilterId != $tahunAjaranAktif->id;
+        $filterNoKelas = ! $isHistorical && $request->boolean('no_kelas');
+        if ($taFilterId && ! $filterNoKelas) {
+            $query->forTahunAjaran($taFilterId);
+        }
+
         // Apply same filters
         if ($request->filled('search')) {
             $search = $request->search;
