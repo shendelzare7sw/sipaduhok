@@ -76,7 +76,15 @@ class SiswaImportStatusTest extends TestCase
             $this->assertEquals(2, $import->getImportedCount(), 'Kedua baris harus terimport: ' . json_encode($import->getWarnings()));
             $this->assertEquals(0, $import->getSkippedCount());
 
-            $nonaktif = Siswa::where('nama_lengkap', 'Nonaktif ' . $sfx)->with('user')->first();
+            // Siswa berakun nonaktif sengaja DISEMBUNYIKAN dari query biasa
+            // (AkunAktifScope) supaya tidak nongol di menu kelas/guru/wali/keuangan.
+            $this->assertNull(
+                Siswa::where('nama_lengkap', 'Nonaktif ' . $sfx)->first(),
+                'Siswa berakun nonaktif harus tersembunyi dari query default'
+            );
+
+            // Tetap ada di database & bisa dilihat halaman pengelolaan admin.
+            $nonaktif = Siswa::termasukNonaktif()->where('nama_lengkap', 'Nonaktif ' . $sfx)->with('user')->first();
             $this->assertNotNull($nonaktif, 'Siswa status nonaktif harus tetap dibuat');
             $this->assertEquals('aktif', $nonaktif->status, 'status akademik tetap aktif (enum valid)');
             $this->assertNotNull($nonaktif->user);

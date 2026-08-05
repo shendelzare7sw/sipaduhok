@@ -124,7 +124,14 @@ class SiswaImport implements ToCollection, WithHeadingRow
             $rawStatus = strtolower(trim((string)($row['status'] ?? 'aktif')));
             if (in_array($rawStatus, ['aktif', 'lulus', 'pindah', 'keluar'], true)) {
                 $siswaStatus = $rawStatus;
-                $isActive = ($rawStatus === 'aktif');
+                // ALUMNI ('lulus') akunnya sengaja TETAP AKTIF - mereka masih harus bisa
+                // login untuk mengecek/melunasi tunggakan, dan tagihannya wajib tetap
+                // terlihat Bendahara (fitur "Alumni Menunggak"). Ini menyamakan perilaku
+                // dengan PromotionService::executeStudentPromotion() yang saat meluluskan
+                // siswa juga memaksa is_active = true. Sebelumnya import menonaktifkan
+                // akun alumni, sehingga alumni + tunggakannya raib dari menu Bendahara.
+                // 'pindah'/'keluar' memang sudah tidak bersekolah -> akun dinonaktifkan.
+                $isActive = in_array($rawStatus, ['aktif', 'lulus'], true);
             } elseif (in_array($rawStatus, ['nonaktif', 'non-aktif', 'non aktif', 'tidak aktif', 'inactive', '0', 'false'], true)) {
                 $siswaStatus = 'aktif';
                 $isActive = false;

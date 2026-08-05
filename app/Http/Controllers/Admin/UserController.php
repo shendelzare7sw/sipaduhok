@@ -361,10 +361,36 @@ class UserController extends Controller
         return $b;
     }
 
+    /**
+     * Peran yang akunnya TIDAK BOLEH dihapus lewat menu manapun.
+     * Admin = pemegang kunci sistem; Ketua PKBM = pejabat tertinggi yang jadi
+     * penyetuju rapor/dispensasi (pengajuan_rapor_ketua memakai FK NO ACTION,
+     * jadi menghapusnya bisa membuat pengajuan menggantung / gagal query).
+     */
+    private const ROLE_TIDAK_BISA_DIHAPUS = ['admin', 'ketua_pkbm'];
+
+    private function tolakHapusRoleDilindungi(?User $user): ?string
+    {
+        if ($user && in_array($user->role, self::ROLE_TIDAK_BISA_DIHAPUS, true)) {
+            $label = $user->role === 'admin' ? 'Admin' : 'Ketua PKBM';
+
+            return "Akun {$label} tidak dapat dihapus demi keamanan sistem. "
+                .'Kalau akun ini sudah tidak dipakai, NONAKTIFKAN saja (ubah status menjadi Nonaktif).';
+        }
+
+        return null;
+    }
+
     public function deleteTenagaPendidik(int $id)
     {
         // Try to find the profile
         $tenagaPendidik = TenagaPendidik::where('id', $id)->orWhere('user_id', $id)->first();
+
+        // Proteksi peran kunci - dicek SEBELUM apapun, di kedua cabang alur.
+        $calonUser = $tenagaPendidik?->user ?? User::find($id);
+        if ($pesan = $this->tolakHapusRoleDilindungi($calonUser)) {
+            return redirect_to_previous('admin.users.tenaga-pendidik')->with('error', $pesan);
+        }
 
         if ($tenagaPendidik) {
             // GUARD INTEGRITAS: jangan hard-delete guru yang masih punya jejak akademik.
@@ -401,7 +427,10 @@ class UserController extends Controller
 
     public function siswa(Request $request)
     {
-        $query = Siswa::with('user', 'kelas.tahunAjaran', 'cabang');
+        // termasukNonaktif(): halaman pengelolaan admin HARUS tetap melihat siswa
+        // berakun nonaktif - kalau ikut disembunyikan, admin tidak punya jalan
+        // untuk mengaktifkannya kembali atau menghapusnya.
+        $query = Siswa::termasukNonaktif()->with('user', 'kelas.tahunAjaran', 'cabang');
 
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
@@ -443,7 +472,8 @@ class UserController extends Controller
 
     public function printSiswa(Request $request)
     {
-        $query = Siswa::with('user', 'kelas.tahunAjaran', 'cabang');
+        // Ikut termasukNonaktif() supaya isi cetakan sama persis dgn daftar di layar.
+        $query = Siswa::termasukNonaktif()->with('user', 'kelas.tahunAjaran', 'cabang');
 
         // Handle search parameter
         if ($request->has('search') && $request->search != '') {
@@ -636,7 +666,7 @@ class UserController extends Controller
 
     public function editSiswa(int $id)
     {
-        $siswa = Siswa::with(['user', 'studentParents.parent'])->findOrFail($id);
+        $siswa = Siswa::termasukNonaktif()->with(['user', 'studentParents.parent'])->findOrFail($id);
         $cabangList = Cabang::where('is_active', true)->get();
         $tahunAjaranAktif = \App\Models\TahunAjaran::where('is_active', true)->first();
 
@@ -655,7 +685,7 @@ class UserController extends Controller
 
     public function updateSiswa(Request $request, int $id)
     {
-        $siswa = Siswa::findOrFail($id);
+        $siswa = Siswa::termasukNonaktif()->findOrFail($id);
 
         $validated = $request->validate([
             'nama_lengkap' => 'required|string|max:255',
@@ -834,9 +864,9 @@ class UserController extends Controller
 
     public function showSiswa(int $id)
     {
-        $siswa = Siswa::with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('id', $id)->first();
+        $siswa = Siswa::termasukNonaktif()->with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('id', $id)->first();
         if (! $siswa) {
-            $siswa = Siswa::with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('user_id', $id)->first();
+            $siswa = Siswa::termasukNonaktif()->with(['user', 'kelas', 'cabang', 'studentParents.parent'])->where('user_id', $id)->first();
         }
 
         if (! $siswa) {
@@ -846,29 +876,78 @@ class UserController extends Controller
         return view('admin.users.siswa-show', compact('siswa'));
     }
 
-    public function deleteSiswa(int $id)
+    public function deleteSiswa(Request $request, int $id)
     {
-        $siswa = Siswa::findOrFail($id);
+        $siswa = Siswa::termasukNonaktif()->findOrFail($id);
 
-        // GUARD INTEGRITAS: jangan hard-delete siswa yang masih punya jejak akademik/keuangan.
-        // FK cascade akan ikut memusnahkan nilai, presensi, ujian_siswa/jawaban, rapor,
-        // TAGIHAN & PEMBAYARAN (riwayat keuangan hilang permanen). Ubah status siswa saja.
         $blockers = $this->siswaBlockers($siswa->id);
 
-        if (! empty($blockers)) {
-            return redirect_to_previous('admin.users.siswa')->with('error',
-                'Siswa ini tidak dapat dihapus karena masih memiliki data terkait ('.implode(', ', $blockers).'). '
-                .'Menghapusnya akan menghilangkan RIWAYAT AKADEMIK & KEUANGAN secara permanen. '
-                .'Untuk menjaga data, NONAKTIFKAN akun / ubah status siswa (mis. Lulus atau Keluar), jangan dihapus.');
+        // TAHAP 1 - siswa masih punya jejak akademik/keuangan: JANGAN langsung hapus.
+        // Tampilkan peringatan berisi rincian data yang akan ikut musnah, lalu tawarkan
+        // konfirmasi kedua. Tanpa flag konfirmasi_permanen, penghapusan tidak terjadi.
+        if (! empty($blockers) && ! $request->boolean('konfirmasi_permanen')) {
+            return redirect_to_previous('admin.users.siswa')
+                ->with('error',
+                    'Siswa ini tidak dapat langsung dihapus karena masih memiliki data terkait ('.implode(', ', $blockers).'). '
+                    .'Menghapusnya akan menghilangkan RIWAYAT AKADEMIK & KEUANGAN secara permanen. '
+                    .'Untuk menjaga data, NONAKTIFKAN akun / ubah status siswa (mis. Lulus atau Keluar), jangan dihapus.')
+                ->with('hapus_siswa_konfirmasi', [
+                    'id' => $siswa->id,
+                    'nama' => $siswa->nama_lengkap,
+                    'nis' => $siswa->nis,
+                    'blockers' => $blockers,
+                ]);
         }
 
+        // TAHAP 2 - admin sudah menegaskan lewat konfirmasi kedua (atau memang tidak
+        // ada data terkait sama sekali): hapus permanen sampai bersih.
+        $nama = $siswa->nama_lengkap;
+        $this->hapusSiswaPermanen($siswa);
+
+        return redirect_to_previous('admin.users.siswa')->with('success',
+            "Siswa \"{$nama}\" beserta SELURUH data terkaitnya telah dihapus permanen.");
+    }
+
+    /**
+     * Hapus siswa sampai benar-benar bersih - tidak menyisakan record sampah
+     * yang bisa jadi bug di menu manapun.
+     *
+     * Sebagian besar tabel anak sudah ON DELETE CASCADE ke siswa (nilai, presensi,
+     * tagihan->pembayaran, rapor->rapor_nilai/rapor_kegiatan_ekstra, ujian_siswa->
+     * jawaban_siswa/ujian_pengawasan_logs/ujian_siswa_soal_statuses, tugas_siswa,
+     * student_parents, status_naik_kelas_siswa, izin_naik_kelas_khusus,
+     * pengajuan_rapor_ketua, request_download_rapor). Yang TIDAK ikut otomatis dan
+     * harus dibersihkan manual:
+     *   - jadwal_pelajaran.siswa_ids : kolom JSON tanpa foreign key, jadi ID siswa
+     *     yang sudah dihapus akan tertinggal di situ (sampah).
+     *   - baris users milik siswa : menghapus user justru meng-cascade siswa, tapi
+     *     urutannya dibalik supaya guard/relasi lain aman.
+     */
+    private function hapusSiswaPermanen(Siswa $siswa): void
+    {
+        $siswaId = $siswa->id;
         $user = $siswa->user;
-        $siswa->delete();
-        if ($user) {
-            $user->delete();
-        }
 
-        return redirect_to_previous('admin.users.siswa')->with('success', 'Siswa berhasil dihapus!');
+        \Illuminate\Support\Facades\DB::transaction(function () use ($siswa, $siswaId, $user) {
+            // Bersihkan ID siswa dari kolom JSON jadwal_pelajaran.siswa_ids (tanpa FK).
+            \App\Models\JadwalPelajaran::whereNotNull('siswa_ids')
+                ->get(['id', 'siswa_ids'])
+                ->each(function ($jadwal) use ($siswaId) {
+                    $ids = $jadwal->siswa_ids;
+                    if (! is_array($ids) || ! in_array($siswaId, $ids)) {
+                        return;
+                    }
+                    $jadwal->siswa_ids = array_values(array_filter(
+                        $ids,
+                        fn ($v) => (int) $v !== (int) $siswaId
+                    ));
+                    $jadwal->save();
+                });
+
+            // Hapus siswa lebih dulu (memicu cascade seluruh tabel anak), lalu akunnya.
+            $siswa->delete();
+            $user?->delete();
+        });
     }
 
     // --- WALI SISWA ---
@@ -1301,9 +1380,12 @@ class UserController extends Controller
 
         // GUARD INTEGRITAS: lewati siswa yang masih punya jejak akademik/keuangan
         // (nilai/presensi/ujian/rapor/tagihan/pembayaran ikut cascade bila dihapus).
-        $siswas = Siswa::whereIn('id', $ids)->get();
-        $safeSiswaIds = [];
-        $safeUserIds = [];
+        // Hapus paksa 2 langkah sengaja TIDAK disediakan di aksi massal - terlalu
+        // berisiko; untuk itu pakai tombol hapus per siswa yang ada konfirmasi kedua.
+        // termasukNonaktif() wajib: siswa berakun nonaktif tetap tampil di daftar
+        // (dan bisa dicentang), jadi harus bisa ditemukan di sini juga.
+        $siswas = Siswa::termasukNonaktif()->whereIn('id', $ids)->get();
+        $safeSiswa = [];
         $skipped = 0;
         foreach ($siswas as $siswa) {
             if (! empty($this->siswaBlockers($siswa->id))) {
@@ -1311,17 +1393,15 @@ class UserController extends Controller
 
                 continue;
             }
-            $safeSiswaIds[] = $siswa->id;
-            if ($siswa->user_id) {
-                $safeUserIds[] = $siswa->user_id;
-            }
+            $safeSiswa[] = $siswa;
         }
 
-        if (! empty($safeSiswaIds)) {
-            Siswa::whereIn('id', $safeSiswaIds)->delete();
-            if (! empty($safeUserIds)) {
-                User::whereIn('id', $safeUserIds)->delete();
-            }
+        $safeSiswaIds = array_map(fn ($s) => $s->id, $safeSiswa);
+
+        foreach ($safeSiswa as $siswa) {
+            // Lewat helper yang sama dgn hapus tunggal supaya pembersihan
+            // jadwal_pelajaran.siswa_ids (tanpa FK) ikut jalan di jalur massal.
+            $this->hapusSiswaPermanen($siswa);
         }
 
         if ($skipped > 0) {
