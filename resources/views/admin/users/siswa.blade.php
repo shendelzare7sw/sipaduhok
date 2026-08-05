@@ -114,7 +114,7 @@
                                 </div>
 
                                 {{-- Filter Jenjang (Dependent on Cabang) --}}
-                                <div class="mb-2 {{ request('cabang_id') ? 'd-block' : 'd-none' }}" id="jenjangFilterContainer">
+                                <div class="mb-2" id="jenjangFilterContainer">
                                     <label class="form-label small fw-bold">Jenjang</label>
                                     <select name="jenjang" id="jenjangSelect" class="form-select form-select-sm">
                                         <option value="">Semua Jenjang</option>
@@ -125,7 +125,7 @@
                                 </div>
 
                                 {{-- Filter Kelas (Dependent on Jenjang) --}}
-                                <div class="mb-2 {{ request('jenjang') ? 'd-block' : 'd-none' }}" id="kelasFilterContainer">
+                                <div class="mb-2" id="kelasFilterContainer">
                                     <label class="form-label small fw-bold">Kelas</label>
                                     <select name="kelas_nama" id="kelasSelect" class="form-select form-select-sm">
                                         <option value="">Semua Kelas</option>

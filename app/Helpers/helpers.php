@@ -131,3 +131,64 @@ if (! function_exists('redirect_to_previous')) {
         return redirect()->route($fallbackRoute, $fallbackParams);
     }
 }
+
+/**
+ * Ubah input nominal rupiah berformat Indonesia menjadi angka mentah.
+ *
+ * MASALAH YANG DICEGAH: form uang memakai pemisah ribuan TITIK ("200.000"),
+ * sedangkan PHP membaca titik sebagai pemisah DESIMAL - is_numeric("200.000")
+ * bernilai true dan (int)"200.000" menghasilkan 200. Jadi tagihan Rp 200.000
+ * tersimpan diam-diam sebagai Rp 200: lolos validasi 'numeric', tanpa error,
+ * dan baru ketahuan setelah datanya salah.
+ *
+ * Pembersihan titik sebenarnya sudah dilakukan JavaScript sebelum submit, tapi
+ * nominal uang tidak boleh bergantung pada sisi klien - cukup satu kegagalan JS
+ * (error skrip, autofill, input yang ditambah dinamis, atau request non-browser)
+ * dan angkanya berubah tanpa jejak. Karena itu normalisasi diulang di server.
+ *
+ * Aturan: titik = pemisah ribuan (dibuang). Koma = desimal (dijadikan titik),
+ * mengikuti kebiasaan penulisan Indonesia.
+ */
+if (! function_exists('rupiah_to_number')) {
+    function rupiah_to_number($value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
+
+        $bersih = preg_replace('/[^\d,.\-]/', '', (string) $value);
+        $bersih = str_replace('.', '', $bersih);
+        $bersih = str_replace(',', '.', $bersih);
+
+        return $bersih === '' ? null : $bersih;
+    }
+}
+
+/**
+ * Normalisasi beberapa field nominal sekaligus pada Request, sebelum validasi.
+ * Mendukung notasi titik untuk array, mis. 'tagihan.*'.
+ */
+if (! function_exists('normalisasi_input_rupiah')) {
+    function normalisasi_input_rupiah(\Illuminate\Http\Request $request, array $fields): void
+    {
+        foreach ($fields as $field) {
+            if (str_contains($field, '*')) {
+                $base = rtrim(strtok($field, '*'), '.');
+                $nilai = $request->input($base);
+                if (is_array($nilai)) {
+                    $request->merge([$base => array_map('rupiah_to_number', $nilai)]);
+                }
+
+                continue;
+            }
+
+            if ($request->has($field)) {
+                $request->merge([$field => rupiah_to_number($request->input($field))]);
+            }
+        }
+    }
+}

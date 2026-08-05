@@ -352,16 +352,8 @@ class TagihanController extends Controller
 
         $siswa = Siswa::findOrFail($siswaId);
 
-        // Sanitize currency inputs BEFORE validation
-        // This handles formatted inputs like "200.000" or "1.500.000"
-        // and converts them to pure numbers (200000, 1500000)
-        $tagihanInput = $request->input('tagihan', []);
-        $sanitizedTagihan = [];
-        foreach ($tagihanInput as $key => $value) {
-            // Remove all non-digit characters (dots, commas, spaces, Rp, etc.)
-            $sanitizedTagihan[$key] = preg_replace('/\D/', '', $value) ?: '0';
-        }
-        $request->merge(['tagihan' => $sanitizedTagihan]);
+        // Normalisasi nominal SEBELUM validasi ("200.000" -> "200000").
+        normalisasi_input_rupiah($request, ['tagihan.*']);
 
         $request->validate([
             'tagihan' => 'required|array',
@@ -544,6 +536,11 @@ class TagihanController extends Controller
             ->get();
 
         if ($request->isMethod('post')) {
+            // Normalisasi nominal SEBELUM validasi: "200.000" -> "200000".
+            // Tanpa ini, titik dibaca PHP sebagai desimal sehingga Rp 200.000
+            // lolos validasi 'numeric' lalu tersimpan sebagai Rp 200.
+            normalisasi_input_rupiah($request, ['tagihan.*']);
+
             $request->validate([
                 'kelas_ids' => 'required|array|min:1',
                 'kelas_ids.*' => 'exists:kelas,id',
@@ -718,6 +715,8 @@ class TagihanController extends Controller
      */
     public function storeCustom(Request $request)
     {
+        normalisasi_input_rupiah($request, ['jumlah']);
+
         $request->validate([
             'siswa_ids' => 'required|array|min:1',
             'siswa_ids.*' => 'exists:siswa,id',
@@ -880,6 +879,8 @@ class TagihanController extends Controller
      */
     public function generateSpp(Request $request)
     {
+        normalisasi_input_rupiah($request, ['jumlah_spp']);
+
         // Validasi berbeda berdasarkan target_type
         if ($request->target_type === 'siswa') {
             $request->validate([

@@ -41,19 +41,11 @@
             <div>
                 <div class="greeting">Selamat, {{ $siswa->nama_lengkap }}!</div>
                 <div class="subtext">
-                    Anda telah dinyatakan <strong>LULUS</strong> dari PKBM. Akses Anda terbatas pada arsip akademik -
-                    rapor terakhir, riwayat tugas, dan riwayat ujian/latihan.
+                    Anda telah dinyatakan <strong>LULUS</strong> dari PKBM.
                 </div>
             </div>
         </div>
     </div>
-
-    @if(session('info'))
-        <div class="alert alert-info alert-dismissible fade show">
-            <i class="fas fa-info-circle me-1"></i>{{ session('info') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <div class="alumni-grid">
         <form method="POST" action="{{ route('logout') }}" class="m-0">
