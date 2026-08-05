@@ -406,7 +406,12 @@ class PresensiController extends Controller
         $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
-            abort(403, 'Data tenaga pendidik tidak ditemukan.');
+            return view('wali-kelas.presensi.riwayat', [
+                'error' => 'Data tenaga pendidik tidak ditemukan.',
+                'kelas' => null,
+                'siswaList' => collect(),
+                'riwayat' => new \Illuminate\Pagination\LengthAwarePaginator(collect(), 0, 20),
+            ]);
         }
 
         if ($this->needsKelasSelection($tenagaPendidik)) {
@@ -416,7 +421,12 @@ class PresensiController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (!$kelas) {
-            abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+            return view('wali-kelas.presensi.riwayat', [
+                'error' => 'Anda belum ditugaskan sebagai wali kelas.',
+                'kelas' => null,
+                'siswaList' => collect(),
+                'riwayat' => new \Illuminate\Pagination\LengthAwarePaginator(collect(), 0, 20),
+            ]);
         }
 
         // Get siswa list for filter
@@ -505,7 +515,8 @@ class PresensiController extends Controller
         $tenagaPendidik = $this->getTenagaPendidik();
 
         if (!$tenagaPendidik) {
-            abort(403, 'Data tenaga pendidik tidak ditemukan.');
+            return redirect()->route('wali.presensi.index')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
         }
 
         if ($this->needsKelasSelection($tenagaPendidik)) {
@@ -515,7 +526,8 @@ class PresensiController extends Controller
         $kelas = $this->getSelectedKelas($tenagaPendidik);
 
         if (!$kelas) {
-            abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+            return redirect()->route('wali.presensi.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
         }
 
         $bulan = (int) $request->get('bulan', now()->month);
@@ -576,14 +588,34 @@ class PresensiController extends Controller
     public function rekapHarian(Request $request): View|RedirectResponse
     {
         $tenagaPendidik = $this->getTenagaPendidik();
-        if (!$tenagaPendidik) abort(403, 'Data tenaga pendidik tidak ditemukan.');
+        if (!$tenagaPendidik) {
+            return view('wali-kelas.presensi.rekap-harian', [
+                'error' => 'Data tenaga pendidik tidak ditemukan.',
+                'kelas' => null,
+                'dates' => collect(),
+                'bulan' => now()->month,
+                'tahun' => now()->year,
+                'semester' => null,
+                'tahunAjaran' => null,
+            ]);
+        }
 
         if ($this->needsKelasSelection($tenagaPendidik)) {
             return $this->redirectToPilihKelas();
         }
 
         $kelas = $this->getSelectedKelas($tenagaPendidik);
-        if (!$kelas) abort(403, 'Anda belum ditugaskan sebagai wali kelas.');
+        if (!$kelas) {
+            return view('wali-kelas.presensi.rekap-harian', [
+                'error' => 'Anda belum ditugaskan sebagai wali kelas.',
+                'kelas' => null,
+                'dates' => collect(),
+                'bulan' => now()->month,
+                'tahun' => now()->year,
+                'semester' => null,
+                'tahunAjaran' => null,
+            ]);
+        }
 
         $bulan = (int) $request->get('bulan', now()->month);
         $tahun = (int) $request->get('tahun', now()->year);
@@ -630,14 +662,20 @@ class PresensiController extends Controller
     public function showHarian(Request $request): View|RedirectResponse
     {
         $tenagaPendidik = $this->getTenagaPendidik();
-        if (!$tenagaPendidik) abort(403);
+        if (!$tenagaPendidik) {
+            return redirect()->route('wali.presensi.index')
+                ->with('error', 'Data tenaga pendidik tidak ditemukan.');
+        }
 
         if ($this->needsKelasSelection($tenagaPendidik)) {
             return $this->redirectToPilihKelas();
         }
 
         $kelas = $this->getSelectedKelas($tenagaPendidik);
-        if (!$kelas) abort(403);
+        if (!$kelas) {
+            return redirect()->route('wali.presensi.index')
+                ->with('error', 'Anda belum ditugaskan sebagai wali kelas.');
+        }
 
         if (!$request->filled('tanggal')) {
             return redirect()
