@@ -19,9 +19,13 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Statistics for dashboard
+        // Kelas dihitung per TA aktif saja - tanpa scoping, angkanya menumpuk tiap
+        // ganti TA (45 kelas jadi 90, lalu 135, dst) karena kelas TA lama tetap ada.
+        $taAktifId = \App\Models\TahunAjaran::where('is_active', true)->value('id');
+
         $totalSiswa = Siswa::where('status', 'aktif')->count();
         $totalGuru = \App\Models\TenagaPendidik::count();
-        $totalKelas = Kelas::count();
+        $totalKelas = Kelas::when($taAktifId, fn ($q) => $q->where('tahun_ajaran_id', $taAktifId))->count();
         $totalUser = User::where('is_active', true)->count();
         
         $siswaBaruBulanIni = Siswa::whereMonth('created_at', now()->month)
