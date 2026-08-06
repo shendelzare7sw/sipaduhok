@@ -81,14 +81,23 @@ class ValidasiAksesController extends Controller
             });
         }
 
+        // Status akses ujian yang SEBENARNYA dialami siswa, dihitung dengan
+        // sumber yang sama persis dengan gerbang di LmsUjianController: murni
+        // sisi keuangan (lunas / validasi Bendahara / dispensasi disetujui).
+        // Sebelumnya halaman ini hanya melihat `validasi_ujian_bendahara`
+        // sehingga tampilannya bisa berbeda dari kenyataan yang dialami siswa.
+        $aksesService = app(\App\Services\ValidasiAksesService::class);
+        $aksesUjian = $siswaList->mapWithKeys(
+            fn ($s) => [$s->id => $aksesService->cekAksesUjian($s)]
+        );
+
         // Filter
         $filterStatus = $request->get('filter');
 
         if ($filterStatus == 'ujian_pending') {
-            $siswaList = $siswaList->where('validasi_ujian_bendahara', true)
-                ->where('validasi_ujian_wali', false);
+            $siswaList = $siswaList->filter(fn ($s) => ! $aksesUjian[$s->id]);
         } elseif ($filterStatus == 'ujian_selesai') {
-            $siswaList = $siswaList->where('validasi_ujian_wali', true);
+            $siswaList = $siswaList->filter(fn ($s) => $aksesUjian[$s->id]);
         } elseif ($filterStatus == 'rapor_pending') {
             $siswaList = $siswaList->where('validasi_rapor_wali', false);
         } elseif ($filterStatus == 'rapor_selesai') {
@@ -97,15 +106,8 @@ class ValidasiAksesController extends Controller
 
         // Count statistik (keys harus match dengan view: ujianValid, raporValid, ujianPending, raporPending)
         $stats = [
-            'ujianPending' => Siswa::where('kelas_id', $kelas->id)
-                ->where('status', 'aktif')
-                ->where('validasi_ujian_bendahara', true)
-                ->where('validasi_ujian_wali', false)
-                ->count(),
-            'ujianValid' => Siswa::where('kelas_id', $kelas->id)
-                ->where('status', 'aktif')
-                ->where('validasi_ujian_wali', true)
-                ->count(),
+            'ujianValid' => $aksesUjian->filter()->count(),
+            'ujianPending' => $aksesUjian->reject()->count(),
             'raporPending' => Siswa::where('kelas_id', $kelas->id)
                 ->where('status', 'aktif')
                 ->where('validasi_rapor_wali', false)
@@ -120,6 +122,7 @@ class ValidasiAksesController extends Controller
             'kelas' => $kelas,
             'kelasList' => $kelasList,
             'siswaList' => $siswaList,
+            'aksesUjian' => $aksesUjian,
             'stats' => $stats,
             'filterStatus' => $filterStatus,
             'search' => $search,

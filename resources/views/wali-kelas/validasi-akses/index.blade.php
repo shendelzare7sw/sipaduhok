@@ -141,7 +141,11 @@
                                         <div class="fw-bold text-gray-900">{{ $siswa->nama_lengkap }}</div>
                                     </td>
                                     <td class="text-center align-middle">
-                                        @if($siswa->validasi_ujian_bendahara)
+                                        {{-- Pakai status akses yang SEBENARNYA dialami siswa
+                                             (sumber sama dengan gerbang ujian), bukan sekadar
+                                             flag validasi_ujian_bendahara - dulu keduanya bisa
+                                             berbeda sehingga layar ini menyesatkan. --}}
+                                        @if($aksesUjian[$siswa->id] ?? false)
                                             <span class="badge bg-success px-3 py-2"><i class="fas fa-check-circle me-1"></i> Akses Terbuka</span>
                                         @else
                                             <span class="badge bg-light border text-muted px-3 py-2"><i class="fas fa-lock me-1"></i> Belum Ada Akses</span>
