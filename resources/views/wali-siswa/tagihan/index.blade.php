@@ -9,6 +9,25 @@
 
 @section('styles')
     @vite(['resources/css/wali-siswa/tagihan/index.css'])
+    <style>
+        .btn-check:checked + .btn-outline-primary,
+        .btn-check:active + .btn-outline-primary,
+        .btn-outline-primary:active,
+        .btn-outline-primary:hover,
+        .btn-outline-primary.active,
+        .btn-outline-primary.dropdown-toggle.show {
+            color: #fff !important;
+        }
+        
+        .btn-check:checked + .btn-outline-info,
+        .btn-check:active + .btn-outline-info,
+        .btn-outline-info:active,
+        .btn-outline-info:hover,
+        .btn-outline-info.active,
+        .btn-outline-info.dropdown-toggle.show {
+            color: #fff !important;
+        }
+    </style>
 @endsection
 
 @section('content')
