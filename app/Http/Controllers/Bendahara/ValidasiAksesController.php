@@ -216,6 +216,15 @@ class ValidasiAksesController extends Controller
                 'tanggal_validasi_ujian_wali' => null,
             ]);
 
+            // Batalkan juga dispensasi (PengajuanRaporKetua) jika ada dan statusnya disetujui
+            \App\Models\PengajuanRaporKetua::where('siswa_id', $siswa->id)
+                ->where('tipe', 'ujian')
+                ->where('status', 'disetujui')
+                ->update([
+                    'status' => 'ditolak',
+                    'catatan_ketua' => 'Dispensasi dibatalkan/ditarik oleh ' . (auth()->user()->name ?? 'Validator')
+                ]);
+
             // Notify wali siswa and siswa
             $notificationService = app(NotificationService::class);
             $notificationService->notifyValidasiAksesUjian($siswa, 'dibatalkan');
@@ -274,6 +283,15 @@ class ValidasiAksesController extends Controller
                 'tanggal_validasi_rapor_bendahara' => null,
                 'validasi_rapor_oleh' => null,
             ]);
+
+            // Batalkan juga dispensasi (PengajuanRaporKetua) jika ada dan statusnya disetujui
+            \App\Models\PengajuanRaporKetua::where('siswa_id', $siswa->id)
+                ->where('tipe', 'rapor')
+                ->where('status', 'disetujui')
+                ->update([
+                    'status' => 'ditolak',
+                    'catatan_ketua' => 'Dispensasi dibatalkan/ditarik oleh ' . (auth()->user()->name ?? 'Validator')
+                ]);
 
             // Notify wali siswa
             $notificationService = app(NotificationService::class);
@@ -429,7 +447,28 @@ class ValidasiAksesController extends Controller
             }
 
             $count = $query->count();
+            $siswaIds = $query->pluck('id');
             $query->update($updateFields);
+
+            // Batalkan dispensasi (PengajuanRaporKetua) jika tipe sesuai
+            if ($request->tipe === 'ujian' || $request->tipe === 'semua') {
+                \App\Models\PengajuanRaporKetua::whereIn('siswa_id', $siswaIds)
+                    ->where('tipe', 'ujian')
+                    ->where('status', 'disetujui')
+                    ->update([
+                        'status' => 'ditolak',
+                        'catatan_ketua' => 'Dibatalkan melalui fitur Reset Validasi oleh ' . (auth()->user()->name ?? 'Sistem')
+                    ]);
+            }
+            if ($request->tipe === 'rapor' || $request->tipe === 'semua') {
+                \App\Models\PengajuanRaporKetua::whereIn('siswa_id', $siswaIds)
+                    ->where('tipe', 'rapor')
+                    ->where('status', 'disetujui')
+                    ->update([
+                        'status' => 'ditolak',
+                        'catatan_ketua' => 'Dibatalkan melalui fitur Reset Validasi oleh ' . (auth()->user()->name ?? 'Sistem')
+                    ]);
+            }
 
             DB::commit();
             return redirect()->back()->with('success', "Validasi berhasil direset untuk {$count} siswa.");
