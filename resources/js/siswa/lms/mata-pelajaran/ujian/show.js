@@ -555,9 +555,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (response.ok) {
                         const html = await response.text();
-                        document.open();
-                        document.write(html);
-                        document.close();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        // Import CSS and JS from the new head
+                        Array.from(doc.head.querySelectorAll('link[rel="stylesheet"], script[src]')).forEach(child => {
+                            const isLink = child.tagName === 'LINK';
+                            const url = isLink ? child.href : child.src;
+                            if (url && !document.head.querySelector(`${isLink ? 'link' : 'script'}[${isLink ? 'href' : 'src'}="${url}"]`)) {
+                                const newChild = document.createElement(child.tagName);
+                                Array.from(child.attributes).forEach(attr => newChild.setAttribute(attr.name, attr.value));
+                                document.head.appendChild(newChild);
+                            }
+                        });
+
+                        // Replace body content without destroying document.documentElement
+                        document.body.innerHTML = doc.body.innerHTML;
+                        document.body.className = doc.body.className;
+
+                        // Re-initialize exam since DOMContentLoaded won't fire again
+                        const newWorkPage = document.querySelector('.siswa-lms-ujian-work-page');
+                        if (newWorkPage) {
+                            setupExam(newWorkPage);
+                        }
                     } else {
                         formMulai.submit(); // fallback
                     }
