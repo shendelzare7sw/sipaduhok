@@ -897,7 +897,8 @@ class TagihanController extends Controller
             $request->validate([
                 'target_type' => 'required|in:kelas,siswa',
                 'tipe_spp' => 'required|in:setahun,sebagian',
-                'target_id' => 'required|exists:kelas,id',
+                'kelas_ids' => 'required|array|min:1',
+                'kelas_ids.*' => 'exists:kelas,id',
                 'jumlah_spp' => 'required|numeric|min:1',
                 'tanggal_jatuh_tempo' => 'required|integer|min:1|max:31',
                 'bulan_mulai' => 'required|integer|min:1|max:12',
@@ -913,7 +914,7 @@ class TagihanController extends Controller
 
         // Tentukan daftar siswa berdasarkan target
         if ($request->target_type === 'kelas') {
-            $siswaList = Siswa::where('kelas_id', $request->target_id)
+            $siswaList = Siswa::whereIn('kelas_id', $request->kelas_ids)
                 ->where('status', 'aktif')
                 ->get();
         } else {
