@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Ketua / 05 Approval Kenaikan Kelas ketua.kenaikan-kelas.approval.index · ketua/promotion/approval.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Ketua / 05 Approval Kenaikan Kelas <span>ketua.kenaikan-kelas.approval.index · ketua/promotion/approval.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.approval"
+     data-title="Approval Dispensasi Kenaikan" data-subtitle="Siswa yang tidak memenuhi syarat otomatis naik kelas" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="alert info"><i class="fas fa-info-circle"></i> Daftar ini berisi siswa yang <strong>tidak lolos kriteria otomatis</strong> (nilai di bawah KKM atau kehadiran kurang) dan memerlukan keputusan manual.</div>
+
+    <div class="card">
+        <div class="toolbar">
+            <select class="control" style="width:180px"><option>Semua Jenjang</option></select>
+            <select class="control" style="width:180px"><option>Semua Kelas</option></select>
+            <div class="spacer"></div>
+            <span class="muted small">Batas keputusan: 30 Juni 2026</span>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas Asal</th><th>Kelas Tujuan</th><th>Alasan Tertahan</th><th class="num">Rata-rata</th><th>Kehadiran</th><th>Rekomendasi</th><th style="width:200px">Keputusan</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>11 IPA</td>
+                    <td><span class="badge danger">2 mapel &lt; KKM</span></td><td class="num strong">68,4</td><td><span class="badge success">92%</span></td>
+                    <td><span class="badge warning">Pertimbangkan</span></td>
+                    <td><a class="btn success sm"><i class="fas fa-arrow-up"></i> Naik</a> <a class="btn danger sm"><i class="fas fa-repeat"></i> Tinggal</a></td></tr>
+                <tr><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>9B</td>
+                    <td><span class="badge warning">Kehadiran &lt; 85%</span></td><td class="num strong">76,1</td><td><span class="badge warning">82%</span></td>
+                    <td><span class="badge success">Layak Naik</span></td>
+                    <td><a class="btn success sm"><i class="fas fa-arrow-up"></i> Naik</a> <a class="btn danger sm"><i class="fas fa-repeat"></i> Tinggal</a></td></tr>
+                <tr><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>8B</td>
+                    <td><span class="badge danger">4 mapel &lt; KKM</span></td><td class="num strong">61,7</td><td><span class="badge danger">74%</span></td>
+                    <td><span class="badge danger">Tidak Disarankan</span></td>
+                    <td><a class="btn success sm"><i class="fas fa-arrow-up"></i> Naik</a> <a class="btn danger sm"><i class="fas fa-repeat"></i> Tinggal</a></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Cetak Laporan ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

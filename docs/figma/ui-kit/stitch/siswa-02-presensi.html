@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Siswa / 02 Presensi siswa.sia.presensi.index · siswa/sia/presensi/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Siswa / 02 Presensi <span>siswa.sia.presensi.index · siswa/sia/presensi/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="siswa" data-active="siswa.presensi"
+     data-title="Presensi Saya" data-subtitle="Semester Genap TA 2025/2026" data-user="A|Ahmad Fauzi">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-check"></i></div>
+            <div class="stat-details"><div class="stat-value">108</div><div class="stat-label">Hadir</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-envelope"></i></div>
+            <div class="stat-details"><div class="stat-value">3</div><div class="stat-label">Izin</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-bed"></i></div>
+            <div class="stat-details"><div class="stat-value">2</div><div class="stat-label">Sakit</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon red"><i class="fas fa-xmark"></i></div>
+            <div class="stat-details"><div class="stat-value">0</div><div class="stat-label">Alpa</div></div></div></div>
+    </div>
+
+    <div class="card mb-20"><div class="card-body">
+        <div class="row between" style="margin-bottom:8px"><span class="strong">Persentase Kehadiran Semester Ini</span><span class="strong" style="font-size:20px;color:#047857">95,6%</span></div>
+        <div class="progress" style="height:12px"><i style="width:95.6%"></i></div>
+        <p class="small muted" style="margin:10px 0 0">Batas minimal kehadiran untuk mengikuti ujian akhir adalah 85%.</p>
+    </div></div>
+
+    <div class="card">
+        <div class="toolbar">
+            <select class="control" style="width:170px"><option>Januari 2026</option></select>
+            <div class="pill-tab"><a class="active">Semua</a><a>Tidak Hadir</a></div>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-print"></i> Cetak Rekap</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:180px">Tanggal</th><th>Hari</th><th>Status</th><th>Keterangan</th><th>Dicatat Oleh</th></tr></thead>
+            <tbody>
+                <tr><td class="cell-main">15 Januari 2026</td><td>Kamis</td><td><span class="badge success">Hadir</span></td><td class="muted small">—</td><td>Dewi Lestari</td></tr>
+                <tr><td class="cell-main">14 Januari 2026</td><td>Rabu</td><td><span class="badge success">Hadir</span></td><td class="muted small">—</td><td>Dewi Lestari</td></tr>
+                <tr><td class="cell-main">13 Januari 2026</td><td>Selasa</td><td><span class="badge warning">Izin</span></td><td class="small">Acara keluarga — disetujui wali kelas</td><td>Dewi Lestari</td></tr>
+                <tr><td class="cell-main">12 Januari 2026</td><td>Senin</td><td><span class="badge success">Hadir</span></td><td class="muted small">—</td><td>Dewi Lestari</td></tr>
+                <tr><td class="cell-main">09 Januari 2026</td><td>Jumat</td><td><span class="badge info">Sakit</span></td><td class="small">Demam, disertai surat dokter</td><td>Dewi Lestari</td></tr>
+                <tr><td class="cell-main">08 Januari 2026</td><td>Kamis</td><td><span class="badge success">Hadir</span></td><td class="muted small">—</td><td>Dewi Lestari</td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Dashboard LMS ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

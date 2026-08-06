@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Wali Siswa / 01 Dashboard wali-siswa.dashboard · wali-siswa/dashboard.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Kartu anak "Bayar"  →  wali-siswa-02-tagihan-anak
+  Kartu anak "Rapor"  →  wali-siswa-05-detail-rapor
+  Kartu anak "Presensi" → "Ajukan Izin"  →  wali-siswa-06-ajukan-izin
+  Sidebar child > "Tagihan"  →  wali-siswa-02-tagihan-anak
+  Sidebar child > "Rapor"  →  wali-siswa-05-detail-rapor
+-->
+
+<div class="screen-label">Wali Siswa / 01 Dashboard <span>wali-siswa.dashboard · wali-siswa/dashboard.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="wali-siswa" data-active="wali-siswa.dashboard"
+     data-title="Dashboard" data-subtitle="Rahmat Hidayat — 2 anak terdaftar" data-user="R|Rahmat Hidayat">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-exclamation-triangle"></i> <strong>Siti Nurhaliza</strong> memiliki tunggakan Rp 600.000. Akses ujian dan rapor akan dibatasi bila melewati 2 bulan.</div>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <div style="background:linear-gradient(135deg,#4361ee,#2b4162);padding:24px;border-radius:12px 12px 0 0;color:#fff" class="row">
+                <div class="avatar-initial" style="width:58px;height:58px;font-size:22px;background:rgba(255,255,255,.22)">AF</div>
+                <div><div style="font-size:19px;font-weight:700">Ahmad Fauzi Ramadhan</div>
+                    <div class="small" style="opacity:.85">Kelas 7A · Paket B · Cabang Pusat</div></div>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-3 mb-20" style="gap:12px">
+                    <div class="tac" style="padding:12px;background:#ecfdf5;border-radius:10px">
+                        <div style="font-size:22px;font-weight:700;color:#047857">96%</div><div class="xsmall muted">Kehadiran</div></div>
+                    <div class="tac" style="padding:12px;background:#eff6ff;border-radius:10px">
+                        <div style="font-size:22px;font-weight:700;color:#2563eb">85,2</div><div class="xsmall muted">Rata-rata</div></div>
+                    <div class="tac" style="padding:12px;background:#ecfdf5;border-radius:10px">
+                        <div style="font-size:22px;font-weight:700;color:#047857">Lunas</div><div class="xsmall muted">Keuangan</div></div>
+                </div>
+                <div class="row" style="gap:8px">
+                    <a class="btn ghost sm" style="flex:1;justify-content:center"><i class="fas fa-calendar-check"></i> Presensi</a>
+                    <a class="btn ghost sm" style="flex:1;justify-content:center"><i class="fas fa-credit-card"></i> Tagihan</a>
+                    <a class="btn ghost sm" style="flex:1;justify-content:center"><i class="fas fa-file-alt"></i> Rapor</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);padding:24px;border-radius:12px 12px 0 0;color:#fff" class="row">
+                <div class="avatar-initial" style="width:58px;height:58px;font-size:22px;background:rgba(255,255,255,.22)">SN</div>
+                <div><div style="font-size:19px;font-weight:700">Siti Nurhaliza</div>
+                    <div class="small" style="opacity:.85">Kelas 7A · Paket B · Cabang Pusat</div></div>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-3 mb-20" style="gap:12px">
+                    <div class="tac" style="padding:12px;background:#ecfdf5;border-radius:10px">
+                        <div style="font-size:22px;font-weight:700;color:#047857">98%</div><div class="xsmall muted">Kehadiran</div></div>
+                    <div class="tac" style="padding:12px;background:#eff6ff;border-radius:10px">
+                        <div style="font-size:22px;font-weight:700;color:#2563eb">88,7</div><div class="xsmall muted">Rata-rata</div></div>
+                    <div class="tac" style="padding:12px;background:#fffbeb;border-radius:10px">
+                        <div style="font-size:19px;font-weight:700;color:#b45309">Rp 600rb</div><div class="xsmall muted">Tunggakan</div></div>
+                </div>
+                <div class="row" style="gap:8px">
+                    <a class="btn ghost sm" style="flex:1;justify-content:center"><i class="fas fa-calendar-check"></i> Presensi</a>
+                    <a class="btn primary sm" style="flex:1;justify-content:center"><i class="fas fa-credit-card"></i> Bayar</a>
+                    <a class="btn ghost sm" style="flex:1;justify-content:center"><i class="fas fa-file-alt"></i> Rapor</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-bell"></i> Informasi Terbaru</h3></div>
+        <div class="activity">
+            <div class="activity-item"><div class="activity-avatar" style="background:#fee2e2;color:#b91c1c"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div><div class="activity-title">Tagihan SPP Januari untuk Siti Nurhaliza jatuh tempo</div><div class="activity-meta">Sisa Rp 250.000 · jatuh tempo 10 Januari 2026</div></div></div>
+            <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857"><i class="fas fa-check"></i></div>
+                <div><div class="activity-title">Pembayaran SPP Januari Ahmad Fauzi telah divalidasi</div><div class="activity-meta">Rp 450.000 · 14 Januari 2026</div></div></div>
+            <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309"><i class="fas fa-calendar-xmark"></i></div>
+                <div><div class="activity-title">Pengajuan izin Ahmad Fauzi disetujui wali kelas</div><div class="activity-meta">13 Januari 2026 · acara keluarga</div></div></div>
+            <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb"><i class="fas fa-bullhorn"></i></div>
+                <div><div class="activity-title">Rapat Wali Murid 28 Januari 2026</div><div class="activity-meta">Pukul 09.00 di Aula Cabang Pusat</div></div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Tagihan Anak ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

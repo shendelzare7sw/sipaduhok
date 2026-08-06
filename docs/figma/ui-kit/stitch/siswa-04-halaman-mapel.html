@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Siswa / 04 Halaman Mapel siswa.lms.mapel.show · siswa/lms/mata-pelajaran/show.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tab "Tugas" → klik tugas  →  siswa-05-kerjakan-tugas
+  Tab "Ujian" → klik ujian  →  siswa-06-ujian-fullscreen ⚡MODE FULLSCREEN, TANPA SIDEBAR⚡
+-->
+
+<div class="screen-label">Siswa / 04 Halaman Mapel <span>siswa.lms.mapel.show · siswa/lms/mata-pelajaran/show.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="siswa" data-active="mapel.mtk"
+     data-title="Matematika" data-subtitle="Hendra Wijaya · Kelas 7A · Semester Genap">
+<div class="content-slot">
+
+    <div class="pill-tab mb-20" style="background:#fff;padding:8px;border-radius:10px;border:1px solid #e2e8f0;display:inline-flex">
+        <a class="active" style="background:#165fac">Materi</a><a>Tugas</a><a>Latihan</a><a>Ujian</a><a>Forum</a><a>Kelas Virtual</a><a>Nilai</a>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-book" style="color:#165fac"></i> Materi Pembelajaran</h3>
+                    <span class="muted small">18 materi</span></div>
+                <div class="card-body" style="padding:0">
+                    <a class="row between" style="padding:18px 24px;border-bottom:1px solid #e2e8f0;text-decoration:none;color:inherit">
+                        <div class="row"><div class="stat-icon" style="width:42px;height:42px;font-size:16px;background:#fee2e2;color:#b91c1c"><i class="fas fa-file-pdf"></i></div>
+                            <div><div class="cell-main">Bangun Ruang Sisi Datar</div><div class="cell-sub">Bab 8 · diunggah 3 hari lalu · PDF + Video</div></div></div>
+                        <span class="badge success"><i class="fas fa-check"></i> Sudah dibuka</span></a>
+                    <a class="row between" style="padding:18px 24px;border-bottom:1px solid #e2e8f0;text-decoration:none;color:inherit">
+                        <div class="row"><div class="stat-icon" style="width:42px;height:42px;font-size:16px;background:#fee2e2;color:#b91c1c"><i class="fas fa-file-pdf"></i></div>
+                            <div><div class="cell-main">Persamaan Linear Satu Variabel</div><div class="cell-sub">Bab 7 · diunggah 1 minggu lalu · PDF</div></div></div>
+                        <span class="badge success"><i class="fas fa-check"></i> Sudah dibuka</span></a>
+                    <a class="row between" style="padding:18px 24px;border-bottom:1px solid #e2e8f0;text-decoration:none;color:inherit">
+                        <div class="row"><div class="stat-icon" style="width:42px;height:42px;font-size:16px;background:#fee2e2;color:#b91c1c"><i class="fas fa-file-pdf"></i></div>
+                            <div><div class="cell-main">Latihan Soal Cerita Aljabar</div><div class="cell-sub">Bab 7 · diunggah 2 minggu lalu · PDF</div></div></div>
+                        <span class="badge success"><i class="fas fa-check"></i> Sudah dibuka</span></a>
+                    <a class="row between" style="padding:18px 24px;text-decoration:none;color:inherit">
+                        <div class="row"><div class="stat-icon" style="width:42px;height:42px;font-size:16px;background:#eff6ff;color:#2563eb"><i class="fas fa-file-powerpoint"></i></div>
+                            <div><div class="cell-main">Statistika Dasar</div><div class="cell-sub">Bab 9 · baru diunggah · Slide</div></div></div>
+                        <span class="badge warning">Belum dibuka</span></a>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-chart-line" style="color:#165fac"></i> Nilai Saya</h3></div>
+                <div class="card-body">
+                    <div class="tac" style="padding:10px 0 18px">
+                        <div style="font-size:42px;font-weight:800;color:#165fac;line-height:1">79</div>
+                        <div class="small muted">Nilai akhir sementara · KKM 70</div>
+                    </div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Rata-rata tugas</span><span class="strong">76</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">UTS</span><span class="strong">74</span></div>
+                    <div class="row between small" style="padding:7px 0"><span class="muted">UAS</span><span class="muted">Belum</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-user-tie" style="color:#165fac"></i> Guru Pengampu</h3></div>
+                <div class="card-body row">
+                    <div class="avatar-initial" style="background:#165fac">H</div>
+                    <div><div class="cell-main">Hendra Wijaya, S.Pd.</div><div class="cell-sub">Matematika · IPA Terpadu</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Kerjakan Tugas ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

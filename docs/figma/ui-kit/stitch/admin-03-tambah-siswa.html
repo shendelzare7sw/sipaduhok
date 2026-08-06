@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Admin / 03 Tambah Siswa admin.users.create-siswa · admin/users/siswa-create.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Simpan Siswa"  →  admin-02-data-siswa (baris baru muncul, status Belum Berkelas)
+  Tombol "Batal"  →  admin-02-data-siswa
+-->
+
+<div class="screen-label">Admin / 03 Tambah Siswa <span>admin.users.create-siswa · admin/users/siswa-create.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="admin" data-active="admin.users.siswa"
+     data-title="Tambah Siswa Baru" data-subtitle="Lengkapi data identitas dan akun peserta didik" data-user="A|Administrator">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-id-card"></i> Data Identitas</h3></div>
+                <div class="card-body">
+                    <div class="grid grid-2">
+                        <div class="field"><label>Nama Lengkap <span class="req">*</span></label><input class="control" placeholder="Sesuai akta kelahiran"></div>
+                        <div class="field"><label>Nama Panggilan</label><input class="control"></div>
+                        <div class="field"><label>NISN <span class="req">*</span></label><input class="control" placeholder="10 digit"><div class="hint">Nomor Induk Siswa Nasional.</div></div>
+                        <div class="field"><label>NIS</label><input class="control" placeholder="Nomor induk internal"></div>
+                        <div class="field"><label>Jenis Kelamin <span class="req">*</span></label><select class="control"><option>Pilih…</option><option>Laki-laki</option><option>Perempuan</option></select></div>
+                        <div class="field"><label>Tanggal Lahir <span class="req">*</span></label><input class="control" type="date"></div>
+                        <div class="field"><label>Tempat Lahir</label><input class="control"></div>
+                        <div class="field"><label>Agama</label><select class="control"><option>Pilih…</option></select></div>
+                    </div>
+                    <div class="field" style="margin-bottom:0"><label>Alamat Domisili</label><textarea class="control" rows="3"></textarea></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-school"></i> Penempatan Akademik</h3></div>
+                <div class="card-body">
+                    <div class="grid grid-3">
+                        <div class="field"><label>Cabang <span class="req">*</span></label><select class="control"><option>Pusat</option></select></div>
+                        <div class="field"><label>Jenjang <span class="req">*</span></label><select class="control"><option>SMP / Paket B</option></select></div>
+                        <div class="field"><label>Kelas</label><select class="control"><option>Belum ditempatkan</option></select></div>
+                    </div>
+                    <div class="field" style="margin-bottom:0"><label>Tahun Ajaran Masuk</label><select class="control"><option>2025/2026 (aktif)</option></select></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-key"></i> Akun Login</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Email <span class="req">*</span></label><input class="control" placeholder="siswa@sipaduhok.sch.id"></div>
+                    <div class="field"><label>Username</label><input class="control"><div class="hint">Kosongkan untuk memakai NISN sebagai username.</div></div>
+                    <div class="field" style="margin-bottom:0"><label>Kata Sandi Awal <span class="req">*</span></label><input class="control" type="password" value="••••••••"><div class="hint">Siswa diminta mengganti saat pertama masuk.</div></div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-user-friends"></i> Hubungkan Wali</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Cari Wali Siswa</label><div class="search"><i class="fas fa-search"></i><input class="control" placeholder="Nama atau nomor WA…"></div></div>
+                    <label class="row small" style="gap:8px;font-weight:400"><input type="checkbox" checked> Wali utama</label>
+                    <label class="row small" style="gap:8px;font-weight:400"><input type="checkbox" checked> Penanggung jawab keuangan</label>
+                    <label class="row small" style="gap:8px;font-weight:400;margin-bottom:0"><input type="checkbox" checked> Dapat mengakses data akademik</label>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20"><i class="fas fa-save"></i> Simpan Siswa</a>
+                <a class="btn ghost block">Batal</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Data Kelas ══════════════════════════════════════════════════ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

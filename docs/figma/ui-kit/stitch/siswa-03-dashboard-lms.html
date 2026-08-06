@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Siswa / 03 Dashboard LMS siswa.lms.dashboard · siswa/lms/dashboard.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Klik kartu "Matematika"  →  siswa-04-halaman-mapel
+  Sidebar "Kembali ke SIA"  →  siswa-01-dashboard-sia ⚡SHELL KEMBALI KE SIA⚡
+-->
+
+<div class="screen-label">Siswa / 03 Dashboard LMS <span>siswa.lms.dashboard · siswa/lms/dashboard.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="siswa" data-active="siswa.lms.dashboard"
+     data-title="Beranda HOK-LMS" data-subtitle="Ahmad Fauzi Ramadhan — Kelas 7A">
+<div class="content-slot">
+
+    <div class="grid grid-3 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-details"><div class="stat-value">3</div><div class="stat-label">Tugas Menunggu</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-details"><div class="stat-value">1</div><div class="stat-label">Ujian Akan Datang</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-book-open"></i></div>
+            <div class="stat-details"><div class="stat-value">7</div><div class="stat-label">Materi Baru</div></div></div></div>
+    </div>
+
+    <h3 style="font-size:17px;font-weight:700;margin:0 0 14px;color:#334155">Mata Pelajaran Saya</h3>
+    <div class="grid grid-4 mb-20">
+        <div class="mapel-card"><div class="top"><h3>Matematika</h3><p>Hendra Wijaya</p></div>
+            <div class="bot"><span><i class="fas fa-book"></i> 18 materi</span><span class="badge warning">2 tugas</span></div></div>
+        <div class="mapel-card"><div class="top" style="background:linear-gradient(135deg,#10b981,#059669)"><h3>IPA Terpadu</h3><p>Hendra Wijaya</p></div>
+            <div class="bot"><span><i class="fas fa-book"></i> 14 materi</span><span class="badge warning">1 tugas</span></div></div>
+        <div class="mapel-card"><div class="top" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><h3>Bahasa Indonesia</h3><p>Nur Aisyah</p></div>
+            <div class="bot"><span><i class="fas fa-book"></i> 12 materi</span><span class="badge success">Selesai</span></div></div>
+        <div class="mapel-card"><div class="top" style="background:linear-gradient(135deg,#f59e0b,#f97316)"><h3>Pendidikan Pancasila</h3><p>Rina Marlina</p></div>
+            <div class="bot"><span><i class="fas fa-book"></i> 9 materi</span><span class="badge success">Selesai</span></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-hourglass-half" style="color:#165fac"></i> Tenggat Terdekat</h3></div>
+            <table class="data">
+                <thead><tr><th>Tugas / Ujian</th><th>Mata Pelajaran</th><th>Tenggat</th><th>Sisa Waktu</th><th style="width:120px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">Tugas Bab 8 — Volume Bangun Ruang</td><td>Matematika</td><td>22 Jan, 23.59</td><td><span class="badge warning">7 hari</span></td><td><a class="btn primary sm" style="background:#165fac">Kerjakan</a></td></tr>
+                    <tr style="background:#fee2e2"><td class="cell-main">UTS Matematika Semester Genap</td><td>Matematika</td><td>19 Jan, 07.30</td><td><span class="badge danger">4 hari</span></td><td><a class="btn ghost sm">Detail</a></td></tr>
+                    <tr><td class="cell-main">Laporan Praktikum Fotosintesis</td><td>IPA Terpadu</td><td>25 Jan, 23.59</td><td><span class="badge neutral">10 hari</span></td><td><a class="btn ghost sm">Kerjakan</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-comments" style="color:#165fac"></i> Forum Aktif</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#e0edfa;color:#165fac">6</div>
+                    <div><div class="activity-title">Soal Cerita Persamaan Linear</div><div class="activity-meta">Matematika · 6 balasan baru</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857">3</div>
+                    <div><div class="activity-title">Diskusi Hasil Praktikum</div><div class="activity-meta">IPA Terpadu · 3 balasan baru</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#f5f3ff;color:#6d28d9">1</div>
+                    <div><div class="activity-title">Tanya Jawab Teks Eksposisi</div><div class="activity-meta">Bahasa Indonesia · 1 balasan baru</div></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Halaman Mapel ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

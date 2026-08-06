@@ -30,20 +30,19 @@ class GuruLmsController extends Controller
         $kelas = Kelas::findOrFail($kelasId);
         $mataPelajaran = MataPelajaran::findOrFail($mapelId);
 
-        // Statistik
+        // Statistik — dihitung per kelas+mapel (bukan per pembuat), supaya guru
+        // pengganti melihat konten guru sebelumnya juga, konsisten dengan
+        // halaman index materi/tugas/ujian yang sudah tidak dikunci ke guru_id.
         $totalMateri = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->count();
 
         $totalTugas = Tugas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->count();
 
         $totalUjian = Ujian::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->count();
 
         $totalSiswa = Siswa::where('kelas_id', $kelasId)
@@ -57,7 +56,6 @@ class GuruLmsController extends Controller
             ->join('tugas', 'tugas_siswa.tugas_id', '=', 'tugas.id')
             ->where('tugas.kelas_id', $kelasId)
             ->where('tugas.mata_pelajaran_id', $mapelId)
-            ->where('tugas.guru_id', $tenagaPendidik->id)
             ->where('tugas_siswa.status', 'dikerjakan')
             ->whereNull('tugas_siswa.nilai')
             ->count();
@@ -65,14 +63,12 @@ class GuruLmsController extends Controller
         // Recent activities
         $recentMateri = Materi::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('tanggal_upload', 'desc')
             ->limit(5)
             ->get();
 
         $recentTugas = Tugas::where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
-            ->where('guru_id', $tenagaPendidik->id)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

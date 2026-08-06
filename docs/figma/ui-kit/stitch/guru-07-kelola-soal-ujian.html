@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Guru / 07 Kelola Soal Ujian guru.lms.ujian.soal.manage · guru/lms/ujian/manage_soal.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Guru / 07 Kelola Soal Ujian <span>guru.lms.ujian.soal.manage · guru/lms/ujian/manage_soal.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.ujian"
+     data-title="Kelola Soal Ujian" data-subtitle="UTS Matematika Semester Genap — Kelas 7A · 25 soal">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <a class="btn primary" style="background:#165fac"><i class="fas fa-plus"></i> Tambah Soal</a>
+        <a class="btn ghost"><i class="fas fa-robot"></i> Generate Soal dengan AI</a>
+        <a class="btn ghost"><i class="fas fa-file-import"></i> Impor dari Template</a>
+        <a class="btn ghost"><i class="fas fa-archive"></i> Ambil dari Bank Soal</a>
+        <div class="spacer"></div>
+        <span class="muted small">Total bobot: <strong>100 poin</strong></span>
+    </div></div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20"><div class="card-body">
+                <div class="row between mb-20"><div class="row"><span class="badge primary">Pilihan Ganda</span><span class="muted small">Soal 1 · 4 poin</span></div>
+                    <div class="row"><a class="btn ghost sm"><i class="fas fa-arrow-up"></i></a><a class="btn ghost sm"><i class="fas fa-arrow-down"></i></a><a class="btn ghost sm"><i class="fas fa-pen"></i></a><a class="btn ghost sm"><i class="fas fa-trash"></i></a></div></div>
+                <p class="strong" style="margin-top:0">Volume sebuah kubus dengan panjang rusuk 12 cm adalah…</p>
+                <div class="opsi"><span class="huruf">A</span><span>144 cm³</span></div>
+                <div class="opsi"><span class="huruf">B</span><span>864 cm³</span></div>
+                <div class="opsi picked"><span class="huruf">C</span><span>1.728 cm³ <span class="badge success" style="margin-left:8px">Kunci</span></span></div>
+                <div class="opsi" style="margin-bottom:0"><span class="huruf">D</span><span>2.048 cm³</span></div>
+            </div></div>
+
+            <div class="card mb-20"><div class="card-body">
+                <div class="row between mb-20"><div class="row"><span class="badge purple">Pilihan Ganda Kompleks</span><span class="muted small">Soal 2 · 5 poin</span></div>
+                    <div class="row"><a class="btn ghost sm"><i class="fas fa-arrow-up"></i></a><a class="btn ghost sm"><i class="fas fa-arrow-down"></i></a><a class="btn ghost sm"><i class="fas fa-pen"></i></a><a class="btn ghost sm"><i class="fas fa-trash"></i></a></div></div>
+                <p class="strong" style="margin-top:0">Pilih semua bangun ruang yang memiliki sisi berbentuk persegi panjang.</p>
+                <div class="opsi picked"><span class="huruf"><i class="fas fa-check"></i></span><span>Balok</span></div>
+                <div class="opsi"><span class="huruf"></span><span>Bola</span></div>
+                <div class="opsi picked"><span class="huruf"><i class="fas fa-check"></i></span><span>Prisma segitiga</span></div>
+                <div class="opsi" style="margin-bottom:0"><span class="huruf"></span><span>Kerucut</span></div>
+            </div></div>
+
+            <div class="card"><div class="card-body">
+                <div class="row between mb-20"><div class="row"><span class="badge neutral">Uraian</span><span class="muted small">Soal 3 · 10 poin</span></div>
+                    <div class="row"><a class="btn ghost sm"><i class="fas fa-arrow-up"></i></a><a class="btn ghost sm"><i class="fas fa-arrow-down"></i></a><a class="btn ghost sm"><i class="fas fa-pen"></i></a><a class="btn ghost sm"><i class="fas fa-trash"></i></a></div></div>
+                <p class="strong" style="margin-top:0">Sebuah bak air berbentuk balok berukuran 80 cm × 50 cm × 40 cm. Hitunglah volume air maksimum dalam liter, lalu jelaskan langkah pengerjaanmu.</p>
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:13px">
+                    <div class="strong" style="margin-bottom:6px">Kunci / rubrik jawaban</div>
+                    V = p × l × t = 80 × 50 × 40 = 160.000 cm³ = 160 liter. Poin penuh bila langkah konversi cm³ → liter dituliskan.
+                </div>
+                <div class="row" style="margin-top:12px"><span class="badge primary"><i class="fas fa-robot"></i> Koreksi otomatis AI aktif</span></div>
+            </div></div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-gear" style="color:#165fac"></i> Pengaturan Ujian</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Durasi</span><span class="strong">90 menit</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Mulai</span><span class="strong">19 Jan, 07.30</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Acak soal</span><span class="badge success">Aktif</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Acak opsi</span><span class="badge success">Aktif</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Anti-screenshot</span><span class="badge success">Aktif</span></div>
+                    <div class="row between small" style="padding:8px 0"><span class="muted">Syarat lunas</span><span class="badge warning">Diperiksa</span></div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-list-ol" style="color:#165fac"></i> Komposisi Soal</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Pilihan Ganda</span><span class="strong">15 soal · 60 poin</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>PG Kompleks</span><span class="strong">4 soal · 20 poin</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Benar / Salah</span><span class="strong">3 soal · 6 poin</span></div>
+                    <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span>Isian Singkat</span><span class="strong">2 soal · 4 poin</span></div>
+                    <div class="row between small" style="padding:7px 0"><span>Uraian</span><span class="strong">1 soal · 10 poin</span></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20" style="background:#165fac"><i class="fas fa-check"></i> Terbitkan Ujian</a>
+                <a class="btn ghost block"><i class="fas fa-eye"></i> Pratinjau Sisi Siswa</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

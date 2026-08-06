@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Bendahara / 06 Laporan Pembayaran bendahara.laporan.index · bendahara/laporan/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Bendahara / 06 Laporan Pembayaran <span>bendahara.laporan.index · bendahara/laporan/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.laporan.index"
+     data-title="Laporan Pembayaran" data-subtitle="Periode 1 – 31 Januari 2026" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="card-body"><div class="grid grid-4">
+        <div class="field" style="margin:0"><label>Dari Tanggal</label><input class="control" type="date" value="2026-01-01"></div>
+        <div class="field" style="margin:0"><label>Sampai Tanggal</label><input class="control" type="date" value="2026-01-31"></div>
+        <div class="field" style="margin:0"><label>Metode</label><select class="control"><option>Semua Metode</option></select></div>
+        <div class="field" style="margin:0"><label>&nbsp;</label><div class="row"><a class="btn primary"><i class="fas fa-filter"></i> Terapkan</a><a class="btn ghost"><i class="fas fa-print"></i> Cetak</a></div></div>
+    </div></div></div>
+
+    <div class="grid grid-3 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-money-bill-wave"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 487.250.000</div><div class="stat-label">Total Diterima</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-receipt"></i></div>
+            <div class="stat-details"><div class="stat-value">1.084</div><div class="stat-label">Jumlah Transaksi</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-calculator"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 449.492</div><div class="stat-label">Rata-rata / Transaksi</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-table-list"></i> Rekapitulasi per Jenis Tagihan</h3></div>
+        <table class="data">
+            <thead><tr><th>Jenis Tagihan</th><th class="num">Transaksi</th><th class="num">Midtrans</th><th class="num">Transfer Manual</th><th class="num">Tunai</th><th class="num">Total</th></tr></thead>
+            <tbody>
+                <tr><td class="cell-main">SPP</td><td class="num">742</td><td class="num money">Rp 198.400.000</td><td class="num money">Rp 92.150.000</td><td class="num money">Rp 21.450.000</td><td class="num money strong">Rp 312.000.000</td></tr>
+                <tr><td class="cell-main">Uang Kegiatan</td><td class="num">148</td><td class="num money">Rp 62.500.000</td><td class="num money">Rp 24.750.000</td><td class="num money">Rp 6.750.000</td><td class="num money strong">Rp 94.000.000</td></tr>
+                <tr><td class="cell-main">Uang Ujian</td><td class="num">126</td><td class="num money">Rp 31.200.000</td><td class="num money">Rp 16.400.000</td><td class="num money">Rp 4.400.000</td><td class="num money strong">Rp 52.000.000</td></tr>
+                <tr><td class="cell-main">Seragam</td><td class="num">42</td><td class="num money">Rp 12.400.000</td><td class="num money">Rp 8.200.000</td><td class="num money">Rp 2.650.000</td><td class="num money strong">Rp 23.250.000</td></tr>
+                <tr><td class="cell-main">Buku</td><td class="num">26</td><td class="num money">Rp 3.100.000</td><td class="num money">Rp 2.400.000</td><td class="num money">Rp 500.000</td><td class="num money strong">Rp 6.000.000</td></tr>
+                <tr style="background:#f8fafc"><td class="strong">TOTAL</td><td class="num strong">1.084</td><td class="num money strong">Rp 307.600.000</td><td class="num money strong">Rp 143.900.000</td><td class="num money strong">Rp 35.750.000</td><td class="num money strong">Rp 487.250.000</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 07 Siswa Belum Lunas ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

@@ -16,6 +16,33 @@
     padding: 0;
 }
 
+.guru-jadwal-filter-bar {
+    background: #fff;
+    border: 1px solid var(--g-line);
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px 18px;
+}
+
+.guru-jadwal-filter-bar .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.guru-jadwal-filter-bar label {
+    color: var(--g-muted);
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
 .guru-stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
@@ -239,6 +266,14 @@
 }
 
 @media (max-width: 767.98px) {
+    .guru-jadwal-filter-bar {
+        padding: 12px 14px;
+    }
+
+    .guru-jadwal-filter-bar .form-group {
+        min-width: 100%;
+    }
+
     .guru-stat-grid,
     .guru-day-grid {
         grid-template-columns: 1fr;

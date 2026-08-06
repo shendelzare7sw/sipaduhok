@@ -30,6 +30,25 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
+    <form method="GET" action="{{ route('guru.jadwal.index') }}" class="guru-jadwal-filter-bar">
+        <div class="form-group">
+            <label for="filterTahunAjaran">Tahun Ajaran</label>
+            <select name="tahun_ajaran_id" id="filterTahunAjaran" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="0" {{ $taFilterId == 0 ? 'selected' : '' }}>Semua TA</option>
+                @foreach($tahunAjarans as $ta)
+                    <option value="{{ $ta->id }}" {{ $taFilterId == $ta->id ? 'selected' : '' }}>
+                        {{ $ta->nama_tahun_ajaran }}{{ $ta->is_active ? ' (Aktif)' : '' }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <noscript>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fas fa-filter me-1"></i>Filter
+            </button>
+        </noscript>
+    </form>
+
     <div class="guru-stat-grid">
         <div class="guru-stat">
             <div class="guru-stat-icon guru-stat-icon-primary">
@@ -74,7 +93,13 @@
             <div class="guru-empty">
                 <div class="guru-empty-icon"><i class="fas fa-calendar-times"></i></div>
                 <h5>Belum Ada Jadwal Mengajar</h5>
-                <p class="mb-0">Jadwal Anda akan tampil di sini setelah ditentukan oleh admin atau waka.</p>
+                <p class="mb-0">
+                    @if($taFilterId)
+                        Tidak ada jadwal untuk tahun ajaran yang dipilih. Coba pilih <strong>Semua TA</strong> di filter di atas.
+                    @else
+                        Jadwal Anda akan tampil di sini setelah ditentukan oleh admin atau waka.
+                    @endif
+                </p>
             </div>
         </div>
     @else

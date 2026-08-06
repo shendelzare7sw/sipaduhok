@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Siswa / 05 Kerjakan Tugas siswa.lms.mapel.tugas.show · siswa/lms/mata-pelajaran/tugas/show.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Kumpulkan Tugas"  →  siswa-04-halaman-mapel (status → Dikumpulkan)
+-->
+
+<div class="screen-label">Siswa / 05 Kerjakan Tugas <span>siswa.lms.mapel.tugas.show · siswa/lms/mata-pelajaran/tugas/show.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="siswa" data-active="mapel.mtk"
+     data-title="Tugas Bab 8 — Volume Bangun Ruang" data-subtitle="Matematika · Tenggat 22 Januari 2026, 23.59">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-hourglass-half"></i> Sisa waktu pengumpulan: <strong>7 hari 4 jam</strong>. Pengumpulan terlambat masih diizinkan, tetapi ditandai pada catatan guru.</div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-clipboard-list" style="color:#165fac"></i> Instruksi Tugas</h3></div>
+                <div class="card-body">
+                    <p style="margin-top:0;line-height:1.8">Kerjakan 10 soal pada lampiran PDF. Tuliskan langkah pengerjaan secara lengkap, bukan hanya hasil akhirnya.</p>
+                    <p style="line-height:1.8">Jawaban ditulis tangan, lalu difoto atau dipindai menjadi satu berkas PDF. Beri nama berkas dengan format: <strong>NamaLengkap_Kelas_Bab8</strong>.</p>
+                    <div class="file-card" style="margin-top:18px">
+                        <div class="ico"><i class="fas fa-file-pdf"></i></div>
+                        <div style="flex:1"><div class="nm">soal-bab8-volume.pdf</div><div class="sz">412 KB · lampiran soal</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-download"></i> Unduh</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-upload" style="color:#165fac"></i> Kumpulkan Jawaban</h3></div>
+                <div class="card-body">
+                    <div style="border:2px dashed #cbd5e1;border-radius:12px;padding:36px;text-align:center;background:#f8fafc">
+                        <i class="fas fa-cloud-arrow-up" style="font-size:34px;color:#94a3b8;display:block;margin-bottom:12px"></i>
+                        <div class="strong" style="margin-bottom:4px">Seret berkas ke sini atau klik untuk memilih</div>
+                        <div class="small muted">Format PDF, JPG, atau PNG · maksimal 10 MB</div>
+                    </div>
+                    <div class="file-card" style="margin-top:16px">
+                        <div class="ico"><i class="fas fa-file-pdf"></i></div>
+                        <div style="flex:1"><div class="nm">AhmadFauzi_7A_Bab8.pdf</div><div class="sz">1,8 MB · siap dikirim</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-trash"></i></a>
+                    </div>
+                    <div class="field" style="margin:18px 0 0"><label>Catatan untuk Guru (opsional)</label>
+                        <textarea class="control" rows="3" placeholder="Sampaikan kendala atau penjelasan tambahan…"></textarea></div>
+                    <a class="btn primary block" style="background:#165fac;margin-top:18px"><i class="fas fa-paper-plane"></i> Kumpulkan Tugas</a>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-circle-info" style="color:#165fac"></i> Informasi</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Status</span><span class="badge warning">Belum Dikumpulkan</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Bobot Nilai</span><span class="strong">100 poin</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Tersedia sejak</span><span class="strong">15 Jan, 07.00</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Tenggat</span><span class="strong">22 Jan, 23.59</span></div>
+                    <div class="row between small" style="padding:8px 0"><span class="muted">Guru</span><span class="strong">Hendra Wijaya</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-clock-rotate-left" style="color:#165fac"></i> Riwayat Tugas Mapel Ini</h3></div>
+                <div class="card-body" style="padding:0">
+                    <div class="row between" style="padding:14px 24px;border-bottom:1px solid #e2e8f0"><div><div class="small strong">Tugas Bab 3 — Aljabar</div><div class="xsmall muted">Dikumpulkan 17 Jan</div></div><span class="badge warning">Dinilai</span></div>
+                    <div class="row between" style="padding:14px 24px;border-bottom:1px solid #e2e8f0"><div><div class="small strong">Tugas Bab 2 — Bilangan Bulat</div><div class="xsmall muted">Dikumpulkan 08 Jan</div></div><span class="badge success">88</span></div>
+                    <div class="row between" style="padding:14px 24px"><div><div class="small strong">Tugas Bab 1 — Himpunan</div><div class="xsmall muted">Dikumpulkan 02 Jan</div></div><span class="badge success">92</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Ujian Fullscreen ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

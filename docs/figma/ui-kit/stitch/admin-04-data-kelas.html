@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Admin / 04 Data Kelas admin.kelas.index · admin/kelas/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Klik kartu kelas  →  detail kelas + daftar siswa
+  Tombol "Tambah Kelas"  →  modal form tambah kelas
+-->
+
+<div class="screen-label">Admin / 04 Data Kelas <span>admin.kelas.index · admin/kelas/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="admin" data-active="admin.kelas.index"
+     data-title="Data Kelas" data-subtitle="36 rombongan belajar pada TA 2025/2026" data-user="A|Administrator">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="search" style="width:260px"><i class="fas fa-search"></i><input class="control" placeholder="Cari nama kelas…"></div>
+            <select class="control" style="width:160px"><option>Semua Cabang</option></select>
+            <select class="control" style="width:150px"><option>Semua Jenjang</option></select>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-copy"></i> Salin dari TA Lalu</a>
+            <a class="btn ghost"><i class="fas fa-print"></i> Cetak</a>
+            <a class="btn primary"><i class="fas fa-plus"></i> Tambah Kelas</a>
+        </div>
+        <table class="data">
+            <thead><tr>
+                <th style="width:52px">No</th><th>Nama Kelas</th><th>Jenjang</th><th>Cabang</th>
+                <th>Wali Kelas</th><th class="num">Jumlah Siswa</th><th>Kapasitas</th><th style="width:150px">Aksi</th>
+            </tr></thead>
+            <tbody>
+                <tr><td>1</td><td class="cell-main">7A</td><td>SMP / Paket B</td><td>Pusat</td>
+                    <td><span class="avatar-sm gray">DL</span>Dewi Lestari</td><td class="num strong">34</td>
+                    <td style="width:180px"><div class="progress"><i style="width:85%"></i></div><div class="xsmall muted" style="margin-top:4px">34 / 40</div></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-users"></i> Siswa</a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>2</td><td class="cell-main">7B</td><td>SMP / Paket B</td><td>Pusat</td>
+                    <td><span class="avatar-sm gray">HW</span>Hendra Wijaya</td><td class="num strong">31</td>
+                    <td><div class="progress"><i style="width:77%"></i></div><div class="xsmall muted" style="margin-top:4px">31 / 40</div></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-users"></i> Siswa</a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>3</td><td class="cell-main">8B</td><td>SMP / Paket B</td><td>Cabang 2</td>
+                    <td><span class="avatar-sm gray">SR</span>Sri Rahayu</td><td class="num strong">39</td>
+                    <td><div class="progress warn"><i style="width:97%"></i></div><div class="xsmall muted" style="margin-top:4px">39 / 40</div></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-users"></i> Siswa</a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>4</td><td class="cell-main">9C</td><td>SMP / Paket B</td><td>Cabang 3</td>
+                    <td><span class="muted">Belum ditetapkan</span></td><td class="num strong">28</td>
+                    <td><div class="progress"><i style="width:70%"></i></div><div class="xsmall muted" style="margin-top:4px">28 / 40</div></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-user-tie"></i> Set Wali</a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td>5</td><td class="cell-main">10 IPA</td><td>SMA / Paket C</td><td>Pusat</td>
+                    <td><span class="avatar-sm gray">YM</span>Yusuf Maulana</td><td class="num strong">30</td>
+                    <td><div class="progress"><i style="width:75%"></i></div><div class="xsmall muted" style="margin-top:4px">30 / 40</div></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-users"></i> Siswa</a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <a class="page-link disabled"><i class="fas fa-chevron-left"></i></a>
+            <a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a>
+            <a class="page-link"><i class="fas fa-chevron-right"></i></a>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Jadwal Pelajaran ════════════════════════════════════════════ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

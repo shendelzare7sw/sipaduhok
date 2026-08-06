@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Waka / 03 Jadwal Pelajaran waka.jadwal-pelajaran.index · waka/jadwal-pelajaran/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Waka / 03 Jadwal Pelajaran <span>waka.jadwal-pelajaran.index · waka/jadwal-pelajaran/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.jadwal-pelajaran.index"
+     data-title="Jadwal Pelajaran" data-subtitle="Kelas 10 IPS — Semester Genap · 4 slot masih kosong" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-exclamation-triangle"></i> Kelas ini masih memiliki <strong>4 slot kosong</strong>. Jadwal belum dapat diterbitkan ke guru dan siswa.</div>
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <select class="control" style="width:190px"><option>Kelas 10 IPS — Pusat</option></select>
+        <select class="control" style="width:170px"><option>Semester Genap</option></select>
+        <div class="spacer"></div>
+        <a class="btn ghost"><i class="fas fa-mug-hot"></i> Atur Istirahat</a>
+        <a class="btn primary"><i class="fas fa-plus"></i> Tambah Jadwal</a>
+    </div></div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-week"></i> Grid Jadwal Mingguan</h3><span class="muted small">Sel kosong menandai slot yang belum diisi</span></div>
+        <div class="card-body">
+            <table class="jadwal">
+                <thead><tr><th style="width:110px">Jam</th><th>Senin</th><th>Selasa</th><th>Rabu</th><th>Kamis</th><th>Jumat</th></tr></thead>
+                <tbody>
+                    <tr><td class="jam">07.00 – 07.40</td><td class="slot">Upacara</td><td class="slot">Ekonomi</td><td class="slot">Sejarah</td><td class="slot">Geografi</td><td class="slot">PAI</td></tr>
+                    <tr><td class="jam">07.40 – 08.20</td><td class="slot">Ekonomi</td><td class="slot">Ekonomi</td><td class="slot">Sejarah</td><td class="slot">Geografi</td><td class="slot">PAI</td></tr>
+                    <tr><td class="jam">08.20 – 09.00</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="kosong">Kosong</td><td class="slot">Sosiologi</td><td class="slot">Penjaskes</td></tr>
+                    <tr><td class="istirahat" colspan="6">Istirahat Pertama · 09.00 – 09.20</td></tr>
+                    <tr><td class="jam">09.20 – 10.00</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="kosong">Kosong</td><td class="slot">Sosiologi</td><td class="slot">Penjaskes</td></tr>
+                    <tr><td class="jam">10.00 – 10.40</td><td class="slot">B. Indonesia</td><td class="slot">Sosiologi</td><td class="slot">Matematika</td><td class="slot">Pancasila</td><td class="kosong">Kosong</td></tr>
+                    <tr><td class="jam">10.40 – 11.20</td><td class="slot">B. Indonesia</td><td class="slot">Sosiologi</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="kosong">Kosong</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Pengaturan KKM ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

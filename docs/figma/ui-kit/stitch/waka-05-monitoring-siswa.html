@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Waka / 05 Monitoring Siswa waka.monitoring.siswa · waka/monitoring/siswa.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Waka / 05 Monitoring Siswa <span>waka.monitoring.siswa · waka/monitoring/siswa.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.monitoring.siswa"
+     data-title="Monitoring Siswa" data-subtitle="Pantauan aktivitas dan capaian peserta didik" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon green" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-check"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">1.094</div><div class="stat-label" style="font-size:12px">Aktif 7 Hari Terakhir</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon yellow" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-clock"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">118</div><div class="stat-label" style="font-size:12px">Tidak Aktif &gt; 14 Hari</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon red" style="width:42px;height:42px;font-size:17px"><i class="fas fa-arrow-trend-down"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">64</div><div class="stat-label" style="font-size:12px">Nilai Turun</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon" style="width:42px;height:42px;font-size:17px"><i class="fas fa-calendar-xmark"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">47</div><div class="stat-label" style="font-size:12px">Kehadiran &lt; 85%</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Perlu Perhatian</a><a>Semua Siswa</a><a>Berprestasi</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:240px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa…"></div>
+            <select class="control" style="width:150px"><option>Semua Kelas</option></select>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Kelas</th><th>Wali Kelas</th><th>Kehadiran</th><th class="num">Rata-rata</th><th>Aktivitas LMS</th><th>Indikasi</th><th style="width:120px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Hendra Wijaya</td>
+                    <td><div class="progress danger" style="width:90px"><i style="width:74%"></i></div><span class="xsmall muted">74%</span></td>
+                    <td class="num strong">61,7</td><td><span class="badge danger">Tidak aktif 21 hari</span></td><td><span class="badge danger">Risiko tinggi</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+                <tr><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>Sri Rahayu</td>
+                    <td><div class="progress warn" style="width:90px"><i style="width:82%"></i></div><span class="xsmall muted">82%</span></td>
+                    <td class="num strong">76,1</td><td><span class="badge warning">Aktif 9 hari lalu</span></td><td><span class="badge warning">Perlu dipantau</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+                <tr><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>Yusuf Maulana</td>
+                    <td><div class="progress" style="width:90px"><i style="width:92%"></i></div><span class="xsmall muted">92%</span></td>
+                    <td class="num strong">68,4</td><td><span class="badge success">Aktif hari ini</span></td><td><span class="badge warning">Nilai di bawah KKM</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+                <tr><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Yusuf Maulana</td>
+                    <td><div class="progress" style="width:90px"><i style="width:94%"></i></div><span class="xsmall muted">94%</span></td>
+                    <td class="num strong">79,8</td><td><span class="badge warning">Aktif 12 hari lalu</span></td><td><span class="badge neutral">Nilai turun 6 poin</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-comment-dots"></i> Catatan</a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

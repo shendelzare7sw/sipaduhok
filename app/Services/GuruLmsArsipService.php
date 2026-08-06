@@ -20,7 +20,29 @@ use Illuminate\Support\Facades\DB;
 class GuruLmsArsipService
 {
     /**
-     * Ambil semua konten LMS milik guru, dengan filter optional.
+     * Batasi query ke konten milik guru ini SENDIRI (guru_id) ATAU konten di
+     * kelas+mapel yang PERNAH ia ampu (lintas TA, lewat GuruPengajarKelas).
+     * Klausa kedua ini yang bikin guru PENGGANTI tetap bisa melihat & menyalin
+     * arsip peninggalan guru sebelumnya di kelas+mapel yang sekarang ia ampu —
+     * tanpa klausa ini, Arsip LMS hanya menampilkan konten milik diri sendiri.
+     */
+    private function scopeMilikAtauDiampu($query, string $table, int $guruId)
+    {
+        return $query->where(function ($q) use ($table, $guruId) {
+            $q->where('guru_id', $guruId)
+                ->orWhereExists(function ($sub) use ($table, $guruId) {
+                    $sub->selectRaw('1')
+                        ->from('guru_pengajar_kelas')
+                        ->whereColumn('guru_pengajar_kelas.kelas_id', "{$table}.kelas_id")
+                        ->whereColumn('guru_pengajar_kelas.mata_pelajaran_id', "{$table}.mata_pelajaran_id")
+                        ->where('guru_pengajar_kelas.tenaga_pendidik_id', $guruId);
+                });
+        });
+    }
+
+    /**
+     * Ambil semua konten LMS milik guru (atau kelas+mapel yang pernah ia
+     * ampu), dengan filter optional.
      *
      * @return array{materi: \Illuminate\Support\Collection, tugas: \Illuminate\Support\Collection, ujian: \Illuminate\Support\Collection, latihan: \Illuminate\Support\Collection}
      */
@@ -43,8 +65,8 @@ class GuruLmsArsipService
         $ujian = collect();
 
         if ($type === null || $type === 'materi') {
-            $q = Materi::with(['kelas.tahunAjaran', 'mataPelajaran'])
-                ->where('guru_id', $guruId);
+            $q = Materi::with(['kelas.tahunAjaran', 'mataPelajaran']);
+            $this->scopeMilikAtauDiampu($q, 'materi', $guruId);
             $applyTaFilter($q);
             if ($mapelId) $q->where('mata_pelajaran_id', $mapelId);
             if ($search) $q->where('judul_materi', 'like', "%{$search}%");
@@ -53,8 +75,8 @@ class GuruLmsArsipService
 
         if ($type === null || $type === 'tugas') {
             $q = Tugas::with(['kelas.tahunAjaran', 'mataPelajaran'])
-                ->where('guru_id', $guruId)
                 ->where('jenis_tugas', Tugas::JENIS_TUGAS);
+            $this->scopeMilikAtauDiampu($q, 'tugas', $guruId);
             $applyTaFilter($q);
             if ($mapelId) $q->where('mata_pelajaran_id', $mapelId);
             if ($search) $q->where('judul_tugas', 'like', "%{$search}%");
@@ -63,8 +85,8 @@ class GuruLmsArsipService
 
         if ($type === null || $type === 'latihan') {
             $q = Ujian::with(['kelas.tahunAjaran', 'mataPelajaran'])
-                ->where('guru_id', $guruId)
                 ->where('tipe_ujian', Ujian::TIPE_LATIHAN);
+            $this->scopeMilikAtauDiampu($q, 'ujian', $guruId);
             $applyTaFilter($q);
             if ($mapelId) $q->where('mata_pelajaran_id', $mapelId);
             if ($search) $q->where('judul_ujian', 'like', "%{$search}%");
@@ -73,8 +95,8 @@ class GuruLmsArsipService
 
         if ($type === null || $type === 'ujian') {
             $q = Ujian::with(['kelas.tahunAjaran', 'mataPelajaran'])
-                ->where('guru_id', $guruId)
                 ->where('tipe_ujian', '!=', Ujian::TIPE_LATIHAN);
+            $this->scopeMilikAtauDiampu($q, 'ujian', $guruId);
             $applyTaFilter($q);
             if ($mapelId) $q->where('mata_pelajaran_id', $mapelId);
             if ($search) $q->where('judul_ujian', 'like', "%{$search}%");
@@ -85,19 +107,20 @@ class GuruLmsArsipService
     }
 
     /**
-     * Tahun ajaran yang punya konten milik guru ini.
+     * Tahun ajaran yang punya konten milik guru ini (atau kelas+mapel yang
+     * pernah ia ampu).
      */
     public function getTahunAjaranDenganKonten(int $guruId)
     {
-        $taIdsMateri = Materi::where('guru_id', $guruId)
+        $taIdsMateri = $this->scopeMilikAtauDiampu(Materi::query(), 'materi', $guruId)
             ->join('kelas', 'materi.kelas_id', '=', 'kelas.id')
             ->pluck('kelas.tahun_ajaran_id');
 
-        $taIdsTugas = Tugas::where('guru_id', $guruId)
+        $taIdsTugas = $this->scopeMilikAtauDiampu(Tugas::query(), 'tugas', $guruId)
             ->join('kelas', 'tugas.kelas_id', '=', 'kelas.id')
             ->pluck('kelas.tahun_ajaran_id');
 
-        $taIdsUjian = Ujian::where('guru_id', $guruId)
+        $taIdsUjian = $this->scopeMilikAtauDiampu(Ujian::query(), 'ujian', $guruId)
             ->join('kelas', 'ujian.kelas_id', '=', 'kelas.id')
             ->pluck('kelas.tahun_ajaran_id');
 
@@ -107,19 +130,51 @@ class GuruLmsArsipService
     }
 
     /**
-     * Mata pelajaran yang pernah diisi guru ini (lintas TA) — untuk dropdown filter.
+     * Mata pelajaran yang pernah diisi guru ini, atau di kelas+mapel yang
+     * pernah ia ampu (lintas TA) — untuk dropdown filter.
      */
     public function getMataPelajaranDenganKonten(int $guruId)
     {
         $ids = collect()
-            ->merge(Materi::where('guru_id', $guruId)->pluck('mata_pelajaran_id'))
-            ->merge(Tugas::where('guru_id', $guruId)->pluck('mata_pelajaran_id'))
-            ->merge(Ujian::where('guru_id', $guruId)->pluck('mata_pelajaran_id'))
+            ->merge($this->scopeMilikAtauDiampu(Materi::query(), 'materi', $guruId)->pluck('mata_pelajaran_id'))
+            ->merge($this->scopeMilikAtauDiampu(Tugas::query(), 'tugas', $guruId)->pluck('mata_pelajaran_id'))
+            ->merge($this->scopeMilikAtauDiampu(Ujian::query(), 'ujian', $guruId)->pluck('mata_pelajaran_id'))
             ->unique()
             ->filter()
             ->values();
 
         return MataPelajaran::whereIn('id', $ids)->orderBy('nama_mapel')->get();
+    }
+
+    /**
+     * Ambil satu materi arsip (preview/form-salin) — milik guru ini atau di
+     * kelas+mapel yang pernah ia ampu. 404 kalau bukan salah satunya.
+     */
+    public function findArsipMateri(int $id, int $guruId): Materi
+    {
+        return $this->scopeMilikAtauDiampu(
+            Materi::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru']),
+            'materi',
+            $guruId
+        )->findOrFail($id);
+    }
+
+    public function findArsipTugas(int $id, int $guruId): Tugas
+    {
+        return $this->scopeMilikAtauDiampu(
+            Tugas::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru']),
+            'tugas',
+            $guruId
+        )->findOrFail($id);
+    }
+
+    public function findArsipUjian(int $id, int $guruId): Ujian
+    {
+        return $this->scopeMilikAtauDiampu(
+            Ujian::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru', 'soalUjian']),
+            'ujian',
+            $guruId
+        )->findOrFail($id);
     }
 
     /**
@@ -163,7 +218,7 @@ class GuruLmsArsipService
 
     public function salinMateri(int $sumberId, int $kelasTujuanId, int $mapelTujuanId, int $guruId): Materi
     {
-        $sumber = Materi::where('guru_id', $guruId)->findOrFail($sumberId);
+        $sumber = $this->scopeMilikAtauDiampu(Materi::query(), 'materi', $guruId)->findOrFail($sumberId);
 
         if (!$this->validateKelasMapelTujuan($guruId, $kelasTujuanId, $mapelTujuanId)) {
             throw new \RuntimeException('Anda tidak ditugaskan ke kelas + mata pelajaran tujuan di TA aktif.');
@@ -185,7 +240,7 @@ class GuruLmsArsipService
 
     public function salinTugas(int $sumberId, int $kelasTujuanId, int $mapelTujuanId, int $guruId): Tugas
     {
-        $sumber = Tugas::where('guru_id', $guruId)->findOrFail($sumberId);
+        $sumber = $this->scopeMilikAtauDiampu(Tugas::query(), 'tugas', $guruId)->findOrFail($sumberId);
 
         if (!$this->validateKelasMapelTujuan($guruId, $kelasTujuanId, $mapelTujuanId)) {
             throw new \RuntimeException('Anda tidak ditugaskan ke kelas + mata pelajaran tujuan di TA aktif.');
@@ -219,7 +274,7 @@ class GuruLmsArsipService
         int $guruId,
         bool $sertakanSoal = true
     ): Ujian {
-        $sumber = Ujian::where('guru_id', $guruId)->findOrFail($sumberId);
+        $sumber = $this->scopeMilikAtauDiampu(Ujian::query(), 'ujian', $guruId)->findOrFail($sumberId);
 
         if (!$this->validateKelasMapelTujuan($guruId, $kelasTujuanId, $mapelTujuanId)) {
             throw new \RuntimeException('Anda tidak ditugaskan ke kelas + mata pelajaran tujuan di TA aktif.');

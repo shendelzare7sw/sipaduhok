@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Guru / 05 Buat Tugas guru.lms.tugas.create · guru/lms/tugas/create.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Terbitkan Tugas"  →  daftar tugas (tugas baru muncul)
+-->
+
+<div class="screen-label">Guru / 05 Buat Tugas <span>guru.lms.tugas.create · guru/lms/tugas/create.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.tugas"
+     data-title="Buat Tugas Baru" data-subtitle="Matematika — Kelas 7A">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-clipboard-list" style="color:#165fac"></i> Detail Tugas</h3></div>
+            <div class="card-body">
+                <div class="field"><label>Judul Tugas <span class="req">*</span></label><input class="control" value="Tugas Bab 8 — Volume Bangun Ruang"></div>
+                <div class="field"><label>Instruksi <span class="req">*</span></label>
+                    <textarea class="control" rows="6">Kerjakan 10 soal pada lampiran PDF. Tuliskan langkah pengerjaan secara lengkap, bukan hanya hasil akhirnya.
+
+Jawaban ditulis tangan, lalu difoto atau dipindai menjadi satu berkas PDF. Beri nama berkas dengan format: NamaLengkap_Kelas_Bab8.</textarea></div>
+                <div class="grid grid-2">
+                    <div class="field"><label>Tipe Pengumpulan</label><select class="control"><option>Unggah berkas</option><option>Teks langsung</option><option>Keduanya</option></select></div>
+                    <div class="field"><label>Format Berkas Diizinkan</label><select class="control"><option>PDF, JPG, PNG</option></select></div>
+                </div>
+                <div class="field" style="margin-bottom:0"><label>Lampiran Soal</label>
+                    <div class="file-card"><div class="ico"><i class="fas fa-file-pdf"></i></div>
+                        <div style="flex:1"><div class="nm">soal-bab8-volume.pdf</div><div class="sz">412 KB</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-trash"></i></a></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-calendar" style="color:#165fac"></i> Penjadwalan</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Mulai Tersedia</label><input class="control" type="datetime-local" value="2026-01-15T07:00"></div>
+                    <div class="field"><label>Batas Pengumpulan <span class="req">*</span></label><input class="control focus" type="datetime-local" value="2026-01-22T23:59"></div>
+                    <div class="field" style="margin-bottom:0">
+                        <label class="row small" style="gap:8px;font-weight:400;margin-bottom:8px"><input type="checkbox" checked> Izinkan pengumpulan terlambat</label>
+                        <label class="row small" style="gap:8px;font-weight:400;margin:0"><input type="checkbox"> Kirim notifikasi WhatsApp ke wali</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-star" style="color:#165fac"></i> Penilaian</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Bobot Nilai</label><input class="control" value="100"></div>
+                    <div class="field" style="margin-bottom:0"><label class="row small" style="gap:8px;font-weight:400;margin:0"><input type="checkbox"> Aktifkan bantuan koreksi AI</label>
+                        <div class="hint">AI memberi saran nilai dan umpan balik; keputusan akhir tetap di tangan guru.</div></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20" style="background:#165fac"><i class="fas fa-paper-plane"></i> Terbitkan Tugas</a>
+                <a class="btn ghost block">Simpan sebagai Draft</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Koreksi Tugas ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

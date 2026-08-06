@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Wali Kelas / 07 Preview Rapor wali.rapor.preview · wali-kelas/rapor/preview-pas.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Kembali"  →  wali-kelas-05-kelola-rapor
+  Tombol "Kirim ke Ketua"  →  wali-kelas-05-kelola-rapor (status → Menunggu Validasi)
+-->
+
+<div class="screen-label">Wali Kelas / 07 Preview Rapor <span>wali.rapor.preview · wali-kelas/rapor/preview-pas.blade.php</span></div>
+<div class="screen" style="background:#94a3b8;padding:40px 0">
+<div class="print-sheet">
+    <div class="print-header">
+        <img src="../assets/img/logo.png" alt="Logo">
+        <div>
+            <div class="t1">PUSAT KEGIATAN BELAJAR MASYARAKAT</div>
+            <div class="t2">HOUSE OF KNOWLEDGE</div>
+            <div class="t3">Jl. Contoh No. 123, Kota · Telp. (021) 1234-5678 · info@sipaduhok.sch.id</div>
+        </div>
+    </div>
+
+    <div class="print-title">LAPORAN HASIL BELAJAR PESERTA DIDIK</div>
+
+    <table style="width:100%;font-size:12px;margin-bottom:16px">
+        <tr><td style="width:130px">Nama Peserta Didik</td><td style="width:14px">:</td><td style="font-weight:700">Ahmad Fauzi Ramadhan</td>
+            <td style="width:110px">Kelas</td><td style="width:14px">:</td><td style="font-weight:700">7A</td></tr>
+        <tr><td>NISN / NIS</td><td>:</td><td>0087654321 / 2025-0112</td><td>Semester</td><td>:</td><td>Genap</td></tr>
+        <tr><td>Satuan Pendidikan</td><td>:</td><td>Paket B (Setara SMP)</td><td>Tahun Ajaran</td><td>:</td><td>2025/2026</td></tr>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:16px 0 8px">A. Nilai Akademik</div>
+    <table class="print">
+        <thead><tr><th style="width:34px">No</th><th>Mata Pelajaran</th><th style="width:50px">KKM</th><th style="width:56px">Nilai</th><th style="width:62px">Predikat</th><th>Capaian Kompetensi</th></tr></thead>
+        <tbody>
+            <tr><td class="tac">1</td><td>Pendidikan Agama dan Budi Pekerti</td><td class="tac">75</td><td class="tac strong">88</td><td class="tac">B</td><td>Menunjukkan pemahaman baik pada materi akhlak dan ibadah.</td></tr>
+            <tr><td class="tac">2</td><td>Pendidikan Pancasila</td><td class="tac">75</td><td class="tac strong">85</td><td class="tac">B</td><td>Mampu menjelaskan nilai-nilai Pancasila dalam kehidupan sehari-hari.</td></tr>
+            <tr><td class="tac">3</td><td>Bahasa Indonesia</td><td class="tac">75</td><td class="tac strong">86</td><td class="tac">B</td><td>Terampil menyusun teks eksposisi dengan struktur yang runtut.</td></tr>
+            <tr><td class="tac">4</td><td>Matematika</td><td class="tac">70</td><td class="tac strong">79</td><td class="tac">C</td><td>Menguasai operasi aljabar; perlu penguatan pada bangun ruang.</td></tr>
+            <tr><td class="tac">5</td><td>Ilmu Pengetahuan Alam</td><td class="tac">70</td><td class="tac strong">83</td><td class="tac">B</td><td>Aktif dalam praktikum dan mampu menyusun laporan pengamatan.</td></tr>
+            <tr><td class="tac">6</td><td>Seni Budaya</td><td class="tac">70</td><td class="tac strong">90</td><td class="tac">A</td><td>Menonjol pada seni rupa dua dimensi.</td></tr>
+            <tr><td colspan="3" style="text-align:right;font-weight:700">Rata-rata</td><td class="tac strong">85,2</td><td colspan="2"></td></tr>
+        </tbody>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:18px 0 8px">B. Ekstrakurikuler</div>
+    <table class="print">
+        <thead><tr><th style="width:34px">No</th><th style="width:180px">Kegiatan</th><th style="width:110px">Predikat</th><th>Keterangan</th></tr></thead>
+        <tbody>
+            <tr><td class="tac">1</td><td>Pramuka</td><td class="tac">Sangat Baik</td><td>Aktif mengikuti seluruh kegiatan kepramukaan.</td></tr>
+            <tr><td class="tac">2</td><td>Futsal</td><td class="tac">Baik</td><td>Rutin berlatih dan mewakili sekolah pada turnamen antar-PKBM.</td></tr>
+        </tbody>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:18px 0 8px">C. Ketidakhadiran</div>
+    <table class="print" style="width:300px">
+        <tr><td>Sakit</td><td class="tac" style="width:60px">2 hari</td></tr>
+        <tr><td>Izin</td><td class="tac">3 hari</td></tr>
+        <tr><td>Tanpa Keterangan</td><td class="tac">0 hari</td></tr>
+    </table>
+
+    <div style="font-weight:700;font-size:13px;margin:18px 0 8px">D. Catatan Wali Kelas</div>
+    <div style="border:1px solid #111827;padding:12px;min-height:60px;font-size:12px;line-height:1.7">
+        Ananda menunjukkan perkembangan yang baik, terutama pada mata pelajaran seni dan bahasa.
+        Perlu penguatan pada materi bangun ruang. Pertahankan kedisiplinan dan keaktifan di kelas.
+    </div>
+
+    <div class="print-sign">
+        <div class="box"><div>Mengetahui,<br>Orang Tua/Wali</div><div class="space"></div><div>(………………………………)</div></div>
+        <div class="box"><div>Kota, 20 Juni 2026<br>Wali Kelas</div><div class="space"></div><div class="nm">Dewi Lestari, S.Pd.</div></div>
+        <div class="box"><div>Mengesahkan,<br>Ketua PKBM</div><div class="space"></div><div class="nm">Drs. H. Suryadi, M.Pd.</div></div>
+    </div>
+</div>
+</div>
+
+<!-- ═══ 08 Permintaan Unduh ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

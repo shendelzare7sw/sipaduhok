@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Guru / 01 Dashboard SIA guru.dashboard · dashboard/guru.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Sidebar "Semua Kelas"  →  guru-02-semua-kelas
+  Quick link "Kelas 7A > Matematika"  →  guru-03-dashboard-lms ⚡SHELL BERUBAH KE LMS⚡
+-->
+
+<div class="screen-label">Guru / 01 Dashboard SIA <span>guru.dashboard · dashboard/guru.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="guru" data-active="guru.dashboard"
+     data-title="Dashboard" data-subtitle="Hendra Wijaya — 3 kelas, 4 mata pelajaran" data-user="H|Hendra Wijaya">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-chalkboard"></i></div>
+            <div class="stat-details"><div class="stat-value">3</div><div class="stat-label">Kelas Diampu</div>
+            <div class="stat-footer"><span>97 siswa total</span><span class="muted">28 JP / minggu</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-details"><div class="stat-value">8</div><div class="stat-label">Tugas Belum Dikoreksi</div>
+            <div class="stat-footer"><span>Tertua 3 hari lalu</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-details"><div class="stat-value">2</div><div class="stat-label">Ujian Berlangsung</div>
+            <div class="stat-footer"><span>7A &amp; 8B</span><span class="badge primary">Pengawasan aktif</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-comment-dots"></i></div>
+            <div class="stat-details"><div class="stat-value">1</div><div class="stat-label">Catatan Monitoring Baru</div>
+            <div class="stat-footer"><span>Dari Wakil Kepala</span><span class="badge warning">Belum dibaca</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-day"></i> Jadwal Mengajar Hari Ini — Kamis</h3></div>
+            <table class="data">
+                <thead><tr><th style="width:150px">Jam</th><th>Kelas</th><th>Mata Pelajaran</th><th>Ruang</th><th style="width:150px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">07.00 – 08.20</td><td>7A</td><td>IPA Terpadu</td><td>R-201</td><td><a class="btn primary sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                    <tr><td class="cell-main">08.20 – 09.00</td><td>8B</td><td>Matematika</td><td>R-105</td><td><a class="btn ghost sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                    <tr><td class="cell-main">10.00 – 11.20</td><td>7A</td><td>Matematika</td><td>R-201</td><td><a class="btn ghost sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                    <tr><td class="cell-main">11.50 – 12.30</td><td>10 IPA</td><td>Fisika</td><td>Lab-1</td><td><a class="btn ghost sm"><i class="fas fa-arrow-right"></i> Masuk LMS</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-list-check"></i> Perlu Dikoreksi</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309">12</div>
+                    <div><div class="activity-title">Tugas Bab 3 — Aljabar</div><div class="activity-meta">Matematika 7A · 12 dari 34 dikumpulkan</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#fee2e2;color:#b91c1c">28</div>
+                    <div><div class="activity-title">Laporan Praktikum Fotosintesis</div><div class="activity-meta">IPA 7A · 28 dari 34 dikumpulkan</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb">31</div>
+                    <div><div class="activity-title">Ulangan Harian Geometri</div><div class="activity-meta">Matematika 8B · perlu koreksi uraian</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#f5f3ff;color:#6d28d9">9</div>
+                    <div><div class="activity-title">Tugas Gerak Lurus</div><div class="activity-meta">Fisika 10 IPA · 9 dari 30 dikumpulkan</div></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Semua Kelas ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Wali Siswa / 05 Detail Rapor wali-siswa.rapor.detail · wali-siswa/rapor/detail.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Ajukan Permintaan Unduh"  →  tetap (status → Menunggu Persetujuan)
+-->
+
+<div class="screen-label">Wali Siswa / 05 Detail Rapor <span>wali-siswa.rapor.detail · wali-siswa/rapor/detail.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="wali-siswa" data-active="anak.1.rapor"
+     data-title="Rapor Anak" data-subtitle="Ahmad Fauzi Ramadhan — Semester Genap TA 2025/2026" data-user="R|Rahmat Hidayat">
+<div class="content-slot">
+
+    <div class="alert info"><i class="fas fa-shield-halved"></i> Berkas rapor hanya dapat diunduh setelah permintaan Anda disetujui wali kelas. Tautan unduh berlaku sekali pakai selama 24 jam.</div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-graduation-cap"></i> Nilai Akademik</h3>
+                    <span class="badge success">Rapor Terbit</span></div>
+                <table class="data">
+                    <thead><tr><th>Mata Pelajaran</th><th class="tac" style="width:60px">KKM</th><th class="num" style="width:70px">Nilai</th><th class="tac" style="width:90px">Predikat</th><th>Capaian Kompetensi</th></tr></thead>
+                    <tbody>
+                        <tr><td class="cell-main">PAI &amp; Budi Pekerti</td><td class="tac">75</td><td class="num strong">88</td><td class="tac"><span class="badge success">B</span></td><td class="small">Menunjukkan pemahaman baik pada materi akhlak dan ibadah.</td></tr>
+                        <tr><td class="cell-main">Pendidikan Pancasila</td><td class="tac">75</td><td class="num strong">85</td><td class="tac"><span class="badge success">B</span></td><td class="small">Mampu menjelaskan nilai Pancasila dalam keseharian.</td></tr>
+                        <tr><td class="cell-main">Bahasa Indonesia</td><td class="tac">75</td><td class="num strong">86</td><td class="tac"><span class="badge success">B</span></td><td class="small">Terampil menyusun teks eksposisi yang runtut.</td></tr>
+                        <tr><td class="cell-main">Matematika</td><td class="tac">70</td><td class="num strong">79</td><td class="tac"><span class="badge warning">C</span></td><td class="small">Menguasai aljabar; perlu penguatan bangun ruang.</td></tr>
+                        <tr><td class="cell-main">IPA Terpadu</td><td class="tac">70</td><td class="num strong">83</td><td class="tac"><span class="badge success">B</span></td><td class="small">Aktif praktikum dan mampu menyusun laporan.</td></tr>
+                        <tr><td class="cell-main">Seni Budaya</td><td class="tac">70</td><td class="num strong">90</td><td class="tac"><span class="badge success">A</span></td><td class="small">Menonjol pada seni rupa dua dimensi.</td></tr>
+                        <tr style="background:#f8fafc"><td colspan="2" class="strong tar">RATA-RATA</td><td class="num strong">85,2</td><td colspan="2"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-comment-dots"></i> Catatan Wali Kelas</h3></div>
+                <div class="card-body">
+                    <p style="margin:0;line-height:1.85;font-size:15px">Ananda menunjukkan perkembangan yang baik, terutama pada mata pelajaran seni dan bahasa. Perlu penguatan pada materi bangun ruang. Pertahankan kedisiplinan dan keaktifan di kelas.</p>
+                    <div class="row" style="margin-top:16px;gap:10px"><div class="avatar-initial" style="width:34px;height:34px;font-size:13px">D</div>
+                        <div><div class="small strong">Dewi Lestari, S.Pd.</div><div class="xsmall muted">Wali Kelas 7A · 20 Juni 2026</div></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20"><div class="card-body tac">
+                <div class="avatar-initial" style="width:72px;height:72px;font-size:26px;margin:0 auto 14px">AF</div>
+                <h3 style="margin:0 0 2px;font-size:18px">Ahmad Fauzi Ramadhan</h3>
+                <p class="small muted" style="margin:0 0 4px">NISN 0087654321 · Kelas 7A</p>
+                <span class="badge success">Naik ke Kelas 8</span>
+            </div></div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-check"></i> Ketidakhadiran</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Sakit</span><span class="strong">2 hari</span></div>
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Izin</span><span class="strong">3 hari</span></div>
+                    <div class="row between small" style="padding:8px 0"><span class="muted">Tanpa Keterangan</span><span class="strong">0 hari</span></div>
+                </div>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-trophy"></i> Ekstrakurikuler</h3></div>
+                <div class="card-body">
+                    <div class="row between small" style="padding:8px 0;border-bottom:1px solid #e2e8f0"><span>Pramuka</span><span class="badge success">Sangat Baik</span></div>
+                    <div class="row between small" style="padding:8px 0"><span>Futsal</span><span class="badge primary">Baik</span></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20"><i class="fas fa-download"></i> Ajukan Permintaan Unduh</a>
+                <a class="btn ghost block"><i class="fas fa-print"></i> Lihat Versi Cetak</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Ajukan Izin ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

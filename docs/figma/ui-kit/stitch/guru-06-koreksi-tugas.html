@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Guru / 06 Koreksi Tugas guru.lms.tugas.koreksi · guru/lms/tugas/koreksi.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Simpan Semua Nilai"  →  daftar tugas
+-->
+
+<div class="screen-label">Guru / 06 Koreksi Tugas <span>guru.lms.tugas.koreksi · guru/lms/tugas/koreksi.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.tugas"
+     data-title="Koreksi Tugas" data-subtitle="Tugas Bab 3 — Aljabar · Matematika 7A">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon green" style="width:40px;height:40px;font-size:16px"><i class="fas fa-check"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">22</div><div class="stat-label" style="font-size:12px">Sudah Dinilai</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon yellow" style="width:40px;height:40px;font-size:16px"><i class="fas fa-hourglass"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">12</div><div class="stat-label" style="font-size:12px">Belum Dinilai</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon red" style="width:40px;height:40px;font-size:16px"><i class="fas fa-xmark"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">0</div><div class="stat-label" style="font-size:12px">Belum Kumpul</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:16px"><div class="stat-icon" style="width:40px;height:40px;font-size:16px;background:rgba(22,95,172,.08);color:#165fac"><i class="fas fa-calculator"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">81,4</div><div class="stat-label" style="font-size:12px">Rata-rata</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Belum Dinilai (12)</a><a>Sudah Dinilai</a><a>Terlambat</a><a>Semua</a></div>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-robot"></i> Saran Nilai AI</a>
+            <a class="btn primary" style="background:#165fac"><i class="fas fa-check-double"></i> Simpan Semua Nilai</a>
+        </div>
+        <table class="data">
+            <thead><tr><th>Siswa</th><th>Dikumpulkan</th><th>Berkas</th><th style="width:110px">Nilai</th><th>Umpan Balik</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi Ramadhan</span></td>
+                    <td>17 Jan, 20.14 <div class="cell-sub">Tepat waktu</div></td>
+                    <td><a class="small"><i class="fas fa-file-pdf"></i> AhmadFauzi_7A_Bab3.pdf</a></td>
+                    <td><input class="control" placeholder="0–100" style="text-align:center;padding:7px"></td>
+                    <td><input class="control" placeholder="Umpan balik…" style="padding:7px;font-size:13px"></td>
+                    <td><span class="badge warning">Belum Dinilai</span></td></tr>
+                <tr><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td>
+                    <td>18 Jan, 09.02 <div class="cell-sub">Tepat waktu</div></td>
+                    <td><a class="small"><i class="fas fa-file-pdf"></i> SitiNurhaliza_7A_Bab3.pdf</a></td>
+                    <td><input class="control focus" value="92" style="text-align:center;padding:7px"></td>
+                    <td><input class="control" value="Langkah pengerjaan rapi dan lengkap." style="padding:7px;font-size:13px"></td>
+                    <td><span class="badge warning">Belum Disimpan</span></td></tr>
+                <tr><td><span class="avatar-sm gray">FR</span><span class="cell-main">Fajar Ramdani</span></td>
+                    <td>19 Jan, 01.37 <div class="cell-sub" style="color:#b45309">Terlambat 2 jam</div></td>
+                    <td><a class="small"><i class="fas fa-file-image"></i> tugas-fajar.jpg</a></td>
+                    <td><input class="control" placeholder="0–100" style="text-align:center;padding:7px"></td>
+                    <td><input class="control" placeholder="Umpan balik…" style="padding:7px;font-size:13px"></td>
+                    <td><span class="badge danger">Terlambat</span></td></tr>
+                <tr style="background:#f8fafc"><td><span class="avatar-sm gray">LK</span><span class="cell-main">Laila Kusuma</span></td>
+                    <td>17 Jan, 15.48 <div class="cell-sub">Tepat waktu</div></td>
+                    <td><a class="small"><i class="fas fa-file-pdf"></i> LailaKusuma_7A_Bab3.pdf</a></td>
+                    <td><span class="strong tac" style="display:block">85</span></td>
+                    <td class="small">Sudah baik, perhatikan ketelitian pada soal nomor 7.</td>
+                    <td><span class="badge success">Sudah Dinilai</span></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 07 Kelola Soal Ujian ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

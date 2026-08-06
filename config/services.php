@@ -36,4 +36,13 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    'pdftotext' => [
+        // spatie/pdf-to-text hanya mengenali beberapa path umum Linux/macOS
+        // (+ satu path Xpdf khusus Windows). Kalau pdftotext (poppler) terpasang
+        // di lokasi lain (mis. Windows/Laragon via Git for Windows), isi path
+        // binary-nya lewat PDFTOTEXT_BIN_PATH di .env. Kosongkan untuk pakai
+        // auto-detect bawaan paket (biasanya cukup di Linux/VPS).
+        'bin_path' => env('PDFTOTEXT_BIN_PATH'),
+    ],
+
 ];

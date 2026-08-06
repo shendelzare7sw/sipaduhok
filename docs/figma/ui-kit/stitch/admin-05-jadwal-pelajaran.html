@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Admin / 05 Jadwal Pelajaran admin.jadwal-pelajaran.index · admin/jadwal-pelajaran/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<div class="screen-label">Admin / 05 Jadwal Pelajaran <span>admin.jadwal-pelajaran.index · admin/jadwal-pelajaran/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="admin" data-active="admin.jadwal-pelajaran.index"
+     data-title="Jadwal Pelajaran" data-subtitle="Kelas 7A — Semester Genap TA 2025/2026" data-user="A|Administrator">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <select class="control" style="width:180px"><option>Kelas 7A — Pusat</option></select>
+        <select class="control" style="width:180px"><option>Semester Genap</option></select>
+        <div class="spacer"></div>
+        <a class="btn ghost"><i class="fas fa-mug-hot"></i> Atur Istirahat</a>
+        <a class="btn ghost"><i class="fas fa-file-import"></i> Impor</a>
+        <a class="btn ghost"><i class="fas fa-print"></i> Cetak</a>
+        <a class="btn primary"><i class="fas fa-plus"></i> Tambah Jadwal</a>
+    </div></div>
+
+    <div class="card">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-week"></i> Grid Jadwal Mingguan</h3>
+            <span class="muted small">Klik sel untuk mengubah</span></div>
+        <div class="card-body">
+            <table class="jadwal">
+                <thead><tr><th style="width:110px">Jam</th><th>Senin</th><th>Selasa</th><th>Rabu</th><th>Kamis</th><th>Jumat</th><th>Sabtu</th></tr></thead>
+                <tbody>
+                    <tr><td class="jam">07.00 – 07.40</td>
+                        <td class="slot">Upacara</td><td class="slot">Matematika</td><td class="slot">B. Indonesia</td><td class="slot">IPA Terpadu</td><td class="slot">PAI</td><td class="kosong">—</td></tr>
+                    <tr><td class="jam">07.40 – 08.20</td>
+                        <td class="slot">Matematika</td><td class="slot">Matematika</td><td class="slot">B. Indonesia</td><td class="slot">IPA Terpadu</td><td class="slot">PAI</td><td class="kosong">—</td></tr>
+                    <tr><td class="jam">08.20 – 09.00</td>
+                        <td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="slot">IPS Terpadu</td><td class="slot">Seni Budaya</td><td class="slot">Penjaskes</td><td class="kosong">—</td></tr>
+                    <tr><td class="istirahat" colspan="7">Istirahat Pertama · 09.00 – 09.20</td></tr>
+                    <tr><td class="jam">09.20 – 10.00</td>
+                        <td class="slot">B. Indonesia</td><td class="slot">B. Inggris</td><td class="slot">IPS Terpadu</td><td class="slot">Seni Budaya</td><td class="slot">Penjaskes</td><td class="kosong">—</td></tr>
+                    <tr><td class="jam">10.00 – 10.40</td>
+                        <td class="slot">B. Indonesia</td><td class="slot">IPA Terpadu</td><td class="slot">Matematika</td><td class="slot">Pancasila</td><td class="slot">Prakarya</td><td class="kosong">—</td></tr>
+                    <tr><td class="jam">10.40 – 11.20</td>
+                        <td class="slot">Pancasila</td><td class="slot">IPA Terpadu</td><td class="slot">Matematika</td><td class="slot">B. Inggris</td><td class="slot">Prakarya</td><td class="kosong">—</td></tr>
+                    <tr><td class="istirahat" colspan="7">Istirahat Kedua · 11.20 – 11.50</td></tr>
+                    <tr><td class="jam">11.50 – 12.30</td>
+                        <td class="slot">Informatika</td><td class="slot">IPS Terpadu</td><td class="slot">PAI</td><td class="slot">B. Inggris</td><td class="kosong">—</td><td class="kosong">—</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Tagihan ═════════════════════════════════════════════════════ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

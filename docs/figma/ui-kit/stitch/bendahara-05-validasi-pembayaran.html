@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Bendahara / 05 Validasi Pembayaran bendahara.pembayaran.show · bendahara/pembayaran/show.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Setujui Pembayaran"  →  bendahara-04-kelola-pembayaran (status → Disetujui)
+  Tombol "Tolak Pembayaran"  →  bendahara-04-kelola-pembayaran (status → Ditolak)
+-->
+
+<div class="screen-label">Bendahara / 05 Validasi Pembayaran <span>bendahara.pembayaran.show · bendahara/pembayaran/show.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.pembayaran.index"
+     data-title="Detail &amp; Validasi Pembayaran" data-subtitle="PB-2026-0148 — Ahmad Fauzi Ramadhan" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="alert warning"><i class="fas fa-hourglass-half"></i> Pembayaran ini <strong>menunggu validasi</strong>. Periksa kesesuaian nominal dan bukti transfer sebelum menyetujui.</div>
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-receipt"></i> Rincian Pembayaran</h3><span class="badge warning">Menunggu Validasi</span></div>
+                <div class="card-body">
+                    <div class="grid grid-2">
+                        <div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Kode Pembayaran</span><span class="strong">PB-2026-0148</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Siswa</span><span class="strong">Ahmad Fauzi Ramadhan</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Kelas</span><span class="strong">7A — Pusat</span></div>
+                            <div class="row between small" style="padding:9px 0"><span class="muted">Dibayar oleh</span><span class="strong">Rahmat Hidayat (Wali)</span></div>
+                        </div>
+                        <div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Tagihan</span><span class="strong">SPP Januari 2026</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Nominal Tagihan</span><span class="strong money">Rp 450.000</span></div>
+                            <div class="row between small" style="padding:9px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Nominal Dibayar</span><span class="strong money" style="color:#047857">Rp 450.000</span></div>
+                            <div class="row between small" style="padding:9px 0"><span class="muted">Metode</span><span class="badge neutral square">Transfer Manual — BCA</span></div>
+                        </div>
+                    </div>
+                    <div class="field" style="margin:22px 0 0"><label>Catatan dari Wali</label>
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;font-size:14px">Transfer dilakukan atas nama Rahmat Hidayat pada 14 Januari 2026 pukul 09.42 WIB.</div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-paperclip"></i> Bukti Pembayaran</h3></div>
+                <div class="card-body">
+                    <div class="file-card mb-20"><div class="ico"><i class="fas fa-file-pdf"></i></div>
+                        <div style="flex:1"><div class="nm">bukti-transfer-spp-januari.pdf</div><div class="sz">248 KB · diunggah 14 Jan 2026, 09.51</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-eye"></i> Lihat</a><a class="btn ghost sm"><i class="fas fa-download"></i></a></div>
+                    <div class="file-card"><div class="ico img"><i class="fas fa-file-image"></i></div>
+                        <div style="flex:1"><div class="nm">struk-atm.jpg</div><div class="sz">1,2 MB · diunggah 14 Jan 2026, 09.52</div></div>
+                        <a class="btn ghost sm"><i class="fas fa-eye"></i> Lihat</a><a class="btn ghost sm"><i class="fas fa-download"></i></a></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-gavel"></i> Keputusan</h3></div>
+                <div class="card-body">
+                    <div class="field"><label>Catatan Validator</label><textarea class="control" rows="3" placeholder="Opsional — wajib diisi bila menolak."></textarea></div>
+                    <a class="btn success block mb-20"><i class="fas fa-check"></i> Setujui Pembayaran</a>
+                    <a class="btn danger block mb-20"><i class="fas fa-times"></i> Tolak</a>
+                    <a class="btn ghost block"><i class="fas fa-arrow-left"></i> Kembali</a>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Jejak Audit</h3></div>
+                <div class="activity">
+                    <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb"><i class="fas fa-upload"></i></div><div><div class="activity-title">Bukti diunggah</div><div class="activity-meta">Rahmat Hidayat · 14 Jan, 09.52</div></div></div>
+                    <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309"><i class="fas fa-hourglass"></i></div><div><div class="activity-title">Menunggu validasi</div><div class="activity-meta">Otomatis · 14 Jan, 09.52</div></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 06 Laporan Pembayaran ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

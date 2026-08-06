@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Wali Kelas / 01 Pilih Kelas wali.pilih-kelas · wali-kelas/pilih-kelas/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Kelola Kelas Ini"  →  wali-kelas-02-dashboard
+-->
+
+<div class="screen-label">Wali Kelas / 01 Pilih Kelas <span>wali.pilih-kelas · wali-kelas/pilih-kelas/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="wali-kelas" data-active="wali.pilih-kelas" data-variant="tanpa-kelas"
+     data-title="Pilih Kelas" data-subtitle="Pilih kelas yang ingin dikelola pada sesi ini" data-user="D|Dewi Lestari">
+<div class="content-slot">
+
+    <div class="alert info"><i class="fas fa-info-circle"></i> Anda ditugaskan sebagai wali kelas untuk <strong>3 kelas</strong>. Semua halaman presensi, nilai, dan rapor mengikuti kelas yang dipilih di sini.</div>
+
+    <div class="grid grid-3">
+        <div class="card">
+            <div style="background:linear-gradient(135deg,#4361ee,#2b4162);padding:26px;border-radius:12px 12px 0 0;color:#fff">
+                <div class="xsmall" style="opacity:.8;text-transform:uppercase;letter-spacing:.06em;font-weight:700">SMP / Paket B</div>
+                <div style="font-size:30px;font-weight:800;margin-top:4px">7A</div>
+                <div class="small" style="opacity:.85">Cabang Pusat</div>
+            </div>
+            <div class="card-body">
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Jumlah siswa</span><span class="strong">34</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Presensi hari ini</span><span class="badge warning">Belum diisi</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Rapor terisi</span><span class="strong">34 / 34</span></div>
+                <div class="row between small" style="padding:7px 0 16px"><span class="muted">Status rapor</span><span class="badge warning">Menunggu validasi</span></div>
+                <a class="btn primary block"><i class="fas fa-arrow-right-to-bracket"></i> Kelola Kelas Ini</a>
+            </div>
+        </div>
+        <div class="card">
+            <div style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);padding:26px;border-radius:12px 12px 0 0;color:#fff">
+                <div class="xsmall" style="opacity:.8;text-transform:uppercase;letter-spacing:.06em;font-weight:700">SMP / Paket B</div>
+                <div style="font-size:30px;font-weight:800;margin-top:4px">8A</div>
+                <div class="small" style="opacity:.85">Cabang Pusat</div>
+            </div>
+            <div class="card-body">
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Jumlah siswa</span><span class="strong">32</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Presensi hari ini</span><span class="badge success">Sudah diisi</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Rapor terisi</span><span class="strong">18 / 32</span></div>
+                <div class="row between small" style="padding:7px 0 16px"><span class="muted">Status rapor</span><span class="badge neutral">Draft</span></div>
+                <a class="btn outline block"><i class="fas fa-arrow-right-to-bracket"></i> Kelola Kelas Ini</a>
+            </div>
+        </div>
+        <div class="card">
+            <div style="background:linear-gradient(135deg,#10b981,#059669);padding:26px;border-radius:12px 12px 0 0;color:#fff">
+                <div class="xsmall" style="opacity:.8;text-transform:uppercase;letter-spacing:.06em;font-weight:700">SMA / Paket C</div>
+                <div style="font-size:30px;font-weight:800;margin-top:4px">10 IPA</div>
+                <div class="small" style="opacity:.85">Cabang Pusat</div>
+            </div>
+            <div class="card-body">
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Jumlah siswa</span><span class="strong">30</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Presensi hari ini</span><span class="badge success">Sudah diisi</span></div>
+                <div class="row between small" style="padding:7px 0;border-bottom:1px solid #e2e8f0"><span class="muted">Rapor terisi</span><span class="strong">0 / 30</span></div>
+                <div class="row between small" style="padding:7px 0 16px"><span class="muted">Status rapor</span><span class="badge neutral">Belum dibuat</span></div>
+                <a class="btn outline block"><i class="fas fa-arrow-right-to-bracket"></i> Kelola Kelas Ini</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Dashboard ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

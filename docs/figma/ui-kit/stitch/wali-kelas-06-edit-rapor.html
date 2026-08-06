@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Wali Kelas / 06 Edit Rapor wali.rapor.edit · wali-kelas/rapor/edit.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Simpan"  →  wali-kelas-05-kelola-rapor
+  Tombol "Pratinjau"  →  wali-kelas-07-preview-rapor
+-->
+
+<div class="screen-label">Wali Kelas / 06 Edit Rapor <span>wali.rapor.edit · wali-kelas/rapor/edit.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="wali-kelas" data-active="wali.rapor.index"
+     data-title="Edit Rapor" data-subtitle="Ahmad Fauzi Ramadhan — Kelas 7A · Semester Genap" data-user="D|Dewi Lestari">
+<div class="content-slot">
+
+    <div class="grid grid-2-1">
+        <div>
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-graduation-cap"></i> Nilai Akademik</h3>
+                    <a class="btn ghost sm"><i class="fas fa-arrows-rotate"></i> Ambil dari Nilai</a></div>
+                <table class="data">
+                    <thead><tr><th>Mata Pelajaran</th><th style="width:60px" class="tac">KKM</th><th style="width:70px" class="num">Nilai</th><th style="width:80px" class="tac">Predikat</th><th>Deskripsi Capaian</th></tr></thead>
+                    <tbody>
+                        <tr><td class="cell-main">PAI &amp; Budi Pekerti</td><td class="tac">75</td><td class="num strong">88</td><td class="tac"><span class="badge success">B</span></td><td class="small">Menunjukkan pemahaman baik pada materi akhlak dan ibadah.</td></tr>
+                        <tr><td class="cell-main">Pendidikan Pancasila</td><td class="tac">75</td><td class="num strong">85</td><td class="tac"><span class="badge success">B</span></td><td class="small">Mampu menjelaskan nilai Pancasila dalam keseharian.</td></tr>
+                        <tr><td class="cell-main">Bahasa Indonesia</td><td class="tac">75</td><td class="num strong">86</td><td class="tac"><span class="badge success">B</span></td><td class="small">Terampil menyusun teks eksposisi yang runtut.</td></tr>
+                        <tr><td class="cell-main">Matematika</td><td class="tac">70</td><td class="num strong">79</td><td class="tac"><span class="badge warning">C</span></td><td class="small">Menguasai aljabar; perlu penguatan bangun ruang.</td></tr>
+                        <tr><td class="cell-main">IPA Terpadu</td><td class="tac">70</td><td class="num strong">83</td><td class="tac"><span class="badge success">B</span></td><td class="small">Aktif praktikum dan mampu menyusun laporan.</td></tr>
+                        <tr><td class="cell-main">Seni Budaya</td><td class="tac">70</td><td class="num strong">90</td><td class="tac"><span class="badge success">A</span></td><td class="small">Menonjol pada seni rupa dua dimensi.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-trophy"></i> Ekstrakurikuler</h3><a class="btn ghost sm"><i class="fas fa-plus"></i> Tambah</a></div>
+                <table class="data">
+                    <thead><tr><th>Kegiatan</th><th style="width:120px">Predikat</th><th>Keterangan</th><th style="width:70px"></th></tr></thead>
+                    <tbody>
+                        <tr><td class="cell-main">Pramuka</td><td><span class="badge success">Sangat Baik</span></td><td class="small">Aktif mengikuti seluruh kegiatan kepramukaan.</td><td><a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                        <tr><td class="cell-main">Futsal</td><td><span class="badge primary">Baik</span></td><td class="small">Rutin berlatih dan mewakili sekolah pada turnamen antar-PKBM.</td><td><a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-comment-dots"></i> Catatan Wali Kelas</h3>
+                    <a class="btn ghost sm"><i class="fas fa-file-lines"></i> Pakai Template</a></div>
+                <div class="card-body">
+                    <textarea class="control" rows="4">Ananda menunjukkan perkembangan yang baik, terutama pada mata pelajaran seni dan bahasa. Perlu penguatan pada materi bangun ruang. Pertahankan kedisiplinan dan keaktifan di kelas.</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="card mb-20"><div class="card-body tac">
+                <div class="avatar-initial" style="width:72px;height:72px;font-size:26px;margin:0 auto 14px">AF</div>
+                <h3 style="margin:0 0 2px;font-size:18px">Ahmad Fauzi Ramadhan</h3>
+                <p class="small muted" style="margin:0 0 16px">NISN 0087654321 · Kelas 7A</p>
+                <span class="badge warning">Menunggu Validasi Ketua</span>
+            </div></div>
+
+            <div class="card mb-20">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-check"></i> Ketidakhadiran</h3>
+                    <a class="btn ghost sm"><i class="fas fa-wand-magic-sparkles"></i> Auto</a></div>
+                <div class="card-body">
+                    <div class="field"><label>Sakit</label><input class="control" value="2"></div>
+                    <div class="field"><label>Izin</label><input class="control" value="3"></div>
+                    <div class="field" style="margin-bottom:0"><label>Tanpa Keterangan</label><input class="control" value="0"></div>
+                </div>
+            </div>
+
+            <div class="card"><div class="card-body">
+                <a class="btn primary block mb-20"><i class="fas fa-save"></i> Simpan Rapor</a>
+                <a class="btn success block mb-20"><i class="fas fa-paper-plane"></i> Kirim ke Ketua</a>
+                <a class="btn ghost block mb-20"><i class="fas fa-eye"></i> Pratinjau</a>
+                <a class="btn ghost block"><i class="fas fa-file-excel"></i> Ekspor Excel</a>
+            </div></div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 07 Preview Rapor (A4) ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

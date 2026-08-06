@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Wali Siswa / 02 Tagihan Anak wali-siswa.tagihan.anak · wali-siswa/tagihan/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Centang tagihan → "Bayar Terpilih"  →  wali-siswa-03-pembayaran-midtrans
+-->
+
+<div class="screen-label">Wali Siswa / 02 Tagihan Anak <span>wali-siswa.tagihan.anak · wali-siswa/tagihan/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="wali-siswa" data-active="anak.2.tagihan"
+     data-title="Tagihan &amp; Pembayaran" data-subtitle="Siti Nurhaliza — Kelas 7A · TA 2025/2026" data-user="R|Rahmat Hidayat">
+<div class="content-slot">
+
+    <div class="grid grid-3 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 5.950.000</div><div class="stat-label">Total Tagihan</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-circle-check"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 5.350.000</div><div class="stat-label">Sudah Dibayar</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-details"><div class="stat-value">Rp 600.000</div><div class="stat-label">Sisa Tagihan</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Belum Lunas (2)</a><a>Lunas</a><a>Semua</a></div>
+            <div class="spacer"></div>
+            <span class="muted small">Pilih tagihan untuk dibayar sekaligus</span>
+            <a class="btn primary"><i class="fas fa-credit-card"></i> Bayar Terpilih (Rp 600.000)</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:48px"><input type="checkbox" checked></th><th>Jenis Tagihan</th><th>Periode</th><th>Jatuh Tempo</th><th class="num">Nominal</th><th class="num">Terbayar</th><th class="num">Sisa</th><th>Status</th></tr></thead>
+            <tbody>
+                <tr style="background:#fffbeb"><td><input type="checkbox" checked></td><td class="cell-main">SPP Januari</td><td>Januari 2026</td><td>10 Jan 2026</td>
+                    <td class="num money">Rp 450.000</td><td class="num money">Rp 200.000</td><td class="num money" style="color:#b45309">Rp 250.000</td><td><span class="badge warning">Cicilan</span></td></tr>
+                <tr><td><input type="checkbox" checked></td><td class="cell-main">Uang Ujian</td><td>Semester Genap</td><td>20 Feb 2026</td>
+                    <td class="num money">Rp 350.000</td><td class="num money">Rp 0</td><td class="num money">Rp 350.000</td><td><span class="badge neutral">Belum Bayar</span></td></tr>
+                <tr><td></td><td class="cell-main">Uang Kegiatan</td><td>Semester Ganjil</td><td>30 Sep 2025</td>
+                    <td class="num money">Rp 750.000</td><td class="num money">Rp 750.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Lunas</span></td></tr>
+                <tr><td></td><td class="cell-main">SPP Agustus</td><td>Agustus 2025</td><td>10 Agu 2025</td>
+                    <td class="num money">Rp 450.000</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Lunas</span></td></tr>
+                <tr><td></td><td class="cell-main">Uang Pangkal</td><td>Awal Masuk</td><td>15 Jul 2025</td>
+                    <td class="num money">Rp 3.500.000</td><td class="num money">Rp 3.500.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Lunas</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-header"><h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Riwayat Pembayaran</h3></div>
+        <table class="data">
+            <thead><tr><th>Tanggal</th><th>Tagihan</th><th class="num">Nominal</th><th>Metode</th><th>Status</th><th style="width:110px">Invoice</th></tr></thead>
+            <tbody>
+                <tr><td>12 Jan 2026</td><td>SPP Januari (cicilan 1)</td><td class="num money">Rp 200.000</td><td><span class="badge neutral square">Transfer Manual</span></td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-file-invoice"></i> Lihat</a></td></tr>
+                <tr><td>28 Sep 2025</td><td>Uang Kegiatan</td><td class="num money">Rp 750.000</td><td><span class="badge primary square">Midtrans</span></td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-file-invoice"></i> Lihat</a></td></tr>
+                <tr><td>08 Agu 2025</td><td>SPP Agustus</td><td class="num money">Rp 450.000</td><td><span class="badge primary square">Midtrans</span></td><td><span class="badge success">Disetujui</span></td><td><a class="btn ghost sm"><i class="fas fa-file-invoice"></i> Lihat</a></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Pembayaran Midtrans ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

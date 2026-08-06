@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Waka / 01 Dashboard waka.dashboard · waka/dashboard.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Sidebar "Data Kelas"  →  waka-02-data-kelas
+  Sidebar "Jadwal Pelajaran"  →  waka-03-jadwal-pelajaran
+  Sidebar "Pengaturan KKM"  →  waka-04-pengaturan-kkm
+  Sidebar "Siswa" (monitoring)  →  waka-05-monitoring-siswa
+-->
+
+<div class="screen-label">Waka / 01 Dashboard <span>waka.dashboard · waka/dashboard.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="waka" data-active="waka.dashboard"
+     data-title="Dashboard" data-subtitle="Ringkasan akademik TA 2025/2026" data-user="W|Wakil Kepala Sekolah">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-chalkboard"></i></div>
+            <div class="stat-details"><div class="stat-value">36</div><div class="stat-label">Rombongan Belajar</div>
+            <div class="stat-footer"><span>3 cabang</span><span class="muted">Rata-rata 34 siswa</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-book"></i></div>
+            <div class="stat-details"><div class="stat-value">24</div><div class="stat-label">Mata Pelajaran</div>
+            <div class="stat-footer"><span>Semua jenjang</span><span class="badge success">KKM lengkap</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-calendar-week"></i></div>
+            <div class="stat-details"><div class="stat-value">31 / 36</div><div class="stat-label">Jadwal Tersusun</div>
+            <div class="stat-footer"><span>5 kelas belum lengkap</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-user-tie"></i></div>
+            <div class="stat-details"><div class="stat-value">24 / 36</div><div class="stat-label">Wali Kelas Ditetapkan</div>
+            <div class="stat-footer"><span>12 kelas kosong</span><span class="badge warning">Perlu tindakan</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-triangle-exclamation"></i> Perlu Tindak Lanjut</h3></div>
+            <table class="data">
+                <thead><tr><th>Kelas</th><th>Jenjang</th><th>Masalah</th><th>Dampak</th><th style="width:130px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">9C</td><td>SMP / Paket B</td><td><span class="badge warning">Wali kelas belum ditetapkan</span></td><td class="small muted">Rapor tidak bisa diisi</td><td><a class="btn primary sm">Tetapkan</a></td></tr>
+                    <tr><td class="cell-main">10 IPS</td><td>SMA / Paket C</td><td><span class="badge danger">Jadwal belum lengkap</span></td><td class="small muted">4 slot kosong</td><td><a class="btn primary sm">Susun</a></td></tr>
+                    <tr><td class="cell-main">11 IPA</td><td>SMA / Paket C</td><td><span class="badge warning">Guru pengajar kurang</span></td><td class="small muted">Fisika belum ada pengampu</td><td><a class="btn primary sm">Tugaskan</a></td></tr>
+                    <tr><td class="cell-main">7C</td><td>SMP / Paket B</td><td><span class="badge danger">KKM belum diatur</span></td><td class="small muted">Prediksi kenaikan tidak akurat</td><td><a class="btn primary sm">Atur KKM</a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-simple"></i> Beban Mengajar</h3></div>
+            <div class="card-body">
+                <div class="row between small" style="margin-bottom:6px"><span>Hendra Wijaya</span><span class="strong">28 JP</span></div>
+                <div class="progress mb-20"><i style="width:93%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>Dewi Lestari</span><span class="strong">24 JP</span></div>
+                <div class="progress mb-20"><i style="width:80%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>Sri Rahayu</span><span class="strong">22 JP</span></div>
+                <div class="progress mb-20"><i style="width:73%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>Yusuf Maulana</span><span class="strong">18 JP</span></div>
+                <div class="progress warn mb-20"><i style="width:60%"></i></div>
+                <div class="row between small" style="margin-bottom:6px"><span>M. Ridwan</span><span class="strong">10 JP</span></div>
+                <div class="progress danger"><i style="width:33%"></i></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Data Kelas ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

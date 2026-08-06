@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Guru / 03 Dashboard LMS guru.lms.dashboard · guru/lms/dashboard.blade.php · shell LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Sidebar LMS "Materi"  →  guru-04-materi
+  Sidebar LMS "Tugas" → "Buat Tugas"  →  guru-05-buat-tugas
+  Notifikasi "12 siswa mengumpulkan"  →  guru-06-koreksi-tugas
+  Sidebar LMS "Ujian" → "Kelola Soal"  →  guru-07-kelola-soal-ujian
+  Sidebar LMS "Kembali ke Dashboard"  →  guru-01-dashboard-sia ⚡SHELL KEMBALI KE SIA⚡
+-->
+
+<div class="screen-label">Guru / 03 Dashboard LMS <span>guru.lms.dashboard · guru/lms/dashboard.blade.php · shell LMS</span></div>
+<div class="screen" data-shell="lms" data-who="guru" data-active="guru.lms.dashboard"
+     data-title="Beranda Kelas" data-subtitle="Matematika — Kelas 7A · Semester Genap 2025/2026">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon" style="background:rgba(22,95,172,.08);color:#165fac"><i class="fas fa-users"></i></div>
+            <div class="stat-details"><div class="stat-value">34</div><div class="stat-label">Siswa</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-book"></i></div>
+            <div class="stat-details"><div class="stat-value">18</div><div class="stat-label">Materi</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-tasks"></i></div>
+            <div class="stat-details"><div class="stat-value">12</div><div class="stat-label">Perlu Dikoreksi</div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-details"><div class="stat-value">6</div><div class="stat-label">Ujian &amp; Latihan</div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-clock-rotate-left" style="color:#165fac"></i> Aktivitas Terbaru</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#e0edfa;color:#165fac"><i class="fas fa-upload"></i></div>
+                    <div><div class="activity-title">12 siswa mengumpulkan Tugas Bab 3 — Aljabar</div><div class="activity-meta">Batas kumpul 18 Januari 2026 · 22 belum mengumpulkan</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857"><i class="fas fa-comments"></i></div>
+                    <div><div class="activity-title">6 balasan baru pada Forum “Soal Cerita Persamaan Linear”</div><div class="activity-meta">Terakhir 24 menit lalu</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#f5f3ff;color:#6d28d9"><i class="fas fa-eye"></i></div>
+                    <div><div class="activity-title">Materi “Bangun Ruang Sisi Datar” dibuka 28 siswa</div><div class="activity-meta">Diunggah 3 hari lalu</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309"><i class="fas fa-video"></i></div>
+                    <div><div class="activity-title">Kelas virtual dijadwalkan Jumat 09.00</div><div class="activity-meta">Pembahasan latihan soal UTS</div></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title" style="color:#165fac"><i class="fas fa-bolt" style="color:#165fac"></i> Aksi Cepat</h3></div>
+            <div class="quick-links" style="grid-template-columns:repeat(2,1fr)">
+                <a class="quick-link"><i class="fas fa-plus"></i><span>Unggah Materi</span></a>
+                <a class="quick-link"><i class="fas fa-clipboard-list"></i><span>Buat Tugas</span></a>
+                <a class="quick-link"><i class="fas fa-file-circle-plus"></i><span>Buat Ujian</span></a>
+                <a class="quick-link"><i class="fas fa-video"></i><span>Kelas Virtual</span></a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 04 Materi ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

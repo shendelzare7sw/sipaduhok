@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Admin / 02 Data Siswa admin.users.siswa · admin/users/siswa.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Tambah Siswa"  →  admin-03-tambah-siswa
+  Tombol "Impor Excel"  →  modal overlay import
+  Klik baris siswa  →  detail/edit siswa
+  Sidebar "Dashboard"  →  admin-01-dashboard
+-->
+
+<div class="screen-label">Admin / 02 Data Siswa <span>admin.users.siswa · admin/users/siswa.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="admin" data-active="admin.users.siswa"
+     data-title="Kelola Data Siswa" data-subtitle="1.248 siswa aktif pada TA 2025/2026" data-user="A|Administrator">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon blue" style="width:42px;height:42px;font-size:17px"><i class="fas fa-users"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">1.248</div><div class="stat-label" style="font-size:12px">Total Aktif</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon green" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-check"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">1.196</div><div class="stat-label" style="font-size:12px">Sudah Berkelas</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon yellow" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-clock"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">52</div><div class="stat-label" style="font-size:12px">Belum Ditempatkan</div></div></div></div>
+        <div class="card"><div class="stat-widget" style="padding:18px"><div class="stat-icon" style="width:42px;height:42px;font-size:17px"><i class="fas fa-user-slash"></i></div><div class="stat-details"><div class="stat-value" style="font-size:22px">37</div><div class="stat-label" style="font-size:12px">Nonaktif</div></div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="search" style="width:300px"><i class="fas fa-search"></i><input class="control" placeholder="Cari nama, NISN, atau NIS…"></div>
+            <select class="control" style="width:160px"><option>Semua Cabang</option></select>
+            <select class="control" style="width:150px"><option>Semua Jenjang</option></select>
+            <select class="control" style="width:150px"><option>Semua Kelas</option></select>
+            <div class="spacer"></div>
+            <a class="btn ghost"><i class="fas fa-file-import"></i> Impor Excel</a>
+            <a class="btn ghost"><i class="fas fa-file-excel"></i> Ekspor</a>
+            <a class="btn primary"><i class="fas fa-plus"></i> Tambah Siswa</a>
+        </div>
+        <table class="data">
+            <thead><tr>
+                <th style="width:48px"><input type="checkbox"></th>
+                <th>Siswa</th><th>NISN</th><th>Kelas</th><th>Cabang</th><th>Wali Siswa</th><th>Status</th><th style="width:130px">Aksi</th>
+            </tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi Ramadhan</span><div class="cell-sub" style="margin-left:44px">L · 13 tahun</div></td>
+                    <td>0087654321</td><td>7A</td><td>Pusat</td><td>Rahmat Hidayat</td>
+                    <td><span class="badge success">Aktif</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span><div class="cell-sub" style="margin-left:44px">P · 13 tahun</div></td>
+                    <td>0087654322</td><td>7A</td><td>Pusat</td><td>Rahmat Hidayat</td>
+                    <td><span class="badge success">Aktif</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span><div class="cell-sub" style="margin-left:44px">L · 14 tahun</div></td>
+                    <td>0087654323</td><td>8B</td><td>Cabang 2</td><td>Sumarni</td>
+                    <td><span class="badge success">Aktif</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya Pratama</span><div class="cell-sub" style="margin-left:44px">L · 16 tahun</div></td>
+                    <td>0087654324</td><td><span class="muted">—</span></td><td>Pusat</td><td><span class="muted">Belum terhubung</span></td>
+                    <td><span class="badge warning">Belum Berkelas</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span><div class="cell-sub" style="margin-left:44px">P · 15 tahun</div></td>
+                    <td>0087654325</td><td>9C</td><td>Cabang 3</td><td>Yusuf Maulana</td>
+                    <td><span class="badge neutral">Nonaktif</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <a class="page-link disabled"><i class="fas fa-chevron-left"></i></a>
+            <a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link">…</a><a class="page-link">25</a>
+            <a class="page-link"><i class="fas fa-chevron-right"></i></a>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Tambah Siswa ════════════════════════════════════════════════ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

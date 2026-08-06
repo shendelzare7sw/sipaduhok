@@ -127,15 +127,15 @@
                                     {{-- View Mode --}}
                                     <span class="view-mode">
                                         @if($status === 'hadir')
-                                            <span class="status-badge bg-success bg-opacity-10 text-success">Hadir</span>
+                                            <span class="status-badge bg-label-success">Hadir</span>
                                         @elseif($status === 'sakit')
-                                            <span class="status-badge bg-warning bg-opacity-10 text-warning">Sakit</span>
+                                            <span class="status-badge bg-label-warning">Sakit</span>
                                         @elseif($status === 'izin')
-                                            <span class="status-badge bg-info bg-opacity-10 text-info">Izin</span>
+                                            <span class="status-badge bg-label-info">Izin</span>
                                         @elseif($status === 'alpha')
-                                            <span class="status-badge bg-danger bg-opacity-10 text-danger">Alpha</span>
+                                            <span class="status-badge bg-label-danger">Alpha</span>
                                         @else
-                                            <span class="status-badge bg-secondary bg-opacity-10 text-secondary">Belum Diisi</span>
+                                            <span class="status-badge bg-label-secondary">Belum Diisi</span>
                                         @endif
                                     </span>
                                     {{-- Edit Mode --}}

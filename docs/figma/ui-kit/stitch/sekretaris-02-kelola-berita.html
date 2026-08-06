@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Sekretaris / 02 Kelola Berita sekretaris.berita.index · sekretaris/berita/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Tulis Berita"  →  sekretaris-03-form-berita
+-->
+
+<div class="screen-label">Sekretaris / 02 Kelola Berita <span>sekretaris.berita.index · sekretaris/berita/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="sekretaris" data-active="sekretaris.berita"
+     data-title="Kelola Berita" data-subtitle="51 berita — 48 terbit, 3 draft" data-user="S|Sekretaris">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Semua</a><a>Terbit</a><a>Draft</a><a>Arsip</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:250px"><i class="fas fa-search"></i><input class="control" placeholder="Cari judul berita…"></div>
+            <a class="btn primary"><i class="fas fa-plus"></i> Tulis Berita</a>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:110px">Gambar</th><th>Judul</th><th>Kategori</th><th>Tanggal Terbit</th><th class="num">Dilihat</th><th>Status</th><th style="width:130px">Aksi</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><img src="../assets/img/news-1.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Pembukaan Pendaftaran Peserta Didik Baru TA 2026/2027</span><div class="cell-sub">Pendaftaran gelombang pertama dibuka 15 Januari…</div></td>
+                    <td><span class="badge primary square">Pengumuman</span></td><td>12 Jan 2026</td><td class="num">1.284</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-2.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Peserta Didik Paket C Raih Juara Lomba Karya Tulis</span><div class="cell-sub">Tiga peserta didik meraih juara tingkat kota…</div></td>
+                    <td><span class="badge neutral square">Prestasi</span></td><td>08 Jan 2026</td><td class="num">876</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-3.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Pelatihan Guru Pendamping Kelas Inklusi</span><div class="cell-sub">Peningkatan kompetensi tenaga pendidik…</div></td>
+                    <td><span class="badge neutral square">Kegiatan</span></td><td><span class="muted">—</span></td><td class="num">—</td>
+                    <td><span class="badge neutral">Draft</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-4.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Kunjungan Edukatif ke Museum Daerah</span><div class="cell-sub">Kegiatan pembelajaran luar kelas kelas 8…</div></td>
+                    <td><span class="badge neutral square">Kegiatan</span></td><td>22 Des 2025</td><td class="num">642</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+                <tr>
+                    <td><img src="../assets/img/news-5.jpg" style="width:84px;height:56px;object-fit:cover;border-radius:8px" alt=""></td>
+                    <td><span class="cell-main">Penerimaan Rapor Semester Ganjil</span><div class="cell-sub">Pembagian rapor dilaksanakan serentak…</div></td>
+                    <td><span class="badge primary square">Pengumuman</span></td><td>18 Des 2025</td><td class="num">1.907</td>
+                    <td><span class="badge success">Terbit</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-pen"></i></a> <a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-trash"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">…</a><a class="page-link">11</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Form Berita ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

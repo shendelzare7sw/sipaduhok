@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Bendahara / 02 Kelola Tagihan bendahara.tagihan.index · bendahara/tagihan/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Klik baris siswa  →  bendahara-03-detail-tagihan-siswa
+-->
+
+<div class="screen-label">Bendahara / 02 Kelola Tagihan <span>bendahara.tagihan.index · bendahara/tagihan/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.tagihan.index"
+     data-title="Kelola Tagihan" data-subtitle="3.842 tagihan pada TA 2025/2026" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="card mb-20"><div class="toolbar" style="border-bottom:none">
+        <a class="btn primary"><i class="fas fa-layer-group"></i> Buat Massal</a>
+        <a class="btn ghost"><i class="fas fa-calendar-plus"></i> Generate SPP</a>
+        <a class="btn ghost"><i class="fas fa-copy"></i> Duplikat Tagihan</a>
+        <a class="btn ghost"><i class="fas fa-arrow-right-arrow-left"></i> Tarik Tunggakan</a>
+        <a class="btn ghost"><i class="fas fa-plus"></i> Tagihan Kustom</a>
+        <div class="spacer"></div>
+        <a class="btn ghost"><i class="fas fa-print"></i> Cetak Laporan</a>
+    </div></div>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Semua</a><a>Belum Bayar</a><a>Cicilan</a><a>Terlambat</a><a>Lunas</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:230px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa…"></div>
+            <select class="control" style="width:140px"><option>Semua Kelas</option></select>
+            <select class="control" style="width:150px"><option>Semua Jenis</option></select>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:48px"><input type="checkbox"></th><th>Siswa</th><th>Kelas</th><th>Jenis Tagihan</th><th>Jatuh Tempo</th><th class="num">Nominal</th><th class="num">Sisa</th><th>Status</th><th style="width:140px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi R.</span></td><td>7A</td><td>SPP Januari</td><td>10 Jan 2026</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#047857">Rp 0</td><td><span class="badge success">Sudah Bayar</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td><td>7A</td><td>SPP Januari</td><td>10 Jan 2026</td><td class="num money">Rp 450.000</td><td class="num money" style="color:#b45309">Rp 250.000</td><td><span class="badge warning">Cicilan</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td><td>8B</td><td>Uang Kegiatan</td><td>05 Jan 2026</td><td class="num money">Rp 750.000</td><td class="num money" style="color:#b91c1c">Rp 750.000</td><td><span class="badge danger">Terlambat</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">RA</span><span class="cell-main">Rizky Aditya P.</span></td><td>10 IPA</td><td>SPP Desember <span class="badge purple square" style="font-size:10px">Carryover</span></td><td>10 Des 2025</td><td class="num money">Rp 500.000</td><td class="num money" style="color:#b91c1c">Rp 500.000</td><td><span class="badge danger">Terlambat</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Uang Ujian</td><td>20 Feb 2026</td><td class="num money">Rp 350.000</td><td class="num money">Rp 350.000</td><td><span class="badge neutral">Belum Bayar</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Seragam</td><td>28 Feb 2026</td><td class="num money">Rp 620.000</td><td class="num money">Rp 620.000</td><td><span class="badge neutral">Belum Bayar</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn ghost sm"><i class="fas fa-print"></i></a></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">…</a><a class="page-link">77</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Detail Tagihan Siswa ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

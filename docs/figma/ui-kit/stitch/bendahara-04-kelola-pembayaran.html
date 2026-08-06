@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Bendahara / 04 Kelola Pembayaran bendahara.pembayaran.index · bendahara/pembayaran/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Klik baris pembayaran  →  bendahara-05-validasi-pembayaran
+-->
+
+<div class="screen-label">Bendahara / 04 Kelola Pembayaran <span>bendahara.pembayaran.index · bendahara/pembayaran/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="bendahara" data-active="bendahara.pembayaran.index"
+     data-title="Kelola Pembayaran" data-subtitle="24 pembayaran menunggu validasi" data-user="B|Bendahara">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Menunggu (24)</a><a>Disetujui</a><a>Ditolak</a><a>Semua</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:230px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa…"></div>
+            <select class="control" style="width:170px"><option>Semua Metode</option><option>Midtrans</option><option>Transfer Manual</option><option>Tunai</option></select>
+        </div>
+        <table class="data">
+            <thead><tr><th style="width:48px"><input type="checkbox"></th><th>Siswa</th><th>Kelas</th><th>Tagihan</th><th class="num">Nominal</th><th>Metode</th><th>Bukti</th><th>Diterima</th><th style="width:180px">Aksi</th></tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi R.</span></td><td>7A</td><td>SPP Januari</td><td class="num money">Rp 450.000</td>
+                    <td><span class="badge neutral square">Transfer Manual</span></td><td><span class="badge primary square"><i class="fas fa-paperclip"></i> Ada</span></td><td>2 jam lalu</td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td><td>7A</td><td>SPP Januari (cicilan 2)</td><td class="num money">Rp 250.000</td>
+                    <td><span class="badge neutral square">Transfer Manual</span></td><td><span class="badge primary square"><i class="fas fa-paperclip"></i> Ada</span></td><td>5 jam lalu</td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td><td>9C</td><td>Uang Ujian</td><td class="num money">Rp 350.000</td>
+                    <td><span class="badge neutral square">Tunai</span></td><td><span class="muted small">—</span></td><td>1 hari lalu</td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i></a> <a class="btn success sm"><i class="fas fa-check"></i> Setujui</a> <a class="btn danger sm"><i class="fas fa-times"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td><td><span class="avatar-sm gray">DP</span><span class="cell-main">Dimas Prayoga</span></td><td>7B</td><td>Seragam</td><td class="num money">Rp 620.000</td>
+                    <td><span class="badge primary square">Midtrans</span></td><td><span class="muted small">Otomatis</span></td><td>1 hari lalu</td>
+                    <td><span class="badge success">Tervalidasi otomatis</span></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link">3</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 05 Validasi Pembayaran ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

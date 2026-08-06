@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Ketua / 02 Validasi Rapor ketua.validasi-rapor.index · ketua/validasi-rapor/index.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Pratinjau"  →  ketua-03-preview-rapor
+  Tombol "Validasi"  →  ketua-02-validasi-rapor (status → Tervalidasi)
+  Tombol "Minta Revisi"  →  ketua-02-validasi-rapor (status → Perlu Revisi)
+-->
+
+<div class="screen-label">Ketua / 02 Validasi Rapor <span>ketua.validasi-rapor.index · ketua/validasi-rapor/index.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="ketua" data-active="ketua.validasi-rapor"
+     data-title="Validasi Rapor" data-subtitle="Semester Genap TA 2025/2026" data-user="K|Ketua PKBM">
+<div class="content-slot">
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="pill-tab"><a class="active">Menunggu (18)</a><a>Tervalidasi</a><a>Perlu Revisi</a></div>
+            <div class="spacer"></div>
+            <div class="search" style="width:250px"><i class="fas fa-search"></i><input class="control" placeholder="Cari siswa atau kelas…"></div>
+            <select class="control" style="width:160px"><option>Semua Kelas</option></select>
+            <a class="btn success"><i class="fas fa-check-double"></i> Validasi Terpilih</a>
+        </div>
+        <table class="data">
+            <thead><tr>
+                <th style="width:48px"><input type="checkbox"></th>
+                <th>Siswa</th><th>Kelas</th><th>Wali Kelas</th><th class="num">Rata-rata</th>
+                <th>Kehadiran</th><th>Dikirim</th><th>Status</th><th style="width:190px">Aksi</th>
+            </tr></thead>
+            <tbody>
+                <tr><td><input type="checkbox" checked></td>
+                    <td><span class="avatar-sm">AF</span><span class="cell-main">Ahmad Fauzi Ramadhan</span></td>
+                    <td>7A</td><td>Dewi Lestari</td><td class="num strong">84,2</td>
+                    <td><span class="badge success">96%</span></td><td>2 hari lalu</td>
+                    <td><span class="badge warning">Menunggu</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a></td></tr>
+                <tr><td><input type="checkbox" checked></td>
+                    <td><span class="avatar-sm gray">SN</span><span class="cell-main">Siti Nurhaliza</span></td>
+                    <td>7A</td><td>Dewi Lestari</td><td class="num strong">88,7</td>
+                    <td><span class="badge success">98%</span></td><td>2 hari lalu</td>
+                    <td><span class="badge warning">Menunggu</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">BS</span><span class="cell-main">Budi Santoso</span></td>
+                    <td>8B</td><td>Sri Rahayu</td><td class="num strong">71,4</td>
+                    <td><span class="badge warning">82%</span></td><td>6 jam lalu</td>
+                    <td><span class="badge warning">Menunggu</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <a class="btn success sm"><i class="fas fa-check"></i></a> <a class="btn warning sm"><i class="fas fa-undo"></i></a></td></tr>
+                <tr><td><input type="checkbox"></td>
+                    <td><span class="avatar-sm gray">NA</span><span class="cell-main">Nabila Azzahra</span></td>
+                    <td>9C</td><td>Yusuf Maulana</td><td class="num strong">79,8</td>
+                    <td><span class="badge success">94%</span></td><td>1 hari lalu</td>
+                    <td><span class="badge danger">Perlu Revisi</span></td>
+                    <td><a class="btn ghost sm"><i class="fas fa-eye"></i> Pratinjau</a> <span class="muted xsmall">Dikembalikan</span></td></tr>
+            </tbody>
+        </table>
+        <div class="pagination"><a class="page-link disabled"><i class="fas fa-chevron-left"></i></a><a class="page-link active">1</a><a class="page-link">2</a><a class="page-link"><i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 03 Preview Rapor (A4) ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

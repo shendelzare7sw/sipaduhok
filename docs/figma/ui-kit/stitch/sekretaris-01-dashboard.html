@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Sekretaris / 01 Dashboard sekretaris.dashboard · dashboard/sekretaris.blade.php</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Sidebar "Kelola Berita"  →  sekretaris-02-kelola-berita
+  Sidebar "Kalender Akademik"  →  sekretaris-04-kalender-akademik
+-->
+
+<div class="screen-label">Sekretaris / 01 Dashboard <span>sekretaris.dashboard · dashboard/sekretaris.blade.php</span></div>
+<div class="screen" data-shell="sneat" data-role="sekretaris" data-active="sekretaris.dashboard"
+     data-title="Dashboard" data-subtitle="Ringkasan konten publikasi sekolah" data-user="S|Sekretaris">
+<div class="content-slot">
+
+    <div class="grid grid-4 mb-20">
+        <div class="card"><div class="stat-widget"><div class="stat-icon blue"><i class="fas fa-newspaper"></i></div>
+            <div class="stat-details"><div class="stat-value">48</div><div class="stat-label">Berita Terbit</div>
+            <div class="stat-footer"><span>3 draft menunggu</span><span class="muted">Total 51</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon green"><i class="fas fa-bullhorn"></i></div>
+            <div class="stat-details"><div class="stat-value">12</div><div class="stat-label">Pengumuman Aktif</div>
+            <div class="stat-footer"><span>4 kedaluwarsa</span><span class="badge success">Tampil</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon yellow"><i class="fas fa-image"></i></div>
+            <div class="stat-details"><div class="stat-value">7</div><div class="stat-label">Flyer Terpasang</div>
+            <div class="stat-footer"><span>2 dijadwalkan</span><span class="muted">Slider beranda</span></div></div></div></div>
+        <div class="card"><div class="stat-widget"><div class="stat-icon purple"><i class="fas fa-calendar-days"></i></div>
+            <div class="stat-details"><div class="stat-value">26</div><div class="stat-label">Agenda Semester Ini</div>
+            <div class="stat-footer"><span>Terdekat 3 hari lagi</span><span class="badge warning">UTS</span></div></div></div></div>
+    </div>
+
+    <div class="grid grid-2-1">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-clock-rotate-left"></i> Konten Terbaru</h3><a class="btn primary sm"><i class="fas fa-plus"></i> Tulis Berita</a></div>
+            <table class="data">
+                <thead><tr><th>Judul</th><th>Jenis</th><th>Penulis</th><th>Tanggal</th><th>Status</th><th style="width:110px">Aksi</th></tr></thead>
+                <tbody>
+                    <tr><td class="cell-main">Pembukaan PPDB TA 2026/2027</td><td><span class="badge primary square">Berita</span></td><td>M. Fadli</td><td>12 Jan 2026</td><td><span class="badge success">Terbit</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Jadwal Ujian Tengah Semester Genap</td><td><span class="badge neutral square">Pengumuman</span></td><td>M. Fadli</td><td>10 Jan 2026</td><td><span class="badge success">Terbit</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Peserta Didik Raih Juara Lomba Karya Tulis</td><td><span class="badge primary square">Berita</span></td><td>M. Fadli</td><td>08 Jan 2026</td><td><span class="badge success">Terbit</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Flyer Open House Februari</td><td><span class="badge purple square">Flyer</span></td><td>M. Fadli</td><td>06 Jan 2026</td><td><span class="badge warning">Dijadwalkan</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                    <tr><td class="cell-main">Pelatihan Guru Pendamping Inklusi</td><td><span class="badge primary square">Berita</span></td><td>M. Fadli</td><td>02 Jan 2026</td><td><span class="badge neutral">Draft</span></td><td><a class="btn ghost sm"><i class="fas fa-pen"></i></a></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-day"></i> Agenda Terdekat</h3></div>
+            <div class="activity">
+                <div class="activity-item"><div class="activity-avatar" style="background:#fee2e2;color:#b91c1c">17</div><div><div class="activity-title">Ujian Tengah Semester</div><div class="activity-meta">17 – 22 Januari 2026</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#eff6ff;color:#2563eb">28</div><div><div class="activity-title">Rapat Wali Murid</div><div class="activity-meta">28 Januari 2026 · 09.00</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#ecfdf5;color:#047857">05</div><div><div class="activity-title">Open House Gelombang I</div><div class="activity-meta">05 Februari 2026</div></div></div>
+                <div class="activity-item"><div class="activity-avatar" style="background:#fffbeb;color:#b45309">14</div><div><div class="activity-title">Pekan Kreativitas Siswa</div><div class="activity-meta">14 – 18 Februari 2026</div></div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- ═══ 02 Kelola Berita ═══ -->
+
+<script src="../ui-kit.js"></script>
+</body>
+</html>

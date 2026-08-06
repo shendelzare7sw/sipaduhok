@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>SIPADUHOK — Login + Pilih Role</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="../ui-kit.css">
+<style>
+.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f0f4ff, #e8f0fe); }
+.login-card { background: #fff; border-radius: 12px; box-shadow: 0 10px 24px rgba(15,23,42,.08); padding: 40px; width: 420px; }
+.login-card .brand { text-align: center; margin-bottom: 32px; }
+.login-card .brand h1 { font-size: 24px; font-weight: 800; color: #4361ee; letter-spacing: 1px; margin: 0; }
+.login-card .brand p { font-size: 13px; color: #94a3b8; margin: 6px 0 0; }
+.login-card h2 { font-size: 18px; font-weight: 600; color: #1e293b; margin: 0 0 6px; }
+.login-card .sub { font-size: 13px; color: #64748b; margin: 0 0 24px; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 7px; }
+.field label .req { color: #ef4444; }
+.field input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-family: inherit; }
+.field input:focus { border-color: #4361ee; outline: none; box-shadow: 0 0 0 3px rgba(67,97,238,.12); }
+.check-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; color: #64748b; }
+.btn-login { width: 100%; padding: 12px; background: #4361ee; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-login:hover { background: #3651d4; }
+.forgot { display: block; text-align: center; margin-top: 16px; font-size: 13px; color: #4361ee; text-decoration: none; }
+
+.role-picker-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 999; align-items: center; justify-content: center; }
+.role-picker-overlay.active { display: flex; }
+.role-picker { background: #fff; border-radius: 14px; padding: 32px; width: 620px; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.12); }
+.role-picker h3 { font-size: 18px; font-weight: 600; color: #1e293b; margin: 0 0 6px; }
+.role-picker .sub { font-size: 13px; color: #64748b; margin: 0 0 20px; }
+.role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.role-card { padding: 16px; border: 1px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; transition: all .15s; }
+.role-card:hover { border-color: #4361ee; background: #eff6ff; transform: translateY(-2px); }
+.role-card .icon { font-size: 28px; margin-bottom: 8px; }
+.role-card .name { font-size: 13px; font-weight: 600; color: #334155; }
+.role-card .desc { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<!--
+=== WIRING (Google Stitch: hubungkan button/link berikut ke layar tujuan) ===
+  Tombol "Masuk"  →  Role Picker overlay (tampil)
+  Role Picker "Admin"  →  admin-01-dashboard.html
+  Role Picker "Ketua PKBM"  →  ketua-01-dashboard.html
+  Role Picker "Wakil Kepala Sekolah"  →  waka-01-dashboard.html
+  Role Picker "Sekretaris"  →  sekretaris-01-dashboard.html
+  Role Picker "Bendahara"  →  bendahara-01-dashboard.html
+  Role Picker "Wali Kelas"  →  wali-kelas-01-pilih-kelas.html
+  Role Picker "Guru Pengajar"  →  guru-01-dashboard-sia.html
+  Role Picker "Siswa"  →  siswa-01-dashboard-sia.html
+  Role Picker "Wali Siswa"  →  wali-siswa-01-dashboard.html
+  Link "Lupa kata sandi?"  →  publik-04-pemulihan-akun.html (kalau ada)
+-->
+
+<div class="login-page">
+    <div class="login-card">
+        <div class="brand">
+            <h1>SIPADUHOK</h1>
+            <p>Sistem Informasi PKBM House of Knowledge</p>
+        </div>
+        <h2>Masuk ke SIPADUHOK</h2>
+        <p class="sub">Silakan masuk dengan akun Anda</p>
+        <div class="field">
+            <label>Username / Email <span class="req">*</span></label>
+            <input type="text" placeholder="Masukkan username atau email">
+        </div>
+        <div class="field">
+            <label>Kata Sandi <span class="req">*</span></label>
+            <input type="password" placeholder="Masukkan kata sandi">
+        </div>
+        <div class="check-row">
+            <input type="checkbox" id="remember"> <label for="remember" style="font-weight:400">Ingat Saya</label>
+        </div>
+        <button class="btn-login" onclick="document.querySelector('.role-picker-overlay').classList.add('active')">Masuk</button>
+        <a href="#" class="forgot">Lupa kata sandi?</a>
+    </div>
+</div>
+
+<div class="role-picker-overlay" onclick="if(event.target===this)this.classList.remove('active')">
+    <div class="role-picker">
+        <h3>Pilih Role untuk Demo</h3>
+        <p class="sub">Klik salah satu role untuk masuk ke dashboard masing-masing</p>
+        <div class="role-grid">
+            <div class="role-card"><div class="icon">👑</div><div class="name">Admin</div><div class="desc">Superset seluruh modul</div></div>
+            <div class="role-card"><div class="icon">🏛️</div><div class="name">Ketua PKBM</div><div class="desc">Approver & monitoring</div></div>
+            <div class="role-card"><div class="icon">📋</div><div class="name">Wakil Kepala Sekolah</div><div class="desc">Akademik saja</div></div>
+            <div class="role-card"><div class="icon">📝</div><div class="name">Sekretaris</div><div class="desc">Konten publikasi</div></div>
+            <div class="role-card"><div class="icon">💰</div><div class="name">Bendahara</div><div class="desc">Keuangan</div></div>
+            <div class="role-card"><div class="icon">🏫</div><div class="name">Wali Kelas</div><div class="desc">Rapor, presensi, nilai</div></div>
+            <div class="role-card"><div class="icon">🧑‍🏫</div><div class="name">Guru Pengajar</div><div class="desc">LMS & pembelajaran</div></div>
+            <div class="role-card"><div class="icon">🎓</div><div class="name">Siswa</div><div class="desc">SIA & LMS</div></div>
+            <div class="role-card"><div class="icon">👨‍👩‍👧</div><div class="name">Wali Siswa</div><div class="desc">Tagihan, rapor, presensi anak</div></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
