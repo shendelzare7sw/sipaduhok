@@ -22,9 +22,15 @@ class ValidasiRaporController extends Controller
     {
         $activeYear = TahunAjaran::where('is_active', true)->first();
 
-        // Base query: Students that Wali Kelas has submitted for Ketua review
+        // Kolom validasi_* menempel di tabel siswa dan TIDAK per tahun ajaran, jadi
+        // keputusan validasi tahun lalu ikut terbawa ke tahun berjalan: Ketua melihat
+        // siswa berstatus "VALID 28/02/2026" padahal itu keputusan TA sebelumnya.
+        // Validasi yang dibuat SEBELUM TA aktif dimulai dianggap tidak berlaku lagi.
+        $awalTa = $activeYear?->tanggal_mulai;
+
         $query = Siswa::with(['kelas.cabang', 'kelas.tahunAjaran'])
             ->where('validasi_rapor_wali', true)
+            ->when($awalTa, fn ($q) => $q->where('tanggal_validasi_rapor_wali', '>=', $awalTa))
             ->where('status', 'aktif');
 
         // Filter by active year

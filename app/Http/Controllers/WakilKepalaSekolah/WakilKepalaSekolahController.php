@@ -639,7 +639,14 @@ class WakilKepalaSekolahController extends Controller
         $ctx = $this->lmsViewContext();
         $service = app(LmsMonitoringService::class);
 
-        $taFilter = $request->has('tahun_ajaran_id') ? (int) $request->input('tahun_ajaran_id') : 0;
+        // Default ke TA AKTIF, bukan 0 (= semua tahun ajaran). Dengan default lama,
+        // Monitoring LMS menampilkan kelas dari SELURUH TA sekaligus - terukur 90
+        // kelas padahal tahun berjalan cuma punya 45, jadi angka pemantauan
+        // menggelembung dua kali lipat. Memilih "Semua TA" tetap bisa lewat
+        // ?tahun_ajaran_id=0 pada dropdown filter.
+        $taFilter = $request->has('tahun_ajaran_id')
+            ? (int) $request->input('tahun_ajaran_id')
+            : (int) (TahunAjaran::where('is_active', true)->value('id') ?? 0);
         $onlyWithContent = $request->boolean('only_with_content');
 
         $kelas = $service->getKelasList(
