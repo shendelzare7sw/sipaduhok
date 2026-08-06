@@ -192,7 +192,8 @@ class GuruKoreksiController extends Controller
                 if ($mime === 'application/pdf') {
                     try {
                         // Strategy 1: Try extract text (Digital PDF)
-                        $pdfText = Pdf::getText($path);
+                        $binPath = config('services.pdftotext.bin_path') ?: null;
+                        $pdfText = Pdf::getText($path, $binPath);
                         $pdfText = trim($pdfText);
 
                         // If we got meaningful text (> 10 chars), use text grading
@@ -206,7 +207,16 @@ class GuruKoreksiController extends Controller
                         }
 
                         // Strategy 2: No text found → Scanned/Image PDF
-                        // Convert first page to image and use Vision AI
+                        // Convert first page to image and use Vision AI.
+                        // Butuh ekstensi PHP Imagick + Ghostscript di server; kalau
+                        // tidak tersedia, jangan crash — minta guru nilai manual.
+                        if (!extension_loaded('imagick')) {
+                            return response()->json([
+                                'error' => true,
+                                'feedback' => 'File PDF ini sepertinya hasil scan/gambar (bukan teks digital) dan server belum mendukung analisis PDF hasil scan. Silakan nilai manual, atau minta siswa mengunggah ulang dalam format JPG/PNG agar bisa dianalisis AI.',
+                            ]);
+                        }
+
                         $imagePath = storage_path('app/temp/' . uniqid('pdf_') . '.jpg');
 
                         // Ensure temp directory exists
@@ -237,7 +247,7 @@ class GuruKoreksiController extends Controller
                         \Log::error('PDF Processing Error: ' . $e->getMessage());
                         return response()->json([
                             'error' => true,
-                            'feedback' => 'Gagal memproses file PDF. Error: ' . $e->getMessage()
+                            'feedback' => 'Gagal memproses file PDF untuk dianalisis AI. Silakan nilai manual, atau minta siswa mengunggah ulang dalam format JPG/PNG.'
                         ]);
                     }
                 }

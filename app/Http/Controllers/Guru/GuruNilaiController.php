@@ -450,7 +450,7 @@ class GuruNilaiController extends Controller
             ->where('kelas_id', $kelasId)
             ->where('mata_pelajaran_id', $mapelId)
             ->exists();
-        
+
         if (!$access) {
             abort(403, 'Anda tidak memiliki akses ke mata pelajaran ini');
         }

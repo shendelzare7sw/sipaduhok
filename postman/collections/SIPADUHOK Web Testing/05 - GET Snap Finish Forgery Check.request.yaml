@@ -1,0 +1,16 @@
+$kind: http-request
+method: GET
+url: '{{base_url}}/wali-siswa/pembayaran/snap-finish?order_id={{order_id}}&status_code=200&transaction_status=settlement'
+order: 5000
+settings:
+  followRedirects: false
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Forgery check: endpoint tidak boleh dianggap create/update sukses API', function () {
+        pm.expect([302, 403, 404]).to.include(pm.response.code);
+      });
+      pm.test('Bukan respons 200 JSON settlement palsu', function () {
+        pm.expect(pm.response.code).to.not.eql(200);
+      });

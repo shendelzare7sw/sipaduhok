@@ -115,16 +115,16 @@
                                     <span class="badge bg-primary rounded-pill">{{ $date->total_siswa }} siswa</span>
                                 </div>
                                 <div class="d-flex flex-wrap gap-1 mt-2">
-                                    <span class="stat-pill bg-success bg-opacity-10 text-success">
+                                    <span class="stat-pill bg-label-success">
                                         <i class="fas fa-check me-1"></i>{{ $date->hadir }}
                                     </span>
-                                    <span class="stat-pill bg-warning bg-opacity-10 text-warning">
+                                    <span class="stat-pill bg-label-warning">
                                         <i class="fas fa-thermometer me-1"></i>{{ $date->sakit }}
                                     </span>
-                                    <span class="stat-pill bg-info bg-opacity-10 text-info">
+                                    <span class="stat-pill bg-label-info">
                                         <i class="fas fa-envelope me-1"></i>{{ $date->izin }}
                                     </span>
-                                    <span class="stat-pill bg-danger bg-opacity-10 text-danger">
+                                    <span class="stat-pill bg-label-danger">
                                         <i class="fas fa-times me-1"></i>{{ $date->alpha }}
                                     </span>
                                 </div>

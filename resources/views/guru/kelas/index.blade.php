@@ -82,10 +82,11 @@
                             <i class="fas fa-folder-open fa-5x text-gray-200"></i>
                         </div>
                         <h4 class="text-gray-800 fw-bold">Belum Ada Kelas</h4>
-                        <p class="text-gray-600 mb-4">Anda belum memiliki jadwal mengajar atau tugas kelas aktif saat ini.</p>
+                        <p class="text-gray-600 mb-4">Anda belum memiliki tugas mengajar di tahun ajaran aktif.</p>
                         <div class="alert alert-info d-inline-block small">
-                            <i class="fas fa-info-circle me-2"></i>Jika Anda merasa ini kesalahan, silakan hubungi bagian
-                            Akademik atau Admin.
+                            <i class="fas fa-info-circle me-2"></i>Mencari konten kelas tahun ajaran lalu? Buka menu
+                            <a href="{{ route('guru.lms.arsip.index') }}">Arsip LMS</a>. Jika Anda merasa ini kesalahan
+                            untuk TA aktif, silakan hubungi bagian Akademik atau Admin.
                         </div>
                     </div>
                 </div>

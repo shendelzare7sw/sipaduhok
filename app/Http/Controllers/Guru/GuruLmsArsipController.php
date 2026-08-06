@@ -3,9 +3,6 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
-use App\Models\Materi;
-use App\Models\Tugas;
-use App\Models\Ujian;
 use App\Services\GuruLmsArsipService;
 use Illuminate\Http\Request;
 
@@ -224,15 +221,9 @@ class GuruLmsArsipController extends Controller
     protected function resolveKonten(string $type, int $id, int $guruId)
     {
         return match ($type) {
-            'materi' => Materi::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru'])
-                ->where('guru_id', $guruId)
-                ->findOrFail($id),
-            'tugas' => Tugas::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru'])
-                ->where('guru_id', $guruId)
-                ->findOrFail($id),
-            'latihan', 'ujian' => Ujian::with(['kelas.tahunAjaran', 'mataPelajaran', 'guru', 'soalUjian'])
-                ->where('guru_id', $guruId)
-                ->findOrFail($id),
+            'materi' => $this->service->findArsipMateri($id, $guruId),
+            'tugas' => $this->service->findArsipTugas($id, $guruId),
+            'latihan', 'ujian' => $this->service->findArsipUjian($id, $guruId),
             default => abort(404),
         };
     }

@@ -7,30 +7,35 @@ use App\Models\TenagaPendidik;
 use App\Models\GuruPengajarKelas;
 use App\Models\Kelas;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 
 class GuruKelasController extends Controller
 {
     /**
-     * Tampilkan daftar KELAS yang diajar oleh guru ini
+     * Tampilkan daftar KELAS yang diajar oleh guru ini di TA aktif.
+     * Kelas dari TA lama tidak ditampilkan di sini — aksesnya lewat menu Arsip LMS.
      */
     public function index()
     {
         $guru = TenagaPendidik::where('user_id', auth()->id())->first();
-        
+
         if (!$guru) {
             return redirect()->route('guru.dashboard')->with('error', 'Data guru tidak ditemukan.');
         }
 
-        // Ambil semua kelas yang diajar (group by kelas)
+        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
+
+        // Ambil semua kelas yang diajar di TA aktif (group by kelas)
         $kelasYangDiajar = GuruPengajarKelas::where('tenaga_pendidik_id', $guru->id)
+            ->when($taAktifId, fn ($q) => $q->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $taAktifId)))
             ->with(['kelas', 'mataPelajaran'])
             ->get()
             ->groupBy('kelas_id');
 
         $dataKelas = [];
         foreach ($kelasYangDiajar as $kelasId => $pengajaran) {
-            $kelas = Kelas::find($kelasId);
+            $kelas = $pengajaran->first()->kelas;
             if ($kelas) {
                 $dataKelas[] = [
                     'kelas' => $kelas,
@@ -45,14 +50,22 @@ class GuruKelasController extends Controller
     }
 
     /**
-     * Tampilkan MATA PELAJARAN yang diajar di kelas tertentu
+     * Tampilkan MATA PELAJARAN yang diajar di kelas tertentu.
+     * Kelas dari TA lama diarahkan ke Arsip LMS agar guru tidak masuk LMS
+     * (buat tugas/ujian dll) untuk kelas yang sudah tidak berjalan.
      */
     public function showMapel(Kelas $kelas)
     {
         $guru = TenagaPendidik::where('user_id', auth()->id())->first();
-        
+
         if (!$guru) {
             return redirect()->route('guru.dashboard')->with('error', 'Data guru tidak ditemukan.');
+        }
+
+        $taAktifId = TahunAjaran::where('is_active', true)->value('id');
+        if ($taAktifId && $kelas->tahun_ajaran_id != $taAktifId) {
+            return redirect()->route('guru.lms.arsip.index')
+                ->with('error', 'Kelas ini bukan dari tahun ajaran aktif. Gunakan menu Arsip LMS untuk mengakses konten kelas lama.');
         }
 
         // Ambil mata pelajaran yang diajar di kelas ini

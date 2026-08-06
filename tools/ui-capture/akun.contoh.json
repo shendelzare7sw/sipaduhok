@@ -1,0 +1,39 @@
+{
+  "_": "Salin berkas ini menjadi akun.local.json lalu isi nilainya. akun.local.json sudah masuk .gitignore — jangan pernah di-commit.",
+
+  "baseUrl": "http://sipaduhok.test",
+  "_baseUrl": "Sesuaikan dengan URL Laragon kamu. Kalau pakai `php artisan serve`, isi http://127.0.0.1:8000",
+
+  "akun": {
+    "_": "Kolom `login` mengikuti nama input di form login (bisa email atau username, lihat auth/login.blade.php:122).",
+    "admin": { "login": "", "password": "" },
+    "ketua": { "login": "", "password": "" },
+    "waka": { "login": "", "password": "" },
+    "sekretaris": { "login": "", "password": "" },
+    "bendahara": { "login": "", "password": "" },
+    "wali-kelas": { "login": "", "password": "" },
+    "guru": { "login": "", "password": "" },
+    "siswa": { "login": "", "password": "" },
+    "wali-siswa": { "login": "", "password": "" }
+  },
+
+  "params": {
+    "_": "ID nyata dari database lokal untuk layar yang URL-nya berparameter. Bisa diisi global (dipakai semua layar) atau spesifik per id layar.",
+
+    "_global": "Nilai di bawah dipakai untuk semua layar yang butuh param dengan nama sama.",
+    "siswa": null,
+    "pembayaran": null,
+    "rapor": null,
+    "kelas": null,
+    "mapel": null,
+    "mapelId": null,
+    "tugas": null,
+    "tugasId": null,
+    "ujian": null,
+    "ujianId": null,
+
+    "_spesifik": "Kalau satu layar butuh ID berbeda, tulis per-id layar seperti contoh berikut (hapus tanda _ di depan untuk mengaktifkan).",
+    "_walisiswa-tagihan": { "siswa": 12 },
+    "_guru-lms-koreksi": { "kelas": 3, "mapel": 5, "tugas": 21 }
+  }
+}

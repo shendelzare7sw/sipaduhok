@@ -12,9 +12,14 @@ use App\Models\LmsMeeting;
 
 class SiswaLmsMeetingController extends Controller
 {
-    public function index($mapelId): View
+    public function index($mapelId): View|\Illuminate\Http\RedirectResponse
     {
         $siswa = auth()->user()->siswa;
+
+        if (!$siswa) {
+            return redirect()->route('siswa.lms.dashboard')
+                ->with('error', 'Data siswa tidak ditemukan');
+        }
 
         // Ensure siswa belongs to the class
         $kelasId = $siswa->kelas_id;
