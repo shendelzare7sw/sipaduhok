@@ -186,12 +186,7 @@
                         @endforeach
                     </div>
 
-                    <!-- Pagination -->
-                    @if($beritaList->hasPages())
-                        <div class="mt-12 flex justify-center">
-                            {{ $beritaList->appends(['kategori' => $kategori, 'search' => $search])->links('pagination::tailwind') }}
-                        </div>
-                    @endif
+
                 @else
                     <div class="text-center py-16">
                         <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
