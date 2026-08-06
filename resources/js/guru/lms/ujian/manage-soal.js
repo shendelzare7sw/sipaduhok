@@ -1,4 +1,17 @@
 (() => {
+        /**
+         * Ambil huruf opsi (A-E) dari sebuah kunci jawaban, apa pun bentuknya.
+         * AI bisa mengirim "a", "D. Kebijakan fiskal", atau " c ". Radio/checkbox
+         * di form bernilai huruf besar, dan selector CSS case-sensitive - tanpa
+         * penyeragaman ini kunci jawaban gagal tercentang lalu tersimpan kosong.
+         * Mengembalikan '' kalau tidak ada huruf A-E yang bisa dikenali.
+         */
+        function normalizeKunciHuruf(nilai) {
+            if (nilai === null || nilai === undefined) return '';
+            const cocok = String(nilai).match(/[A-Ea-e]/);
+            return cocok ? cocok[0].toUpperCase() : '';
+        }
+
 // === Global LMS Toast Notification ===
         function showLmsToast(type, message) {
             let container = document.getElementById('lmsToastContainer');
@@ -247,8 +260,16 @@
                         }
                     }
                     if (data.kunci_jawaban) {
-                        let radio = el.querySelector(`input[name="soal[${index}][kunci_jawaban_pilgan]"][value="${data.kunci_jawaban}"]`);
-                        if (radio) radio.checked = true;
+                        // Nilai radio selalu huruf besar A-E. Kunci dari AI kadang
+                        // huruf kecil ("d") atau lengkap ("D. Kebijakan fiskal"),
+                        // dan selector atribut CSS itu case-sensitive - kalau tidak
+                        // diseragamkan, radio tidak pernah tercentang dan kunci
+                        // jawaban tersimpan kosong.
+                        let huruf = normalizeKunciHuruf(data.kunci_jawaban);
+                        if (huruf) {
+                            let radio = el.querySelector(`input[name="soal[${index}][kunci_jawaban_pilgan]"][value="${huruf}"]`);
+                            if (radio) radio.checked = true;
+                        }
                     }
                 }
                 else if (type === 'pilihan_ganda_kompleks') {
@@ -269,9 +290,14 @@
                     if (typeof keys === 'string') {
                         try { keys = JSON.parse(keys); } catch(e) { keys = []; }
                     }
+                    if (typeof keys === 'string') {
+                        keys = keys.split(',');
+                    }
                     if (Array.isArray(keys)) {
                         keys.forEach(k => {
-                            let cb = el.querySelector(`input[name="soal[${index}][kunci_jawaban_kompleks][]"][value="${k}"]`);
+                            let huruf = normalizeKunciHuruf(k);
+                            if (!huruf) return;
+                            let cb = el.querySelector(`input[name="soal[${index}][kunci_jawaban_kompleks][]"][value="${huruf}"]`);
                             if (cb) cb.checked = true;
                         });
                     }

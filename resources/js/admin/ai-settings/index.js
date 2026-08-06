@@ -33,19 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
         syncBooleanHidden(questionGeneratorToggle, questionGeneratorHidden);
     });
 
-    const modelsByProvider = {
-        groq: [
-            'qwen/qwen3-32b',
-            'llama-3.3-70b-versatile',
-            'llama-3.1-8b-instant',
-            'openai/gpt-oss-120b',
-            'allam-2-7b',
-            'groq/compound',
-        ],
-        gemini: [
-            'gemini-2.5-flash',
-        ],
-    };
+    // Daftar model diambil dari <option> yang sudah dirender server (sumbernya
+    // config/ai-models.php), bukan disalin ulang di sini - dulu salinan JS ini
+    // ikut basi saat penyedia mematikan sebuah model.
+    const modelsByProvider = (() => {
+        const hasil = { groq: [], gemini: [] };
+        document.querySelectorAll('#ai_model optgroup').forEach((grup) => {
+            const kunci = /gemini/i.test(grup.label) ? 'gemini' : 'groq';
+            grup.querySelectorAll('option').forEach((opt) => hasil[kunci].push(opt.value));
+        });
+        return hasil;
+    })();
 
     const setProviderFieldVisibility = (field, isVisible) => {
         field?.classList.toggle('is-hidden', !isVisible);

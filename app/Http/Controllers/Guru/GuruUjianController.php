@@ -1330,6 +1330,7 @@ class GuruUjianController extends Controller
             'soal' => 'required|array|min:1|max:10',
             'soal.*.tipe_soal' => 'required|in:pilihan_ganda,pilihan_ganda_kompleks,benar_salah,uraian,isian_singkat',
             'soal.*.pertanyaan' => 'required|string',
+            'soal.*.narasi' => 'nullable|string',
             'soal.*.bobot' => 'required|integer|min:1',
             'soal.*.kunci_jawaban' => 'nullable',
             'soal.*.pilihan_a' => 'nullable|string',
@@ -1344,7 +1345,7 @@ class GuruUjianController extends Controller
         \DB::beginTransaction();
         try {
             $ujian = $this->authorizedUjian($tenagaPendidik->id, $kelasId, $mapelId, $ujianId);
-            $currentMaxUrutan = Soal::where('ujian_id', $ujianId)->max('urutan') ?? 0;
+            $currentMaxUrutan = SoalUjian::where('ujian_id', $ujianId)->max('urutan') ?? 0;
             $createdCount = 0;
 
             foreach ($validated['soal'] as $index => $soalData) {
@@ -1353,33 +1354,70 @@ class GuruUjianController extends Controller
                 // Prepare pilihan_jawaban based on tipe_soal
                 $pilihanJawaban = null;
                 $kunciJawaban = $soalData['kunci_jawaban'] ?? null;
+                if (is_array($kunciJawaban)) {
+                    $kunciJawaban = implode(',', $kunciJawaban);
+                }
+                $jawabanBenar = null;
+                $jumlahPilihan = 5;
 
-                if ($soalData['tipe_soal'] === 'pilihan_ganda') {
-                    $pilihanJawaban = [
+                if (in_array($soalData['tipe_soal'], ['pilihan_ganda', 'pilihan_ganda_kompleks'], true)) {
+                    $pilihanJawaban = array_filter([
                         'A' => $soalData['pilihan_a'] ?? '',
                         'B' => $soalData['pilihan_b'] ?? '',
                         'C' => $soalData['pilihan_c'] ?? '',
                         'D' => $soalData['pilihan_d'] ?? '',
                         'E' => $soalData['pilihan_e'] ?? '',
-                    ];
-                } elseif ($soalData['tipe_soal'] === 'benar_salah') {
-                    // For true/false, kunci_jawaban is stored as 'B' or 'S'
-                    if (in_array(strtolower($kunciJawaban), ['benar', 'true', '1'])) {
-                        $kunciJawaban = 'B';
+                    ], fn ($v) => $v !== null && trim((string) $v) !== '');
+
+                    $jumlahPilihan = max(count($pilihanJawaban), 3);
+
+                    // Huruf kunci selalu disimpan KAPITAL supaya cocok saat dikoreksi.
+                    $hurufKunci = array_values(array_filter(array_map(
+                        fn ($b) => preg_match('/[A-Ea-e]/', trim($b), $m) ? strtoupper($m[0]) : null,
+                        preg_split('/[,;]+/', (string) $kunciJawaban)
+                    )));
+
+                    if ($soalData['tipe_soal'] === 'pilihan_ganda_kompleks') {
+                        // Model checkPilihanGandaKompleks() membaca daftar kunci dari sini.
+                        $pilihanJawaban['jawaban_benar'] = $hurufKunci;
+                        $kunciJawaban = json_encode($hurufKunci);
                     } else {
-                        $kunciJawaban = 'S';
+                        $kunciJawaban = $hurufKunci[0] ?? null;
+                        $jawabanBenar = $kunciJawaban;
                     }
+                } elseif ($soalData['tipe_soal'] === 'benar_salah') {
+                    // Model checkBenarSalah() membaca struktur pernyataan, bukan kolom kunci.
+                    $benar = in_array(strtolower(trim((string) $kunciJawaban)), ['benar', 'true', '1', 'b'], true);
+                    $pilihanJawaban = ['pernyataan' => [[
+                        'text' => $soalData['pertanyaan'],
+                        'benar' => $benar,
+                    ]]];
+                    $kunciJawaban = $benar ? 'B' : 'S';
+                    $jawabanBenar = $kunciJawaban;
+                } elseif ($soalData['tipe_soal'] === 'isian_singkat') {
+                    // Sertakan alternatif jawaban agar sinonim ikut dinilai benar.
+                    $alternatif = array_values(array_filter(array_merge(
+                        [(string) $kunciJawaban],
+                        $soalData['alternatif_jawaban'] ?? []
+                    )));
+                    $pilihanJawaban = ['jawaban_benar' => $alternatif];
+                    $jawabanBenar = (string) $kunciJawaban;
+                } else {
+                    // Uraian: dikoreksi manual, tidak ada kunci.
+                    $kunciJawaban = null;
                 }
 
-                Soal::create([
+                SoalUjian::create([
                     'ujian_id' => $ujian->id,
                     'urutan' => $urutan,
                     'tipe_soal' => $soalData['tipe_soal'],
                     'pertanyaan' => $soalData['pertanyaan'],
+                    'narasi' => $soalData['narasi'] ?? null,
+                    'jumlah_pilihan' => $jumlahPilihan,
                     'pilihan_jawaban' => $pilihanJawaban,
                     'kunci_jawaban' => $kunciJawaban,
-                    'bobot' => $soalData['bobot'],
-                    'rubrik_penilaian' => $soalData['rubrik_penilaian'] ?? null,
+                    'jawaban_benar' => $jawabanBenar,
+                    'bobot_nilai' => $soalData['bobot'],
                 ]);
 
                 $createdCount++;

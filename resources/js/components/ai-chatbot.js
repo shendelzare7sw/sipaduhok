@@ -16,6 +16,9 @@ const chatbotState = {
     quickActionsLoaded: false,
     modelsLoaded: false,
     selectedModel: 'llama-3.3-70b-versatile',
+    // Model TEKS pilihan pengguna. Disimpan terpisah supaya setelah meminjam
+    // model gambar/PDF untuk sebuah lampiran, percakapan bisa balik ke sini.
+    modelTeksPilihan: 'llama-3.3-70b-versatile',
     attachedFiles: [],
     availableModels: [],
     fabPosition: { right: 96 },
@@ -289,12 +292,13 @@ async function loadAvailableModels() {
         }
     } catch (error) {
         console.error('[AI Chatbot] Error loading models:', error);
+        // Daftar darurat kalau server tidak bisa dihubungi. Hanya berisi model
+        // yang masih hidup - lihat config/ai-models.php sebagai sumber utamanya.
         const defaultModels = [
-            { id: 'qwen/qwen3-32b', name: 'Qwen 3 32B (High Rate Limit)', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
-            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Recommended)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
+            { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (Direkomendasikan)', provider: 'groq', supports_vision: false, supports_pdf: false, default: true },
             { id: 'openai/gpt-oss-120b', name: 'GPT OSS 120B', provider: 'groq', supports_vision: false, supports_pdf: false, default: false },
-            { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout (Vision)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false },
-            { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (PDF + Vision)', provider: 'gemini', supports_vision: true, supports_pdf: true, default: false }
+            { id: 'qwen/qwen3.6-27b', name: 'Qwen 3.6 27B (Multimodal)', provider: 'groq', supports_vision: true, supports_pdf: false, default: false },
+            { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (PDF + Gambar)', provider: 'gemini', supports_vision: true, supports_pdf: true, default: false }
         ];
         chatbotState.availableModels = defaultModels;
         populateModelSelector(defaultModels);
@@ -472,34 +476,72 @@ function handleFileAttachment(event) {
         }
         chatbotState.attachedFiles.push(fileObj);
     });
-    const hasPdf = chatbotState.attachedFiles.some(f => f.file.type === 'application/pdf');
-    const hasImage = chatbotState.attachedFiles.some(f => f.file.type.startsWith('image/'));
-    if (hasPdf || hasImage) {
-        const selectedModel = chatbotState.availableModels.find(m => m.id === chatbotState.selectedModel);
-        if (hasPdf) {
-            const geminiModel = chatbotState.availableModels.find(m => m.id === 'gemini-2.5-flash');
-            if (geminiModel && chatbotState.selectedModel !== 'gemini-2.5-flash') {
-                chatbotState.selectedModel = geminiModel.id;
-                const selector = document.getElementById('modelSelector');
-                if (selector) selector.value = geminiModel.id;
-                showToastChatbot('info', 'PDF hanya support Gemini 2.5 Flash. Model beralih otomatis.');
-            } else if (!geminiModel) {
-                showToastChatbot('error', 'PDF memerlukan Gemini 2.5 Flash. Hubungi admin untuk konfigurasi API key.');
-            }
-        } else if (hasImage && selectedModel && !selectedModel.supports_vision) {
-            const visionModel = chatbotState.availableModels.find(m => m.supports_vision);
-            if (visionModel) {
-                chatbotState.selectedModel = visionModel.id;
-                const selector = document.getElementById('modelSelector');
-                if (selector) selector.value = visionModel.id;
-                showToastChatbot('info', `Berhasil beralih ke ${visionModel.name}`);
-            } else {
-                showToastChatbot('error', 'Tidak ada model vision tersedia');
-            }
-        }
-    }
+    selaraskanModelDenganLampiran();
     renderAttachmentsPreview();
     event.target.value = '';
+}
+
+/**
+ * Pilih model sesuai jenis lampiran saat ini.
+ *
+ * Aturannya: percakapan TEKS tetap memakai model teks pilihan pengguna
+ * (default Llama). Model gambar/PDF hanya dipinjam selama ada lampiran, lalu
+ * DIKEMBALIKAN lagi begitu lampiran dilepas - supaya kuota model multimodal
+ * yang lebih terbatas tidak terpakai untuk tanya-jawab teks biasa.
+ */
+function selaraskanModelDenganLampiran() {
+    const berkas = chatbotState.attachedFiles;
+    const adaPdf = berkas.some(f => f.file.type === 'application/pdf');
+    const adaGambar = berkas.some(f => f.file.type.startsWith('image/'));
+    const selector = document.getElementById('modelSelector');
+
+    const pakai = (model, pesan) => {
+        if (!model || chatbotState.selectedModel === model.id) return;
+        chatbotState.selectedModel = model.id;
+        if (selector) selector.value = model.id;
+        if (pesan) showToastChatbot('info', pesan);
+    };
+
+    if (!adaPdf && !adaGambar) {
+        // Tidak ada lampiran lagi -> balik ke model teks pilihan pengguna.
+        const modelTeks = chatbotState.availableModels.find(m => m.id === chatbotState.modelTeksPilihan)
+            || chatbotState.availableModels.find(m => !m.supports_vision)
+            || chatbotState.availableModels[0];
+        pakai(modelTeks, modelTeks && modelTeks.id !== chatbotState.selectedModel
+            ? `Kembali ke ${modelTeks.name}`
+            : null);
+        return;
+    }
+
+    // Ingat model teks terakhir supaya bisa dipulihkan nanti.
+    const modelSaatIni = chatbotState.availableModels.find(m => m.id === chatbotState.selectedModel);
+    if (modelSaatIni && !modelSaatIni.supports_vision) {
+        chatbotState.modelTeksPilihan = modelSaatIni.id;
+    }
+
+    // Gambar: dahulukan model gambar dari Groq (Qwen). Kalau kuotanya habis,
+    // server yang otomatis mengalihkan ke Gemini - jadi jangan langsung
+    // memilih Gemini di sini, supaya kuota Gemini lebih hemat.
+    if (adaGambar && modelSaatIni && !modelSaatIni.supports_vision) {
+        const modelGambarGroq = chatbotState.availableModels
+            .find(m => m.supports_vision && m.provider === 'groq');
+        const modelGambar = modelGambarGroq
+            || chatbotState.availableModels.find(m => m.supports_vision);
+
+        if (modelGambar) {
+            pakai(modelGambar, `Beralih ke ${modelGambar.name} untuk membaca gambar.`);
+        } else {
+            showToastChatbot('error', 'Tidak ada model yang bisa membaca gambar. Cek Pengaturan AI.');
+        }
+        return;
+    }
+
+    // PDF: model Groq tidak bisa menelan berkas PDF, tapi server akan mencoba
+    // mengambil TEKS-nya dulu agar tetap ditangani Groq. Model baru dipindah ke
+    // Gemini kalau server memberi tahu PDF-nya hasil scan (lewat switch_to_gemini).
+    if (adaPdf && !chatbotState.availableModels.some(m => m.supports_pdf)) {
+        showToastChatbot('warning', 'Belum ada model yang bisa membaca PDF hasil scan. Minta admin mengisi API key Gemini di Pengaturan AI.');
+    }
 }
 
 function renderAttachmentsPreview() {
@@ -531,6 +573,8 @@ function renderAttachmentsPreview() {
 
 function removeAttachmentByIndex(index) {
     chatbotState.attachedFiles.splice(index, 1);
+    // Lampiran terakhir dilepas -> kembali ke model teks (hemat kuota multimodal).
+    selaraskanModelDenganLampiran();
     renderAttachmentsPreview();
 }
 
@@ -561,6 +605,7 @@ async function sendMessage(messageText = null) {
     addMessage('user', message, chatbotState.attachedFiles);
     input.value = '';
     const currentFiles = [...chatbotState.attachedFiles];
+    const modelUntukPesanIni = chatbotState.selectedModel;
     chatbotState.attachedFiles = [];
     renderAttachmentsPreview();
     updateCharCount(0);
@@ -571,6 +616,13 @@ async function sendMessage(messageText = null) {
     const response = await sendMessageToApi(message, currentFiles);
     chatbotState.isWaitingResponse = false;
     hideTypingIndicator();
+
+    // Model gambar/PDF hanya dipinjam untuk pesan berlampiran. Setelah terkirim,
+    // kembalikan ke model teks supaya percakapan biasa berikutnya tidak ikut
+    // memakan kuota model multimodal yang lebih terbatas.
+    if (currentFiles.length > 0 && chatbotState.selectedModel === modelUntukPesanIni) {
+        selaraskanModelDenganLampiran();
+    }
     if (response.success) {
         const text = response.structured?.text ?? response.response;
         addMessage('assistant', text, null, true, false, response.structured ?? null);
@@ -647,12 +699,14 @@ async function sendMessageToApi(message, attachedFiles) {
                 chatbotState.conversationHistory = chatbotState.conversationHistory.slice(-20);
             }
         } else if (data.switch_to_gemini) {
-            const geminiModel = chatbotState.availableModels.find(m => m.id === 'gemini-2.5-flash');
-            if (geminiModel) {
-                chatbotState.selectedModel = geminiModel.id;
+            // Server sudah mencoba membaca teks PDF-nya lewat Groq dan gagal
+            // (PDF hasil scan). Hanya di titik inilah Gemini dipakai.
+            const modelPdf = chatbotState.availableModels.find(m => m.supports_pdf);
+            if (modelPdf) {
+                chatbotState.selectedModel = modelPdf.id;
                 const selector = document.getElementById('modelSelector');
-                if (selector) selector.value = geminiModel.id;
-                showToastChatbot('info', 'Beralih ke Gemini untuk membaca PDF. Mengirim ulang...');
+                if (selector) selector.value = modelPdf.id;
+                showToastChatbot('info', `PDF hasil scan — beralih ke ${modelPdf.name}. Mengirim ulang...`);
                 return await sendMessageToApi(message, attachedFiles);
             }
         }
@@ -840,7 +894,10 @@ function restoreChatState() {
     // NOTE: Chatbot always starts CLOSED on page navigation.
     // Only restore model preference, not open/close state.
     const savedModel = localStorage.getItem('selectedChatModel');
-    if (savedModel) chatbotState.selectedModel = savedModel;
+    if (savedModel) {
+        chatbotState.selectedModel = savedModel;
+        chatbotState.modelTeksPilihan = savedModel;
+    }
 }
 
 // ==================== Setup Event Listeners ====================
@@ -850,6 +907,13 @@ function setupEventListeners() {
         modelSelector.addEventListener('change', (e) => {
             chatbotState.selectedModel = e.target.value;
             const selectedModelInfo = chatbotState.availableModels.find(m => m.id === e.target.value);
+
+            // Kalau pengguna memilih sendiri model TEKS, jadikan itu pilihan
+            // yang dipulihkan setelah selesai memakai model gambar/PDF.
+            if (selectedModelInfo && !selectedModelInfo.supports_vision) {
+                chatbotState.modelTeksPilihan = e.target.value;
+            }
+
             if (selectedModelInfo && selectedModelInfo.provider === 'groq') {
                 localStorage.setItem('selectedChatModel', e.target.value);
             } else if (selectedModelInfo && selectedModelInfo.provider === 'gemini') {

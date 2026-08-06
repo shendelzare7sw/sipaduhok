@@ -36,17 +36,61 @@ class AiChatbotService
         $this->provider = $settings['ai_provider'] ?? 'groq';
         $this->groqApiKey = $settings['groq_api_key'] ?? '';
         $this->geminiApiKey = $settings['gemini_api_key'] ?? '';
-        $this->defaultModel = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
-        $this->visionModel = $settings['ai_vision_model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct';
+        // Ganti otomatis model yang sudah dimatikan penyedianya (config/ai-models.php).
+        $this->defaultModel = ai_model_aktif($settings['ai_model'] ?? null, $this->provider);
+        $this->visionModel = ai_model_aktif($settings['ai_vision_model'] ?? null, $this->provider, true);
+    }
 
-        // Auto-fix for decommissioned models
-        if (in_array($this->defaultModel, ['llama3-70b-8192', 'llama-3.2-90b-text-preview'])) {
-            $this->defaultModel = 'llama-3.3-70b-versatile';
+    /**
+     * Ambil teks dari lampiran PDF supaya bisa dikirim ke model Groq.
+     *
+     * Groq (termasuk Qwen yang multimodal) hanya menerima GAMBAR, bukan berkas
+     * PDF. Padahal umumnya PDF berisi teks digital yang bisa dibaca langsung —
+     * jadi teksnya diambil di sini dan disisipkan ke pesan, sehingga PDF biasa
+     * tetap bisa ditangani Groq tanpa menghabiskan kuota Gemini.
+     *
+     * @return array{0: string, 1: array, 2: bool} [pesan, lampiranSisa, adaPdfHasilScan]
+     */
+    private function ubahPdfJadiTeks(string $userMessage, array $attachedFiles): array
+    {
+        $sisa = [];
+        $adaPdfTakTerbaca = false;
+        $binPath = config('services.pdftotext.bin_path') ?: null;
+
+        foreach ($attachedFiles as $file) {
+            if (($file['mime'] ?? null) !== 'application/pdf') {
+                $sisa[] = $file;
+                continue;
+            }
+
+            $teks = '';
+            try {
+                $teks = trim(\Spatie\PdfToText\Pdf::getText($file['path'], $binPath));
+            } catch (\Throwable $e) {
+                Log::warning('Gagal membaca teks PDF lampiran chatbot', [
+                    'file' => $file['name'] ?? '?',
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            // Terlalu sedikit teks = kemungkinan besar PDF hasil scan/gambar.
+            if (mb_strlen($teks) < 50) {
+                $adaPdfTakTerbaca = true;
+                $sisa[] = $file;
+                continue;
+            }
+
+            // Batasi panjang agar tidak melampaui jendela konteks model.
+            $maksKarakter = 12000;
+            if (mb_strlen($teks) > $maksKarakter) {
+                $teks = mb_substr($teks, 0, $maksKarakter) . "\n\n[...dokumen dipotong karena terlalu panjang...]";
+            }
+
+            $nama = $file['name'] ?? 'dokumen.pdf';
+            $userMessage .= "\n\n--- Isi berkas PDF \"{$nama}\" ---\n{$teks}\n--- akhir berkas ---";
         }
 
-        if (in_array($this->visionModel, ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'])) {
-            $this->visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
-        }
+        return [$userMessage, $sisa, $adaPdfTakTerbaca];
     }
 
     /**
@@ -58,82 +102,40 @@ class AiChatbotService
     {
         $models = [];
 
-        // Add Groq models if API key configured
+        // Daftar model dibaca dari config/ai-models.php (satu sumber kebenaran),
+        // bukan ditulis ulang di tiap tempat — dulu daftar hardcode di sini
+        // sempat menawarkan model yang sudah dimatikan Groq.
+        $providerKeys = [];
         if (!empty($this->groqApiKey)) {
-            $models[] = [
-                'id' => 'llama-3.3-70b-versatile',
-                'name' => 'Llama 3.3 70B (Versatile)',
-                'provider' => 'groq',
-                'supports_vision' => false,
-                'supports_pdf' => false,
-                'default' => $this->defaultModel === 'llama-3.3-70b-versatile',
-            ];
-
-            $models[] = [
-                'id' => 'qwen/qwen3-32b',
-                'name' => 'Qwen 3 32B (High Rate Limit)',
-                'provider' => 'groq',
-                'supports_vision' => false,
-                'supports_pdf' => false,
-                'default' => $this->defaultModel === 'qwen/qwen3-32b',
-            ];
-
-            $models[] = [
-                'id' => 'openai/gpt-oss-120b',
-                'name' => 'GPT OSS 120B',
-                'provider' => 'groq',
-                'supports_vision' => false,
-                'supports_pdf' => false,
-                'default' => $this->defaultModel === 'openai/gpt-oss-120b',
-            ];
-
-            $models[] = [
-                'id' => 'meta-llama/llama-4-scout-17b-16e-instruct',
-                'name' => 'Llama 4 Scout 17B (Vision)',
-                'provider' => 'groq',
-                'supports_vision' => true,
-                'supports_pdf' => false, 
-                'default' => $this->defaultModel === 'meta-llama/llama-4-scout-17b-16e-instruct',
-            ];
-
-            $models[] = [
-                'id' => 'allam-2-7b',
-                'name' => 'Allam 2 7B',
-                'provider' => 'groq',
-                'supports_vision' => false,
-                'supports_pdf' => false,
-                'default' => $this->defaultModel === 'allam-2-7b',
-            ];
-
-            $models[] = [
-                'id' => 'groq/compound',
-                'name' => 'Groq Compound',
-                'provider' => 'groq',
-                'supports_vision' => false,
-                'supports_pdf' => false,
-                'default' => $this->defaultModel === 'groq/compound',
-            ];
+            $providerKeys[] = 'groq';
+        }
+        if (!empty($this->geminiApiKey)) {
+            $providerKeys[] = 'gemini';
         }
 
-        // Add Gemini models if API key configured
-        if (!empty($this->geminiApiKey)) {
-            $models[] = [
-                'id' => 'gemini-2.5-flash',
-                'name' => 'Gemini 2.5 Flash (PDF + Vision)',
-                'provider' => 'gemini',
-                'supports_vision' => true,
-                'supports_pdf' => true, // Only Gemini supports PDF
-                'default' => $this->defaultModel === 'gemini-2.5-flash',
-            ];
+        foreach ($providerKeys as $provider) {
+            foreach (config("ai-models.available.{$provider}", []) as $id => $info) {
+                $models[] = [
+                    'id' => $id,
+                    'name' => $info['label'],
+                    'provider' => $provider,
+                    'supports_vision' => (bool) ($info['vision'] ?? false),
+                    // Hanya Gemini yang bisa membaca berkas PDF secara langsung.
+                    'supports_pdf' => $provider === 'gemini',
+                    'default' => $this->defaultModel === $id,
+                ];
+            }
         }
 
         // If no models available, return default
         if (empty($models)) {
+            $fallback = config('ai-models.default_text.groq');
             $models[] = [
-                'id' => 'llama-3.3-70b-versatile',
-                'name' => 'Llama 3.3 70B (Not Configured)',
+                'id' => $fallback,
+                'name' => 'Llama 3.3 70B (Belum dikonfigurasi)',
                 'provider' => 'groq',
                 'supports_vision' => false,
+                'supports_pdf' => false,
                 'default' => true,
             ];
         }
@@ -171,31 +173,46 @@ class AiChatbotService
                 ];
             }
 
-            // Validate PDF compatibility
+            // PDF: Groq tidak bisa menelan berkas PDF mentah (termasuk Qwen —
+            // model multimodal Groq hanya menerima GAMBAR). Tapi sebagian besar
+            // PDF itu teks digital, jadi teksnya diambil dulu dan dikirim sebagai
+            // teks biasa supaya kuota Groq yang dipakai lebih dulu. Gemini —
+            // satu-satunya yang bisa membaca PDF langsung — hanya dipakai untuk
+            // PDF hasil scan (tanpa lapisan teks), agar kuotanya lebih hemat.
             $hasPdf = !empty($attachedFiles) && collect($attachedFiles)->contains('mime', 'application/pdf');
             if ($hasPdf && $provider === 'groq') {
-                if (empty($this->geminiApiKey)) {
+                [$userMessage, $attachedFiles, $adaPdfTakTerbaca] =
+                    $this->ubahPdfJadiTeks($userMessage, $attachedFiles);
+
+                if ($adaPdfTakTerbaca) {
+                    if (empty($this->geminiApiKey)) {
+                        return [
+                            'success' => false,
+                            'error' => 'PDF ini hasil scan (tidak ada teks yang bisa dibaca) sehingga perlu Gemini, tetapi API Key Gemini belum diisi. Hubungi Administrator.',
+                            'model' => $selectedModel,
+                            'switch_to_gemini' => false,
+                        ];
+                    }
+
                     return [
                         'success' => false,
-                        'error' => 'Model Groq tidak support membaca dokumen PDF. API Key Gemini belum dikonfigurasi, silakan hubungi Administrator.',
+                        'error' => 'PDF ini hasil scan sehingga perlu dibaca Gemini. Silakan beralih ke Gemini 2.5 Flash.',
                         'model' => $selectedModel,
-                        'switch_to_gemini' => false,
+                        'switch_to_gemini' => true, // Signal to frontend
                     ];
                 }
-                
-                return [
-                    'success' => false,
-                    'error' => 'Model Groq tidak support PDF. Silakan gunakan Gemini 2.5 Flash untuk membaca PDF.',
-                    'model' => $selectedModel,
-                    'switch_to_gemini' => true, // Signal to frontend
-                ];
             }
 
             // Build messages array
             $messages = $this->buildMessagesArray($conversationHistory, $userMessage, $userRole, $attachedFiles, $provider);
 
+            // Ada gambar? Pakai model pembaca gambar (Qwen) lebih dulu, lalu
+            // Gemini hanya kalau kuota Groq benar-benar habis.
+            $adaGambar = collect($attachedFiles)
+                ->contains(fn ($f) => str_starts_with($f['mime'] ?? '', 'image/'));
+
             // Call AI with fallback
-            $result = $this->callAiWithFallback($messages, $selectedModel, $provider);
+            $result = $this->callAiWithFallback($messages, $selectedModel, $provider, $adaGambar);
 
             if ($result['success'] && !empty($result['response'])) {
                 $result['structured'] = $this->parseStructuredResponse($result['response'], $userRole);
@@ -738,10 +755,10 @@ PROMPT;
      * @param string $provider
      * @return array
      */
-    private function callAiWithFallback(array $messages, string $selectedModel, string $provider): array
+    private function callAiWithFallback(array $messages, string $selectedModel, string $provider, bool $butuhVision = false): array
     {
         if ($provider === 'groq' && !empty($this->groqApiKey)) {
-            $chain = $this->buildGroqFallbackChain($selectedModel);
+            $chain = $this->buildGroqFallbackChain($selectedModel, $butuhVision);
             $tried = [];
             $lastResult = null;
 
@@ -797,23 +814,33 @@ PROMPT;
     /**
      * Build ordered list of Groq models to try, starting with the selected one.
      */
-    private function buildGroqFallbackChain(string $selectedModel): array
+    private function buildGroqFallbackChain(string $selectedModel, bool $butuhVision = false): array
     {
-        $defaultOrder = [
-            'llama-3.3-70b-versatile',
-            'qwen/qwen3-32b',
-            'llama-3.1-8b-instant',
-            'openai/gpt-oss-120b',
-            'groq/compound',
-            'allam-2-7b',
-        ];
+        // Urutan cadangan diambil dari daftar model aktif (config/ai-models.php)
+        // supaya rantai fallback tidak pernah menunjuk model yang sudah mati.
+        $tersedia = config('ai-models.available.groq', []);
 
-        $chain = [$selectedModel];
-        foreach ($defaultOrder as $model) {
+        if ($butuhVision) {
+            // Pesan berisi gambar: HANYA model yang bisa membaca gambar yang
+            // boleh dicoba. Kalau model teks ikut masuk rantai, panggilannya
+            // pasti gagal dan malah memboroskan waktu sebelum pindah ke Gemini.
+            $tersedia = array_filter($tersedia, fn ($info) => $info['vision'] ?? false);
+
+            $awal = ai_model_aktif($selectedModel, 'groq', true);
+            if (!isset($tersedia[$awal])) {
+                $awal = config('ai-models.default_vision.groq');
+            }
+        } else {
+            $awal = ai_model_aktif($selectedModel, 'groq');
+        }
+
+        $chain = [$awal];
+        foreach (array_keys($tersedia) as $model) {
             if (!in_array($model, $chain, true)) {
                 $chain[] = $model;
             }
         }
+
         return $chain;
     }
 

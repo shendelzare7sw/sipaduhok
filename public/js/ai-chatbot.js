@@ -380,8 +380,8 @@ async function loadAvailableModels() {
                 default: false
             },
             {
-                id: 'meta-llama/llama-4-scout-17b-16e-instruct',
-                name: 'Llama 4 Scout (Vision)',
+                id: 'qwen/qwen3.6-27b',
+                name: 'Qwen 3.6 27B (Multimodal)',
                 provider: 'groq',
                 supports_vision: true,
                 supports_pdf: false,
