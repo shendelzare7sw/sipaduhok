@@ -435,8 +435,9 @@ function setupExam(page) {
     }
 
     updateTimer();
+    let timerInterval = null;
     if (!isUnlimited) {
-        window.setInterval(updateTimer, 1000);
+        timerInterval = window.setInterval(updateTimer, 1000);
     }
 
     updateUI();
@@ -447,6 +448,39 @@ function setupExam(page) {
     window.setInterval(() => {
         sendMonitoringEvent('heartbeat');
     }, 5000);
+
+    // Fullscreen Overlay Logic
+    const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+    const btnEnterFullscreen = document.getElementById('btn-enter-fullscreen');
+    if (fullscreenOverlay && btnEnterFullscreen) {
+        btnEnterFullscreen.addEventListener('click', () => {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen:", err);
+                });
+            } else if (docElm.webkitRequestFullscreen) { /* Safari */
+                docElm.webkitRequestFullscreen();
+            } else if (docElm.msRequestFullscreen) { /* IE11 */
+                docElm.msRequestFullscreen();
+            }
+            fullscreenOverlay.style.display = 'none';
+        });
+
+        // Ensure if they exit fullscreen, overlay comes back
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                fullscreenOverlay.style.display = 'flex';
+                fullscreenOverlay.style.setProperty('display', 'flex', 'important');
+            }
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (!document.webkitFullscreenElement) {
+                fullscreenOverlay.style.display = 'flex';
+                fullscreenOverlay.style.setProperty('display', 'flex', 'important');
+            }
+        });
+    }
 
     history.pushState(null, null, location.href);
     window.onpopstate = () => {
@@ -489,6 +523,7 @@ function setupExam(page) {
     });
 
     window.addEventListener('focus', () => {
+        updateTimer();
         registerFocusReturned('window_focus');
     });
 
@@ -496,6 +531,7 @@ function setupExam(page) {
         if (document.hidden) {
             registerFocusLost('visibility_hidden');
         } else {
+            updateTimer();
             registerFocusReturned('visibility_visible');
         }
     });
