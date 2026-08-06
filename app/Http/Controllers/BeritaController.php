@@ -33,7 +33,7 @@ class BeritaController extends Controller
             $query->search($search);
         }
 
-        $beritaList = $query->paginate(6);
+        $beritaList = $query->get();
 
         return view('berita', compact('beritaUtama', 'beritaList', 'kategori', 'search'));
     }
