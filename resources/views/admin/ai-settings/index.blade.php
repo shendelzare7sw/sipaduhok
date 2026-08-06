@@ -109,19 +109,20 @@
                             </div>
                         </div>
 
+                        {{-- Daftar model dibaca dari config/ai-models.php agar tidak
+                             pernah lagi menawarkan model yang sudah dimatikan penyedianya. --}}
                         <div class="mb-4">
                             <label class="form-label fw-bold">Model Text (Chat)</label>
                             <select class="form-select" name="ai_model" id="ai_model">
-                                <optgroup label="Groq Cloud (FREE)">
-                                    <option value="qwen/qwen3-32b" {{ $model == 'qwen/qwen3-32b' ? 'selected' : '' }}>Qwen 3 32B (60 RPM - Balanced)</option>
-                                    <option value="llama-3.3-70b-versatile" {{ $model == 'llama-3.3-70b-versatile' ? 'selected' : '' }}>Llama 3.3 70B (Recommended - Best)</option>
-                                    <option value="llama-3.1-8b-instant" {{ $model == 'llama-3.1-8b-instant' ? 'selected' : '' }}>Llama 3.1 8B (Fastest - Light)</option>
-                                    <option value="openai/gpt-oss-120b" {{ $model == 'openai/gpt-oss-120b' ? 'selected' : '' }}>GPT OSS 120B (Heavy Model)</option>
-                                    <option value="allam-2-7b" {{ $model == 'allam-2-7b' ? 'selected' : '' }}>Allam 2 7B</option>
-                                    <option value="groq/compound" {{ $model == 'groq/compound' ? 'selected' : '' }}>Groq Compound</option>
+                                <optgroup label="Groq Cloud (GRATIS)">
+                                    @foreach(config('ai-models.available.groq') as $id => $info)
+                                        <option value="{{ $id }}" {{ $model == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
+                                    @endforeach
                                 </optgroup>
-                                <optgroup label="Google Gemini (FREE)">
-                                    <option value="gemini-2.5-flash" {{ $model == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Vision + PDF Support)</option>
+                                <optgroup label="Google Gemini (GRATIS)">
+                                    @foreach(config('ai-models.available.gemini') as $id => $info)
+                                        <option value="{{ $id }}" {{ $model == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
+                                    @endforeach
                                 </optgroup>
                             </select>
                             <div class="form-text">Fitur Auto-Fallback aktif: Jika model Groq melebihi batas Rate Limit, sistem akan otomatis beralih meminjam model lain.</div>
@@ -130,14 +131,26 @@
                         <div class="mb-4">
                             <label class="form-label fw-bold">Model Vision (Multimodal)</label>
                             <select class="form-select" name="ai_vision_model" id="ai_vision_model">
-                                <optgroup label="Llama 4 (Groq)">
-                                    <option value="meta-llama/llama-4-scout-17b-16e-instruct" {{ $visionModel == 'meta-llama/llama-4-scout-17b-16e-instruct' ? 'selected' : '' }}>Llama 4 Scout (Image Only)</option>
+                                <optgroup label="Groq Cloud (GRATIS)">
+                                    @foreach(config('ai-models.available.groq') as $id => $info)
+                                        @if($info['vision'] ?? false)
+                                            <option value="{{ $id }}" {{ $visionModel == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
+                                        @endif
+                                    @endforeach
                                 </optgroup>
-                                <optgroup label="Google Gemini">
-                                    <option value="gemini-2.5-flash" {{ $visionModel == 'gemini-2.5-flash' ? 'selected' : '' }}>Gemini 2.5 Flash (Image + PDF - Only FREE)</option>
+                                <optgroup label="Google Gemini (GRATIS)">
+                                    @foreach(config('ai-models.available.gemini') as $id => $info)
+                                        @if($info['vision'] ?? false)
+                                            <option value="{{ $id }}" {{ $visionModel == $id ? 'selected' : '' }}>{{ $info['label'] }}</option>
+                                        @endif
+                                    @endforeach
                                 </optgroup>
                             </select>
-                            <div class="form-text">Model ini digunakan khusus untuk menganalisis gambar dan PDF pada tugas. Hanya Gemini 2.5 Flash yang gratis.</div>
+                            <div class="form-text">
+                                Dipakai khusus menganalisis <strong>gambar</strong> pada jawaban tugas.
+                                Di Groq, hanya <strong>Qwen 3.6 27B</strong> yang bisa membaca gambar.
+                                Untuk berkas <strong>PDF</strong>, gunakan Gemini — hanya Gemini yang bisa membaca PDF secara langsung.
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mt-4">

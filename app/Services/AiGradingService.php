@@ -40,27 +40,8 @@ class AiGradingService
             $this->model = 'llama-3.3-70b-versatile';
         }
 
-        // Auto-fix for decommissioned Groq models
-        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview', 'llama-3.1-70b-versatile'])) {
-            Log::warning("Decommissioned model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
-            $this->model = 'llama-3.3-70b-versatile';
-        }
-
-        // Auto-fix for unavailable Mixtral/Gemma models (not free in Groq)
-        // Note: qwen/qwen3-32b IS available on Groq free tier (60 RPM), so we allow it
-        $blockedModels = ['mixtral', 'gemma', 'qwen-2.5', 'qwen2'];
-        foreach ($blockedModels as $blocked) {
-            if (str_contains($this->model, $blocked)) {
-                Log::warning("Unavailable model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
-                $this->model = 'llama-3.3-70b-versatile';
-                break;
-            }
-        }
-
-        // Auto-fix for deprecated Gemini models
-        if (in_array($this->model, ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'])) {
-            $this->model = 'gemini-2.5-flash';
-        }
+        // Ganti otomatis model yang sudah dimatikan penyedianya (config/ai-models.php).
+        $this->model = ai_model_aktif($this->model, $this->provider);
 
         // CRITICAL: Validate model compatibility with provider
         $isGeminiModel = str_contains($this->model, 'gemini');
@@ -76,13 +57,14 @@ class AiGradingService
             $this->model = 'gemini-2.5-flash';
         }
 
-        // Default to Llama 4 Scout (Vision capable)
-        $this->visionModel = $settings['ai_vision_model'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct';
-
-        // Auto-fix for decommissioned vision models (11b & 90b previews)
-        if (in_array($this->visionModel, ['llama-3.2-11b-vision-preview', 'llama-3.2-90b-vision-preview'])) {
-            $this->visionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
-        }
+        // Model pembaca gambar (analisis jawaban tugas berupa foto/PDF scan).
+        // Model vision Groq yang lama sudah dimatikan; penggantinya ditentukan
+        // di config/ai-models.php agar tidak tersebar hardcode lagi.
+        $this->visionModel = ai_model_aktif(
+            $settings['ai_vision_model'] ?? null,
+            $this->provider,
+            true
+        );
     }
 
     /**
@@ -112,7 +94,7 @@ class AiGradingService
 
                     if ($isQuotaError) {
                         // Determine alternative Groq model
-                        $altModel = str_contains($this->model, 'qwen') ? 'llama-3.3-70b-versatile' : 'qwen/qwen3-32b';
+                        $altModel = ai_model_cadangan($this->model);
                         Log::warning("Groq quota exceeded for {$this->model} during grading, trying alternative model {$altModel}");
                         
                         // Temporarily change model and retry

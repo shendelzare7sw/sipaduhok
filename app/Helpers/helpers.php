@@ -149,6 +149,69 @@ if (! function_exists('redirect_to_previous')) {
  * Aturan: titik = pemisah ribuan (dibuang). Koma = desimal (dijadikan titik),
  * mengikuti kebiasaan penulisan Indonesia.
  */
+if (! function_exists('ai_model_aktif')) {
+    /**
+     * Kembalikan nama model AI yang MASIH hidup.
+     *
+     * Groq/Google rutin mematikan model lama. Kalau setting di database masih
+     * menunjuk model mati, permintaan API dibalas 404 dan di layar hanya muncul
+     * "Gagal terhubung ke Groq API. Periksa API Key" — menyesatkan, karena API
+     * key-nya sebenarnya baik-baik saja. Fungsi ini memetakan model pensiun ke
+     * penggantinya (lihat config/ai-models.php) tanpa perlu guru mengubah apa pun.
+     *
+     * @param  string|null  $model     Nama model dari setting.
+     * @param  string       $provider  'groq' atau 'gemini'.
+     * @param  bool         $vision    True kalau butuh model pembaca gambar.
+     */
+    function ai_model_aktif(?string $model, string $provider = 'groq', bool $vision = false): string
+    {
+        $default = config(
+            ($vision ? 'ai-models.default_vision.' : 'ai-models.default_text.') . $provider
+        ) ?? config('ai-models.default_text.groq');
+
+        $model = trim((string) $model);
+        if ($model === '') {
+            return $default;
+        }
+
+        $pengganti = config('ai-models.retired.' . $model);
+        if ($pengganti) {
+            \Illuminate\Support\Facades\Log::warning(
+                "Model AI '{$model}' sudah dimatikan penyedianya, dialihkan ke '{$pengganti}'."
+            );
+
+            return $pengganti;
+        }
+
+        return $model;
+    }
+}
+
+if (! function_exists('ai_model_cadangan')) {
+    /**
+     * Model pengganti sementara saat model utama kena rate limit.
+     * Sengaja memilih model dari "keluarga" berbeda supaya kuotanya terpisah.
+     */
+    function ai_model_cadangan(string $modelUtama): string
+    {
+        $kandidat = array_keys(config('ai-models.available.groq', []));
+
+        foreach ($kandidat as $model) {
+            // Lewati model yang sama & model vision (lebih mahal untuk tugas teks).
+            if ($model === $modelUtama) {
+                continue;
+            }
+            if (config("ai-models.available.groq.{$model}.vision")) {
+                continue;
+            }
+
+            return $model;
+        }
+
+        return config('ai-models.default_text.groq');
+    }
+}
+
 if (! function_exists('rupiah_to_number')) {
     function rupiah_to_number($value)
     {

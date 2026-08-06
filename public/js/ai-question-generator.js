@@ -627,9 +627,13 @@
         // Map model ID to friendly name
         const modelNames = {
             'llama-3.3-70b-versatile': 'Llama 3.3 70B',
-            'qwen/qwen3-32b': 'Qwen3 32B',
+            'llama-3.1-8b-instant': 'Llama 3.1 8B',
+            'openai/gpt-oss-120b': 'GPT OSS 120B',
+            'openai/gpt-oss-20b': 'GPT OSS 20B',
+            'qwen/qwen3.6-27b': 'Qwen 3.6 27B',
+            'groq/compound': 'Groq Compound',
             'gemini-2.5-flash': 'Gemini 2.5 Flash',
-            'meta-llama/llama-4-scout-17b-16e-instruct': 'Llama 4 Scout'
+            'gemini-2.5-pro': 'Gemini 2.5 Pro'
         };
 
         const friendlyName = modelNames[modelUsed] || modelUsed;

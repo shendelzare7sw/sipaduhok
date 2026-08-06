@@ -32,27 +32,10 @@ class AiQuestionGeneratorService
         $this->provider = $settings['ai_provider'] ?? 'groq';
         $this->model = $settings['ai_model'] ?? 'llama-3.3-70b-versatile';
 
-        // Auto-fix for decommissioned Groq models
-        if (in_array($this->model, ['llama3-70b-8192', 'llama-3.2-90b-text-preview', 'llama-3.1-70b-versatile'])) {
-            Log::warning("Decommissioned model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
-            $this->model = 'llama-3.3-70b-versatile';
-        }
-
-        // Auto-fix for unavailable Mixtral/Gemma models (not free in Groq)
-        // Note: qwen/qwen3-32b IS available on Groq free tier (60 RPM), so we allow it
-        $blockedModels = ['mixtral', 'gemma', 'qwen-2.5', 'qwen2'];
-        foreach ($blockedModels as $blocked) {
-            if (str_contains($this->model, $blocked)) {
-                Log::warning("Unavailable model detected: {$this->model}. Fallback to llama-3.3-70b-versatile");
-                $this->model = 'llama-3.3-70b-versatile';
-                break;
-            }
-        }
-
-        // Auto-fix for deprecated Gemini models
-        if (in_array($this->model, ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-exp'])) {
-            $this->model = 'gemini-2.5-flash';
-        }
+        // Ganti otomatis model yang sudah dimatikan penyedianya (daftar di
+        // config/ai-models.php), supaya setting lama di database tidak bikin
+        // fitur mati diam-diam dengan pesan "Gagal terhubung".
+        $this->model = ai_model_aktif($this->model, $this->provider);
 
         // Load API key based on active provider (dual API key system)
         if ($this->provider === 'groq') {
@@ -294,7 +277,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
         if (count($questions) < $count) {
             $missing = $count - count($questions);
-            Log::warning("MCQ generator returned {count($questions)}/{$count} questions. Retrying.");
+            Log::warning('MCQ generator returned ' . count($questions) . "/{$count} questions. Retrying.");
             $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal. Jangan berhenti di tengah jalan.";
             $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
             if ($retryResponse['success']) {
@@ -366,7 +349,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
         if (count($questions) < $count) {
             $missing = $count - count($questions);
-            Log::warning("Complex MCQ generator returned {count($questions)}/{$count} questions. Retrying.");
+            Log::warning('Complex MCQ generator returned ' . count($questions) . "/{$count} questions. Retrying.");
             $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal.";
             $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
             if ($retryResponse['success']) {
@@ -459,7 +442,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
         if (count($questions) < $count) {
             $missing = $count - count($questions);
-            Log::warning("True/False generator returned {count($questions)}/{$count} questions. Retrying.");
+            Log::warning('True/False generator returned ' . count($questions) . "/{$count} questions. Retrying.");
             $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal.";
             $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
             if ($retryResponse['success']) {
@@ -560,7 +543,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         // If we got fewer questions than requested, retry once with explicit count instruction
         if (count($questions) < $count) {
             $missing = $count - count($questions);
-            Log::warning("Essay generator returned {count($questions)}/{$count} questions. Retrying for {$missing} missing questions.");
+            Log::warning('Essay generator returned ' . count($questions) . "/{$count} questions. Retrying for {$missing} missing questions.");
 
             $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya {" . count($questions) . "} soal yang di-generate. Kali ini WAJIB generate semua {$count} soal. Jangan berhenti sebelum semua {$count} soal selesai.";
             $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens);
@@ -661,7 +644,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
         if (count($questions) < $count) {
             $missing = $count - count($questions);
-            Log::warning("Fill In Blank generator returned {count($questions)}/{$count} questions. Retrying.");
+            Log::warning('Fill In Blank generator returned ' . count($questions) . "/{$count} questions. Retrying.");
             $retryPrompt = $userPrompt . "\n\n[RETRY]: Sebelumnya hanya " . count($questions) . " soal yang di-generate. Kali ini WAJIB generate semua {$count} soal.";
             $retryResponse = $this->callAiWithFallback($model, $systemPrompt, $retryPrompt, 0.5, $maxTokens, false);
             if ($retryResponse['success']) {
@@ -719,7 +702,7 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
 
                 if ($isQuotaError) {
                     // Determine alternative Groq model
-                    $altModel = str_contains($model, 'qwen') ? 'llama-3.3-70b-versatile' : 'qwen/qwen3-32b';
+                    $altModel = ai_model_cadangan($model);
                     Log::warning("Groq quota exceeded for {$model}, trying alternative model {$altModel}");
                     
                     // Try alternative model
@@ -947,10 +930,36 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                 $data = $data['soal'];
             }
 
+            // AI kadang membalas SATU objek soal langsung (tanpa dibungkus array
+            // maupun key pembungkus) - apalagi saat mode json_object Groq aktif.
+            // Tanpa penanganan ini, foreach di bawah malah mengulang per-FIELD
+            // ("pertanyaan", "tipe_soal", ...) sehingga semua ditolak dan guru
+            // hanya melihat "No valid questions generated".
+            if (isset($data['pertanyaan'])) {
+                $data = [$data];
+            }
+
+            // Objek berkunci angka ({"1": {...}, "2": {...}}) -> jadikan list biasa.
+            $data = array_values($data);
+
+            // Tiap soal kadang masih dibungkus lagi, mis. [{"soal_1": {...}},
+            // {"soal_2": {...}}]. Buka pembungkusnya supaya isinya terbaca.
+            $data = array_map(fn ($item) => $this->bukaPembungkusSoal($item), $data);
+
             // Validate each question
             $validatedQuestions = [];
             foreach ($data as $question) {
-                if (is_array($question) && $this->validateQuestion($question, $expectedType)) {
+                if (!is_array($question)) {
+                    Log::warning('Invalid question structure', ['question' => $question]);
+                    continue;
+                }
+
+                // Rapikan dulu (huruf kunci jadi kapital, opsi kosong dilengkapi)
+                // baru divalidasi — supaya soal tidak ditolak hanya gara-gara AI
+                // menulis "a" alih-alih "A" atau melewatkan satu opsi.
+                $question = $this->normalizeQuestion($question, $expectedType);
+
+                if ($this->validateQuestion($question, $expectedType)) {
                     $validatedQuestions[] = $question;
                 } else {
                     Log::warning('Invalid question structure', ['question' => $question]);
@@ -975,6 +984,123 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
     }
 
     /**
+     * Rapikan satu soal hasil AI sebelum divalidasi/dikirim ke form.
+     *
+     * AI sering tidak konsisten: kunci ditulis huruf kecil ("a"), ditulis
+     * lengkap ("A. Ekonomi pasar"), dikirim sebagai array, atau opsi D/E
+     * dilewatkan. Semua itu dirapikan di sini agar soal tidak ditolak dan
+     * kunci jawabannya tidak hilang saat disimpan.
+     */
+    private function normalizeQuestion(array $question, string $type): array
+    {
+        $kunci = $question['kunci_jawaban'] ?? null;
+
+        // Kunci berupa array → gabung (PGK) / ambil elemen pertama (lainnya).
+        if (is_array($kunci)) {
+            $kunci = $type === 'pilihan_ganda_kompleks'
+                ? implode(',', array_map('strval', $kunci))
+                : (string) (reset($kunci) ?: '');
+        } elseif (is_bool($kunci)) {
+            $kunci = $kunci ? 'benar' : 'salah';
+        } elseif ($kunci !== null) {
+            $kunci = (string) $kunci;
+        }
+
+        if ($type === 'pilihan_ganda' || $type === 'pilihan_ganda_kompleks') {
+            // Opsi A–E: kalau AI melewatkan satu, isi string kosong supaya
+            // strukturnya tetap utuh (opsi kosong disaring lagi saat disimpan).
+            foreach (['a', 'b', 'c', 'd', 'e'] as $huruf) {
+                $key = 'pilihan_' . $huruf;
+                if (!isset($question[$key]) || $question[$key] === null) {
+                    $question[$key] = '';
+                } elseif (is_array($question[$key])) {
+                    $question[$key] = implode(' ', array_map('strval', $question[$key]));
+                } else {
+                    $question[$key] = (string) $question[$key];
+                }
+            }
+
+            // Ambil huruf kuncinya saja lalu KAPITALKAN. Ini yang bikin kunci
+            // jawaban sempat hilang: form mencocokkan value "A"–"E", sedangkan
+            // AI kerap mengirim "a" / "a. teks jawaban".
+            if ($kunci !== null && $kunci !== '') {
+                $hurufKunci = [];
+                foreach (preg_split('/[,;]+/', $kunci) as $bagian) {
+                    if (preg_match('/[A-Ea-e]/', trim($bagian), $m)) {
+                        $hurufKunci[] = strtoupper($m[0]);
+                    }
+                }
+                if (!empty($hurufKunci)) {
+                    $hurufKunci = array_values(array_unique($hurufKunci));
+                    $kunci = $type === 'pilihan_ganda_kompleks'
+                        ? implode(',', $hurufKunci)
+                        : $hurufKunci[0];
+                }
+            }
+        } elseif ($type === 'benar_salah' && $kunci !== null) {
+            // Samakan ragam penulisan: true/1/B/Benar → "benar".
+            $k = strtolower(trim($kunci));
+            if (in_array($k, ['true', '1', 'b', 'benar'], true)) {
+                $kunci = 'benar';
+            } elseif (in_array($k, ['false', '0', 's', 'salah'], true)) {
+                $kunci = 'salah';
+            }
+        }
+
+        if ($kunci !== null) {
+            $question['kunci_jawaban'] = $kunci;
+        }
+
+        // Bobot harus angka; AI kadang mengirim "10 poin".
+        if (isset($question['bobot']) && !is_int($question['bobot'])) {
+            $bobot = (int) filter_var((string) $question['bobot'], FILTER_SANITIZE_NUMBER_INT);
+            $question['bobot'] = $bobot > 0 ? $bobot : 10;
+        }
+
+        return $question;
+    }
+
+    /**
+     * Buka pembungkus di sekitar satu soal.
+     *
+     * AI kerap membungkus tiap soal dengan key sendiri, mis.
+     *   {"soal_1": {"pertanyaan": ...}}  atau  {"question": {...}}
+     * Kalau tidak dibuka, isinya tidak terbaca dan soal ditolak validasi.
+     * Menelusuri maksimal 3 lapis agar tidak terjebak struktur aneh.
+     */
+    private function bukaPembungkusSoal($item, int $kedalaman = 0)
+    {
+        if (!is_array($item) || isset($item['pertanyaan']) || $kedalaman >= 3) {
+            return $item;
+        }
+
+        // Pembungkus = objek berisi tepat satu anak yang juga objek.
+        if (count($item) === 1) {
+            $anak = reset($item);
+            if (is_array($anak)) {
+                return $this->bukaPembungkusSoal($anak, $kedalaman + 1);
+            }
+        }
+
+        return $item;
+    }
+
+    /**
+     * Berapa opsi jawaban (A-E) yang benar-benar terisi.
+     */
+    private function hitungOpsiTerisi(array $question): int
+    {
+        $jumlah = 0;
+        foreach (['a', 'b', 'c', 'd', 'e'] as $huruf) {
+            $nilai = $question['pilihan_' . $huruf] ?? '';
+            if (is_scalar($nilai) && trim((string) $nilai) !== '') {
+                $jumlah++;
+            }
+        }
+        return $jumlah;
+    }
+
+    /**
      * Validate question structure based on type
      */
     private function validateQuestion(array $question, string $type): bool
@@ -996,28 +1122,35 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
         // Type-specific validation
         switch ($type) {
             case 'pilihan_ganda':
-                $valid = isset($question['pilihan_a'], $question['pilihan_b'], $question['pilihan_c'],
-                             $question['pilihan_d'], $question['pilihan_e'], $question['kunci_jawaban']);
+                // Cukup 3 opsi terisi + kunci yang menunjuk salah satu opsi.
+                // Dulu WAJIB kelima opsi A-E ada; kalau AI melewatkan opsi E
+                // (sering terjadi pada soal sulit) SEMUA soal ditolak dan guru
+                // hanya melihat "No valid questions generated".
+                $terisi = $this->hitungOpsiTerisi($question);
+                $kunci = strtoupper(trim((string) ($question['kunci_jawaban'] ?? '')));
+                $valid = $terisi >= 3
+                    && $kunci !== ''
+                    && isset($question['pilihan_' . strtolower($kunci)])
+                    && trim((string) $question['pilihan_' . strtolower($kunci)]) !== '';
+
                 if (!$valid) {
                     Log::warning('MCQ validation failed', [
-                        'has_pilihan_a' => isset($question['pilihan_a']),
-                        'has_pilihan_b' => isset($question['pilihan_b']),
-                        'has_pilihan_c' => isset($question['pilihan_c']),
-                        'has_pilihan_d' => isset($question['pilihan_d']),
-                        'has_pilihan_e' => isset($question['pilihan_e']),
-                        'has_kunci_jawaban' => isset($question['kunci_jawaban']),
-                        'question_keys' => array_keys($question)
+                        'opsi_terisi' => $terisi,
+                        'kunci_jawaban' => $question['kunci_jawaban'] ?? 'NULL',
+                        'question_keys' => array_keys($question),
                     ]);
                 }
                 return $valid;
 
             case 'benar_salah':
-                $valid = isset($question['kunci_jawaban']) &&
-                       in_array(strtolower($question['kunci_jawaban']), ['benar', 'salah', 'true', 'false']);
+                $kunci = $question['kunci_jawaban'] ?? null;
+                // normalizeQuestion() sudah menyeragamkan jadi "benar"/"salah";
+                // sisa nilai lain tetap diterima kalau masih dikenali.
+                $valid = is_scalar($kunci)
+                    && in_array(strtolower(trim((string) $kunci)), ['benar', 'salah', 'true', 'false'], true);
                 if (!$valid) {
                     Log::warning('True/False validation failed', [
-                        'has_kunci_jawaban' => isset($question['kunci_jawaban']),
-                        'kunci_value' => $question['kunci_jawaban'] ?? 'NULL',
+                        'kunci_value' => is_scalar($kunci) ? $kunci : gettype($kunci),
                         'question_keys' => array_keys($question)
                     ]);
                 }
@@ -1033,12 +1166,25 @@ JANGAN HILANGKAN FIELD APAPUN - tambahkan 'narasi', jangan replace field lainnya
                 return true; // Accept all essay questions that have 'pertanyaan'
 
             case 'pilihan_ganda_kompleks':
-                // Multi-answer MCQ: needs pilihan A-E and kunci_jawaban (comma-separated)
-                return isset($question['pilihan_a'], $question['pilihan_b'], $question['pilihan_c'],
-                             $question['pilihan_d'], $question['pilihan_e'], $question['kunci_jawaban']);
+                // Multi-answer MCQ: minimal 3 opsi terisi + minimal 1 huruf kunci.
+                $terisi = $this->hitungOpsiTerisi($question);
+                $kunciList = array_filter(array_map(
+                    'trim',
+                    explode(',', (string) ($question['kunci_jawaban'] ?? ''))
+                ));
+                $valid = $terisi >= 3 && count($kunciList) >= 1;
+                if (!$valid) {
+                    Log::warning('Complex MCQ validation failed', [
+                        'opsi_terisi' => $terisi,
+                        'kunci_jawaban' => $question['kunci_jawaban'] ?? 'NULL',
+                    ]);
+                }
+                return $valid;
 
             case 'isian_singkat':
-                $valid = isset($question['kunci_jawaban']);
+                $valid = isset($question['kunci_jawaban'])
+                    && is_scalar($question['kunci_jawaban'])
+                    && trim((string) $question['kunci_jawaban']) !== '';
                 if (!$valid) {
                     Log::warning('Fill-in-blank validation failed', [
                         'has_kunci_jawaban' => isset($question['kunci_jawaban']),
