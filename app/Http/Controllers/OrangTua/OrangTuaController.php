@@ -1202,6 +1202,13 @@ class OrangTuaController extends Controller
         }
 
         // Update status untuk SEMUA pembayaran di order ini bila webhook belum menyentuhnya.
+        // Kumpulkan yang BARU disetujui di sini supaya notifikasinya ikut terkirim:
+        // jalur finish ini kerap menyelesaikan transaksi lebih dulu daripada webhook,
+        // dan dulu hanya webhook yang mengirim notifikasi. Akibatnya webhook menyusul
+        // dengan status yang sudah sama, dianggap "tidak ada perubahan", lalu
+        // notifikasi ke Admin/Bendahara/Wali tidak pernah terkirim sama sekali.
+        $baruDisetujui = collect();
+
         if ($newStatus !== null) {
             foreach ($payments as $pembayaran) {
                 $oldStatus = $pembayaran->status_validasi;
@@ -1228,6 +1235,7 @@ class OrangTuaController extends Controller
 
                     // Auto-update status tagihan if payment approved
                     if ($newStatus === 'disetujui') {
+                        $baruDisetujui->push($pembayaran);
                         $pembayaran->tagihan->updateStatusBayar();
 
                         \Log::info('Tagihan status auto-updated from snapFinish', [
@@ -1263,6 +1271,19 @@ class OrangTuaController extends Controller
                         }
                     }
                 }
+            }
+        }
+
+        // Kirim notifikasi ke Admin, Bendahara, dan Wali Siswa untuk pembayaran
+        // yang baru disetujui lewat jalur ini. Kalau webhook yang lebih dulu
+        // menyetujui, daftar ini kosong dan notifikasinya sudah dikirim di sana -
+        // jadi tidak ada notifikasi ganda.
+        if ($baruDisetujui->isNotEmpty()) {
+            try {
+                app(\App\Services\NotificationService::class)
+                    ->notifyPembayaranDigitalBerhasil($baruDisetujui);
+            } catch (\Exception $e) {
+                \Log::error('Gagal mengirim notifikasi pembayaran (snapFinish): ' . $e->getMessage());
             }
         }
 
