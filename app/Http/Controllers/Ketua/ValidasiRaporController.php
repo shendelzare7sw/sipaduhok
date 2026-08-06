@@ -296,7 +296,17 @@ class ValidasiRaporController extends Controller
      */
     public function dispensasiIndex(Request $request): View
     {
+        // Tabel pengajuan_rapor_ketua TIDAK punya kolom tahun_ajaran_id, jadi
+        // scope TA ditempuh lewat kelas siswanya. Tanpa ini, pengajuan tahun lalu
+        // ikut tampil setelah ganti tahun ajaran.
+        $taFilterId = $request->tahun_ajaran_id ?: TahunAjaran::where('is_active', true)->value('id');
+        $scopeTa = fn ($q) => $q->when(
+            $taFilterId,
+            fn ($s) => $s->whereHas('kelas', fn ($k) => $k->where('tahun_ajaran_id', $taFilterId))
+        );
+
         $query = PengajuanRaporKetua::with(['siswa.kelas', 'pengaju'])
+            ->whereHas('siswa', $scopeTa)
             ->orderByRaw("FIELD(status, 'menunggu', 'disetujui', 'ditolak')")
             ->latest('tanggal_pengajuan');
 
@@ -310,9 +320,9 @@ class ValidasiRaporController extends Controller
         $dispensasiList = $query->paginate(25);
 
         $stats = [
-            'menunggu' => PengajuanRaporKetua::where('status', 'menunggu')->count(),
-            'disetujui' => PengajuanRaporKetua::where('status', 'disetujui')->count(),
-            'ditolak' => PengajuanRaporKetua::where('status', 'ditolak')->count(),
+            'menunggu' => PengajuanRaporKetua::whereHas('siswa', $scopeTa)->where('status', 'menunggu')->count(),
+            'disetujui' => PengajuanRaporKetua::whereHas('siswa', $scopeTa)->where('status', 'disetujui')->count(),
+            'ditolak' => PengajuanRaporKetua::whereHas('siswa', $scopeTa)->where('status', 'ditolak')->count(),
         ];
 
         return view('ketua.dispensasi.index', compact('dispensasiList', 'stats'));
