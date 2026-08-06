@@ -6,6 +6,7 @@ use App\Models\Siswa;
 use App\Models\PengaturanBatasPembayaran;
 use App\Models\PengajuanRaporKetua;
 use App\Models\TahunAjaran;
+use App\Models\Tagihan;
 use Illuminate\Support\Facades\DB;
 
 class ValidasiAksesService
@@ -38,11 +39,22 @@ class ValidasiAksesService
             ->where('periode', $periode)
             ->first();
 
-        if (!$pengaturan) {
-            return true; // Belum ada setting = anggap lunas
+        if ($pengaturan) {
+            return $pengaturan->cekSiswaLunas($siswa);
         }
 
-        return $pengaturan->cekSiswaLunas($siswa);
+        // Belum ada aturan jenis tagihan wajib untuk periode ini.
+        //
+        // Dulu di sini langsung `return true` (semua siswa dianggap lunas).
+        // Karena tabel pengaturan itu tidak pernah diisi, gerbang keuangan jadi
+        // tidak berfungsi sama sekali: siswa dengan tunggakan pun dinyatakan
+        // lunas. Sekarang jatuh ke arti "lunas" yang paling wajar dan sama
+        // dengan yang dilihat Bendahara di layar: tidak ada tagihan tersisa
+        // di tahun ajaran berjalan.
+        return ! Tagihan::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $activeYear->id)
+            ->where('status', '!=', 'sudah_bayar')
+            ->exists();
     }
 
     /**

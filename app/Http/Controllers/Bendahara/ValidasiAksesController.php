@@ -119,6 +119,13 @@ class ValidasiAksesController extends Controller
             $siswa->sisa_tagihan = $sisaTagihan;
             $siswa->is_lunas = $sisaTagihan <= 0;
 
+            // Status akses ujian yang SEBENARNYA dialami siswa - sumber yang
+            // sama dengan gerbang di LmsUjianController dan halaman Wali Kelas.
+            // Kolom `validasi_ujian_bendahara` saja tidak cukup: siswa yang
+            // sudah lunas berhak akses tanpa perlu divalidasi manual.
+            $siswa->punya_akses_ujian = app(\App\Services\ValidasiAksesService::class)
+                ->cekAksesUjian($siswa);
+
             return $siswa;
         });
 

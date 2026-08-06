@@ -189,11 +189,21 @@
                                 <td data-label="Sisa">
                                     <span class="currency-font {{ $s->sisa_tagihan > 0 ? 'text-danger' : 'text-success' }}">Rp {{ number_format($s->sisa_tagihan, 0, ',', '.') }}</span>
                                 </td>
+                                {{-- Sama dengan halaman Bendahara: tampilkan akses yang
+                                     SEBENARNYA dialami siswa, bukan hanya flag validasi manual. --}}
                                 <td data-label="Akses Ujian">
-                                    @if($s->validasi_ujian_bendahara)
+                                    @if($s->punya_akses_ujian ?? false)
                                         <div class="text-end">
                                             <span class="badge bg-success badge-status"><i class="fas fa-check-circle me-1"></i>Valid</span>
-                                            <div class="small text-muted mt-1">{{ \Carbon\Carbon::parse($s->tanggal_validasi_ujian_bendahara)->format('d/m/Y') }}</div>
+                                            <div class="small text-muted mt-1">
+                                                @if($s->validasi_ujian_bendahara)
+                                                    {{ \Carbon\Carbon::parse($s->tanggal_validasi_ujian_bendahara)->format('d/m/Y') }}
+                                                @elseif($s->is_lunas)
+                                                    Lunas
+                                                @else
+                                                    Dispensasi
+                                                @endif
+                                            </div>
                                         </div>
                                     @else
                                         <span class="badge bg-warning text-dark badge-status"><i class="fas fa-clock me-1"></i>Belum</span>
