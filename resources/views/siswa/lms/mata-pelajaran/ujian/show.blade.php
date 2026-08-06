@@ -241,6 +241,17 @@
         data-answers-state="{{ $encodedAnswersState }}">
     <form action="{{ route($routePrefix . 'submit', [$mataPelajaran->id, $ujian->id]) }}" method="POST" id="examForm">
         @csrf
+        
+        <!-- Fullscreen Overlay -->
+        <div id="fullscreen-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-white" style="z-index: 9999;">
+            <i class="fas fa-expand fa-4x text-primary mb-3"></i>
+            <h2 class="mb-3 fw-bold text-dark">Siap untuk Ujian?</h2>
+            <p class="text-muted mb-4 text-center">Ujian ini memerlukan mode layar penuh (fullscreen).<br>Harap tidak keluar dari mode layar penuh selama ujian berlangsung.</p>
+            <button type="button" id="btn-enter-fullscreen" class="btn btn-primary btn-lg px-5 shadow-sm rounded-pill">
+                <i class="fas fa-play me-2"></i> Masuk Layar Penuh & Mulai
+            </button>
+        </div>
+
         <div class="container-fluid px-0">
             <div class="row g-3 mx-0">
                 <!-- Left: Question Area (70%) -->
