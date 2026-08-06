@@ -494,25 +494,25 @@ class SiswaDashboardController extends Controller
         $bulanIni = now()->month;
         $tahunIni = now()->year;
 
-        $sakit = Presensi::where('siswa_id', $siswaId)
-            ->where('status', 'sakit')
+        // Dihitung sekali lalu dikelompokkan, bukan 4 query terpisah seperti sebelumnya.
+        //
+        // Kartu "Hadir" di dashboard siswa dulu SELALU menampilkan 0: view meminta
+        // $absensi['hadir'] (resources/views/siswa/sia/dashboard.blade.php), tapi
+        // fungsi ini hanya mengembalikan sakit/izin/alpha - sehingga kuncinya tidak
+        // pernah ada dan jatuh ke nilai default 0 berapa pun kehadiran aslinya.
+        $rekap = Presensi::where('siswa_id', $siswaId)
             ->whereMonth('tanggal', $bulanIni)
             ->whereYear('tanggal', $tahunIni)
-            ->count();
+            ->selectRaw('status, COUNT(*) as jumlah')
+            ->groupBy('status')
+            ->pluck('jumlah', 'status');
 
-        $izin = Presensi::where('siswa_id', $siswaId)
-            ->where('status', 'izin')
-            ->whereMonth('tanggal', $bulanIni)
-            ->whereYear('tanggal', $tahunIni)
-            ->count();
-
-        $alpha = Presensi::where('siswa_id', $siswaId)
-            ->where('status', 'alpha')
-            ->whereMonth('tanggal', $bulanIni)
-            ->whereYear('tanggal', $tahunIni)
-            ->count();
-
-        return compact('sakit', 'izin', 'alpha');
+        return [
+            'hadir' => (int) $rekap->get('hadir', 0),
+            'sakit' => (int) $rekap->get('sakit', 0),
+            'izin' => (int) $rekap->get('izin', 0),
+            'alpha' => (int) $rekap->get('alpha', 0),
+        ];
     }
 
     /**
