@@ -366,7 +366,11 @@
                                         </button>
                                     @elseif($ujian->isOngoing())
                                         @php $aksesService = app(\App\Services\ValidasiAksesService::class); @endphp
-                                        @if($ujian->requiresValidation() && (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali))
+                                        {{-- Akses ujian murni dari sisi keuangan (lunas / validasi
+                                             Bendahara / dispensasi). Syarat `validasi_ujian_wali`
+                                             sudah dilepas: halaman Wali Kelas kini read-only dan
+                                             tidak punya tombol untuk menyalakannya lagi. --}}
+                                        @if($ujian->requiresValidation() && !$aksesService->cekAksesUjian($siswa))
                                             <button class="btn btn-secondary btn-sm btn-disabled-muted" disabled>
                                                 <i class="fas fa-lock me-1"></i> Belum Memiliki Akses
                                             </button>

@@ -36,12 +36,20 @@ class LmsUjianController extends Controller
             ->with(['mataPelajaran', 'guru', 'soalUjian'])
             ->firstOrFail();
 
-        // Cek validasi akses ujian untuk semester (PTS/PAS/UTS/UAS)
+        // Cek validasi akses ujian untuk semester (PTS/PAS/UTS/UAS).
+        //
+        // Akses ujian ditentukan MURNI dari sisi keuangan (lunas / validasi
+        // Bendahara / dispensasi yang disetujui) - lihat cekAksesUjian().
+        // Dulu di sini masih ada syarat tambahan `validasi_ujian_wali`, padahal
+        // halaman Wali Kelas sudah dijadikan read-only dan tidak punya tombol
+        // untuk menyalakan flag itu lagi. Akibatnya SEMUA siswa terkunci: sudah
+        // lunas, di layar wali tertulis "Akses Terbuka", tapi tetap ditolak saat
+        // membuka ujian, dan tidak ada satu pun jalan di UI untuk membukanya.
         if ($ujian->requiresValidation()) {
             $aksesService = app(\App\Services\ValidasiAksesService::class);
-            if (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali) {
+            if (!$aksesService->cekAksesUjian($siswa)) {
                 return redirect()->route('siswa.lms.mapel.show', $mapelId)
-                    ->with('error', 'Belum Memiliki Akses Ujian. Pastikan pembayaran sudah lunas (Bendahara) dan disetujui Wali Kelas.');
+                    ->with('error', 'Belum Memiliki Akses Ujian. Pembayaran belum lunas - silakan hubungi Bendahara untuk pelunasan atau pengajuan dispensasi.');
             }
         }
 
@@ -156,11 +164,12 @@ class LmsUjianController extends Controller
             ->where('mata_pelajaran_id', $mapelId)
             ->firstOrFail();
 
-        // Cek validasi akses untuk ujian semester (PTS/PAS/UTS/UAS)
+        // Cek validasi akses untuk ujian semester (PTS/PAS/UTS/UAS).
+        // Syaratnya sama dengan show(): murni dari sisi keuangan.
         if ($ujian->requiresValidation()) {
             $aksesService = app(\App\Services\ValidasiAksesService::class);
-            if (!$aksesService->cekAksesUjian($siswa) || !$siswa->validasi_ujian_wali) {
-                return back()->with('error', 'Belum Memiliki Akses Ujian. Pastikan pembayaran sudah lunas (Bendahara) dan disetujui Wali Kelas.');
+            if (!$aksesService->cekAksesUjian($siswa)) {
+                return back()->with('error', 'Belum Memiliki Akses Ujian. Pembayaran belum lunas - silakan hubungi Bendahara untuk pelunasan atau pengajuan dispensasi.');
             }
         }
 
