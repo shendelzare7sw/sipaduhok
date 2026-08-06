@@ -189,7 +189,7 @@
                     <!-- Pagination -->
                     @if($beritaList->hasPages())
                         <div class="mt-12 flex justify-center">
-                            {{ $beritaList->appends(['kategori' => $kategori, 'search' => $search])->links() }}
+                            {{ $beritaList->appends(['kategori' => $kategori, 'search' => $search])->links('pagination::tailwind') }}
                         </div>
                     @endif
                 @else
