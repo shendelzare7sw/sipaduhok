@@ -17,6 +17,8 @@
         .btn-outline-primary.active,
         .btn-outline-primary.dropdown-toggle.show {
             color: #fff !important;
+            background-color: #696cff !important;
+            border-color: #696cff !important;
         }
         
         .btn-check:checked + .btn-outline-info,
@@ -26,6 +28,8 @@
         .btn-outline-info.active,
         .btn-outline-info.dropdown-toggle.show {
             color: #fff !important;
+            background-color: #03c3ec !important;
+            border-color: #03c3ec !important;
         }
     </style>
 @endsection

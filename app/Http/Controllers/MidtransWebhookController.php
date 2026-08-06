@@ -52,9 +52,9 @@ class MidtransWebhookController extends Controller
             }
 
             // Find pembayaran by order_id
-            $pembayaran = Pembayaran::where('order_id', $orderId)->first();
+            $pembayaranList = Pembayaran::where('order_id', $orderId)->get();
 
-            if (!$pembayaran) {
+            if ($pembayaranList->isEmpty()) {
                 Log::error('Midtrans Pembayaran Not Found', ['order_id' => $orderId]);
 
                 return response()->json([
@@ -65,78 +65,90 @@ class MidtransWebhookController extends Controller
 
             // Map transaction status
             $newStatus = $this->midtransService->mapTransactionStatus($transactionStatus, $fraudStatus);
-            $oldStatus = $pembayaran->status_validasi;
+            $firstPembayaran = $pembayaranList->first();
+            $oldStatus = $firstPembayaran->status_validasi;
 
-            // Update pembayaran
-            $pembayaran->update([
-                'status_validasi' => $newStatus,
-                'transaction_id' => $transactionId,
-                'payment_type' => $paymentType,
-                'gateway_response' => json_encode($notification),
-                'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
-            ]);
-
-            // Create audit log for bendahara tracking
             if ($oldStatus !== $newStatus) {
-                FinancialAuditLog::create([
-                    'user_id' => null, // System action
-                    'action' => 'update_status',
-                    'model_type' => 'Pembayaran',
-                    'model_id' => $pembayaran->id,
-                    'old_values' => json_encode(['status_validasi' => $oldStatus]),
-                    'new_values' => json_encode([
+                foreach ($pembayaranList as $pembayaran) {
+                    // Update pembayaran
+                    $pembayaran->update([
                         'status_validasi' => $newStatus,
                         'transaction_id' => $transactionId,
                         'payment_type' => $paymentType,
-                    ]),
-                    'description' => "Pembayaran digital {$orderId} status updated via Midtrans webhook: {$transactionStatus} → {$newStatus}",
-                    'ip_address' => request()->ip(),
-                    'user_agent' => 'Midtrans Webhook',
-                ]);
-
-                // Auto-update status tagihan if payment approved
-                if ($newStatus === 'disetujui') {
-                    $pembayaran->tagihan->updateStatusBayar();
-
-                    Log::info('Tagihan status auto-updated', [
-                        'tagihan_id' => $pembayaran->tagihan_id,
-                        'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
+                        'gateway_response' => json_encode($notification),
+                        'tanggal_validasi' => $newStatus === 'disetujui' ? now() : null,
                     ]);
 
-                    // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
-                    // Ini mencegah double payment untuk produk/tagihan yang sama
-                    $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
-                        ->where('siswa_id', $pembayaran->siswa_id)
-                        ->where('id', '!=', $pembayaran->id) // Kecuali pembayaran yang baru saja sukses
-                        ->where('status_validasi', 'pending')
-                        ->update([
-                            'status_validasi' => 'ditolak',
-                            'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
-                        ]);
+                    // Create audit log for bendahara tracking
+                    FinancialAuditLog::create([
+                        'user_id' => null, // System action
+                        'action' => 'update_status',
+                        'model_type' => 'Pembayaran',
+                        'model_id' => $pembayaran->id,
+                        'old_values' => json_encode(['status_validasi' => $pembayaran->getOriginal('status_validasi')]),
+                        'new_values' => json_encode([
+                            'status_validasi' => $newStatus,
+                            'transaction_id' => $transactionId,
+                            'payment_type' => $paymentType,
+                        ]),
+                        'description' => "Pembayaran digital {$orderId} status updated via Midtrans webhook: {$transactionStatus} → {$newStatus}",
+                        'ip_address' => request()->ip(),
+                        'user_agent' => 'Midtrans Webhook',
+                    ]);
 
-                    if ($cancelledCount > 0) {
-                        Log::info('Auto-cancelled duplicate pending payments', [
+                    // Auto-update status tagihan if payment approved
+                    if ($newStatus === 'disetujui') {
+                        $pembayaran->tagihan->updateStatusBayar();
+
+                        Log::info('Tagihan status auto-updated', [
                             'tagihan_id' => $pembayaran->tagihan_id,
-                            'siswa_id' => $pembayaran->siswa_id,
-                            'cancelled_count' => $cancelledCount,
-                            'successful_order_id' => $orderId,
+                            'new_tagihan_status' => $pembayaran->tagihan->fresh()->status,
                         ]);
 
-                        // Audit log untuk pembatalan otomatis
-                        FinancialAuditLog::create([
-                            'user_id' => null,
-                            'action' => 'auto_cancel_duplicates',
-                            'model_type' => 'Pembayaran',
-                            'model_id' => $pembayaran->id,
-                            'old_values' => null,
-                            'new_values' => json_encode([
+                        // PENTING: Batalkan semua pembayaran pending lainnya untuk tagihan yang sama
+                        // Ini mencegah double payment untuk produk/tagihan yang sama
+                        $cancelledCount = Pembayaran::where('tagihan_id', $pembayaran->tagihan_id)
+                            ->where('siswa_id', $pembayaran->siswa_id)
+                            ->where('id', '!=', $pembayaran->id) // Kecuali pembayaran yang baru saja sukses
+                            ->where('status_validasi', 'pending')
+                            ->update([
+                                'status_validasi' => 'ditolak',
+                                'catatan' => 'Otomatis dibatalkan karena tagihan sudah dibayar via transaksi lain (Order ID: ' . $orderId . ')',
+                            ]);
+
+                        if ($cancelledCount > 0) {
+                            Log::info('Auto-cancelled duplicate pending payments', [
+                                'tagihan_id' => $pembayaran->tagihan_id,
+                                'siswa_id' => $pembayaran->siswa_id,
                                 'cancelled_count' => $cancelledCount,
-                                'reason' => 'duplicate_payment_prevention',
-                            ]),
-                            'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$orderId} berhasil",
-                            'ip_address' => request()->ip(),
-                            'user_agent' => 'Midtrans Webhook - Auto Cancel',
-                        ]);
+                                'successful_order_id' => $orderId,
+                            ]);
+
+                            // Audit log untuk pembatalan otomatis
+                            FinancialAuditLog::create([
+                                'user_id' => null,
+                                'action' => 'auto_cancel_duplicates',
+                                'model_type' => 'Pembayaran',
+                                'model_id' => $pembayaran->id,
+                                'old_values' => null,
+                                'new_values' => json_encode([
+                                    'cancelled_count' => $cancelledCount,
+                                    'reason' => 'duplicate_payment_prevention',
+                                ]),
+                                'description' => "Otomatis membatalkan {$cancelledCount} pembayaran pending lainnya untuk tagihan yang sama setelah pembayaran {$orderId} berhasil",
+                                'ip_address' => request()->ip(),
+                                'user_agent' => 'Midtrans Webhook - Auto Cancel',
+                            ]);
+                        }
+                    }
+                }
+
+                // Jika pembayaran berhasil disetujui, kirim notifikasi!
+                if ($newStatus === 'disetujui') {
+                    try {
+                        app(\App\Services\NotificationService::class)->notifyPembayaranDigitalBerhasil($pembayaranList);
+                    } catch (\Exception $e) {
+                        Log::error('Gagal mengirim notifikasi Midtrans: ' . $e->getMessage());
                     }
                 }
             }
