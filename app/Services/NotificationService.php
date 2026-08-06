@@ -464,6 +464,56 @@ class NotificationService
     }
 
     /**
+     * Notify Admin/Bendahara and Wali Siswa about successful digital payment (Midtrans)
+     */
+    public function notifyPembayaranDigitalBerhasil($pembayaranList)
+    {
+        if ($pembayaranList->isEmpty()) return;
+
+        $first = $pembayaranList->first();
+        $siswa = $first->siswa;
+        $siswaName = $siswa ? $siswa->nama_lengkap : 'Siswa';
+        $totalAmount = $pembayaranList->sum('jumlah_bayar');
+        $count = $pembayaranList->count();
+        $metode = ucfirst($first->payment_type ?? 'Digital');
+        $orderId = $first->order_id;
+
+        // Notify Admin and Bendahara
+        $targetAdmins = User::whereIn('role', ['admin', 'bendahara'])->get();
+        foreach ($targetAdmins as $user) {
+            $route = $user->role === 'admin' 
+                ? ($count > 1 ? route('admin.keuangan.pembayaran.index') : route('admin.keuangan.pembayaran.show', $first->id))
+                : ($count > 1 ? route('bendahara.pembayaran.index') : route('bendahara.pembayaran.show', $first->id));
+
+            $this->create(
+                $user->id,
+                Notification::TIPE_PEMBAYARAN,
+                'Pembayaran Digital Berhasil: ' . $siswaName,
+                ($count > 1 ? $count . ' Tagihan, Total ' : '') . 'Rp ' . number_format($totalAmount, 0, ',', '.') . ' (' . $metode . ')',
+                $route,
+                ['order_id' => $orderId, 'siswa_id' => $first->siswa_id]
+            );
+        }
+
+        // Notify Wali Siswa
+        if ($siswa) {
+            $parents = $siswa->orangTua;
+            foreach ($parents as $parent) {
+                if ($parent->id) {
+                    $this->create(
+                        $parent->id,
+                        Notification::TIPE_PEMBAYARAN,
+                        'Pembayaran Digital Berhasil',
+                        'Pembayaran sebesar Rp ' . number_format($totalAmount, 0, ',', '.') . ' telah berhasil diterima.',
+                        route('wali-siswa.tagihan.anak', $siswa->id),
+                        ['order_id' => $orderId]
+                    );
+                }
+            }
+        }
+    }
+
+    /**
      * Notify wali siswa bahwa tunggakan TA lama dialihkan menjadi tagihan di TA aktif.
      * Tagihan parameter di sini adalah tagihan BARU (carryover) dengan tagihan_asal_id.
      */
