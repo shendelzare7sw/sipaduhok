@@ -449,38 +449,12 @@ function setupExam(page) {
         sendMonitoringEvent('heartbeat');
     }, 5000);
 
-    // Fullscreen Overlay Logic
-    const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-    const btnEnterFullscreen = document.getElementById('btn-enter-fullscreen');
-    if (fullscreenOverlay && btnEnterFullscreen) {
-        btnEnterFullscreen.addEventListener('click', () => {
-            const docElm = document.documentElement;
-            if (docElm.requestFullscreen) {
-                docElm.requestFullscreen().catch(err => {
-                    console.error("Error attempting to enable fullscreen:", err);
-                });
-            } else if (docElm.webkitRequestFullscreen) { /* Safari */
-                docElm.webkitRequestFullscreen();
-            } else if (docElm.msRequestFullscreen) { /* IE11 */
-                docElm.msRequestFullscreen();
-            }
-            fullscreenOverlay.style.display = 'none';
-        });
-
-        // Ensure if they exit fullscreen, overlay comes back
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                fullscreenOverlay.style.display = 'flex';
-                fullscreenOverlay.style.setProperty('display', 'flex', 'important');
-            }
-        });
-        document.addEventListener('webkitfullscreenchange', () => {
-            if (!document.webkitFullscreenElement) {
-                fullscreenOverlay.style.display = 'flex';
-                fullscreenOverlay.style.setProperty('display', 'flex', 'important');
-            }
-        });
-    }
+    // Enforce fullscreen if user tries to exit during exam
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && !examForm.submitted) {
+            registerFocusLost('exited_fullscreen');
+        }
+    });
 
     history.pushState(null, null, location.href);
     window.onpopstate = () => {
@@ -551,13 +525,50 @@ function setupExam(page) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const showPage = document.querySelector('.siswa-lms-ujian-show-page');
-
     if (showPage) {
         setupRetake(showPage);
+        
+        // Intercept "Mulai Ujian Sekarang" form to enforce fullscreen immediately
+        const formMulai = showPage.querySelector('form[action*="/mulai"]');
+        if (formMulai) {
+            formMulai.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Request fullscreen on click
+                const docElm = document.documentElement;
+                if (docElm.requestFullscreen) docElm.requestFullscreen().catch(()=>{});
+                else if (docElm.webkitRequestFullscreen) docElm.webkitRequestFullscreen();
+                else if (docElm.msRequestFullscreen) docElm.msRequestFullscreen();
+                
+                const btnMulai = formMulai.querySelector('button[type="submit"]');
+                if (btnMulai) {
+                    btnMulai.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Mempersiapkan Ujian...';
+                    btnMulai.disabled = true;
+                }
+                
+                try {
+                    const response = await fetch(formMulai.action, {
+                        method: 'POST',
+                        body: new FormData(formMulai),
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    
+                    if (response.ok) {
+                        const html = await response.text();
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    } else {
+                        formMulai.submit(); // fallback
+                    }
+                } catch (error) {
+                    formMulai.submit(); // fallback
+                }
+            });
+        }
     }
 
     const workPage = document.querySelector('.siswa-lms-ujian-work-page');
-
     if (workPage) {
         setupExam(workPage);
     }
