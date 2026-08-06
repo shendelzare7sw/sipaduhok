@@ -14,6 +14,12 @@ class PromotionApprovalController extends Controller
 {
     public function index(): View
     {
+        // Scope ke TA aktif - method history() sudah melakukannya, tapi daftar
+        // MENUNGGU ini dulu tidak, sehingga pasca ganti tahun ajaran Ketua masih
+        // melihat permintaan dispensasi tahun lalu dan bisa keliru menyetujuinya
+        // untuk tahun berjalan.
+        $activeYear = TahunAjaran::where('is_active', true)->first();
+
         $requests = DB::table('izin_naik_kelas_khusus')
             ->join('siswa', 'izin_naik_kelas_khusus.siswa_id', '=', 'siswa.id')
             ->join('users', 'izin_naik_kelas_khusus.diajukan_oleh', '=', 'users.id')
@@ -25,6 +31,7 @@ class PromotionApprovalController extends Controller
                 'users.name as pengaju'
             )
             ->where('izin_naik_kelas_khusus.status', 'MENUNGGU')
+            ->when($activeYear, fn ($q) => $q->where('izin_naik_kelas_khusus.tahun_ajaran_id', $activeYear->id))
             ->get();
 
         return view('ketua.promotion.approval', [

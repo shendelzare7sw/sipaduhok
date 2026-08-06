@@ -319,10 +319,19 @@ class WakilKepalaSekolahController extends Controller
     {
         $userCabangId = auth()->user()->cabang_id;
 
-        $query = TenagaPendidik::with(['guruKelas.kelas', 'guruKelas.mataPelajaran'])
-            ->whereHas('guruKelas.kelas', function ($q) use ($userCabangId) {
-                $q->where('cabang_id', $userCabangId);
-            });
+        // Scope ke tahun ajaran (default TA aktif, bisa lihat TA lama lewat
+        // ?tahun_ajaran_id=). Tanpa ini progres guru dihitung LINTAS tahun ajaran.
+        $taFilterId = $request->tahun_ajaran_id ?: TahunAjaran::where('is_active', true)->value('id');
+        $scopeKelas = function ($q) use ($userCabangId, $taFilterId) {
+            $q->where('cabang_id', $userCabangId)
+                ->when($taFilterId, fn ($k) => $k->where('tahun_ajaran_id', $taFilterId));
+        };
+
+        $query = TenagaPendidik::with([
+            'guruKelas' => fn ($q) => $q->whereHas('kelas', $scopeKelas),
+            'guruKelas.kelas',
+            'guruKelas.mataPelajaran',
+        ])->whereHas('guruKelas.kelas', $scopeKelas);
 
         // Search
         if ($request->filled('search')) {
@@ -331,21 +340,24 @@ class WakilKepalaSekolahController extends Controller
 
         $guruPengajar = $query->paginate(15);
 
-        $guruPengajar->getCollection()->transform(function ($tp) use ($userCabangId) {
+        $guruPengajar->getCollection()->transform(function ($tp) use ($userCabangId, $taFilterId) {
             $visibleAssignments = $tp->guruKelas
                 ->filter(fn ($assignment) => (int) optional($assignment->kelas)->cabang_id === (int) $userCabangId)
                 ->values();
 
             $kelasIds = $visibleAssignments->pluck('kelas_id')->filter()->unique()->values();
 
+            // Tanpa penugasan di TA terpilih -> progres HARUS nol, bukan jatuh ke
+            // "tanpa filter kelas" yang menarik data TA lama.
             $nilaiQuery = Nilai::where('guru_id', $tp->id)
-                ->when($kelasIds->isNotEmpty(), fn ($q) => $q->whereIn('kelas_id', $kelasIds));
+                ->when($taFilterId, fn ($q) => $q->where('tahun_ajaran_id', $taFilterId))
+                ->whereIn('kelas_id', $kelasIds->isNotEmpty() ? $kelasIds->all() : [0]);
 
             $totalNilaiHarusDiisi = (clone $nilaiQuery)->whereNull('nilai_akhir')->count();
             $nilaiSudahDiisi = (clone $nilaiQuery)->whereNotNull('nilai_akhir')->count();
 
             $lmsBase = fn ($query) => $query->where('guru_id', $tp->id)
-                ->when($kelasIds->isNotEmpty(), fn ($q) => $q->whereIn('kelas_id', $kelasIds));
+                ->whereIn('kelas_id', $kelasIds->isNotEmpty() ? $kelasIds->all() : [0]);
 
             $materiDibuat = $lmsBase(Materi::query())->count();
             $tugasDibuat = $lmsBase(Tugas::query())->count();
@@ -381,19 +393,27 @@ class WakilKepalaSekolahController extends Controller
     {
         $userCabangId = auth()->user()->cabang_id;
 
+        // Scope ke tahun ajaran: default TA aktif, tetap bisa melihat TA lama lewat
+        // ?tahun_ajaran_id=. Tanpa ini daftar wali kelas menampilkan penugasan
+        // tahun lalu yang sudah tidak berlaku.
+        $taFilterId = $request->tahun_ajaran_id ?: TahunAjaran::where('is_active', true)->value('id');
+        $scopeKelas = function ($q) use ($userCabangId, $taFilterId) {
+            $q->where('cabang_id', $userCabangId)
+                ->when($taFilterId, fn ($k) => $k->where('tahun_ajaran_id', $taFilterId));
+        };
+
         $query = TenagaPendidik::with([
+            'kelasWali' => $scopeKelas,
             'kelasWali.siswa',
             'kelasWali.tahunAjaran',
             'kelasWali.cabang',
+            'kelasWaliMultiple' => $scopeKelas,
             'kelasWaliMultiple.siswa',
             'kelasWaliMultiple.tahunAjaran',
             'kelasWaliMultiple.cabang',
-        ])->where(function ($q) use ($userCabangId) {
-            $q->whereHas('kelasWali', function ($kelasQuery) use ($userCabangId) {
-                $kelasQuery->where('cabang_id', $userCabangId);
-            })->orWhereHas('kelasWaliMultiple', function ($kelasQuery) use ($userCabangId) {
-                $kelasQuery->where('cabang_id', $userCabangId);
-            });
+        ])->where(function ($q) use ($scopeKelas) {
+            $q->whereHas('kelasWali', $scopeKelas)
+                ->orWhereHas('kelasWaliMultiple', $scopeKelas);
         });
 
         // Search

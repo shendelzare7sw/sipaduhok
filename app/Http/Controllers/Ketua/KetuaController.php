@@ -81,16 +81,24 @@ class KetuaController extends Controller
 
     public function monitoringWaliKelas(Request $request)
     {
+        // Scope ke tahun ajaran: default TA aktif, tetap bisa melihat TA lama
+        // lewat ?tahun_ajaran_id=. Tanpa ini daftar wali kelas menampilkan
+        // penugasan tahun lalu (terukur 24 dari 25 kelas berasal dari TA lama).
+        $taFilterId = $request->tahun_ajaran_id ?: TahunAjaran::where('is_active', true)->value('id');
+        $scopeTa = fn ($q) => $q->when($taFilterId, fn ($k) => $k->where('tahun_ajaran_id', $taFilterId));
+
         $query = TenagaPendidik::with([
+            'kelasWali' => $scopeTa,
             'kelasWali.siswa',
             'kelasWali.tahunAjaran',
             'kelasWali.cabang',
+            'kelasWaliMultiple' => $scopeTa,
             'kelasWaliMultiple.siswa',
             'kelasWaliMultiple.tahunAjaran',
             'kelasWaliMultiple.cabang',
-        ])->where(function ($q) {
-            $q->whereHas('kelasWali')
-                ->orWhereHas('kelasWaliMultiple');
+        ])->where(function ($q) use ($scopeTa) {
+            $q->whereHas('kelasWali', $scopeTa)
+                ->orWhereHas('kelasWaliMultiple', $scopeTa);
         });
 
         // Search
@@ -150,8 +158,19 @@ class KetuaController extends Controller
 
     public function monitoringGuruPengajar(Request $request)
     {
-        $query = TenagaPendidik::with(['guruKelas.kelas', 'guruKelas.mataPelajaran'])
-            ->whereHas('guruKelas');
+        // Scope ke tahun ajaran. Default TA aktif, tapi tetap bisa melihat TA lama
+        // lewat ?tahun_ajaran_id=. Tanpa ini, penugasan & progres guru dihitung
+        // LINTAS tahun ajaran - pasca ganti TA, seorang guru masih terlihat
+        // mengampu 9 kelas dengan 106 nilai padahal di TA berjalan belum ada
+        // penugasan sama sekali.
+        $taFilterId = $request->tahun_ajaran_id ?: TahunAjaran::where('is_active', true)->value('id');
+        $scopeTa = fn ($q) => $q->when($taFilterId, fn ($k) => $k->where('tahun_ajaran_id', $taFilterId));
+
+        $query = TenagaPendidik::with([
+            'guruKelas' => fn ($q) => $q->whereHas('kelas', $scopeTa),
+            'guruKelas.kelas',
+            'guruKelas.mataPelajaran',
+        ])->whereHas('guruKelas.kelas', $scopeTa);
 
         // Search
         if ($request->filled('search')) {
@@ -167,7 +186,7 @@ class KetuaController extends Controller
 
         $guruPengajar = $query->paginate(15);
 
-        $guruPengajar->getCollection()->transform(function ($tp) use ($request) {
+        $guruPengajar->getCollection()->transform(function ($tp) use ($request, $taFilterId) {
             $visibleAssignments = $tp->guruKelas;
             if ($request->filled('cabang_id')) {
                 $visibleAssignments = $visibleAssignments
@@ -177,14 +196,19 @@ class KetuaController extends Controller
 
             $kelasIds = $visibleAssignments->pluck('kelas_id')->filter()->unique()->values();
 
+            // Kalau guru tidak punya penugasan di TA terpilih, progresnya HARUS nol -
+            // bukan jatuh ke "tanpa filter kelas" yang membuat data TA lama ikut terhitung.
+            $batasiKelas = fn ($q) => $q->whereIn('kelas_id', $kelasIds->isNotEmpty() ? $kelasIds->all() : [0]);
+
             $nilaiQuery = Nilai::where('guru_id', $tp->id)
-                ->when($kelasIds->isNotEmpty(), fn ($q) => $q->whereIn('kelas_id', $kelasIds));
+                ->when($taFilterId, fn ($q) => $q->where('tahun_ajaran_id', $taFilterId));
+            $batasiKelas($nilaiQuery);
 
             $totalNilaiHarusDiisi = (clone $nilaiQuery)->whereNull('nilai_akhir')->count();
             $nilaiSudahDiisi = (clone $nilaiQuery)->whereNotNull('nilai_akhir')->count();
 
             $lmsBase = fn ($query) => $query->where('guru_id', $tp->id)
-                ->when($kelasIds->isNotEmpty(), fn ($q) => $q->whereIn('kelas_id', $kelasIds));
+                ->whereIn('kelas_id', $kelasIds->isNotEmpty() ? $kelasIds->all() : [0]);
 
             $materiDibuat = $lmsBase(Materi::query())->count();
             $tugasDibuat = $lmsBase(Tugas::query())->count();
