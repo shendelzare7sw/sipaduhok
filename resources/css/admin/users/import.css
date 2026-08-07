@@ -130,7 +130,8 @@
     align-items: center;
 }
 
-.upload-area:hover {
+.upload-area:hover,
+.upload-area.is-dragging {
     border-color: var(--import-accent);
     background: var(--import-hover-bg);
 }

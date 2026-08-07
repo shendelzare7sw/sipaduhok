@@ -12,10 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        uploadArea.addEventListener('click', () => fileInput.click());
-
-        fileInput.addEventListener('change', () => {
-            const file = fileInput.files?.[0];
+        const showFile = (file) => {
             if (!file) return;
 
             fileName.textContent = file.name;
@@ -23,13 +20,39 @@ document.addEventListener('DOMContentLoaded', () => {
             fileSelected.classList.add('show');
             uploadArea.classList.add('is-hidden');
             submitButton.disabled = false;
-        });
+        };
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => showFile(fileInput.files?.[0]));
 
         clearButton?.addEventListener('click', () => {
             fileInput.value = '';
             fileSelected.classList.remove('show');
             uploadArea.classList.remove('is-hidden');
             submitButton.disabled = true;
+        });
+
+        ['dragenter', 'dragover'].forEach((eventName) => {
+            uploadArea.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                uploadArea.classList.add('is-dragging');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach((eventName) => {
+            uploadArea.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                uploadArea.classList.remove('is-dragging');
+            });
+        });
+
+        uploadArea.addEventListener('drop', (event) => {
+            const file = event.dataTransfer.files?.[0];
+            if (!file) return;
+
+            fileInput.files = event.dataTransfer.files;
+            showFile(file);
         });
     });
 });

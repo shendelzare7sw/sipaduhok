@@ -33,8 +33,13 @@ class JadwalPelajaranImport implements ToCollection, WithHeadingRow
     {
         $this->tahunAjaranId = $tahunAjaranId ?? TahunAjaran::where('is_active', true)->first()?->id;
 
-        // Load classes with cabang info
-        $this->kelasList = Kelas::with('cabang')->get()->map(function ($kelas) {
+        // Load classes with cabang info, dibatasi ke tahun ajaran yang dipilih untuk
+        // import ini. Nama kelas (mis. "7A") dipakai ulang tiap tahun ajaran, jadi
+        // tanpa pembatasan ini jadwal bisa nyangkut ke kelas tahun ajaran lain yang
+        // kebetulan namanya sama (id beda meski nama & cabang sama).
+        $this->kelasList = Kelas::with('cabang')
+            ->when($this->tahunAjaranId, fn ($q) => $q->where('tahun_ajaran_id', $this->tahunAjaranId))
+            ->get()->map(function ($kelas) {
             return [
                 'id' => $kelas->id,
                 'nama_kelas' => strtolower(trim($kelas->nama_kelas)),

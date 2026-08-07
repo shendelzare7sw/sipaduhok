@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Kelas;
 use App\Models\Cabang;
 use App\Models\Role;
+use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,12 @@ class SiswaImport implements ToCollection, WithHeadingRow
 
     public function __construct()
     {
-        $this->kelasList = Kelas::pluck('id', 'nama_kelas')->toArray();
+        // Kelas dibatasi ke tahun ajaran aktif saja. Nama kelas (mis. "7A") dipakai
+        // ulang tiap tahun ajaran & tiap cabang, jadi tanpa pembatasan ini import bisa
+        // "nyangkut" ke kelas cabang/tahun lain yang kebetulan namanya sama.
+        $tahunAjaranAktif = TahunAjaran::where('is_active', true)->first();
+        $this->kelasList = Kelas::when($tahunAjaranAktif, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranAktif->id))
+            ->get(['id', 'nama_kelas', 'cabang_id']);
         $this->cabangList = Cabang::pluck('id', 'nama_cabang')->toArray();
     }
 
@@ -68,10 +74,17 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+            // Lookup cabang dulu (kelas dicari di bawah dibatasi ke cabang ini, supaya
+            // nama kelas yang sama di cabang lain tidak ikut cocok).
+            $cabangId = null;
+            if (!empty($row['nama_cabang'])) {
+                $cabangId = $this->findCabang($row['nama_cabang']);
+            }
+
             // Lookup kelas (optional - siswa tetap dibuat)
             $kelasId = null;
             if (!empty($row['nama_kelas'])) {
-                $kelasId = $this->findKelas($row['nama_kelas']);
+                $kelasId = $this->findKelas($row['nama_kelas'], $cabangId);
                 if (!$kelasId) {
                     $kelasName = trim($row['nama_kelas']);
                     if (!in_array($kelasName, $this->missingKelas)) {
@@ -81,15 +94,10 @@ class SiswaImport implements ToCollection, WithHeadingRow
                 }
             }
 
-            // Lookup cabang  
-            $cabangId = null;
-            if (!empty($row['nama_cabang'])) {
-                $cabangId = $this->findCabang($row['nama_cabang']);
-            }
             // Default cabang from kelas if not specified
             if (!$cabangId && $kelasId) {
-                $kelas = Kelas::find($kelasId);
-                $cabangId = $kelas ? $kelas->cabang_id : null;
+                $kelas = $this->kelasList->firstWhere('id', $kelasId);
+                $cabangId = $kelas?->cabang_id;
             }
 
             // Validation: Cabang is required
@@ -188,16 +196,25 @@ class SiswaImport implements ToCollection, WithHeadingRow
         }
     }
 
-    private function findKelas($name)
+    private function findKelas($name, $cabangId = null)
     {
-        $name = trim($name);
-        if (isset($this->kelasList[$name]))
-            return $this->kelasList[$name];
-        foreach ($this->kelasList as $n => $id) {
-            if (strtolower(trim($n)) === strtolower($name))
-                return $id;
+        $name = strtolower(trim($name));
+
+        $candidates = $this->kelasList->filter(
+            fn ($k) => strtolower(trim($k->nama_kelas)) === $name
+        );
+
+        if ($cabangId) {
+            $inCabang = $candidates->firstWhere('cabang_id', $cabangId);
+            if ($inCabang) {
+                return $inCabang->id;
+            }
+            // Cabang diketahui tapi tidak ada kelas dgn nama ini di cabang tsb -> jangan
+            // jatuh ke kelas cabang lain yg kebetulan namanya sama.
+            return null;
         }
-        return null;
+
+        return $candidates->first()?->id;
     }
 
     private function findCabang($name)
