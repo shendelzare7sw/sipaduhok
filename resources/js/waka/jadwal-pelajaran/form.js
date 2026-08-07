@@ -367,6 +367,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const hariSelect = document.getElementById('hariSelect');
     const istirahatCollapse = document.getElementById('istirahatCollapse');
     const collapseBtn = document.querySelector('[data-bs-target="#istirahatCollapse"]');
+    const tahunAjaranSelect = document.getElementById('tahunAjaranSelect');
+
+    // Daftar kelas dirender di server berdasarkan tahun ajaran saat halaman dimuat.
+    // Reload halaman saat tahun ajaran diganti agar daftar kelas tidak "nyangkut"
+    // ke tahun ajaran lama (kelas dari tahun lain punya id berbeda meski nama sama).
+    tahunAjaranSelect?.addEventListener('change', function () {
+        const createUrl = this.dataset.createUrl;
+        if (createUrl) {
+            window.location.href = `${createUrl}?tahun_ajaran_id=${this.value}`;
+        }
+    });
 
     istirahatCollapse?.addEventListener('show.bs.collapse', () => collapseBtn?.classList.add('is-expanded'));
     istirahatCollapse?.addEventListener('hide.bs.collapse', () => collapseBtn?.classList.remove('is-expanded'));

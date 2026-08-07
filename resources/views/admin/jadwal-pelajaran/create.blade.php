@@ -45,13 +45,15 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Tahun Ajaran <span class="text-danger">*</span></label>
-                                <select name="tahun_ajaran_id" id="tahunAjaranSelect" class="form-select" required>
+                                <select name="tahun_ajaran_id" id="tahunAjaranSelect" class="form-select" required
+                                        data-create-url="{{ route('admin.jadwal-pelajaran.create') }}">
                                     @foreach($tahunAjarans as $ta)
                                         <option value="{{ $ta->id }}" {{ old('tahun_ajaran_id', $currentTahunAjaran?->id) == $ta->id ? 'selected' : '' }}>
                                             {{ $ta->nama_tahun_ajaran }} {{ $ta->is_active ? '(Aktif)' : '' }}
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="text-muted">Daftar kelas di bawah akan menyesuaikan otomatis dengan Tahun Ajaran yang dipilih.</small>
                             </div>
     
                             <div class="col-md-6 mb-3">
