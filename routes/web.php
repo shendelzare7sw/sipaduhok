@@ -177,6 +177,12 @@ Route::middleware('guest')->group(function () {
             }
 
             $user = $ticket->user;
+
+            // Password baru tidak boleh sama dengan password lama
+            if (\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+                return back()->withErrors(['password' => 'Password baru tidak boleh sama dengan password lama.']);
+            }
+
             $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
             $user->save();
 

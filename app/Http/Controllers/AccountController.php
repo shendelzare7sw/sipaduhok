@@ -104,6 +104,11 @@ class AccountController extends Controller
             return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
         }
 
+        // Password baru tidak boleh sama dengan password lama
+        if (Hash::check($validated['new_password'], $user->password)) {
+            return back()->withErrors(['new_password' => 'Password baru tidak boleh sama dengan password lama.']);
+        }
+
         // Update password
         $user->update([
             'password' => Hash::make($validated['new_password']),
