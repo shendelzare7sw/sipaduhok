@@ -227,8 +227,10 @@ class GuruPengajarController extends Controller
 
             GuruPengajarKelas::whereIn('kelas_id', $kelasIds)->delete();
 
+            // firstOrCreate agar tahan terhadap entri yang belum ikut terhapus,
+            // misal karena kelas sudah pindah tahun ajaran.
             foreach ($fromJadwal as $entry) {
-                GuruPengajarKelas::create($entry);
+                GuruPengajarKelas::firstOrCreate($entry);
             }
 
             DB::commit();
