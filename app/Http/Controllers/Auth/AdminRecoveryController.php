@@ -87,6 +87,11 @@ class AdminRecoveryController extends Controller
             return back()->withInput()->withErrors(['security_pin' => 'PIN Keamanan salah.']);
         }
 
+        // Password baru tidak boleh sama dengan password lama
+        if (Hash::check($request->password, $user->password)) {
+            return back()->withInput()->withErrors(['password' => 'Password baru tidak boleh sama dengan password lama.']);
+        }
+
         // All checks passed, update password
         $user->password = Hash::make($request->password);
         $user->save();
